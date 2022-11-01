@@ -126,6 +126,11 @@ enable_testing()
 
 file(GLOB_RECURSE Sleipnir_test_src test/*.cpp)
 add_executable(SleipnirTest ${Sleipnir_test_src})
+if (NOT MSVC)
+  target_compile_options(Sleipnir PRIVATE -Wall -pedantic -Wextra -Werror -Wno-unused-parameter)
+else()
+  target_compile_options(Sleipnir PRIVATE /wd4146 /wd4244 /wd4251 /wd4267 /WX)
+endif()
 target_link_libraries(SleipnirTest PRIVATE Sleipnir GTest::gtest GTest::gtest_main)
 add_test(
   NAME SleipnirTest

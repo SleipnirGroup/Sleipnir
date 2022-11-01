@@ -37,7 +37,7 @@ jobs:
         run: cmake -B build -S .
 
       - name: build
-        run: cmake --build build --parallel $(nproc)
+        run: cmake --build build --target all --config RelWithDebInfo --parallel $(nproc)
 
       - name: test
         working-directory: build
