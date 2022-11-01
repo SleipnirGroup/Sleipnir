@@ -1,8 +1,38 @@
+# Disable in-source builds to prevent source tree corruption
+if(" ${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL " ${CMAKE_CURRENT_BINARY_DIR}")
+  message(FATAL_ERROR "
+FATAL: In-source builds are not allowed.
+       You should create a separate directory for build files.
+")
+endif()
+
 cmake_minimum_required(VERSION 3.24)
 
 project(Sleipnir)
 
-include(GoogleTest)
+INCLUDE(CPack)
+
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
+# Use, i.e. don't skip the full RPATH for the build tree
+set(CMAKE_SKIP_BUILD_RPATH  FALSE)
+
+# When building, don't use the install RPATH already (but later on when
+# installing)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+
+# add the automatically determined parts of the RPATH
+# which point to directories outside the build tree to the install RPATH
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+# the RPATH to be used when installing, but only if it's not a system directory
+list(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
+if ("${isSystemDir}" STREQUAL "-1")
+   set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+endif("${isSystemDir}" STREQUAL "-1")
 
 # Set default build type to release with debug info (i.e. release mode
 # optimizations are performed, but debug info still exists).
@@ -31,10 +61,33 @@ target_link_libraries(Sleipnir Eigen3::Eigen fmt::fmt)
 
 target_include_directories(Sleipnir PUBLIC
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-                           $<INSTALL_INTERFACE:${include_dest}/Sleipnir>)
+                           $<INSTALL_INTERFACE:include/Sleipnir>)
 
-install(TARGETS Sleipnir EXPORT Sleipnir DESTINATION "${main_lib_dest}")
-install(DIRECTORY src/main/native/include/ DESTINATION "${include_dest}/Sleipnir")
+install(TARGETS Sleipnir EXPORT Sleipnir DESTINATION lib)
+install(DIRECTORY include/ DESTINATION "include/Sleipnir")
+
+target_include_directories(Sleipnir
+                           INTERFACE
+                           $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+                           $<INSTALL_INTERFACE:include>
+                           )
+
+install(EXPORT Sleipnir
+  FILE Sleipnir.cmake
+  DESTINATION lib/cmake/Sleipnir
+)
+
+include(CMakePackageConfigHelpers)
+
+# Generate the config file that is includes the exports
+configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/Sleipnir-config.cmake.in
+  "${CMAKE_CURRENT_BINARY_DIR}/Sleipnir.cmake"
+  INSTALL_DESTINATION "lib/cmake/Sleipnir"
+  NO_SET_AND_CHECK_MACRO
+  NO_CHECK_REQUIRED_COMPONENTS_MACRO
+)
+
+include(GoogleTest)
 
 file(GLOB_RECURSE Sleipnir_test_src test/*.cpp)
 add_executable(SleipnirTest ${Sleipnir_test_src})
