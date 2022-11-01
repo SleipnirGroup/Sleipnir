@@ -22,8 +22,9 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
 
   VariableMatrix& operator=(double value);
 
-  template <int _Rows, int _Cols>
-  VariableMatrix(const Eigen::Matrix<double, _Rows, _Cols>& values)  // NOLINT
+  template <int _Rows, int _Cols, int... Args>
+  VariableMatrix(
+      const Eigen::Matrix<double, _Rows, _Cols, Args...>& values)  // NOLINT
       : m_rows{_Rows}, m_cols{_Cols} {
     m_storage.reserve(_Rows * _Cols);
     for (size_t row = 0; row < _Rows; ++row) {
@@ -33,56 +34,58 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
     }
   }
 
-  template <int _Rows, int _Cols>
-  VariableMatrix& operator=(const Eigen::Matrix<double, _Rows, _Cols>& values) {
-    for (size_t row = 0; row < _Rows; ++row) {
-      for (size_t col = 0; col < _Cols; ++col) {
-        Autodiff(row, col) = values(row, col);
-      }
-    }
-
-    return *this;
-  }
-
-  template <int _Rows, int _Cols>
-  explicit VariableMatrix(Eigen::Matrix<double, _Rows, _Cols>&& values)
-      : m_rows{_Rows}, m_cols{_Cols} {
-    m_storage.clear();
-    m_storage.reserve(_Rows * _Cols);
-    for (size_t row = 0; row < _Rows; ++row) {
-      for (size_t col = 0; col < _Cols; ++col) {
-        m_storage.emplace_back(values(row, col));
-      }
-    }
-  }
-
-  template <int _Rows, int _Cols>
-  VariableMatrix& operator=(Eigen::Matrix<double, _Rows, _Cols>&& values) {
-    for (size_t row = 0; row < _Rows; ++row) {
-      for (size_t col = 0; col < _Cols; ++col) {
-        Autodiff(row, col) = values(row, col);
-      }
-    }
-
-    return *this;
-  }
-
-  template <int _Rows, int _Cols>
-  explicit VariableMatrix(
-      const Eigen::Matrix<autodiff::Variable, _Rows, _Cols>& values)
-      : m_rows{_Rows}, m_cols{_Cols} {
-    m_storage.clear();
-    m_storage.reserve(_Rows * _Cols);
-    for (size_t row = 0; row < _Rows; ++row) {
-      for (size_t col = 0; col < _Cols; ++col) {
-        m_storage.emplace_back(values(row, col));
-      }
-    }
-  }
-
-  template <int _Rows, int _Cols>
+  template <int _Rows, int _Cols, int... Args>
   VariableMatrix& operator=(
-      const Eigen::Matrix<autodiff::Variable, _Rows, _Cols>& values) {
+      const Eigen::Matrix<double, _Rows, _Cols, Args...>& values) {
+    for (size_t row = 0; row < _Rows; ++row) {
+      for (size_t col = 0; col < _Cols; ++col) {
+        Autodiff(row, col) = values(row, col);
+      }
+    }
+
+    return *this;
+  }
+
+  template <int _Rows, int _Cols, int... Args>
+  explicit VariableMatrix(Eigen::Matrix<double, _Rows, _Cols, Args...>&& values)
+      : m_rows{_Rows}, m_cols{_Cols} {
+    m_storage.clear();
+    m_storage.reserve(_Rows * _Cols);
+    for (size_t row = 0; row < _Rows; ++row) {
+      for (size_t col = 0; col < _Cols; ++col) {
+        m_storage.emplace_back(values(row, col));
+      }
+    }
+  }
+
+  template <int _Rows, int _Cols, int... Args>
+  VariableMatrix& operator=(
+      Eigen::Matrix<double, _Rows, _Cols, Args...>&& values) {
+    for (size_t row = 0; row < _Rows; ++row) {
+      for (size_t col = 0; col < _Cols; ++col) {
+        Autodiff(row, col) = values(row, col);
+      }
+    }
+
+    return *this;
+  }
+
+  template <int _Rows, int _Cols, int... Args>
+  explicit VariableMatrix(
+      const Eigen::Matrix<autodiff::Variable, _Rows, _Cols, Args...>& values)
+      : m_rows{_Rows}, m_cols{_Cols} {
+    m_storage.clear();
+    m_storage.reserve(_Rows * _Cols);
+    for (size_t row = 0; row < _Rows; ++row) {
+      for (size_t col = 0; col < _Cols; ++col) {
+        m_storage.emplace_back(values(row, col));
+      }
+    }
+  }
+
+  template <int _Rows, int _Cols, int... Args>
+  VariableMatrix& operator=(
+      const Eigen::Matrix<autodiff::Variable, _Rows, _Cols, Args...>& values) {
     m_storage.clear();
     m_storage.reserve(_Rows * _Cols);
     for (size_t row = 0; row < _Rows; ++row) {
@@ -94,9 +97,9 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
     return *this;
   }
 
-  template <int _Rows, int _Cols>
+  template <int _Rows, int _Cols, int... Args>
   explicit VariableMatrix(
-      Eigen::Matrix<autodiff::Variable, _Rows, _Cols>&& values)
+      Eigen::Matrix<autodiff::Variable, _Rows, _Cols, Args...>&& values)
       : m_rows{_Rows}, m_cols{_Cols} {
     m_storage.clear();
     m_storage.reserve(_Rows * _Cols);
@@ -107,9 +110,9 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
     }
   }
 
-  template <int _Rows, int _Cols>
+  template <int _Rows, int _Cols, int... Args>
   VariableMatrix& operator=(
-      Eigen::Matrix<autodiff::Variable, _Rows, _Cols>&& values) {
+      Eigen::Matrix<autodiff::Variable, _Rows, _Cols, Args...>&& values) {
     m_storage.clear();
     m_storage.reserve(_Rows * _Cols);
     for (size_t row = 0; row < _Rows; ++row) {
@@ -211,9 +214,9 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param lhs Operator left-hand side.
    * @param rhs Operator right-hand side.
    */
-  template <int _Rows, int _Cols>
+  template <int _Rows, int _Cols, int... Args>
   friend VariableMatrix operator*(
-      const Eigen::Matrix<double, _Rows, _Cols>& lhs,
+      const Eigen::Matrix<double, _Rows, _Cols, Args...>& lhs,
       const VariableMatrix& rhs) {
     assert(lhs.cols() == rhs.Rows());
 
@@ -239,10 +242,10 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param lhs Operator left-hand side.
    * @param rhs Operator right-hand side.
    */
-  template <int _Rows, int _Cols>
+  template <int _Rows, int _Cols, int... Args>
   friend VariableMatrix operator*(
       const VariableMatrix& lhs,
-      const Eigen::Matrix<double, _Rows, _Cols>& rhs) {
+      const Eigen::Matrix<double, _Rows, _Cols, Args...>& rhs) {
     assert(lhs.Cols() == rhs.rows());
 
     VariableMatrix result{lhs.Rows(), static_cast<int>(rhs.cols())};
@@ -343,9 +346,9 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param lhs Operator left-hand side.
    * @param rhs Operator right-hand side.
    */
-  template <int _Rows, int _Cols>
+  template <int _Rows, int _Cols, int... Args>
   friend VariableMatrix operator+(
-      const Eigen::Matrix<double, _Rows, _Cols>& lhs,
+      const Eigen::Matrix<double, _Rows, _Cols, Args...>& lhs,
       const VariableMatrix& rhs) {
     VariableMatrix result{static_cast<int>(lhs.rows()),
                           static_cast<int>(lhs.cols())};
@@ -367,10 +370,10 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param lhs Operator left-hand side.
    * @param rhs Operator right-hand side.
    */
-  template <int _Rows, int _Cols>
+  template <int _Rows, int _Cols, int... Args>
   friend VariableMatrix operator+(
       const VariableMatrix& lhs,
-      const Eigen::Matrix<double, _Rows, _Cols>& rhs) {
+      const Eigen::Matrix<double, _Rows, _Cols, Args...>& rhs) {
     VariableMatrix result{lhs.Rows(), lhs.Cols()};
 
     for (int row = 0; row < result.Rows(); ++row) {
@@ -406,9 +409,9 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param lhs Operator left-hand side.
    * @param rhs Operator right-hand side.
    */
-  template <int _Rows, int _Cols>
+  template <int _Rows, int _Cols, int... Args>
   friend VariableMatrix operator-(
-      const Eigen::Matrix<double, _Rows, _Cols>& lhs,
+      const Eigen::Matrix<double, _Rows, _Cols, Args...>& lhs,
       const VariableMatrix& rhs) {
     VariableMatrix result{static_cast<int>(lhs.rows()),
                           static_cast<int>(lhs.cols())};
@@ -439,10 +442,10 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param lhs Operator left-hand side.
    * @param rhs Operator right-hand side.
    */
-  template <int _Rows, int _Cols>
+  template <int _Rows, int _Cols, int... Args>
   friend VariableMatrix operator-(
       const VariableMatrix& lhs,
-      const Eigen::Matrix<double, _Rows, _Cols>& rhs) {
+      const Eigen::Matrix<double, _Rows, _Cols, Args...>& rhs) {
     VariableMatrix result{lhs.Rows(), lhs.Cols()};
 
     for (int row = 0; row < result.Rows(); ++row) {

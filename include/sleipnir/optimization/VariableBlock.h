@@ -24,9 +24,9 @@ class VariableBlock {
 
   VariableBlock<Mat>& operator=(double value);
 
-  template <int _Rows, int _Cols>
+  template <int _Rows, int _Cols, int... Args>
   VariableBlock<Mat>& operator=(
-      const Eigen::Matrix<double, _Rows, _Cols>& values) {
+      const Eigen::Matrix<double, _Rows, _Cols, Args...>& values) {
     for (size_t row = 0; row < _Rows; ++row) {
       for (size_t col = 0; col < _Cols; ++col) {
         Autodiff(row, col) = values(row, col);
@@ -36,8 +36,9 @@ class VariableBlock {
     return *this;
   }
 
-  template <int _Rows, int _Cols>
-  VariableBlock<Mat>& operator=(Eigen::Matrix<double, _Rows, _Cols>&& values) {
+  template <int _Rows, int _Cols, int... Args>
+  VariableBlock<Mat>& operator=(
+      Eigen::Matrix<double, _Rows, _Cols, Args...>&& values) {
     for (size_t row = 0; row < _Rows; ++row) {
       for (size_t col = 0; col < _Cols; ++col) {
         Autodiff(row, col) = values(row, col);
@@ -47,9 +48,9 @@ class VariableBlock {
     return *this;
   }
 
-  template <int _Rows, int _Cols>
+  template <int _Rows, int _Cols, int... Args>
   VariableBlock<Mat>& operator=(
-      const Eigen::Matrix<autodiff::Variable, _Rows, _Cols>& values) {
+      const Eigen::Matrix<autodiff::Variable, _Rows, _Cols, Args...>& values) {
     for (int row = 0; row < m_blockRows; ++row) {
       for (int col = 0; col < m_blockCols; ++col) {
         Autodiff(row, col) = values(row, col);
@@ -58,9 +59,9 @@ class VariableBlock {
     return *this;
   }
 
-  template <int _Rows, int _Cols>
+  template <int _Rows, int _Cols, int... Args>
   VariableBlock<Mat>& operator=(
-      Eigen::Matrix<autodiff::Variable, _Rows, _Cols>&& values) {
+      Eigen::Matrix<autodiff::Variable, _Rows, _Cols, Args...>&& values) {
     for (int row = 0; row < m_blockRows; ++row) {
       for (int col = 0; col < m_blockCols; ++col) {
         Autodiff(row, col) = std::move(values(row, col));

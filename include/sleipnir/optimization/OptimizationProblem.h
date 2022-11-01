@@ -97,8 +97,8 @@ subject to cₑ(x) = 0
  * @code{.cpp}
  * // Start and end at rest
  * problem.SubjectTo(X.Col(0) == Eigen::Matrix<double, 2, 1>{{0.0}, {0.0}});
- * problem.SubjectTo(X.Col(N + 1) == Eigen::Matrix<double, 2, 1>{{10.0},
-{0.0}});
+ * problem.SubjectTo(
+ *   X.Col(N + 1) == Eigen::Matrix<double, 2, 1>{{10.0}, {0.0}});
  *
  * // Limit velocity
  * problem.SubjectTo(-1 <= X.Row(1));
