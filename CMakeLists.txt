@@ -12,7 +12,6 @@ project(Sleipnir)
 
 INCLUDE(CPack)
 
-set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # Use, i.e. don't skip the full RPATH for the build tree
@@ -42,6 +41,14 @@ endif()
 
 file(GLOB_RECURSE Sleipnir_src src/*.cpp)
 
+# Control where the static and shared libraries are built so that on Windows,
+# we don't need to tinker with the path to run the executable
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
+
+option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
+
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS FALSE)
 add_library(Sleipnir ${Sleipnir_src})
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
@@ -69,13 +76,11 @@ install(DIRECTORY include/ DESTINATION "include/Sleipnir")
 target_include_directories(Sleipnir
                            INTERFACE
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-                           $<INSTALL_INTERFACE:include>
-                           )
+                           $<INSTALL_INTERFACE:include>)
 
 install(EXPORT Sleipnir
   FILE Sleipnir.cmake
-  DESTINATION lib/cmake/Sleipnir
-)
+  DESTINATION lib/cmake/Sleipnir)
 
 include(CMakePackageConfigHelpers)
 
@@ -84,8 +89,7 @@ configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/Sleipnir-config.cmake.
   "${CMAKE_CURRENT_BINARY_DIR}/Sleipnir.cmake"
   INSTALL_DESTINATION "lib/cmake/Sleipnir"
   NO_SET_AND_CHECK_MACRO
-  NO_CHECK_REQUIRED_COMPONENTS_MACRO
-)
+  NO_CHECK_REQUIRED_COMPONENTS_MACRO)
 
 include(GoogleTest)
 
