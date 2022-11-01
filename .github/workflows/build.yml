@@ -24,10 +24,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - uses: ilammy/msvc-dev-cmd@v1.12.0
+        if: matrix.name == 'Windows'
+
       - name: Setup cmake
         uses: jwlawson/actions-setup-cmake@v1.13
         with:
-          cmake-version: '3.16.x'
+          cmake-version: latest
         if: matrix.name == 'Windows'
 
       - name: configure
