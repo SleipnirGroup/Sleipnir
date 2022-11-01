@@ -10,12 +10,12 @@ cmake_minimum_required(VERSION 3.11)
 
 project(Sleipnir)
 
-INCLUDE(CPack)
+include(CPack)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # Use, i.e. don't skip the full RPATH for the build tree
-set(CMAKE_SKIP_BUILD_RPATH  FALSE)
+set(CMAKE_SKIP_BUILD_RPATH FALSE)
 
 # When building, don't use the install RPATH already (but later on when
 # installing)
