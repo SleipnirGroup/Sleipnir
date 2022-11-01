@@ -38,7 +38,7 @@ jobs:
 
       - name: test
         working-directory: build
-        run: ctest --output-on-failure
+        run: ctest -R SleipnirTest --output-on-failure
 
       - name: install
         run: cmake --install build --prefix pkg

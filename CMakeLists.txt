@@ -114,9 +114,12 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(googletest)
 
-include(GoogleTest)
+enable_testing()
 
 file(GLOB_RECURSE Sleipnir_test_src test/*.cpp)
 add_executable(SleipnirTest ${Sleipnir_test_src})
-gtest_discover_tests(SleipnirTest)
 target_link_libraries(SleipnirTest PRIVATE Sleipnir GTest::gtest GTest::gtest_main)
+add_test(
+  NAME SleipnirTest
+  COMMAND SleipnirTest
+)
