@@ -1,4 +1,5 @@
 build*/
+*.csv
 
 # compile_commands
 compile_commands.json
