@@ -3441,5 +3441,3 @@ namespace dimensionless {
 namespace units::literals {}
 using namespace units::literals;
 #endif  // UNIT_HAS_LITERAL_SUPPORT
-
-#include "frc/fmt/Units.h"
