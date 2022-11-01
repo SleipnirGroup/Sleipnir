@@ -50,8 +50,16 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS FALSE)
+
 add_library(Sleipnir ${Sleipnir_src})
+if (NOT MSVC)
+  target_compile_options(Sleipnir PRIVATE -Wall -pedantic -Wextra -Werror -Wno-unused-parameter)
+else()
+  target_compile_options(Sleipnir PRIVATE /wd4146 /wd4244 /wd4251 /wd4267 /WX)
+endif()
+
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+
 set_target_properties(Sleipnir PROPERTIES DEBUG_POSTFIX "d")
 
 set_property(TARGET Sleipnir PROPERTY FOLDER "libraries")

@@ -13,25 +13,25 @@ jobs:
       matrix:
         include:
           - os: windows-2022
-            name: Windows
+            artifact-name: Windows
           - os: ubuntu-22.04
-            name: Linux
+            artifact-name: Linux
           - os: macOS-11
-            name: macOS
+            artifact-name: macOS
 
-    name: "Build - ${{ matrix.name }}"
+    name: "Build - ${{ matrix.artifact-name }}"
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
 
       - uses: ilammy/msvc-dev-cmd@v1.12.0
-        if: matrix.name == 'Windows'
+        if: matrix.artifact-name == 'Windows'
 
       - name: Setup cmake
         uses: jwlawson/actions-setup-cmake@v1.13
         with:
           cmake-version: latest
-        if: matrix.name == 'Windows'
+        if: matrix.artifact-name == 'Windows'
 
       - name: configure
         run: cmake -B build -S .
@@ -46,7 +46,7 @@ jobs:
       - name: install
         run: cmake --install build --prefix pkg
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3.1.1
         with:
-          name: ${matrix.name}
+          name: ${{ matrix.artifact-name }}
           path: pkg
