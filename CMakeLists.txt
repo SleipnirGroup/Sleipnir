@@ -63,8 +63,10 @@ if (MSVC)
 endif()
 
 find_package(Eigen3 CONFIG REQUIRED)
+target_link_libraries(Sleipnir Eigen3::Eigen)
+
 find_package(fmt CONFIG REQUIRED)
-target_link_libraries(Sleipnir Eigen3::Eigen fmt::fmt)
+target_link_libraries(Sleipnir fmt::fmt)
 
 target_include_directories(Sleipnir PUBLIC
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
