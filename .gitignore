@@ -1,1 +1,8 @@
 build*/
+
+# compile_commands
+compile_commands.json
+
+# clangd cache
+.clangd/
+.cache/
