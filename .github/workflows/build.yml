@@ -1,0 +1,49 @@
+name: Build
+
+on: [pull_request, push]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-2022
+            name: Windows
+          - os: ubuntu-22.04
+            name: Linux
+          - os: macOS-11
+            name: macOS
+
+    name: "Build - ${{ matrix.name }}"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup cmake
+        uses: jwlawson/actions-setup-cmake@v1.13
+        with:
+          cmake-version: '3.16.x'
+        if: matrix.name == 'Windows'
+
+      - name: configure
+        run: cmake -B build -S .
+
+      - name: build
+        run: cmake --build build --parallel $(nproc)
+
+      - name: test
+        working-directory: build
+        run: ctest --output-on-failure
+
+      - name: install
+        run: cmake --install build --prefix pkg
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ${matrix.name}
+          path: pkg
