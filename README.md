@@ -8,7 +8,7 @@ Sleipnir is a linearity-exploiting sparse nonlinear optimization problem solver 
 
 If the following dependencies aren't installed locally, they will be automatically downloaded and built by CMake.
 
-## Library dependencies
+### Library dependencies
 
 * Eigen (https://gitlab.com/libeigen/eigen)
 * fmtlib (https://github.com/fmtlib/fmt)
