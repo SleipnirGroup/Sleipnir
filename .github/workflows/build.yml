@@ -14,10 +14,13 @@ jobs:
         include:
           - os: windows-2022
             artifact-name: Windows
+            target: ALL_BUILD
           - os: ubuntu-22.04
             artifact-name: Linux
+            target: all
           - os: macOS-11
             artifact-name: macOS
+            target: all
 
     name: "Build - ${{ matrix.artifact-name }}"
     runs-on: ${{ matrix.os }}
@@ -37,7 +40,7 @@ jobs:
         run: cmake -B build -S .
 
       - name: build
-        run: cmake --build build --target all --config RelWithDebInfo --parallel $(nproc)
+        run: cmake --build build --target ${{ matrix.target }} --config RelWithDebInfo --parallel $(nproc)
 
       - name: test
         working-directory: build
