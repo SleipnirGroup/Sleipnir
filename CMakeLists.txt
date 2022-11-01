@@ -1,5 +1,5 @@
 # Disable in-source builds to prevent source tree corruption
-if(" ${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL " ${CMAKE_CURRENT_BINARY_DIR}")
+if ("${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}")
   message(FATAL_ERROR "
 FATAL: In-source builds are not allowed.
        You should create a separate directory for build files.
@@ -30,13 +30,13 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 # the RPATH to be used when installing, but only if it's not a system directory
 list(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
 if ("${isSystemDir}" STREQUAL "-1")
-   set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+  set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 endif("${isSystemDir}" STREQUAL "-1")
 
 # Set default build type to release with debug info (i.e. release mode
 # optimizations are performed, but debug info still exists).
 if (NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "" FORCE)
+  set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "" FORCE)
 endif()
 
 file(GLOB_RECURSE Sleipnir_src src/*.cpp)
@@ -59,13 +59,26 @@ target_compile_definitions(Sleipnir PRIVATE SLEIPNIR_EXPORTS)
 
 target_compile_features(Sleipnir PUBLIC cxx_std_20)
 if (MSVC)
-    target_compile_options(Sleipnir PUBLIC /bigobj)
+  target_compile_options(Sleipnir PUBLIC /bigobj)
 endif()
 
-find_package(Eigen3 CONFIG REQUIRED)
+include(FetchContent)
+
+FetchContent_Declare(
+  Eigen3
+  GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
+  GIT_TAG        3.4.0
+)
+FetchContent_MakeAvailable(Eigen3)
 target_link_libraries(Sleipnir Eigen3::Eigen)
 
-find_package(fmt CONFIG REQUIRED)
+option(FMT_INSTALL "Enable install for fmt project" ON)
+FetchContent_Declare(
+  fmt
+  GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+  GIT_TAG        9.1.0
+)
+FetchContent_MakeAvailable(fmt)
 target_link_libraries(Sleipnir fmt::fmt)
 
 target_include_directories(Sleipnir PUBLIC
