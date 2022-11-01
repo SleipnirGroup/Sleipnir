@@ -6,7 +6,7 @@ FATAL: In-source builds are not allowed.
 ")
 endif()
 
-cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 3.11)
 
 project(Sleipnir)
 
@@ -106,9 +106,17 @@ configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/Sleipnir-config.cmake.
   NO_SET_AND_CHECK_MACRO
   NO_CHECK_REQUIRED_COMPONENTS_MACRO)
 
+FetchContent_Declare(
+  googletest
+  GIT_REPOSITORY https://github.com/google/googletest.git
+  GIT_TAG        release-1.12.1
+  FIND_PACKAGE_ARGS NAMES GTest
+)
+FetchContent_MakeAvailable(googletest)
+
 include(GoogleTest)
 
 file(GLOB_RECURSE Sleipnir_test_src test/*.cpp)
 add_executable(SleipnirTest ${Sleipnir_test_src})
 gtest_discover_tests(SleipnirTest)
-target_link_libraries(SleipnirTest PRIVATE Sleipnir gtest gtest_main)
+target_link_libraries(SleipnirTest PRIVATE Sleipnir GTest::gtest GTest::gtest_main)
