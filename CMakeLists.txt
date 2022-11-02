@@ -190,9 +190,17 @@ configure_package_config_file(
 # Add benchmark executables if CasADi exists
 find_package(casadi)
 if (casadi_FOUND)
-  file(GLOB_RECURSE ScalabilityBenchmark_src benchmarks/scalability/*.cpp)
-  add_executable(ScalabilityBenchmark ${ScalabilityBenchmark_src})
-  target_link_libraries(ScalabilityBenchmark PRIVATE Sleipnir casadi)
+  file(GLOB FlywheelScalabilityBenchmark_src
+    benchmarks/scalability/*.cpp
+    benchmarks/scalability/flywheel/*.cpp)
+  add_executable(FlywheelScalabilityBenchmark ${FlywheelScalabilityBenchmark_src})
+  target_link_libraries(FlywheelScalabilityBenchmark PRIVATE Sleipnir casadi)
+
+  file(GLOB CartPoleScalabilityBenchmark_src
+    benchmarks/scalability/*.cpp
+    benchmarks/scalability/cartpole/*.cpp)
+  add_executable(CartPoleScalabilityBenchmark ${CartPoleScalabilityBenchmark_src})
+  target_link_libraries(CartPoleScalabilityBenchmark PRIVATE Sleipnir casadi)
 endif()
 
 FetchContent_Declare(
