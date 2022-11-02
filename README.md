@@ -10,11 +10,13 @@ Sleipnir is a linearity-exploiting sparse nonlinear optimization problem solver 
   * On Linux, install GCC 11 or greater
   * On Windows, install [Visual Studio Community 2022](https://visualstudio.microsoft.com/vs/community/) and select the C++ programming language during installation
   * On macOS, install the Xcode command-line build tools via `xcode-select --install`
-* Eigen (https://gitlab.com/libeigen/eigen)
-* fmtlib (https://github.com/fmtlib/fmt)
-* googletest (https://github.com/google/googletest; tests only)
+* [Eigen](https://gitlab.com/libeigen/eigen)
+* [fmtlib](https://github.com/fmtlib/fmt)
+* [googletest](https://github.com/google/googletest) (tests only)
 
 Library dependencies which aren't installed locally will be automatically downloaded and built by CMake.
+
+If [CasADi](https://github.com/casadi/casadi) is installed locally, the benchmark executables will be built.
 
 ## Build instructions
 
