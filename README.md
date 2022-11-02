@@ -6,16 +6,37 @@ Sleipnir is a linearity-exploiting sparse nonlinear optimization problem solver 
 
 ## Dependencies
 
-If the following dependencies aren't installed locally, they will be automatically downloaded and built by CMake.
-
-### Library dependencies
-
+* C++20 compiler
+  * On Linux, install GCC 11 or greater
+  * On Windows, install [Visual Studio Community 2022](https://visualstudio.microsoft.com/vs/community/) and select the C++ programming language during installation
+  * On macOS, install the Xcode command-line build tools via `xcode-select --install`
 * Eigen (https://gitlab.com/libeigen/eigen)
 * fmtlib (https://github.com/fmtlib/fmt)
+* googletest (https://github.com/google/googletest; tests only)
 
-### Test dependencies
+Library dependencies which aren't installed locally will be automatically downloaded and built by CMake.
 
-* googletest (https://github.com/google/googletest)
+## Build instructions
+
+Starting from the repository root, run the configure step:
+```bash
+cmake -B build -S .
+```
+
+This will automatically download library dependencies.
+
+Run the build step:
+```bash
+cmake --build build
+```
+
+Run the tests:
+```bash
+cd build
+ctest -R SleipnirTest
+```
+
+A regex is used to filter for the Sleipnir tests because CMake includes the tests of dependencies in our test set; they take a long time and are unnecessary.
 
 ## Algorithm documentation
 
