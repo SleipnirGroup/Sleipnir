@@ -49,7 +49,7 @@ jobs:
         if: matrix.artifact-name != 'Windows'
 
       - name: install
-        run: cmake --install build --prefix pkg
+        run: cmake --install build --config RelWithDebInfo --prefix pkg
 
       - uses: actions/upload-artifact@v3.1.1
         with:
