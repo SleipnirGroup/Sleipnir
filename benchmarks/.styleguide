@@ -1,21 +1,15 @@
 cppHeaderFileInclude {
   \.h$
   \.inc$
-  scope$
 }
 
 cppSrcFileInclude {
   \.cpp$
 }
 
-generatedFileExclude {
-  include/wpi/
-  include/units/base\.h$
-  include/units/units\.h$
-  src/llvm/
-}
-
 includeOtherLibs {
   ^Eigen/
   ^fmt/
+  ^sleipnir/
+  ^units/
 }

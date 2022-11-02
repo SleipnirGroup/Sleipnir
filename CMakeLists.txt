@@ -187,6 +187,15 @@ configure_package_config_file(
   NO_SET_AND_CHECK_MACRO
   NO_CHECK_REQUIRED_COMPONENTS_MACRO)
 
+# Add benchmark executables
+option(BUILD_BENCHMARKS "Build benchmarks. Requires CasADi" OFF)
+if (BUILD_BENCHMARKS)
+  find_package(casadi)
+  file(GLOB_RECURSE ScalabilityBenchmark_src benchmarks/scalability/*.cpp)
+  add_executable(ScalabilityBenchmark ${ScalabilityBenchmark_src})
+  target_link_libraries(ScalabilityBenchmark PRIVATE Sleipnir casadi)
+endif()
+
 FetchContent_Declare(
   googletest
   GIT_REPOSITORY https://github.com/google/googletest.git
