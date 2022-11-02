@@ -58,7 +58,7 @@ int main() {
 
   results << "Samples,"
           << "CasADi setup time (ms),CasADi solve time (ms),"
-          << "Problem setup time (ms),Problem solve time (ms)\n";
+          << "Sleipnir setup time (ms),Sleipnir solve time (ms)\n";
   std::flush(results);
 
   std::vector<int> Ns;
@@ -86,7 +86,7 @@ int main() {
     results << ",";
     std::flush(results);
 
-    fmt::print(stderr, "Problem (N = {})...", N);
+    fmt::print(stderr, "Sleipnir (N = {})...", N);
     RunTest<sleipnir::OptimizationProblem>(
         results, [=] { return FlywheelOptimizationProblem(dt, N); },
         [](sleipnir::OptimizationProblem& problem) {
