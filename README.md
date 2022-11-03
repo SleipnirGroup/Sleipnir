@@ -4,6 +4,10 @@
 
 Sleipnir is a linearity-exploiting sparse nonlinear optimization problem solver that uses the interior-point method and has readable internals, unlike other optimization problem solvers. It's named after Odin's eight-legged horse from Norse mythology.
 
+## Examples
+
+See the [examples](examples) and [optimization unit tests](test/optimization).
+
 ## Dependencies
 
 * C++20 compiler
