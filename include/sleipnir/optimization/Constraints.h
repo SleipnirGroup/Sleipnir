@@ -11,16 +11,18 @@
 namespace sleipnir {
 
 /**
- * An equality constraint has the form c(x) = 0.
+ * A vector of equality constraints of the form cₑ(x) = 0.
  */
 struct SLEIPNIR_DLLEXPORT EqualityConstraints {
+  /// A vector of scalar equality constraints.
   std::vector<autodiff::Variable> constraints;
 };
 
 /**
- * An inequality constraint has the form c(x) ≥ 0.
+ * A vector of inequality constraints of the form cᵢ(x) ≥ 0.
  */
 struct SLEIPNIR_DLLEXPORT InequalityConstraints {
+  /// A vector of scalar inequality constraints.
   std::vector<autodiff::Variable> constraints;
 };
 

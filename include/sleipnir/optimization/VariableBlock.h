@@ -14,16 +14,43 @@ namespace sleipnir {
 
 class SLEIPNIR_DLLEXPORT Mat;
 
+/**
+ * A submatrix of autodiff variables with reference semantics.
+ *
+ * @tparam Mat The type of the matrix whose storage this class points to.
+ */
 template <typename Mat>
 class VariableBlock {
  public:
+  /**
+   * Constructs a Variable block pointing to all of the given matrix.
+   *
+   * @param mat The matrix to which to point.
+   */
   VariableBlock(Mat& mat);  // NOLINT
 
+  /**
+   * Constructs a Variable block pointing to a subset of the given matrix.
+   *
+   * @param mat The matrix to which to point.
+   * @param rowOffset The block's row offset.
+   * @param colOffset The block's column offset.
+   * @param blockRows The number of rows in the block.
+   * @param blockCols The number of columns in the block.
+   */
   VariableBlock(Mat& mat, int rowOffset, int colOffset, int blockRows,
                 int blockCols);
 
+  /**
+   * Assigns a double to the block.
+   *
+   * This only works for blocks with one row and one column.
+   */
   VariableBlock<Mat>& operator=(double value);
 
+  /**
+   * Assigns an Eigen matrix of doubles to the block.
+   */
   template <int _Rows, int _Cols, int... Args>
   VariableBlock<Mat>& operator=(
       const Eigen::Matrix<double, _Rows, _Cols, Args...>& values) {
@@ -36,6 +63,9 @@ class VariableBlock {
     return *this;
   }
 
+  /**
+   * Assigns an Eigen matrix of doubles to the block.
+   */
   template <int _Rows, int _Cols, int... Args>
   VariableBlock<Mat>& operator=(
       Eigen::Matrix<double, _Rows, _Cols, Args...>&& values) {
@@ -48,6 +78,9 @@ class VariableBlock {
     return *this;
   }
 
+  /**
+   * Assigns an Eigen matrix of Variables to the block.
+   */
   template <int _Rows, int _Cols, int... Args>
   VariableBlock<Mat>& operator=(
       const Eigen::Matrix<autodiff::Variable, _Rows, _Cols, Args...>& values) {
@@ -59,6 +92,9 @@ class VariableBlock {
     return *this;
   }
 
+  /**
+   * Assigns an Eigen matrix of Variables to the block.
+   */
   template <int _Rows, int _Cols, int... Args>
   VariableBlock<Mat>& operator=(
       Eigen::Matrix<autodiff::Variable, _Rows, _Cols, Args...>&& values) {
@@ -70,6 +106,9 @@ class VariableBlock {
     return *this;
   }
 
+  /**
+   * Assigns a VariableMatrix to the block.
+   */
   VariableBlock<Mat>& operator=(const Mat& values) {
     for (int row = 0; row < m_blockRows; ++row) {
       for (int col = 0; col < m_blockCols; ++col) {
@@ -79,6 +118,9 @@ class VariableBlock {
     return *this;
   }
 
+  /**
+   * Assigns a VariableMatrix to the block.
+   */
   VariableBlock<Mat>& operator=(Mat&& values) {
     for (int row = 0; row < m_blockRows; ++row) {
       for (int col = 0; col < m_blockCols; ++col) {
@@ -88,12 +130,34 @@ class VariableBlock {
     return *this;
   }
 
+  /**
+   * Returns a scalar subblock at the given row and column.
+   *
+   * @param row The scalar subblock's row.
+   * @param col The scalar subblock's column.
+   */
   VariableBlock<Mat> operator()(int row, int col);
 
+  /**
+   * Returns a scalar subblock at the given row and column.
+   *
+   * @param row The scalar subblock's row.
+   * @param col The scalar subblock's column.
+   */
   VariableBlock<const Mat> operator()(int row, int col) const;
 
+  /**
+   * Returns a scalar subblock at the given row.
+   *
+   * @param row The scalar subblock's row.
+   */
   VariableBlock<Mat> operator()(int row);
 
+  /**
+   * Returns a scalar subblock at the given row.
+   *
+   * @param row The scalar subblock's row.
+   */
   VariableBlock<const Mat> operator()(int row) const;
 
   /**

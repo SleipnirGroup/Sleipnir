@@ -11,20 +11,51 @@
 
 namespace sleipnir::autodiff {
 
+/**
+ * An autodiff variable pointing to an expression node.
+ */
 class SLEIPNIR_DLLEXPORT Variable {
  public:
+  /// The expression node.
   IntrusiveSharedPtr<Expression> expr;
 
+  /**
+   * Constructs an uninitialized Variable.
+   */
   constexpr Variable() = default;
 
+  /**
+   * Copy constructor.
+   */
   Variable(const Variable&) = default;
+
+  /**
+   * Copy assignment operator.
+   */
   Variable& operator=(const Variable&) = default;
 
+  /**
+   * Move constructor.
+   */
   Variable(Variable&&) = default;
+
+  /**
+   * Move assignment operator.
+   */
   Variable& operator=(Variable&&) = default;
 
+  /**
+   * Constructs a Variable from a double.
+   *
+   * @param value The value of the Variable.
+   */
   Variable(double value);  // NOLINT
 
+  /**
+   * Constructs a Variable from an int.
+   *
+   * @param value The value of the Variable.
+   */
   Variable(int value);  // NOLINT
 
   /**
@@ -34,97 +65,337 @@ class SLEIPNIR_DLLEXPORT Variable {
    */
   explicit Variable(IntrusiveSharedPtr<Expression> expr);
 
+  /**
+   * Assignment operator for double.
+   *
+   * @param value The value of the Variable.
+   */
   Variable& operator=(double value);
 
+  /**
+   * Assignment operator for int.
+   *
+   * @param value The value of the Variable.
+   */
   Variable& operator=(int value);
 
+  /**
+   * double-Variable multiplication operator.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
   friend SLEIPNIR_DLLEXPORT Variable operator*(double lhs, const Variable& rhs);
 
+  /**
+   * Variable-double multiplication operator.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
   friend SLEIPNIR_DLLEXPORT Variable operator*(const Variable& lhs, double rhs);
 
+  /**
+   * Variable-Variable multiplication operator.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
   friend SLEIPNIR_DLLEXPORT Variable operator*(const Variable& lhs,
                                                const Variable& rhs);
 
+  /**
+   * Variable-double compound multiplication operator.
+   *
+   * @param rhs Operator right-hand side.
+   */
   Variable& operator*=(double rhs);
 
+  /**
+   * Variable-Variable compound multiplication operator.
+   *
+   * @param rhs Operator right-hand side.
+   */
   Variable& operator*=(const Variable& rhs);
 
+  /**
+   * double-Variable division operator.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
   friend SLEIPNIR_DLLEXPORT Variable operator/(double lhs, const Variable& rhs);
 
+  /**
+   * Variable-double division operator.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
   friend SLEIPNIR_DLLEXPORT Variable operator/(const Variable& lhs, double rhs);
 
+  /**
+   * Variable-Variable division operator.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
   friend SLEIPNIR_DLLEXPORT Variable operator/(const Variable& lhs,
                                                const Variable& rhs);
 
+  /**
+   * Variable-double compound division operator.
+   *
+   * @param rhs Operator right-hand side.
+   */
   Variable& operator/=(double rhs);
 
+  /**
+   * Variable-Variable compound division operator.
+   *
+   * @param rhs Operator right-hand side.
+   */
   Variable& operator/=(const Variable& rhs);
 
+  /**
+   * double-Variable addition operator.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
   friend SLEIPNIR_DLLEXPORT Variable operator+(double lhs, const Variable& rhs);
 
+  /**
+   * Variable-double addition operator.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
   friend SLEIPNIR_DLLEXPORT Variable operator+(const Variable& lhs, double rhs);
 
+  /**
+   * Variable-Variable addition operator.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
   friend SLEIPNIR_DLLEXPORT Variable operator+(const Variable& lhs,
                                                const Variable& rhs);
 
+  /**
+   * Variable-double compound addition operator.
+   *
+   * @param rhs Operator right-hand side.
+   */
   Variable& operator+=(double rhs);
 
+  /**
+   * Variable-Variable compound addition operator.
+   *
+   * @param rhs Operator right-hand side.
+   */
   Variable& operator+=(const Variable& rhs);
 
+  /**
+   * double-Variable subtraction operator.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
   friend SLEIPNIR_DLLEXPORT Variable operator-(double lhs, const Variable& rhs);
 
+  /**
+   * Variable-double subtraction operator.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
   friend SLEIPNIR_DLLEXPORT Variable operator-(const Variable& lhs, double rhs);
 
+  /**
+   * Variable-Variable subtraction operator.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
   friend SLEIPNIR_DLLEXPORT Variable operator-(const Variable& lhs,
                                                const Variable& rhs);
 
+  /**
+   * Variable-double compound subtraction operator.
+   *
+   * @param rhs Operator right-hand side.
+   */
   Variable& operator-=(double rhs);
 
+  /**
+   * Variable-Variable compound subtraction operator.
+   *
+   * @param rhs Operator right-hand side.
+   */
   Variable& operator-=(const Variable& rhs);
 
+  /**
+   * Unary minus operator.
+   *
+   * @param lhs Operand for unary minus.
+   */
   friend SLEIPNIR_DLLEXPORT Variable operator-(const Variable& lhs);
 
+  /**
+   * Unary plus operator.
+   *
+   * @param lhs Operand for unary plus.
+   */
   friend SLEIPNIR_DLLEXPORT Variable operator+(const Variable& lhs);
 
+  /**
+   * Returns true if double equals Variable.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
   friend SLEIPNIR_DLLEXPORT bool operator==(double lhs, const Variable& rhs);
 
+  /**
+   * Returns true if Variable equals double.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
   friend SLEIPNIR_DLLEXPORT bool operator==(const Variable& lhs, double rhs);
 
+  /**
+   * Returns true if Variable equals Variable.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
   friend SLEIPNIR_DLLEXPORT bool operator==(const Variable& lhs,
                                             const Variable& rhs);
 
+  /**
+   * Returns true if double doesn't equal Variable.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
   friend SLEIPNIR_DLLEXPORT bool operator!=(double lhs, const Variable& rhs);
 
+  /**
+   * Returns true if Variable doesn't equal double.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
   friend SLEIPNIR_DLLEXPORT bool operator!=(const Variable& lhs, double rhs);
 
+  /**
+   * Returns true if Variable doesn't equal Variable.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
   friend SLEIPNIR_DLLEXPORT bool operator!=(const Variable& lhs,
                                             const Variable& rhs);
 
+  /**
+   * Returns true if double is less than Variable.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
   friend SLEIPNIR_DLLEXPORT bool operator<(double lhs, const Variable& rhs);
 
+  /**
+   * Returns true if Variable is less than double.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
   friend SLEIPNIR_DLLEXPORT bool operator<(const Variable& lhs, double rhs);
 
+  /**
+   * Returns true if Variable is less than Variable.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
   friend SLEIPNIR_DLLEXPORT bool operator<(const Variable& lhs,
                                            const Variable& rhs);
 
+  /**
+   * Returns true if double is greater than Variable.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
   friend SLEIPNIR_DLLEXPORT bool operator>(double lhs, const Variable& rhs);
 
+  /**
+   * Returns true if Variable is greater than double.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
   friend SLEIPNIR_DLLEXPORT bool operator>(const Variable& lhs, double rhs);
 
+  /**
+   * Returns true if Variable is greater than Variable.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
   friend SLEIPNIR_DLLEXPORT bool operator>(const Variable& lhs,
                                            const Variable& rhs);
 
+  /**
+   * Returns true if double is less than or equal to Variable.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
   friend SLEIPNIR_DLLEXPORT bool operator<=(double lhs, const Variable& rhs);
 
+  /**
+   * Returns true if Variable is less than or equal to double.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
   friend SLEIPNIR_DLLEXPORT bool operator<=(const Variable& lhs, double rhs);
 
+  /**
+   * Returns true if Variable is less than or equal to Variable.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
   friend SLEIPNIR_DLLEXPORT bool operator<=(const Variable& lhs,
                                             const Variable& rhs);
 
+  /**
+   * Returns true if double is greater than or equal to Variable.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
   friend SLEIPNIR_DLLEXPORT bool operator>=(double lhs, const Variable& rhs);
 
+  /**
+   * Returns true if Variable is greater than or equal to double.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
   friend SLEIPNIR_DLLEXPORT bool operator>=(const Variable& lhs, double rhs);
 
+  /**
+   * Returns true if Variable is greater than or equal to Variable.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
   friend SLEIPNIR_DLLEXPORT bool operator>=(const Variable& lhs,
                                             const Variable& rhs);
 

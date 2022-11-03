@@ -24,12 +24,29 @@ namespace sleipnir::autodiff {
 template <typename T>
 class PoolResource {
  public:
+  /**
+   * Constructs a pool resource with one chunk allocated.
+   */
   PoolResource() { AddChunk(); }
 
+  /**
+   * Copy constructor.
+   */
   PoolResource(const PoolResource&) = delete;
+
+  /**
+   * Copy-assignment operator.
+   */
   PoolResource& operator=(const PoolResource&) = delete;
 
+  /**
+   * Move constructor.
+   */
   PoolResource(PoolResource&&) = default;
+
+  /**
+   * Move-assignment operator.
+   */
   PoolResource& operator=(PoolResource&&) = default;
 
   /**
@@ -95,6 +112,9 @@ class PoolResource {
 template <typename T>
 class PoolAllocator {
  public:
+  /**
+   * The type of object in the pool.
+   */
   using value_type = T;
 
   /**
@@ -104,6 +124,9 @@ class PoolAllocator {
    */
   explicit PoolAllocator(PoolResource<T>* r) : m_memoryResource{r} {}
 
+  /**
+   * Copy constructor.
+   */
   PoolAllocator(const PoolAllocator<T>& other) = default;
 
   PoolAllocator<T>& operator=(const PoolAllocator<T>&) = delete;

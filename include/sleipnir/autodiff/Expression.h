@@ -15,39 +15,58 @@ namespace sleipnir::autodiff {
 
 enum class ExpressionType { kNone, kConstant, kLinear, kQuadratic, kNonlinear };
 
+/**
+ * An autodiff expression node.
+ */
 struct SLEIPNIR_DLLEXPORT Expression {
+  /**
+   * Binary function taking two doubles and returning a double.
+   */
   using BinaryFuncDouble = double (*)(double, double);
+
+  /**
+   * Trinary function taking three doubles and returning a double.
+   */
   using TrinaryFuncDouble = double (*)(double, double, double);
+
+  /**
+   * Trinary function taking three expressions and returning an expression.
+   */
   using TrinaryFuncExpr = sleipnir::IntrusiveSharedPtr<Expression> (*)(
       const sleipnir::IntrusiveSharedPtr<Expression>&,
       const sleipnir::IntrusiveSharedPtr<Expression>&,
       const sleipnir::IntrusiveSharedPtr<Expression>&);
 
+  /// The value of the expression node.
   double value = 0.0;
+
+  /// The adjoint of the expression node used during autodiff.
   double adjoint = 0.0;
 
-  // Tracks the number of instances of this expression yet to be encountered in
-  // an expression tree.
+  /// Tracks the number of instances of this expression yet to be encountered in
+  /// an expression tree.
   int duplications = 0;
 
-  // This expression's row in wrt for autodiff gradient, Jacobian, or Hessian.
-  // This is -1 if the expression isn't in wrt.
+  /// This expression's row in wrt for autodiff gradient, Jacobian, or Hessian.
+  /// This is -1 if the expression isn't in wrt.
   int row = -1;
 
-  // The expression's creation order. The value assigned here is from a
-  // monotonically increasing counter that increments every time an Expression
-  // is constructed. This is used for sorting a flattened representation of the
-  // expression tree in autodiff Jacobian or Hessian.
+  /// The expression's creation order. The value assigned here is from a
+  /// monotonically increasing counter that increments every time an Expression
+  /// is constructed. This is used for sorting a flattened representation of the
+  /// expression tree in autodiff Jacobian or Hessian.
   size_t id;
 
+  /// The adjoint of the expression node used during gradient expression tree
+  /// generation.
   sleipnir::IntrusiveSharedPtr<Expression> adjointExpr;
 
-  // Expression argument type
+  /// Expression argument type.
   ExpressionType type = sleipnir::autodiff::ExpressionType::kLinear;
 
-  // Either nullary operator with no arguments, unary operator with one
-  // argument, or binary operator with two arguments. This operator is
-  // used to update the node's value.
+  /// Either nullary operator with no arguments, unary operator with one
+  /// argument, or binary operator with two arguments. This operator is
+  /// used to update the node's value.
   BinaryFuncDouble valueFunc = [](double, double) { return 0.0; };
 
   /// Functions returning double adjoints of the children expressions.
@@ -82,17 +101,31 @@ struct SLEIPNIR_DLLEXPORT Expression {
         return sleipnir::IntrusiveSharedPtr<Expression>{};
       }};
 
-  // Expression arguments
+  /// Expression arguments.
   std::array<sleipnir::IntrusiveSharedPtr<Expression>, 2> args{nullptr,
                                                                nullptr};
 
-  // Reference count for intrusive shared pointer
+  /// Reference count for intrusive shared pointer.
   uint32_t refCount = 0;
 
+  /**
+   * Copy constructor.
+   */
   Expression(const Expression&) = default;
+
+  /**
+   * Copy-assignment operator.
+   */
   Expression& operator=(const Expression&) = default;
 
+  /**
+   * Move constructor.
+   */
   Expression(Expression&&) = default;
+
+  /**
+   * Move-assignment operator.
+   */
   Expression& operator=(Expression&&) = default;
 
   /**
@@ -138,49 +171,131 @@ struct SLEIPNIR_DLLEXPORT Expression {
              sleipnir::IntrusiveSharedPtr<Expression> lhs,
              sleipnir::IntrusiveSharedPtr<Expression> rhs);
 
+  /**
+   * Double-expression multiplication operator.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
   friend SLEIPNIR_DLLEXPORT sleipnir::IntrusiveSharedPtr<Expression> operator*(
       double lhs, const sleipnir::IntrusiveSharedPtr<Expression>& rhs);
 
+  /**
+   * Expression-double multiplication operator.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
   friend SLEIPNIR_DLLEXPORT sleipnir::IntrusiveSharedPtr<Expression> operator*(
       const sleipnir::IntrusiveSharedPtr<Expression>& lhs, double rhs);
 
+  /**
+   * Expression-Expression multiplication operator.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
   friend SLEIPNIR_DLLEXPORT sleipnir::IntrusiveSharedPtr<Expression> operator*(
       const sleipnir::IntrusiveSharedPtr<Expression>& lhs,
       const sleipnir::IntrusiveSharedPtr<Expression>& rhs);
 
+  /**
+   * double-Expression division operator.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
   friend SLEIPNIR_DLLEXPORT sleipnir::IntrusiveSharedPtr<Expression> operator/(
       double lhs, const sleipnir::IntrusiveSharedPtr<Expression>& rhs);
 
+  /**
+   * Expression-double division operator.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
   friend SLEIPNIR_DLLEXPORT sleipnir::IntrusiveSharedPtr<Expression> operator/(
       const sleipnir::IntrusiveSharedPtr<Expression>& lhs, double rhs);
 
+  /**
+   * Expression-Expression division operator.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
   friend SLEIPNIR_DLLEXPORT sleipnir::IntrusiveSharedPtr<Expression> operator/(
       const sleipnir::IntrusiveSharedPtr<Expression>& lhs,
       const sleipnir::IntrusiveSharedPtr<Expression>& rhs);
 
+  /**
+   * double-Expression addition operator.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
   friend SLEIPNIR_DLLEXPORT sleipnir::IntrusiveSharedPtr<Expression> operator+(
       double lhs, const sleipnir::IntrusiveSharedPtr<Expression>& rhs);
 
+  /**
+   * Expression-double addition operator.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
   friend SLEIPNIR_DLLEXPORT sleipnir::IntrusiveSharedPtr<Expression> operator+(
       const sleipnir::IntrusiveSharedPtr<Expression>& lhs, double rhs);
 
+  /**
+   * Expression-Expression addition operator.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
   friend SLEIPNIR_DLLEXPORT sleipnir::IntrusiveSharedPtr<Expression> operator+(
       const sleipnir::IntrusiveSharedPtr<Expression>& lhs,
       const sleipnir::IntrusiveSharedPtr<Expression>& rhs);
 
+  /**
+   * double-Expression subtraction operator.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
   friend SLEIPNIR_DLLEXPORT sleipnir::IntrusiveSharedPtr<Expression> operator-(
       double lhs, const sleipnir::IntrusiveSharedPtr<Expression>& rhs);
 
+  /**
+   * Expression-double subtraction operator.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
   friend SLEIPNIR_DLLEXPORT sleipnir::IntrusiveSharedPtr<Expression> operator-(
       const sleipnir::IntrusiveSharedPtr<Expression>& lhs, double rhs);
 
+  /**
+   * Expression-Expression subtraction operator.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
   friend SLEIPNIR_DLLEXPORT sleipnir::IntrusiveSharedPtr<Expression> operator-(
       const sleipnir::IntrusiveSharedPtr<Expression>& lhs,
       const sleipnir::IntrusiveSharedPtr<Expression>& rhs);
 
+  /**
+   * Unary minus operator.
+   *
+   * @param lhs Operand of unary minus.
+   */
   friend SLEIPNIR_DLLEXPORT sleipnir::IntrusiveSharedPtr<Expression> operator-(
       const sleipnir::IntrusiveSharedPtr<Expression>& lhs);
 
+  /**
+   * Unary plus operator.
+   *
+   * @param lhs Operand of unary plus.
+   */
   friend SLEIPNIR_DLLEXPORT sleipnir::IntrusiveSharedPtr<Expression> operator+(
       const sleipnir::IntrusiveSharedPtr<Expression>& lhs);
 
@@ -191,6 +306,9 @@ struct SLEIPNIR_DLLEXPORT Expression {
   void Update();
 };
 
+/**
+ * Returns an allocator for the global Expression pool memory resource.
+ */
 SLEIPNIR_DLLEXPORT PoolAllocator<Expression> Allocator();
 
 /**

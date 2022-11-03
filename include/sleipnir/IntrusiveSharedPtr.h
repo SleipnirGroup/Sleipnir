@@ -29,10 +29,20 @@ namespace sleipnir {
 template <typename T>
 class IntrusiveSharedPtr {
  public:
+  /**
+   * Constructs an empty intrusive shared pointer.
+   */
   constexpr IntrusiveSharedPtr() noexcept = default;
 
+  /**
+   * Constructs an empty intrusive shared pointer.
+   */
   constexpr IntrusiveSharedPtr(std::nullptr_t) noexcept {}  // NOLINT
 
+  /**
+   * Constructs an intrusive shared pointer from the given pointer and takes
+   * ownership.
+   */
   explicit IntrusiveSharedPtr(T* ptr) noexcept : m_ptr{ptr} {
     if (m_ptr != nullptr) {
       IntrusiveSharedPtrIncRefCount(m_ptr);
@@ -45,6 +55,9 @@ class IntrusiveSharedPtr {
     }
   }
 
+  /**
+   * Copy constructs from the given intrusive shared pointer.
+   */
   IntrusiveSharedPtr(const IntrusiveSharedPtr<T>& rhs) noexcept
       : m_ptr{rhs.m_ptr} {
     if (m_ptr != nullptr) {
@@ -52,6 +65,9 @@ class IntrusiveSharedPtr {
     }
   }
 
+  /**
+   * Makes a copy of the given intrusive shared pointer.
+   */
   IntrusiveSharedPtr<T>& operator=(  // NOLINT
       const IntrusiveSharedPtr<T>& rhs) noexcept {
     if (m_ptr == rhs.m_ptr) {
@@ -71,9 +87,15 @@ class IntrusiveSharedPtr {
     return *this;
   }
 
+  /**
+   * Move constructs from the given intrusive shared pointer.
+   */
   IntrusiveSharedPtr(IntrusiveSharedPtr<T>&& rhs) noexcept
       : m_ptr{std::exchange(rhs.m_ptr, nullptr)} {}
 
+  /**
+   * Move assigns from the given intrusive shared pointer.
+   */
   IntrusiveSharedPtr<T>& operator=(IntrusiveSharedPtr<T>&& rhs) noexcept {
     if (m_ptr == rhs.m_ptr) {
       return *this;
@@ -84,39 +106,73 @@ class IntrusiveSharedPtr {
     return *this;
   }
 
+  /**
+   * Returns the internal pointer.
+   */
   T* Get() const noexcept { return m_ptr; }
 
+  /**
+   * Returns the object pointed to by the internal pointer.
+   */
   T& operator*() const noexcept { return *m_ptr; }
 
+  /**
+   * Returns the internal pointer.
+   */
   T* operator->() const noexcept { return m_ptr; }
 
+  /**
+   * Returns true if the internal pointer isn't nullptr.
+   */
   explicit operator bool() const noexcept { return m_ptr != nullptr; }
 
+  /**
+   * Returns true if the given intrusive shared pointers point to the same
+   * object.
+   */
   friend bool operator==(const IntrusiveSharedPtr<T>& lhs,
                          const IntrusiveSharedPtr<T>& rhs) noexcept {
     return lhs.m_ptr == rhs.m_ptr;
   }
 
+  /**
+   * Returns true if the given intrusive shared pointers point to different
+   * objects.
+   */
   friend bool operator!=(const IntrusiveSharedPtr<T>& lhs,
                          const IntrusiveSharedPtr<T>& rhs) noexcept {
     return lhs.m_ptr != rhs.m_ptr;
   }
 
+  /**
+   * Returns true if the left-hand intrusive shared pointer points to nullptr.
+   */
   friend bool operator==(const IntrusiveSharedPtr<T>& lhs,
                          std::nullptr_t) noexcept {
     return lhs.m_ptr == nullptr;
   }
 
+  /**
+   * Returns true if the right-hand intrusive shared pointer points to nullptr.
+   */
   friend bool operator==(std::nullptr_t,
                          const IntrusiveSharedPtr<T>& rhs) noexcept {
     return nullptr == rhs.m_ptr;
   }
 
+  /**
+   * Returns true if the left-hand intrusive shared pointer doesn't point to
+   * nullptr.
+   */
   friend bool operator!=(const IntrusiveSharedPtr<T>& lhs,
                          std::nullptr_t) noexcept {
     return lhs.m_ptr != nullptr;
   }
 
+  /**
+   * Returns true if the right-hand intrusive shared pointer doesn't point to
+   * nullptr.
+   */
   friend bool operator!=(std::nullptr_t,
                          const IntrusiveSharedPtr<T>& rhs) noexcept {
     return nullptr != rhs.m_ptr;

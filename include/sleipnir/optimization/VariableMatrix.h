@@ -14,17 +14,37 @@
 
 namespace sleipnir {
 
+/**
+ * A matrix of autodiff variables.
+ */
 class SLEIPNIR_DLLEXPORT VariableMatrix {
  public:
+  /**
+   * Constructs a VariableMatrix with the given dimensions.
+   *
+   * The internal storage is uninitialized until it's assigned.
+   *
+   * @param rows The number of matrix rows.
+   * @param cols The number of matrix columns.
+   */
   VariableMatrix(int rows, int cols);
 
+  /**
+   * Constructs a scalar VariableMatrix from a double.
+   */
   VariableMatrix(double value);  // NOLINT
 
+  /**
+   * Assigns a double to a scalar VariableMatrix.
+   */
   VariableMatrix& operator=(double value);
 
+  /**
+   * Constructs a VariableMatrix from an Eigen matrix of doubles.
+   */
   template <int _Rows, int _Cols, int... Args>
-  VariableMatrix(
-      const Eigen::Matrix<double, _Rows, _Cols, Args...>& values)  // NOLINT
+  VariableMatrix(  // NOLINT
+      const Eigen::Matrix<double, _Rows, _Cols, Args...>& values)
       : m_rows{_Rows}, m_cols{_Cols} {
     m_storage.reserve(_Rows * _Cols);
     for (size_t row = 0; row < _Rows; ++row) {
@@ -34,6 +54,9 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
     }
   }
 
+  /**
+   * Constructs a VariableMatrix from an Eigen matrix of doubles.
+   */
   template <int _Rows, int _Cols, int... Args>
   VariableMatrix& operator=(
       const Eigen::Matrix<double, _Rows, _Cols, Args...>& values) {
@@ -46,6 +69,9 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
     return *this;
   }
 
+  /**
+   * Constructs a VariableMatrix from an Eigen matrix of doubles.
+   */
   template <int _Rows, int _Cols, int... Args>
   explicit VariableMatrix(Eigen::Matrix<double, _Rows, _Cols, Args...>&& values)
       : m_rows{_Rows}, m_cols{_Cols} {
@@ -58,6 +84,9 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
     }
   }
 
+  /**
+   * Constructs a VariableMatrix from an Eigen matrix of doubles.
+   */
   template <int _Rows, int _Cols, int... Args>
   VariableMatrix& operator=(
       Eigen::Matrix<double, _Rows, _Cols, Args...>&& values) {
@@ -70,6 +99,9 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
     return *this;
   }
 
+  /**
+   * Constructs a VariableMatrix from an Eigen matrix of Variables.
+   */
   template <int _Rows, int _Cols, int... Args>
   explicit VariableMatrix(
       const Eigen::Matrix<autodiff::Variable, _Rows, _Cols, Args...>& values)
@@ -83,6 +115,9 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
     }
   }
 
+  /**
+   * Constructs a VariableMatrix from an Eigen matrix of Variables.
+   */
   template <int _Rows, int _Cols, int... Args>
   VariableMatrix& operator=(
       const Eigen::Matrix<autodiff::Variable, _Rows, _Cols, Args...>& values) {
@@ -97,6 +132,9 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
     return *this;
   }
 
+  /**
+   * Constructs a VariableMatrix from an Eigen matrix of Variables.
+   */
   template <int _Rows, int _Cols, int... Args>
   explicit VariableMatrix(
       Eigen::Matrix<autodiff::Variable, _Rows, _Cols, Args...>&& values)
@@ -110,6 +148,9 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
     }
   }
 
+  /**
+   * Constructs a VariableMatrix from an Eigen matrix of Variables.
+   */
   template <int _Rows, int _Cols, int... Args>
   VariableMatrix& operator=(
       Eigen::Matrix<autodiff::Variable, _Rows, _Cols, Args...>&& values) {
@@ -124,20 +165,54 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
     return *this;
   }
 
+  /**
+   * Constructs a scalar VariableMatrix from a Variable.
+   */
   VariableMatrix(const autodiff::Variable& variable);  // NOLINT
 
+  /**
+   * Constructs a scalar VariableMatrix from a Variable.
+   */
   VariableMatrix(autodiff::Variable&& variable);  // NOLINT
 
+  /**
+   * Constructs a VariableMatrix from a VariableBlock.
+   */
   VariableMatrix(const VariableBlock<VariableMatrix>& values);  // NOLINT
 
+  /**
+   * Constructs a VariableMatrix from a VariableBlock.
+   */
   VariableMatrix(const VariableBlock<const VariableMatrix>& values);  // NOLINT
 
+  /**
+   * Returns a block pointing to the given row and column.
+   *
+   * @param row The block row.
+   * @param col The block column.
+   */
   VariableBlock<VariableMatrix> operator()(int row, int col);
 
+  /**
+   * Returns a block pointing to the given row and column.
+   *
+   * @param row The block row.
+   * @param col The block column.
+   */
   VariableBlock<const VariableMatrix> operator()(int row, int col) const;
 
+  /**
+   * Returns a block pointing to the given row.
+   *
+   * @param row The block row.
+   */
   VariableBlock<VariableMatrix> operator()(int row);
 
+  /**
+   * Returns a block pointing to the given row.
+   *
+   * @param row The block row.
+   */
   VariableBlock<const VariableMatrix> operator()(int row) const;
 
   /**

@@ -1,0 +1,27 @@
+name: Documentation
+
+on: [pull_request, push]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  doxygen:
+    name: "Doxygen"
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install doxygen
+        run: sudo apt update && sudo apt install -y doxygen
+
+      - name: Run doxygen
+        run: |
+          mkdir build
+          doxygen
+
+      - uses: actions/upload-artifact@v3.1.1
+        with:
+          name: documentation
+          path: build/docs
