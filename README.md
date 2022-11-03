@@ -6,6 +6,16 @@ Named after Odin's eight-legged horse from Norse mythology, Sleipnir is a linear
 
 Sleipnir's internals are intended to be readable by those who aren't domain experts, unlike other optimization problem solvers.
 
+## Documentation
+
+Run the following in the repository root:
+```bash
+mkdir build
+doxygen docs/Doxyfile
+```
+
+Open `build/docs/html/index.html` in a browser.
+
 ## Examples
 
 See the [examples](examples) and [optimization unit tests](test/optimization).
@@ -66,13 +76,3 @@ This will generate a scalability-results.csv. To plot the results, run the follo
 # Install matplotlib, numpy, and scipy pip packages first
 ./tools/plot_scalability_results.py
 ```
-
-## Documentation
-
-Run the following in the repository root:
-```bash
-mkdir build
-doxygen docs/Doxyfile
-```
-
-Open `build/docs/html/index.html` in a browser.
