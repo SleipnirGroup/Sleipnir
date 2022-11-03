@@ -22,7 +22,7 @@ jobs:
             artifact-name: macOS
             target: all
 
-    name: "Build - ${{ matrix.artifact-name }}"
+    name: "${{ matrix.artifact-name }}"
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
