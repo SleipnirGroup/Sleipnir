@@ -82,7 +82,9 @@ def plot_exp2_fit(ax, x, y, color, force_intercept=False):
     casadi_solve_time,
     problem_setup_time,
     problem_solve_time,
-) = np.genfromtxt("results.csv", delimiter=",", skip_header=1, unpack=True, ndmin=2)
+) = np.genfromtxt(
+    "scalability-results.csv", delimiter=",", skip_header=1, unpack=True, ndmin=2
+)
 
 if (
     math.isnan(casadi_setup_time[-1])

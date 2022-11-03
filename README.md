@@ -40,6 +40,27 @@ ctest -R SleipnirTest
 
 A regex is used to filter for the Sleipnir tests because CMake includes the tests of dependencies in our test set; they take a long time and are unnecessary.
 
+## Benchmarks
+
+The following benchmarks are available:
+
+* benchmarks/scalability/cartpole
+* benchmarks/scalability/flywheel
+
+To compile and run the flywheel scalability benchmark, run:
+```bash
+# Install CasADi first
+cmake -B build -S .
+cmake --build build
+./build/FlywheelScalabilityBenchmark
+```
+
+This will generate a scalability-results.csv in the current directory. To plot the results, run:
+```bash
+# Install matplotlib, numpy, and scipy pip packages first
+./tools/plot_scalability_results.py
+```
+
 ## Algorithm documentation
 
 ### Reverse accumulation automatic differentiation

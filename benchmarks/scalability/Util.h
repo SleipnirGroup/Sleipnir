@@ -23,11 +23,11 @@ double ToMilliseconds(const std::chrono::duration<Rep, Period>& duration) {
 
 /**
  * Runs the setup and solve for an optimization problem instance, records the
- * setup time and solve time for each, then writes them to results.csv.
+ * setup time and solve time for each, then writes them to a CSV file.
  *
  * @tparam Problem The optimization problem's type (casadi::Opti or
  *   sleipnir::OptimizationProblem).
- * @param results The results.csv file to which to write the results.
+ * @param results The CSV file to which to write the results.
  * @param setup A function that returns an optimization problem instance.
  * @param solve A function that takes an optimization problem instance and
  *   solves it.
@@ -58,7 +58,7 @@ void RunBenchmark(std::ofstream& results, std::function<Problem()> setup,
 /**
  * Runs scalability benchmarks for CasADi and Sleipnir versions of an
  * optimization problem, records the setup time and solve time for each, then
- * writes them to results.csv.
+ * writes them to scalability-results.csv.
  *
  * The scale of the problem is iteratively increased by increasing the number of
  * timesteps within the time horizon.

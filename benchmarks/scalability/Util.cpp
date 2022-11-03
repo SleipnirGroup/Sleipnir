@@ -10,7 +10,7 @@ int RunBenchmarksAndLog(
     std::function<casadi::Opti(units::second_t, int)> casadiSetup,
     std::function<sleipnir::OptimizationProblem(units::second_t, int)>
         sleipnirSetup) {
-  std::ofstream results{"results.csv"};
+  std::ofstream results{"scalability-results.csv"};
   if (!results.is_open()) {
     return 1;
   }
