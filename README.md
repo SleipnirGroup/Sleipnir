@@ -8,7 +8,7 @@ Sleipnir's internals are intended to be readable by those who aren't domain expe
 
 ## Examples
 
-See the [examples](examples) and [optimization unit tests](test/optimization).
+See the [examples](https://github.com/calcmogul/Sleipnir/tree/main/examples) and [optimization unit tests](https://github.com/calcmogul/Sleipnir/tree/main/test/optimization).
 
 ## Dependencies
 
