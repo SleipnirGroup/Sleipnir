@@ -1,7 +1,7 @@
 // Copyright (c) Joshua Nichols and Tyler Veness
 
-#include "gtest/gtest.h"
-#include "sleipnir/autodiff/Jacobian.h"
+#include <gtest/gtest.h>
+#include <sleipnir/autodiff/Jacobian.h>
 
 TEST(JacobianTest, YvsX) {
   sleipnir::autodiff::VectorXvar y{3, 1};

@@ -7,14 +7,13 @@
 
 #include <Eigen/Core>
 #include <fmt/core.h>
-
-#include "gtest/gtest.h"
-#include "sleipnir/optimization/OptimizationProblem.h"
-#include "units/acceleration.h"
-#include "units/angle.h"
-#include "units/force.h"
-#include "units/length.h"
-#include "units/time.h"
+#include <gtest/gtest.h>
+#include <sleipnir/optimization/OptimizationProblem.h>
+#include <units/acceleration.h>
+#include <units/angle.h>
+#include <units/force.h>
+#include <units/length.h>
+#include <units/time.h>
 
 /**
  * Performs 4th order Runge-Kutta integration of dx/dt = f(x, u) for dt.

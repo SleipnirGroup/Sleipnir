@@ -23,14 +23,14 @@
 #endif  // defined(__GNUC__) && !defined(__clang__)
 
 #include <fmt/core.h>
+#include <gtest/gtest.h>
+#include <units/angle.h>
+#include <units/angular_acceleration.h>
+#include <units/angular_velocity.h>
+#include <units/time.h>
+#include <units/voltage.h>
 
-#include "gtest/gtest.h"
 #include "sleipnir/optimization/OptimizationProblem.h"
-#include "units/angle.h"
-#include "units/angular_acceleration.h"
-#include "units/angular_velocity.h"
-#include "units/time.h"
-#include "units/voltage.h"
 
 TEST(FlywheelProblemTest, DirectTranscription) {
   auto start = std::chrono::system_clock::now();

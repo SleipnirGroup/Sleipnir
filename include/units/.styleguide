@@ -1,7 +1,6 @@
 cppHeaderFileInclude {
   \.h$
   \.inc$
-  scope$
 }
 
 cppSrcFileInclude {
@@ -9,15 +8,10 @@ cppSrcFileInclude {
 }
 
 generatedFileExclude {
-  include/wpi/
   include/units/base\.h$
   include/units/units\.h$
-  src/llvm/
 }
 
-includeOtherLibs {
-  ^Eigen/
-  ^fmt/
-  ^gtest/
+includeProject {
   ^units/
 }

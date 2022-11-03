@@ -2,12 +2,12 @@
 
 #pragma once
 
+#include <span>
+#include <vector>
+
 #include <sleipnir/SymbolExports.h>
 #include <sleipnir/optimization/OptimizationProblem.h>
 #include <units/current.h>
-
-#include <span>
-#include <vector>
 
 /**
  * This class computes the optimal current allocation for a list of subsystems

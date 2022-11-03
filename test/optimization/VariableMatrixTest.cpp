@@ -1,10 +1,9 @@
 // Copyright (c) Joshua Nichols and Tyler Veness
 
 #include <Eigen/Core>
-
-#include "gtest/gtest.h"
-#include "sleipnir/autodiff/Hessian.h"
-#include "sleipnir/optimization/VariableMatrix.h"
+#include <gtest/gtest.h>
+#include <sleipnir/autodiff/Hessian.h>
+#include <sleipnir/optimization/VariableMatrix.h>
 
 TEST(VariableMatrixTest, HessianSumOfSquares) {
   sleipnir::autodiff::VectorXvar r{{25.0, 10.0, 5.0, 0.0}};

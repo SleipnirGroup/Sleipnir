@@ -1,7 +1,7 @@
 // Copyright (c) Joshua Nichols and Tyler Veness
 
-#include "gtest/gtest.h"
-#include "sleipnir/optimization/OptimizationProblem.h"
+#include <gtest/gtest.h>
+#include <sleipnir/optimization/OptimizationProblem.h>
 
 TEST(QuadraticProblemTest, Unconstrained1d) {
   sleipnir::OptimizationProblem problem;

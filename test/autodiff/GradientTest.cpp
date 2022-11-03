@@ -2,8 +2,8 @@
 
 #include <numbers>
 
-#include "gtest/gtest.h"
-#include "sleipnir/autodiff/Gradient.h"
+#include <gtest/gtest.h>
+#include <sleipnir/autodiff/Gradient.h>
 
 TEST(GradientTest, Gradient) {
   sleipnir::autodiff::Variable a = 10;

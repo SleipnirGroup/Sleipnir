@@ -5,10 +5,9 @@
 
 #include <Eigen/Core>
 #include <fmt/core.h>
-
-#include "gtest/gtest.h"
-#include "sleipnir/optimization/OptimizationProblem.h"
-#include "units/time.h"
+#include <gtest/gtest.h>
+#include <sleipnir/optimization/OptimizationProblem.h>
+#include <units/time.h>
 
 TEST(DoubleIntegratorProblemTest, MinimumTime) {
   auto start = std::chrono::system_clock::now();

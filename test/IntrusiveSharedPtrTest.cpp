@@ -5,8 +5,8 @@
 #include <type_traits>
 #include <utility>
 
-#include "gtest/gtest.h"
-#include "sleipnir/IntrusiveSharedPtr.h"
+#include <gtest/gtest.h>
+#include <sleipnir/IntrusiveSharedPtr.h>
 
 struct Mock {
   uint32_t refCount = 0;

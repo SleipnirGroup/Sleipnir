@@ -1,9 +1,8 @@
 // Copyright (c) Joshua Nichols and Tyler Veness
 
 #include <Eigen/Core>
-
-#include "gtest/gtest.h"
-#include "sleipnir/optimization/OptimizationProblem.h"
+#include <gtest/gtest.h>
+#include <sleipnir/optimization/OptimizationProblem.h>
 
 TEST(DecisionVariableTest, ScalarInitAssign) {
   sleipnir::OptimizationProblem problem;

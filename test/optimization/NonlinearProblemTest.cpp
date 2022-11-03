@@ -2,8 +2,8 @@
 
 #include <vector>
 
-#include "gtest/gtest.h"
-#include "sleipnir/optimization/OptimizationProblem.h"
+#include <gtest/gtest.h>
+#include <sleipnir/optimization/OptimizationProblem.h>
 
 std::vector<double> Range(double start, double end, double step) {
   std::vector<double> ret;
