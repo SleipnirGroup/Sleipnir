@@ -19,7 +19,7 @@ jobs:
       - name: Run doxygen
         run: |
           mkdir build
-          doxygen
+          doxygen docs/Doxyfile
 
       - uses: actions/upload-artifact@v3.1.1
         with:

@@ -72,7 +72,7 @@ This will generate a scalability-results.csv. To plot the results, run the follo
 Run the following in the repository root:
 ```bash
 mkdir build
-doxygen
+doxygen docs/Doxyfile
 ```
 
 Open `build/docs/html/index.html` in a browser.
