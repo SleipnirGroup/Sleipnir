@@ -214,8 +214,9 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
-file(GLOB_RECURSE Sleipnir_test_src test/*.cpp)
+file(GLOB_RECURSE Sleipnir_test_src examples/*.cpp test/*.cpp)
 add_executable(SleipnirTest ${Sleipnir_test_src})
+target_include_directories(SleipnirTest PRIVATE examples/currentmanager)
 if (NOT MSVC)
   target_compile_options(SleipnirTest PRIVATE -Wall -pedantic -Wextra -Werror -Wno-unused-parameter)
 else()
