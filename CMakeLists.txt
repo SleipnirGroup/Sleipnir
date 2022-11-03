@@ -54,8 +54,11 @@ if (isMultiConfig)
   if (NOT "Ubsan" IN_LIST CMAKE_CONFIGURATION_TYPES)
       list(APPEND CMAKE_CONFIGURATION_TYPES Ubsan)
   endif()
+  if (NOT "Perf" IN_LIST CMAKE_CONFIGURATION_TYPES)
+      list(APPEND CMAKE_CONFIGURATION_TYPES Perf)
+  endif()
 else()
-  set(allowedBuildTypes Asan Tsan Ubsan Debug Release RelWithDebInfo MinSizeRel)
+  set(allowedBuildTypes Asan Tsan Ubsan Perf Debug Release RelWithDebInfo MinSizeRel)
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "${allowedBuildTypes}")
 
   if (CMAKE_BUILD_TYPE AND NOT CMAKE_BUILD_TYPE IN_LIST allowedBuildTypes)
@@ -110,6 +113,22 @@ set(CMAKE_EXE_LINKER_FLAGS_UBSAN
 set(CMAKE_SHARED_LINKER_FLAGS_UBSAN
     "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} -fsanitize=undefined" CACHE STRING
     "Linker lags to be used to create shared libraries for Ubsan build type." FORCE)
+
+set(CMAKE_C_FLAGS_PERF
+    "${CMAKE_C_FLAGS_RELWITHDEBINFO} -fno-omit-frame-pointer" CACHE STRING
+    "Flags used by the C compiler for perf build type or configuration." FORCE)
+
+set(CMAKE_CXX_FLAGS_PERF
+    "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -fno-omit-frame-pointer" CACHE STRING
+    "Flags used by the C++ compiler for perf build type or configuration." FORCE)
+
+set(CMAKE_EXE_LINKER_FLAGS_PERF
+    "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO}" CACHE STRING
+    "Linker flags to be used to create executables for perf build type." FORCE)
+
+set(CMAKE_SHARED_LINKER_FLAGS_PERF
+    "${CMAKE_SHARED_LINKER_FLAGS_DEBUG}" CACHE STRING
+    "Linker lags to be used to create shared libraries for perf build type." FORCE)
 
 file(GLOB_RECURSE Sleipnir_src src/*.cpp)
 
