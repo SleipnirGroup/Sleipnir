@@ -1,8 +1,10 @@
 # Sleipnir
 
-> Sparse Linearity-Exploiting Interior-Point solver - Now Internally Readable
+> Sparsity and Linearity-Exploiting Interior-Point solver - Now Internals are Readable
 
-Sleipnir is a linearity-exploiting sparse nonlinear optimization problem solver that uses the interior-point method and has readable internals, unlike other optimization problem solvers. It's named after Odin's eight-legged horse from Norse mythology.
+Named after Odin's eight-legged horse from Norse mythology, Sleipnir is a linearity-exploiting sparse nonlinear constrained optimization problem solver that uses the interior-point method.
+
+Sleipnir's internals are intended to be readable by those who aren't domain experts, unlike other optimization problem solvers.
 
 ## Examples
 
