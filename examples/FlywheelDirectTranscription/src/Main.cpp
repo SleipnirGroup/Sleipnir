@@ -6,7 +6,8 @@
 #include <sleipnir/optimization/OptimizationProblem.h>
 #include <units/time.h>
 
-void FlywheelDirectTranscription() {
+#ifndef RUNNING_TESTS
+int main() {
   constexpr auto T = 5_s;
   constexpr units::second_t dt = 5_ms;
   constexpr int N = T / dt;
@@ -47,3 +48,4 @@ void FlywheelDirectTranscription() {
   // The first input
   fmt::print("u₀ = {}\n", U.Value(0, 0));
 }
+#endif

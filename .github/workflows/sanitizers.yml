@@ -38,4 +38,4 @@ jobs:
 
       - name: test
         working-directory: build
-        run: ${{ matrix.ctest-env }} ctest -R SleipnirTest -C RelWithDebInfo --output-on-failure
+        run: ${{ matrix.ctest-env }} ctest -C RelWithDebInfo --output-on-failure

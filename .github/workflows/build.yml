@@ -45,7 +45,7 @@ jobs:
       # Crashes with exit code 0xc0000135 on Windows (missing DLLs)
       - name: test
         working-directory: build
-        run: ctest -R SleipnirTest -C RelWithDebInfo --output-on-failure
+        run: ctest -C RelWithDebInfo --output-on-failure
         if: matrix.artifact-name != 'Windows'
 
       - name: install

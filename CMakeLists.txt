@@ -6,7 +6,8 @@ FATAL: In-source builds are not allowed.
 ")
 endif()
 
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.21)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
 
 project(Sleipnir)
 
@@ -130,8 +131,6 @@ set(CMAKE_SHARED_LINKER_FLAGS_PERF
     "${CMAKE_SHARED_LINKER_FLAGS_DEBUG}" CACHE STRING
     "Linker lags to be used to create shared libraries for perf build type." FORCE)
 
-file(GLOB_RECURSE Sleipnir_src src/*.cpp)
-
 # Control where the static and shared libraries are built so that on Windows,
 # we don't need to tinker with the path to run the executable
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
@@ -142,12 +141,11 @@ option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS FALSE)
 
+include(SleipnirCompilerFlags)
+
+file(GLOB_RECURSE Sleipnir_src src/*.cpp)
 add_library(Sleipnir ${Sleipnir_src})
-if (NOT MSVC)
-  target_compile_options(Sleipnir PRIVATE -Wall -pedantic -Wextra -Werror -Wno-unused-parameter)
-else()
-  target_compile_options(Sleipnir PRIVATE /wd4146 /wd4244 /wd4251 /wd4267 /WX)
-endif()
+sleipnir_compiler_flags(Sleipnir)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 
@@ -170,6 +168,14 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(Eigen3)
 target_link_libraries(Sleipnir Eigen3::Eigen)
+
+# Prevent Eigen tests from running
+add_custom_command(
+  TARGET Sleipnir
+  PRE_BUILD
+  COMMAND ${CMAKE_COMMAND} -E rm ${CMAKE_BINARY_DIR}/_deps/eigen3-build/CTestTestfile.cmake
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
 
 option(FMT_INSTALL "Enable install for fmt project" ON)
 FetchContent_Declare(
@@ -213,12 +219,14 @@ if (casadi_FOUND)
     benchmarks/scalability/*.cpp
     benchmarks/scalability/flywheel/*.cpp)
   add_executable(FlywheelScalabilityBenchmark ${FlywheelScalabilityBenchmark_src})
+  sleipnir_compiler_flags(FlywheelScalabilityBenchmark)
   target_link_libraries(FlywheelScalabilityBenchmark PRIVATE Sleipnir casadi)
 
   file(GLOB CartPoleScalabilityBenchmark_src
     benchmarks/scalability/*.cpp
     benchmarks/scalability/cartpole/*.cpp)
   add_executable(CartPoleScalabilityBenchmark ${CartPoleScalabilityBenchmark_src})
+  sleipnir_compiler_flags(CartPoleScalabilityBenchmark)
   target_link_libraries(CartPoleScalabilityBenchmark PRIVATE Sleipnir casadi)
 endif()
 
@@ -231,18 +239,45 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(googletest)
 
-enable_testing()
-
-file(GLOB_RECURSE Sleipnir_test_src examples/*.cpp test/*.cpp)
-add_executable(SleipnirTest ${Sleipnir_test_src})
-target_include_directories(SleipnirTest PRIVATE examples/currentmanager)
-if (NOT MSVC)
-  target_compile_options(SleipnirTest PRIVATE -Wall -pedantic -Wextra -Werror -Wno-unused-parameter)
-else()
-  target_compile_options(SleipnirTest PRIVATE /wd4146 /wd4244 /wd4251 /wd4267 /WX)
+cmake_dependent_option(BUILD_TESTING "Enable creation of tests." ON "PROJECT_IS_TOP_LEVEL" OFF)
+if (BUILD_TESTING)
+  enable_testing()
 endif()
-target_link_libraries(SleipnirTest PRIVATE Sleipnir GTest::gtest GTest::gtest_main)
-add_test(
-  NAME SleipnirTest
-  COMMAND SleipnirTest
-)
+
+# Build examples and their tests
+include(SleipnirSubdirList)
+sleipnir_subdir_list(EXAMPLES ${CMAKE_SOURCE_DIR}/examples)
+foreach(example ${EXAMPLES})
+  file(GLOB_RECURSE sources examples/${example}/src/*.cpp)
+  add_executable(${example} ${sources})
+  sleipnir_compiler_flags(${example})
+  target_include_directories(${example} PUBLIC examples/${example}/include)
+  target_link_libraries(${example} Sleipnir)
+
+  if (BUILD_TESTING AND EXISTS ${CMAKE_SOURCE_DIR}/examples/${example}/test)
+    file(GLOB_RECURSE test_sources examples/${example}/test/*.cpp)
+    message("sources=" ${sources})
+    add_executable(${example}Test ${sources} ${test_sources})
+    target_include_directories(${example}Test PRIVATE
+      examples/${example}/src
+      examples/${example}/test)
+    sleipnir_compiler_flags(${example}Test)
+    target_compile_definitions(${example}Test PUBLIC RUNNING_TESTS)
+    target_link_libraries(${example}Test PRIVATE Sleipnir GTest::gtest GTest::gtest_main)
+    add_test(
+      NAME ${example}Test
+      COMMAND ${example}Test
+    )
+  endif()
+endforeach()
+
+if (BUILD_TESTING)
+  file(GLOB_RECURSE Sleipnir_test_src test/*.cpp)
+  add_executable(SleipnirTest ${Sleipnir_test_src})
+  sleipnir_compiler_flags(SleipnirTest)
+  target_link_libraries(SleipnirTest PRIVATE Sleipnir GTest::gtest GTest::gtest_main)
+  add_test(
+    NAME SleipnirTest
+    COMMAND SleipnirTest
+  )
+endif()
