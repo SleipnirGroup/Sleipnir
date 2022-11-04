@@ -42,6 +42,11 @@ if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "" FORCE)
 endif()
 
+# Generate compile_commands.json by default
+if (NOT CMAKE_EXPORT_COMPILE_COMMANDS)
+  set(CMAKE_EXPORT_COMPILE_COMMANDS "YES" CACHE STRING "" FORCE)
+endif()
+
 get_property(isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
 if (isMultiConfig)
   if (NOT "Asan" IN_LIST CMAKE_CONFIGURATION_TYPES)
