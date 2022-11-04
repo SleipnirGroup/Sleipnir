@@ -268,10 +268,6 @@ foreach(example ${EXAMPLES})
     target_compile_definitions(${example}Test PUBLIC RUNNING_TESTS)
     target_link_libraries(${example}Test PRIVATE Sleipnir GTest::gtest GTest::gtest_main)
     gtest_discover_tests(${example}Test)
-    add_test(
-      NAME ${example}Test
-      COMMAND ${example}Test
-    )
   endif()
 endforeach()
 
@@ -281,8 +277,4 @@ if (BUILD_TESTING)
   sleipnir_compiler_flags(SleipnirTest)
   target_link_libraries(SleipnirTest PRIVATE Sleipnir GTest::gtest GTest::gtest_main)
   gtest_discover_tests(SleipnirTest)
-  add_test(
-    NAME SleipnirTest
-    COMMAND SleipnirTest
-  )
 endif()
