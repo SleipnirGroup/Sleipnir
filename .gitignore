@@ -2,6 +2,9 @@ build*/
 *.csv
 perf.*
 
+# CMake
+CMakeUserPresets.json
+
 # compile_commands
 compile_commands.json
 
