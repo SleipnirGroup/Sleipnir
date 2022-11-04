@@ -255,7 +255,6 @@ foreach(example ${EXAMPLES})
 
   if (BUILD_TESTING AND EXISTS ${CMAKE_SOURCE_DIR}/examples/${example}/test)
     file(GLOB_RECURSE test_sources examples/${example}/test/*.cpp)
-    message("sources=" ${sources})
     add_executable(${example}Test ${sources} ${test_sources})
     target_include_directories(${example}Test PRIVATE
       examples/${example}/src
