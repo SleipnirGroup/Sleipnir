@@ -242,6 +242,7 @@ FetchContent_MakeAvailable(googletest)
 cmake_dependent_option(BUILD_TESTING "Enable creation of tests." ON "PROJECT_IS_TOP_LEVEL" OFF)
 if (BUILD_TESTING)
   enable_testing()
+  include(GoogleTest)
 endif()
 
 # Build examples and their tests
@@ -264,6 +265,7 @@ foreach(example ${EXAMPLES})
     sleipnir_compiler_flags(${example}Test)
     target_compile_definitions(${example}Test PUBLIC RUNNING_TESTS)
     target_link_libraries(${example}Test PRIVATE Sleipnir GTest::gtest GTest::gtest_main)
+    gtest_discover_tests(${example}Test)
     add_test(
       NAME ${example}Test
       COMMAND ${example}Test
@@ -276,6 +278,7 @@ if (BUILD_TESTING)
   add_executable(SleipnirTest ${Sleipnir_test_src})
   sleipnir_compiler_flags(SleipnirTest)
   target_link_libraries(SleipnirTest PRIVATE Sleipnir GTest::gtest GTest::gtest_main)
+  gtest_discover_tests(SleipnirTest)
   add_test(
     NAME SleipnirTest
     COMMAND SleipnirTest
