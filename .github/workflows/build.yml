@@ -12,9 +12,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: windows-2022
-            artifact-name: Windows
-            target: ALL_BUILD
+          # Windows tests crash with exit code 0xc0000135 (missing DLLs)
+          # - os: windows-2022
+          #   artifact-name: Windows
+          #   target: ALL_BUILD
           - os: ubuntu-22.04
             artifact-name: Linux
             target: all
@@ -42,11 +43,9 @@ jobs:
       - name: build
         run: cmake --build build --target ${{ matrix.target }} --config RelWithDebInfo --parallel $(nproc)
 
-      # Crashes with exit code 0xc0000135 on Windows (missing DLLs)
       - name: test
         working-directory: build
         run: ctest -C RelWithDebInfo --output-on-failure
-        if: matrix.artifact-name != 'Windows'
 
       - name: install
         run: cmake --install build --config RelWithDebInfo --prefix pkg
