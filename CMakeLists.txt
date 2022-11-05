@@ -216,7 +216,7 @@ configure_package_config_file(
   NO_CHECK_REQUIRED_COMPONENTS_MACRO)
 
 # Add benchmark executables if CasADi exists
-find_package(casadi)
+find_package(casadi QUIET)
 if (casadi_FOUND)
   file(GLOB FlywheelScalabilityBenchmark_src
     benchmarks/scalability/*.cpp
