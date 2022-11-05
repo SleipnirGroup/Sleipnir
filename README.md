@@ -20,7 +20,7 @@ See the [examples](https://github.com/calcmogul/Sleipnir/tree/main/examples) and
   * On Windows, install [Visual Studio Community 2022](https://visualstudio.microsoft.com/vs/community/) and select the C++ programming language during installation
   * On macOS, install the Xcode command-line build tools via `xcode-select --install`
 * [Eigen](https://gitlab.com/libeigen/eigen)
-* [fmtlib](https://github.com/fmtlib/fmt)
+* [fmtlib](https://github.com/fmtlib/fmt) (internal only)
 * [googletest](https://github.com/google/googletest) (tests only)
 
 Library dependencies which aren't installed locally will be automatically downloaded and built by CMake.

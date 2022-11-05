@@ -176,7 +176,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(Eigen3)
 set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_SAVE})
 
-target_link_libraries(Sleipnir Eigen3::Eigen)
+target_link_libraries(Sleipnir PUBLIC Eigen3::Eigen)
 
 # Prevent Eigen tests from running
 add_custom_command(
@@ -187,7 +187,6 @@ add_custom_command(
 )
 
 # fmt dependency (static linkage)
-option(FMT_INSTALL "Enable install for fmt project" ON)
 set(BUILD_SHARED_LIBS_SAVE ${BUILD_SHARED_LIBS})
 set(BUILD_SHARED_LIBS OFF)
 FetchContent_Declare(
@@ -198,7 +197,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(fmt)
 set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_SAVE})
 
-target_link_libraries(Sleipnir fmt::fmt)
+target_link_libraries(Sleipnir PRIVATE fmt)
 
 target_include_directories(Sleipnir PUBLIC
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -234,14 +233,14 @@ if (casadi_FOUND)
     benchmarks/scalability/flywheel/*.cpp)
   add_executable(FlywheelScalabilityBenchmark ${FlywheelScalabilityBenchmark_src})
   sleipnir_compiler_flags(FlywheelScalabilityBenchmark)
-  target_link_libraries(FlywheelScalabilityBenchmark PRIVATE Sleipnir casadi)
+  target_link_libraries(FlywheelScalabilityBenchmark PRIVATE Sleipnir fmt casadi)
 
   file(GLOB CartPoleScalabilityBenchmark_src
     benchmarks/scalability/*.cpp
     benchmarks/scalability/cartpole/*.cpp)
   add_executable(CartPoleScalabilityBenchmark ${CartPoleScalabilityBenchmark_src})
   sleipnir_compiler_flags(CartPoleScalabilityBenchmark)
-  target_link_libraries(CartPoleScalabilityBenchmark PRIVATE Sleipnir casadi)
+  target_link_libraries(CartPoleScalabilityBenchmark PRIVATE Sleipnir fmt casadi)
 endif()
 
 # GoogleTest dependency (static linkage)
@@ -271,7 +270,7 @@ foreach(example ${EXAMPLES})
   add_executable(${example} ${sources})
   sleipnir_compiler_flags(${example})
   target_include_directories(${example} PUBLIC examples/${example}/include)
-  target_link_libraries(${example} Sleipnir)
+  target_link_libraries(${example} PRIVATE Sleipnir fmt)
 
   if (BUILD_TESTING AND EXISTS ${CMAKE_SOURCE_DIR}/examples/${example}/test)
     file(GLOB_RECURSE test_sources examples/${example}/test/*.cpp)
@@ -281,7 +280,8 @@ foreach(example ${EXAMPLES})
       examples/${example}/test)
     sleipnir_compiler_flags(${example}Test)
     target_compile_definitions(${example}Test PUBLIC RUNNING_TESTS)
-    target_link_libraries(${example}Test PRIVATE Sleipnir GTest::gtest GTest::gtest_main)
+    target_link_libraries(${example}Test PRIVATE
+      Sleipnir fmt GTest::gtest GTest::gtest_main)
     gtest_discover_tests(${example}Test)
   endif()
 endforeach()
@@ -290,6 +290,7 @@ if (BUILD_TESTING)
   file(GLOB_RECURSE Sleipnir_test_src test/*.cpp)
   add_executable(SleipnirTest ${Sleipnir_test_src})
   sleipnir_compiler_flags(SleipnirTest)
-  target_link_libraries(SleipnirTest PRIVATE Sleipnir GTest::gtest GTest::gtest_main)
+  target_link_libraries(SleipnirTest PRIVATE
+    Sleipnir fmt GTest::gtest GTest::gtest_main)
   gtest_discover_tests(SleipnirTest)
 endif()
