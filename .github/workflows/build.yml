@@ -12,10 +12,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # Windows tests crash with exit code 0xc0000135 (missing DLLs)
-          # - os: windows-2022
-          #   artifact-name: Windows
-          #   target: ALL_BUILD
+          - os: windows-2022
+            artifact-name: Windows
+            target: ALL_BUILD
           - os: ubuntu-22.04
             artifact-name: Linux
             target: all

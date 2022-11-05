@@ -141,6 +141,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
 
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS FALSE)
 
@@ -164,12 +165,17 @@ endif()
 
 include(FetchContent)
 
+# Eigen dependency (static linkage)
+set(BUILD_SHARED_LIBS_SAVE ${BUILD_SHARED_LIBS})
+set(BUILD_SHARED_LIBS OFF)
 FetchContent_Declare(
   Eigen3
   GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
   GIT_TAG        3.4.0
 )
 FetchContent_MakeAvailable(Eigen3)
+set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_SAVE})
+
 target_link_libraries(Sleipnir Eigen3::Eigen)
 
 # Prevent Eigen tests from running
@@ -180,13 +186,18 @@ add_custom_command(
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
+# fmt dependency (static linkage)
 option(FMT_INSTALL "Enable install for fmt project" ON)
+set(BUILD_SHARED_LIBS_SAVE ${BUILD_SHARED_LIBS})
+set(BUILD_SHARED_LIBS OFF)
 FetchContent_Declare(
   fmt
   GIT_REPOSITORY https://github.com/fmtlib/fmt.git
   GIT_TAG        9.1.0
 )
 FetchContent_MakeAvailable(fmt)
+set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_SAVE})
+
 target_link_libraries(Sleipnir fmt::fmt)
 
 target_include_directories(Sleipnir PUBLIC
@@ -233,6 +244,9 @@ if (casadi_FOUND)
   target_link_libraries(CartPoleScalabilityBenchmark PRIVATE Sleipnir casadi)
 endif()
 
+# GoogleTest dependency (static linkage)
+set(BUILD_SHARED_LIBS_SAVE ${BUILD_SHARED_LIBS})
+set(BUILD_SHARED_LIBS OFF)
 FetchContent_Declare(
   googletest
   GIT_REPOSITORY https://github.com/google/googletest.git
@@ -241,6 +255,7 @@ FetchContent_Declare(
   FIND_PACKAGE_ARGS NAMES GTest
 )
 FetchContent_MakeAvailable(googletest)
+set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_SAVE})
 
 cmake_dependent_option(BUILD_TESTING "Enable creation of tests." ON "PROJECT_IS_TOP_LEVEL" OFF)
 if (BUILD_TESTING)
