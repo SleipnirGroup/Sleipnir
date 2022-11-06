@@ -1,7 +1,8 @@
 // Copyright (c) Joshua Nichols and Tyler Veness
 
 #include <gtest/gtest.h>
-#include <sleipnir/scope>
+
+#include "ScopeExit.h"
 
 TEST(ScopeExitTest, ScopeExit) {
   int exitCount = 0;

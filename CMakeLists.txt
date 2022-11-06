@@ -152,8 +152,8 @@ add_library(Sleipnir ${Sleipnir_src})
 sleipnir_compiler_flags(Sleipnir)
 target_include_directories(Sleipnir
                            PRIVATE
-                           src
-                           thirdparty/llvm/include)
+                           ${CMAKE_CURRENT_SOURCE_DIR}/src
+                           ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/llvm/include)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 
@@ -237,8 +237,8 @@ if (casadi_FOUND)
     sleipnir_compiler_flags(${benchmark}ScalabilityBenchmark)
     target_include_directories(${benchmark}ScalabilityBenchmark
                                PRIVATE
-                               benchmarks/scalability
-                               thirdparty/units/include)
+                               ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/scalability
+                               ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/units/include)
     target_link_libraries(${benchmark}ScalabilityBenchmark
                           PRIVATE
                           Sleipnir
@@ -266,14 +266,16 @@ if (BUILD_TESTING)
   include(GoogleTest)
 endif()
 
+# Build Sleipnir tests
 if (BUILD_TESTING)
   file(GLOB_RECURSE Sleipnir_test_src test/src/*.cpp)
   add_executable(SleipnirTest ${Sleipnir_test_src})
   sleipnir_compiler_flags(SleipnirTest)
   target_include_directories(SleipnirTest
                              PRIVATE
-                             test/include
-                             thirdparty/units/include)
+                             ${CMAKE_CURRENT_SOURCE_DIR}/src
+                             ${CMAKE_CURRENT_SOURCE_DIR}/test/include
+                             ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/units/include)
   target_link_libraries(SleipnirTest
                         PRIVATE
                         Sleipnir
@@ -283,7 +285,7 @@ if (BUILD_TESTING)
   gtest_discover_tests(SleipnirTest)
 endif()
 
-# Build examples and their tests
+# Build examples and example tests
 include(SleipnirSubdirList)
 sleipnir_subdir_list(EXAMPLES ${CMAKE_SOURCE_DIR}/examples)
 foreach(example ${EXAMPLES})
@@ -293,8 +295,8 @@ foreach(example ${EXAMPLES})
   sleipnir_compiler_flags(${example})
   target_include_directories(${example}
                              PRIVATE
-                             examples/${example}/include
-                             thirdparty/units/include)
+                             ${CMAKE_CURRENT_SOURCE_DIR}/examples/${example}/include
+                             ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/units/include)
   target_link_libraries(${example}
                         PRIVATE
                         Sleipnir
@@ -306,15 +308,15 @@ foreach(example ${EXAMPLES})
     add_executable(${example}Test ${sources} ${test_sources})
     target_include_directories(${example}Test
                                PRIVATE
-                               examples/${example}/src
-                               examples/${example}/test
-                               thirdparty/units/include)
+                               ${CMAKE_CURRENT_SOURCE_DIR}/examples/${example}/src
+                               ${CMAKE_CURRENT_SOURCE_DIR}/examples/${example}/test
+                               ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/units/include)
     sleipnir_compiler_flags(${example}Test)
     target_compile_definitions(${example}Test PUBLIC RUNNING_TESTS)
     target_include_directories(${example}Test
                                PRIVATE
-                               examples/${example}/include
-                               thirdparty/units/include)
+                               ${CMAKE_CURRENT_SOURCE_DIR}/examples/${example}/include
+                               ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/units/include)
     target_link_libraries(${example}Test
                           PRIVATE
                           Sleipnir

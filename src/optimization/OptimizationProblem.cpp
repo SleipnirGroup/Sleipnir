@@ -14,13 +14,13 @@
 #include <Eigen/SparseCore>
 #include <fmt/core.h>
 
+#include "ScopeExit.h"
 #include "SimplicialLDLTPreconditioner.h"
 #include "sleipnir/autodiff/Expression.h"
 #include "sleipnir/autodiff/Gradient.h"
 #include "sleipnir/autodiff/Hessian.h"
 #include "sleipnir/autodiff/Jacobian.h"
 #include "sleipnir/autodiff/Variable.h"
-#include "sleipnir/scope"
 
 using namespace sleipnir;
 
