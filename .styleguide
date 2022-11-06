@@ -10,7 +10,6 @@ cppSrcFileInclude {
 
 generatedFileExclude {
   include/units/
-  src/llvm/
   src/wpi/
 }
 
