@@ -275,13 +275,13 @@ foreach(example ${EXAMPLES})
     file(GLOB_RECURSE test_sources examples/${example}/test/*.cpp)
     add_executable(${example}Test ${sources} ${test_sources})
     target_include_directories(${example}Test PRIVATE
-      examples/${example}/src
-      examples/${example}/test)
+                               examples/${example}/src
+                               examples/${example}/test)
     sleipnir_compiler_flags(${example}Test)
     target_compile_definitions(${example}Test PUBLIC RUNNING_TESTS)
     target_include_directories(${example}Test PUBLIC examples/${example}/include)
     target_link_libraries(${example}Test PRIVATE
-      Sleipnir fmt GTest::gtest GTest::gtest_main)
+                          Sleipnir fmt GTest::gtest GTest::gtest_main)
     gtest_discover_tests(${example}Test)
   endif()
 endforeach()
@@ -292,6 +292,6 @@ if (BUILD_TESTING)
   sleipnir_compiler_flags(SleipnirTest)
   target_include_directories(SleipnirTest PUBLIC test/include)
   target_link_libraries(SleipnirTest PRIVATE
-    Sleipnir fmt GTest::gtest GTest::gtest_main)
+                        Sleipnir fmt GTest::gtest GTest::gtest_main)
   gtest_discover_tests(SleipnirTest)
 endif()
