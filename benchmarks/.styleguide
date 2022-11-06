@@ -8,12 +8,14 @@ cppSrcFileInclude {
 }
 
 generatedFileExclude {
-  include/units/
+  thirdparty/
 }
 
 includeOtherLibs {
   ^Eigen/
   ^fmt/
+  ^gtest/
   ^sleipnir/
   ^units/
+  ^wpi/
 }

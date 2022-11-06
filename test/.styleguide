@@ -7,10 +7,15 @@ cppSrcFileInclude {
   \.cpp$
 }
 
+generatedFileExclude {
+  thirdparty/
+}
+
 includeOtherLibs {
   ^Eigen/
   ^fmt/
   ^gtest/
   ^sleipnir/
   ^units/
+  ^wpi/
 }

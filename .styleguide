@@ -9,8 +9,7 @@ cppSrcFileInclude {
 }
 
 generatedFileExclude {
-  include/units/
-  src/wpi/
+  thirdparty/
 }
 
 includeOtherLibs {

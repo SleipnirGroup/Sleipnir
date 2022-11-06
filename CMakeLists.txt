@@ -147,10 +147,13 @@ set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS FALSE)
 
 include(SleipnirCompilerFlags)
 
-file(GLOB_RECURSE Sleipnir_src src/*.cpp)
+file(GLOB_RECURSE Sleipnir_src src/*.cpp thirdparty/llvm/src/*.cpp)
 add_library(Sleipnir ${Sleipnir_src})
 sleipnir_compiler_flags(Sleipnir)
-target_include_directories(Sleipnir PRIVATE src)
+target_include_directories(Sleipnir
+                           PRIVATE
+                           src
+                           thirdparty/llvm/include)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 
@@ -158,11 +161,6 @@ set_target_properties(Sleipnir PROPERTIES DEBUG_POSTFIX "d")
 
 set_property(TARGET Sleipnir PROPERTY FOLDER "libraries")
 target_compile_definitions(Sleipnir PRIVATE SLEIPNIR_EXPORTS)
-
-target_compile_features(Sleipnir PUBLIC cxx_std_20)
-if (MSVC)
-  target_compile_options(Sleipnir PUBLIC /bigobj)
-endif()
 
 include(FetchContent)
 
@@ -200,7 +198,8 @@ set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_SAVE})
 
 target_link_libraries(Sleipnir PRIVATE fmt)
 
-target_include_directories(Sleipnir PUBLIC
+target_include_directories(Sleipnir
+                           PUBLIC
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
                            $<INSTALL_INTERFACE:include/Sleipnir>)
 
@@ -237,9 +236,14 @@ if (casadi_FOUND)
                    ${${benchmark}ScalabilityBenchmark_src})
     sleipnir_compiler_flags(${benchmark}ScalabilityBenchmark)
     target_include_directories(${benchmark}ScalabilityBenchmark
-                               PUBLIC benchmarks/scalability)
+                               PRIVATE
+                               benchmarks/scalability
+                               thirdparty/units/include)
     target_link_libraries(${benchmark}ScalabilityBenchmark
-                          PRIVATE Sleipnir fmt casadi)
+                          PRIVATE
+                          Sleipnir
+                          fmt
+                          casadi)
   endforeach()
 endif()
 
@@ -262,37 +266,61 @@ if (BUILD_TESTING)
   include(GoogleTest)
 endif()
 
-# Build examples and their tests
-include(SleipnirSubdirList)
-sleipnir_subdir_list(EXAMPLES ${CMAKE_SOURCE_DIR}/examples)
-foreach(example ${EXAMPLES})
-  file(GLOB_RECURSE sources examples/${example}/src/*.cpp)
-  add_executable(${example} ${sources})
-  sleipnir_compiler_flags(${example})
-  target_include_directories(${example} PUBLIC examples/${example}/include)
-  target_link_libraries(${example} PRIVATE Sleipnir fmt)
-
-  if (BUILD_TESTING AND EXISTS ${CMAKE_SOURCE_DIR}/examples/${example}/test)
-    file(GLOB_RECURSE test_sources examples/${example}/test/*.cpp)
-    add_executable(${example}Test ${sources} ${test_sources})
-    target_include_directories(${example}Test PRIVATE
-                               examples/${example}/src
-                               examples/${example}/test)
-    sleipnir_compiler_flags(${example}Test)
-    target_compile_definitions(${example}Test PUBLIC RUNNING_TESTS)
-    target_include_directories(${example}Test PUBLIC examples/${example}/include)
-    target_link_libraries(${example}Test PRIVATE
-                          Sleipnir fmt GTest::gtest GTest::gtest_main)
-    gtest_discover_tests(${example}Test)
-  endif()
-endforeach()
-
 if (BUILD_TESTING)
   file(GLOB_RECURSE Sleipnir_test_src test/src/*.cpp)
   add_executable(SleipnirTest ${Sleipnir_test_src})
   sleipnir_compiler_flags(SleipnirTest)
-  target_include_directories(SleipnirTest PUBLIC test/include)
-  target_link_libraries(SleipnirTest PRIVATE
-                        Sleipnir fmt GTest::gtest GTest::gtest_main)
+  target_include_directories(SleipnirTest
+                             PRIVATE
+                             test/include
+                             thirdparty/units/include)
+  target_link_libraries(SleipnirTest
+                        PRIVATE
+                        Sleipnir
+                        fmt
+                        GTest::gtest
+                        GTest::gtest_main)
   gtest_discover_tests(SleipnirTest)
 endif()
+
+# Build examples and their tests
+include(SleipnirSubdirList)
+sleipnir_subdir_list(EXAMPLES ${CMAKE_SOURCE_DIR}/examples)
+foreach(example ${EXAMPLES})
+  # Build example
+  file(GLOB_RECURSE sources examples/${example}/src/*.cpp)
+  add_executable(${example} ${sources})
+  sleipnir_compiler_flags(${example})
+  target_include_directories(${example}
+                             PRIVATE
+                             examples/${example}/include
+                             thirdparty/units/include)
+  target_link_libraries(${example}
+                        PRIVATE
+                        Sleipnir
+                        fmt)
+
+  # Build example test if files exist for it
+  if (BUILD_TESTING AND EXISTS ${CMAKE_SOURCE_DIR}/examples/${example}/test)
+    file(GLOB_RECURSE test_sources examples/${example}/test/*.cpp)
+    add_executable(${example}Test ${sources} ${test_sources})
+    target_include_directories(${example}Test
+                               PRIVATE
+                               examples/${example}/src
+                               examples/${example}/test
+                               thirdparty/units/include)
+    sleipnir_compiler_flags(${example}Test)
+    target_compile_definitions(${example}Test PUBLIC RUNNING_TESTS)
+    target_include_directories(${example}Test
+                               PRIVATE
+                               examples/${example}/include
+                               thirdparty/units/include)
+    target_link_libraries(${example}Test
+                          PRIVATE
+                          Sleipnir
+                          fmt
+                          GTest::gtest
+                          GTest::gtest_main)
+    gtest_discover_tests(${example}Test)
+  endif()
+endforeach()
