@@ -10,8 +10,8 @@ cppSrcFileInclude {
 
 generatedFileExclude {
   include/units/
-  include/wpi/
   src/llvm/
+  src/wpi/
 }
 
 includeOtherLibs {
@@ -19,4 +19,5 @@ includeOtherLibs {
   ^fmt/
   ^gtest/
   ^units/
+  ^wpi/
 }

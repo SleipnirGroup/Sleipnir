@@ -150,6 +150,7 @@ include(SleipnirCompilerFlags)
 file(GLOB_RECURSE Sleipnir_src src/*.cpp)
 add_library(Sleipnir ${Sleipnir_src})
 sleipnir_compiler_flags(Sleipnir)
+target_include_directories(Sleipnir PRIVATE src)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 

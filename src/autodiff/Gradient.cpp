@@ -2,9 +2,9 @@
 
 #include "sleipnir/autodiff/Gradient.h"
 
-#include <wpi/DenseMap.h>
-
 #include <tuple>
+
+#include <wpi/DenseMap.h>
 
 #include "sleipnir/IntrusiveSharedPtr.h"
 
