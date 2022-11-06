@@ -233,6 +233,8 @@ if (casadi_FOUND)
     benchmarks/scalability/flywheel/*.cpp)
   add_executable(FlywheelScalabilityBenchmark ${FlywheelScalabilityBenchmark_src})
   sleipnir_compiler_flags(FlywheelScalabilityBenchmark)
+  target_include_directories(FlywheelScalabilityBenchmark PUBLIC
+    benchmarks/scalability/include)
   target_link_libraries(FlywheelScalabilityBenchmark PRIVATE Sleipnir fmt casadi)
 
   file(GLOB CartPoleScalabilityBenchmark_src
@@ -240,6 +242,8 @@ if (casadi_FOUND)
     benchmarks/scalability/cartpole/*.cpp)
   add_executable(CartPoleScalabilityBenchmark ${CartPoleScalabilityBenchmark_src})
   sleipnir_compiler_flags(CartPoleScalabilityBenchmark)
+  target_include_directories(CartPoleScalabilityBenchmark PUBLIC
+    benchmarks/scalability/include)
   target_link_libraries(CartPoleScalabilityBenchmark PRIVATE Sleipnir fmt casadi)
 endif()
 
@@ -280,6 +284,7 @@ foreach(example ${EXAMPLES})
       examples/${example}/test)
     sleipnir_compiler_flags(${example}Test)
     target_compile_definitions(${example}Test PUBLIC RUNNING_TESTS)
+    target_include_directories(${example}Test PUBLIC examples/${example}/include)
     target_link_libraries(${example}Test PRIVATE
       Sleipnir fmt GTest::gtest GTest::gtest_main)
     gtest_discover_tests(${example}Test)
@@ -287,9 +292,10 @@ foreach(example ${EXAMPLES})
 endforeach()
 
 if (BUILD_TESTING)
-  file(GLOB_RECURSE Sleipnir_test_src test/*.cpp)
+  file(GLOB_RECURSE Sleipnir_test_src test/src/*.cpp)
   add_executable(SleipnirTest ${Sleipnir_test_src})
   sleipnir_compiler_flags(SleipnirTest)
+  target_include_directories(SleipnirTest PUBLIC test/include)
   target_link_libraries(SleipnirTest PRIVATE
     Sleipnir fmt GTest::gtest GTest::gtest_main)
   gtest_discover_tests(SleipnirTest)

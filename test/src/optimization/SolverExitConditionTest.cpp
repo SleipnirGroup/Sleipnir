@@ -110,6 +110,8 @@ TEST(SolverExitConditionTest, MaxIterations) {
 }
 
 TEST(SolverExitConditionTest, Timeout) {
+  using namespace std::chrono_literals;
+
   sleipnir::OptimizationProblem problem;
 
   auto x = problem.DecisionVariable();
@@ -118,7 +120,7 @@ TEST(SolverExitConditionTest, Timeout) {
 
   sleipnir::SolverConfig config;
   config.diagnostics = true;
-  config.timeout = 0_s;
+  config.timeout = 0s;
 
   auto status = problem.Solve(config);
 

@@ -7,6 +7,10 @@ cppSrcFileInclude {
   \.cpp$
 }
 
+generatedFileExclude {
+  include/units/
+}
+
 includeOtherLibs {
   ^Eigen/
   ^fmt/

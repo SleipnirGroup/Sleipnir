@@ -5,8 +5,6 @@
 #include <chrono>
 #include <limits>
 
-#include <units/time.h>
-
 namespace sleipnir {
 
 /**
@@ -20,7 +18,8 @@ struct SolverConfig {
   int maxIterations = 1000;
 
   /// The maximum elapsed wall clock time before returning a solution.
-  units::second_t timeout{std::numeric_limits<double>::infinity()};
+  std::chrono::duration<double> timeout{
+      std::numeric_limits<double>::infinity()};
 
   /// Enables diagnostic prints.
   bool diagnostics = false;

@@ -891,8 +891,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
         return x;
       }
 
-      if (units::second_t{innerIterEndTime - solveStartTime} >
-          m_config.timeout) {
+      if (innerIterEndTime - solveStartTime > m_config.timeout) {
         status->exitCondition = SolverExitCondition::kTimeout;
         return x;
       }

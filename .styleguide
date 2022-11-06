@@ -9,9 +9,8 @@ cppSrcFileInclude {
 }
 
 generatedFileExclude {
+  include/units/
   include/wpi/
-  include/units/base\.h$
-  include/units/units\.h$
   src/llvm/
 }
 

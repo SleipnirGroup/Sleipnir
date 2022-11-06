@@ -2,6 +2,7 @@
 
 #include <vector>
 
+#include <fmt/core.h>
 #include <gtest/gtest.h>
 #include <sleipnir/optimization/OptimizationProblem.h>
 
