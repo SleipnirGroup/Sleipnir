@@ -228,23 +228,18 @@ configure_package_config_file(
 # Add benchmark executables if CasADi exists
 find_package(casadi QUIET)
 if (casadi_FOUND)
-  file(GLOB FlywheelScalabilityBenchmark_src
-    benchmarks/scalability/*.cpp
-    benchmarks/scalability/flywheel/*.cpp)
-  add_executable(FlywheelScalabilityBenchmark ${FlywheelScalabilityBenchmark_src})
-  sleipnir_compiler_flags(FlywheelScalabilityBenchmark)
-  target_include_directories(FlywheelScalabilityBenchmark PUBLIC
-    benchmarks/scalability/include)
-  target_link_libraries(FlywheelScalabilityBenchmark PRIVATE Sleipnir fmt casadi)
-
-  file(GLOB CartPoleScalabilityBenchmark_src
-    benchmarks/scalability/*.cpp
-    benchmarks/scalability/cartpole/*.cpp)
-  add_executable(CartPoleScalabilityBenchmark ${CartPoleScalabilityBenchmark_src})
-  sleipnir_compiler_flags(CartPoleScalabilityBenchmark)
-  target_include_directories(CartPoleScalabilityBenchmark PUBLIC
-    benchmarks/scalability/include)
-  target_link_libraries(CartPoleScalabilityBenchmark PRIVATE Sleipnir fmt casadi)
+  foreach (benchmark "CartPole" "Flywheel")
+    file(GLOB ${benchmark}ScalabilityBenchmark_src
+      benchmarks/scalability/*.cpp
+      benchmarks/scalability/${benchmark}/*.cpp)
+    add_executable(${benchmark}ScalabilityBenchmark
+                   ${${benchmark}ScalabilityBenchmark_src})
+    sleipnir_compiler_flags(${benchmark}ScalabilityBenchmark)
+    target_include_directories(${benchmark}ScalabilityBenchmark
+                               PUBLIC benchmarks/scalability)
+    target_link_libraries(${benchmark}ScalabilityBenchmark
+                          PRIVATE Sleipnir fmt casadi)
+  endforeach()
 endif()
 
 # GoogleTest dependency (static linkage)
