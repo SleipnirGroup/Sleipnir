@@ -6,7 +6,7 @@
 #include <numbers>
 #include <type_traits>
 
-#include "sleipnir/autodiff/Indexer.h"
+#include "Indexer.h"
 
 // https://en.cppreference.com/w/cpp/utility/to_underlying from C++23
 template <class Enum>

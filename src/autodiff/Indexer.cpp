@@ -1,6 +1,6 @@
 // Copyright (c) Joshua Nichols and Tyler Veness
 
-#include "sleipnir/autodiff/Indexer.h"
+#include "Indexer.h"
 
 using namespace sleipnir::autodiff;
 
