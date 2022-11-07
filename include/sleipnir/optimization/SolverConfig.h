@@ -15,7 +15,7 @@ struct SolverConfig {
   double tolerance = 1e-6;
 
   /// The maximum number of solver iterations before returning a solution.
-  int maxIterations = 1000;
+  int maxIterations = 500;
 
   /// The maximum elapsed wall clock time before returning a solution.
   std::chrono::duration<double> timeout{
