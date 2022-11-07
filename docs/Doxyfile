@@ -1013,8 +1013,7 @@ RECURSIVE              = YES
 EXCLUDE                = benchmarks \
                          build \
                          examples \
-                         include/units \
-                         include/wpi \
+                         thirdparty \
                          test \
                          tools
 
