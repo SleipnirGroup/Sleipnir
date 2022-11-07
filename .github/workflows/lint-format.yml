@@ -79,4 +79,4 @@ jobs:
       - name: List changed files
         run: wpiformat -list-changed-files
       - name: Run clang-tidy
-        run: wpiformat -clang 14 -no-format -tidy-all -compile-commands=build -vv
+        run: wpiformat -clang 14 -no-format -tidy-all -compile-commands=build -tidy-extra-args std=c++20 -vv
