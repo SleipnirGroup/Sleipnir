@@ -9,6 +9,7 @@
 std::vector<double> Range(double start, double end, double step) {
   std::vector<double> ret;
 
+  // NOLINTNEXTLINE (clang-analyzer-security.FloatLoopCounter)
   for (double i = start; i < end; i += step) {
     ret.emplace_back(i);
   }

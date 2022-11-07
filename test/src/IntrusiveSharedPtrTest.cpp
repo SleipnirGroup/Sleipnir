@@ -8,6 +8,8 @@
 #include <gtest/gtest.h>
 #include <sleipnir/IntrusiveSharedPtr.h>
 
+// NOLINTBEGIN (clang-analyzer-cplusplus.NewDeleteLeaks)
+
 struct Mock {
   uint32_t refCount = 0;
 };
@@ -173,3 +175,5 @@ TEST(IntrusiveSharedPtrTest, SelfAssignment) {
   EXPECT_EQ(ptr2.Get(), object);
   EXPECT_EQ(object->refCount, 2u);
 }
+
+// NOLINTEND (clang-analyzer-cplusplus.NewDeleteLeaks)

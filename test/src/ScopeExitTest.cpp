@@ -22,7 +22,8 @@ TEST(ScopeExitTest, Release) {
   {
     sleipnir::scope_exit exit1{[&] { ++exitCount; }};
     sleipnir::scope_exit exit2 = std::move(exit1);
-    sleipnir::scope_exit exit3 = std::move(exit1);
+    sleipnir::scope_exit exit3 =
+        std::move(exit1);  // NOLINT (clang-analyzer-cplusplus.Move)
     EXPECT_EQ(0, exitCount);
   }
   EXPECT_EQ(1, exitCount);
