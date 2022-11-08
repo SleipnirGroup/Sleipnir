@@ -421,9 +421,11 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   // Fraction-to-the-boundary rule scale factor minimum
   constexpr double tau_min = 0.99;
 
-  // Tuning parameters for μ update
-  constexpr double kappa_mu = 0.2;  // (0, 1)
-  constexpr double theta_mu = 1.5;  // (1, 2)
+  // Barrier parameter linear decrease power in "κ_μ μ". Range of (0, 1).
+  constexpr double kappa_mu = 0.2;
+
+  // Barrier parameter superlinear decrease power in "μ^(θ_μ)". Range of (1, 2).
+  constexpr double theta_mu = 1.5;
 
   // Barrier parameter μ
   double mu = 0.1;
