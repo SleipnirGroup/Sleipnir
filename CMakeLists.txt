@@ -181,7 +181,7 @@ target_link_libraries(Sleipnir PUBLIC Eigen3::Eigen)
 add_custom_command(
   TARGET Sleipnir
   PRE_BUILD
-  COMMAND ${CMAKE_COMMAND} -E rm ${CMAKE_BINARY_DIR}/_deps/eigen3-build/CTestTestfile.cmake
+  COMMAND ${CMAKE_COMMAND} -E rm -f ${CMAKE_BINARY_DIR}/_deps/eigen3-build/CTestTestfile.cmake
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
