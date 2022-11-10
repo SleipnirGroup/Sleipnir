@@ -11,12 +11,12 @@ In reverse accumulation, the quantity of interest is the adjoint, denoted with a
 Given the expression f(x₁,x₂) = sin(x₁) + x₁x₂, the computational graph is:
 ```mermaid
 graph TD
-    f("f(x₁, x₂)") --> w5(+)
-    w5 --> w4("sin")
-    w5 --> w3("*")
-    w4 --> w1("x₁")
-    w3 --> w1
-    w3 --> w2("x₂")
+    f("f(x₁, x₂)") -->|"w₅"| w5(+)
+    w5 -->|"w₄"| w4("sin")
+    w5 -->|"w₃"| w3("*")
+    w4 -->|"w₁"| w1("x₁")
+    w3 -->|"w₁"| w1
+    w3 -->|"w₂"| w2("x₂")
 ```
 
 The operations to compute the derivative:
