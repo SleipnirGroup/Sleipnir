@@ -21,10 +21,10 @@ graph TD
 
 The operations to compute the derivative:
 
-w̄₅ = 1 (seed)\
-w̄₄ = w̄₅(∂w₅/∂w₄) = w̄₅\
-w̄₃ = w̄₅(∂w₅/∂w₃) = w̄₅\
-w̄₂ = w̄₃(∂w₃/∂w₂) = w̄₃w₁\
+w̄₅ = 1 (seed)<br>
+w̄₄ = w̄₅(∂w₅/∂w₄) = w̄₅<br>
+w̄₃ = w̄₅(∂w₅/∂w₃) = w̄₅<br>
+w̄₂ = w̄₃(∂w₃/∂w₂) = w̄₃w₁<br>
 w̄₁ = w̄₄(∂w₄/∂w₁) + w̄₃(∂w₃/∂w₁) = w̄₄cos(w₁) + w̄₃w₂
 
 https://en.wikipedia.org/wiki/Automatic_differentiation#Beyond_forward_and_reverse_accumulation
