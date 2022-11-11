@@ -49,6 +49,29 @@ ctest -R SleipnirTest
 
 A regex is used to filter for the Sleipnir tests because CMake includes the tests of dependencies in our test set; they take a long time and are unnecessary.
 
+### Supported build types
+
+The following build types can be specified via `-DCMAKE_BUILD_TYPE`:
+
+* Debug
+  * Optimizations off
+  * Debug symbols on
+* Release
+  * Optimizations on
+  * Debug symbols off
+* RelWithDebInfo (default)
+  * Release build type, but with debug info
+* MinSizeRel
+  * Minimum size release build
+* Asan
+  * Enables address sanitizer
+* Tsan
+  * Enables thread sanitizer
+* Ubsan
+  * Enables undefined behavior sanitizer
+* Perf
+  * RelWithDebInfo build type, but with frame pointer so perf utility can use it
+
 ## Benchmarks
 
 The following benchmarks are available:
