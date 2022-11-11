@@ -83,7 +83,12 @@ def plot_exp2_fit(ax, x, y, color, force_intercept=False):
     problem_setup_time,
     problem_solve_time,
 ) = np.genfromtxt(
-    "scalability-results.csv", delimiter=",", skip_header=1, unpack=True, ndmin=2
+    "scalability-results.csv",
+    delimiter=",",
+    skip_header=1,
+    unpack=True,
+    invalid_raise=False,
+    ndmin=2,
 )
 
 if (
