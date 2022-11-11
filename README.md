@@ -3,7 +3,7 @@
 ![Build](https://github.com/calcmogul/Sleipnir/actions/workflows/build.yml/badge.svg)
 [![C++ Documentation](https://img.shields.io/badge/documentation-c%2B%2B-blue)](https://calcmogul.github.io/Sleipnir/)
 
-> Sparsity and Linearity-Exploiting Interior-Point solver - Now Internals are Readable
+> Sparsity and Linearity-Exploiting Interior-Point solver - Now Internally Readable
 
 Named after Odin's eight-legged horse from Norse mythology, Sleipnir is a linearity-exploiting sparse nonlinear constrained optimization problem solver that uses the interior-point method.
 
