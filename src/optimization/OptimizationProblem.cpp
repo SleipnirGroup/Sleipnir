@@ -11,11 +11,11 @@
 #include <vector>
 
 #include <Eigen/IterativeLinearSolvers>
+#include <Eigen/SparseCholesky>
 #include <Eigen/SparseCore>
 #include <fmt/core.h>
 
 #include "ScopeExit.h"
-#include "SimplicialLDLTPreconditioner.h"
 #include "sleipnir/autodiff/Expression.h"
 #include "sleipnir/autodiff/Gradient.h"
 #include "sleipnir/autodiff/Hessian.h"
@@ -698,9 +698,9 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       // Solve the Newton-KKT system
       //
       // https://en.wikipedia.org/wiki/Conjugate_gradient_method#The_preconditioned_conjugate_gradient_method
-      Eigen::ConjugateGradient<Eigen::SparseMatrix<double>,
-                               Eigen::Lower | Eigen::Upper,
-                               SimplicialLDLTPreconditioner<double>>
+      Eigen::ConjugateGradient<
+          Eigen::SparseMatrix<double>, Eigen::Lower | Eigen::Upper,
+          Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>>>
           solver{lhs};
       step = solver.solve(-rhs);
 
