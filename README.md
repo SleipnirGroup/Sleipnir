@@ -70,6 +70,10 @@ The following build types can be specified via `-DCMAKE_BUILD_TYPE`:
 * Perf
   * RelWithDebInfo build type, but with frame pointer so perf utility can use it
 
+## Test problem solutions
+
+Some test problems generate CSV files containing their solutions. These can be plotted with tools/plot_test_problem_solutions.py.
+
 ## Benchmarks
 
 The following benchmarks are available:
