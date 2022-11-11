@@ -10,11 +10,10 @@
 #include <string>
 #include <vector>
 
-#include <Eigen/IterativeLinearSolvers>
-#include <Eigen/SparseCholesky>
 #include <Eigen/SparseCore>
 #include <fmt/core.h>
 
+#include "RegularizedLDLT.h"
 #include "ScopeExit.h"
 #include "sleipnir/autodiff/Expression.h"
 #include "sleipnir/autodiff/Gradient.h"
@@ -582,6 +581,8 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
     }
   }};
 
+  RegularizedLDLT solver{theta_mu};
+
   while (E_mu > m_config.tolerance) {
     while (E_mu > kappa_epsilon * mu) {
       auto innerIterStartTime = std::chrono::system_clock::now();
@@ -680,29 +681,8 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       }
       rhs.bottomRows(y.rows()) = c_e;
 
-      // Regularize lhs by adding a multiple of the identity matrix
-      //
-      // lhs = [H + AᵢᵀΣAᵢ + δI   Aₑᵀ]
-      //       [       Aₑ        −δI ]
-      Eigen::SparseMatrix<double> regularization{lhs.rows(), lhs.cols()};
-      triplets.clear();
-      for (int row = 0; row < H.rows(); ++row) {
-        triplets.emplace_back(row, row, 1e-9);
-      }
-      for (int row = H.rows(); row < lhs.rows(); ++row) {
-        triplets.emplace_back(row, row, -1e-9);
-      }
-      regularization.setFromTriplets(triplets.begin(), triplets.end());
-      lhs += regularization;
-
       // Solve the Newton-KKT system
-      //
-      // https://en.wikipedia.org/wiki/Conjugate_gradient_method#The_preconditioned_conjugate_gradient_method
-      Eigen::ConjugateGradient<
-          Eigen::SparseMatrix<double>, Eigen::Lower | Eigen::Upper,
-          Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>>>
-          solver{lhs};
-      step = solver.solve(-rhs);
+      step = solver.Solve(lhs, -rhs, m_equalityConstraints.size(), mu);
 
       // step = [ pₖˣ]
       //        [−pₖʸ]

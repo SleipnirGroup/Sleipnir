@@ -43,7 +43,7 @@ TEST(NonlinearProblemTest, Quartic) {
   EXPECT_NEAR(1.0, x.Value(0), 1e-6);
 }
 
-TEST(NonlinearProblemTest, DISABLED_RosenbrockWithCubicAndLineConstraint) {
+TEST(NonlinearProblemTest, RosenbrockWithCubicAndLineConstraint) {
   // https://en.wikipedia.org/wiki/Test_functions_for_optimization#Test_functions_for_constrained_optimization
   for (auto x0 : Range(-1.5, 1.5, 0.1)) {
     for (auto y0 : Range(-0.5, 2.5, 0.1)) {
