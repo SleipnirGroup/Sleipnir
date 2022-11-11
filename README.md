@@ -44,10 +44,8 @@ cmake --build build
 Run the tests:
 ```bash
 cd build
-ctest -R SleipnirTest
+ctest
 ```
-
-A regex is used to filter for the Sleipnir tests because CMake includes the tests of dependencies in our test set; they take a long time and are unnecessary.
 
 ### Supported build types
 
