@@ -32,6 +32,12 @@
 
 #include "sleipnir/optimization/OptimizationProblem.h"
 
+namespace {
+bool Near(double expected, double actual, double tolerance) {
+  return std::abs(expected - actual) < tolerance;
+}
+}  // namespace
+
 TEST(FlywheelProblemTest, DirectTranscription) {
   auto start = std::chrono::system_clock::now();
 
@@ -95,29 +101,39 @@ TEST(FlywheelProblemTest, DirectTranscription) {
   Eigen::Matrix<double, 1, 1> u_ss =
       B.householderQr().solve(decltype(A)::Identity() - A) * r;
 
-  Eigen::Matrix<double, 1, 1> x{{0.0}};
+  Eigen::Matrix<double, 1, 1> x{0.0};
+  Eigen::Matrix<double, 1, 1> u{0.0};
   for (int k = 0; k < N; ++k) {
     // Verify state
-    EXPECT_NEAR(x(0), X.Value(0, k), 1e-2);
+    EXPECT_NEAR(x(0), X.Value(0, k), 1e-2) << fmt::format("  k = {}", k);
 
+    // Determine expected input for this timestep
     double error = r(0) - x(0);
     if (error > 1e-2) {
       // Max control input until the reference is reached
-      EXPECT_NEAR(12.0, U.Value(0, k), 1e-2);
-
-      // Project state forward
-      x = A * x + B * 12.0;
+      u(0) = 12.0;
     } else {
-      // If control input isn't at transition value
-      if (std::abs(U.Value(0, k) - 10.7065) > 1e-2) {
-        // Control input that maintains steady-state velocity
-        EXPECT_NEAR(u_ss(0), U.Value(0, k), 1e-2);
-      }
-
-      // Project state forward
-      x = A * x + B * u_ss;
+      // Maintain speed
+      u = u_ss;
     }
+
+    // Verify input
+    if (k > 0 && k < N - 1 && Near(12.0, U.Value(0, k - 1), 1e-2) &&
+        Near(u_ss(0), U.Value(0, k + 1), 1e-2)) {
+      // If control input is transitioning between 12 and u_ss, ensure it's
+      // within (u_ss, 12)
+      EXPECT_GE(u(0), u_ss(0)) << fmt::format("  k = {}", k);
+      EXPECT_LE(u(0), 12.0) << fmt::format("  k = {}", k);
+    } else {
+      EXPECT_NEAR(u(0), U.Value(0, k), 1e-2) << fmt::format("  k = {}", k);
+    }
+
+    // Project state forward
+    x = A * x + B * u;
   }
+
+  // Verify final state
+  EXPECT_NEAR(r(0), X.Value(0, N - 1), 1e-2);
 
   // Log states for offline viewing
   std::ofstream states{"Flywheel states.csv"};

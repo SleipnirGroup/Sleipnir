@@ -1,6 +1,7 @@
 // Copyright (c) Joshua Nichols and Tyler Veness
 
 #include <chrono>
+#include <cmath>
 #include <fstream>
 
 #include <Eigen/Core>
@@ -80,7 +81,49 @@ TEST(DoubleIntegratorProblemTest, MinimumTime) {
             status.inequalityConstraintType);
   EXPECT_EQ(sleipnir::SolverExitCondition::kOk, status.exitCondition);
 
-  // TODO: Verify solution
+  Eigen::Matrix<double, 2, 2> A{{1.0, dt.value()}, {0.0, 1.0}};
+  Eigen::Matrix<double, 2, 1> B{0.5 * dt.value() * dt.value(), dt.value()};
+
+  Eigen::Matrix<double, 2, 1> x{0.0, 0.0};
+  Eigen::Matrix<double, 1, 1> u{0.0};
+  for (int k = 0; k < N; ++k) {
+    // Verify state
+    EXPECT_NEAR(x(0), X.Value(0, k), 1e-2) << fmt::format("  k = {}", k);
+    EXPECT_NEAR(x(1), X.Value(1, k), 1e-2) << fmt::format("  k = {}", k);
+
+    // Determine expected input for this timestep
+    if (k * dt < 1_s) {
+      // Accelerate
+      u(0) = 1.0;
+    } else if (k * dt < 2.05_s) {
+      // Maintain speed
+      u(0) = 0.0;
+    } else if (k * dt < 3.275_s) {
+      // Decelerate
+      u(0) = -1.0;
+    } else {
+      // Accelerate
+      u(0) = 1.0;
+    }
+
+    // Verify input
+    if (k > 0 && k < N - 1 &&
+        std::abs(U.Value(0, k - 1) - U.Value(0, k + 1)) >= 1.0 - 1e-2) {
+      // If control input is transitioning between -1, 0, or 1, ensure it's
+      // within (-1, 1)
+      EXPECT_GE(u(0), -1.0) << fmt::format("  k = {}", k);
+      EXPECT_LE(u(0), 1.0) << fmt::format("  k = {}", k);
+    } else {
+      EXPECT_NEAR(u(0), U.Value(0, k), 1e-2) << fmt::format("  k = {}", k);
+    }
+
+    // Project state forward
+    x = A * x + B * u;
+  }
+
+  // Verify final state
+  EXPECT_NEAR(r, X.Value(0, N - 1), 1e-2);
+  EXPECT_NEAR(0.0, X.Value(1, N - 1), 1e-2);
 
   // Log states for offline viewing
   std::ofstream states{"Double integrator states.csv"};
