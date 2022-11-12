@@ -7,7 +7,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  build-native:
     strategy:
       fail-fast: false
       matrix:
@@ -19,7 +19,7 @@ jobs:
             artifact-name: Linux
             target: all
           - os: macOS-11
-            artifact-name: macOS
+            artifact-name: macOS x86_64
             target: all
 
     name: "${{ matrix.artifact-name }}"
@@ -45,6 +45,35 @@ jobs:
       - name: test
         working-directory: build
         run: ctest -C RelWithDebInfo --output-on-failure
+
+      - name: install
+        run: cmake --install build --config RelWithDebInfo --prefix pkg
+
+      - uses: actions/upload-artifact@v3.1.1
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: pkg
+
+  build-cross:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macOS-11
+            artifact-name: macOS arm64
+            target: all
+            cmake-config-env-vars: CFLAGS="$CFLAGS -arch arm64" CXXFLAGS="$CXXFLAGS -arch arm64"
+
+    name: "${{ matrix.artifact-name }}"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: configure
+        run: ${{ matrix.cmake-config-env-vars }} cmake -B build -S .
+
+      - name: build
+        run: cmake --build build --target Sleipnir --config RelWithDebInfo --parallel $(nproc)
 
       - name: install
         run: cmake --install build --config RelWithDebInfo --prefix pkg

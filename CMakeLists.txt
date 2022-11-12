@@ -70,6 +70,8 @@ target_include_directories(Sleipnir
                            ${CMAKE_CURRENT_SOURCE_DIR}/src
                            ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/llvm/include)
 
+option(INSTALL_SLEIPNIR "Install Sleipnir" ON)
+
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 
 set_target_properties(Sleipnir PROPERTIES DEBUG_POSTFIX "d")
@@ -118,17 +120,21 @@ target_include_directories(Sleipnir
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
                            $<INSTALL_INTERFACE:include/Sleipnir>)
 
-install(TARGETS Sleipnir EXPORT Sleipnir DESTINATION lib)
-install(DIRECTORY include/ DESTINATION "include/Sleipnir")
+if (INSTALL_SLEIPNIR)
+  install(TARGETS Sleipnir EXPORT Sleipnir DESTINATION lib)
+  install(DIRECTORY include/ DESTINATION "include/Sleipnir")
+endif()
 
 target_include_directories(Sleipnir
                            INTERFACE
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
                            $<INSTALL_INTERFACE:include>)
 
-install(EXPORT Sleipnir
-  FILE Sleipnir.cmake
-  DESTINATION lib/cmake/Sleipnir)
+if (INSTALL_SLEIPNIR)
+  install(EXPORT Sleipnir
+    FILE Sleipnir.cmake
+    DESTINATION lib/cmake/Sleipnir)
+endif()
 
 include(CMakePackageConfigHelpers)
 
@@ -165,6 +171,8 @@ endif()
 # GoogleTest dependency (static linkage)
 set(BUILD_SHARED_LIBS_SAVE ${BUILD_SHARED_LIBS})
 set(BUILD_SHARED_LIBS OFF)
+option(INSTALL_GMOCK "Install GoogleTest's GMock" OFF)
+option(INSTALL_GTEST "Install GoogleTest's GTest" OFF)
 FetchContent_Declare(
   googletest
   GIT_REPOSITORY https://github.com/google/googletest.git
