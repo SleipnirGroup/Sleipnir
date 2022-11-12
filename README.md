@@ -94,3 +94,8 @@ This will generate a scalability-results.csv. To plot the results, run the follo
 # Install matplotlib, numpy, and scipy pip packages first
 ./tools/plot_scalability_results.py
 ```
+
+## Logo
+
+Logo: [SVG](https://github.com/calcmogul/Sleipnir/tree/main/logo/sleipnir.svg), [PNG (1000px)](https://github.com/calcmogul/Sleipnir/tree/main/logo/sleipnir_THcolors_1000px.png)<br>
+Font: [Centaur](https://en.wikipedia.org/wiki/Centaur_(typeface))
