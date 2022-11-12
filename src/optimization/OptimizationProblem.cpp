@@ -638,10 +638,10 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
 
       // Update cₑ and cᵢ
       for (size_t row = 0; row < m_equalityConstraints.size(); row++) {
-        c_e[row] = m_equalityConstraints[row].Value();
+        c_e(row) = m_equalityConstraints[row].Value();
       }
       for (size_t row = 0; row < m_inequalityConstraints.size(); row++) {
-        c_i[row] = m_inequalityConstraints[row].Value();
+        c_i(row) = m_inequalityConstraints[row].Value();
       }
 
       // Check for overconstrained problem
