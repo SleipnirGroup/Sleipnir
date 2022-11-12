@@ -186,9 +186,6 @@ void OptimizationProblem::SubjectTo(InequalityConstraints&& constraint) {
 }
 
 SolverStatus OptimizationProblem::Solve(const SolverConfig& config) {
-  constexpr std::array<const char*, 5> kExprTypeToName = {
-      "empty", "constant", "linear", "quadratic", "nonlinear"};
-
   m_config = config;
 
   // Create the initial value column vector
@@ -221,6 +218,9 @@ SolverStatus OptimizationProblem::Solve(const SolverConfig& config) {
   }
 
   if (m_config.diagnostics) {
+    constexpr std::array<const char*, 5> kExprTypeToName = {
+        "empty", "constant", "linear", "quadratic", "nonlinear"};
+
     fmt::print("The cost function is {}.\n",
                kExprTypeToName[static_cast<int>(status.costFunctionType)]);
     fmt::print(
