@@ -7,6 +7,7 @@ Numerical Optimization by Nocedal & Wright: https://www.csie.ntu.edu.tw/~r97002/
 ## Papers
 
 IPOPT Paper: http://cepac.cheme.cmu.edu/pasilectures/biegler/ipopt.pdf
+
 KNITRO Paper: http://users.iems.northwestern.edu/~nocedal/PDFfiles/integrated.pdf
 
 ## Videos
