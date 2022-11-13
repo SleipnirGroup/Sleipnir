@@ -9,15 +9,7 @@ In reverse accumulation AD, the dependent variable to be differentiated is fixed
 In reverse accumulation, the quantity of interest is the adjoint, denoted with a bar (w̄); it is a derivative of a chosen dependent variable with respect to a subexpression w: ∂y/∂w.
 
 Given the expression f(x₁,x₂) = sin(x₁) + x₁x₂, the computational graph is:
-```mermaid
-graph TD
-    f("f(x₁, x₂)") -->|"w₅"| w5(+)
-    w5 -->|"w₄"| w4("sin")
-    w5 -->|"w₃"| w3("*")
-    w4 -->|"w₁"| w1("x₁")
-    w3 -->|"w₁"| w1
-    w3 -->|"w₂"| w2("x₂")
-```
+@mermaid{reverse-autodiff}
 
 The operations to compute the derivative:
 
