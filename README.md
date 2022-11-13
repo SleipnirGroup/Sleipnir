@@ -1,7 +1,7 @@
 # Sleipnir
 
-![Build](https://github.com/calcmogul/Sleipnir/actions/workflows/build.yml/badge.svg)
-[![C++ Documentation](https://img.shields.io/badge/documentation-c%2B%2B-blue)](https://calcmogul.github.io/Sleipnir/)
+![Build](https://github.com/SleipnirGroup/Sleipnir/actions/workflows/build.yml/badge.svg)
+[![C++ Documentation](https://img.shields.io/badge/documentation-c%2B%2B-blue)](https://sleipnirgroup.github.io/Sleipnir/)
 
 > Sparsity and Linearity-Exploiting Interior-Point solver - Now Internally Readable
 
@@ -11,7 +11,7 @@ Sleipnir's internals are intended to be readable by those who aren't domain expe
 
 ## Examples
 
-See the [examples](https://github.com/calcmogul/Sleipnir/tree/main/examples) and [optimization unit tests](https://github.com/calcmogul/Sleipnir/tree/main/test/optimization).
+See the [examples](https://github.com/SleipnirGroup/Sleipnir/tree/main/examples) and [optimization unit tests](https://github.com/SleipnirGroup/Sleipnir/tree/main/test/optimization).
 
 ## Dependencies
 
@@ -97,5 +97,5 @@ This will generate a scalability-results.csv. To plot the results, run the follo
 
 ## Logo
 
-Logo: [SVG](https://github.com/calcmogul/Sleipnir/tree/main/logo/sleipnir.svg), [PNG (1000px)](https://github.com/calcmogul/Sleipnir/tree/main/logo/sleipnir_THcolors_1000px.png)<br>
+Logo: [SVG](https://github.com/SleipnirGroup/Sleipnir/tree/main/logo/sleipnir.svg), [PNG (1000px)](https://github.com/SleipnirGroup/Sleipnir/tree/main/logo/sleipnir_THcolors_1000px.png)<br>
 Font: [Centaur](https://en.wikipedia.org/wiki/Centaur_(typeface))
