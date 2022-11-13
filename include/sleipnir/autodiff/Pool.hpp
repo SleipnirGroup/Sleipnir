@@ -8,7 +8,7 @@
 #include <memory>
 #include <vector>
 
-#include "sleipnir/SymbolExports.h"
+#include "sleipnir/SymbolExports.hpp"
 
 namespace sleipnir::autodiff {
 

@@ -8,9 +8,9 @@
 
 #include <Eigen/Core>
 
-#include "sleipnir/SymbolExports.h"
-#include "sleipnir/autodiff/Variable.h"
-#include "sleipnir/optimization/VariableBlock.h"
+#include "sleipnir/SymbolExports.hpp"
+#include "sleipnir/autodiff/Variable.hpp"
+#include "sleipnir/optimization/VariableBlock.hpp"
 
 namespace sleipnir {
 

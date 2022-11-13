@@ -3,7 +3,7 @@
 #include <cmath>
 
 #include <fmt/core.h>
-#include <sleipnir/optimization/OptimizationProblem.h>
+#include <sleipnir/optimization/OptimizationProblem.hpp>
 #include <units/time.h>
 
 #ifndef RUNNING_TESTS

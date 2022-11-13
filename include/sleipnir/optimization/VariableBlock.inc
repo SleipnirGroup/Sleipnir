@@ -4,7 +4,7 @@
 
 #include <type_traits>
 
-#include "sleipnir/optimization/VariableBlock.h"
+#include "sleipnir/optimization/VariableBlock.hpp"
 
 namespace sleipnir {
 

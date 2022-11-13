@@ -1,7 +1,7 @@
 // Copyright (c) Joshua Nichols and Tyler Veness
 
 #include <gtest/gtest.h>
-#include <sleipnir/optimization/OptimizationProblem.h>
+#include <sleipnir/optimization/OptimizationProblem.hpp>
 
 // These tests ensure coverage of the off-nominal solver exit conditions
 

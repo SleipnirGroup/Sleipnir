@@ -1,6 +1,6 @@
 // Copyright (c) Joshua Nichols and Tyler Veness
 
-#include "CurrentManager.h"
+#include "CurrentManager.hpp"
 
 #include <algorithm>
 #include <stdexcept>

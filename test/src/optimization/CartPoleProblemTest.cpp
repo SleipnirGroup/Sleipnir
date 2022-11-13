@@ -8,7 +8,7 @@
 #include <Eigen/Core>
 #include <fmt/core.h>
 #include <gtest/gtest.h>
-#include <sleipnir/optimization/OptimizationProblem.h>
+#include <sleipnir/optimization/OptimizationProblem.hpp>
 #include <units/acceleration.h>
 #include <units/angle.h>
 #include <units/force.h>

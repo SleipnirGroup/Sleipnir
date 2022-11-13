@@ -1,8 +1,8 @@
 // Copyright (c) Joshua Nichols and Tyler Veness
 
 #include <gtest/gtest.h>
-#include <sleipnir/autodiff/Gradient.h>
-#include <sleipnir/autodiff/Hessian.h>
+#include <sleipnir/autodiff/Gradient.hpp>
+#include <sleipnir/autodiff/Hessian.hpp>
 
 TEST(HessianTest, Linear) {
   // y = x

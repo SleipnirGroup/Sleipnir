@@ -1,12 +1,12 @@
 // Copyright (c) Joshua Nichols and Tyler Veness
 
-#include "sleipnir/autodiff/Expression.h"
+#include "sleipnir/autodiff/Expression.hpp"
 
 #include <cmath>
 #include <numbers>
 #include <type_traits>
 
-#include "Indexer.h"
+#include "Indexer.hpp"
 
 // https://en.cppreference.com/w/cpp/utility/to_underlying from C++23
 template <class Enum>

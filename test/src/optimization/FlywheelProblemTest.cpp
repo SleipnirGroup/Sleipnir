@@ -24,13 +24,12 @@
 
 #include <fmt/core.h>
 #include <gtest/gtest.h>
+#include <sleipnir/optimization/OptimizationProblem.hpp>
 #include <units/angle.h>
 #include <units/angular_acceleration.h>
 #include <units/angular_velocity.h>
 #include <units/time.h>
 #include <units/voltage.h>
-
-#include "sleipnir/optimization/OptimizationProblem.h"
 
 namespace {
 bool Near(double expected, double actual, double tolerance) {

@@ -1,6 +1,6 @@
 // Copyright (c) Joshua Nichols and Tyler Veness
 
-#include "sleipnir/optimization/Constraints.h"
+#include "sleipnir/optimization/Constraints.hpp"
 
 #include <cassert>
 

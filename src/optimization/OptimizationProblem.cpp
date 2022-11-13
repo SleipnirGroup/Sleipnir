@@ -1,6 +1,6 @@
 // Copyright (c) Joshua Nichols and Tyler Veness
 
-#include "sleipnir/optimization/OptimizationProblem.h"
+#include "sleipnir/optimization/OptimizationProblem.hpp"
 
 #include <array>
 #include <cassert>
@@ -13,13 +13,13 @@
 #include <Eigen/SparseCore>
 #include <fmt/core.h>
 
-#include "RegularizedLDLT.h"
-#include "ScopeExit.h"
-#include "sleipnir/autodiff/Expression.h"
-#include "sleipnir/autodiff/Gradient.h"
-#include "sleipnir/autodiff/Hessian.h"
-#include "sleipnir/autodiff/Jacobian.h"
-#include "sleipnir/autodiff/Variable.h"
+#include "RegularizedLDLT.hpp"
+#include "ScopeExit.hpp"
+#include "sleipnir/autodiff/Expression.hpp"
+#include "sleipnir/autodiff/Gradient.hpp"
+#include "sleipnir/autodiff/Hessian.hpp"
+#include "sleipnir/autodiff/Jacobian.hpp"
+#include "sleipnir/autodiff/Variable.hpp"
 
 using namespace sleipnir;
 

@@ -5,10 +5,10 @@
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
 
-#include "sleipnir/SymbolExports.h"
-#include "sleipnir/autodiff/Jacobian.h"
-#include "sleipnir/autodiff/Profiler.h"
-#include "sleipnir/autodiff/Variable.h"
+#include "sleipnir/SymbolExports.hpp"
+#include "sleipnir/autodiff/Jacobian.hpp"
+#include "sleipnir/autodiff/Profiler.hpp"
+#include "sleipnir/autodiff/Variable.hpp"
 
 namespace sleipnir::autodiff {
 

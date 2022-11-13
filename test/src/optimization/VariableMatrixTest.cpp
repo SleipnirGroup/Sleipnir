@@ -2,8 +2,8 @@
 
 #include <Eigen/Core>
 #include <gtest/gtest.h>
-#include <sleipnir/autodiff/Hessian.h>
-#include <sleipnir/optimization/VariableMatrix.h>
+#include <sleipnir/autodiff/Hessian.hpp>
+#include <sleipnir/optimization/VariableMatrix.hpp>
 
 TEST(VariableMatrixTest, HessianSumOfSquares) {
   sleipnir::autodiff::VectorXvar r{{25.0, 10.0, 5.0, 0.0}};

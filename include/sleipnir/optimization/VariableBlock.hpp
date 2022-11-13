@@ -7,8 +7,8 @@
 
 #include <Eigen/Core>
 
-#include "sleipnir/SymbolExports.h"
-#include "sleipnir/autodiff/Variable.h"
+#include "sleipnir/SymbolExports.hpp"
+#include "sleipnir/autodiff/Variable.hpp"
 
 namespace sleipnir {
 

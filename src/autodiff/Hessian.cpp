@@ -1,6 +1,6 @@
 // Copyright (c) Joshua Nichols and Tyler Veness
 
-#include "sleipnir/autodiff/Hessian.h"
+#include "sleipnir/autodiff/Hessian.hpp"
 
 using namespace sleipnir::autodiff;
 

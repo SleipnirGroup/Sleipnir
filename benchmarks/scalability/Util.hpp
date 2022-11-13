@@ -7,7 +7,7 @@
 #include <functional>
 
 #include <casadi/casadi.hpp>
-#include <sleipnir/optimization/OptimizationProblem.h>
+#include <sleipnir/optimization/OptimizationProblem.hpp>
 #include <units/time.h>
 
 /**

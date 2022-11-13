@@ -1,12 +1,12 @@
 // Copyright (c) Joshua Nichols and Tyler Veness
 
-#include "sleipnir/autodiff/Gradient.h"
+#include "sleipnir/autodiff/Gradient.hpp"
 
 #include <tuple>
 
 #include <wpi/DenseMap.h>
 
-#include "sleipnir/IntrusiveSharedPtr.h"
+#include "sleipnir/IntrusiveSharedPtr.hpp"
 
 using namespace sleipnir::autodiff;
 

@@ -4,7 +4,7 @@
 
 #include <gtest/gtest.h>
 
-#include "CurrentManager.h"
+#include "CurrentManager.hpp"
 
 TEST(CurrentManagerTest, EnoughCurrent) {
   CurrentManager manager{std::array{1_A, 5_A, 10_A, 5_A}, 40_A};
