@@ -7,9 +7,9 @@
 #include <array>
 #include <memory>
 
-#include "sleipnir/IntrusiveSharedPtr.h"
-#include "sleipnir/SymbolExports.h"
-#include "sleipnir/autodiff/Pool.h"
+#include "sleipnir/IntrusiveSharedPtr.hpp"
+#include "sleipnir/SymbolExports.hpp"
+#include "sleipnir/autodiff/Pool.hpp"
 
 namespace sleipnir::autodiff {
 

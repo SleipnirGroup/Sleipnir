@@ -1,8 +1,8 @@
 // Copyright (c) Joshua Nichols and Tyler Veness
 
-#include "sleipnir/autodiff/Jacobian.h"
+#include "sleipnir/autodiff/Jacobian.hpp"
 
-#include "sleipnir/autodiff/Gradient.h"
+#include "sleipnir/autodiff/Gradient.hpp"
 
 using namespace sleipnir::autodiff;
 

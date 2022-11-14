@@ -1,6 +1,6 @@
 // Copyright (c) Joshua Nichols and Tyler Veness
 
-#include "CasADi.h"
+#include "CasADi.hpp"
 
 #include <cmath>
 

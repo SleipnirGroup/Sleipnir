@@ -5,8 +5,8 @@
 #include <span>
 #include <vector>
 
-#include <sleipnir/SymbolExports.h>
-#include <sleipnir/optimization/OptimizationProblem.h>
+#include <sleipnir/SymbolExports.hpp>
+#include <sleipnir/optimization/OptimizationProblem.hpp>
 #include <units/current.h>
 
 /**

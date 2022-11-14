@@ -2,7 +2,7 @@
 
 #include <Eigen/Core>
 #include <gtest/gtest.h>
-#include <sleipnir/optimization/OptimizationProblem.h>
+#include <sleipnir/optimization/OptimizationProblem.hpp>
 
 TEST(DecisionVariableTest, ScalarInitAssign) {
   sleipnir::OptimizationProblem problem;

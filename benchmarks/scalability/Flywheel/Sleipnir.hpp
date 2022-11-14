@@ -2,8 +2,16 @@
 
 #pragma once
 
-#include <sleipnir/optimization/OptimizationProblem.h>
+#include <sleipnir/optimization/OptimizationProblem.hpp>
 #include <units/time.h>
+
+/**
+ * Creates a flywheel quadratic optimization problem with Sleipnir.
+ *
+ * @param dt Timestep duration.
+ * @param N Number of samples in the problem.
+ */
+sleipnir::OptimizationProblem FlywheelSleipnir(units::second_t dt, int N);
 
 /**
  * Creates a cart-pole nonlinear optimization problem with Sleipnir.

@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "sleipnir/autodiff/Expression.h"
-#include "sleipnir/optimization/SolverExitCondition.h"
+#include "sleipnir/autodiff/Expression.hpp"
+#include "sleipnir/optimization/SolverExitCondition.hpp"
 
 namespace sleipnir {
 

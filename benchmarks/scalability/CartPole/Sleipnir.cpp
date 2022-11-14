@@ -1,6 +1,6 @@
 // Copyright (c) Joshua Nichols and Tyler Veness
 
-#include "Sleipnir.h"
+#include "Sleipnir.hpp"
 
 #include <cmath>
 #include <numbers>

@@ -8,12 +8,12 @@
 
 #include <Eigen/Core>
 
-#include "sleipnir/SymbolExports.h"
-#include "sleipnir/autodiff/Variable.h"
-#include "sleipnir/optimization/Constraints.h"
-#include "sleipnir/optimization/SolverConfig.h"
-#include "sleipnir/optimization/SolverStatus.h"
-#include "sleipnir/optimization/VariableMatrix.h"
+#include "sleipnir/SymbolExports.hpp"
+#include "sleipnir/autodiff/Variable.hpp"
+#include "sleipnir/optimization/Constraints.hpp"
+#include "sleipnir/optimization/SolverConfig.hpp"
+#include "sleipnir/optimization/SolverStatus.hpp"
+#include "sleipnir/optimization/VariableMatrix.hpp"
 
 namespace sleipnir {
 

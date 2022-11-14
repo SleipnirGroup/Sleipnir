@@ -4,7 +4,7 @@
 
 #include <fmt/core.h>
 #include <gtest/gtest.h>
-#include <sleipnir/optimization/OptimizationProblem.h>
+#include <sleipnir/optimization/OptimizationProblem.hpp>
 
 std::vector<double> Range(double start, double end, double step) {
   std::vector<double> ret;

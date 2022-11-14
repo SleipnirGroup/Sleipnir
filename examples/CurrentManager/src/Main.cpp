@@ -5,7 +5,7 @@
 #include <fmt/core.h>
 #include <units/formatter.h>
 
-#include "CurrentManager.h"
+#include "CurrentManager.hpp"
 
 #ifndef RUNNING_TESTS
 int main() {

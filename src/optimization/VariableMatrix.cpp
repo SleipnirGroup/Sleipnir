@@ -1,8 +1,8 @@
 // Copyright (c) Joshua Nichols and Tyler Veness
 
-#include "sleipnir/optimization/VariableMatrix.h"
+#include "sleipnir/optimization/VariableMatrix.hpp"
 
-#include "sleipnir/autodiff/Expression.h"
+#include "sleipnir/autodiff/Expression.hpp"
 
 namespace sleipnir {
 

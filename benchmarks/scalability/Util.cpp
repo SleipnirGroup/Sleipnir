@@ -1,9 +1,9 @@
 // Copyright (c) Joshua Nichols and Tyler Veness
 
-#include "Util.h"
+#include "Util.hpp"
 
 #include <fmt/core.h>
-#include <sleipnir/optimization/OptimizationProblem.h>
+#include <sleipnir/optimization/OptimizationProblem.hpp>
 
 int RunBenchmarksAndLog(
     bool diagnostics, units::second_t T, int minPower, int maxPower,

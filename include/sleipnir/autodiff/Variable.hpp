@@ -5,9 +5,9 @@
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
 
-#include "sleipnir/IntrusiveSharedPtr.h"
-#include "sleipnir/SymbolExports.h"
-#include "sleipnir/autodiff/Expression.h"
+#include "sleipnir/IntrusiveSharedPtr.hpp"
+#include "sleipnir/SymbolExports.hpp"
+#include "sleipnir/autodiff/Expression.hpp"
 
 namespace sleipnir::autodiff {
 

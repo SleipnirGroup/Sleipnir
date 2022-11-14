@@ -1,12 +1,12 @@
 // Copyright (c) Joshua Nichols and Tyler Veness
 
-#include "sleipnir/autodiff/Variable.h"
+#include "sleipnir/autodiff/Variable.hpp"
 
 #include <cmath>
 #include <tuple>
 #include <vector>
 
-#include "sleipnir/SymbolExports.h"
+#include "sleipnir/SymbolExports.hpp"
 
 namespace sleipnir::autodiff {
 

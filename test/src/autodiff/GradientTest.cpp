@@ -3,7 +3,7 @@
 #include <numbers>
 
 #include <gtest/gtest.h>
-#include <sleipnir/autodiff/Gradient.h>
+#include <sleipnir/autodiff/Gradient.hpp>
 
 TEST(GradientTest, Gradient) {
   sleipnir::autodiff::Variable a = 10;

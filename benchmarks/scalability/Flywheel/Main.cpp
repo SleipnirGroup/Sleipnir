@@ -1,8 +1,8 @@
 // Copyright (c) Joshua Nichols and Tyler Veness
 
-#include "CasADi.h"
-#include "Sleipnir.h"
-#include "Util.h"
+#include "CasADi.hpp"
+#include "Sleipnir.hpp"
+#include "Util.hpp"
 
 int main() {
   constexpr bool diagnostics = false;

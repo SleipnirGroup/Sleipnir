@@ -4,9 +4,9 @@
 
 #include <vector>
 
-#include "sleipnir/SymbolExports.h"
-#include "sleipnir/autodiff/Variable.h"
-#include "sleipnir/optimization/VariableMatrix.h"
+#include "sleipnir/SymbolExports.hpp"
+#include "sleipnir/autodiff/Variable.hpp"
+#include "sleipnir/optimization/VariableMatrix.hpp"
 
 namespace sleipnir {
 
