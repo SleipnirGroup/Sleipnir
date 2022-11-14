@@ -1,5 +1,7 @@
 // Copyright (c) Joshua Nichols and Tyler Veness
 
+#include <vector>
+
 #include "CasADi.hpp"
 #include "Sleipnir.hpp"
 #include "Util.hpp"
@@ -8,9 +10,19 @@ int main() {
   constexpr bool diagnostics = false;
 
   constexpr auto T = 5_s;
-  constexpr int kMinPower = 2;
-  constexpr int kMaxPower = 4;
 
-  return RunBenchmarksAndLog(diagnostics, T, kMinPower, kMaxPower,
-                             &FlywheelCasADi, &FlywheelSleipnir);
+  std::vector<int> sampleSizesToTest;
+  for (int N = 100; N < 1000; N += 100) {
+    sampleSizesToTest.emplace_back(N);
+  }
+  for (int N = 1000; N < 5000; N += 1000) {
+    sampleSizesToTest.emplace_back(N);
+  }
+  sampleSizesToTest.emplace_back(5000);
+
+  fmt::print("Solving flywheel problem from N = {} to N = {}.\n",
+             sampleSizesToTest.front(), sampleSizesToTest.back());
+  return RunBenchmarksAndLog("flywheel-scalability-results.csv", diagnostics, T,
+                             sampleSizesToTest, &FlywheelCasADi,
+                             &FlywheelSleipnir);
 }

@@ -6,11 +6,12 @@
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 
 int RunBenchmarksAndLog(
-    bool diagnostics, units::second_t T, int minPower, int maxPower,
+    std::string_view filename, bool diagnostics, units::second_t T,
+    std::span<int> sampleSizesToTest,
     std::function<casadi::Opti(units::second_t, int)> casadiSetup,
     std::function<sleipnir::OptimizationProblem(units::second_t, int)>
         sleipnirSetup) {
-  std::ofstream results{"scalability-results.csv"};
+  std::ofstream results{std::string{filename}};
   if (!results.is_open()) {
     return 1;
   }
@@ -20,17 +21,7 @@ int RunBenchmarksAndLog(
           << "Sleipnir setup time (ms),Sleipnir solve time (ms)\n";
   std::flush(results);
 
-  std::vector<int> Ns;
-  for (int power = minPower; power < maxPower; ++power) {
-    for (int N = std::pow(10, power); N < std::pow(10, power + 1);
-         N += std::pow(10, power)) {
-      Ns.emplace_back(N);
-    }
-  }
-  Ns.emplace_back(std::pow(10, maxPower));
-
-  fmt::print("Solving from N = {} to N = {}.\n", Ns.front(), Ns.back());
-  for (int N : Ns) {
+  for (int N : sampleSizesToTest) {
     results << N << ",";
     std::flush(results);
 

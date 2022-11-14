@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import argparse
 import math
 import sys
 
@@ -76,63 +77,97 @@ def plot_exp2_fit(ax, x, y, color, force_intercept=False):
         )
 
 
-(
-    samples,
-    casadi_setup_time,
-    casadi_solve_time,
-    problem_setup_time,
-    problem_solve_time,
-) = np.genfromtxt(
-    "scalability-results.csv",
-    delimiter=",",
-    skip_header=1,
-    unpack=True,
-    invalid_raise=False,
-    ndmin=2,
-)
+def main():
+    parser = argparse.ArgumentParser(
+        description="Runs all formatting tasks on the code base. This should be invoked from a directory within the project."
+    )
+    parser.add_argument(
+        "--filename",
+        dest="filename",
+        type=str,
+        required=True,
+        help="filename of CSV to plot",
+    )
+    parser.add_argument(
+        "--title",
+        dest="title",
+        type=str,
+        help="plot title",
+    )
+    parser.add_argument(
+        "--noninteractive",
+        dest="noninteractive",
+        action="store_true",
+        help="if present, saves the figure to a file instead of displaying it",
+    )
+    args = parser.parse_args()
 
-if (
-    math.isnan(casadi_setup_time[-1])
-    or math.isnan(casadi_solve_time[-1])
-    or math.isnan(problem_setup_time[-1])
-    or math.isnan(problem_solve_time[-1])
-):
-    samples = samples[:-1]
-    casadi_setup_time = casadi_setup_time[:-1]
-    casadi_solve_time = casadi_solve_time[:-1]
-    problem_setup_time = problem_setup_time[:-1]
-    problem_solve_time = problem_solve_time[:-1]
+    (
+        samples,
+        casadi_setup_time,
+        casadi_solve_time,
+        problem_setup_time,
+        problem_solve_time,
+    ) = np.genfromtxt(
+        args.filename,
+        delimiter=",",
+        skip_header=1,
+        unpack=True,
+        invalid_raise=False,
+        ndmin=2,
+    )
 
-if len(samples) == 0:
-    print("No data to plot.")
-    sys.exit(1)
+    if (
+        math.isnan(casadi_setup_time[-1])
+        or math.isnan(casadi_solve_time[-1])
+        or math.isnan(problem_setup_time[-1])
+        or math.isnan(problem_solve_time[-1])
+    ):
+        samples = samples[:-1]
+        casadi_setup_time = casadi_setup_time[:-1]
+        casadi_solve_time = casadi_solve_time[:-1]
+        problem_setup_time = problem_setup_time[:-1]
+        problem_solve_time = problem_solve_time[:-1]
 
-fig = plt.figure()
+    if len(samples) == 0:
+        print("No data to plot.")
+        sys.exit(1)
 
-ax1 = fig.add_subplot(2, 1, 1)
-ax1.set_title("Optimization API runtime vs samples")
-ax1.set_ylabel("Setup time (ms)")
-ax1.grid(visible=True)
+    fig = plt.figure()
 
-ax1.plot(samples, casadi_setup_time, label="CasADi")
-plot_poly2_fit(ax1, samples, casadi_setup_time, color="blue")
+    ax1 = fig.add_subplot(2, 1, 1)
+    ax1.set_title(f"{args.title} problem runtime vs samples")
+    ax1.set_ylabel("Setup time (ms)")
+    ax1.grid(visible=True)
 
-ax1.plot(samples, problem_setup_time, label="Sleipnir")
-plot_poly2_fit(ax1, samples, problem_setup_time, color="orange")
+    ax1.plot(samples, casadi_setup_time, label="CasADi + ipopt")
+    plot_poly2_fit(ax1, samples, casadi_setup_time, color="blue")
 
-ax1.legend()
+    ax1.plot(samples, problem_setup_time, label="Sleipnir")
+    plot_poly2_fit(ax1, samples, problem_setup_time, color="orange")
 
-ax2 = fig.add_subplot(2, 1, 2)
-ax2.set_xlabel("Samples")
-ax2.set_ylabel("Solve time (ms)")
-ax2.grid(visible=True)
+    ax1.legend()
 
-ax2.plot(samples, casadi_solve_time, label="CasADi")
-plot_exp2_fit(ax2, samples, casadi_solve_time, color="blue", force_intercept=True)
+    ax2 = fig.add_subplot(2, 1, 2)
+    ax2.set_xlabel("Samples")
+    ax2.set_ylabel("Solve time (ms)")
+    ax2.grid(visible=True)
 
-ax2.plot(samples, problem_solve_time, label="Sleipnir")
-plot_exp2_fit(ax2, samples, problem_solve_time, color="orange", force_intercept=True)
+    ax2.plot(samples, casadi_solve_time, label="CasADi + ipopt")
+    plot_exp2_fit(ax2, samples, casadi_solve_time, color="blue", force_intercept=True)
 
-ax2.legend()
+    ax2.plot(samples, problem_solve_time, label="Sleipnir")
+    plot_exp2_fit(
+        ax2, samples, problem_solve_time, color="orange", force_intercept=True
+    )
 
-plt.show()
+    ax2.legend()
+
+    if args.noninteractive:
+        plt.savefig(args.filename.replace(".csv", ".png"))
+    else:
+        plt.show()
+
+
+if __name__ == "__main__":
+    main()
