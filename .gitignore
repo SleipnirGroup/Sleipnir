@@ -1,5 +1,8 @@
 build*/
 *.csv
+*.png
+!logo/*.png
+!*-results.png
 perf.*
 
 # CMake

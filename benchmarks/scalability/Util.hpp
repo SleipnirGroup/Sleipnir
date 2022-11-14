@@ -5,6 +5,8 @@
 #include <chrono>
 #include <fstream>
 #include <functional>
+#include <span>
+#include <string_view>
 
 #include <casadi/casadi.hpp>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
@@ -63,8 +65,10 @@ void RunBenchmark(std::ofstream& results, std::function<Problem()> setup,
  * The scale of the problem is iteratively increased by increasing the number of
  * timesteps within the time horizon.
  *
+ * @param filename Results CSV filename.
  * @param diagnostics Whether to enable diagnostic prints.
  * @param T The time horizon of the optimization problem.
+ * @param sampleSizesToTest List of sample sizes for which to record results.
  * @param minPower The minimum power of 10 for the number of samples in the
  *   problem.
  * @param maxPower The maximum power of 10 for the number of samples in the
@@ -75,7 +79,8 @@ void RunBenchmark(std::ofstream& results, std::function<Problem()> setup,
  *   samples and returns a Sleipnir optimization problem instance.
  */
 int RunBenchmarksAndLog(
-    bool diagnostics, units::second_t T, int minPower, int maxPower,
+    std::string_view filename, bool diagnostics, units::second_t T,
+    std::span<int> sampleSizesToTest,
     std::function<casadi::Opti(units::second_t, int)> casadiSetup,
     std::function<sleipnir::OptimizationProblem(units::second_t, int)>
         sleipnirSetup);
