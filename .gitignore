@@ -4,6 +4,7 @@ build*/
 !logo/*.png
 !*-results.png
 perf.*
+.DS_Store
 
 # CMake
 CMakeUserPresets.json
