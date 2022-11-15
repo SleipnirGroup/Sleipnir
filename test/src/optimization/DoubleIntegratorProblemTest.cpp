@@ -84,6 +84,7 @@ TEST(DoubleIntegratorProblemTest, MinimumTime) {
   Eigen::Matrix<double, 2, 2> A{{1.0, dt.value()}, {0.0, 1.0}};
   Eigen::Matrix<double, 2, 1> B{0.5 * dt.value() * dt.value(), dt.value()};
 
+  // Verify solution
   Eigen::Matrix<double, 2, 1> x{0.0, 0.0};
   Eigen::Matrix<double, 1, 1> u{0.0};
   for (int k = 0; k < N; ++k) {
