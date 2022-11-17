@@ -35,9 +35,87 @@ T RK4(F&& f, T x, U u, units::second_t dt) {
   return x + h / 6.0 * (k1 + 2.0 * k2 + 2.0 * k3 + k4);
 }
 
+Eigen::Vector<double, 4> CartPoleDynamicsDouble(
+    const Eigen::Vector<double, 4>& x, const Eigen::Vector<double, 1>& u) {
+  // https://underactuated.mit.edu/acrobot.html#cart_pole
+  //
+  // θ is CCW+ measured from negative y-axis.
+  //
+  // q = [x, θ]ᵀ
+  // q̇ = [ẋ, θ̇]ᵀ
+  // u = f_x
+  //
+  // M(q)q̈ + C(q, q̇)q̇ = τ_g(q) + Bu
+  // M(q)q̈ = τ_g(q) − C(q, q̇)q̇ + Bu
+  // q̈ = M⁻¹(q)(τ_g(q) − C(q, q̇)q̇ + Bu)
+  //
+  //        [ m_c + m_p  m_p l cosθ]
+  // M(q) = [m_p l cosθ    m_p l²  ]
+  //
+  //           [0  −m_p lθ̇ sinθ]
+  // C(q, q̇) = [0       0      ]
+  //
+  //          [     0      ]
+  // τ_g(q) = [-m_p gl sinθ]
+  //
+  //     [1]
+  // B = [0]
+  constexpr double m_c = (5_kg).value();        // Cart mass
+  constexpr double m_p = (0.5_kg).value();      // Pole mass
+  constexpr double l = (0.5_m).value();         // Pole length
+  constexpr double g = (9.806_mps_sq).value();  // Acceleration due to gravity
+
+  Eigen::Vector<double, 2> q = x.segment(0, 2);
+  Eigen::Vector<double, 2> qdot = x.segment(2, 2);
+  double theta = q(1);
+  double thetadot = qdot(1);
+
+  //        [ m_c + m_p  m_p l cosθ]
+  // M(q) = [m_p l cosθ    m_p l²  ]
+  Eigen::Matrix<double, 2, 2> M;
+  M(0, 0) = m_c + m_p;
+  M(0, 1) = m_p * l * cos(theta);  // NOLINT
+  M(1, 0) = m_p * l * cos(theta);  // NOLINT
+  M(1, 1) = m_p * std::pow(l, 2);
+
+  Eigen::Matrix<double, 2, 2> Minv;
+  Minv(0, 0) = M(1, 1);
+  Minv(0, 1) = -M(0, 1);
+  Minv(1, 0) = -M(1, 0);
+  Minv(1, 1) = M(0, 0);
+  double detM = M(0, 0) * M(1, 1) - M(0, 1) * M(1, 0);
+  Minv /= detM;
+
+  //           [0  −m_p lθ̇ sinθ]
+  // C(q, q̇) = [0       0      ]
+  Eigen::Matrix<double, 2, 2> C;
+  C(0, 0) = 0;
+  C(0, 1) = -m_p * l * thetadot * sin(theta);  // NOLINT
+  C(1, 0) = 0;
+  C(1, 1) = 0;
+
+  //          [     0      ]
+  // τ_g(q) = [-m_p gl sinθ]
+  Eigen::Vector<double, 2> tau_g;
+  tau_g(0) = 0;
+  tau_g(1) = -m_p * g * l * sin(theta);  // NOLINT
+
+  //     [1]
+  // B = [0]
+  Eigen::Matrix<double, 2, 1> B{{1}, {0}};
+
+  // q̈ = M⁻¹(q)(τ_g(q) − C(q, q̇)q̇ + Bu)
+  Eigen::Vector<double, 4> qddot;
+  qddot.segment(0, 2) = qdot;
+  qddot.segment(2, 2) = Minv * (tau_g - C * qdot + B * u);
+  return qddot;
+}
+
 sleipnir::VariableMatrix CartPoleDynamics(const sleipnir::VariableMatrix& x,
                                           const sleipnir::VariableMatrix& u) {
   // https://underactuated.mit.edu/acrobot.html#cart_pole
+  //
+  // θ is CCW+ measured from negative y-axis.
   //
   // q = [x, θ]ᵀ
   // q̇ = [ẋ, θ̇]ᵀ
@@ -184,13 +262,39 @@ TEST(CartPoleProblemTest, DirectTranscription) {
             status.inequalityConstraintType);
   EXPECT_EQ(sleipnir::SolverExitCondition::kOk, status.exitCondition);
 
-  // TODO: Verify solution
+  // Verify solution
+  Eigen::Matrix<double, 4, 1> x{0.0, 0.0, 0.0, 0.0};
+  Eigen::Matrix<double, 1, 1> u{0.0};
+  for (int k = 0; k < N; ++k) {
+    u = U.Col(k).Value();
+
+    // Verify state
+    // FIXME
+#if 0
+    EXPECT_NEAR(x(0), X.Value(0, k), 1e-2) << fmt::format("  k = {}", k);
+    EXPECT_NEAR(x(1), X.Value(1, k), 1e-2) << fmt::format("  k = {}", k);
+    EXPECT_NEAR(x(2), X.Value(2, k), 1e-2) << fmt::format("  k = {}", k);
+    EXPECT_NEAR(x(3), X.Value(3, k), 1e-2) << fmt::format("  k = {}", k);
+#endif
+
+    // Project state forward
+    x = RK4(CartPoleDynamicsDouble, x, u, dt);
+  }
+
+  // Verify final state
+  // FIXME
+#if 0
+  EXPECT_NEAR(1.0, X.Value(0, N - 1), 1e-2);
+  EXPECT_NEAR(std::numbers::pi, X.Value(1, N - 1), 1e-2);
+  EXPECT_NEAR(0.0, X.Value(2, N - 1), 1e-2);
+  EXPECT_NEAR(0.0, X.Value(3, N - 1), 1e-2);
+#endif
 
   // Log states for offline viewing
   std::ofstream states{"Cart-pole states.csv"};
   if (states.is_open()) {
-    states << "Time (s),Cart position (m),Pole angle (rad),Cart velocity "
-              "(m/s),Pole angular velocity (rad/s)\n";
+    states << "Time (s),Cart position (m),Pole angle (rad),Cart velocity (m/s),"
+              "Pole angular velocity (rad/s)\n";
 
     for (int k = 0; k < N + 1; ++k) {
       states << fmt::format("{},{},{},{},{}\n", k * dt.value(), X.Value(0, k),

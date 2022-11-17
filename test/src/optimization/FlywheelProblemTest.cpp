@@ -100,6 +100,7 @@ TEST(FlywheelProblemTest, DirectTranscription) {
   Eigen::Matrix<double, 1, 1> u_ss =
       B.householderQr().solve(decltype(A)::Identity() - A) * r;
 
+  // Verify solution
   Eigen::Matrix<double, 1, 1> x{0.0};
   Eigen::Matrix<double, 1, 1> u{0.0};
   for (int k = 0; k < N; ++k) {
