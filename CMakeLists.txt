@@ -140,8 +140,8 @@ include(CMakePackageConfigHelpers)
 
 # Generate the config file that is includes the exports
 configure_package_config_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/Sleipnir-config.cmake.in
-  ${CMAKE_CURRENT_BINARY_DIR}/Sleipnir.cmake
+  ${CMAKE_CURRENT_SOURCE_DIR}/SleipnirConfig.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/SleipnirConfig.cmake
   INSTALL_DESTINATION "lib/cmake/Sleipnir"
   NO_SET_AND_CHECK_MACRO
   NO_CHECK_REQUIRED_COMPONENTS_MACRO)
