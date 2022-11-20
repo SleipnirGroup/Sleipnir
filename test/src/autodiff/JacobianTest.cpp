@@ -133,3 +133,33 @@ TEST(JacobianTest, NonSquare) {
   EXPECT_DOUBLE_EQ(3.0, J(0, 1));
   EXPECT_DOUBLE_EQ(-5.0, J(0, 2));
 }
+
+TEST(JacobianTest, DISABLED_Reuse) {
+  sleipnir::autodiff::VectorXvar y{1, 1};
+  sleipnir::autodiff::VectorXvar x{2};
+
+  // y = [x₁x₂]
+  x << 1, 2;
+  y(0) = x(0) * x(1);
+
+  sleipnir::autodiff::Jacobian jacobian{y, x};
+
+  // dy/dx = [x₂  x₁]
+  // dy/dx = [2  1]
+  Eigen::MatrixXd J = jacobian.Calculate();
+
+  EXPECT_EQ(1, J.rows());
+  EXPECT_EQ(2, J.cols());
+  EXPECT_DOUBLE_EQ(2.0, J(0, 0));
+  EXPECT_DOUBLE_EQ(1.0, J(0, 1));
+
+  x << 2, 1;
+  // dy/dx = [x₁  x₂]
+  // dy/dx = [1  2]
+  J = jacobian.Calculate();
+
+  EXPECT_EQ(1, J.rows());
+  EXPECT_EQ(2, J.cols());
+  EXPECT_DOUBLE_EQ(1.0, J(0, 0));
+  EXPECT_DOUBLE_EQ(2.0, J(0, 1));
+}
