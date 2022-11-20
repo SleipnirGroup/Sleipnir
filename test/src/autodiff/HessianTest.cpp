@@ -174,3 +174,31 @@ TEST(HessianTest, SumOfSquaredResiduals) {
   EXPECT_EQ(-2.0, H(4, 3));
   EXPECT_EQ(2.0, H(4, 4));
 }
+
+TEST(HessianTest, DISABLED_Reuse) {
+  sleipnir::autodiff::Variable y;
+  sleipnir::autodiff::VectorXvar x{1};
+
+  // y = x³
+  x << 1;
+  y = x(0) * x(0) * x(0);
+
+  sleipnir::autodiff::Hessian hessian{y, x};
+
+  // d²y/dx² = 6x
+  // H = 6
+  Eigen::MatrixXd H = hessian.Calculate();
+
+  EXPECT_EQ(1, H.rows());
+  EXPECT_EQ(1, H.cols());
+  EXPECT_DOUBLE_EQ(6.0, H(0, 0));
+
+  x << 2;
+  // d²y/dx² = 6x
+  // H = 12
+  H = hessian.Calculate();
+
+  EXPECT_EQ(1, H.rows());
+  EXPECT_EQ(1, H.cols());
+  EXPECT_DOUBLE_EQ(12.0, H(0, 0));
+}

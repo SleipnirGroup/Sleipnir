@@ -526,3 +526,18 @@ TEST(GradientTest, Gradient) {
                 .Calculate()
                 .coeff(0));
 }
+
+TEST(GradientTest, Reuse) {
+  sleipnir::autodiff::Variable a = 10;
+  sleipnir::autodiff::Variable b = 20;
+  sleipnir::autodiff::Variable x = a * b;
+
+  sleipnir::autodiff::Gradient gradient{x, a};
+
+  auto g = gradient.Calculate();
+  EXPECT_EQ(20.0, g.coeff(0));
+
+  b = 10;
+  g = gradient.Calculate();
+  EXPECT_EQ(10.0, g.coeff(0));
+}
