@@ -154,7 +154,7 @@ TEST(JacobianTest, DISABLED_Reuse) {
   EXPECT_DOUBLE_EQ(1.0, J(0, 1));
 
   x << 2, 1;
-  // dy/dx = [x₁  x₂]
+  // dy/dx = [x₂  x₁]
   // dy/dx = [1  2]
   J = jacobian.Calculate();
 

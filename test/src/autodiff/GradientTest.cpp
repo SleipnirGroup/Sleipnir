@@ -534,10 +534,10 @@ TEST(GradientTest, Reuse) {
 
   sleipnir::autodiff::Gradient gradient{x, a};
 
-  auto g = gradient.Calculate();
-  EXPECT_EQ(20.0, g.coeff(0));
+  Eigen::VectorXd g = gradient.Calculate();
+  EXPECT_EQ(20.0, g(0));
 
   b = 10;
   g = gradient.Calculate();
-  EXPECT_EQ(10.0, g.coeff(0));
+  EXPECT_EQ(10.0, g(0));
 }
