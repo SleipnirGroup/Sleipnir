@@ -15,17 +15,16 @@ Gradient::Gradient(Variable variable, Variable wrt) noexcept
 
 Gradient::Gradient(Variable variable, Eigen::Ref<VectorXvar> wrt) noexcept
     : m_variable{std::move(variable)}, m_wrt{wrt}, m_g{m_wrt.rows()} {
-  if (m_variable.Type() < ExpressionType::kLinear) {
-    // If the expression is less than linear, the Jacobian is zero
+  if (m_variable.Type() == ExpressionType::kConstant) {
+    // If the expression is constant, the gradient is zero.
     m_profiler.StartSolve();
     m_g.setZero();
     m_profiler.StopSolve();
   } else {
-    // BFS
+    // Generates the BFS tape of the expression.
     std::vector<Expression*> stack;
 
     m_graph.clear();
-
     stack.emplace_back(m_variable.expr.Get());
 
     // Initialize the number of instances of each node in the tree
@@ -112,19 +111,22 @@ Profiler& Gradient::GetProfiler() {
 }
 
 void Gradient::Compute() {
+  // Computes the gradient and assigns it to m_g.
   Update();
-
   m_g.setZero();
 
+  // Assigns leaf nodes their respective position in the gradient.
   for (int row = 0; row < m_wrt.rows(); ++row) {
     m_wrt(row).expr->row = row;
   }
 
+  // Zero adjoints.
   for (auto col : m_graph) {
     col->adjoint = 0.0;
   }
   m_graph[0]->adjoint = 1.0;
 
+  // Push adjoints.
   for (auto col : m_graph) {
     auto& lhs = col->args[0];
     auto& rhs = col->args[1];
@@ -141,6 +143,7 @@ void Gradient::Compute() {
       }
     }
 
+    // If variable is a leaf node, assign its adjoint to m_g.
     if (col->row != -1) {
       m_g.coeffRef(col->row) = col->adjoint;
     }
