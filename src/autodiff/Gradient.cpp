@@ -74,9 +74,9 @@ Gradient::Gradient(Variable variable, Eigen::Ref<VectorXvar> wrt) noexcept
     }
 
     if (m_variable.expr->type == ExpressionType::kLinear) {
-      // If the expression is linear, compute its gradient once here and cache its
-      // value. Constant expressions are ignored because their gradients have no
-      // nonzero values.
+      // If the expression is linear, compute its gradient once here and cache
+      // its value. Constant expressions are ignored because their gradients
+      // have no nonzero values.
       Compute();
     }
   }
