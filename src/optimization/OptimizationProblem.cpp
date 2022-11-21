@@ -614,9 +614,6 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       Eigen::SparseMatrix<double> S{s.rows(), s.rows()};
       S.setFromTriplets(triplets.begin(), triplets.end());
 
-      // S⁻¹
-      Eigen::SparseMatrix<double> inverseS = S.cwiseInverse();
-
       //         [∇ᵀcₑ₁(x)ₖ]
       // Aₑ(x) = [∇ᵀcₑ₂(x)ₖ]
       //         [    ⋮    ]
@@ -736,6 +733,9 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       if (E_mu <= kappa_epsilon * old_mu) {
         break;
       }
+
+      // S⁻¹
+      Eigen::SparseMatrix<double> inverseS = S.cwiseInverse();
 
       //     [z₁ 0 ⋯ 0 ]
       // Z = [0  ⋱   ⋮ ]
