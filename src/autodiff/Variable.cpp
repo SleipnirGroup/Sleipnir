@@ -25,7 +25,9 @@ Variable& Variable::operator=(double value) {
     expr = AllocateIntrusiveShared<Expression>(Allocator(), value);
   } else {
     if (expr->args[0] != nullptr) {
-      fmt::print(stderr, "WARNING {}:{}: Modified the value of a dependent variable", __FILE__, __LINE__);
+      fmt::print(stderr, 
+                 "WARNING {}:{}: Modified the value of a dependent variable", 
+                 __FILE__, __LINE__);
     }
     expr->value = value;
   }
@@ -37,7 +39,9 @@ Variable& Variable::operator=(int value) {
     expr = AllocateIntrusiveShared<Expression>(Allocator(), value);
   } else{
     if (expr->args[0] != nullptr) {
-      fmt::print(stderr, "WARNING {}:{}: Modified the value of a dependent variable", __FILE__, __LINE__);
+      fmt::print(stderr, 
+                 "WARNING {}:{}: Modified the value of a dependent variable",
+                 __FILE__, __LINE__);
     }
     expr->value = value;
   }

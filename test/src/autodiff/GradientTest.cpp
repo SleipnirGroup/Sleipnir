@@ -5,8 +5,6 @@
 #include <gtest/gtest.h>
 #include <sleipnir/autodiff/Gradient.hpp>
 
-#include <iostream>
-
 TEST(GradientTest, TrivialCase) {
   sleipnir::autodiff::Variable a = 10;
   sleipnir::autodiff::Variable b = 20;
@@ -23,7 +21,8 @@ TEST(GradientTest, PositiveOperator) {
   sleipnir::autodiff::Variable c = +a;
 
   EXPECT_DOUBLE_EQ(a.Value(), c.Value());
-  EXPECT_DOUBLE_EQ(1.0, sleipnir::autodiff::Gradient(c, a).Calculate().coeff(0));
+  EXPECT_DOUBLE_EQ(1.0, 
+                   sleipnir::autodiff::Gradient(c, a).Calculate().coeff(0));
 }
 
 TEST(GradientTest, NegativeOperator) {
@@ -31,7 +30,8 @@ TEST(GradientTest, NegativeOperator) {
   sleipnir::autodiff::Variable c = -a;
 
   EXPECT_DOUBLE_EQ(-a.Value(), c.Value());
-  EXPECT_DOUBLE_EQ(-1.0, sleipnir::autodiff::Gradient(c, a).Calculate().coeff(0));
+  EXPECT_DOUBLE_EQ(-1.0, 
+                   sleipnir::autodiff::Gradient(c, a).Calculate().coeff(0));
 }
 
 TEST(GradientTest, IdenticalVariables) {
