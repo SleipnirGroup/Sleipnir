@@ -6,7 +6,9 @@
 TEST(JacobianTest, YvsX) {
   sleipnir::autodiff::VectorXvar y{3, 1};
   sleipnir::autodiff::VectorXvar x{3};
-  x << 1, 2, 3;
+  x(0) = 1;
+  x(1) = 2;
+  x(2) = 3;
 
   // y = x
   //
@@ -30,7 +32,9 @@ TEST(JacobianTest, YvsX) {
 TEST(JacobianTest, Yvs3X) {
   sleipnir::autodiff::VectorXvar y{3, 1};
   sleipnir::autodiff::VectorXvar x{3};
-  x << 1, 2, 3;
+  x(0) = 1;
+  x(1) = 2;
+  x(2) = 3;
 
   // y = 3x
   //
@@ -54,7 +58,9 @@ TEST(JacobianTest, Yvs3X) {
 TEST(JacobianTest, Products) {
   sleipnir::autodiff::VectorXvar y{3, 1};
   sleipnir::autodiff::VectorXvar x{3};
-  x << 1, 2, 3;
+  x(0) = 1;
+  x(1) = 2;
+  x(2) = 3;
 
   //     [x₁x₂]
   // y = [x₂x₃]
@@ -87,7 +93,9 @@ TEST(JacobianTest, DISABLED_NestedProducts) {
   sleipnir::autodiff::VectorXvar y{3, 1};
   sleipnir::autodiff::VectorXvar x{3};
   sleipnir::autodiff::Variable z = 1;
-  x << 1 * z, 2 * z, 3 * z;
+  x(0) = 1 * z;
+  x(1) = 2 * z;
+  x(2) = 3 * z;
 
   //     [x₁x₂]
   // y = [x₂x₃]
@@ -119,7 +127,9 @@ TEST(JacobianTest, DISABLED_NestedProducts) {
 TEST(JacobianTest, NonSquare) {
   sleipnir::autodiff::VectorXvar y{1, 1};
   sleipnir::autodiff::VectorXvar x{3};
-  x << 1, 2, 3;
+  x(0) = 1;
+  x(1) = 2;
+  x(2) = 3;
 
   // y = [x₁ + 3x₂ − 5x₃]
   //
@@ -134,12 +144,13 @@ TEST(JacobianTest, NonSquare) {
   EXPECT_DOUBLE_EQ(-5.0, J(0, 2));
 }
 
-TEST(JacobianTest, DISABLED_Reuse) {
+TEST(JacobianTest, Reuse) {
   sleipnir::autodiff::VectorXvar y{1, 1};
   sleipnir::autodiff::VectorXvar x{2};
 
   // y = [x₁x₂]
-  x << 1, 2;
+  x(0) = 1;
+  x(1) = 2;
   y(0) = x(0) * x(1);
 
   sleipnir::autodiff::Jacobian jacobian{y, x};
@@ -153,7 +164,8 @@ TEST(JacobianTest, DISABLED_Reuse) {
   EXPECT_DOUBLE_EQ(2.0, J(0, 0));
   EXPECT_DOUBLE_EQ(1.0, J(0, 1));
 
-  x << 2, 1;
+  x(0) = 2;
+  x(1) = 1;
   // dy/dx = [x₂  x₁]
   // dy/dx = [1  2]
   J = jacobian.Calculate();
