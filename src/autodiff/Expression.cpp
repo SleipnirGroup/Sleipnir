@@ -321,17 +321,16 @@ SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator+(
 }
 
 void Expression::Update() {
-  if (args[0] != nullptr) {
-    auto& lhs = args[0];
+  auto& lhs = args[0];
+  auto& rhs = args[1];
+
+  if (lhs != nullptr) {
     lhs->Update();
-
-    if (args[1] == nullptr) {
-      value = valueFunc(lhs->value, 0.0);
-    } else {
-      auto& rhs = args[1];
+    if (rhs != nullptr) {
       rhs->Update();
-
       value = valueFunc(lhs->value, rhs->value);
+    } else {
+      value = valueFunc(lhs->value, 0.0);
     }
   }
 }
