@@ -21,7 +21,7 @@ TEST(GradientTest, PositiveOperator) {
   sleipnir::autodiff::Variable c = +a;
 
   EXPECT_DOUBLE_EQ(a.Value(), c.Value());
-  EXPECT_DOUBLE_EQ(1.0, 
+  EXPECT_DOUBLE_EQ(1.0,
                    sleipnir::autodiff::Gradient(c, a).Calculate().coeff(0));
 }
 
@@ -30,7 +30,7 @@ TEST(GradientTest, NegativeOperator) {
   sleipnir::autodiff::Variable c = -a;
 
   EXPECT_DOUBLE_EQ(-a.Value(), c.Value());
-  EXPECT_DOUBLE_EQ(-1.0, 
+  EXPECT_DOUBLE_EQ(-1.0,
                    sleipnir::autodiff::Gradient(c, a).Calculate().coeff(0));
 }
 
@@ -48,7 +48,6 @@ TEST(GradientTest, IdenticalVariables) {
           1,
       sleipnir::autodiff::Gradient(c, a).Calculate().coeff(0));
 }
-
 
 TEST(GradientTest, Elementary) {
   sleipnir::autodiff::Variable a = 1.0;
@@ -262,8 +261,6 @@ TEST(GradientTest, Power) {
       sleipnir::autodiff::Gradient(sleipnir::autodiff::pow(x, x), x)
           .Calculate()
           .coeff(0));
-
-  
 
   EXPECT_EQ(2 * a.Value(), y);
   EXPECT_DOUBLE_EQ(2.0,

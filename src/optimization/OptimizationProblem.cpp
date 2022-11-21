@@ -632,7 +632,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       for (size_t row = 0; row < m_inequalityConstraints.size(); row++) {
         c_i(row) = m_inequalityConstraints[row].Value();
       }
-      
+
       // Check for problem local infeasibility. The problem is locally
       // infeasible if
       //
