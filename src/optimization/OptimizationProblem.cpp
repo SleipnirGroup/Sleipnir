@@ -428,6 +428,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
 
   // Barrier parameter μ
   double mu = 0.1;
+  double old_mu = mu;
 
   // Fraction-to-the-boundary rule scale factor τ
   double tau = tau_min;
@@ -747,7 +748,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
         eq1 -= A_i.transpose() * z;
       }
       E_mu = std::max(eq1.lpNorm<Eigen::Infinity>() / s_d,
-                      (S * z - mu * e).lpNorm<Eigen::Infinity>() / s_c);
+                      (S * z - old_mu * e).lpNorm<Eigen::Infinity>() / s_c);
       if (m_equalityConstraints.size() > 0) {
         E_mu = std::max(E_mu, c_e.lpNorm<Eigen::Infinity>());
       }
@@ -755,7 +756,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
         E_mu = std::max(E_mu, (c_i - s).lpNorm<Eigen::Infinity>());
       }
 
-      if (E_mu <= kappa_epsilon * mu) {
+      if (E_mu <= kappa_epsilon * old_mu) {
         break;
       }
 
@@ -872,6 +873,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
     //   μⱼ₊₁ = max(εₜₒₗ/10, min(κ_μ μⱼ, μⱼ^θ_μ))
     //
     // See equation (7) in [2].
+    old_mu = mu;
     mu = std::max(m_config.tolerance / 10.0,
                   std::min(kappa_mu * mu, std::pow(mu, theta_mu)));
 
