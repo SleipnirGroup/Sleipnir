@@ -7,7 +7,7 @@
 TEST(HessianTest, Linear) {
   // y = x
   sleipnir::autodiff::VectorXvar x{1};
-  x << 3;
+  x(0) = 3;
   sleipnir::autodiff::Variable y = x(0);
 
   // dy/dx = 1
@@ -25,7 +25,7 @@ TEST(HessianTest, Quadratic) {
   // y = x²
   // y = x * x
   sleipnir::autodiff::VectorXvar x{1};
-  x << 3;
+  x(0) = 3;
   sleipnir::autodiff::Variable y = x(0) * x(0);
 
   // dy/dx = x (rhs) + x (lhs)
@@ -46,7 +46,11 @@ TEST(HessianTest, Sum) {
   Eigen::VectorXd g;
   Eigen::MatrixXd H;
   sleipnir::autodiff::VectorXvar x{5};
-  x << 1, 2, 3, 4, 5;
+  x(0) = 1;
+  x(1) = 2;
+  x(2) = 3;
+  x(3) = 4;
+  x(4) = 5;
 
   // y = sum(x)
   y = x.sum();
@@ -70,7 +74,11 @@ TEST(HessianTest, SumOfProducts) {
   Eigen::VectorXd g;
   Eigen::MatrixXd H;
   sleipnir::autodiff::VectorXvar x{5};
-  x << 1, 2, 3, 4, 5;
+  x(0) = 1;
+  x(1) = 2;
+  x(2) = 3;
+  x(3) = 4;
+  x(4) = 5;
 
   // y = ||x||^2
   y = x.cwiseProduct(x).sum();
@@ -98,7 +106,11 @@ TEST(HessianTest, ProductOfSines) {
   Eigen::VectorXd g;
   Eigen::MatrixXd H;
   sleipnir::autodiff::VectorXvar x{5};
-  x << 1, 2, 3, 4, 5;
+  x(0) = 1;
+  x(1) = 2;
+  x(2) = 3;
+  x(3) = 4;
+  x(4) = 5;
 
   // y = prod(sin(x))
   y = x.array().sin().prod();
@@ -134,7 +146,11 @@ TEST(HessianTest, SumOfSquaredResiduals) {
   Eigen::VectorXd g;
   Eigen::MatrixXd H;
   sleipnir::autodiff::VectorXvar x{5};
-  x << 1, 1, 1, 1, 1;
+  x(0) = 1;
+  x(1) = 1;
+  x(2) = 1;
+  x(3) = 1;
+  x(4) = 1;
 
   // y = sum(diff(x).^2)
   y = (x.head(4) - x.tail(4)).array().pow(2).sum();
@@ -175,12 +191,12 @@ TEST(HessianTest, SumOfSquaredResiduals) {
   EXPECT_EQ(2.0, H(4, 4));
 }
 
-TEST(HessianTest, DISABLED_Reuse) {
+TEST(HessianTest, Reuse) {
   sleipnir::autodiff::Variable y;
   sleipnir::autodiff::VectorXvar x{1};
 
   // y = x³
-  x << 1;
+  x(0) = 1;
   y = x(0) * x(0) * x(0);
 
   sleipnir::autodiff::Hessian hessian{y, x};
@@ -193,7 +209,7 @@ TEST(HessianTest, DISABLED_Reuse) {
   EXPECT_EQ(1, H.cols());
   EXPECT_DOUBLE_EQ(6.0, H(0, 0));
 
-  x << 2;
+  x(0) = 2;
   // d²y/dx² = 6x
   // H = 12
   H = hessian.Calculate();
