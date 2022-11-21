@@ -57,11 +57,13 @@ class SLEIPNIR_DLLEXPORT Gradient {
   Variable m_variable;
   VectorXvar m_wrt;
 
+  std::vector<Expression*> m_graph;
+
   Eigen::SparseVector<double> m_g;
 
   Profiler m_profiler;
 
-  void CalculateImpl();
+  void Compute();
 };
 
 }  // namespace sleipnir::autodiff
