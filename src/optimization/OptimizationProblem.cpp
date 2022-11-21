@@ -542,6 +542,21 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
     fmt::print("Error tolerance: {}\n\n", m_config.tolerance);
   }
 
+  // Check for overconstrained problem
+  if (m_equalityConstraints.size() > m_decisionVariables.size()) {
+    fmt::print("The problem has too few degrees of freedom.\n");
+    fmt::print(
+        "Violated constraints (cₑ(x) = 0) in order of declaration:\n");
+    for (int row = 0; row < c_e.rows(); ++row) {
+      if (c_e(row) < 0.0) {
+        fmt::print("  {}/{}: {} = 0\n", row + 1, c_e.rows(), c_e(row));
+      }
+    }
+
+    status->exitCondition = SolverExitCondition::kTooFewDOFs;
+    return x;
+  }
+
   int iterations = 0;
 
   scope_exit exit{[&] {
@@ -599,28 +614,8 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       Eigen::SparseMatrix<double> S{s.rows(), s.rows()};
       S.setFromTriplets(triplets.begin(), triplets.end());
 
-      //     [z₁ 0 ⋯ 0 ]
-      // Z = [0  ⋱   ⋮ ]
-      //     [⋮    ⋱ 0 ]
-      //     [0  ⋯ 0 zₘ]
-      triplets.clear();
-      for (int k = 0; k < s.rows(); k++) {
-        triplets.emplace_back(k, k, z[k]);
-      }
-      Eigen::SparseMatrix<double> Z{z.rows(), z.rows()};
-      Z.setFromTriplets(triplets.begin(), triplets.end());
-
       // S⁻¹
       Eigen::SparseMatrix<double> inverseS = S.cwiseInverse();
-
-      // Z⁻¹
-      Eigen::SparseMatrix<double> inverseZ = Z.cwiseInverse();
-
-      // Σ = S⁻¹Z
-      Eigen::SparseMatrix<double> sigma = inverseS * Z;
-
-      // Σ⁻¹ = SZ⁻¹
-      Eigen::SparseMatrix<double> inverseSigma = S * inverseZ;
 
       //         [∇ᵀcₑ₁(x)ₖ]
       // Aₑ(x) = [∇ᵀcₑ₂(x)ₖ]
@@ -641,22 +636,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       for (size_t row = 0; row < m_inequalityConstraints.size(); row++) {
         c_i(row) = m_inequalityConstraints[row].Value();
       }
-
-      // Check for overconstrained problem
-      if (m_equalityConstraints.size() > m_decisionVariables.size()) {
-        fmt::print("The problem has too few degrees of freedom.\n");
-        fmt::print(
-            "Violated constraints (cₑ(x) = 0) in order of declaration:\n");
-        for (int row = 0; row < c_e.rows(); ++row) {
-          if (c_e(row) < 0.0) {
-            fmt::print("  {}/{}: {} = 0\n", row + 1, c_e.rows(), c_e(row));
-          }
-        }
-
-        status->exitCondition = SolverExitCondition::kTooFewDOFs;
-        return x;
-      }
-
+      
       // Check for problem local infeasibility. The problem is locally
       // infeasible if
       //
@@ -756,6 +736,26 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       if (E_mu <= kappa_epsilon * old_mu) {
         break;
       }
+
+      //     [z₁ 0 ⋯ 0 ]
+      // Z = [0  ⋱   ⋮ ]
+      //     [⋮    ⋱ 0 ]
+      //     [0  ⋯ 0 zₘ]
+      triplets.clear();
+      for (int k = 0; k < s.rows(); k++) {
+        triplets.emplace_back(k, k, z[k]);
+      }
+      Eigen::SparseMatrix<double> Z{z.rows(), z.rows()};
+      Z.setFromTriplets(triplets.begin(), triplets.end());
+
+      // Z⁻¹
+      Eigen::SparseMatrix<double> inverseZ = Z.cwiseInverse();
+
+      // Σ = S⁻¹Z
+      Eigen::SparseMatrix<double> sigma = inverseS * Z;
+
+      // Σ⁻¹ = SZ⁻¹
+      Eigen::SparseMatrix<double> inverseSigma = S * inverseZ;
 
       // Hₖ = ∇²ₓₓL(x, s, y, z)ₖ
       H = hessianL.Calculate();
