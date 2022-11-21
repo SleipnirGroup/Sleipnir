@@ -622,8 +622,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       // Σ⁻¹ = SZ⁻¹
       Eigen::SparseMatrix<double> inverseSigma = S * inverseZ;
 
-      // Hₖ = ∇²ₓₓL(x, s, y, z)ₖ
-      H = hessianL.Calculate();
+      
 
       //         [∇ᵀcₑ₁(x)ₖ]
       // Aₑ(x) = [∇ᵀcₑ₂(x)ₖ]
@@ -759,6 +758,9 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       if (E_mu <= kappa_epsilon * old_mu) {
         break;
       }
+
+      // Hₖ = ∇²ₓₓL(x, s, y, z)ₖ
+      H = hessianL.Calculate();
 
       // lhs = [H + AᵢᵀΣAᵢ  Aₑᵀ]
       //       [    Aₑ       0 ]
