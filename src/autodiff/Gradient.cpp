@@ -16,9 +16,10 @@ Gradient::Gradient(Variable variable, Eigen::Ref<VectorXvar> wrt) noexcept
     // If the expression is constant, the gradient is zero.
     m_g.setZero();
   } else {
-    // Breadth-first search (BFS) of the expression's computational tree. BFS is used as
-    // opposed to a depth-first search (DFS) to avoid counting duplicate nodes multiple times.
-    // A list of nodes ordered from parent to child with no duplicates is generated for later use.
+    // Breadth-first search (BFS) of the expression's computational tree. BFS is
+    // used as opposed to a depth-first search (DFS) to avoid counting duplicate
+    // nodes multiple times. A list of nodes ordered from parent to child with
+    // no duplicates is generated for later use.
     // https://en.wikipedia.org/wiki/Breadth-first_search
     std::vector<Expression*> stack;
 
@@ -89,7 +90,8 @@ const Eigen::SparseVector<double>& Gradient::Calculate() {
 }
 
 void Gradient::Update() {
-  // Traverse the BFS list backward from child to parent and update the value of each node.
+  // Traverse the BFS list backward from child to parent and update the value of
+  // each node.
   for (int col = m_graph.size() - 1; col >= 0; --col) {
     auto& node = m_graph[col];
 
@@ -111,8 +113,8 @@ Profiler& Gradient::GetProfiler() {
 }
 
 void Gradient::Compute() {
-  // Computes the gradient of the expression. Given the expression f and variable x,
-  // the derivative df/dx is denoted the "adjoint" of x.
+  // Computes the gradient of the expression. Given the expression f and
+  // variable x, the derivative df/dx is denoted the "adjoint" of x.
   Update();
 
   // Assigns leaf nodes their respective position in the gradient.
@@ -126,9 +128,10 @@ void Gradient::Compute() {
   }
   m_graph[0]->adjoint = 1.0;
 
-  // df/dx = (df/dy)(dy/dx). The adjoint of x is equal to the adjoint of y multiplied by dy/dx.
-  // If there are multiple "paths" from the root node to variable; the variable's adjoint is the
-  // sum of each path's adjoint contribution.
+  // df/dx = (df/dy)(dy/dx). The adjoint of x is equal to the adjoint of y
+  // multiplied by dy/dx. If there are multiple "paths" from the root node to
+  // variable; the variable's adjoint is the sum of each path's adjoint
+  // contribution.
   for (auto col : m_graph) {
     auto& lhs = col->args[0];
     auto& rhs = col->args[1];
