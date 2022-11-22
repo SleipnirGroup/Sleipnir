@@ -41,7 +41,7 @@ Variable& Variable::operator=(int value) {
   } else {
     if (expr->args[0] != nullptr) {
       fmt::print(stderr,
-                 "WARNING {}:{}: Modified the value of a dependent variable",
+                 "WARNING {}:{}: Modified the value of a dependent variable\n",
                  __FILE__, __LINE__);
     }
     expr->value = value;
