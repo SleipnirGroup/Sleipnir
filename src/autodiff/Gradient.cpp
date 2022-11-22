@@ -79,11 +79,11 @@ Gradient::Gradient(Variable variable, Eigen::Ref<VectorXvar> wrt) noexcept
 }
 
 const Eigen::SparseVector<double>& Gradient::Calculate() {
-  m_profiler.StartSolve();
   if (m_variable.Type() > ExpressionType::kLinear) {
+    m_profiler.StartSolve();
     Compute();
+    m_profiler.StopSolve();
   }
-  m_profiler.StopSolve();
 
   return m_g;
 }
@@ -127,6 +127,8 @@ void Gradient::Compute() {
   m_graph[0]->adjoint = 1.0;
 
   // df/dx = (df/dy)(dy/dx). The adjoint of x is equal to the adjoint of y multiplied by dy/dx.
+  // If there are multiple "paths" from the root node to variable; the variable's adjoint is the
+  // sum of each path's adjoint contribution.
   for (auto col : m_graph) {
     auto& lhs = col->args[0];
     auto& rhs = col->args[1];
