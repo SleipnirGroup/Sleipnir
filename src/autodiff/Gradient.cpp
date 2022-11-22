@@ -120,7 +120,7 @@ void Gradient::Compute() {
     m_wrt(row).expr->row = row;
   }
 
-  // Zero adjoints, the root node's adjoint is 1.0 as df/df is always 1.
+  // Zero adjoints. The root node's adjoint is 1.0 as df/df is always 1.
   for (auto col : m_graph) {
     col->adjoint = 0.0;
   }
