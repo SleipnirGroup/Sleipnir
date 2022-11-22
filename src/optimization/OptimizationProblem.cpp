@@ -466,11 +466,12 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   if (m_inequalityConstraints.size() > 0) {
     L -= zAD.transpose() * (c_iAD - sAD);
   }
+  auto graphL = L.expr->GenerateBFS();
 
   Eigen::VectorXd step = Eigen::VectorXd::Zero(x.rows());
 
   SetAD(xAD, x);
-  L.Update();
+  autodiff::Expression::UpdateGraph(graphL);
 
   autodiff::Gradient gradientF{m_f.value(), xAD};
   autodiff::Hessian hessianL{L, xAD};
@@ -842,7 +843,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       SetAD(sAD, s);
       SetAD(yAD, y);
       SetAD(zAD, z);
-      L.Update();
+      autodiff::Expression::UpdateGraph(graphL);
 
       auto innerIterEndTime = std::chrono::system_clock::now();
 

@@ -320,18 +320,11 @@ SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator+(
       lhs);
 }
 
-void Expression::Update() {
-  // Breadth-first search (BFS) of the expression's computational tree. BFS is
-  // used as opposed to a depth-first search (DFS) to avoid counting duplicate
-  // nodes multiple times. A list of nodes ordered from parent to child with
-  // no duplicates is generated for later use.
-  // https://en.wikipedia.org/wiki/Breadth-first_search
-
+std::vector<Expression*> Expression::GenerateBFS() {
   // BFS list sorted from parent to child.
-  std::vector<Expression*> m_graph;
+  std::vector<Expression*> graph;
   std::vector<Expression*> stack;
 
-  m_graph.clear();
   stack.emplace_back(this);
 
   // Initialize the number of instances of each node in the tree
@@ -361,7 +354,7 @@ void Expression::Update() {
     stack.pop_back();
 
     // BFS list sorted from parent to child.
-    m_graph.emplace_back(currentNode);
+    graph.emplace_back(currentNode);
 
     for (auto&& arg : currentNode->args) {
       // Only add node if it's not a constant and doesn't already exist in the
@@ -378,10 +371,18 @@ void Expression::Update() {
     }
   }
 
+  return graph;
+}
+
+void Expression::Update() {
+  UpdateGraph(GenerateBFS());
+}
+
+void Expression::UpdateGraph(std::vector<Expression*> graph) {
   // Traverse the BFS list backward from child to parent and update the value of
   // each node.
-  for (int col = m_graph.size() - 1; col >= 0; --col) {
-    auto& node = m_graph[col];
+  for (int col = graph.size() - 1; col >= 0; --col) {
+    auto& node = graph[col];
 
     auto& lhs = node->args[0];
     auto& rhs = node->args[1];

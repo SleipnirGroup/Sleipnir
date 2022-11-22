@@ -300,10 +300,25 @@ struct SLEIPNIR_DLLEXPORT Expression {
       const sleipnir::IntrusiveSharedPtr<Expression>& lhs);
 
   /**
+   * Breadth-first search (BFS) of the expression's computational tree. BFS is
+   * sed as opposed to a depth-first search (DFS) to avoid counting duplicate
+   * nodes multiple times. A list of nodes ordered from parent to child with
+   * no duplicates is generated.
+   * https://en.wikipedia.org/wiki/Breadth-first_search
+   */
+  std::vector<Expression*> GenerateBFS();
+
+  /**
    * Update the value of this node based on the values of its dependent
    * nodes.
    */
   void Update();
+
+  /**
+   * Update the values of all nodes in this computational tree based on
+   * the values of their dependent nodes.
+   */
+  static void UpdateGraph(std::vector<Expression*> graph);
 };
 
 /**
