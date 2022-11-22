@@ -321,16 +321,77 @@ SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator+(
 }
 
 void Expression::Update() {
-  auto& lhs = args[0];
-  auto& rhs = args[1];
+  // Breadth-first search (BFS) of the expression's computational tree. BFS is
+  // used as opposed to a depth-first search (DFS) to avoid counting duplicate
+  // nodes multiple times. A list of nodes ordered from parent to child with
+  // no duplicates is generated for later use.
+  // https://en.wikipedia.org/wiki/Breadth-first_search
 
-  if (lhs != nullptr) {
-    lhs->Update();
-    if (rhs != nullptr) {
-      rhs->Update();
-      value = valueFunc(lhs->value, rhs->value);
-    } else {
-      value = valueFunc(lhs->value, 0.0);
+  // BFS list sorted from parent to child.
+  std::vector<Expression*> m_graph;
+  std::vector<Expression*> stack;
+
+  m_graph.clear();
+  stack.emplace_back(this);
+
+  // Initialize the number of instances of each node in the tree
+  // (Expression::duplications)
+  while (!stack.empty()) {
+    auto& currentNode = stack.back();
+    stack.pop_back();
+
+    for (auto&& arg : currentNode->args) {
+      // Only continue if the node is not a constant and hasn't already been
+      // explored.
+      if (arg != nullptr && arg->type != ExpressionType::kConstant) {
+        // If this is the first instance of the node encountered (it hasn't
+        // been explored yet), add it to stack so it's recursed upon
+        if (arg->duplications == 0) {
+          stack.push_back(arg.Get());
+        }
+        ++arg->duplications;
+      }
+    }
+  }
+
+  stack.emplace_back(this);
+
+  while (!stack.empty()) {
+    auto& currentNode = stack.back();
+    stack.pop_back();
+
+    // BFS list sorted from parent to child.
+    m_graph.emplace_back(currentNode);
+
+    for (auto&& arg : currentNode->args) {
+      // Only add node if it's not a constant and doesn't already exist in the
+      // tape.
+      if (arg != nullptr && arg->type != ExpressionType::kConstant) {
+        // Once the number of node visitations equals the number of
+        // duplications (the counter hits zero), add it to the stack. Note
+        // that this means the node is only enqueued once.
+        --arg->duplications;
+        if (arg->duplications == 0) {
+          stack.push_back(arg.Get());
+        }
+      }
+    }
+  }
+
+  // Traverse the BFS list backward from child to parent and update the value of
+  // each node.
+  for (int col = m_graph.size() - 1; col >= 0; --col) {
+    auto& node = m_graph[col];
+
+    auto& lhs = node->args[0];
+    auto& rhs = node->args[1];
+
+    if (lhs != nullptr) {
+      if (rhs != nullptr) {
+        node->value = node->valueFunc(lhs->value, rhs->value);
+      } else {
+        node->value = node->valueFunc(lhs->value, 0.0);
+      }
     }
   }
 }
