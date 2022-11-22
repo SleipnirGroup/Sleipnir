@@ -6,6 +6,8 @@
 #include <tuple>
 #include <vector>
 
+#include <fmt/core.h>
+
 #include "sleipnir/SymbolExports.hpp"
 
 namespace sleipnir::autodiff {
@@ -23,6 +25,11 @@ Variable& Variable::operator=(double value) {
   if (expr == nullptr) {
     expr = AllocateIntrusiveShared<Expression>(Allocator(), value);
   } else {
+    if (expr->args[0] != nullptr) {
+      fmt::print(stderr,
+                 "WARNING {}:{}: Modified the value of a dependent variable\n",
+                 __FILE__, __LINE__);
+    }
     expr->value = value;
   }
   return *this;
@@ -32,6 +39,11 @@ Variable& Variable::operator=(int value) {
   if (expr == nullptr) {
     expr = AllocateIntrusiveShared<Expression>(Allocator(), value);
   } else {
+    if (expr->args[0] != nullptr) {
+      fmt::print(stderr,
+                 "WARNING {}:{}: Modified the value of a dependent variable\n",
+                 __FILE__, __LINE__);
+    }
     expr->value = value;
   }
   return *this;

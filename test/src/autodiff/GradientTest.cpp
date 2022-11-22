@@ -5,181 +5,92 @@
 #include <gtest/gtest.h>
 #include <sleipnir/autodiff/Gradient.hpp>
 
-TEST(GradientTest, Gradient) {
+TEST(GradientTest, TrivialCase) {
   sleipnir::autodiff::Variable a = 10;
   sleipnir::autodiff::Variable b = 20;
   sleipnir::autodiff::Variable c = a;
-  sleipnir::autodiff::Variable x;
-  sleipnir::autodiff::Variable y;
-  sleipnir::autodiff::Variable r;
 
-  //------------------------------------------------------------------------------
-  // TEST TRIVIAL DERIVATIVE CALCULATIONS
-  //------------------------------------------------------------------------------
   EXPECT_DOUBLE_EQ(1, sleipnir::autodiff::Gradient(a, a).Calculate().coeff(0));
   EXPECT_DOUBLE_EQ(0, sleipnir::autodiff::Gradient(a, b).Calculate().coeff(0));
-  EXPECT_DOUBLE_EQ(1, sleipnir::autodiff::Gradient(c, c).Calculate().coeff(0));
   EXPECT_DOUBLE_EQ(1, sleipnir::autodiff::Gradient(c, a).Calculate().coeff(0));
   EXPECT_DOUBLE_EQ(0, sleipnir::autodiff::Gradient(c, b).Calculate().coeff(0));
+}
 
-  //------------------------------------------------------------------------------
-  // TEST POSITIVE OPERATOR
-  //------------------------------------------------------------------------------
-  c = +a;
+TEST(GradientTest, PositiveOperator) {
+  sleipnir::autodiff::Variable a = 10;
+  sleipnir::autodiff::Variable c = +a;
 
   EXPECT_DOUBLE_EQ(a.Value(), c.Value());
   EXPECT_DOUBLE_EQ(1.0,
                    sleipnir::autodiff::Gradient(c, a).Calculate().coeff(0));
+}
 
-  //------------------------------------------------------------------------------
-  // TEST NEGATIVE OPERATOR
-  //------------------------------------------------------------------------------
-  c = -a;
+TEST(GradientTest, NegativeOperator) {
+  sleipnir::autodiff::Variable a = 10;
+  sleipnir::autodiff::Variable c = -a;
 
   EXPECT_DOUBLE_EQ(-a.Value(), c.Value());
   EXPECT_DOUBLE_EQ(-1.0,
                    sleipnir::autodiff::Gradient(c, a).Calculate().coeff(0));
+}
 
-  //------------------------------------------------------------------------------
-  // TEST WHEN IDENTICAL/EQUIVALENT VARIABLES ARE PRESENT
-  //------------------------------------------------------------------------------
-  x = a;
-  c = a * a + x;
+TEST(GradientTest, IdenticalVariables) {
+  sleipnir::autodiff::Variable a = 10;
+  sleipnir::autodiff::Variable x = a;
+  sleipnir::autodiff::Variable c = a * a + x;
 
   EXPECT_DOUBLE_EQ(a.Value() * a.Value() + x.Value(), c.Value());
   EXPECT_DOUBLE_EQ(
       2 * a.Value() + sleipnir::autodiff::Gradient(x, a).Calculate().coeff(0),
       sleipnir::autodiff::Gradient(c, a).Calculate().coeff(0));
   EXPECT_DOUBLE_EQ(
-      2 * a.Value() * sleipnir::autodiff::Gradient(a, x).Calculate().coeff(0) +
+      2 * a.Value() * sleipnir::autodiff::Gradient(x, a).Calculate().coeff(0) +
           1,
-      sleipnir::autodiff::Gradient(c, x).Calculate().coeff(0));
+      sleipnir::autodiff::Gradient(c, a).Calculate().coeff(0));
+}
 
-  //------------------------------------------------------------------------------
-  // TEST DERIVATIVES COMPUTATION AFTER CHANGING VAR VALUE
-  //------------------------------------------------------------------------------
-  a = sleipnir::autodiff::Variable{
-      20.0};  // a is now a new independent variable
+TEST(GradientTest, Elementary) {
+  sleipnir::autodiff::Variable a = 1.0;
+  sleipnir::autodiff::Variable b = 2.0;
+  sleipnir::autodiff::Variable c = 3.0;
 
-  EXPECT_DOUBLE_EQ(0.0,
-                   sleipnir::autodiff::Gradient(c, a).Calculate().coeff(0));
-  EXPECT_DOUBLE_EQ(2 * x.Value() + 1,
-                   sleipnir::autodiff::Gradient(c, x).Calculate().coeff(0));
-
-  //------------------------------------------------------------------------------
-  // TEST MULTIPLICATION OPERATOR (USING CONSTANT FACTOR)
-  //------------------------------------------------------------------------------
   c = -2 * a;
-
   EXPECT_DOUBLE_EQ(-2, sleipnir::autodiff::Gradient(c, a).Calculate().coeff(0));
 
-  //------------------------------------------------------------------------------
-  // TEST DIVISION OPERATOR (USING CONSTANT FACTOR)
-  //------------------------------------------------------------------------------
   c = a / 3.0;
-
   EXPECT_DOUBLE_EQ(1.0 / 3.0,
                    sleipnir::autodiff::Gradient(c, a).Calculate().coeff(0));
 
-  //------------------------------------------------------------------------------
-  // TEST DERIVATIVES WITH RESPECT TO DEPENDENT VARIABLES USING += -= *= /=
-  //------------------------------------------------------------------------------
-
-  a += 2.0;
-  c = a * b;
-
-  EXPECT_EQ(b, sleipnir::autodiff::Gradient(c, a).Calculate().coeff(0));
-
-  a -= 3.0;
-  c = a * b;
-
-  EXPECT_EQ(b, sleipnir::autodiff::Gradient(c, a).Calculate().coeff(0));
-
-  a *= 2.0;
-  c = a * b;
-
-  EXPECT_EQ(b, sleipnir::autodiff::Gradient(c, a).Calculate().coeff(0));
-
-  a /= 3.0;
-  c = a * b;
-
-  EXPECT_EQ(b, sleipnir::autodiff::Gradient(c, a).Calculate().coeff(0));
-
-  a += 2 * b;
-  c = a * b;
-
-  EXPECT_EQ(b + a * sleipnir::autodiff::Gradient(b, a).Calculate().coeff(0),
-            sleipnir::autodiff::Gradient(c, a).Calculate().coeff(0));
-
-  a -= 3 * b;
-  c = a * b;
-
-  EXPECT_EQ(b, sleipnir::autodiff::Gradient(c, a).Calculate().coeff(0));
-
-  a *= b;
-  c = a * b;
-
-  EXPECT_EQ(b, sleipnir::autodiff::Gradient(c, a).Calculate().coeff(0));
-
-  a /= b;
-  c = a * b;
-
-  EXPECT_EQ(b, sleipnir::autodiff::Gradient(c, a).Calculate().coeff(0));
-
-  //------------------------------------------------------------------------------
-  // TEST BINARY ARITHMETIC OPERATORS
-  //------------------------------------------------------------------------------
-  a = sleipnir::autodiff::Variable{100.0};
-  b = sleipnir::autodiff::Variable{200.0};
+  a = 100.0;
+  b = 200.0;
 
   c = a + b;
-
   EXPECT_DOUBLE_EQ(1.0,
                    sleipnir::autodiff::Gradient(c, a).Calculate().coeff(0));
   EXPECT_DOUBLE_EQ(1.0,
                    sleipnir::autodiff::Gradient(c, b).Calculate().coeff(0));
 
   c = a - b;
-
   EXPECT_DOUBLE_EQ(1.0,
                    sleipnir::autodiff::Gradient(c, a).Calculate().coeff(0));
   EXPECT_DOUBLE_EQ(-1.0,
                    sleipnir::autodiff::Gradient(c, b).Calculate().coeff(0));
 
   c = -a + b;
-
   EXPECT_DOUBLE_EQ(-1.0,
                    sleipnir::autodiff::Gradient(c, a).Calculate().coeff(0));
   EXPECT_DOUBLE_EQ(1.0,
                    sleipnir::autodiff::Gradient(c, b).Calculate().coeff(0));
 
   c = a + 1;
-
   EXPECT_DOUBLE_EQ(1.0,
                    sleipnir::autodiff::Gradient(c, a).Calculate().coeff(0));
+}
 
-  //------------------------------------------------------------------------------
-  // TEST DERIVATIVES WITH RESPECT TO SUB-EXPRESSIONS
-  //------------------------------------------------------------------------------
-  x = 2 * a + b;
-  r = x * x - a + b;
-
-  EXPECT_EQ((2 * x).Value(),
-            sleipnir::autodiff::Gradient(r, x).Calculate().coeff(0));
-  EXPECT_EQ(
-      (2 * x * sleipnir::autodiff::Gradient(x, a).Calculate().coeff(0) - 1.0)
-          .Value(),
-      sleipnir::autodiff::Gradient(r, a).Calculate().coeff(0));
-  EXPECT_EQ(
-      (2 * x * sleipnir::autodiff::Gradient(x, b).Calculate().coeff(0) + 1.0)
-          .Value(),
-      sleipnir::autodiff::Gradient(r, b).Calculate().coeff(0));
-
-  //------------------------------------------------------------------------------
-  // TEST COMPARISON OPERATORS
-  //------------------------------------------------------------------------------
-  a = 10;
-  x = 10;
+TEST(GradientTest, Comparison) {
+  sleipnir::autodiff::Variable x = 10.0;
+  sleipnir::autodiff::Variable a = 10.0;
+  sleipnir::autodiff::Variable b = 200.0;
 
   EXPECT_EQ(a, a);
   EXPECT_EQ(a, x);
@@ -234,12 +145,10 @@ TEST(GradientTest, Gradient) {
 
   EXPECT_GE(a + a, a);
   EXPECT_GE(a, a - a);
+}
 
-  //--------------------------------------------------------------------------
-  // TEST TRIGONOMETRIC FUNCTIONS
-  //--------------------------------------------------------------------------
-  x = 0.5;
-
+TEST(GradientTest, Trigonometry) {
+  sleipnir::autodiff::Variable x = 0.5;
   EXPECT_DOUBLE_EQ(std::sin(x.Value()), sleipnir::autodiff::sin(x).Value());
   EXPECT_DOUBLE_EQ(std::cos(x.Value()),
                    sleipnir::autodiff::Gradient(sleipnir::autodiff::sin(x), x)
@@ -275,10 +184,10 @@ TEST(GradientTest, Gradient) {
                    sleipnir::autodiff::Gradient(sleipnir::autodiff::atan(x), x)
                        .Calculate()
                        .coeff(0));
+}
 
-  //--------------------------------------------------------------------------
-  // TEST HYPERBOLIC FUNCTIONS
-  //--------------------------------------------------------------------------
+TEST(GradientTest, Hyperbolic) {
+  sleipnir::autodiff::Variable x = 1.0;
   EXPECT_DOUBLE_EQ(std::sinh(x.Value()), sleipnir::autodiff::sinh(x).Value());
   EXPECT_DOUBLE_EQ(std::cosh(x.Value()),
                    sleipnir::autodiff::Gradient(sleipnir::autodiff::sinh(x), x)
@@ -296,10 +205,10 @@ TEST(GradientTest, Gradient) {
                    sleipnir::autodiff::Gradient(sleipnir::autodiff::tanh(x), x)
                        .Calculate()
                        .coeff(0));
+}
 
-  //--------------------------------------------------------------------------
-  // TEST EXPONENTIAL AND LOGARITHMIC FUNCTIONS
-  //--------------------------------------------------------------------------
+TEST(GradientTest, Exponential) {
+  sleipnir::autodiff::Variable x = 1.0;
   EXPECT_DOUBLE_EQ(std::log(x.Value()), sleipnir::autodiff::log(x).Value());
   EXPECT_DOUBLE_EQ(1.0 / x.Value(),
                    sleipnir::autodiff::Gradient(sleipnir::autodiff::log(x), x)
@@ -317,10 +226,12 @@ TEST(GradientTest, Gradient) {
                    sleipnir::autodiff::Gradient(sleipnir::autodiff::exp(x), x)
                        .Calculate()
                        .coeff(0));
+}
 
-  //--------------------------------------------------------------------------
-  // TEST POWER FUNCTIONS
-  //--------------------------------------------------------------------------
+TEST(GradientTest, Power) {
+  sleipnir::autodiff::Variable x = 1.0;
+  sleipnir::autodiff::Variable a = 2.0;
+  sleipnir::autodiff::Variable y = 2 * a;
   EXPECT_DOUBLE_EQ(std::sqrt(x.Value()), sleipnir::autodiff::sqrt(x).Value());
   EXPECT_DOUBLE_EQ(0.5 / std::sqrt(x.Value()),
                    sleipnir::autodiff::Gradient(sleipnir::autodiff::sqrt(x), x)
@@ -351,8 +262,6 @@ TEST(GradientTest, Gradient) {
           .Calculate()
           .coeff(0));
 
-  y = 2 * a;
-
   EXPECT_EQ(2 * a.Value(), y);
   EXPECT_DOUBLE_EQ(2.0,
                    sleipnir::autodiff::Gradient(y, a).Calculate().coeff(0));
@@ -378,12 +287,10 @@ TEST(GradientTest, Gradient) {
       sleipnir::autodiff::Gradient(sleipnir::autodiff::pow(x, y), y)
           .Calculate()
           .coeff(0));
+}
 
-  //--------------------------------------------------------------------------
-  // TEST ABS FUNCTION
-  //--------------------------------------------------------------------------
-
-  x = 1.0;
+TEST(GradientTest, Abs) {
+  sleipnir::autodiff::Variable x = 1.0;
   EXPECT_DOUBLE_EQ(std::abs(x.Value()), sleipnir::autodiff::abs(x).Value());
   EXPECT_DOUBLE_EQ(1.0,
                    sleipnir::autodiff::Gradient(sleipnir::autodiff::abs(x), x)
@@ -401,13 +308,12 @@ TEST(GradientTest, Gradient) {
                    sleipnir::autodiff::Gradient(sleipnir::autodiff::abs(x), x)
                        .Calculate()
                        .coeff(0));
+}
 
-  //--------------------------------------------------------------------------
-  // TEST ATAN2 FUNCTION
-  //--------------------------------------------------------------------------
-
+TEST(GradientTest, Atan2) {
   // Testing atan2 function on (double, var)
-  x = 1.0;
+  sleipnir::autodiff::Variable x = 1.0;
+  sleipnir::autodiff::Variable y = 0.9;
   EXPECT_EQ(sleipnir::autodiff::atan2(2.0, x).Value(),
             std::atan2(2.0, x.Value()));
   EXPECT_EQ(sleipnir::autodiff::Gradient(sleipnir::autodiff::atan2(2.0, x), x)
@@ -425,7 +331,6 @@ TEST(GradientTest, Gradient) {
 
   // Testing atan2 function on (var, var)
   x = 1.1;
-  y = 0.9;
   EXPECT_EQ(sleipnir::autodiff::atan2(y, x), std::atan2(y.Value(), x.Value()));
   EXPECT_EQ(sleipnir::autodiff::Gradient(sleipnir::autodiff::atan2(y, x), y)
                 .Calculate()
@@ -458,13 +363,12 @@ TEST(GradientTest, Gradient) {
       3 * -2 * sleipnir::autodiff::sin(y) /
           ((2 * x + 1) * (2 * x + 1) +
            sleipnir::autodiff::sin(y) * sleipnir::autodiff::sin(y)));
+}
 
-  //--------------------------------------------------------------------------
-  // TEST HYPOT2 FUNCTIONS
-  //--------------------------------------------------------------------------
-
+TEST(GradientTest, Hypot) {
   // Testing hypot function on (var, double)
-  x = 1.8;
+  sleipnir::autodiff::Variable x = 1.8;
+  sleipnir::autodiff::Variable y = 1.5;
   EXPECT_EQ(std::hypot(x.Value(), 2.0), sleipnir::autodiff::hypot(x, 2.0));
   EXPECT_EQ(x / std::hypot(x.Value(), 2.0),
             sleipnir::autodiff::Gradient(sleipnir::autodiff::hypot(x, 2.0), x)
@@ -472,7 +376,6 @@ TEST(GradientTest, Gradient) {
                 .coeff(0));
 
   // Testing hypot function on (double, var)
-  y = 1.5;
   EXPECT_EQ(std::hypot(2.0, y.Value()), sleipnir::autodiff::hypot(2.0, y));
   EXPECT_EQ(y / std::hypot(2.0, y.Value()),
             sleipnir::autodiff::Gradient(sleipnir::autodiff::hypot(2.0, y), y)
@@ -507,12 +410,11 @@ TEST(GradientTest, Gradient) {
                 sleipnir::autodiff::hypot(2.0 * x, 3.0 * y), y)
                 .Calculate()
                 .coeff(0));
+}
 
-  //--------------------------------------------------------------------------
-  // TEST OTHER FUNCTIONS
-  //--------------------------------------------------------------------------
-  x = 3.0;
-  y = x;
+TEST(GradientTest, Miscellaneous) {
+  sleipnir::autodiff::Variable x = 3.0;
+  sleipnir::autodiff::Variable y = x;
 
   EXPECT_DOUBLE_EQ(std::abs(x.Value()), sleipnir::autodiff::abs(x).Value());
   EXPECT_DOUBLE_EQ(1.0,
