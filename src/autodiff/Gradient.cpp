@@ -2,10 +2,6 @@
 
 #include "sleipnir/autodiff/Gradient.hpp"
 
-#include <tuple>
-
-#include <wpi/DenseMap.h>
-
 #include "sleipnir/IntrusiveSharedPtr.hpp"
 
 using namespace sleipnir::autodiff;
@@ -15,13 +11,15 @@ Gradient::Gradient(Variable variable, Variable wrt) noexcept
 
 Gradient::Gradient(Variable variable, Eigen::Ref<VectorXvar> wrt) noexcept
     : m_variable{std::move(variable)}, m_wrt{wrt}, m_g{m_wrt.rows()} {
+  m_profiler.StartSetup();
   if (m_variable.Type() == ExpressionType::kConstant) {
     // If the expression is constant, the gradient is zero.
-    m_profiler.StartSolve();
     m_g.setZero();
-    m_profiler.StopSolve();
   } else {
-    // Generates the BFS tape of the expression.
+    // Breadth-first search (BFS) of the expression's computational tree. BFS is used as
+    // opposed to a depth-first search (DFS) to avoid counting duplicate nodes multiple times.
+    // A list of nodes ordered from parent to child with no duplicates is generated for later use.
+    // https://en.wikipedia.org/wiki/Breadth-first_search
     std::vector<Expression*> stack;
 
     m_graph.clear();
@@ -47,14 +45,13 @@ Gradient::Gradient(Variable variable, Eigen::Ref<VectorXvar> wrt) noexcept
       }
     }
 
-    stack.clear();
     stack.emplace_back(m_variable.expr.Get());
 
     while (!stack.empty()) {
       auto& currentNode = stack.back();
       stack.pop_back();
 
-      // BFS tape sorted from parent to child.
+      // BFS list sorted from parent to child.
       m_graph.emplace_back(currentNode);
 
       for (auto&& arg : currentNode->args) {
@@ -74,22 +71,25 @@ Gradient::Gradient(Variable variable, Eigen::Ref<VectorXvar> wrt) noexcept
 
     if (m_variable.expr->type == ExpressionType::kLinear) {
       // If the expression is linear, compute its gradient once here and cache
-      // its value. Constant expressions are ignored because their gradients
-      // have no nonzero values.
+      // its value.
       Compute();
     }
   }
+  m_profiler.StopSetup();
 }
 
 const Eigen::SparseVector<double>& Gradient::Calculate() {
+  m_profiler.StartSolve();
   if (m_variable.Type() > ExpressionType::kLinear) {
     Compute();
   }
+  m_profiler.StopSolve();
 
   return m_g;
 }
 
 void Gradient::Update() {
+  // Traverse the BFS list backward from child to parent and update the value of each node.
   for (int col = m_graph.size() - 1; col >= 0; --col) {
     auto& node = m_graph[col];
 
@@ -111,22 +111,22 @@ Profiler& Gradient::GetProfiler() {
 }
 
 void Gradient::Compute() {
-  // Computes the gradient and assigns it to m_g.
+  // Computes the gradient of the expression. Given the expression f and variable x,
+  // the derivative df/dx is denoted the "adjoint" of x.
   Update();
-  m_g.setZero();
 
   // Assigns leaf nodes their respective position in the gradient.
   for (int row = 0; row < m_wrt.rows(); ++row) {
     m_wrt(row).expr->row = row;
   }
 
-  // Zero adjoints.
+  // Zero adjoints, the root node's adjoint is 1.0 as df/df is always 1.
   for (auto col : m_graph) {
     col->adjoint = 0.0;
   }
   m_graph[0]->adjoint = 1.0;
 
-  // Push adjoints.
+  // df/dx = (df/dy)(dy/dx). The adjoint of x is equal to the adjoint of y multiplied by dy/dx.
   for (auto col : m_graph) {
     auto& lhs = col->args[0];
     auto& rhs = col->args[1];
@@ -143,7 +143,7 @@ void Gradient::Compute() {
       }
     }
 
-    // If variable is a leaf node, assign its adjoint to m_g.
+    // If variable is a leaf node, assign its adjoint to the gradient.
     if (col->row != -1) {
       m_g.coeffRef(col->row) = col->adjoint;
     }
