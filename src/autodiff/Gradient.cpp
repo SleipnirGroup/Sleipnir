@@ -52,37 +52,8 @@ void Gradient::Compute() {
     m_wrt(row).expr->row = row;
   }
 
-  // Zero adjoints. The root node's adjoint is 1.0 as df/df is always 1.
-  for (auto col : m_graph) {
-    col->adjoint = 0.0;
-  }
-  m_graph[0]->adjoint = 1.0;
-
-  // df/dx = (df/dy)(dy/dx). The adjoint of x is equal to the adjoint of y
-  // multiplied by dy/dx. If there are multiple "paths" from the root node to
-  // variable; the variable's adjoint is the sum of each path's adjoint
-  // contribution.
-  for (auto col : m_graph) {
-    auto& lhs = col->args[0];
-    auto& rhs = col->args[1];
-
-    if (lhs != nullptr) {
-      if (rhs != nullptr) {
-        lhs->adjoint +=
-            col->gradientValueFuncs[0](lhs->value, rhs->value, col->adjoint);
-        rhs->adjoint +=
-            col->gradientValueFuncs[1](lhs->value, rhs->value, col->adjoint);
-      } else {
-        lhs->adjoint +=
-            col->gradientValueFuncs[0](lhs->value, 0.0, col->adjoint);
-      }
-    }
-
-    // If variable is a leaf node, assign its adjoint to the gradient.
-    if (col->row != -1) {
-      m_g.coeffRef(col->row) = col->adjoint;
-    }
-  }
+  m_graph.ComputeAdjoints(
+      [&](int row, double adjoint) { m_g.coeffRef(row) = adjoint; });
 
   for (int row = 0; row < m_wrt.rows(); ++row) {
     m_wrt(row).expr->row = -1;

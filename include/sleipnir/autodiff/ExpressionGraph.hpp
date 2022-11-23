@@ -30,28 +30,46 @@ class SLEIPNIR_DLLEXPORT ExpressionGraph {
   void Update();
 
   /**
-   * Returns a reference to the BFS list element at the given index.
+   * Updates the adjoints in the expression graph, effectively computing the
+   * gradient.
    *
-   * @param index An index into the BFS list.
+   * @param func A function that takes two arguments: an int for the gradient
+   *   row, and a double for the adjoint (gradient value).
    */
-  const Expression* operator[](size_t index) const { return m_list[index]; }
+  template <typename F>
+  void ComputeAdjoints(F&& func) {
+    // Zero adjoints. The root node's adjoint is 1.0 as df/df is always 1.
+    for (auto col : m_list) {
+      col->adjoint = 0.0;
+    }
+    m_list[0]->adjoint = 1.0;
 
-  /**
-   * Returns a reference to the BFS list element at the given index.
-   *
-   * @param index An index into the BFS list.
-   */
-  Expression* operator[](size_t index) { return m_list[index]; }
+    // df/dx = (df/dy)(dy/dx). The adjoint of x is equal to the adjoint of y
+    // multiplied by dy/dx. If there are multiple "paths" from the root node to
+    // variable; the variable's adjoint is the sum of each path's adjoint
+    // contribution.
+    for (auto col : m_list) {
+      auto& lhs = col->args[0];
+      auto& rhs = col->args[1];
 
-  /**
-   * Returns an iterator to the beginning of the BFS list.
-   */
-  decltype(auto) begin() { return m_list.begin(); }
+      if (lhs != nullptr) {
+        if (rhs != nullptr) {
+          lhs->adjoint +=
+              col->gradientValueFuncs[0](lhs->value, rhs->value, col->adjoint);
+          rhs->adjoint +=
+              col->gradientValueFuncs[1](lhs->value, rhs->value, col->adjoint);
+        } else {
+          lhs->adjoint +=
+              col->gradientValueFuncs[0](lhs->value, 0.0, col->adjoint);
+        }
+      }
 
-  /**
-   * Returns an iterator to the end of the BFS list.
-   */
-  decltype(auto) end() { return m_list.end(); }
+      // If variable is a leaf node, assign its adjoint to the gradient.
+      if (col->row != -1) {
+        func(col->row, col->adjoint);
+      }
+    }
+  }
 
  private:
   std::vector<Expression*> m_list;
