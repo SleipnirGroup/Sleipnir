@@ -64,6 +64,10 @@ class SLEIPNIR_DLLEXPORT Gradient {
 
   Profiler m_profiler;
 
+  /**
+   * Computes the gradient of the expression. Given the expression f and
+   * variable x, the derivative df/dx is denoted the "adjoint" of x.
+   */
   void Compute();
 };
 

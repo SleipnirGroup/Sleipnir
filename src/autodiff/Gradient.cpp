@@ -45,8 +45,6 @@ Profiler& Gradient::GetProfiler() {
 }
 
 void Gradient::Compute() {
-  // Computes the gradient of the expression. Given the expression f and
-  // variable x, the derivative df/dx is denoted the "adjoint" of x.
   Update();
 
   // Assigns leaf nodes their respective position in the gradient.

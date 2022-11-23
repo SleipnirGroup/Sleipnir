@@ -91,11 +91,16 @@ void Jacobian::ComputeRow(int rowIndex,
                           std::vector<Eigen::Triplet<double>>& triplets) {
   auto& row = m_graphs[rowIndex];
 
+  // Zero adjoints. The root node's adjoint is 1.0 as df/df is always 1.
   for (auto col : row) {
     col->adjoint = 0.0;
   }
   row[0]->adjoint = 1.0;
 
+  // df/dx = (df/dy)(dy/dx). The adjoint of x is equal to the adjoint of y
+  // multiplied by dy/dx. If there are multiple "paths" from the root node to
+  // variable; the variable's adjoint is the sum of each path's adjoint
+  // contribution.
   for (auto col : row) {
     auto& lhs = col->args[0];
     auto& rhs = col->args[1];
@@ -112,6 +117,7 @@ void Jacobian::ComputeRow(int rowIndex,
       }
     }
 
+    // If variable is a leaf node, add its adjoint to the Jacobian.
     if (col->row != -1) {
       triplets.emplace_back(rowIndex, col->row, col->adjoint);
     }
