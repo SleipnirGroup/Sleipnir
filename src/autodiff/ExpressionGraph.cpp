@@ -9,6 +9,12 @@ ExpressionGraph::ExpressionGraph(Variable& root) {
     return;
   }
 
+  // Breadth-first search (BFS) is used as opposed to a depth-first search (DFS)
+  // to avoid counting duplicate nodes multiple times. A list of nodes ordered
+  // from parent to child with no duplicates is generated.
+  //
+  // https://en.wikipedia.org/wiki/Breadth-first_search
+
   // BFS list sorted from parent to child.
   std::vector<Expression*> stack;
 
@@ -62,12 +68,6 @@ ExpressionGraph::ExpressionGraph(Variable& root) {
 void ExpressionGraph::Update() {
   // Traverse the BFS list backward from child to parent and update the value of
   // each node.
-  //
-  // Breadth-first search (BFS) is used as opposed to a depth-first search (DFS)
-  // to avoid counting duplicate nodes multiple times. A list of nodes ordered
-  // from parent to child with no duplicates is generated.
-  //
-  // https://en.wikipedia.org/wiki/Breadth-first_search
   for (int col = m_list.size() - 1; col >= 0; --col) {
     auto& node = m_list[col];
 
