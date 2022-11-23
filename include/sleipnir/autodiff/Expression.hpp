@@ -298,12 +298,6 @@ struct SLEIPNIR_DLLEXPORT Expression {
    */
   friend SLEIPNIR_DLLEXPORT sleipnir::IntrusiveSharedPtr<Expression> operator+(
       const sleipnir::IntrusiveSharedPtr<Expression>& lhs);
-
-  /**
-   * Update the value of this node based on the values of its dependent
-   * nodes.
-   */
-  void Update();
 };
 
 /**

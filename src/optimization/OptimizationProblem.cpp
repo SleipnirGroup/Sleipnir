@@ -467,7 +467,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   if (m_inequalityConstraints.size() > 0) {
     L -= zAD.transpose() * (c_iAD - sAD);
   }
-  autodiff::ExpressionGraph graphL{*L.expr};
+  autodiff::ExpressionGraph graphL{L};
 
   Eigen::VectorXd step = Eigen::VectorXd::Zero(x.rows());
 

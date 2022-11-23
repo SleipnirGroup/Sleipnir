@@ -11,7 +11,7 @@ Jacobian::Jacobian(VectorXvar variables, VectorXvar wrt) noexcept
   m_profiler.StartSetup();
 
   for (Variable variable : m_variables) {
-    m_graphs.emplace_back(*variable.expr);
+    m_graphs.emplace_back(variable);
   }
 
   for (int row = 0; row < m_wrt.rows(); ++row) {

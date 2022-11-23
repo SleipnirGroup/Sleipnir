@@ -321,11 +321,6 @@ SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator+(
       lhs);
 }
 
-void Expression::Update() {
-  ExpressionGraph graph{*this};
-  graph.Update();
-}
-
 IntrusiveSharedPtr<Expression> MakeConstant(double x) {
   return AllocateIntrusiveShared<Expression>(Allocator(), x,
                                              ExpressionType::kConstant);

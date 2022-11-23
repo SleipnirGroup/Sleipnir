@@ -9,6 +9,7 @@
 #include <fmt/core.h>
 
 #include "sleipnir/SymbolExports.hpp"
+#include "sleipnir/autodiff/ExpressionGraph.hpp"
 
 namespace sleipnir::autodiff {
 
@@ -239,7 +240,8 @@ ExpressionType Variable::Type() const {
 
 void Variable::Update() {
   if (expr != nullptr) {
-    expr->Update();
+    ExpressionGraph graph{*this};
+    graph.Update();
   }
 }
 

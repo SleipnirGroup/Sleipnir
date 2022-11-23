@@ -4,11 +4,15 @@
 
 using namespace sleipnir::autodiff;
 
-ExpressionGraph::ExpressionGraph(Expression& root) {
+ExpressionGraph::ExpressionGraph(Variable& root) {
+  if (root.Type() == ExpressionType::kConstant) {
+    return;
+  }
+
   // BFS list sorted from parent to child.
   std::vector<Expression*> stack;
 
-  stack.emplace_back(&root);
+  stack.emplace_back(root.expr.Get());
 
   // Initialize the number of instances of each node in the tree
   // (Expression::duplications)
@@ -30,7 +34,7 @@ ExpressionGraph::ExpressionGraph(Expression& root) {
     }
   }
 
-  stack.emplace_back(&root);
+  stack.emplace_back(root.expr.Get());
 
   while (!stack.empty()) {
     auto& currentNode = stack.back();
@@ -56,6 +60,10 @@ ExpressionGraph::ExpressionGraph(Expression& root) {
 }
 
 void ExpressionGraph::Update() {
+  if (m_list.empty()) {
+    return;
+  }
+
   // Traverse the BFS list backward from child to parent and update the value of
   // each node.
   //

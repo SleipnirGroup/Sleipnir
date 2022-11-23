@@ -6,6 +6,7 @@
 
 #include "sleipnir/SymbolExports.hpp"
 #include "sleipnir/autodiff/Expression.hpp"
+#include "sleipnir/autodiff/Variable.hpp"
 
 namespace sleipnir::autodiff {
 
@@ -15,14 +16,12 @@ namespace sleipnir::autodiff {
  */
 class SLEIPNIR_DLLEXPORT ExpressionGraph {
  public:
-  ExpressionGraph() = default;
-
   /**
    * Generates the deduplicated computational graph for the given expression.
    *
    * @param root The root node of the expression.
    */
-  explicit ExpressionGraph(Expression& root);
+  explicit ExpressionGraph(Variable& root);
 
   /**
    * Update the values of all nodes in this computational tree based on the

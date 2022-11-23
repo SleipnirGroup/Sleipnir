@@ -10,19 +10,18 @@ Gradient::Gradient(Variable variable, Variable wrt) noexcept
     : Gradient{std::move(variable), MapVectorXvar{&wrt, 1}} {}
 
 Gradient::Gradient(Variable variable, Eigen::Ref<VectorXvar> wrt) noexcept
-    : m_variable{std::move(variable)}, m_wrt{wrt}, m_g{m_wrt.rows()} {
+    : m_variable{std::move(variable)},
+      m_wrt{wrt},
+      m_graph{m_variable},
+      m_g{m_wrt.rows()} {
   m_profiler.StartSetup();
   if (m_variable.Type() == ExpressionType::kConstant) {
     // If the expression is constant, the gradient is zero.
     m_g.setZero();
-  } else {
-    m_graph = ExpressionGraph{*m_variable.expr};
-
-    if (m_variable.expr->type == ExpressionType::kLinear) {
-      // If the expression is linear, compute its gradient once here and cache
-      // its value.
-      Compute();
-    }
+  } else if (m_variable.expr->type == ExpressionType::kLinear) {
+    // If the expression is linear, compute its gradient once here and cache its
+    // value.
+    Compute();
   }
   m_profiler.StopSetup();
 }
