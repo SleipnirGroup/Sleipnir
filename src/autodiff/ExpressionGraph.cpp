@@ -5,6 +5,8 @@
 using namespace sleipnir::autodiff;
 
 ExpressionGraph::ExpressionGraph(Variable& root) {
+  // If the root type is a constant, Update() is a no-op, so there's no work to
+  // do
   if (root.Type() == ExpressionType::kConstant) {
     return;
   }
