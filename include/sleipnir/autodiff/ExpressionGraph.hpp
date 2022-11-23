@@ -30,6 +30,13 @@ class SLEIPNIR_DLLEXPORT ExpressionGraph {
   void Update();
 
   /**
+   * Returns the variable's gradient tree.
+   *
+   * @param wrt Variables with respect to which to compute the gradient.
+   */
+  VectorXvar GenerateGradientTree(Eigen::Ref<VectorXvar> wrt);
+
+  /**
    * Updates the adjoints in the expression graph, effectively computing the
    * gradient.
    *

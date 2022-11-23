@@ -85,3 +85,45 @@ void ExpressionGraph::Update() {
     }
   }
 }
+
+VectorXvar ExpressionGraph::GenerateGradientTree(Eigen::Ref<VectorXvar> wrt) {
+  // Read wpimath/README.md#Reverse_accumulation_automatic_differentiation for
+  // background on reverse accumulation automatic differentiation.
+
+  for (int row = 0; row < wrt.rows(); ++row) {
+    wrt(row).expr->row = row;
+  }
+
+  VectorXvar grad{wrt.rows()};
+  grad.fill(Variable{});
+
+  // Zero adjoints
+  for (auto col : m_list) {
+    col->adjointExpr = nullptr;
+  }
+  m_list[0]->adjointExpr = MakeConstant(1.0);
+
+  for (auto col : m_list) {
+    auto& lhs = col->args[0];
+    auto& rhs = col->args[1];
+
+    if (lhs != nullptr) {
+      lhs->adjointExpr =
+          lhs->adjointExpr + col->gradientFuncs[0](lhs, rhs, col->adjointExpr);
+      if (rhs != nullptr) {
+        rhs->adjointExpr = rhs->adjointExpr +
+                           col->gradientFuncs[1](lhs, rhs, col->adjointExpr);
+      }
+    }
+
+    if (col->row != -1) {
+      grad(col->row) = Variable{col->adjointExpr};
+    }
+  }
+
+  for (int row = 0; row < wrt.rows(); ++row) {
+    wrt(row).expr->row = -1;
+  }
+
+  return grad;
+}
