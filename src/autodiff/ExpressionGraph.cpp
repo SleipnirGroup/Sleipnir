@@ -60,10 +60,6 @@ ExpressionGraph::ExpressionGraph(Variable& root) {
 }
 
 void ExpressionGraph::Update() {
-  if (m_list.empty()) {
-    return;
-  }
-
   // Traverse the BFS list backward from child to parent and update the value of
   // each node.
   //
