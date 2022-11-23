@@ -302,9 +302,10 @@ struct SLEIPNIR_DLLEXPORT Expression {
 
   /**
    * Breadth-first search (BFS) of the expression's computational tree. BFS is
-   * sed as opposed to a depth-first search (DFS) to avoid counting duplicate
+   * used as opposed to a depth-first search (DFS) to avoid counting duplicate
    * nodes multiple times. A list of nodes ordered from parent to child with
    * no duplicates is generated.
+   *
    * https://en.wikipedia.org/wiki/Breadth-first_search
    */
   std::vector<Expression*> GenerateBFS();
