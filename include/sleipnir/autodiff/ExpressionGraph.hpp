@@ -15,7 +15,7 @@ namespace sleipnir::autodiff {
  */
 class SLEIPNIR_DLLEXPORT ExpressionGraph {
  public:
-  constexpr ExpressionGraph() = default;
+  ExpressionGraph() = default;
 
   /**
    * Generates the deduplicated computational graph for the given expression.
