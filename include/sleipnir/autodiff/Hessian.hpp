@@ -46,15 +46,6 @@ class SLEIPNIR_DLLEXPORT Hessian {
 
  private:
   Jacobian m_jacobian;
-
-  /**
-   * Returns the given variable's gradient tree.
-   *
-   * @param variable Variable of which to compute the gradient.
-   * @param wrt Variables with respect to which to compute the gradient.
-   */
-  static VectorXvar GenerateGradientTree(Variable& variable,
-                                         Eigen::Ref<VectorXvar> wrt);
 };
 
 }  // namespace sleipnir::autodiff

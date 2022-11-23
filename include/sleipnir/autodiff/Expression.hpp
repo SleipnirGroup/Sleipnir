@@ -51,12 +51,6 @@ struct SLEIPNIR_DLLEXPORT Expression {
   /// This is -1 if the expression isn't in wrt.
   int row = -1;
 
-  /// The expression's creation order. The value assigned here is from a
-  /// monotonically increasing counter that increments every time an Expression
-  /// is constructed. This is used for sorting a flattened representation of the
-  /// expression tree in autodiff Jacobian or Hessian.
-  size_t id;
-
   /// The adjoint of the expression node used during gradient expression tree
   /// generation.
   sleipnir::IntrusiveSharedPtr<Expression> adjointExpr;
@@ -298,12 +292,6 @@ struct SLEIPNIR_DLLEXPORT Expression {
    */
   friend SLEIPNIR_DLLEXPORT sleipnir::IntrusiveSharedPtr<Expression> operator+(
       const sleipnir::IntrusiveSharedPtr<Expression>& lhs);
-
-  /**
-   * Update the value of this node based on the values of its dependent
-   * nodes.
-   */
-  void Update();
 };
 
 /**

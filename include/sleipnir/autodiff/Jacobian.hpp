@@ -8,6 +8,7 @@
 
 #include "sleipnir/SymbolExports.hpp"
 #include "sleipnir/autodiff/Expression.hpp"
+#include "sleipnir/autodiff/ExpressionGraph.hpp"
 #include "sleipnir/autodiff/Profiler.hpp"
 #include "sleipnir/autodiff/Variable.hpp"
 
@@ -49,7 +50,7 @@ class SLEIPNIR_DLLEXPORT Jacobian {
   VectorXvar m_variables;
   VectorXvar m_wrt;
 
-  std::vector<std::vector<Expression*>> m_graph;
+  std::vector<ExpressionGraph> m_graphs;
 
   Eigen::SparseMatrix<double> m_J{m_variables.rows(), m_wrt.rows()};
 

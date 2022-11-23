@@ -8,6 +8,7 @@
 
 #include "sleipnir/SymbolExports.hpp"
 #include "sleipnir/autodiff/Expression.hpp"
+#include "sleipnir/autodiff/ExpressionGraph.hpp"
 #include "sleipnir/autodiff/Profiler.hpp"
 #include "sleipnir/autodiff/Variable.hpp"
 
@@ -57,13 +58,16 @@ class SLEIPNIR_DLLEXPORT Gradient {
   Variable m_variable;
   VectorXvar m_wrt;
 
-  // Breadth-first search (BFS) list sorted from parent to child.
-  std::vector<Expression*> m_graph;
+  ExpressionGraph m_graph;
 
   Eigen::SparseVector<double> m_g;
 
   Profiler m_profiler;
 
+  /**
+   * Computes the gradient of the expression. Given the expression f and
+   * variable x, the derivative df/dx is denoted the "adjoint" of x.
+   */
   void Compute();
 };
 

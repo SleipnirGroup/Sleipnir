@@ -10,60 +10,8 @@ Jacobian::Jacobian(VectorXvar variables, VectorXvar wrt) noexcept
     : m_variables{std::move(variables)}, m_wrt{std::move(wrt)} {
   m_profiler.StartSetup();
 
-  std::vector<Expression*> row;
-  std::vector<Expression*> stack;
   for (Variable variable : m_variables) {
-    // BFS
-    row.clear();
-
-    stack.emplace_back(variable.expr.Get());
-
-    // Initialize the number of instances of each node in the tree
-    // (Expression::duplications)
-    while (!stack.empty()) {
-      auto& currentNode = stack.back();
-      stack.pop_back();
-
-      for (auto&& arg : currentNode->args) {
-        // Only continue if the node is not a constant and hasn't already been
-        // explored.
-        if (arg != nullptr && arg->type != ExpressionType::kConstant) {
-          // If this is the first instance of the node encountered (it hasn't
-          // been explored yet), add it to stack so it's recursed upon
-          if (arg->duplications == 0) {
-            stack.push_back(arg.Get());
-          }
-          ++arg->duplications;
-        }
-      }
-    }
-
-    stack.clear();
-    stack.emplace_back(variable.expr.Get());
-
-    while (!stack.empty()) {
-      auto& currentNode = stack.back();
-      stack.pop_back();
-
-      // BFS tape sorted from parent to child.
-      row.emplace_back(currentNode);
-
-      for (auto&& arg : currentNode->args) {
-        // Only add node if it's not a constant and doesn't already exist in the
-        // tape.
-        if (arg != nullptr && arg->type != ExpressionType::kConstant) {
-          // Once the number of node visitations equals the number of
-          // duplications (the counter hits zero), add it to the stack. Note
-          // that this means the node is only enqueued once.
-          --arg->duplications;
-          if (arg->duplications == 0) {
-            stack.push_back(arg.Get());
-          }
-        }
-      }
-    }
-
-    m_graph.emplace_back(std::move(row));
+    m_graphs.emplace_back(variable);
   }
 
   for (int row = 0; row < m_wrt.rows(); ++row) {
@@ -130,21 +78,8 @@ const Eigen::SparseMatrix<double>& Jacobian::Calculate() {
 }
 
 void Jacobian::Update() {
-  for (size_t row = 0; row < m_graph.size(); ++row) {
-    for (int col = m_graph[row].size() - 1; col >= 0; --col) {
-      auto& node = m_graph[row][col];
-
-      auto& lhs = node->args[0];
-      auto& rhs = node->args[1];
-
-      if (lhs != nullptr) {
-        if (rhs != nullptr) {
-          node->value = node->valueFunc(lhs->value, rhs->value);
-        } else {
-          node->value = node->valueFunc(lhs->value, 0.0);
-        }
-      }
-    }
+  for (auto& graph : m_graphs) {
+    graph.Update();
   }
 }
 
@@ -154,31 +89,9 @@ Profiler& Jacobian::GetProfiler() {
 
 void Jacobian::ComputeRow(int rowIndex,
                           std::vector<Eigen::Triplet<double>>& triplets) {
-  auto& row = m_graph[rowIndex];
+  auto& row = m_graphs[rowIndex];
 
-  for (auto col : row) {
-    col->adjoint = 0.0;
-  }
-  row[0]->adjoint = 1.0;
-
-  for (auto col : row) {
-    auto& lhs = col->args[0];
-    auto& rhs = col->args[1];
-
-    if (lhs != nullptr) {
-      if (rhs != nullptr) {
-        lhs->adjoint +=
-            col->gradientValueFuncs[0](lhs->value, rhs->value, col->adjoint);
-        rhs->adjoint +=
-            col->gradientValueFuncs[1](lhs->value, rhs->value, col->adjoint);
-      } else {
-        lhs->adjoint +=
-            col->gradientValueFuncs[0](lhs->value, 0.0, col->adjoint);
-      }
-    }
-
-    if (col->row != -1) {
-      triplets.emplace_back(rowIndex, col->row, col->adjoint);
-    }
-  }
+  row.ComputeAdjoints([&](int row, double adjoint) {
+    triplets.emplace_back(rowIndex, row, adjoint);
+  });
 }
