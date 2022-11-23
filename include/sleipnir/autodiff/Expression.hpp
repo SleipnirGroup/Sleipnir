@@ -6,7 +6,6 @@
 
 #include <array>
 #include <memory>
-#include <vector>
 
 #include "sleipnir/IntrusiveSharedPtr.hpp"
 #include "sleipnir/SymbolExports.hpp"
