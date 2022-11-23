@@ -70,8 +70,8 @@ ExpressionGraph::ExpressionGraph(Variable& root) {
 void ExpressionGraph::Update() {
   // Traverse the BFS list backward from child to parent and update the value of
   // each node.
-  for (int col = m_list.size() - 1; col >= 0; --col) {
-    auto& node = m_list[col];
+  for (auto it = m_list.rbegin(); it != m_list.rend(); ++it) {
+    auto& node = *it;
 
     auto& lhs = node->args[0];
     auto& rhs = node->args[1];
