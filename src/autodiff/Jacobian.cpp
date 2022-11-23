@@ -78,8 +78,8 @@ const Eigen::SparseMatrix<double>& Jacobian::Calculate() {
 }
 
 void Jacobian::Update() {
-  for (size_t row = 0; row < m_graphs.size(); ++row) {
-    m_graphs[row].Update();
+  for (auto& graph : m_graphs) {
+    graph.Update();
   }
 }
 
