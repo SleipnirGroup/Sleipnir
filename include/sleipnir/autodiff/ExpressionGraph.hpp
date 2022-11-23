@@ -30,12 +30,16 @@ class SLEIPNIR_DLLEXPORT ExpressionGraph {
   void Update();
 
   /**
-   * Returns a reference to the given element in the BFS list.
+   * Returns a reference to the BFS list element at the given index.
+   *
+   * @param index An index into the BFS list.
    */
   const Expression* operator[](size_t index) const { return m_list[index]; }
 
   /**
-   * Returns a reference to the given element in the BFS list.
+   * Returns a reference to the BFS list element at the given index.
+   *
+   * @param index An index into the BFS list.
    */
   Expression* operator[](size_t index) { return m_list[index]; }
 
