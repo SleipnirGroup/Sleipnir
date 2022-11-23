@@ -16,6 +16,7 @@
 #include "RegularizedLDLT.hpp"
 #include "ScopeExit.hpp"
 #include "sleipnir/autodiff/Expression.hpp"
+#include "sleipnir/autodiff/ExpressionGraph.hpp"
 #include "sleipnir/autodiff/Gradient.hpp"
 #include "sleipnir/autodiff/Hessian.hpp"
 #include "sleipnir/autodiff/Jacobian.hpp"
@@ -466,12 +467,12 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   if (m_inequalityConstraints.size() > 0) {
     L -= zAD.transpose() * (c_iAD - sAD);
   }
-  auto graphL = L.expr->GenerateBFS();
+  autodiff::ExpressionGraph graphL{*L.expr};
 
   Eigen::VectorXd step = Eigen::VectorXd::Zero(x.rows());
 
   SetAD(xAD, x);
-  autodiff::Expression::UpdateGraph(graphL);
+  graphL.Update();
 
   autodiff::Gradient gradientF{m_f.value(), xAD};
   autodiff::Hessian hessianL{L, xAD};
@@ -843,7 +844,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       SetAD(sAD, s);
       SetAD(yAD, y);
       SetAD(zAD, z);
-      autodiff::Expression::UpdateGraph(graphL);
+      graphL.Update();
 
       auto innerIterEndTime = std::chrono::system_clock::now();
 

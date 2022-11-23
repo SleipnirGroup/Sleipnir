@@ -7,6 +7,7 @@
 #include <type_traits>
 
 #include "Indexer.hpp"
+#include "sleipnir/autodiff/ExpressionGraph.hpp"
 
 // https://en.cppreference.com/w/cpp/utility/to_underlying from C++23
 template <class Enum>
@@ -320,81 +321,9 @@ SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator+(
       lhs);
 }
 
-std::vector<Expression*> Expression::GenerateBFS() {
-  // BFS list sorted from parent to child.
-  std::vector<Expression*> graph;
-  std::vector<Expression*> stack;
-
-  stack.emplace_back(this);
-
-  // Initialize the number of instances of each node in the tree
-  // (Expression::duplications)
-  while (!stack.empty()) {
-    auto& currentNode = stack.back();
-    stack.pop_back();
-
-    for (auto&& arg : currentNode->args) {
-      // Only continue if the node is not a constant and hasn't already been
-      // explored.
-      if (arg != nullptr && arg->type != ExpressionType::kConstant) {
-        // If this is the first instance of the node encountered (it hasn't
-        // been explored yet), add it to stack so it's recursed upon
-        if (arg->duplications == 0) {
-          stack.push_back(arg.Get());
-        }
-        ++arg->duplications;
-      }
-    }
-  }
-
-  stack.emplace_back(this);
-
-  while (!stack.empty()) {
-    auto& currentNode = stack.back();
-    stack.pop_back();
-
-    // BFS list sorted from parent to child.
-    graph.emplace_back(currentNode);
-
-    for (auto&& arg : currentNode->args) {
-      // Only add node if it's not a constant and doesn't already exist in the
-      // tape.
-      if (arg != nullptr && arg->type != ExpressionType::kConstant) {
-        // Once the number of node visitations equals the number of
-        // duplications (the counter hits zero), add it to the stack. Note
-        // that this means the node is only enqueued once.
-        --arg->duplications;
-        if (arg->duplications == 0) {
-          stack.push_back(arg.Get());
-        }
-      }
-    }
-  }
-
-  return graph;
-}
-
 void Expression::Update() {
-  UpdateGraph(GenerateBFS());
-}
-
-void Expression::UpdateGraph(std::vector<Expression*> graph) {
-  // Traverse the BFS list backward from child to parent and update the value of
-  // each node.
-  for (int col = graph.size() - 1; col >= 0; --col) {
-    auto& node = graph[col];
-
-    auto& lhs = node->args[0];
-    auto& rhs = node->args[1];
-
-    if (lhs != nullptr) {
-      if (rhs != nullptr) {
-        node->value = node->valueFunc(lhs->value, rhs->value);
-      } else {
-        node->value = node->valueFunc(lhs->value, 0.0);
-      }
-    }
-  }
+  ExpressionGraph graph{*this};
+  graph.Update();
 }
 
 IntrusiveSharedPtr<Expression> MakeConstant(double x) {

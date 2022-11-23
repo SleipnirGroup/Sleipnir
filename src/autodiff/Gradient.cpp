@@ -16,7 +16,7 @@ Gradient::Gradient(Variable variable, Eigen::Ref<VectorXvar> wrt) noexcept
     // If the expression is constant, the gradient is zero.
     m_g.setZero();
   } else {
-    m_graph = m_variable.expr->GenerateBFS();
+    m_graph = ExpressionGraph{*m_variable.expr};
 
     if (m_variable.expr->type == ExpressionType::kLinear) {
       // If the expression is linear, compute its gradient once here and cache
@@ -38,7 +38,7 @@ const Eigen::SparseVector<double>& Gradient::Calculate() {
 }
 
 void Gradient::Update() {
-  Expression::UpdateGraph(m_graph);
+  m_graph.Update();
 }
 
 Profiler& Gradient::GetProfiler() {
@@ -56,16 +56,16 @@ void Gradient::Compute() {
   }
 
   // Zero adjoints. The root node's adjoint is 1.0 as df/df is always 1.
-  for (auto col : m_graph) {
+  for (auto col : m_graph.GetList()) {
     col->adjoint = 0.0;
   }
-  m_graph[0]->adjoint = 1.0;
+  m_graph.GetList()[0]->adjoint = 1.0;
 
   // df/dx = (df/dy)(dy/dx). The adjoint of x is equal to the adjoint of y
   // multiplied by dy/dx. If there are multiple "paths" from the root node to
   // variable; the variable's adjoint is the sum of each path's adjoint
   // contribution.
-  for (auto col : m_graph) {
+  for (auto col : m_graph.GetList()) {
     auto& lhs = col->args[0];
     auto& rhs = col->args[1];
 

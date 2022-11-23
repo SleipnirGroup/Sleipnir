@@ -11,7 +11,7 @@ Jacobian::Jacobian(VectorXvar variables, VectorXvar wrt) noexcept
   m_profiler.StartSetup();
 
   for (Variable variable : m_variables) {
-    m_graph.emplace_back(variable.expr->GenerateBFS());
+    m_graphs.emplace_back(*variable.expr);
   }
 
   for (int row = 0; row < m_wrt.rows(); ++row) {
@@ -78,8 +78,8 @@ const Eigen::SparseMatrix<double>& Jacobian::Calculate() {
 }
 
 void Jacobian::Update() {
-  for (size_t row = 0; row < m_graph.size(); ++row) {
-    Expression::UpdateGraph(m_graph[row]);
+  for (size_t row = 0; row < m_graphs.size(); ++row) {
+    m_graphs[row].Update();
   }
 }
 
@@ -89,14 +89,14 @@ Profiler& Jacobian::GetProfiler() {
 
 void Jacobian::ComputeRow(int rowIndex,
                           std::vector<Eigen::Triplet<double>>& triplets) {
-  auto& row = m_graph[rowIndex];
+  auto& row = m_graphs[rowIndex];
 
-  for (auto col : row) {
+  for (auto col : row.GetList()) {
     col->adjoint = 0.0;
   }
-  row[0]->adjoint = 1.0;
+  row.GetList()[0]->adjoint = 1.0;
 
-  for (auto col : row) {
+  for (auto col : row.GetList()) {
     auto& lhs = col->args[0];
     auto& rhs = col->args[1];
 
