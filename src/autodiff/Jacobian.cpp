@@ -91,12 +91,12 @@ void Jacobian::ComputeRow(int rowIndex,
                           std::vector<Eigen::Triplet<double>>& triplets) {
   auto& row = m_graphs[rowIndex];
 
-  for (auto col : row.GetList()) {
+  for (auto col : row) {
     col->adjoint = 0.0;
   }
-  row.GetList()[0]->adjoint = 1.0;
+  row[0]->adjoint = 1.0;
 
-  for (auto col : row.GetList()) {
+  for (auto col : row) {
     auto& lhs = col->args[0];
     auto& rhs = col->args[1];
 

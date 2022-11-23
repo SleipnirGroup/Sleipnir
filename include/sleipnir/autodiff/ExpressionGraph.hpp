@@ -31,9 +31,24 @@ class SLEIPNIR_DLLEXPORT ExpressionGraph {
   void Update();
 
   /**
-   * Returns the graph's list of nodes.
+   * Returns a reference to the given element in the BFS list.
    */
-  const std::vector<Expression*>& GetList() const;
+  const Expression* operator[](size_t index) const { return m_list[index]; }
+
+  /**
+   * Returns a reference to the given element in the BFS list.
+   */
+  Expression* operator[](size_t index) { return m_list[index]; }
+
+  /**
+   * Returns an iterator to the beginning of the BFS list.
+   */
+  decltype(auto) begin() { return m_list.begin(); }
+
+  /**
+   * Returns an iterator to the end of the BFS list.
+   */
+  decltype(auto) end() { return m_list.end(); }
 
  private:
   std::vector<Expression*> m_list;

@@ -56,16 +56,16 @@ void Gradient::Compute() {
   }
 
   // Zero adjoints. The root node's adjoint is 1.0 as df/df is always 1.
-  for (auto col : m_graph.GetList()) {
+  for (auto col : m_graph) {
     col->adjoint = 0.0;
   }
-  m_graph.GetList()[0]->adjoint = 1.0;
+  m_graph[0]->adjoint = 1.0;
 
   // df/dx = (df/dy)(dy/dx). The adjoint of x is equal to the adjoint of y
   // multiplied by dy/dx. If there are multiple "paths" from the root node to
   // variable; the variable's adjoint is the sum of each path's adjoint
   // contribution.
-  for (auto col : m_graph.GetList()) {
+  for (auto col : m_graph) {
     auto& lhs = col->args[0];
     auto& rhs = col->args[1];
 

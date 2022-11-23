@@ -79,7 +79,3 @@ void ExpressionGraph::Update() {
     }
   }
 }
-
-const std::vector<Expression*>& ExpressionGraph::GetList() const {
-  return m_list;
-}
