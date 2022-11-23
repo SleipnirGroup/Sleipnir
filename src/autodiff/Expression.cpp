@@ -6,7 +6,6 @@
 #include <numbers>
 #include <type_traits>
 
-#include "Indexer.hpp"
 #include "sleipnir/autodiff/ExpressionGraph.hpp"
 
 // https://en.cppreference.com/w/cpp/utility/to_underlying from C++23
@@ -23,14 +22,13 @@ PoolAllocator<Expression> Allocator() {
 }
 
 Expression::Expression(double value, ExpressionType type)
-    : value{value}, id{Indexer::GetIndex()}, type{type} {}
+    : value{value}, type{type} {}
 
 Expression::Expression(ExpressionType type, BinaryFuncDouble valueFunc,
                        TrinaryFuncDouble lhsGradientValueFunc,
                        TrinaryFuncExpr lhsGradientFunc,
                        IntrusiveSharedPtr<Expression> lhs)
     : value{valueFunc(lhs->value, 0.0)},
-      id{Indexer::GetIndex()},
       type{type},
       valueFunc{valueFunc},
       gradientValueFuncs{lhsGradientValueFunc, TrinaryFuncDouble{}},
@@ -46,7 +44,6 @@ Expression::Expression(ExpressionType type, BinaryFuncDouble valueFunc,
                        IntrusiveSharedPtr<Expression> rhs)
     : value{valueFunc(lhs != nullptr ? lhs->value : 0.0,
                       rhs != nullptr ? rhs->value : 0.0)},
-      id{Indexer::GetIndex()},
       type{type},
       valueFunc{valueFunc},
       gradientValueFuncs{lhsGradientValueFunc, rhsGradientValueFunc},

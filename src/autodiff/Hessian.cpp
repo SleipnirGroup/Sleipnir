@@ -30,7 +30,6 @@ VectorXvar Hessian::GenerateGradientTree(Variable& variable,
 
   // BFS
   std::vector<Expression*> row;
-  row.reserve(variable.expr->id);
   std::vector<Expression*> stack;
 
   stack.emplace_back(variable.expr.Get());
