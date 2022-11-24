@@ -10,12 +10,12 @@ Jacobian::Jacobian(VectorXvar variables, VectorXvar wrt) noexcept
     : m_variables{std::move(variables)}, m_wrt{std::move(wrt)} {
   m_profiler.StartSetup();
 
-  for (Variable variable : m_variables) {
-    m_graphs.emplace_back(variable);
-  }
-
   for (int row = 0; row < m_wrt.rows(); ++row) {
     m_wrt(row).expr->row = row;
+  }
+
+  for (Variable variable : m_variables) {
+    m_graphs.emplace_back(variable);
   }
 
   // Reserve triplet space for 99% sparsity
@@ -54,20 +54,12 @@ const Eigen::SparseMatrix<double>& Jacobian::Calculate() {
 
   Update();
 
-  for (int row = 0; row < m_wrt.rows(); ++row) {
-    m_wrt(row).expr->row = row;
-  }
-
   // Copy the cached triplets so triplets added for the nonlinear rows are
   // thrown away at the end of the function
   auto triplets = m_cachedTriplets;
 
   for (int row : m_nonlinearRows) {
     ComputeRow(row, triplets);
-  }
-
-  for (int row = 0; row < m_wrt.rows(); ++row) {
-    m_wrt(row).expr->row = -1;
   }
 
   m_J.setFromTriplets(triplets.begin(), triplets.end());

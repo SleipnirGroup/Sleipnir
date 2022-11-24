@@ -12,9 +12,22 @@ Gradient::Gradient(Variable variable, Variable wrt) noexcept
 Gradient::Gradient(Variable variable, Eigen::Ref<VectorXvar> wrt) noexcept
     : m_variable{std::move(variable)},
       m_wrt{wrt},
-      m_graph{m_variable},
+      m_graph{[&] {
+        for (int row = 0; row < m_wrt.rows(); ++row) {
+          m_wrt(row).expr->row = row;
+        }
+
+        ExpressionGraph graph{m_variable};
+
+        for (int row = 0; row < m_wrt.rows(); ++row) {
+          m_wrt(row).expr->row = -1;
+        }
+
+        return graph;
+      }()},
       m_g{m_wrt.rows()} {
   m_profiler.StartSetup();
+
   if (m_variable.Type() == ExpressionType::kConstant) {
     // If the expression is constant, the gradient is zero.
     m_g.setZero();
@@ -46,16 +59,6 @@ Profiler& Gradient::GetProfiler() {
 
 void Gradient::Compute() {
   Update();
-
-  // Assigns leaf nodes their respective position in the gradient.
-  for (int row = 0; row < m_wrt.rows(); ++row) {
-    m_wrt(row).expr->row = row;
-  }
-
   m_graph.ComputeAdjoints(
       [&](int row, double adjoint) { m_g.coeffRef(row) = adjoint; });
-
-  for (int row = 0; row < m_wrt.rows(); ++row) {
-    m_wrt(row).expr->row = -1;
-  }
 }
