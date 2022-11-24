@@ -265,6 +265,25 @@ struct SLEIPNIR_DLLEXPORT Expression {
       const sleipnir::IntrusiveSharedPtr<Expression>& rhs);
 
   /**
+   * Expression-double compound addition operator.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
+  friend SLEIPNIR_DLLEXPORT sleipnir::IntrusiveSharedPtr<Expression>&
+  operator+=(sleipnir::IntrusiveSharedPtr<Expression>& lhs, double rhs);
+
+  /**
+   * Expression-Expression compound addition operator.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
+  friend SLEIPNIR_DLLEXPORT sleipnir::IntrusiveSharedPtr<Expression>&
+  operator+=(sleipnir::IntrusiveSharedPtr<Expression>& lhs,
+             const sleipnir::IntrusiveSharedPtr<Expression>& rhs);
+
+  /**
    * double-Expression subtraction operator.
    *
    * @param lhs Operator left-hand side.
