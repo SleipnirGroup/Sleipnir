@@ -265,6 +265,25 @@ struct SLEIPNIR_DLLEXPORT Expression {
       const sleipnir::IntrusiveSharedPtr<Expression>& rhs);
 
   /**
+   * Expression-double compound addition operator.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
+  friend SLEIPNIR_DLLEXPORT sleipnir::IntrusiveSharedPtr<Expression>&
+  operator+=(sleipnir::IntrusiveSharedPtr<Expression>& lhs, double rhs);
+
+  /**
+   * Expression-Expression compound addition operator.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
+  friend SLEIPNIR_DLLEXPORT sleipnir::IntrusiveSharedPtr<Expression>&
+  operator+=(sleipnir::IntrusiveSharedPtr<Expression>& lhs,
+             const sleipnir::IntrusiveSharedPtr<Expression>& rhs);
+
+  /**
    * double-Expression subtraction operator.
    *
    * @param lhs Operator left-hand side.
@@ -310,11 +329,6 @@ struct SLEIPNIR_DLLEXPORT Expression {
 };
 
 /**
- * Returns an allocator for the global Expression pool memory resource.
- */
-SLEIPNIR_DLLEXPORT PoolAllocator<Expression> Allocator();
-
-/**
  * Refcount increment for intrusive shared pointer.
  *
  * @param expr The shared pointer's managed object.
@@ -330,7 +344,7 @@ inline void IntrusiveSharedPtrIncRefCount(Expression* expr) {
  */
 inline void IntrusiveSharedPtrDecRefCount(Expression* expr) {
   if (--expr->refCount == 0) {
-    auto alloc = Allocator();
+    auto alloc = GlobalPoolAllocator<Expression>();
     std::allocator_traits<decltype(alloc)>::destroy(alloc, expr);
     std::allocator_traits<decltype(alloc)>::deallocate(alloc, expr,
                                                        sizeof(Expression));

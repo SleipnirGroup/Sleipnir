@@ -97,27 +97,26 @@ VectorXvar ExpressionGraph::GenerateGradientTree(Eigen::Ref<VectorXvar> wrt) {
   grad.fill(Variable{});
 
   // Zero adjoints. The root node's adjoint is 1.0 as df/df is always 1.
-  for (auto col : m_adjointList) {
-    col->adjointExpr = Zero();
-  }
   m_adjointList[0]->adjointExpr = MakeConstant(1.0);
+  for (auto it = m_adjointList.begin() + 1; it != m_adjointList.end(); ++it) {
+    auto& node = *it;
+    node->adjointExpr = Zero();
+  }
 
   // df/dx = (df/dy)(dy/dx). The adjoint of x is equal to the adjoint of y
   // multiplied by dy/dx. If there are multiple "paths" from the root node to
   // variable; the variable's adjoint is the sum of each path's adjoint
   // contribution.
-  for (auto col : m_adjointList) {
-    auto& lhs = col->args[0];
-    auto& rhs = col->args[1];
+  for (auto node : m_adjointList) {
+    auto& lhs = node->args[0];
+    auto& rhs = node->args[1];
 
-    lhs->adjointExpr =
-        lhs->adjointExpr + col->gradientFuncs[0](lhs, rhs, col->adjointExpr);
-    rhs->adjointExpr =
-        rhs->adjointExpr + col->gradientFuncs[1](lhs, rhs, col->adjointExpr);
+    lhs->adjointExpr += node->gradientFuncs[0](lhs, rhs, node->adjointExpr);
+    rhs->adjointExpr += node->gradientFuncs[1](lhs, rhs, node->adjointExpr);
 
     // If variable is a leaf node, assign its adjoint to the gradient.
-    if (col->row != -1) {
-      grad(col->row) = Variable{col->adjointExpr};
+    if (node->row != -1) {
+      grad(node->row) = Variable{node->adjointExpr};
     }
   }
 
