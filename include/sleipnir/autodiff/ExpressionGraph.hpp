@@ -55,23 +55,28 @@ class SLEIPNIR_DLLEXPORT ExpressionGraph {
     // multiplied by dy/dx. If there are multiple "paths" from the root node to
     // variable; the variable's adjoint is the sum of each path's adjoint
     // contribution.
-    for (auto col : m_adjointList) {
-      auto& lhs = col->args[0];
-      auto& rhs = col->args[1];
+    for (size_t col = 0; col < m_adjointList.size(); ++col) {
+      auto& currentNode = m_adjointList[col];
+      auto& lhs = currentNode->args[0];
+      auto& rhs = currentNode->args[1];
 
       lhs->adjoint +=
-          col->gradientValueFuncs[0](lhs->value, rhs->value, col->adjoint);
+          currentNode->gradientValueFuncs[0](lhs->value, rhs->value, currentNode->adjoint);
       rhs->adjoint +=
-          col->gradientValueFuncs[1](lhs->value, rhs->value, col->adjoint);
+          currentNode->gradientValueFuncs[1](lhs->value, rhs->value, currentNode->adjoint);
 
       // If variable is a leaf node, assign its adjoint to the gradient.
-      if (col->row != -1) {
-        func(col->row, col->adjoint);
+      int row = m_rowList[col];
+      if (row != -1) {
+        func(row, currentNode->adjoint);
       }
     }
   }
 
  private:
+  // List that maps nodes to their respective row.
+  std::vector<int> m_rowList;
+
   // List for updating adjoints
   std::vector<Expression*> m_adjointList;
 

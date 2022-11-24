@@ -22,6 +22,10 @@ ExpressionGraph::ExpressionGraph(Variable& root) {
 
   stack.emplace_back(root.expr.Get());
 
+  m_rowList.clear();
+  m_adjointList.clear();
+  m_valueList.clear();
+
   // Initialize the number of instances of each node in the tree
   // (Expression::duplications)
   while (!stack.empty()) {
@@ -50,6 +54,7 @@ ExpressionGraph::ExpressionGraph(Variable& root) {
 
     // BFS lists sorted from parent to child.
     m_adjointList.emplace_back(currentNode);
+    m_rowList.emplace_back(currentNode->row);
     if (currentNode->valueFunc != nullptr) {
       // Constants have no valueFunc and don't need to be updated
       m_valueList.emplace_back(currentNode);
