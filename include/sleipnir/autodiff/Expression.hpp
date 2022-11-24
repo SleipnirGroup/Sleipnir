@@ -310,11 +310,6 @@ struct SLEIPNIR_DLLEXPORT Expression {
 };
 
 /**
- * Returns an allocator for the global Expression pool memory resource.
- */
-SLEIPNIR_DLLEXPORT PoolAllocator<Expression> Allocator();
-
-/**
  * Refcount increment for intrusive shared pointer.
  *
  * @param expr The shared pointer's managed object.
@@ -330,7 +325,7 @@ inline void IntrusiveSharedPtrIncRefCount(Expression* expr) {
  */
 inline void IntrusiveSharedPtrDecRefCount(Expression* expr) {
   if (--expr->refCount == 0) {
-    auto alloc = Allocator();
+    auto alloc = GlobalPoolAllocator<Expression>();
     std::allocator_traits<decltype(alloc)>::destroy(alloc, expr);
     std::allocator_traits<decltype(alloc)>::deallocate(alloc, expr,
                                                        sizeof(Expression));
