@@ -18,13 +18,8 @@ namespace sleipnir::autodiff {
 
 sleipnir::IntrusiveSharedPtr<Expression>& Zero() {
   static auto expr = AllocateIntrusiveShared<Expression>(
-      Allocator(), Expression::ZeroSingleton);
+      GlobalPoolAllocator<Expression>(), Expression::ZeroSingleton);
   return expr;
-}
-
-PoolAllocator<Expression> Allocator() {
-  static PoolResource<Expression> pool;
-  return PoolAllocator<Expression>{&pool};
 }
 
 Expression::Expression(ZeroSingleton_t)
@@ -127,7 +122,8 @@ SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator*(
   }
 
   return AllocateIntrusiveShared<Expression>(
-      Allocator(), type, [](double lhs, double rhs) { return lhs * rhs; },
+      GlobalPoolAllocator<Expression>(), type,
+      [](double lhs, double rhs) { return lhs * rhs; },
       [](double lhs, double rhs, double parentAdjoint) {
         return parentAdjoint * rhs;
       },
@@ -177,7 +173,8 @@ SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator/(
   }
 
   return AllocateIntrusiveShared<Expression>(
-      Allocator(), type, [](double lhs, double rhs) { return lhs / rhs; },
+      GlobalPoolAllocator<Expression>(), type,
+      [](double lhs, double rhs) { return lhs / rhs; },
       [](double lhs, double rhs, double parentAdjoint) {
         return parentAdjoint / rhs;
       },
@@ -225,7 +222,7 @@ SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator+(
   }
 
   return AllocateIntrusiveShared<Expression>(
-      Allocator(),
+      GlobalPoolAllocator<Expression>(),
       ExpressionType{
           std::max(to_underlying(lhs->type), to_underlying(rhs->type))},
       [](double lhs, double rhs) { return lhs + rhs; },
@@ -279,7 +276,7 @@ SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator-(
   }
 
   return AllocateIntrusiveShared<Expression>(
-      Allocator(),
+      GlobalPoolAllocator<Expression>(),
       ExpressionType{
           std::max(to_underlying(lhs->type), to_underlying(rhs->type))},
       [](double lhs, double rhs) { return lhs - rhs; },
@@ -309,7 +306,8 @@ SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator-(
   }
 
   return AllocateIntrusiveShared<Expression>(
-      Allocator(), lhs->type, [](double lhs, double) { return -lhs; },
+      GlobalPoolAllocator<Expression>(), lhs->type,
+      [](double lhs, double) { return -lhs; },
       [](double lhs, double, double parentAdjoint) { return -parentAdjoint; },
       [](const IntrusiveSharedPtr<Expression>& lhs,
          const IntrusiveSharedPtr<Expression>& rhs,
@@ -326,7 +324,8 @@ SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator+(
   }
 
   return AllocateIntrusiveShared<Expression>(
-      Allocator(), lhs->type, [](double lhs, double) { return lhs; },
+      GlobalPoolAllocator<Expression>(), lhs->type,
+      [](double lhs, double) { return lhs; },
       [](double lhs, double, double parentAdjoint) { return parentAdjoint; },
       [](const IntrusiveSharedPtr<Expression>& lhs,
          const IntrusiveSharedPtr<Expression>& rhs,
@@ -337,8 +336,8 @@ SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator+(
 }
 
 IntrusiveSharedPtr<Expression> MakeConstant(double x) {
-  return AllocateIntrusiveShared<Expression>(Allocator(), x,
-                                             ExpressionType::kConstant);
+  return AllocateIntrusiveShared<Expression>(GlobalPoolAllocator<Expression>(),
+                                             x, ExpressionType::kConstant);
 }
 
 IntrusiveSharedPtr<Expression> abs(  // NOLINT
@@ -356,7 +355,8 @@ IntrusiveSharedPtr<Expression> abs(  // NOLINT
   }
 
   return AllocateIntrusiveShared<Expression>(
-      Allocator(), type, [](double x, double) { return std::abs(x); },
+      GlobalPoolAllocator<Expression>(), type,
+      [](double x, double) { return std::abs(x); },
       [](double x, double, double parentAdjoint) {
         if (x < 0.0) {
           return -parentAdjoint;
@@ -395,7 +395,8 @@ IntrusiveSharedPtr<Expression> acos(  // NOLINT
   }
 
   return AllocateIntrusiveShared<Expression>(
-      Allocator(), type, [](double x, double) { return std::acos(x); },
+      GlobalPoolAllocator<Expression>(), type,
+      [](double x, double) { return std::acos(x); },
       [](double x, double, double parentAdjoint) {
         return -parentAdjoint / std::sqrt(1.0 - x * x);
       },
@@ -422,7 +423,8 @@ IntrusiveSharedPtr<Expression> asin(  // NOLINT
   }
 
   return AllocateIntrusiveShared<Expression>(
-      Allocator(), type, [](double x, double) { return std::asin(x); },
+      GlobalPoolAllocator<Expression>(), type,
+      [](double x, double) { return std::asin(x); },
       [](double x, double, double parentAdjoint) {
         return parentAdjoint / std::sqrt(1.0 - x * x);
       },
@@ -449,7 +451,8 @@ IntrusiveSharedPtr<Expression> atan(  // NOLINT
   }
 
   return AllocateIntrusiveShared<Expression>(
-      Allocator(), type, [](double x, double) { return std::atan(x); },
+      GlobalPoolAllocator<Expression>(), type,
+      [](double x, double) { return std::atan(x); },
       [](double x, double, double parentAdjoint) {
         return parentAdjoint / (1.0 + x * x);
       },
@@ -480,7 +483,8 @@ IntrusiveSharedPtr<Expression> atan2(  // NOLINT
   }
 
   return AllocateIntrusiveShared<Expression>(
-      Allocator(), type, [](double y, double x) { return std::atan2(y, x); },
+      GlobalPoolAllocator<Expression>(), type,
+      [](double y, double x) { return std::atan2(y, x); },
       [](double y, double x, double parentAdjoint) {
         return parentAdjoint * x / (y * y + x * x);
       },
@@ -515,7 +519,8 @@ IntrusiveSharedPtr<Expression> cos(  // NOLINT
   }
 
   return AllocateIntrusiveShared<Expression>(
-      Allocator(), type, [](double x, double) { return std::cos(x); },
+      GlobalPoolAllocator<Expression>(), type,
+      [](double x, double) { return std::cos(x); },
       [](double x, double, double parentAdjoint) {
         return -parentAdjoint * std::sin(x);
       },
@@ -542,7 +547,8 @@ IntrusiveSharedPtr<Expression> cosh(  // NOLINT
   }
 
   return AllocateIntrusiveShared<Expression>(
-      Allocator(), type, [](double x, double) { return std::cosh(x); },
+      GlobalPoolAllocator<Expression>(), type,
+      [](double x, double) { return std::cosh(x); },
       [](double x, double, double parentAdjoint) {
         return parentAdjoint * std::sinh(x);
       },
@@ -572,7 +578,8 @@ IntrusiveSharedPtr<Expression> erf(  // NOLINT
   }
 
   return AllocateIntrusiveShared<Expression>(
-      Allocator(), type, [](double x, double) { return std::erf(x); },
+      GlobalPoolAllocator<Expression>(), type,
+      [](double x, double) { return std::erf(x); },
       [](double x, double, double parentAdjoint) {
         return parentAdjoint * 2.0 / sqrt_pi * std::exp(-x * x);
       },
@@ -599,7 +606,8 @@ IntrusiveSharedPtr<Expression> exp(  // NOLINT
   }
 
   return AllocateIntrusiveShared<Expression>(
-      Allocator(), type, [](double x, double) { return std::exp(x); },
+      GlobalPoolAllocator<Expression>(), type,
+      [](double x, double) { return std::exp(x); },
       [](double x, double, double parentAdjoint) {
         return parentAdjoint * std::exp(x);
       },
@@ -628,7 +636,8 @@ IntrusiveSharedPtr<Expression> hypot(  // NOLINT
     }
 
     return AllocateIntrusiveShared<Expression>(
-        Allocator(), type, [](double x, double y) { return std::hypot(x, y); },
+        GlobalPoolAllocator<Expression>(), type,
+        [](double x, double y) { return std::hypot(x, y); },
         [](double x, double y, double parentAdjoint) {
           return parentAdjoint * x / std::hypot(x, y);
         },
@@ -656,7 +665,8 @@ IntrusiveSharedPtr<Expression> hypot(  // NOLINT
     }
 
     return AllocateIntrusiveShared<Expression>(
-        Allocator(), type, [](double x, double y) { return std::hypot(x, y); },
+        GlobalPoolAllocator<Expression>(), type,
+        [](double x, double y) { return std::hypot(x, y); },
         [](double x, double y, double parentAdjoint) {
           return parentAdjoint * x / std::hypot(x, y);
         },
@@ -685,7 +695,8 @@ IntrusiveSharedPtr<Expression> hypot(  // NOLINT
     }
 
     return AllocateIntrusiveShared<Expression>(
-        Allocator(), type, [](double x, double y) { return std::hypot(x, y); },
+        GlobalPoolAllocator<Expression>(), type,
+        [](double x, double y) { return std::hypot(x, y); },
         [](double x, double y, double parentAdjoint) {
           return parentAdjoint * x / std::hypot(x, y);
         },
@@ -721,7 +732,8 @@ IntrusiveSharedPtr<Expression> log(  // NOLINT
   }
 
   return AllocateIntrusiveShared<Expression>(
-      Allocator(), type, [](double x, double) { return std::log(x); },
+      GlobalPoolAllocator<Expression>(), type,
+      [](double x, double) { return std::log(x); },
       [](double x, double, double parentAdjoint) { return parentAdjoint / x; },
       [](const IntrusiveSharedPtr<Expression>& x,
          const IntrusiveSharedPtr<Expression>&,
@@ -748,7 +760,8 @@ IntrusiveSharedPtr<Expression> log10(  // NOLINT
   }
 
   return AllocateIntrusiveShared<Expression>(
-      Allocator(), type, [](double x, double) { return std::log10(x); },
+      GlobalPoolAllocator<Expression>(), type,
+      [](double x, double) { return std::log10(x); },
       [](double x, double, double parentAdjoint) {
         return parentAdjoint / (ln10 * x);
       },
@@ -791,7 +804,7 @@ IntrusiveSharedPtr<Expression> pow(  // NOLINT
   }
 
   return AllocateIntrusiveShared<Expression>(
-      Allocator(), type,
+      GlobalPoolAllocator<Expression>(), type,
       [](double base, double power) { return std::pow(base, power); },
       [](double base, double power, double parentAdjoint) {
         return parentAdjoint * std::pow(base, power - 1) * power;
@@ -839,7 +852,8 @@ IntrusiveSharedPtr<Expression> sin(  // NOLINT
   }
 
   return AllocateIntrusiveShared<Expression>(
-      Allocator(), type, [](double x, double) { return std::sin(x); },
+      GlobalPoolAllocator<Expression>(), type,
+      [](double x, double) { return std::sin(x); },
       [](double x, double, double parentAdjoint) {
         return parentAdjoint * std::cos(x);
       },
@@ -865,7 +879,8 @@ IntrusiveSharedPtr<Expression> sinh(const IntrusiveSharedPtr<Expression>& x) {
   }
 
   return AllocateIntrusiveShared<Expression>(
-      Allocator(), type, [](double x, double) { return std::sinh(x); },
+      GlobalPoolAllocator<Expression>(), type,
+      [](double x, double) { return std::sinh(x); },
       [](double x, double, double parentAdjoint) {
         return parentAdjoint * std::cosh(x);
       },
@@ -892,7 +907,8 @@ IntrusiveSharedPtr<Expression> sqrt(  // NOLINT
   }
 
   return AllocateIntrusiveShared<Expression>(
-      Allocator(), type, [](double x, double) { return std::sqrt(x); },
+      GlobalPoolAllocator<Expression>(), type,
+      [](double x, double) { return std::sqrt(x); },
       [](double x, double, double parentAdjoint) {
         return parentAdjoint / (2.0 * std::sqrt(x));
       },
@@ -919,7 +935,8 @@ IntrusiveSharedPtr<Expression> tan(  // NOLINT
   }
 
   return AllocateIntrusiveShared<Expression>(
-      Allocator(), type, [](double x, double) { return std::tan(x); },
+      GlobalPoolAllocator<Expression>(), type,
+      [](double x, double) { return std::tan(x); },
       [](double x, double, double parentAdjoint) {
         return parentAdjoint / (std::cos(x) * std::cos(x));
       },
@@ -945,7 +962,8 @@ IntrusiveSharedPtr<Expression> tanh(const IntrusiveSharedPtr<Expression>& x) {
   }
 
   return AllocateIntrusiveShared<Expression>(
-      Allocator(), type, [](double x, double) { return std::tanh(x); },
+      GlobalPoolAllocator<Expression>(), type,
+      [](double x, double) { return std::tanh(x); },
       [](double x, double, double parentAdjoint) {
         return parentAdjoint / (std::cosh(x) * std::cosh(x));
       },

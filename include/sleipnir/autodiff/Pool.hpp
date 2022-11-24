@@ -163,4 +163,15 @@ class PoolAllocator {
   PoolResource<T>* m_memoryResource;
 };
 
+/**
+ * Returns an allocator for a global pool memory resource.
+ *
+ * @tparam T The type the pool memory resource contains.
+ */
+template <typename T>
+PoolAllocator<T> GlobalPoolAllocator() {
+  static PoolResource<T> pool;
+  return PoolAllocator<T>{&pool};
+}
+
 }  // namespace sleipnir::autodiff

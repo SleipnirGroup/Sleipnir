@@ -14,17 +14,20 @@
 namespace sleipnir::autodiff {
 
 Variable::Variable(double value)
-    : expr{AllocateIntrusiveShared<Expression>(Allocator(), value)} {}
+    : expr{AllocateIntrusiveShared<Expression>(
+          GlobalPoolAllocator<Expression>(), value)} {}
 
 Variable::Variable(int value)
-    : expr{AllocateIntrusiveShared<Expression>(Allocator(), value)} {}
+    : expr{AllocateIntrusiveShared<Expression>(
+          GlobalPoolAllocator<Expression>(), value)} {}
 
 Variable::Variable(IntrusiveSharedPtr<Expression> expr)
     : expr{std::move(expr)} {}
 
 Variable& Variable::operator=(double value) {
   if (expr == Zero()) {
-    expr = AllocateIntrusiveShared<Expression>(Allocator(), value);
+    expr = AllocateIntrusiveShared<Expression>(
+        GlobalPoolAllocator<Expression>(), value);
   } else {
     if (expr->args[0] != Zero()) {
       fmt::print(stderr,
@@ -38,7 +41,8 @@ Variable& Variable::operator=(double value) {
 
 Variable& Variable::operator=(int value) {
   if (expr == Zero()) {
-    expr = AllocateIntrusiveShared<Expression>(Allocator(), value);
+    expr = AllocateIntrusiveShared<Expression>(
+        GlobalPoolAllocator<Expression>(), value);
   } else {
     if (expr->args[0] != Zero()) {
       fmt::print(stderr,
