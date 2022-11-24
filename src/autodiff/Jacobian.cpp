@@ -26,7 +26,9 @@ Jacobian::Jacobian(VectorXvar variables, VectorXvar wrt) noexcept
       // If the row is linear, compute its gradient once here and cache its
       // triplets. Constant rows are ignored because their gradients have no
       // nonzero triplets.
-      ComputeRow(row, m_cachedTriplets);
+      m_graphs[row].ComputeAdjoints([&](int col, double adjoint) {
+        m_cachedTriplets.emplace_back(row, col, adjoint);
+      });
     } else if (m_variables(row).expr->type > ExpressionType::kLinear) {
       // If the row is quadratic or nonlinear, add it to the list of nonlinear
       // rows to be recomputed in Calculate().
@@ -58,8 +60,11 @@ const Eigen::SparseMatrix<double>& Jacobian::Calculate() {
   // thrown away at the end of the function
   auto triplets = m_cachedTriplets;
 
+  // Compute each nonlinear row of the Jacobian
   for (int row : m_nonlinearRows) {
-    ComputeRow(row, triplets);
+    m_graphs[row].ComputeAdjoints([&](int col, double adjoint) {
+      triplets.emplace_back(row, col, adjoint);
+    });
   }
 
   m_J.setFromTriplets(triplets.begin(), triplets.end());
@@ -77,13 +82,4 @@ void Jacobian::Update() {
 
 Profiler& Jacobian::GetProfiler() {
   return m_profiler;
-}
-
-void Jacobian::ComputeRow(int rowIndex,
-                          std::vector<Eigen::Triplet<double>>& triplets) {
-  auto& row = m_graphs[rowIndex];
-
-  row.ComputeAdjoints([&](int row, double adjoint) {
-    triplets.emplace_back(rowIndex, row, adjoint);
-  });
 }

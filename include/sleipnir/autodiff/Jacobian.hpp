@@ -62,15 +62,6 @@ class SLEIPNIR_DLLEXPORT Jacobian {
   std::vector<int> m_nonlinearRows;
 
   Profiler m_profiler;
-
-  /**
-   * Computes the gradient for the given row and stores its triplets in
-   * "triplets".
-   *
-   * @param row The row of which to compute the gradient.
-   * @param triplets The destination storage for the gradient's triplets.
-   */
-  void ComputeRow(int row, std::vector<Eigen::Triplet<double>>& triplets);
 };
 
 }  // namespace sleipnir::autodiff
