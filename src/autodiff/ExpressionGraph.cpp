@@ -49,8 +49,8 @@ ExpressionGraph::ExpressionGraph(Variable& root) {
     stack.pop_back();
 
     // BFS lists sorted from parent to child.
-    m_adjointList.emplace_back(currentNode);
     m_rowList.emplace_back(currentNode->row);
+    m_adjointList.emplace_back(currentNode);
     if (currentNode->valueFunc != nullptr) {
       // Constants have no valueFunc and don't need to be updated
       m_valueList.emplace_back(currentNode);

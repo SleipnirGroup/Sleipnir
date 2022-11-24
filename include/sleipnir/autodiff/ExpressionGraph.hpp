@@ -60,10 +60,10 @@ class SLEIPNIR_DLLEXPORT ExpressionGraph {
       auto& lhs = currentNode->args[0];
       auto& rhs = currentNode->args[1];
 
-      lhs->adjoint +=
-          currentNode->gradientValueFuncs[0](lhs->value, rhs->value, currentNode->adjoint);
-      rhs->adjoint +=
-          currentNode->gradientValueFuncs[1](lhs->value, rhs->value, currentNode->adjoint);
+      lhs->adjoint += currentNode->gradientValueFuncs[0](lhs->value, rhs->value,
+                                                         currentNode->adjoint);
+      rhs->adjoint += currentNode->gradientValueFuncs[1](lhs->value, rhs->value,
+                                                         currentNode->adjoint);
 
       // If variable is a leaf node, assign its adjoint to the gradient.
       int row = m_rowList[col];

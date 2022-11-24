@@ -12,7 +12,7 @@ Gradient::Gradient(Variable variable, Variable wrt) noexcept
 Gradient::Gradient(Variable variable, Eigen::Ref<VectorXvar> wrt) noexcept
     : m_variable{std::move(variable)},
       m_wrt{wrt},
-      m_graph{[&]() -> ExpressionGraph {
+      m_graph{[&] {
         for (int row = 0; row < m_wrt.rows(); ++row) {
           m_wrt(row).expr->row = row;
         }
