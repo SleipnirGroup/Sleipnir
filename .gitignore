@@ -6,6 +6,9 @@ build*/
 perf.*
 .DS_Store
 
+#VisualStudioCode
+.vscode/settings.json
+
 # CMake
 CMakeUserPresets.json
 
