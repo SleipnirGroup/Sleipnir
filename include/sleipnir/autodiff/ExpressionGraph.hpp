@@ -46,30 +46,23 @@ class SLEIPNIR_DLLEXPORT ExpressionGraph {
   template <typename F>
   void ComputeAdjoints(F&& func) {
     // Zero adjoints. The root node's adjoint is 1.0 as df/df is always 1.
-    for (auto col : m_list) {
+    for (auto col : m_adjointList) {
       col->adjoint = 0.0;
     }
-    m_list[0]->adjoint = 1.0;
+    m_adjointList[0]->adjoint = 1.0;
 
     // df/dx = (df/dy)(dy/dx). The adjoint of x is equal to the adjoint of y
     // multiplied by dy/dx. If there are multiple "paths" from the root node to
     // variable; the variable's adjoint is the sum of each path's adjoint
     // contribution.
-    for (auto col : m_list) {
+    for (auto col : m_adjointList) {
       auto& lhs = col->args[0];
       auto& rhs = col->args[1];
 
-      if (lhs != nullptr) {
-        if (rhs != nullptr) {
-          lhs->adjoint +=
-              col->gradientValueFuncs[0](lhs->value, rhs->value, col->adjoint);
-          rhs->adjoint +=
-              col->gradientValueFuncs[1](lhs->value, rhs->value, col->adjoint);
-        } else {
-          lhs->adjoint +=
-              col->gradientValueFuncs[0](lhs->value, 0.0, col->adjoint);
-        }
-      }
+      lhs->adjoint +=
+          col->gradientValueFuncs[0](lhs->value, rhs->value, col->adjoint);
+      rhs->adjoint +=
+          col->gradientValueFuncs[1](lhs->value, rhs->value, col->adjoint);
 
       // If variable is a leaf node, assign its adjoint to the gradient.
       if (col->row != -1) {
@@ -79,7 +72,11 @@ class SLEIPNIR_DLLEXPORT ExpressionGraph {
   }
 
  private:
-  std::vector<Expression*> m_list;
+  // List for updating adjoints
+  std::vector<Expression*> m_adjointList;
+
+  // List for updating values
+  std::vector<Expression*> m_valueList;
 };
 
 }  // namespace sleipnir::autodiff

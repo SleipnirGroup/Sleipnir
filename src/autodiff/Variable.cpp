@@ -23,12 +23,12 @@ Variable::Variable(IntrusiveSharedPtr<Expression> expr)
     : expr{std::move(expr)} {}
 
 Variable& Variable::operator=(double value) {
-  if (expr == nullptr) {
+  if (expr == Zero()) {
     expr = AllocateIntrusiveShared<Expression>(Allocator(), value);
   } else {
-    if (expr->args[0] != nullptr) {
+    if (expr->args[0] != Zero()) {
       fmt::print(stderr,
-                 "WARNING {}:{}: Modified the value of a dependent variable\n",
+                 "WARNING: {}:{}: Modified the value of a dependent variable\n",
                  __FILE__, __LINE__);
     }
     expr->value = value;
@@ -37,12 +37,12 @@ Variable& Variable::operator=(double value) {
 }
 
 Variable& Variable::operator=(int value) {
-  if (expr == nullptr) {
+  if (expr == Zero()) {
     expr = AllocateIntrusiveShared<Expression>(Allocator(), value);
   } else {
-    if (expr->args[0] != nullptr) {
+    if (expr->args[0] != Zero()) {
       fmt::print(stderr,
-                 "WARNING {}:{}: Modified the value of a dependent variable\n",
+                 "WARNING: {}:{}: Modified the value of a dependent variable\n",
                  __FILE__, __LINE__);
     }
     expr->value = value;
@@ -223,23 +223,15 @@ SLEIPNIR_DLLEXPORT bool operator>=(const Variable& lhs, const Variable& rhs) {
 }
 
 double Variable::Value() const {
-  if (expr == nullptr) {
-    return 0.0;
-  } else {
-    return expr->value;
-  }
+  return expr->value;
 }
 
 ExpressionType Variable::Type() const {
-  if (expr == nullptr) {
-    return ExpressionType::kNone;
-  } else {
-    return expr->type;
-  }
+  return expr->type;
 }
 
 void Variable::Update() {
-  if (expr != nullptr) {
+  if (expr != Zero()) {
     ExpressionGraph graph{*this};
     graph.Update();
   }
