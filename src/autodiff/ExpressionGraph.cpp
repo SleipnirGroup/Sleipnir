@@ -22,10 +22,6 @@ ExpressionGraph::ExpressionGraph(Variable& root) {
 
   stack.emplace_back(root.expr.Get());
 
-  m_rowList.clear();
-  m_adjointList.clear();
-  m_valueList.clear();
-
   // Initialize the number of instances of each node in the tree
   // (Expression::duplications)
   while (!stack.empty()) {
