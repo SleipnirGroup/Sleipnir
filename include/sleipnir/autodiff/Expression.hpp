@@ -15,6 +15,10 @@ namespace sleipnir::autodiff {
 
 enum class ExpressionType { kNone, kConstant, kLinear, kQuadratic, kNonlinear };
 
+struct SLEIPNIR_DLLEXPORT Expression;
+
+SLEIPNIR_DLLEXPORT sleipnir::IntrusiveSharedPtr<Expression>& Zero();
+
 /**
  * An autodiff expression node.
  */
@@ -61,7 +65,7 @@ struct SLEIPNIR_DLLEXPORT Expression {
   /// Either nullary operator with no arguments, unary operator with one
   /// argument, or binary operator with two arguments. This operator is
   /// used to update the node's value.
-  BinaryFuncDouble valueFunc = [](double, double) { return 0.0; };
+  BinaryFuncDouble valueFunc = nullptr;
 
   /// Functions returning double adjoints of the children expressions.
   ///
@@ -86,21 +90,32 @@ struct SLEIPNIR_DLLEXPORT Expression {
   std::array<TrinaryFuncExpr, 2> gradientFuncs{
       [](const sleipnir::IntrusiveSharedPtr<Expression>&,
          const sleipnir::IntrusiveSharedPtr<Expression>&,
-         const sleipnir::IntrusiveSharedPtr<Expression>&) {
-        return sleipnir::IntrusiveSharedPtr<Expression>{};
-      },
+         const sleipnir::IntrusiveSharedPtr<Expression>&) { return Zero(); },
       [](const sleipnir::IntrusiveSharedPtr<Expression>&,
          const sleipnir::IntrusiveSharedPtr<Expression>&,
-         const sleipnir::IntrusiveSharedPtr<Expression>&) {
-        return sleipnir::IntrusiveSharedPtr<Expression>{};
-      }};
+         const sleipnir::IntrusiveSharedPtr<Expression>&) { return Zero(); }};
 
   /// Expression arguments.
-  std::array<sleipnir::IntrusiveSharedPtr<Expression>, 2> args{nullptr,
-                                                               nullptr};
+  std::array<sleipnir::IntrusiveSharedPtr<Expression>, 2> args;
 
   /// Reference count for intrusive shared pointer.
   uint32_t refCount = 0;
+
+  /**
+   * Type tag used for constructing the "zero" expression.
+   */
+  struct ZeroSingleton_t {};
+
+  /**
+   * Type tag used for constructing the "zero" expression.
+   */
+  static inline ZeroSingleton_t ZeroSingleton;
+
+  /**
+   * Constructs an instance of "zero", which has special meaning in expression
+   * operations. This should only be constructed once via Zero().
+   */
+  explicit Expression(ZeroSingleton_t);
 
   /**
    * Copy constructor.

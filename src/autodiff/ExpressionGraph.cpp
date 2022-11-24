@@ -31,7 +31,7 @@ ExpressionGraph::ExpressionGraph(Variable& root) {
     for (auto&& arg : currentNode->args) {
       // Only continue if the node is not a constant and hasn't already been
       // explored.
-      if (arg != nullptr && arg->type != ExpressionType::kConstant) {
+      if (arg->type != ExpressionType::kConstant) {
         // If this is the first instance of the node encountered (it hasn't
         // been explored yet), add it to stack so it's recursed upon
         if (arg->duplications == 0) {
@@ -48,13 +48,17 @@ ExpressionGraph::ExpressionGraph(Variable& root) {
     auto& currentNode = stack.back();
     stack.pop_back();
 
-    // BFS list sorted from parent to child.
-    m_list.emplace_back(currentNode);
+    // BFS lists sorted from parent to child.
+    m_adjointList.emplace_back(currentNode);
+    if (currentNode->valueFunc != nullptr) {
+      // Constants have no valueFunc and don't need to be updated
+      m_valueList.emplace_back(currentNode);
+    }
 
     for (auto&& arg : currentNode->args) {
       // Only add node if it's not a constant and doesn't already exist in the
       // tape.
-      if (arg != nullptr && arg->type != ExpressionType::kConstant) {
+      if (arg->type != ExpressionType::kConstant) {
         // Once the number of node visitations equals the number of
         // duplications (the counter hits zero), add it to the stack. Note
         // that this means the node is only enqueued once.
@@ -70,19 +74,13 @@ ExpressionGraph::ExpressionGraph(Variable& root) {
 void ExpressionGraph::Update() {
   // Traverse the BFS list backward from child to parent and update the value of
   // each node.
-  for (auto it = m_list.rbegin(); it != m_list.rend(); ++it) {
+  for (auto it = m_valueList.rbegin(); it != m_valueList.rend(); ++it) {
     auto& node = *it;
 
     auto& lhs = node->args[0];
     auto& rhs = node->args[1];
 
-    if (lhs != nullptr) {
-      if (rhs != nullptr) {
-        node->value = node->valueFunc(lhs->value, rhs->value);
-      } else {
-        node->value = node->valueFunc(lhs->value, 0.0);
-      }
-    }
+    node->value = node->valueFunc(lhs->value, rhs->value);
   }
 }
 
@@ -98,27 +96,23 @@ VectorXvar ExpressionGraph::GenerateGradientTree(Eigen::Ref<VectorXvar> wrt) {
   grad.fill(Variable{});
 
   // Zero adjoints. The root node's adjoint is 1.0 as df/df is always 1.
-  for (auto col : m_list) {
-    col->adjointExpr = nullptr;
+  for (auto col : m_adjointList) {
+    col->adjointExpr = Zero();
   }
-  m_list[0]->adjointExpr = MakeConstant(1.0);
+  m_adjointList[0]->adjointExpr = MakeConstant(1.0);
 
   // df/dx = (df/dy)(dy/dx). The adjoint of x is equal to the adjoint of y
   // multiplied by dy/dx. If there are multiple "paths" from the root node to
   // variable; the variable's adjoint is the sum of each path's adjoint
   // contribution.
-  for (auto col : m_list) {
+  for (auto col : m_adjointList) {
     auto& lhs = col->args[0];
     auto& rhs = col->args[1];
 
-    if (lhs != nullptr) {
-      lhs->adjointExpr =
-          lhs->adjointExpr + col->gradientFuncs[0](lhs, rhs, col->adjointExpr);
-      if (rhs != nullptr) {
-        rhs->adjointExpr = rhs->adjointExpr +
-                           col->gradientFuncs[1](lhs, rhs, col->adjointExpr);
-      }
-    }
+    lhs->adjointExpr =
+        lhs->adjointExpr + col->gradientFuncs[0](lhs, rhs, col->adjointExpr);
+    rhs->adjointExpr =
+        rhs->adjointExpr + col->gradientFuncs[1](lhs, rhs, col->adjointExpr);
 
     // If variable is a leaf node, assign its adjoint to the gradient.
     if (col->row != -1) {

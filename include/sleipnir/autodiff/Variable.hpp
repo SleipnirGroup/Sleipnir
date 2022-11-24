@@ -17,7 +17,7 @@ namespace sleipnir::autodiff {
 class SLEIPNIR_DLLEXPORT Variable {
  public:
   /// The expression node.
-  IntrusiveSharedPtr<Expression> expr;
+  IntrusiveSharedPtr<Expression> expr = Zero();
 
   /**
    * Constructs an uninitialized Variable.
