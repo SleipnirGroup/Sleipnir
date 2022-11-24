@@ -244,6 +244,30 @@ SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator+(
       },
       lhs, rhs);
 }
+
+SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression>& operator+=(
+    IntrusiveSharedPtr<Expression>& lhs, double rhs) {
+  if (rhs == 0.0) {
+    return lhs;
+  }
+
+  return lhs += MakeConstant(rhs);
+}
+
+SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression>& operator+=(
+    IntrusiveSharedPtr<Expression>& lhs,
+    const IntrusiveSharedPtr<Expression>& rhs) {
+  if (lhs == Zero()) {
+    lhs = rhs;
+  } else if (rhs == Zero()) {
+    return lhs;
+  } else {
+    lhs = lhs + rhs;
+  }
+
+  return lhs;
+}
+
 SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator-(
     double lhs, const IntrusiveSharedPtr<Expression>& rhs) {
   if (lhs == 0.0) {
