@@ -205,7 +205,9 @@ if (BUILD_TESTING)
                         fmt
                         GTest::gtest
                         GTest::gtest_main)
-  gtest_discover_tests(SleipnirTest)
+  if (NOT CMAKE_TOOLCHAIN_FILE)
+    gtest_discover_tests(SleipnirTest)
+  endif()
 endif()
 
 # Build examples and example tests
@@ -246,6 +248,8 @@ foreach(example ${EXAMPLES})
                           fmt
                           GTest::gtest
                           GTest::gtest_main)
-    gtest_discover_tests(${example}Test)
+    if (NOT CMAKE_TOOLCHAIN_FILE)
+      gtest_discover_tests(${example}Test)
+    endif()
   endif()
 endforeach()

@@ -4,24 +4,8 @@
 #include <cmath>
 #include <fstream>
 
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-#endif  // defined(__GNUC__) && !defined(__clang__)
 #include <Eigen/Core>
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC diagnostic pop
-#endif  // defined(__GNUC__) && !defined(__clang__)
-
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Warray-bounds"
-#endif  // defined(__GNUC__) && !defined(__clang__)
 #include <Eigen/QR>
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC diagnostic pop
-#endif  // defined(__GNUC__) && !defined(__clang__)
-
 #include <fmt/core.h>
 #include <gtest/gtest.h>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
