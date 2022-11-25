@@ -12,18 +12,18 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: windows-2022
-            artifact-name: Windows
+          - artifact-name: Windows
+            cmake-config-env-vars:
+            os: windows-2022
             target: ALL_BUILD
+          - artifact-name: Linux
             cmake-config-env-vars:
-          - os: ubuntu-22.04
-            artifact-name: Linux
+            os: macOS-11
             target: all
-            cmake-config-env-vars:
-          - os: macOS-11
-            artifact-name: macOS
-            target: all
+          - artifact-name: macOS
             cmake-config-env-vars: CFLAGS="$CFLAGS -arch x86_64 -arch arm64" CXXFLAGS="$CXXFLAGS -arch x86_64 -arch arm64"
+            os: macOS-11
+            target: all
 
     name: "${{ matrix.artifact-name }}"
     runs-on: ${{ matrix.os }}
@@ -48,6 +48,35 @@ jobs:
       - name: test
         working-directory: build
         run: ctest -C RelWithDebInfo --output-on-failure
+
+      - name: install
+        run: cmake --install build --config RelWithDebInfo --prefix pkg
+
+      - uses: actions/upload-artifact@v3.1.1
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: pkg
+
+  build-cross:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - artifact-name: roboRIO
+            container: wpilib/roborio-cross-ubuntu:2023-22.04
+            toolchain: /usr/local/toolchain-config.cmake
+
+    name: "${{ matrix.artifact-name }}"
+    runs-on: ubuntu-22.04
+    container: ${{ matrix.container }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: configure
+        run: cmake -B build -S . --toolchain ${{ matrix.toolchain }}
+
+      - name: build
+        run: cmake --build build --config RelWithDebInfo --parallel $(nproc)
 
       - name: install
         run: cmake --install build --config RelWithDebInfo --prefix pkg
