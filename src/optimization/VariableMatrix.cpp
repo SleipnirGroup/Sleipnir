@@ -490,7 +490,7 @@ VariableMatrix log10(const VariableMatrix& x) {
 }
 
 VariableMatrix pow(double base, const VariableMatrix& power) {
-  VariableMatrix result{1, 1};
+  VariableMatrix result{power.Rows(), power.Cols()};
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
