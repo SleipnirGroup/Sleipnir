@@ -6,20 +6,18 @@
 
 #include <Eigen/SparseCore>
 
-#include "Jacobian.hpp"
 #include "sleipnir/SymbolExports.hpp"
-#include "sleipnir/autodiff/Expression.hpp"
-#include "sleipnir/autodiff/ExpressionGraph.hpp"
+#include "sleipnir/autodiff/Jacobian.hpp"
 #include "sleipnir/autodiff/Profiler.hpp"
 #include "sleipnir/autodiff/Variable.hpp"
 
 namespace sleipnir::autodiff {
 
 /**
- * This class calculates the Jacobian of a vector of variables with respect to a
- * vector of variables.
+ * This class calculates the gradient of a a variable with respect to a vector
+ * of variables.
  *
- * The Jacobian is only recomputed if the variable expression is quadratic or
+ * The gradient is only recomputed if the variable expression is quadratic or
  * higher order.
  */
 class SLEIPNIR_DLLEXPORT Gradient {

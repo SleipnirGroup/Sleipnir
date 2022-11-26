@@ -2,8 +2,6 @@
 
 #include "sleipnir/autodiff/Gradient.hpp"
 
-#include "sleipnir/IntrusiveSharedPtr.hpp"
-
 using namespace sleipnir::autodiff;
 
 Gradient::Gradient(Variable variable, Variable wrt) noexcept

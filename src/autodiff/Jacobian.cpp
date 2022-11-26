@@ -2,8 +2,6 @@
 
 #include "sleipnir/autodiff/Jacobian.hpp"
 
-#include "sleipnir/autodiff/Gradient.hpp"
-
 using namespace sleipnir::autodiff;
 
 Jacobian::Jacobian(VectorXvar variables, VectorXvar wrt) noexcept
