@@ -9,7 +9,7 @@ using namespace sleipnir::autodiff;
 Gradient::Gradient(Variable variable, Variable wrt) noexcept
     : Gradient{std::move(variable), MapVectorXvar{&wrt, 1}} {}
 
-Gradient::Gradient(Variable variable, Eigen::Ref<VectorXvar> wrt) noexcept 
+Gradient::Gradient(Variable variable, Eigen::Ref<VectorXvar> wrt) noexcept
     : m_jacobian{Jacobian(MapVectorXvar(&variable, 1), std::move(wrt))} {}
 
 const Eigen::SparseVector<double>& Gradient::Calculate() {
