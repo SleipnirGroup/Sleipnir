@@ -7,18 +7,17 @@
 #include <Eigen/SparseCore>
 
 #include "sleipnir/SymbolExports.hpp"
-#include "sleipnir/autodiff/Expression.hpp"
-#include "sleipnir/autodiff/ExpressionGraph.hpp"
+#include "sleipnir/autodiff/Jacobian.hpp"
 #include "sleipnir/autodiff/Profiler.hpp"
 #include "sleipnir/autodiff/Variable.hpp"
 
 namespace sleipnir::autodiff {
 
 /**
- * This class calculates the Jacobian of a vector of variables with respect to a
- * vector of variables.
+ * This class calculates the gradient of a a variable with respect to a vector
+ * of variables.
  *
- * The Jacobian is only recomputed if the variable expression is quadratic or
+ * The gradient is only recomputed if the variable expression is quadratic or
  * higher order.
  */
 class SLEIPNIR_DLLEXPORT Gradient {
@@ -55,20 +54,9 @@ class SLEIPNIR_DLLEXPORT Gradient {
   Profiler& GetProfiler();
 
  private:
-  Variable m_variable;
-  VectorXvar m_wrt;
-
-  ExpressionGraph m_graph;
-
   Eigen::SparseVector<double> m_g;
 
-  Profiler m_profiler;
-
-  /**
-   * Computes the gradient of the expression. Given the expression f and
-   * variable x, the derivative df/dx is denoted the "adjoint" of x.
-   */
-  void Compute();
+  Jacobian m_jacobian;
 };
 
 }  // namespace sleipnir::autodiff
