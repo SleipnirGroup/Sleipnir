@@ -11,6 +11,7 @@
 #include "sleipnir/autodiff/ExpressionGraph.hpp"
 #include "sleipnir/autodiff/Profiler.hpp"
 #include "sleipnir/autodiff/Variable.hpp"
+#include "Jacobian.hpp"
 
 namespace sleipnir::autodiff {
 
@@ -55,20 +56,9 @@ class SLEIPNIR_DLLEXPORT Gradient {
   Profiler& GetProfiler();
 
  private:
-  Variable m_variable;
-  VectorXvar m_wrt;
-
-  ExpressionGraph m_graph;
-
   Eigen::SparseVector<double> m_g;
 
-  Profiler m_profiler;
-
-  /**
-   * Computes the gradient of the expression. Given the expression f and
-   * variable x, the derivative df/dx is denoted the "adjoint" of x.
-   */
-  void Compute();
+  Jacobian m_jacobian;
 };
 
 }  // namespace sleipnir::autodiff
