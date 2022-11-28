@@ -265,11 +265,23 @@ TEST(CartPoleProblemTest, DirectTranscription) {
   EXPECT_EQ(sleipnir::SolverExitCondition::kOk, status.exitCondition);
 #endif
 
+  // Log states from input-replay for offline viewing
+  std::ofstream inputReplayStates{"Cart-pole input-replay states.csv"};
+  if (inputReplayStates.is_open()) {
+    inputReplayStates << "Time (s),Cart position (m),Pole angle (rad),"
+                         "Cart velocity (m/s),Pole angular velocity (rad/s)\n";
+  }
+
   // Verify solution
   Eigen::Matrix<double, 4, 1> x{0.0, 0.0, 0.0, 0.0};
   Eigen::Matrix<double, 1, 1> u{0.0};
   for (int k = 0; k < N; ++k) {
     u = U.Col(k).Value();
+
+    if (inputReplayStates.is_open()) {
+      inputReplayStates << fmt::format("{},{},{},{},{}\n", k * dt.value(), x(0),
+                                       x(1), x(2), x(3));
+    }
 
     // Verify state
     // FIXME
