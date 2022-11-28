@@ -49,6 +49,22 @@ class VariableBlock {
   VariableBlock<Mat>& operator=(double value);
 
   /**
+   * Assigns a VariableBlock to the block.
+   */
+  VariableBlock<Mat>& operator=(VariableBlock<Mat>& values) {
+    if (this == &values) {
+      return *this;
+    }
+
+    for (int row = 0; row < m_blockRows; ++row) {
+      for (int col = 0; col < m_blockCols; ++col) {
+        Autodiff(row, col) = std::move(values.Autodiff(row, col));
+      }
+    }
+    return *this;
+  }
+
+  /**
    * Assigns an Eigen matrix of doubles to the block.
    */
   template <int _Rows, int _Cols, int... Args>
