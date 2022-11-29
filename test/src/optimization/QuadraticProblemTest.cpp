@@ -62,7 +62,7 @@ TEST(QuadraticProblemTest, Unconstrained2d) {
     x(0) = 1.0;
     x(1) = 2.0;
 
-    problem.Minimize(x.Transpose() * x);
+    problem.Minimize(x.T() * x);
 
     sleipnir::SolverConfig config;
     config.diagnostics = true;
@@ -155,7 +155,7 @@ TEST(QuadraticProblemTest, EqualityConstrained) {
     x(0) = 1.0;
     x(1) = 2.0;
 
-    problem.Minimize(x.Transpose() * x);
+    problem.Minimize(x.T() * x);
 
     problem.SubjectTo(x == Eigen::Matrix<double, 2, 1>{{3.0, 3.0}});
 
