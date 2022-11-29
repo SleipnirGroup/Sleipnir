@@ -239,7 +239,7 @@ TEST(CartPoleProblemTest, DirectTranscription) {
   // Minimize sum squared inputs
   sleipnir::VariableMatrix J = 0.0;
   for (int k = 0; k < N; ++k) {
-    J += U.Col(k).Transpose() * U.Col(k);
+    J += U.Col(k).T() * U.Col(k);
   }
   problem.Minimize(J);
 

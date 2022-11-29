@@ -551,7 +551,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
   /**
    * Returns the transpose of the variable matrix.
    */
-  VariableMatrix Transpose() const;
+  VariableMatrix T() const;
 
   /**
    * Returns number of rows in the matrix.

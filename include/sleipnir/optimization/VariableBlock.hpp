@@ -274,7 +274,7 @@ class VariableBlock {
   /**
    * Returns the transpose of the variable matrix.
    */
-  Mat Transpose() const;
+  Mat T() const;
 
   /**
    * Returns number of rows in the matrix.

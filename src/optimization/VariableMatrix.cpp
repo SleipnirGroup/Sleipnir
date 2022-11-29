@@ -295,7 +295,7 @@ SLEIPNIR_DLLEXPORT VariableMatrix operator-(const VariableMatrix& lhs) {
   return result;
 }
 
-VariableMatrix VariableMatrix::Transpose() const {
+VariableMatrix VariableMatrix::T() const {
   VariableMatrix result{Cols(), Rows()};
 
   for (int row = 0; row < Rows(); ++row) {

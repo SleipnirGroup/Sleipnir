@@ -166,7 +166,7 @@ VariableBlock<Mat>& VariableBlock<Mat>::operator-=(
 }
 
 template <typename Mat>
-Mat VariableBlock<Mat>::Transpose() const {
+Mat VariableBlock<Mat>::T() const {
   Mat result{Cols(), Rows()};
 
   for (int row = 0; row < Rows(); ++row) {
