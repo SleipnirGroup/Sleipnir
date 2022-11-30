@@ -10,7 +10,7 @@
 #include "sleipnir/autodiff/Profiler.hpp"
 #include "sleipnir/autodiff/Variable.hpp"
 
-namespace sleipnir::autodiff {
+namespace sleipnir {
 
 /**
  * This class calculates the Hessian of a variable with respect to a vector of
@@ -48,4 +48,4 @@ class SLEIPNIR_DLLEXPORT Hessian {
   Jacobian m_jacobian;
 };
 
-}  // namespace sleipnir::autodiff
+}  // namespace sleipnir

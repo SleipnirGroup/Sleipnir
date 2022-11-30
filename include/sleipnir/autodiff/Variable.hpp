@@ -9,7 +9,7 @@
 #include "sleipnir/SymbolExports.hpp"
 #include "sleipnir/autodiff/Expression.hpp"
 
-namespace sleipnir::autodiff {
+namespace sleipnir {
 
 /**
  * An autodiff variable pointing to an expression node.
@@ -417,7 +417,7 @@ class SLEIPNIR_DLLEXPORT Variable {
   void Update();
 };
 
-using VectorXvar = Eigen::Vector<sleipnir::autodiff::Variable, Eigen::Dynamic>;
+using VectorXvar = Eigen::Vector<Variable, Eigen::Dynamic>;
 using MapVectorXvar = Eigen::Map<VectorXvar>;
 
 /**
@@ -702,4 +702,4 @@ SLEIPNIR_DLLEXPORT Variable tanh(double x);
  */
 SLEIPNIR_DLLEXPORT Variable tanh(const Variable& x);
 
-}  // namespace sleipnir::autodiff
+}  // namespace sleipnir

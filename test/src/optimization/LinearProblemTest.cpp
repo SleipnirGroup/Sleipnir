@@ -25,12 +25,9 @@ TEST(LinearProblemTest, Maximize) {
 
   auto status = problem.Solve(config);
 
-  EXPECT_EQ(sleipnir::autodiff::ExpressionType::kLinear,
-            status.costFunctionType);
-  EXPECT_EQ(sleipnir::autodiff::ExpressionType::kNone,
-            status.equalityConstraintType);
-  EXPECT_EQ(sleipnir::autodiff::ExpressionType::kLinear,
-            status.inequalityConstraintType);
+  EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.costFunctionType);
+  EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
+  EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.inequalityConstraintType);
   EXPECT_EQ(sleipnir::SolverExitCondition::kOk, status.exitCondition);
 
   EXPECT_NEAR(375.0, x.Value(0), 1e-6);

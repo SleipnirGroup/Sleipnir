@@ -12,8 +12,6 @@
 
 namespace sleipnir {
 
-class SLEIPNIR_DLLEXPORT Mat;
-
 /**
  * A submatrix of autodiff variables with reference semantics.
  *
@@ -99,7 +97,7 @@ class VariableBlock {
    */
   template <int _Rows, int _Cols, int... Args>
   VariableBlock<Mat>& operator=(
-      const Eigen::Matrix<autodiff::Variable, _Rows, _Cols, Args...>& values) {
+      const Eigen::Matrix<Variable, _Rows, _Cols, Args...>& values) {
     for (int row = 0; row < m_blockRows; ++row) {
       for (int col = 0; col < m_blockCols; ++col) {
         Autodiff(row, col) = values(row, col);
@@ -113,7 +111,7 @@ class VariableBlock {
    */
   template <int _Rows, int _Cols, int... Args>
   VariableBlock<Mat>& operator=(
-      Eigen::Matrix<autodiff::Variable, _Rows, _Cols, Args...>&& values) {
+      Eigen::Matrix<Variable, _Rows, _Cols, Args...>&& values) {
     for (int row = 0; row < m_blockRows; ++row) {
       for (int col = 0; col < m_blockCols; ++col) {
         Autodiff(row, col) = std::move(values(row, col));
@@ -309,12 +307,12 @@ class VariableBlock {
   /**
    * Returns the autodiff variable backing a matrix entry.
    */
-  autodiff::Variable& Autodiff(int row, int col);
+  Variable& Autodiff(int row, int col);
 
   /**
    * Returns the autodiff variable backing a matrix entry.
    */
-  const autodiff::Variable& Autodiff(int row, int col) const;
+  const Variable& Autodiff(int row, int col) const;
 
  private:
   Mat* m_mat = nullptr;
@@ -509,4 +507,4 @@ Mat tanh(const VariableBlock<Mat>& x);
 
 }  // namespace sleipnir
 
-#include "sleipnir/optimization/VariableBlock.inc"
+#include "sleipnir/autodiff/VariableBlock.inc"

@@ -254,12 +254,10 @@ TEST(CartPoleProblemTest, DirectTranscription) {
 
   auto status = problem.Solve(config);
 
-  EXPECT_EQ(sleipnir::autodiff::ExpressionType::kQuadratic,
-            status.costFunctionType);
-  EXPECT_EQ(sleipnir::autodiff::ExpressionType::kNonlinear,
+  EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
+  EXPECT_EQ(sleipnir::ExpressionType::kNonlinear,
             status.equalityConstraintType);
-  EXPECT_EQ(sleipnir::autodiff::ExpressionType::kLinear,
-            status.inequalityConstraintType);
+  EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.inequalityConstraintType);
   // FIXME
 #if 0
   EXPECT_EQ(sleipnir::SolverExitCondition::kOk, status.exitCondition);

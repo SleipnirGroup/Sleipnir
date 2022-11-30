@@ -32,12 +32,9 @@ TEST(NonlinearProblemTest, Quartic) {
 
   auto status = problem.Solve(config);
 
-  EXPECT_EQ(sleipnir::autodiff::ExpressionType::kNonlinear,
-            status.costFunctionType);
-  EXPECT_EQ(sleipnir::autodiff::ExpressionType::kNone,
-            status.equalityConstraintType);
-  EXPECT_EQ(sleipnir::autodiff::ExpressionType::kLinear,
-            status.inequalityConstraintType);
+  EXPECT_EQ(sleipnir::ExpressionType::kNonlinear, status.costFunctionType);
+  EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
+  EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.inequalityConstraintType);
   EXPECT_EQ(sleipnir::SolverExitCondition::kOk, status.exitCondition);
 
   EXPECT_NEAR(1.0, x.Value(0), 1e-6);
@@ -62,11 +59,9 @@ TEST(NonlinearProblemTest, RosenbrockWithCubicAndLineConstraint) {
 
       auto status = problem.Solve();
 
-      EXPECT_EQ(sleipnir::autodiff::ExpressionType::kNonlinear,
-                status.costFunctionType);
-      EXPECT_EQ(sleipnir::autodiff::ExpressionType::kNone,
-                status.equalityConstraintType);
-      EXPECT_EQ(sleipnir::autodiff::ExpressionType::kNonlinear,
+      EXPECT_EQ(sleipnir::ExpressionType::kNonlinear, status.costFunctionType);
+      EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
+      EXPECT_EQ(sleipnir::ExpressionType::kNonlinear,
                 status.inequalityConstraintType);
       EXPECT_EQ(sleipnir::SolverExitCondition::kOk, status.exitCondition);
 
@@ -104,11 +99,9 @@ TEST(NonlinearProblemTest, RosenbrockWithDiskConstraint) {
 
       auto status = problem.Solve();
 
-      EXPECT_EQ(sleipnir::autodiff::ExpressionType::kNonlinear,
-                status.costFunctionType);
-      EXPECT_EQ(sleipnir::autodiff::ExpressionType::kNone,
-                status.equalityConstraintType);
-      EXPECT_EQ(sleipnir::autodiff::ExpressionType::kQuadratic,
+      EXPECT_EQ(sleipnir::ExpressionType::kNonlinear, status.costFunctionType);
+      EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
+      EXPECT_EQ(sleipnir::ExpressionType::kQuadratic,
                 status.inequalityConstraintType);
       EXPECT_EQ(sleipnir::SolverExitCondition::kOk, status.exitCondition);
 

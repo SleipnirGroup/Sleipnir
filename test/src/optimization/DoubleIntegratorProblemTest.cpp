@@ -73,12 +73,9 @@ TEST(DoubleIntegratorProblemTest, MinimumTime) {
 
   auto status = problem.Solve(config);
 
-  EXPECT_EQ(sleipnir::autodiff::ExpressionType::kQuadratic,
-            status.costFunctionType);
-  EXPECT_EQ(sleipnir::autodiff::ExpressionType::kLinear,
-            status.equalityConstraintType);
-  EXPECT_EQ(sleipnir::autodiff::ExpressionType::kLinear,
-            status.inequalityConstraintType);
+  EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
+  EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.equalityConstraintType);
+  EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.inequalityConstraintType);
   EXPECT_EQ(sleipnir::SolverExitCondition::kOk, status.exitCondition);
 
   Eigen::Matrix<double, 2, 2> A{{1.0, dt.value()}, {0.0, 1.0}};

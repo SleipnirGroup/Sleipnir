@@ -12,7 +12,7 @@
 #include "sleipnir/autodiff/Profiler.hpp"
 #include "sleipnir/autodiff/Variable.hpp"
 
-namespace sleipnir::autodiff {
+namespace sleipnir {
 
 /**
  * This class calculates the Jacobian of a vector of variables with respect to a
@@ -64,4 +64,4 @@ class SLEIPNIR_DLLEXPORT Jacobian {
   Profiler m_profiler;
 };
 
-}  // namespace sleipnir::autodiff
+}  // namespace sleipnir

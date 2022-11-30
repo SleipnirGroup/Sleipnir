@@ -10,7 +10,7 @@
 
 #include "sleipnir/SymbolExports.hpp"
 
-namespace sleipnir::autodiff {
+namespace sleipnir {
 
 /**
  * This class implements a pool memory resource.
@@ -177,4 +177,4 @@ PoolAllocator<T, BlocksPerChunk> GlobalPoolAllocator() {
   return PoolAllocator<T, BlocksPerChunk>{&pool};
 }
 
-}  // namespace sleipnir::autodiff
+}  // namespace sleipnir

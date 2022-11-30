@@ -22,11 +22,9 @@ TEST(SolverExitConditionTest, TooFewDOFs) {
 
   auto status = problem.Solve(config);
 
-  EXPECT_EQ(sleipnir::autodiff::ExpressionType::kNone, status.costFunctionType);
-  EXPECT_EQ(sleipnir::autodiff::ExpressionType::kLinear,
-            status.equalityConstraintType);
-  EXPECT_EQ(sleipnir::autodiff::ExpressionType::kNone,
-            status.inequalityConstraintType);
+  EXPECT_EQ(sleipnir::ExpressionType::kNone, status.costFunctionType);
+  EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.equalityConstraintType);
+  EXPECT_EQ(sleipnir::ExpressionType::kNone, status.inequalityConstraintType);
   EXPECT_EQ(sleipnir::SolverExitCondition::kTooFewDOFs, status.exitCondition);
 }
 
@@ -48,12 +46,9 @@ TEST(SolverExitConditionTest, LocallyInfeasible) {
 
     auto status = problem.Solve(config);
 
-    EXPECT_EQ(sleipnir::autodiff::ExpressionType::kNone,
-              status.costFunctionType);
-    EXPECT_EQ(sleipnir::autodiff::ExpressionType::kLinear,
-              status.equalityConstraintType);
-    EXPECT_EQ(sleipnir::autodiff::ExpressionType::kNone,
-              status.inequalityConstraintType);
+    EXPECT_EQ(sleipnir::ExpressionType::kNone, status.costFunctionType);
+    EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.equalityConstraintType);
+    EXPECT_EQ(sleipnir::ExpressionType::kNone, status.inequalityConstraintType);
     EXPECT_EQ(sleipnir::SolverExitCondition::kLocallyInfeasible,
               status.exitCondition);
   }
@@ -75,11 +70,9 @@ TEST(SolverExitConditionTest, LocallyInfeasible) {
 
     auto status = problem.Solve(config);
 
-    EXPECT_EQ(sleipnir::autodiff::ExpressionType::kNone,
-              status.costFunctionType);
-    EXPECT_EQ(sleipnir::autodiff::ExpressionType::kNone,
-              status.equalityConstraintType);
-    EXPECT_EQ(sleipnir::autodiff::ExpressionType::kLinear,
+    EXPECT_EQ(sleipnir::ExpressionType::kNone, status.costFunctionType);
+    EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
+    EXPECT_EQ(sleipnir::ExpressionType::kLinear,
               status.inequalityConstraintType);
     EXPECT_EQ(sleipnir::SolverExitCondition::kLocallyInfeasible,
               status.exitCondition);
@@ -99,12 +92,9 @@ TEST(SolverExitConditionTest, MaxIterations) {
 
   auto status = problem.Solve(config);
 
-  EXPECT_EQ(sleipnir::autodiff::ExpressionType::kLinear,
-            status.costFunctionType);
-  EXPECT_EQ(sleipnir::autodiff::ExpressionType::kNone,
-            status.equalityConstraintType);
-  EXPECT_EQ(sleipnir::autodiff::ExpressionType::kNone,
-            status.inequalityConstraintType);
+  EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.costFunctionType);
+  EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
+  EXPECT_EQ(sleipnir::ExpressionType::kNone, status.inequalityConstraintType);
   EXPECT_EQ(sleipnir::SolverExitCondition::kMaxIterations,
             status.exitCondition);
 }
@@ -124,11 +114,8 @@ TEST(SolverExitConditionTest, Timeout) {
 
   auto status = problem.Solve(config);
 
-  EXPECT_EQ(sleipnir::autodiff::ExpressionType::kLinear,
-            status.costFunctionType);
-  EXPECT_EQ(sleipnir::autodiff::ExpressionType::kNone,
-            status.equalityConstraintType);
-  EXPECT_EQ(sleipnir::autodiff::ExpressionType::kNone,
-            status.inequalityConstraintType);
+  EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.costFunctionType);
+  EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
+  EXPECT_EQ(sleipnir::ExpressionType::kNone, status.inequalityConstraintType);
   EXPECT_EQ(sleipnir::SolverExitCondition::kTimeout, status.exitCondition);
 }

@@ -16,9 +16,9 @@ namespace {
  * the form lhs = rhs or lhs ≥ rhs and converts them to lhs - rhs = 0 or
  * lhs - rhs ≥ 0.
  */
-std::vector<autodiff::Variable> MakeConstraints(const VariableMatrix& lhs,
-                                                const VariableMatrix& rhs) {
-  std::vector<autodiff::Variable> constraints;
+std::vector<Variable> MakeConstraints(const VariableMatrix& lhs,
+                                      const VariableMatrix& rhs) {
+  std::vector<Variable> constraints;
 
   if (lhs.Rows() == 1 && lhs.Cols() == 1) {
     constraints.reserve(rhs.Rows() * rhs.Cols());

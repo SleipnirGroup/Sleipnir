@@ -13,15 +13,13 @@ namespace sleipnir {
  */
 struct SolverStatus {
   /// The cost function type detected by the solver.
-  autodiff::ExpressionType costFunctionType = autodiff::ExpressionType::kNone;
+  ExpressionType costFunctionType = ExpressionType::kNone;
 
   /// The equality constraint type detected by the solver.
-  autodiff::ExpressionType equalityConstraintType =
-      autodiff::ExpressionType::kNone;
+  ExpressionType equalityConstraintType = ExpressionType::kNone;
 
   /// The inequality constraint type detected by the solver.
-  autodiff::ExpressionType inequalityConstraintType =
-      autodiff::ExpressionType::kNone;
+  ExpressionType inequalityConstraintType = ExpressionType::kNone;
 
   /// The solver's exit condition.
   SolverExitCondition exitCondition = SolverExitCondition::kOk;
