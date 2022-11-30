@@ -16,12 +16,9 @@ TEST(QuadraticProblemTest, Unconstrained1d) {
 
   auto status = problem.Solve(config);
 
-  EXPECT_EQ(sleipnir::autodiff::ExpressionType::kQuadratic,
-            status.costFunctionType);
-  EXPECT_EQ(sleipnir::autodiff::ExpressionType::kNone,
-            status.equalityConstraintType);
-  EXPECT_EQ(sleipnir::autodiff::ExpressionType::kNone,
-            status.inequalityConstraintType);
+  EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
+  EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
+  EXPECT_EQ(sleipnir::ExpressionType::kNone, status.inequalityConstraintType);
   EXPECT_EQ(sleipnir::SolverExitCondition::kOk, status.exitCondition);
 
   EXPECT_NEAR(3.0, x.Value(0), 1e-6);
@@ -43,12 +40,9 @@ TEST(QuadraticProblemTest, Unconstrained2d) {
 
     auto status = problem.Solve(config);
 
-    EXPECT_EQ(sleipnir::autodiff::ExpressionType::kQuadratic,
-              status.costFunctionType);
-    EXPECT_EQ(sleipnir::autodiff::ExpressionType::kNone,
-              status.equalityConstraintType);
-    EXPECT_EQ(sleipnir::autodiff::ExpressionType::kNone,
-              status.inequalityConstraintType);
+    EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
+    EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
+    EXPECT_EQ(sleipnir::ExpressionType::kNone, status.inequalityConstraintType);
     EXPECT_EQ(sleipnir::SolverExitCondition::kOk, status.exitCondition);
 
     EXPECT_NEAR(0.0, x.Value(0), 1e-6);
@@ -69,12 +63,9 @@ TEST(QuadraticProblemTest, Unconstrained2d) {
 
     auto status = problem.Solve(config);
 
-    EXPECT_EQ(sleipnir::autodiff::ExpressionType::kQuadratic,
-              status.costFunctionType);
-    EXPECT_EQ(sleipnir::autodiff::ExpressionType::kNone,
-              status.equalityConstraintType);
-    EXPECT_EQ(sleipnir::autodiff::ExpressionType::kNone,
-              status.inequalityConstraintType);
+    EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
+    EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
+    EXPECT_EQ(sleipnir::ExpressionType::kNone, status.inequalityConstraintType);
     EXPECT_EQ(sleipnir::SolverExitCondition::kOk, status.exitCondition);
 
     EXPECT_NEAR(0.0, x.Value(0), 1e-6);
@@ -136,12 +127,9 @@ TEST(QuadraticProblemTest, EqualityConstrained) {
 
     auto status = problem.Solve(config);
 
-    EXPECT_EQ(sleipnir::autodiff::ExpressionType::kQuadratic,
-              status.costFunctionType);
-    EXPECT_EQ(sleipnir::autodiff::ExpressionType::kLinear,
-              status.equalityConstraintType);
-    EXPECT_EQ(sleipnir::autodiff::ExpressionType::kNone,
-              status.inequalityConstraintType);
+    EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
+    EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.equalityConstraintType);
+    EXPECT_EQ(sleipnir::ExpressionType::kNone, status.inequalityConstraintType);
     EXPECT_EQ(sleipnir::SolverExitCondition::kOk, status.exitCondition);
 
     EXPECT_NEAR(18.0, x.Value(0), 1e-5);
@@ -164,12 +152,9 @@ TEST(QuadraticProblemTest, EqualityConstrained) {
 
     auto status = problem.Solve(config);
 
-    EXPECT_EQ(sleipnir::autodiff::ExpressionType::kQuadratic,
-              status.costFunctionType);
-    EXPECT_EQ(sleipnir::autodiff::ExpressionType::kLinear,
-              status.equalityConstraintType);
-    EXPECT_EQ(sleipnir::autodiff::ExpressionType::kNone,
-              status.inequalityConstraintType);
+    EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
+    EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.equalityConstraintType);
+    EXPECT_EQ(sleipnir::ExpressionType::kNone, status.inequalityConstraintType);
     EXPECT_EQ(sleipnir::SolverExitCondition::kOk, status.exitCondition);
 
     EXPECT_NEAR(3.0, x.Value(0), 1e-5);

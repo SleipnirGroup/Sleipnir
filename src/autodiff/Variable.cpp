@@ -11,7 +11,7 @@
 #include "sleipnir/SymbolExports.hpp"
 #include "sleipnir/autodiff/ExpressionGraph.hpp"
 
-namespace sleipnir::autodiff {
+namespace sleipnir {
 
 Variable::Variable(double value)
     : expr{AllocateIntrusiveShared<Expression>(
@@ -242,7 +242,7 @@ void Variable::Update() {
 }
 
 Variable abs(double x) {
-  return Variable{autodiff::abs(autodiff::MakeConstant(x))};
+  return Variable{sleipnir::abs(MakeConstant(x))};
 }
 
 Variable abs(const Variable& x) {
@@ -250,7 +250,7 @@ Variable abs(const Variable& x) {
 }
 
 Variable acos(double x) {
-  return Variable{autodiff::acos(autodiff::MakeConstant(x))};
+  return Variable{sleipnir::cos(MakeConstant(x))};
 }
 
 Variable acos(const Variable& x) {
@@ -258,7 +258,7 @@ Variable acos(const Variable& x) {
 }
 
 Variable asin(double x) {
-  return Variable{autodiff::asin(autodiff::MakeConstant(x))};
+  return Variable{sleipnir::asin(MakeConstant(x))};
 }
 
 Variable asin(const Variable& x) {
@@ -266,7 +266,7 @@ Variable asin(const Variable& x) {
 }
 
 Variable atan(double x) {
-  return Variable{autodiff::atan(MakeConstant(x))};
+  return Variable{sleipnir::atan(MakeConstant(x))};
 }
 
 Variable atan(const Variable& x) {
@@ -274,11 +274,11 @@ Variable atan(const Variable& x) {
 }
 
 Variable atan2(double y, const Variable& x) {
-  return Variable{autodiff::atan2(MakeConstant(y), x.expr)};
+  return Variable{sleipnir::atan2(MakeConstant(y), x.expr)};
 }
 
 Variable atan2(const Variable& y, double x) {
-  return Variable{autodiff::atan2(y.expr, MakeConstant(x))};
+  return Variable{sleipnir::atan2(y.expr, MakeConstant(x))};
 }
 
 Variable atan2(const Variable& y, const Variable& x) {
@@ -286,7 +286,7 @@ Variable atan2(const Variable& y, const Variable& x) {
 }
 
 Variable cos(double x) {
-  return Variable{autodiff::cos(MakeConstant(x))};
+  return Variable{sleipnir::cos(MakeConstant(x))};
 }
 
 Variable cos(const Variable& x) {
@@ -294,7 +294,7 @@ Variable cos(const Variable& x) {
 }
 
 Variable cosh(double x) {
-  return Variable{autodiff::cosh(MakeConstant(x))};
+  return Variable{sleipnir::cosh(MakeConstant(x))};
 }
 
 Variable cosh(const Variable& x) {
@@ -302,7 +302,7 @@ Variable cosh(const Variable& x) {
 }
 
 Variable erf(double x) {
-  return Variable{autodiff::erf(MakeConstant(x))};
+  return Variable{sleipnir::erf(MakeConstant(x))};
 }
 
 Variable erf(const Variable& x) {
@@ -310,7 +310,7 @@ Variable erf(const Variable& x) {
 }
 
 Variable exp(double x) {
-  return Variable{autodiff::exp(MakeConstant(x))};
+  return Variable{sleipnir::exp(MakeConstant(x))};
 }
 
 Variable exp(const Variable& x) {
@@ -318,19 +318,19 @@ Variable exp(const Variable& x) {
 }
 
 Variable hypot(double x, const Variable& y) {
-  return Variable{autodiff::hypot(MakeConstant(x), y.expr)};
+  return Variable{sleipnir::hypot(MakeConstant(x), y.expr)};
 }
 
 Variable hypot(const Variable& x, double y) {
-  return Variable{autodiff::hypot(x.expr, MakeConstant(y))};
+  return Variable{sleipnir::hypot(x.expr, MakeConstant(y))};
 }
 
 Variable hypot(const Variable& x, const Variable& y) {
-  return Variable{hypot(x.expr, y.expr)};
+  return Variable{sleipnir::hypot(x.expr, y.expr)};
 }
 
 Variable log(double x) {
-  return Variable{autodiff::log(MakeConstant(x))};
+  return Variable{sleipnir::log(MakeConstant(x))};
 }
 
 Variable log(const Variable& x) {
@@ -338,7 +338,7 @@ Variable log(const Variable& x) {
 }
 
 Variable log10(double x) {
-  return Variable{autodiff::log10(MakeConstant(x))};
+  return Variable{sleipnir::log10(MakeConstant(x))};
 }
 
 Variable log10(const Variable& x) {
@@ -346,11 +346,11 @@ Variable log10(const Variable& x) {
 }
 
 Variable pow(double base, const Variable& power) {
-  return Variable{autodiff::pow(MakeConstant(base), power.expr)};
+  return Variable{sleipnir::pow(MakeConstant(base), power.expr)};
 }
 
 Variable pow(const Variable& base, double power) {
-  return Variable{autodiff::pow(base.expr, MakeConstant(power))};
+  return Variable{sleipnir::pow(base.expr, MakeConstant(power))};
 }
 
 Variable pow(const Variable& base, const Variable& power) {
@@ -358,7 +358,7 @@ Variable pow(const Variable& base, const Variable& power) {
 }
 
 Variable sin(double x) {
-  return Variable{autodiff::sin(MakeConstant(x))};
+  return Variable{sleipnir::sin(MakeConstant(x))};
 }
 
 Variable sin(const Variable& x) {
@@ -366,7 +366,7 @@ Variable sin(const Variable& x) {
 }
 
 Variable sinh(double x) {
-  return Variable{autodiff::sinh(MakeConstant(x))};
+  return Variable{sleipnir::sinh(MakeConstant(x))};
 }
 
 Variable sinh(const Variable& x) {
@@ -374,7 +374,7 @@ Variable sinh(const Variable& x) {
 }
 
 Variable sqrt(double x) {
-  return Variable{autodiff::sqrt(MakeConstant(x))};
+  return Variable{sleipnir::sqrt(MakeConstant(x))};
 }
 
 Variable sqrt(const Variable& x) {
@@ -382,7 +382,7 @@ Variable sqrt(const Variable& x) {
 }
 
 Variable tan(double x) {
-  return Variable{autodiff::tan(MakeConstant(x))};
+  return Variable{sleipnir::tan(MakeConstant(x))};
 }
 
 Variable tan(const Variable& x) {
@@ -390,11 +390,11 @@ Variable tan(const Variable& x) {
 }
 
 Variable tanh(double x) {
-  return Variable{autodiff::tanh(MakeConstant(x))};
+  return Variable{sleipnir::tanh(MakeConstant(x))};
 }
 
 Variable tanh(const Variable& x) {
   return Variable{tanh(x.expr)};
 }
 
-}  // namespace sleipnir::autodiff
+}  // namespace sleipnir

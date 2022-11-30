@@ -11,11 +11,9 @@ TEST(TrivialProblemTest, Empty) {
 
   auto status = problem.Solve(config);
 
-  EXPECT_EQ(sleipnir::autodiff::ExpressionType::kNone, status.costFunctionType);
-  EXPECT_EQ(sleipnir::autodiff::ExpressionType::kNone,
-            status.equalityConstraintType);
-  EXPECT_EQ(sleipnir::autodiff::ExpressionType::kNone,
-            status.inequalityConstraintType);
+  EXPECT_EQ(sleipnir::ExpressionType::kNone, status.costFunctionType);
+  EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
+  EXPECT_EQ(sleipnir::ExpressionType::kNone, status.inequalityConstraintType);
   EXPECT_EQ(sleipnir::SolverExitCondition::kOk, status.exitCondition);
 }
 
@@ -30,12 +28,9 @@ TEST(TrivialProblemTest, NoCostUnconstrained) {
 
     auto status = problem.Solve(config);
 
-    EXPECT_EQ(sleipnir::autodiff::ExpressionType::kNone,
-              status.costFunctionType);
-    EXPECT_EQ(sleipnir::autodiff::ExpressionType::kNone,
-              status.equalityConstraintType);
-    EXPECT_EQ(sleipnir::autodiff::ExpressionType::kNone,
-              status.inequalityConstraintType);
+    EXPECT_EQ(sleipnir::ExpressionType::kNone, status.costFunctionType);
+    EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
+    EXPECT_EQ(sleipnir::ExpressionType::kNone, status.inequalityConstraintType);
     EXPECT_EQ(sleipnir::SolverExitCondition::kOk, status.exitCondition);
 
     for (int row = 0; row < X.Rows(); ++row) {
@@ -56,12 +51,9 @@ TEST(TrivialProblemTest, NoCostUnconstrained) {
 
     auto status = problem.Solve(config);
 
-    EXPECT_EQ(sleipnir::autodiff::ExpressionType::kNone,
-              status.costFunctionType);
-    EXPECT_EQ(sleipnir::autodiff::ExpressionType::kNone,
-              status.equalityConstraintType);
-    EXPECT_EQ(sleipnir::autodiff::ExpressionType::kNone,
-              status.inequalityConstraintType);
+    EXPECT_EQ(sleipnir::ExpressionType::kNone, status.costFunctionType);
+    EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
+    EXPECT_EQ(sleipnir::ExpressionType::kNone, status.inequalityConstraintType);
     EXPECT_EQ(sleipnir::SolverExitCondition::kOk, status.exitCondition);
 
     for (int row = 0; row < X.Rows(); ++row) {

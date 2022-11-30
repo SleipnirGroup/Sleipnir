@@ -2,7 +2,7 @@
 
 #include "sleipnir/autodiff/Jacobian.hpp"
 
-using namespace sleipnir::autodiff;
+using namespace sleipnir;
 
 Jacobian::Jacobian(VectorXvar variables, VectorXvar wrt) noexcept
     : m_variables{std::move(variables)}, m_wrt{std::move(wrt)} {

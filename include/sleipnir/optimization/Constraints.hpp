@@ -6,7 +6,7 @@
 
 #include "sleipnir/SymbolExports.hpp"
 #include "sleipnir/autodiff/Variable.hpp"
-#include "sleipnir/optimization/VariableMatrix.hpp"
+#include "sleipnir/autodiff/VariableMatrix.hpp"
 
 namespace sleipnir {
 
@@ -15,7 +15,7 @@ namespace sleipnir {
  */
 struct SLEIPNIR_DLLEXPORT EqualityConstraints {
   /// A vector of scalar equality constraints.
-  std::vector<autodiff::Variable> constraints;
+  std::vector<Variable> constraints;
 };
 
 /**
@@ -23,7 +23,7 @@ struct SLEIPNIR_DLLEXPORT EqualityConstraints {
  */
 struct SLEIPNIR_DLLEXPORT InequalityConstraints {
   /// A vector of scalar inequality constraints.
-  std::vector<autodiff::Variable> constraints;
+  std::vector<Variable> constraints;
 };
 
 SLEIPNIR_DLLEXPORT EqualityConstraints operator==(const VariableMatrix& lhs,

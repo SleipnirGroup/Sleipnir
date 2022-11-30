@@ -4,7 +4,7 @@
 
 #include <chrono>
 
-namespace sleipnir::autodiff {
+namespace sleipnir {
 
 /**
  * Records the number of profiler measurements (start/stop pairs) and the
@@ -74,4 +74,4 @@ class Profiler {
   std::chrono::system_clock::time_point m_solveStartTime;
 };
 
-}  // namespace sleipnir::autodiff
+}  // namespace sleipnir

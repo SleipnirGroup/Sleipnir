@@ -8,7 +8,7 @@
 #include "sleipnir/autodiff/Expression.hpp"
 #include "sleipnir/autodiff/Variable.hpp"
 
-namespace sleipnir::autodiff {
+namespace sleipnir {
 
 /**
  * This class is an adaptor type that performs value updates of an expression's
@@ -85,4 +85,4 @@ class SLEIPNIR_DLLEXPORT ExpressionGraph {
   std::vector<Expression*> m_valueList;
 };
 
-}  // namespace sleipnir::autodiff
+}  // namespace sleipnir

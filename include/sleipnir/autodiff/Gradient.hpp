@@ -11,7 +11,7 @@
 #include "sleipnir/autodiff/Profiler.hpp"
 #include "sleipnir/autodiff/Variable.hpp"
 
-namespace sleipnir::autodiff {
+namespace sleipnir {
 
 /**
  * This class calculates the gradient of a a variable with respect to a vector
@@ -59,4 +59,4 @@ class SLEIPNIR_DLLEXPORT Gradient {
   Jacobian m_jacobian;
 };
 
-}  // namespace sleipnir::autodiff
+}  // namespace sleipnir

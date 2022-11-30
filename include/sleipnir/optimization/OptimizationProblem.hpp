@@ -10,10 +10,10 @@
 
 #include "sleipnir/SymbolExports.hpp"
 #include "sleipnir/autodiff/Variable.hpp"
+#include "sleipnir/autodiff/VariableMatrix.hpp"
 #include "sleipnir/optimization/Constraints.hpp"
 #include "sleipnir/optimization/SolverConfig.hpp"
 #include "sleipnir/optimization/SolverStatus.hpp"
-#include "sleipnir/optimization/VariableMatrix.hpp"
 
 namespace sleipnir {
 
@@ -284,16 +284,16 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
 
  private:
   // Decision variables, which are the root of the problem's expression tree
-  std::vector<autodiff::Variable> m_decisionVariables;
+  std::vector<Variable> m_decisionVariables;
 
   // Cost function: f(x)
-  std::optional<autodiff::Variable> m_f;
+  std::optional<Variable> m_f;
 
   // Equality constraints: cₑ(x) = 0
-  std::vector<autodiff::Variable> m_equalityConstraints;
+  std::vector<Variable> m_equalityConstraints;
 
   // Inequality constraints: cᵢ(x) ≥ 0
-  std::vector<autodiff::Variable> m_inequalityConstraints;
+  std::vector<Variable> m_inequalityConstraints;
 
   SolverConfig m_config;
 

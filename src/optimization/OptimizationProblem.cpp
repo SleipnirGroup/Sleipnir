@@ -31,7 +31,7 @@ namespace {
  * @param dest The autodiff vector.
  * @param src The double vector.
  */
-void SetAD(std::vector<autodiff::Variable>& dest,
+void SetAD(std::vector<Variable>& dest,
            const Eigen::Ref<const Eigen::VectorXd>& src) {
   assert(dest.size() == static_cast<size_t>(src.rows()));
 
@@ -46,7 +46,7 @@ void SetAD(std::vector<autodiff::Variable>& dest,
  * @param dest The autodiff vector.
  * @param src The double vector.
  */
-void SetAD(Eigen::Ref<autodiff::VectorXvar> dest,
+void SetAD(Eigen::Ref<VectorXvar> dest,
            const Eigen::Ref<const Eigen::VectorXd>& src) {
   assert(dest.rows() == src.rows());
 
@@ -234,9 +234,9 @@ SolverStatus OptimizationProblem::Solve(const SolverConfig& config) {
   }
 
   // If the problem is empty or constant, there's nothing to do
-  if (status.costFunctionType <= autodiff::ExpressionType::kConstant &&
-      status.equalityConstraintType <= autodiff::ExpressionType::kConstant &&
-      status.inequalityConstraintType <= autodiff::ExpressionType::kConstant) {
+  if (status.costFunctionType <= ExpressionType::kConstant &&
+      status.equalityConstraintType <= ExpressionType::kConstant &&
+      status.inequalityConstraintType <= ExpressionType::kConstant) {
     return status;
   }
 
@@ -437,47 +437,43 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   std::vector<Eigen::Triplet<double>> triplets;
 
   Eigen::VectorXd x = initialGuess;
-  autodiff::MapVectorXvar xAD(m_decisionVariables.data(),
-                              m_decisionVariables.size());
+  MapVectorXvar xAD(m_decisionVariables.data(), m_decisionVariables.size());
 
   Eigen::VectorXd s = Eigen::VectorXd::Ones(m_inequalityConstraints.size());
-  autodiff::VectorXvar sAD =
-      autodiff::VectorXvar::Ones(m_inequalityConstraints.size());
+  VectorXvar sAD = VectorXvar::Ones(m_inequalityConstraints.size());
 
   Eigen::VectorXd y = Eigen::VectorXd::Zero(m_equalityConstraints.size());
-  autodiff::VectorXvar yAD =
-      autodiff::VectorXvar::Zero(m_equalityConstraints.size());
+  VectorXvar yAD = VectorXvar::Zero(m_equalityConstraints.size());
 
   Eigen::VectorXd z = Eigen::VectorXd::Ones(m_inequalityConstraints.size());
-  autodiff::VectorXvar zAD =
-      autodiff::VectorXvar::Ones(m_inequalityConstraints.size());
+  VectorXvar zAD = VectorXvar::Ones(m_inequalityConstraints.size());
 
-  autodiff::MapVectorXvar c_eAD(m_equalityConstraints.data(),
-                                m_equalityConstraints.size());
-  autodiff::MapVectorXvar c_iAD(m_inequalityConstraints.data(),
-                                m_inequalityConstraints.size());
+  MapVectorXvar c_eAD(m_equalityConstraints.data(),
+                      m_equalityConstraints.size());
+  MapVectorXvar c_iAD(m_inequalityConstraints.data(),
+                      m_inequalityConstraints.size());
 
   const Eigen::MatrixXd e = Eigen::VectorXd::Ones(s.rows());
 
   // L(x, s, y, z)ₖ = f(x)ₖ − yₖᵀcₑ(x)ₖ − zₖᵀ(cᵢ(x)ₖ − sₖ)
-  autodiff::Variable L = m_f.value();
+  Variable L = m_f.value();
   if (m_equalityConstraints.size() > 0) {
     L -= yAD.transpose() * c_eAD;
   }
   if (m_inequalityConstraints.size() > 0) {
     L -= zAD.transpose() * (c_iAD - sAD);
   }
-  autodiff::ExpressionGraph graphL{L};
+  ExpressionGraph graphL{L};
 
   Eigen::VectorXd step = Eigen::VectorXd::Zero(x.rows());
 
   SetAD(xAD, x);
   graphL.Update();
 
-  autodiff::Gradient gradientF{m_f.value(), xAD};
-  autodiff::Hessian hessianL{L, xAD};
-  autodiff::Jacobian jacobianCe{c_eAD, xAD};
-  autodiff::Jacobian jacobianCi{c_iAD, xAD};
+  Gradient gradientF{m_f.value(), xAD};
+  Hessian hessianL{L, xAD};
+  Jacobian jacobianCe{c_eAD, xAD};
+  Jacobian jacobianCi{c_iAD, xAD};
 
   // Error estimate E_μ
   double E_mu = std::numeric_limits<double>::infinity();
@@ -518,20 +514,18 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
     // Print number of nonzeros in Lagrangian Hessian and constraint Jacobians
     std::string prints;
 
-    if (status->costFunctionType <= autodiff::ExpressionType::kQuadratic &&
-        status->equalityConstraintType <=
-            autodiff::ExpressionType::kQuadratic &&
-        status->inequalityConstraintType <=
-            autodiff::ExpressionType::kQuadratic) {
+    if (status->costFunctionType <= ExpressionType::kQuadratic &&
+        status->equalityConstraintType <= ExpressionType::kQuadratic &&
+        status->inequalityConstraintType <= ExpressionType::kQuadratic) {
       prints += fmt::format("Number of nonzeros in Lagrangian Hessian: {}\n",
                             H.nonZeros());
     }
-    if (status->equalityConstraintType <= autodiff::ExpressionType::kLinear) {
+    if (status->equalityConstraintType <= ExpressionType::kLinear) {
       prints += fmt::format(
           "Number of nonzeros in equality constraint Jacobian: {}\n",
           A_e.nonZeros());
     }
-    if (status->inequalityConstraintType <= autodiff::ExpressionType::kLinear) {
+    if (status->inequalityConstraintType <= ExpressionType::kLinear) {
       prints += fmt::format(
           "Number of nonzeros in inequality constraint Jacobian: {}\n",
           A_i.nonZeros());

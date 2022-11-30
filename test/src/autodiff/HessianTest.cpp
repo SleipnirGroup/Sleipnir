@@ -6,46 +6,46 @@
 
 TEST(HessianTest, Linear) {
   // y = x
-  sleipnir::autodiff::VectorXvar x{1};
+  sleipnir::VectorXvar x{1};
   x(0) = 3;
-  sleipnir::autodiff::Variable y = x(0);
+  sleipnir::Variable y = x(0);
 
   // dy/dx = 1
-  double g = sleipnir::autodiff::Gradient{y, x(0)}.Calculate().coeff(0);
+  double g = sleipnir::Gradient{y, x(0)}.Calculate().coeff(0);
   EXPECT_DOUBLE_EQ(1.0, g);
 
   // d²y/dx² = d/dx(x (rhs) + x (lhs))
   //         = 1 + 1
   //         = 2
-  Eigen::MatrixXd H = sleipnir::autodiff::Hessian{y, x}.Calculate();
+  Eigen::MatrixXd H = sleipnir::Hessian{y, x}.Calculate();
   EXPECT_DOUBLE_EQ(0.0, H(0, 0));
 }
 
 TEST(HessianTest, Quadratic) {
   // y = x²
   // y = x * x
-  sleipnir::autodiff::VectorXvar x{1};
+  sleipnir::VectorXvar x{1};
   x(0) = 3;
-  sleipnir::autodiff::Variable y = x(0) * x(0);
+  sleipnir::Variable y = x(0) * x(0);
 
   // dy/dx = x (rhs) + x (lhs)
   //       = (3) + (3)
   //       = 6
-  double g = sleipnir::autodiff::Gradient{y, x(0)}.Calculate().coeff(0);
+  double g = sleipnir::Gradient{y, x(0)}.Calculate().coeff(0);
   EXPECT_DOUBLE_EQ(6.0, g);
 
   // d²y/dx² = d/dx(x (rhs) + x (lhs))
   //         = 1 + 1
   //         = 2
-  Eigen::MatrixXd H = sleipnir::autodiff::Hessian{y, x}.Calculate();
+  Eigen::MatrixXd H = sleipnir::Hessian{y, x}.Calculate();
   EXPECT_DOUBLE_EQ(2.0, H(0, 0));
 }
 
 TEST(HessianTest, Sum) {
-  sleipnir::autodiff::Variable y;
+  sleipnir::Variable y;
   Eigen::VectorXd g;
   Eigen::MatrixXd H;
-  sleipnir::autodiff::VectorXvar x{5};
+  sleipnir::VectorXvar x{5};
   x(0) = 1;
   x(1) = 2;
   x(2) = 3;
@@ -54,14 +54,14 @@ TEST(HessianTest, Sum) {
 
   // y = sum(x)
   y = x.sum();
-  g = sleipnir::autodiff::Gradient{y, x}.Calculate();
+  g = sleipnir::Gradient{y, x}.Calculate();
 
   EXPECT_DOUBLE_EQ(15.0, y.Value());
   for (int i = 0; i < x.rows(); ++i) {
     EXPECT_DOUBLE_EQ(1.0, g(i));
   }
 
-  H = sleipnir::autodiff::Hessian{y, x}.Calculate();
+  H = sleipnir::Hessian{y, x}.Calculate();
   for (int i = 0; i < x.rows(); ++i) {
     for (int j = 0; j < x.rows(); ++j) {
       EXPECT_DOUBLE_EQ(0.0, H(i, j));
@@ -70,10 +70,10 @@ TEST(HessianTest, Sum) {
 }
 
 TEST(HessianTest, SumOfProducts) {
-  sleipnir::autodiff::Variable y;
+  sleipnir::Variable y;
   Eigen::VectorXd g;
   Eigen::MatrixXd H;
-  sleipnir::autodiff::VectorXvar x{5};
+  sleipnir::VectorXvar x{5};
   x(0) = 1;
   x(1) = 2;
   x(2) = 3;
@@ -82,14 +82,14 @@ TEST(HessianTest, SumOfProducts) {
 
   // y = ||x||^2
   y = x.cwiseProduct(x).sum();
-  g = sleipnir::autodiff::Gradient{y, x}.Calculate();
+  g = sleipnir::Gradient{y, x}.Calculate();
 
   EXPECT_DOUBLE_EQ(1 + 2 * 2 + 3 * 3 + 4 * 4 + 5 * 5, y.Value());
   for (int i = 0; i < x.rows(); ++i) {
     EXPECT_EQ(2 * x(i), g(i));
   }
 
-  H = sleipnir::autodiff::Hessian{y, x}.Calculate();
+  H = sleipnir::Hessian{y, x}.Calculate();
   for (int i = 0; i < x.rows(); ++i) {
     for (int j = 0; j < x.size(); ++j) {
       if (i == j) {
@@ -102,10 +102,10 @@ TEST(HessianTest, SumOfProducts) {
 }
 
 TEST(HessianTest, ProductOfSines) {
-  sleipnir::autodiff::Variable y;
+  sleipnir::Variable y;
   Eigen::VectorXd g;
   Eigen::MatrixXd H;
-  sleipnir::autodiff::VectorXvar x{5};
+  sleipnir::VectorXvar x{5};
   x(0) = 1;
   x(1) = 2;
   x(2) = 3;
@@ -114,38 +114,35 @@ TEST(HessianTest, ProductOfSines) {
 
   // y = prod(sin(x))
   y = x.array().sin().prod();
-  g = sleipnir::autodiff::Gradient{y, x}.Calculate();
+  g = sleipnir::Gradient{y, x}.Calculate();
 
-  EXPECT_EQ(sleipnir::autodiff::sin(1) * sleipnir::autodiff::sin(2) *
-                sleipnir::autodiff::sin(3) * sleipnir::autodiff::sin(4) *
-                sleipnir::autodiff::sin(5),
+  EXPECT_EQ(std::sin(1) * std::sin(2) * std::sin(3) * std::sin(4) * std::sin(5),
             y);
   for (int i = 0; i < x.rows(); ++i) {
-    EXPECT_EQ(y / sleipnir::autodiff::tan(x(i)), g(i));
+    EXPECT_EQ(y / sleipnir::tan(x(i)), g(i));
   }
 
-  H = sleipnir::autodiff::Hessian{y, x}.Calculate();
+  H = sleipnir::Hessian{y, x}.Calculate();
   for (int i = 0; i < x.rows(); ++i) {
     for (int j = 0; j < x.rows(); ++j) {
       if (i == j) {
-        EXPECT_NEAR((g(i) / sleipnir::autodiff::tan(x(i))).Value() *
-                        (1.0 - 1.0 / (sleipnir::autodiff::cos(x(i)) *
-                                      sleipnir::autodiff::cos(x(i))))
-                            .Value(),
-                    H(i, j), 1e-14);
+        EXPECT_NEAR(
+            (g(i) / tan(x(i))).Value() *
+                (1.0 - 1.0 / (sleipnir::cos(x(i)) * sleipnir::cos(x(i))))
+                    .Value(),
+            H(i, j), 1e-14);
       } else {
-        EXPECT_NEAR((g(j) / sleipnir::autodiff::tan(x(i))).Value(), H(i, j),
-                    1e-14);
+        EXPECT_NEAR((g(j) / tan(x(i))).Value(), H(i, j), 1e-14);
       }
     }
   }
 }
 
 TEST(HessianTest, SumOfSquaredResiduals) {
-  sleipnir::autodiff::Variable y;
+  sleipnir::Variable y;
   Eigen::VectorXd g;
   Eigen::MatrixXd H;
-  sleipnir::autodiff::VectorXvar x{5};
+  sleipnir::VectorXvar x{5};
   x(0) = 1;
   x(1) = 1;
   x(2) = 1;
@@ -154,7 +151,7 @@ TEST(HessianTest, SumOfSquaredResiduals) {
 
   // y = sum(diff(x).^2)
   y = (x.head(4) - x.tail(4)).array().pow(2).sum();
-  g = sleipnir::autodiff::Gradient{y, x}.Calculate();
+  g = sleipnir::Gradient{y, x}.Calculate();
 
   EXPECT_EQ(0.0, y);
   EXPECT_EQ(2 * x[0] - 2 * x[1], g(0));
@@ -163,7 +160,7 @@ TEST(HessianTest, SumOfSquaredResiduals) {
   EXPECT_EQ(-2 * x[2] + 4 * x[3] - 2 * x[4], g(3));
   EXPECT_EQ(-2 * x[3] + 2 * x[4], g(4));
 
-  H = sleipnir::autodiff::Hessian{y, x}.Calculate();
+  H = sleipnir::Hessian{y, x}.Calculate();
   EXPECT_EQ(2.0, H(0, 0));
   EXPECT_EQ(-2.0, H(0, 1));
   EXPECT_EQ(0.0, H(0, 2));
@@ -192,14 +189,14 @@ TEST(HessianTest, SumOfSquaredResiduals) {
 }
 
 TEST(HessianTest, Reuse) {
-  sleipnir::autodiff::Variable y;
-  sleipnir::autodiff::VectorXvar x{1};
+  sleipnir::Variable y;
+  sleipnir::VectorXvar x{1};
 
   // y = x³
   x(0) = 1;
   y = x(0) * x(0) * x(0);
 
-  sleipnir::autodiff::Hessian hessian{y, x};
+  sleipnir::Hessian hessian{y, x};
 
   // d²y/dx² = 6x
   // H = 6

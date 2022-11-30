@@ -2,7 +2,7 @@
 
 #include "sleipnir/autodiff/ExpressionGraph.hpp"
 
-using namespace sleipnir::autodiff;
+using namespace sleipnir;
 
 ExpressionGraph::ExpressionGraph(Variable& root) {
   // If the root type is a constant, Update() is a no-op, so there's no work to

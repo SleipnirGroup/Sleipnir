@@ -2,7 +2,7 @@
 
 #include "sleipnir/autodiff/Gradient.hpp"
 
-using namespace sleipnir::autodiff;
+using namespace sleipnir;
 
 Gradient::Gradient(Variable variable, Variable wrt) noexcept
     : Gradient{std::move(variable), MapVectorXvar{&wrt, 1}} {}

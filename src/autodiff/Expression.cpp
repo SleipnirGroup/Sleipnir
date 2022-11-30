@@ -14,9 +14,9 @@ constexpr std::underlying_type_t<Enum> to_underlying(Enum e) noexcept {
   return static_cast<std::underlying_type_t<Enum>>(e);
 }
 
-namespace sleipnir::autodiff {
+namespace sleipnir {
 
-sleipnir::IntrusiveSharedPtr<Expression>& Zero() {
+IntrusiveSharedPtr<Expression>& Zero() {
   static auto expr = AllocateIntrusiveShared<Expression>(
       GlobalPoolAllocator<Expression>(), Expression::ZeroSingleton);
   return expr;
@@ -40,12 +40,11 @@ Expression::Expression(ExpressionType type, BinaryFuncDouble valueFunc,
       valueFunc{valueFunc},
       gradientValueFuncs{lhsGradientValueFunc,
                          [](double, double, double) { return 0.0; }},
-      gradientFuncs{lhsGradientFunc,
-                    [](const sleipnir::IntrusiveSharedPtr<Expression>&,
-                       const sleipnir::IntrusiveSharedPtr<Expression>&,
-                       const sleipnir::IntrusiveSharedPtr<Expression>&) {
-                      return Zero();
-                    }},
+      gradientFuncs{
+          lhsGradientFunc,
+          [](const IntrusiveSharedPtr<Expression>&,
+             const IntrusiveSharedPtr<Expression>&,
+             const IntrusiveSharedPtr<Expression>&) { return Zero(); }},
       args{lhs, Zero()} {}
 
 Expression::Expression(ExpressionType type, BinaryFuncDouble valueFunc,
@@ -427,7 +426,7 @@ IntrusiveSharedPtr<Expression> acos(  // NOLINT
       [](const IntrusiveSharedPtr<Expression>& x,
          const IntrusiveSharedPtr<Expression>&,
          const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-        return -parentAdjoint / autodiff::sqrt(1.0 - x * x);
+        return -parentAdjoint / sleipnir::sqrt(1.0 - x * x);
       },
       x);
 }
@@ -455,7 +454,7 @@ IntrusiveSharedPtr<Expression> asin(  // NOLINT
       [](const IntrusiveSharedPtr<Expression>& x,
          const IntrusiveSharedPtr<Expression>&,
          const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-        return parentAdjoint / autodiff::sqrt(1.0 - x * x);
+        return parentAdjoint / sleipnir::sqrt(1.0 - x * x);
       },
       x);
 }
@@ -551,7 +550,7 @@ IntrusiveSharedPtr<Expression> cos(  // NOLINT
       [](const IntrusiveSharedPtr<Expression>& x,
          const IntrusiveSharedPtr<Expression>&,
          const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-        return parentAdjoint * -autodiff::sin(x);
+        return parentAdjoint * -sleipnir::sin(x);
       },
       x);
 }
@@ -579,7 +578,7 @@ IntrusiveSharedPtr<Expression> cosh(  // NOLINT
       [](const IntrusiveSharedPtr<Expression>& x,
          const IntrusiveSharedPtr<Expression>&,
          const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-        return parentAdjoint * autodiff::sinh(x);
+        return parentAdjoint * sleipnir::sinh(x);
       },
       x);
 }
@@ -610,7 +609,7 @@ IntrusiveSharedPtr<Expression> erf(  // NOLINT
       [](const IntrusiveSharedPtr<Expression>& x,
          const IntrusiveSharedPtr<Expression>&,
          const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-        return parentAdjoint * 2.0 / sqrt_pi * autodiff::exp(-x * x);
+        return parentAdjoint * 2.0 / sqrt_pi * sleipnir::exp(-x * x);
       },
       x);
 }
@@ -638,7 +637,7 @@ IntrusiveSharedPtr<Expression> exp(  // NOLINT
       [](const IntrusiveSharedPtr<Expression>& x,
          const IntrusiveSharedPtr<Expression>&,
          const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-        return parentAdjoint * autodiff::exp(x);
+        return parentAdjoint * sleipnir::exp(x);
       },
       x);
 }
@@ -671,12 +670,12 @@ IntrusiveSharedPtr<Expression> hypot(  // NOLINT
         [](const IntrusiveSharedPtr<Expression>& x,
            const IntrusiveSharedPtr<Expression>& y,
            const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-          return parentAdjoint * x / autodiff::hypot(x, y);
+          return parentAdjoint * x / sleipnir::hypot(x, y);
         },
         [](const IntrusiveSharedPtr<Expression>& x,
            const IntrusiveSharedPtr<Expression>& y,
            const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-          return parentAdjoint * y / autodiff::hypot(x, y);
+          return parentAdjoint * y / sleipnir::hypot(x, y);
         },
         MakeConstant(0.0), y);
   } else if (x != Zero() && y == Zero()) {
@@ -700,12 +699,12 @@ IntrusiveSharedPtr<Expression> hypot(  // NOLINT
         [](const IntrusiveSharedPtr<Expression>& x,
            const IntrusiveSharedPtr<Expression>& y,
            const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-          return parentAdjoint * x / autodiff::hypot(x, y);
+          return parentAdjoint * x / sleipnir::hypot(x, y);
         },
         [](const IntrusiveSharedPtr<Expression>& x,
            const IntrusiveSharedPtr<Expression>& y,
            const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-          return parentAdjoint * y / autodiff::hypot(x, y);
+          return parentAdjoint * y / sleipnir::hypot(x, y);
         },
         x, MakeConstant(0.0));
   } else {
@@ -730,12 +729,12 @@ IntrusiveSharedPtr<Expression> hypot(  // NOLINT
         [](const IntrusiveSharedPtr<Expression>& x,
            const IntrusiveSharedPtr<Expression>& y,
            const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-          return parentAdjoint * x / autodiff::hypot(x, y);
+          return parentAdjoint * x / sleipnir::hypot(x, y);
         },
         [](const IntrusiveSharedPtr<Expression>& x,
            const IntrusiveSharedPtr<Expression>& y,
            const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-          return parentAdjoint * y / autodiff::hypot(x, y);
+          return parentAdjoint * y / sleipnir::hypot(x, y);
         },
         x, y);
   }
@@ -845,7 +844,7 @@ IntrusiveSharedPtr<Expression> pow(  // NOLINT
       [](const IntrusiveSharedPtr<Expression>& base,
          const IntrusiveSharedPtr<Expression>& power,
          const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-        return parentAdjoint * autodiff::pow(base, power - 1) * power;
+        return parentAdjoint * sleipnir::pow(base, power - 1) * power;
       },
       [](const IntrusiveSharedPtr<Expression>& base,
          const IntrusiveSharedPtr<Expression>& power,
@@ -854,8 +853,8 @@ IntrusiveSharedPtr<Expression> pow(  // NOLINT
         if (base->value == 0.0) {
           return Zero();
         } else {
-          return parentAdjoint * autodiff::pow(base, power - 1) * base *
-                 autodiff::log(base);
+          return parentAdjoint * sleipnir::pow(base, power - 1) * base *
+                 sleipnir::log(base);
         }
       },
       base, power);
@@ -884,7 +883,7 @@ IntrusiveSharedPtr<Expression> sin(  // NOLINT
       [](const IntrusiveSharedPtr<Expression>& x,
          const IntrusiveSharedPtr<Expression>&,
          const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-        return parentAdjoint * autodiff::cos(x);
+        return parentAdjoint * sleipnir::cos(x);
       },
       x);
 }
@@ -911,7 +910,7 @@ IntrusiveSharedPtr<Expression> sinh(const IntrusiveSharedPtr<Expression>& x) {
       [](const IntrusiveSharedPtr<Expression>& x,
          const IntrusiveSharedPtr<Expression>&,
          const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-        return parentAdjoint * autodiff::cosh(x);
+        return parentAdjoint * sleipnir::cosh(x);
       },
       x);
 }
@@ -939,7 +938,7 @@ IntrusiveSharedPtr<Expression> sqrt(  // NOLINT
       [](const IntrusiveSharedPtr<Expression>& x,
          const IntrusiveSharedPtr<Expression>&,
          const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-        return parentAdjoint / (2.0 * autodiff::sqrt(x));
+        return parentAdjoint / (2.0 * sleipnir::sqrt(x));
       },
       x);
 }
@@ -967,7 +966,7 @@ IntrusiveSharedPtr<Expression> tan(  // NOLINT
       [](const IntrusiveSharedPtr<Expression>& x,
          const IntrusiveSharedPtr<Expression>&,
          const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-        return parentAdjoint / (autodiff::cos(x) * autodiff::cos(x));
+        return parentAdjoint / (sleipnir::cos(x) * sleipnir::cos(x));
       },
       x);
 }
@@ -994,9 +993,9 @@ IntrusiveSharedPtr<Expression> tanh(const IntrusiveSharedPtr<Expression>& x) {
       [](const IntrusiveSharedPtr<Expression>& x,
          const IntrusiveSharedPtr<Expression>&,
          const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-        return parentAdjoint / (autodiff::cosh(x) * autodiff::cosh(x));
+        return parentAdjoint / (sleipnir::cosh(x) * sleipnir::cosh(x));
       },
       x);
 }
 
-}  // namespace sleipnir::autodiff
+}  // namespace sleipnir
