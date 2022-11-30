@@ -86,7 +86,7 @@ TEST(HessianTest, SumOfProducts) {
 
   EXPECT_DOUBLE_EQ(1 + 2 * 2 + 3 * 3 + 4 * 4 + 5 * 5, y.Value());
   for (int i = 0; i < x.rows(); ++i) {
-    EXPECT_EQ(2 * x(i), g(i));
+    EXPECT_DOUBLE_EQ((2 * x(i)).Value(), g(i));
   }
 
   H = sleipnir::Hessian{y, x}.Calculate();
@@ -116,10 +116,11 @@ TEST(HessianTest, ProductOfSines) {
   y = x.array().sin().prod();
   g = sleipnir::Gradient{y, x}.Calculate();
 
-  EXPECT_EQ(std::sin(1) * std::sin(2) * std::sin(3) * std::sin(4) * std::sin(5),
-            y);
+  EXPECT_DOUBLE_EQ(
+      std::sin(1) * std::sin(2) * std::sin(3) * std::sin(4) * std::sin(5),
+      y.Value());
   for (int i = 0; i < x.rows(); ++i) {
-    EXPECT_EQ(y / sleipnir::tan(x(i)), g(i));
+    EXPECT_DOUBLE_EQ((y / sleipnir::tan(x(i))).Value(), g(i));
   }
 
   H = sleipnir::Hessian{y, x}.Calculate();
@@ -132,7 +133,7 @@ TEST(HessianTest, ProductOfSines) {
                     .Value(),
             H(i, j), 1e-14);
       } else {
-        EXPECT_NEAR((g(j) / tan(x(i))).Value(), H(i, j), 1e-14);
+        EXPECT_DOUBLE_EQ((g(j) / tan(x(i))).Value(), H(i, j));
       }
     }
   }
@@ -153,39 +154,39 @@ TEST(HessianTest, SumOfSquaredResiduals) {
   y = (x.head(4) - x.tail(4)).array().pow(2).sum();
   g = sleipnir::Gradient{y, x}.Calculate();
 
-  EXPECT_EQ(0.0, y);
-  EXPECT_EQ(2 * x[0] - 2 * x[1], g(0));
-  EXPECT_EQ(-2 * x[0] + 4 * x[1] - 2 * x[2], g(1));
-  EXPECT_EQ(-2 * x[1] + 4 * x[2] - 2 * x[3], g(2));
-  EXPECT_EQ(-2 * x[2] + 4 * x[3] - 2 * x[4], g(3));
-  EXPECT_EQ(-2 * x[3] + 2 * x[4], g(4));
+  EXPECT_DOUBLE_EQ(0.0, y.Value());
+  EXPECT_DOUBLE_EQ((2 * x[0] - 2 * x[1]).Value(), g(0));
+  EXPECT_DOUBLE_EQ((-2 * x[0] + 4 * x[1] - 2 * x[2]).Value(), g(1));
+  EXPECT_DOUBLE_EQ((-2 * x[1] + 4 * x[2] - 2 * x[3]).Value(), g(2));
+  EXPECT_DOUBLE_EQ((-2 * x[2] + 4 * x[3] - 2 * x[4]).Value(), g(3));
+  EXPECT_DOUBLE_EQ((-2 * x[3] + 2 * x[4]).Value(), g(4));
 
   H = sleipnir::Hessian{y, x}.Calculate();
-  EXPECT_EQ(2.0, H(0, 0));
-  EXPECT_EQ(-2.0, H(0, 1));
-  EXPECT_EQ(0.0, H(0, 2));
-  EXPECT_EQ(0.0, H(0, 3));
-  EXPECT_EQ(0.0, H(0, 4));
-  EXPECT_EQ(-2.0, H(1, 0));
-  EXPECT_EQ(4.0, H(1, 1));
-  EXPECT_EQ(-2.0, H(1, 2));
-  EXPECT_EQ(0.0, H(1, 3));
-  EXPECT_EQ(0.0, H(1, 4));
-  EXPECT_EQ(0.0, H(2, 0));
-  EXPECT_EQ(-2.0, H(2, 1));
-  EXPECT_EQ(4.0, H(2, 2));
-  EXPECT_EQ(-2.0, H(2, 3));
-  EXPECT_EQ(0.0, H(2, 4));
-  EXPECT_EQ(0.0, H(3, 0));
-  EXPECT_EQ(0.0, H(3, 1));
-  EXPECT_EQ(-2.0, H(3, 2));
-  EXPECT_EQ(4.0, H(3, 3));
-  EXPECT_EQ(-2.0, H(3, 4));
-  EXPECT_EQ(0.0, H(4, 0));
-  EXPECT_EQ(0.0, H(4, 1));
-  EXPECT_EQ(0.0, H(4, 2));
-  EXPECT_EQ(-2.0, H(4, 3));
-  EXPECT_EQ(2.0, H(4, 4));
+  EXPECT_DOUBLE_EQ(2.0, H(0, 0));
+  EXPECT_DOUBLE_EQ(-2.0, H(0, 1));
+  EXPECT_DOUBLE_EQ(0.0, H(0, 2));
+  EXPECT_DOUBLE_EQ(0.0, H(0, 3));
+  EXPECT_DOUBLE_EQ(0.0, H(0, 4));
+  EXPECT_DOUBLE_EQ(-2.0, H(1, 0));
+  EXPECT_DOUBLE_EQ(4.0, H(1, 1));
+  EXPECT_DOUBLE_EQ(-2.0, H(1, 2));
+  EXPECT_DOUBLE_EQ(0.0, H(1, 3));
+  EXPECT_DOUBLE_EQ(0.0, H(1, 4));
+  EXPECT_DOUBLE_EQ(0.0, H(2, 0));
+  EXPECT_DOUBLE_EQ(-2.0, H(2, 1));
+  EXPECT_DOUBLE_EQ(4.0, H(2, 2));
+  EXPECT_DOUBLE_EQ(-2.0, H(2, 3));
+  EXPECT_DOUBLE_EQ(0.0, H(2, 4));
+  EXPECT_DOUBLE_EQ(0.0, H(3, 0));
+  EXPECT_DOUBLE_EQ(0.0, H(3, 1));
+  EXPECT_DOUBLE_EQ(-2.0, H(3, 2));
+  EXPECT_DOUBLE_EQ(4.0, H(3, 3));
+  EXPECT_DOUBLE_EQ(-2.0, H(3, 4));
+  EXPECT_DOUBLE_EQ(0.0, H(4, 0));
+  EXPECT_DOUBLE_EQ(0.0, H(4, 1));
+  EXPECT_DOUBLE_EQ(0.0, H(4, 2));
+  EXPECT_DOUBLE_EQ(-2.0, H(4, 3));
+  EXPECT_DOUBLE_EQ(2.0, H(4, 4));
 }
 
 TEST(HessianTest, Reuse) {

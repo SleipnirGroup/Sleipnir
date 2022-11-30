@@ -25,32 +25,9 @@ template <typename Mat>
 VariableBlock<Mat>& VariableBlock<Mat>::operator=(double value) {
   assert(Rows() == 1 && Cols() == 1);
 
-  Autodiff(0, 0) = value;
+  (*this)(0, 0) = value;
 
   return *this;
-}
-
-template <typename Mat>
-VariableBlock<Mat> VariableBlock<Mat>::operator()(int row, int col) {
-  assert(row < Rows() && col < Cols());
-  return VariableBlock{(*m_mat)(m_rowOffset + row, m_colOffset + col)};
-}
-
-template <typename Mat>
-VariableBlock<const Mat> VariableBlock<Mat>::operator()(int row,
-                                                        int col) const {
-  assert(row < Rows() && col < Cols());
-  return VariableBlock{(*m_mat)(m_rowOffset + row, m_colOffset + col)};
-}
-
-template <typename Mat>
-VariableBlock<Mat> VariableBlock<Mat>::operator()(int row) {
-  return VariableBlock{(*m_mat)(row)};
-}
-
-template <typename Mat>
-VariableBlock<const Mat> VariableBlock<Mat>::operator()(int row) const {
-  return VariableBlock{(*m_mat)(row)};
 }
 
 template <typename Mat>
@@ -96,9 +73,9 @@ VariableBlock<Mat>& VariableBlock<Mat>::operator*=(
     for (int j = 0; j < rhs.Cols(); ++j) {
       Variable sum;
       for (int k = 0; k < Cols(); ++k) {
-        sum += Autodiff(i, k) * rhs.Autodiff(k, j);
+        sum += (*this)(i, k) * rhs(k, j);
       }
-      Autodiff(i, j) = sum;
+      (*this)(i, j) = sum;
     }
   }
 
@@ -109,7 +86,7 @@ template <typename Mat>
 VariableBlock<Mat>& VariableBlock<Mat>::operator*=(double rhs) {
   for (int row = 0; row < Rows(); ++row) {
     for (int col = 0; col < Cols(); ++col) {
-      Autodiff(row, col) *= Variable{MakeConstant(rhs)};
+      (*this)(row, col) *= Variable{MakeConstant(rhs)};
     }
   }
 
@@ -123,7 +100,7 @@ VariableBlock<Mat>& VariableBlock<Mat>::operator/=(
 
   for (int row = 0; row < Rows(); ++row) {
     for (int col = 0; col < Cols(); ++col) {
-      Autodiff(row, col) /= rhs.Autodiff(0, 0);
+      (*this)(row, col) /= rhs(0, 0);
     }
   }
 
@@ -134,7 +111,7 @@ template <typename Mat>
 VariableBlock<Mat>& VariableBlock<Mat>::operator/=(double rhs) {
   for (int row = 0; row < Rows(); ++row) {
     for (int col = 0; col < Cols(); ++col) {
-      Autodiff(row, col) /= Variable{MakeConstant(rhs)};
+      (*this)(row, col) /= Variable{MakeConstant(rhs)};
     }
   }
 
@@ -146,7 +123,7 @@ VariableBlock<Mat>& VariableBlock<Mat>::operator+=(
     const VariableBlock<Mat>& rhs) {
   for (int row = 0; row < Rows(); ++row) {
     for (int col = 0; col < Cols(); ++col) {
-      Autodiff(row, col) += rhs.Autodiff(row, col);
+      (*this)(row, col) += rhs(row, col);
     }
   }
 
@@ -158,7 +135,7 @@ VariableBlock<Mat>& VariableBlock<Mat>::operator-=(
     const VariableBlock<Mat>& rhs) {
   for (int row = 0; row < Rows(); ++row) {
     for (int col = 0; col < Cols(); ++col) {
-      Autodiff(row, col) -= rhs.Autodiff(row, col);
+      (*this)(row, col) -= rhs(row, col);
     }
   }
 
@@ -171,7 +148,7 @@ Mat VariableBlock<Mat>::T() const {
 
   for (int row = 0; row < Rows(); ++row) {
     for (int col = 0; col < Cols(); ++col) {
-      result.Autodiff(col, row) = Autodiff(row, col);
+      result(col, row) = (*this)(row, col);
     }
   }
 
@@ -190,14 +167,13 @@ int VariableBlock<Mat>::Cols() const {
 
 template <typename Mat>
 double VariableBlock<Mat>::Value(int row, int col) const {
-  return m_mat->Autodiff(m_rowOffset + row, m_colOffset + col).Value();
+  return (*m_mat)(m_rowOffset + row, m_colOffset + col).Value();
 }
 
 template <typename Mat>
 double VariableBlock<Mat>::Value(int index) const {
-  return m_mat
-      ->Autodiff(m_rowOffset + index / m_blockCols,
-                 m_colOffset + index % m_blockCols)
+  return (*m_mat)(m_rowOffset + index / m_blockCols,
+                  m_colOffset + index % m_blockCols)
       .Value();
 }
 
@@ -215,22 +191,12 @@ Eigen::MatrixXd VariableBlock<Mat>::Value() const {
 }
 
 template <typename Mat>
-Variable& VariableBlock<Mat>::Autodiff(int row, int col) {
-  return m_mat->Autodiff(m_rowOffset + row, m_colOffset + col);
-}
-
-template <typename Mat>
-const Variable& VariableBlock<Mat>::Autodiff(int row, int col) const {
-  return m_mat->Autodiff(m_rowOffset + row, m_colOffset + col);
-}
-
-template <typename Mat>
 Mat abs(const VariableBlock<Mat>& x) {
   std::remove_cv_t<Mat> result{x.Rows(), x.Cols()};
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) = sleipnir::abs(x.Autodiff(row, col));
+      result(row, col) = sleipnir::abs(x(row, col));
     }
   }
 
@@ -243,7 +209,7 @@ Mat acos(const VariableBlock<Mat>& x) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) = sleipnir::acos(x.Autodiff(row, col));
+      result(row, col) = sleipnir::acos(x(row, col));
     }
   }
 
@@ -256,7 +222,7 @@ Mat asin(const VariableBlock<Mat>& x) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) = sleipnir::asin(x.Autodiff(row, col));
+      result(row, col) = sleipnir::asin(x(row, col));
     }
   }
 
@@ -269,7 +235,7 @@ Mat atan(const VariableBlock<Mat>& x) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) = sleipnir::atan(x.Autodiff(row, col));
+      result(row, col) = sleipnir::atan(x(row, col));
     }
   }
 
@@ -282,8 +248,7 @@ Mat atan2(const VariableBlock<Mat>& y, const VariableBlock<Mat>& x) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) =
-          sleipnir::atan2(y.Autodiff(row, col), x.Autodiff(row, col));
+      result(row, col) = sleipnir::atan2(y(row, col), x(row, col));
     }
   }
 
@@ -296,7 +261,7 @@ Mat cos(const VariableBlock<Mat>& x) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) = sleipnir::cos(x.Autodiff(row, col));
+      result(row, col) = sleipnir::cos(x(row, col));
     }
   }
 
@@ -309,7 +274,7 @@ Mat cosh(const VariableBlock<Mat>& x) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) = sleipnir::cosh(x.Autodiff(row, col));
+      result(row, col) = sleipnir::cosh(x(row, col));
     }
   }
 
@@ -322,7 +287,7 @@ Mat erf(const VariableBlock<Mat>& x) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) = sleipnir::erf(x.Autodiff(row, col));
+      result(row, col) = sleipnir::erf(x(row, col));
     }
   }
 
@@ -335,7 +300,7 @@ Mat exp(const VariableBlock<Mat>& x) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) = sleipnir::exp(x.Autodiff(row, col));
+      result(row, col) = sleipnir::exp(x(row, col));
     }
   }
 
@@ -348,8 +313,7 @@ Mat hypot(const VariableBlock<Mat>& x, const VariableBlock<Mat>& y) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) =
-          sleipnir::hypot(x.Autodiff(row, col), y.Autodiff(row, col));
+      result(row, col) = sleipnir::hypot(x(row, col), y(row, col));
     }
   }
 
@@ -362,7 +326,7 @@ Mat log(const VariableBlock<Mat>& x) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) = sleipnir::log(x.Autodiff(row, col));
+      result(row, col) = sleipnir::log(x(row, col));
     }
   }
 
@@ -375,7 +339,7 @@ Mat log10(const VariableBlock<Mat>& x) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) = sleipnir::log10(x.Autodiff(row, col));
+      result(row, col) = sleipnir::log10(x(row, col));
     }
   }
 
@@ -388,8 +352,7 @@ Mat pow(const VariableBlock<Mat>& base, const VariableBlock<Mat>& power) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) =
-          sleipnir::pow(base.Autodiff(row, col), power.Autodiff(row, col));
+      result(row, col) = sleipnir::pow(base(row, col), power(row, col));
     }
   }
 
@@ -402,7 +365,7 @@ Mat sin(const VariableBlock<Mat>& x) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) = sleipnir::sin(x.Autodiff(row, col));
+      result(row, col) = sleipnir::sin(x(row, col));
     }
   }
 
@@ -415,7 +378,7 @@ Mat sinh(const VariableBlock<Mat>& x) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) = sleipnir::sinh(x.Autodiff(row, col));
+      result(row, col) = sleipnir::sinh(x(row, col));
     }
   }
 
@@ -428,7 +391,7 @@ Mat sqrt(const VariableBlock<Mat>& x) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) = sleipnir::sqrt(x.Autodiff(row, col));
+      result(row, col) = sleipnir::sqrt(x(row, col));
     }
   }
 
@@ -441,7 +404,7 @@ Mat tan(const VariableBlock<Mat>& x) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) = sleipnir::tan(x.Autodiff(row, col));
+      result(row, col) = sleipnir::tan(x(row, col));
     }
   }
 
@@ -454,7 +417,7 @@ Mat tanh(const VariableBlock<Mat>& x) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) = sleipnir::tanh(x.Autodiff(row, col));
+      result(row, col) = sleipnir::tanh(x(row, col));
     }
   }
 

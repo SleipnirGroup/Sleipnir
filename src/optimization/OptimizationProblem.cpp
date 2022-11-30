@@ -134,7 +134,7 @@ VariableMatrix OptimizationProblem::DecisionVariable(int rows, int cols) {
   for (int row = 0; row < rows; ++row) {
     for (int col = 0; col < cols; ++col) {
       m_decisionVariables.emplace_back(0.0);
-      vars.Autodiff(row, col) = m_decisionVariables[oldSize + row * cols + col];
+      vars(row, col) = m_decisionVariables[oldSize + row * cols + col];
     }
   }
 
@@ -143,26 +143,26 @@ VariableMatrix OptimizationProblem::DecisionVariable(int rows, int cols) {
 
 void OptimizationProblem::Minimize(const VariableMatrix& cost) {
   assert(cost.Rows() == 1 && cost.Cols() == 1);
-  m_f = cost.Autodiff(0, 0);
+  m_f = cost(0, 0);
 }
 
 void OptimizationProblem::Minimize(VariableMatrix&& cost) {
   assert(cost.Rows() == 1 && cost.Cols() == 1);
-  m_f = std::move(cost.Autodiff(0, 0));
+  m_f = std::move(cost(0, 0));
 }
 
 void OptimizationProblem::Maximize(const VariableMatrix& objective) {
   assert(objective.Rows() == 1 && objective.Cols() == 1);
 
   // Maximizing an objective function is the same as minimizing its negative
-  m_f = -objective.Autodiff(0, 0);
+  m_f = -objective(0, 0);
 }
 
 void OptimizationProblem::Maximize(VariableMatrix&& objective) {
   assert(objective.Rows() == 1 && objective.Cols() == 1);
 
   // Maximizing an objective function is the same as minimizing its negative
-  m_f = -std::move(objective.Autodiff(0, 0));
+  m_f = -std::move(objective(0, 0));
 }
 
 void OptimizationProblem::SubjectTo(EqualityConstraints&& constraint) {

@@ -62,7 +62,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
       const Eigen::Matrix<double, _Rows, _Cols, Args...>& values) {
     for (size_t row = 0; row < _Rows; ++row) {
       for (size_t col = 0; col < _Cols; ++col) {
-        Autodiff(row, col) = values(row, col);
+        (*this)(row, col) = values(row, col);
       }
     }
 
@@ -92,7 +92,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
       Eigen::Matrix<double, _Rows, _Cols, Args...>&& values) {
     for (size_t row = 0; row < _Rows; ++row) {
       for (size_t col = 0; col < _Cols; ++col) {
-        Autodiff(row, col) = values(row, col);
+        (*this)(row, col) = values(row, col);
       }
     }
 
@@ -191,7 +191,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param row The block row.
    * @param col The block column.
    */
-  VariableBlock<VariableMatrix> operator()(int row, int col);
+  Variable& operator()(int row, int col);
 
   /**
    * Returns a block pointing to the given row and column.
@@ -199,21 +199,21 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param row The block row.
    * @param col The block column.
    */
-  VariableBlock<const VariableMatrix> operator()(int row, int col) const;
+  const Variable& operator()(int row, int col) const;
 
   /**
    * Returns a block pointing to the given row.
    *
    * @param row The block row.
    */
-  VariableBlock<VariableMatrix> operator()(int row);
+  Variable& operator()(int row);
 
   /**
    * Returns a block pointing to the given row.
    *
    * @param row The block row.
    */
-  VariableBlock<const VariableMatrix> operator()(int row) const;
+  const Variable& operator()(int row) const;
 
   /**
    * Returns a block slice of the variable matrix.
@@ -267,7 +267,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    *
    * @param row The row to slice.
    */
-  VariableBlock<const VariableMatrix> Row(int row) const;
+  const VariableBlock<const VariableMatrix> Row(int row) const;
 
   /**
    * Returns a column slice of the variable matrix.
@@ -281,7 +281,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    *
    * @param col The column to slice.
    */
-  VariableBlock<const VariableMatrix> Col(int col) const;
+  const VariableBlock<const VariableMatrix> Col(int col) const;
 
   /**
    * Matrix multiplication operator.
@@ -301,9 +301,9 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
       for (int j = 0; j < rhs.Cols(); ++j) {
         Variable sum = 0.0;
         for (int k = 0; k < lhs.cols(); ++k) {
-          sum += Variable{MakeConstant(lhs(i, k))} * rhs.Autodiff(k, j);
+          sum += Variable{MakeConstant(lhs(i, k))} * rhs(k, j);
         }
-        result.Autodiff(i, j) = sum;
+        result(i, j) = sum;
       }
     }
 
@@ -328,9 +328,9 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
       for (int j = 0; j < rhs.cols(); ++j) {
         Variable sum = 0.0;
         for (int k = 0; k < lhs.Cols(); ++k) {
-          sum += lhs.Autodiff(i, k) * Variable{MakeConstant(rhs(k, j))};
+          sum += lhs(i, k) * Variable{MakeConstant(rhs(k, j))};
         }
-        result.Autodiff(i, j) = sum;
+        result(i, j) = sum;
       }
     }
 
@@ -428,8 +428,8 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
 
     for (int row = 0; row < result.Rows(); ++row) {
       for (int col = 0; col < result.Cols(); ++col) {
-        result.Autodiff(row, col) =
-            Variable{MakeConstant(lhs(row, col))} + rhs.Autodiff(row, col);
+        result(row, col) =
+            Variable{MakeConstant(lhs(row, col))} + rhs(row, col);
       }
     }
 
@@ -450,8 +450,8 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
 
     for (int row = 0; row < result.Rows(); ++row) {
       for (int col = 0; col < result.Cols(); ++col) {
-        result.Autodiff(row, col) =
-            lhs.Autodiff(row, col) + Variable{MakeConstant(rhs(row, col))};
+        result(row, col) =
+            lhs(row, col) + Variable{MakeConstant(rhs(row, col))};
       }
     }
 
@@ -489,8 +489,8 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
 
     for (int row = 0; row < result.Rows(); ++row) {
       for (int col = 0; col < result.Cols(); ++col) {
-        result.Autodiff(row, col) =
-            Variable{MakeConstant(lhs(row, col))} - rhs.Autodiff(row, col);
+        result(row, col) =
+            Variable{MakeConstant(lhs(row, col))} - rhs(row, col);
       }
     }
 
@@ -520,8 +520,8 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
 
     for (int row = 0; row < result.Rows(); ++row) {
       for (int col = 0; col < result.Cols(); ++col) {
-        result.Autodiff(row, col) =
-            lhs.Autodiff(row, col) - Variable{MakeConstant(rhs(row, col))};
+        result(row, col) =
+            lhs(row, col) - Variable{MakeConstant(rhs(row, col))};
       }
     }
 
@@ -576,16 +576,6 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * Returns the contents of the variable matrix.
    */
   Eigen::MatrixXd Value() const;
-
-  /**
-   * Returns the autodiff variable backing a matrix entry.
-   */
-  Variable& Autodiff(int row, int col);
-
-  /**
-   * Returns the autodiff variable backing a matrix entry.
-   */
-  const Variable& Autodiff(int row, int col) const;
 
  private:
   std::vector<Variable> m_storage;

@@ -4,6 +4,9 @@
 
 #include <cassert>
 
+#include "sleipnir/autodiff/Variable.hpp"
+#include "sleipnir/autodiff/VariableMatrix.hpp"
+
 namespace sleipnir {
 
 namespace {
@@ -26,7 +29,7 @@ std::vector<Variable> MakeConstraints(const VariableMatrix& lhs,
     for (int row = 0; row < rhs.Rows(); ++row) {
       for (int col = 0; col < rhs.Cols(); ++col) {
         // Make right-hand side zero
-        constraints.emplace_back(lhs.Autodiff(0, 0) - rhs.Autodiff(row, col));
+        constraints.emplace_back(lhs(0, 0) - rhs(row, col));
       }
     }
   } else if (rhs.Rows() == 1 && rhs.Cols() == 1) {
@@ -35,7 +38,7 @@ std::vector<Variable> MakeConstraints(const VariableMatrix& lhs,
     for (int row = 0; row < lhs.Rows(); ++row) {
       for (int col = 0; col < lhs.Cols(); ++col) {
         // Make right-hand side zero
-        constraints.emplace_back(lhs.Autodiff(row, col) - rhs.Autodiff(0, 0));
+        constraints.emplace_back(lhs(row, col) - rhs(0, 0));
       }
     }
   } else {
@@ -45,8 +48,7 @@ std::vector<Variable> MakeConstraints(const VariableMatrix& lhs,
     for (int row = 0; row < lhs.Rows(); ++row) {
       for (int col = 0; col < lhs.Cols(); ++col) {
         // Make right-hand side zero
-        constraints.emplace_back(lhs.Autodiff(row, col) -
-                                 rhs.Autodiff(row, col));
+        constraints.emplace_back(lhs(row, col) - rhs(row, col));
       }
     }
   }
@@ -56,6 +58,26 @@ std::vector<Variable> MakeConstraints(const VariableMatrix& lhs,
 
 }  // namespace
 
+EqualityConstraints operator==(const Variable& lhs, const Variable& rhs) {
+  return EqualityConstraints{MakeConstraints(lhs, rhs)};
+}
+
+InequalityConstraints operator<(const Variable& lhs, const Variable& rhs) {
+  return rhs >= lhs;
+}
+
+InequalityConstraints operator<=(const Variable& lhs, const Variable& rhs) {
+  return rhs >= lhs;
+}
+
+InequalityConstraints operator>(const Variable& lhs, const Variable& rhs) {
+  return lhs >= rhs;
+}
+
+InequalityConstraints operator>=(const Variable& lhs, const Variable& rhs) {
+  return InequalityConstraints{MakeConstraints(lhs, rhs)};
+}
+
 EqualityConstraints operator==(const VariableMatrix& lhs,
                                const VariableMatrix& rhs) {
   return EqualityConstraints{MakeConstraints(lhs, rhs)};
@@ -63,7 +85,6 @@ EqualityConstraints operator==(const VariableMatrix& lhs,
 
 InequalityConstraints operator<(const VariableMatrix& lhs,
                                 const VariableMatrix& rhs) {
-  // Since the solver can make lhs arbitrarily close to rhs, just use <=
   return lhs <= rhs;
 }
 
@@ -74,7 +95,6 @@ InequalityConstraints operator<=(const VariableMatrix& lhs,
 
 InequalityConstraints operator>(const VariableMatrix& lhs,
                                 const VariableMatrix& rhs) {
-  // Since the solver can make lhs arbitrarily close to rhs, just use >=
   return lhs >= rhs;
 }
 

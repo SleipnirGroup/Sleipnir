@@ -3,6 +3,7 @@
 #pragma once
 
 #include <cassert>
+#include <type_traits>
 #include <utility>
 
 #include <Eigen/Core>
@@ -56,7 +57,7 @@ class VariableBlock {
 
     for (int row = 0; row < m_blockRows; ++row) {
       for (int col = 0; col < m_blockCols; ++col) {
-        Autodiff(row, col) = std::move(values.Autodiff(row, col));
+        (*this)(row, col) = std::move(values(row, col));
       }
     }
     return *this;
@@ -70,7 +71,7 @@ class VariableBlock {
       const Eigen::Matrix<double, _Rows, _Cols, Args...>& values) {
     for (size_t row = 0; row < _Rows; ++row) {
       for (size_t col = 0; col < _Cols; ++col) {
-        Autodiff(row, col) = values(row, col);
+        (*this)(row, col) = values(row, col);
       }
     }
 
@@ -85,7 +86,7 @@ class VariableBlock {
       Eigen::Matrix<double, _Rows, _Cols, Args...>&& values) {
     for (size_t row = 0; row < _Rows; ++row) {
       for (size_t col = 0; col < _Cols; ++col) {
-        Autodiff(row, col) = values(row, col);
+        (*this)(row, col) = values(row, col);
       }
     }
 
@@ -100,7 +101,7 @@ class VariableBlock {
       const Eigen::Matrix<Variable, _Rows, _Cols, Args...>& values) {
     for (int row = 0; row < m_blockRows; ++row) {
       for (int col = 0; col < m_blockCols; ++col) {
-        Autodiff(row, col) = values(row, col);
+        (*this)(row, col) = values(row, col);
       }
     }
     return *this;
@@ -114,7 +115,7 @@ class VariableBlock {
       Eigen::Matrix<Variable, _Rows, _Cols, Args...>&& values) {
     for (int row = 0; row < m_blockRows; ++row) {
       for (int col = 0; col < m_blockCols; ++col) {
-        Autodiff(row, col) = std::move(values(row, col));
+        (*this)(row, col) = std::move(values(row, col));
       }
     }
     return *this;
@@ -126,7 +127,7 @@ class VariableBlock {
   VariableBlock<Mat>& operator=(const Mat& values) {
     for (int row = 0; row < m_blockRows; ++row) {
       for (int col = 0; col < m_blockCols; ++col) {
-        Autodiff(row, col) = values.Autodiff(row, col);
+        (*this)(row, col) = values(row, col);
       }
     }
     return *this;
@@ -138,7 +139,7 @@ class VariableBlock {
   VariableBlock<Mat>& operator=(Mat&& values) {
     for (int row = 0; row < m_blockRows; ++row) {
       for (int col = 0; col < m_blockCols; ++col) {
-        Autodiff(row, col) = std::move(values.Autodiff(row, col));
+        (*this)(row, col) = std::move(values(row, col));
       }
     }
     return *this;
@@ -150,7 +151,12 @@ class VariableBlock {
    * @param row The scalar subblock's row.
    * @param col The scalar subblock's column.
    */
-  VariableBlock<Mat> operator()(int row, int col);
+  template <typename Mat2 = Mat,
+            std::enable_if_t<!std::is_const_v<Mat2>, bool> = true>
+  Variable& operator()(int row, int col) {
+    assert(row < Rows() && col < Cols());
+    return (*m_mat)(m_rowOffset + row, m_colOffset + col);
+  }
 
   /**
    * Returns a scalar subblock at the given row and column.
@@ -158,21 +164,28 @@ class VariableBlock {
    * @param row The scalar subblock's row.
    * @param col The scalar subblock's column.
    */
-  VariableBlock<const Mat> operator()(int row, int col) const;
+  const Variable& operator()(int row, int col) const {
+    assert(row < Rows() && col < Cols());
+    return (*m_mat)(m_rowOffset + row, m_colOffset + col);
+  }
 
   /**
    * Returns a scalar subblock at the given row.
    *
    * @param row The scalar subblock's row.
    */
-  VariableBlock<Mat> operator()(int row);
+  template <typename Mat2 = Mat,
+            std::enable_if_t<!std::is_const_v<Mat2>, bool> = true>
+  Variable& operator()(int row) {
+    return (*m_mat)(row);
+  }
 
   /**
    * Returns a scalar subblock at the given row.
    *
    * @param row The scalar subblock's row.
    */
-  VariableBlock<const Mat> operator()(int row) const;
+  const Variable& operator()(int row) const { return (*m_mat)(row); }
 
   /**
    * Returns a block slice of the variable matrix.
@@ -303,16 +316,6 @@ class VariableBlock {
    * Returns the contents of the variable matrix.
    */
   Eigen::MatrixXd Value() const;
-
-  /**
-   * Returns the autodiff variable backing a matrix entry.
-   */
-  Variable& Autodiff(int row, int col);
-
-  /**
-   * Returns the autodiff variable backing a matrix entry.
-   */
-  const Variable& Autodiff(int row, int col) const;
 
  private:
   Mat* m_mat = nullptr;

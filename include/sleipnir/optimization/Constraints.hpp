@@ -26,6 +26,21 @@ struct SLEIPNIR_DLLEXPORT InequalityConstraints {
   std::vector<Variable> constraints;
 };
 
+SLEIPNIR_DLLEXPORT EqualityConstraints operator==(const Variable& lhs,
+                                                  const Variable& rhs);
+
+SLEIPNIR_DLLEXPORT InequalityConstraints operator<(const Variable& lhs,
+                                                   const Variable& rhs);
+
+SLEIPNIR_DLLEXPORT InequalityConstraints operator<=(const Variable& lhs,
+                                                    const Variable& rhs);
+
+SLEIPNIR_DLLEXPORT InequalityConstraints operator>(const Variable& lhs,
+                                                   const Variable& rhs);
+
+SLEIPNIR_DLLEXPORT InequalityConstraints operator>=(const Variable& lhs,
+                                                    const Variable& rhs);
+
 SLEIPNIR_DLLEXPORT EqualityConstraints operator==(const VariableMatrix& lhs,
                                                   const VariableMatrix& rhs);
 
