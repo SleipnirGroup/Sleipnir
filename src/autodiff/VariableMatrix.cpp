@@ -22,7 +22,7 @@ VariableMatrix::VariableMatrix(double value) : m_rows{1}, m_cols{1} {
 VariableMatrix& VariableMatrix::operator=(double value) {
   assert(Rows() == 1 && Cols() == 1);
 
-  Autodiff(0, 0) = value;
+  (*this)(0, 0) = value;
 
   return *this;
 }
@@ -40,7 +40,7 @@ VariableMatrix::VariableMatrix(const VariableBlock<VariableMatrix>& values)
     : m_rows{values.Rows()}, m_cols{values.Cols()} {
   for (int row = 0; row < Rows(); ++row) {
     for (int col = 0; col < Cols(); ++col) {
-      m_storage.emplace_back(values.Autodiff(row, col));
+      m_storage.emplace_back(values(row, col));
     }
   }
 }
@@ -50,28 +50,27 @@ VariableMatrix::VariableMatrix(
     : m_rows{values.Rows()}, m_cols{values.Cols()} {
   for (int row = 0; row < Rows(); ++row) {
     for (int col = 0; col < Cols(); ++col) {
-      m_storage.emplace_back(values.Autodiff(row, col));
+      m_storage.emplace_back(values(row, col));
     }
   }
 }
 
-VariableBlock<VariableMatrix> VariableMatrix::operator()(int row, int col) {
+Variable& VariableMatrix::operator()(int row, int col) {
   assert(row < Rows() && col < Cols());
-  return Block(row, col, 1, 1);
+  return m_storage[row * Cols() + col];
 }
 
-VariableBlock<const VariableMatrix> VariableMatrix::operator()(int row,
-                                                               int col) const {
+const Variable& VariableMatrix::operator()(int row, int col) const {
   assert(row < Rows() && col < Cols());
-  return Block(row, col, 1, 1);
+  return m_storage[row * Cols() + col];
 }
 
-VariableBlock<VariableMatrix> VariableMatrix::operator()(int row) {
-  return Block(row, 0, 1, 1);
+Variable& VariableMatrix::operator()(int row) {
+  return m_storage[row * Cols()];
 }
 
-VariableBlock<const VariableMatrix> VariableMatrix::operator()(int row) const {
-  return Block(row, 0, 1, 1);
+const Variable& VariableMatrix::operator()(int row) const {
+  return m_storage[row * Cols()];
 }
 
 VariableBlock<VariableMatrix> VariableMatrix::Block(int rowOffset,
@@ -99,7 +98,7 @@ VariableBlock<VariableMatrix> VariableMatrix::Row(int row) {
   return Block(row, 0, 1, Cols());
 }
 
-VariableBlock<const VariableMatrix> VariableMatrix::Row(int row) const {
+const VariableBlock<const VariableMatrix> VariableMatrix::Row(int row) const {
   return Block(row, 0, 1, Cols());
 }
 
@@ -107,7 +106,7 @@ VariableBlock<VariableMatrix> VariableMatrix::Col(int col) {
   return Block(0, col, Rows(), 1);
 }
 
-VariableBlock<const VariableMatrix> VariableMatrix::Col(int col) const {
+const VariableBlock<const VariableMatrix> VariableMatrix::Col(int col) const {
   return Block(0, col, Rows(), 1);
 }
 
@@ -121,9 +120,9 @@ SLEIPNIR_DLLEXPORT VariableMatrix operator*(const VariableMatrix& lhs,
     for (int j = 0; j < rhs.Cols(); ++j) {
       Variable sum;
       for (int k = 0; k < lhs.Cols(); ++k) {
-        sum += lhs.Autodiff(i, k) * rhs.Autodiff(k, j);
+        sum += lhs(i, k) * rhs(k, j);
       }
-      result.Autodiff(i, j) = sum;
+      result(i, j) = sum;
     }
   }
 
@@ -137,7 +136,7 @@ SLEIPNIR_DLLEXPORT VariableMatrix operator*(const VariableMatrix& lhs,
   Variable rhsVar{MakeConstant(rhs)};
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) = lhs.Autodiff(row, col) * rhsVar;
+      result(row, col) = lhs(row, col) * rhsVar;
     }
   }
 
@@ -151,7 +150,7 @@ SLEIPNIR_DLLEXPORT VariableMatrix operator*(double lhs,
   Variable lhsVar{MakeConstant(lhs)};
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) = rhs.Autodiff(row, col) * lhsVar;
+      result(row, col) = rhs(row, col) * lhsVar;
     }
   }
 
@@ -165,9 +164,9 @@ VariableMatrix& VariableMatrix::operator*=(const VariableMatrix& rhs) {
     for (int j = 0; j < rhs.Cols(); ++j) {
       Variable sum;
       for (int k = 0; k < Cols(); ++k) {
-        sum += Autodiff(i, k) * rhs.Autodiff(k, j);
+        sum += (*this)(i, k) * rhs(k, j);
       }
-      Autodiff(i, j) = sum;
+      (*this)(i, j) = sum;
     }
   }
 
@@ -177,7 +176,7 @@ VariableMatrix& VariableMatrix::operator*=(const VariableMatrix& rhs) {
 VariableMatrix& VariableMatrix::operator*=(double rhs) {
   for (int row = 0; row < Rows(); ++row) {
     for (int col = 0; col < Cols(); ++col) {
-      Autodiff(row, col) *= Variable{MakeConstant(rhs)};
+      (*this)(row, col) *= Variable{MakeConstant(rhs)};
     }
   }
 
@@ -192,7 +191,7 @@ SLEIPNIR_DLLEXPORT VariableMatrix operator/(const VariableMatrix& lhs,
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) = lhs.Autodiff(row, col) / rhs.Autodiff(0, 0);
+      result(row, col) = lhs(row, col) / rhs(0, 0);
     }
   }
 
@@ -205,8 +204,7 @@ SLEIPNIR_DLLEXPORT VariableMatrix operator/(const VariableMatrix& lhs,
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) =
-          lhs.Autodiff(row, col) / Variable{MakeConstant(rhs)};
+      result(row, col) = lhs(row, col) / Variable{MakeConstant(rhs)};
     }
   }
 
@@ -216,7 +214,7 @@ SLEIPNIR_DLLEXPORT VariableMatrix operator/(const VariableMatrix& lhs,
 VariableMatrix& VariableMatrix::operator/=(const VariableMatrix& rhs) {
   for (int row = 0; row < Rows(); ++row) {
     for (int col = 0; col < Cols(); ++col) {
-      Autodiff(row, col) /= rhs.Autodiff(0, 0);
+      (*this)(row, col) /= rhs(0, 0);
     }
   }
 
@@ -226,7 +224,7 @@ VariableMatrix& VariableMatrix::operator/=(const VariableMatrix& rhs) {
 VariableMatrix& VariableMatrix::operator/=(double rhs) {
   for (int row = 0; row < Rows(); ++row) {
     for (int col = 0; col < Cols(); ++col) {
-      Autodiff(row, col) /= Variable{MakeConstant(rhs)};
+      (*this)(row, col) /= Variable{MakeConstant(rhs)};
     }
   }
 
@@ -239,8 +237,7 @@ SLEIPNIR_DLLEXPORT VariableMatrix operator+(const VariableMatrix& lhs,
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) =
-          lhs.Autodiff(row, col) + rhs.Autodiff(row, col);
+      result(row, col) = lhs(row, col) + rhs(row, col);
     }
   }
 
@@ -250,7 +247,7 @@ SLEIPNIR_DLLEXPORT VariableMatrix operator+(const VariableMatrix& lhs,
 VariableMatrix& VariableMatrix::operator+=(const VariableMatrix& rhs) {
   for (int row = 0; row < Rows(); ++row) {
     for (int col = 0; col < Cols(); ++col) {
-      Autodiff(row, col) += rhs.Autodiff(row, col);
+      (*this)(row, col) += rhs(row, col);
     }
   }
 
@@ -263,8 +260,7 @@ SLEIPNIR_DLLEXPORT VariableMatrix operator-(const VariableMatrix& lhs,
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) =
-          lhs.Autodiff(row, col) - rhs.Autodiff(row, col);
+      result(row, col) = lhs(row, col) - rhs(row, col);
     }
   }
 
@@ -274,7 +270,7 @@ SLEIPNIR_DLLEXPORT VariableMatrix operator-(const VariableMatrix& lhs,
 VariableMatrix& VariableMatrix::operator-=(const VariableMatrix& rhs) {
   for (int row = 0; row < Rows(); ++row) {
     for (int col = 0; col < Cols(); ++col) {
-      Autodiff(row, col) -= rhs.Autodiff(row, col);
+      (*this)(row, col) -= rhs(row, col);
     }
   }
 
@@ -286,7 +282,7 @@ SLEIPNIR_DLLEXPORT VariableMatrix operator-(const VariableMatrix& lhs) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) = -lhs.Autodiff(row, col);
+      result(row, col) = -lhs(row, col);
     }
   }
 
@@ -298,7 +294,7 @@ VariableMatrix VariableMatrix::T() const {
 
   for (int row = 0; row < Rows(); ++row) {
     for (int col = 0; col < Cols(); ++col) {
-      result.Autodiff(col, row) = Autodiff(row, col);
+      result(col, row) = (*this)(row, col);
     }
   }
 
@@ -333,20 +329,12 @@ Eigen::MatrixXd VariableMatrix::Value() const {
   return result;
 }
 
-Variable& VariableMatrix::Autodiff(int row, int col) {
-  return m_storage[row * Cols() + col];
-}
-
-const Variable& VariableMatrix::Autodiff(int row, int col) const {
-  return m_storage[row * Cols() + col];
-}
-
 VariableMatrix abs(const VariableMatrix& x) {
   VariableMatrix result{x.Rows(), x.Cols()};
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) = sleipnir::abs(x.Autodiff(row, col));
+      result(row, col) = sleipnir::abs(x(row, col));
     }
   }
 
@@ -358,7 +346,7 @@ VariableMatrix acos(const VariableMatrix& x) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) = sleipnir::acos(x.Autodiff(row, col));
+      result(row, col) = sleipnir::acos(x(row, col));
     }
   }
 
@@ -370,7 +358,7 @@ VariableMatrix asin(const VariableMatrix& x) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) = sleipnir::asin(x.Autodiff(row, col));
+      result(row, col) = sleipnir::asin(x(row, col));
     }
   }
 
@@ -382,7 +370,7 @@ VariableMatrix atan(const VariableMatrix& x) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) = sleipnir::atan(x.Autodiff(row, col));
+      result(row, col) = sleipnir::atan(x(row, col));
     }
   }
 
@@ -394,8 +382,7 @@ VariableMatrix atan2(const VariableMatrix& y, const VariableMatrix& x) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) =
-          sleipnir::atan2(y.Autodiff(row, col), x.Autodiff(row, col));
+      result(row, col) = sleipnir::atan2(y(row, col), x(row, col));
     }
   }
 
@@ -407,7 +394,7 @@ VariableMatrix cos(const VariableMatrix& x) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) = sleipnir::cos(x.Autodiff(row, col));
+      result(row, col) = sleipnir::cos(x(row, col));
     }
   }
 
@@ -419,7 +406,7 @@ VariableMatrix cosh(const VariableMatrix& x) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) = sleipnir::cosh(x.Autodiff(row, col));
+      result(row, col) = sleipnir::cosh(x(row, col));
     }
   }
 
@@ -431,7 +418,7 @@ VariableMatrix erf(const VariableMatrix& x) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) = sleipnir::erf(x.Autodiff(row, col));
+      result(row, col) = sleipnir::erf(x(row, col));
     }
   }
 
@@ -443,7 +430,7 @@ VariableMatrix exp(const VariableMatrix& x) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) = sleipnir::exp(x.Autodiff(row, col));
+      result(row, col) = sleipnir::exp(x(row, col));
     }
   }
 
@@ -455,8 +442,7 @@ VariableMatrix hypot(const VariableMatrix& x, const VariableMatrix& y) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) =
-          sleipnir::hypot(x.Autodiff(row, col), y.Autodiff(row, col));
+      result(row, col) = sleipnir::hypot(x(row, col), y(row, col));
     }
   }
 
@@ -468,7 +454,7 @@ VariableMatrix log(const VariableMatrix& x) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) = sleipnir::log(x.Autodiff(row, col));
+      result(row, col) = sleipnir::log(x(row, col));
     }
   }
 
@@ -480,7 +466,7 @@ VariableMatrix log10(const VariableMatrix& x) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) = sleipnir::log10(x.Autodiff(row, col));
+      result(row, col) = sleipnir::log10(x(row, col));
     }
   }
 
@@ -492,8 +478,8 @@ VariableMatrix pow(double base, const VariableMatrix& power) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) =
-          sleipnir::pow(Variable{MakeConstant(base)}, power.Autodiff(row, col));
+      result(row, col) =
+          sleipnir::pow(Variable{MakeConstant(base)}, power(row, col));
     }
   }
 
@@ -505,8 +491,8 @@ VariableMatrix pow(const VariableMatrix& base, double power) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) =
-          sleipnir::pow(base.Autodiff(row, col), Variable{MakeConstant(power)});
+      result(row, col) =
+          sleipnir::pow(base(row, col), Variable{MakeConstant(power)});
     }
   }
 
@@ -518,8 +504,7 @@ VariableMatrix pow(const VariableMatrix& base, const VariableMatrix& power) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) =
-          sleipnir::pow(base.Autodiff(row, col), power.Autodiff(row, col));
+      result(row, col) = sleipnir::pow(base(row, col), power(row, col));
     }
   }
 
@@ -531,7 +516,7 @@ VariableMatrix sin(const VariableMatrix& x) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) = sleipnir::sin(x.Autodiff(row, col));
+      result(row, col) = sleipnir::sin(x(row, col));
     }
   }
 
@@ -543,7 +528,7 @@ VariableMatrix sinh(const VariableMatrix& x) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) = sleipnir::sinh(x.Autodiff(row, col));
+      result(row, col) = sleipnir::sinh(x(row, col));
     }
   }
 
@@ -555,7 +540,7 @@ VariableMatrix sqrt(const VariableMatrix& x) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) = sleipnir::sqrt(x.Autodiff(row, col));
+      result(row, col) = sleipnir::sqrt(x(row, col));
     }
   }
 
@@ -567,7 +552,7 @@ VariableMatrix tan(const VariableMatrix& x) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) = sleipnir::tan(x.Autodiff(row, col));
+      result(row, col) = sleipnir::tan(x(row, col));
     }
   }
 
@@ -579,7 +564,7 @@ VariableMatrix tanh(const VariableMatrix& x) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result.Autodiff(row, col) = sleipnir::tanh(x.Autodiff(row, col));
+      result(row, col) = sleipnir::tanh(x(row, col));
     }
   }
 
