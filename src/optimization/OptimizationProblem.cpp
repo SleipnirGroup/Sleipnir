@@ -847,10 +847,8 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
           fmt::print("iter  duration (ms)    error     infeasibility\n");
           fmt::print("=============================================\n");
         }
-        fmt::print("{:>4} {:>10}      {:>9.3e}     {:>9.3e}\n",
-                   iterations,
-                   ToMilliseconds(innerIterEndTime - innerIterStartTime),
-                   E_mu,
+        fmt::print("{:>4} {:>10}      {:>9.3e}     {:>9.3e}\n", iterations,
+                   ToMilliseconds(innerIterEndTime - innerIterStartTime), E_mu,
                    c_e.lpNorm<1>() + (c_i - s).lpNorm<1>());
       }
 
