@@ -26,7 +26,8 @@ class VariableBlock {
    *
    * @param mat The matrix to which to point.
    */
-  VariableBlock(Mat& mat);  // NOLINT
+  VariableBlock(Mat& mat)  // NOLINT
+      : m_mat{&mat}, m_blockRows{mat.Rows()}, m_blockCols{mat.Cols()} {}
 
   /**
    * Constructs a Variable block pointing to a subset of the given matrix.
@@ -38,14 +39,25 @@ class VariableBlock {
    * @param blockCols The number of columns in the block.
    */
   VariableBlock(Mat& mat, int rowOffset, int colOffset, int blockRows,
-                int blockCols);
+                int blockCols)
+      : m_mat{&mat},
+        m_rowOffset{rowOffset},
+        m_colOffset{colOffset},
+        m_blockRows{blockRows},
+        m_blockCols{blockCols} {}
 
   /**
    * Assigns a double to the block.
    *
    * This only works for blocks with one row and one column.
    */
-  VariableBlock<Mat>& operator=(double value);
+  VariableBlock<Mat>& operator=(double value) {
+    assert(Rows() == 1 && Cols() == 1);
+
+    (*this)(0, 0) = value;
+
+    return *this;
+  }
 
   /**
    * Assigns a VariableBlock to the block.
@@ -196,7 +208,9 @@ class VariableBlock {
    * @param blockCols The number of columns in the block selection.
    */
   VariableBlock<Mat> Block(int rowOffset, int colOffset, int blockRows,
-                           int blockCols);
+                           int blockCols) {
+    return VariableBlock{*m_mat, rowOffset, colOffset, blockRows, blockCols};
+  }
 
   /**
    * Returns a block slice of the variable matrix.
@@ -207,42 +221,62 @@ class VariableBlock {
    * @param blockCols The number of columns in the block selection.
    */
   const VariableBlock<const Mat> Block(int rowOffset, int colOffset,
-                                       int blockRows, int blockCols) const;
+                                       int blockRows, int blockCols) const {
+    return VariableBlock{*m_mat, rowOffset, colOffset, blockRows, blockCols};
+  }
 
   /**
    * Returns a row slice of the variable matrix.
    *
    * @param row The row to slice.
    */
-  VariableBlock<Mat> Row(int row);
+  VariableBlock<Mat> Row(int row) { return Block(row, 0, 1, Cols()); }
 
   /**
    * Returns a row slice of the variable matrix.
    *
    * @param row The row to slice.
    */
-  VariableBlock<const Mat> Row(int row) const;
+  VariableBlock<const Mat> Row(int row) const {
+    return Block(row, 0, 1, Cols());
+  }
 
   /**
    * Returns a column slice of the variable matrix.
    *
    * @param col The column to slice.
    */
-  VariableBlock<Mat> Col(int col);
+  VariableBlock<Mat> Col(int col) { return Block(0, col, Rows(), 1); }
 
   /**
    * Returns a column slice of the variable matrix.
    *
    * @param col The column to slice.
    */
-  VariableBlock<const Mat> Col(int col) const;
+  VariableBlock<const Mat> Col(int col) const {
+    return Block(0, col, Rows(), 1);
+  }
 
   /**
    * Compound matrix multiplication-assignment operator.
    *
    * @param rhs Variable to multiply.
    */
-  VariableBlock<Mat>& operator*=(const VariableBlock<Mat>& rhs);
+  VariableBlock<Mat>& operator*=(const VariableBlock<Mat>& rhs) {
+    assert(Cols() == rhs.Rows() && Cols() == rhs.Cols());
+
+    for (int i = 0; i < Rows(); ++i) {
+      for (int j = 0; j < rhs.Cols(); ++j) {
+        Variable sum;
+        for (int k = 0; k < Cols(); ++k) {
+          sum += (*this)(i, k) * rhs(k, j);
+        }
+        (*this)(i, j) = sum;
+      }
+    }
+
+    return *this;
+  }
 
   /**
    * Compound matrix multiplication-assignment operator (only enabled when lhs
@@ -250,7 +284,15 @@ class VariableBlock {
    *
    * @param rhs Variable to multiply.
    */
-  VariableBlock& operator*=(double rhs);
+  VariableBlock& operator*=(double rhs) {
+    for (int row = 0; row < Rows(); ++row) {
+      for (int col = 0; col < Cols(); ++col) {
+        (*this)(row, col) *= Variable{MakeConstant(rhs)};
+      }
+    }
+
+    return *this;
+  }
 
   /**
    * Compound matrix division-assignment operator (only enabled when rhs
@@ -258,7 +300,17 @@ class VariableBlock {
    *
    * @param rhs Variable to divide.
    */
-  VariableBlock<Mat>& operator/=(const VariableBlock<Mat>& rhs);
+  VariableBlock<Mat>& operator/=(const VariableBlock<Mat>& rhs) {
+    assert(rhs.Rows() == 1 && rhs.Cols() == 1);
+
+    for (int row = 0; row < Rows(); ++row) {
+      for (int col = 0; col < Cols(); ++col) {
+        (*this)(row, col) /= rhs(0, 0);
+      }
+    }
+
+    return *this;
+  }
 
   /**
    * Compound matrix division-assignment operator (only enabled when rhs
@@ -266,36 +318,70 @@ class VariableBlock {
    *
    * @param rhs Variable to divide.
    */
-  VariableBlock<Mat>& operator/=(double rhs);
+  VariableBlock<Mat>& operator/=(double rhs) {
+    for (int row = 0; row < Rows(); ++row) {
+      for (int col = 0; col < Cols(); ++col) {
+        (*this)(row, col) /= Variable{MakeConstant(rhs)};
+      }
+    }
+
+    return *this;
+  }
 
   /**
    * Compound addition-assignment operator.
    *
    * @param rhs Variable to add.
    */
-  VariableBlock<Mat>& operator+=(const VariableBlock<Mat>& rhs);
+  VariableBlock<Mat>& operator+=(const VariableBlock<Mat>& rhs) {
+    for (int row = 0; row < Rows(); ++row) {
+      for (int col = 0; col < Cols(); ++col) {
+        (*this)(row, col) += rhs(row, col);
+      }
+    }
+
+    return *this;
+  }
 
   /**
    * Compound subtraction-assignment operator.
    *
    * @param rhs Variable to subtract.
    */
-  VariableBlock<Mat>& operator-=(const VariableBlock<Mat>& rhs);
+  VariableBlock<Mat>& operator-=(const VariableBlock<Mat>& rhs) {
+    for (int row = 0; row < Rows(); ++row) {
+      for (int col = 0; col < Cols(); ++col) {
+        (*this)(row, col) -= rhs(row, col);
+      }
+    }
+
+    return *this;
+  }
 
   /**
    * Returns the transpose of the variable matrix.
    */
-  Mat T() const;
+  Mat T() const {
+    Mat result{Cols(), Rows()};
+
+    for (int row = 0; row < Rows(); ++row) {
+      for (int col = 0; col < Cols(); ++col) {
+        result(col, row) = (*this)(row, col);
+      }
+    }
+
+    return result;
+  }
 
   /**
    * Returns number of rows in the matrix.
    */
-  int Rows() const;
+  int Rows() const { return m_blockRows; }
 
   /**
    * Returns number of columns in the matrix.
    */
-  int Cols() const;
+  int Cols() const { return m_blockCols; }
 
   /**
    * Returns an element of the variable matrix.
@@ -303,19 +389,35 @@ class VariableBlock {
    * @param row The row of the element to return.
    * @param col The column of the element to return.
    */
-  double Value(int row, int col) const;
+  double Value(int row, int col) const {
+    return (*m_mat)(m_rowOffset + row, m_colOffset + col).Value();
+  }
 
   /**
    * Returns a row of the variable column vector.
    *
    * @param index The index of the element to return.
    */
-  double Value(int index) const;
+  double Value(int index) const {
+    return (*m_mat)(m_rowOffset + index / m_blockCols,
+                    m_colOffset + index % m_blockCols)
+        .Value();
+  }
 
   /**
    * Returns the contents of the variable matrix.
    */
-  Eigen::MatrixXd Value() const;
+  Eigen::MatrixXd Value() const {
+    Eigen::MatrixXd result{Rows(), Cols()};
+
+    for (int row = 0; row < Rows(); ++row) {
+      for (int col = 0; col < Cols(); ++col) {
+        result(row, col) = Value(row, col);
+      }
+    }
+
+    return result;
+  }
 
  private:
   Mat* m_mat = nullptr;
@@ -333,7 +435,17 @@ class VariableBlock {
  * @param x The argument.
  */
 template <typename Mat>
-Mat abs(const VariableBlock<Mat>& x);
+Mat abs(const VariableBlock<Mat>& x) {
+  std::remove_cv_t<Mat> result{x.Rows(), x.Cols()};
+
+  for (int row = 0; row < result.Rows(); ++row) {
+    for (int col = 0; col < result.Cols(); ++col) {
+      result(row, col) = sleipnir::abs(x(row, col));
+    }
+  }
+
+  return result;
+}
 
 /**
  * std::acos() for VariableMatrices.
@@ -343,7 +455,17 @@ Mat abs(const VariableBlock<Mat>& x);
  * @param x The argument.
  */
 template <typename Mat>
-Mat acos(const VariableBlock<Mat>& x);
+Mat acos(const VariableBlock<Mat>& x) {
+  std::remove_cv_t<Mat> result{x.Rows(), x.Cols()};
+
+  for (int row = 0; row < result.Rows(); ++row) {
+    for (int col = 0; col < result.Cols(); ++col) {
+      result(row, col) = sleipnir::acos(x(row, col));
+    }
+  }
+
+  return result;
+}
 
 /**
  * std::asin() for VariableMatrices.
@@ -353,7 +475,17 @@ Mat acos(const VariableBlock<Mat>& x);
  * @param x The argument.
  */
 template <typename Mat>
-Mat asin(const VariableBlock<Mat>& x);
+Mat asin(const VariableBlock<Mat>& x) {
+  std::remove_cv_t<Mat> result{x.Rows(), x.Cols()};
+
+  for (int row = 0; row < result.Rows(); ++row) {
+    for (int col = 0; col < result.Cols(); ++col) {
+      result(row, col) = sleipnir::asin(x(row, col));
+    }
+  }
+
+  return result;
+}
 
 /**
  * std::atan() for VariableMatrices.
@@ -363,7 +495,17 @@ Mat asin(const VariableBlock<Mat>& x);
  * @param x The argument.
  */
 template <typename Mat>
-Mat atan(const VariableBlock<Mat>& x);
+Mat atan(const VariableBlock<Mat>& x) {
+  std::remove_cv_t<Mat> result{x.Rows(), x.Cols()};
+
+  for (int row = 0; row < result.Rows(); ++row) {
+    for (int col = 0; col < result.Cols(); ++col) {
+      result(row, col) = sleipnir::atan(x(row, col));
+    }
+  }
+
+  return result;
+}
 
 /**
  * std::atan2() for VariableMatrices.
@@ -374,7 +516,17 @@ Mat atan(const VariableBlock<Mat>& x);
  * @param x The x argument.
  */
 template <typename Mat>
-Mat atan2(const VariableBlock<Mat>& y, const VariableBlock<Mat>& x);
+Mat atan2(const VariableBlock<Mat>& y, const VariableBlock<Mat>& x) {
+  std::remove_cv_t<Mat> result{x.Rows(), x.Cols()};
+
+  for (int row = 0; row < result.Rows(); ++row) {
+    for (int col = 0; col < result.Cols(); ++col) {
+      result(row, col) = sleipnir::atan2(y(row, col), x(row, col));
+    }
+  }
+
+  return result;
+}
 
 /**
  * std::cos() for VariableMatrices.
@@ -384,7 +536,17 @@ Mat atan2(const VariableBlock<Mat>& y, const VariableBlock<Mat>& x);
  * @param x The argument.
  */
 template <typename Mat>
-Mat cos(const VariableBlock<Mat>& x);
+Mat cos(const VariableBlock<Mat>& x) {
+  std::remove_cv_t<Mat> result{x.Rows(), x.Cols()};
+
+  for (int row = 0; row < result.Rows(); ++row) {
+    for (int col = 0; col < result.Cols(); ++col) {
+      result(row, col) = sleipnir::cos(x(row, col));
+    }
+  }
+
+  return result;
+}
 
 /**
  * std::cosh() for VariableMatrices.
@@ -394,7 +556,17 @@ Mat cos(const VariableBlock<Mat>& x);
  * @param x The argument.
  */
 template <typename Mat>
-Mat cosh(const VariableBlock<Mat>& x);
+Mat cosh(const VariableBlock<Mat>& x) {
+  Mat result{x.Rows(), x.Cols()};
+
+  for (int row = 0; row < result.Rows(); ++row) {
+    for (int col = 0; col < result.Cols(); ++col) {
+      result(row, col) = sleipnir::cosh(x(row, col));
+    }
+  }
+
+  return result;
+}
 
 /**
  * std::erf() for VariableMatrices.
@@ -404,7 +576,17 @@ Mat cosh(const VariableBlock<Mat>& x);
  * @param x The argument.
  */
 template <typename Mat>
-Mat erf(const VariableBlock<Mat>& x);
+Mat erf(const VariableBlock<Mat>& x) {
+  std::remove_cv_t<Mat> result{x.Rows(), x.Cols()};
+
+  for (int row = 0; row < result.Rows(); ++row) {
+    for (int col = 0; col < result.Cols(); ++col) {
+      result(row, col) = sleipnir::erf(x(row, col));
+    }
+  }
+
+  return result;
+}
 
 /**
  * std::exp() for VariableMatrices.
@@ -414,7 +596,17 @@ Mat erf(const VariableBlock<Mat>& x);
  * @param x The argument.
  */
 template <typename Mat>
-Mat exp(const VariableBlock<Mat>& x);
+Mat exp(const VariableBlock<Mat>& x) {
+  std::remove_cv_t<Mat> result{x.Rows(), x.Cols()};
+
+  for (int row = 0; row < result.Rows(); ++row) {
+    for (int col = 0; col < result.Cols(); ++col) {
+      result(row, col) = sleipnir::exp(x(row, col));
+    }
+  }
+
+  return result;
+}
 
 /**
  * std::hypot() for VariableMatrices.
@@ -425,7 +617,17 @@ Mat exp(const VariableBlock<Mat>& x);
  * @param y The y argument.
  */
 template <typename Mat>
-Mat hypot(const VariableBlock<Mat>& x, const VariableBlock<Mat>& y);
+Mat hypot(const VariableBlock<Mat>& x, const VariableBlock<Mat>& y) {
+  std::remove_cv_t<Mat> result{x.Rows(), x.Cols()};
+
+  for (int row = 0; row < result.Rows(); ++row) {
+    for (int col = 0; col < result.Cols(); ++col) {
+      result(row, col) = sleipnir::hypot(x(row, col), y(row, col));
+    }
+  }
+
+  return result;
+}
 
 /**
  * std::log() for VariableMatrices.
@@ -435,7 +637,17 @@ Mat hypot(const VariableBlock<Mat>& x, const VariableBlock<Mat>& y);
  * @param x The argument.
  */
 template <typename Mat>
-Mat log(const VariableBlock<Mat>& x);
+Mat log(const VariableBlock<Mat>& x) {
+  std::remove_cv_t<Mat> result{x.Rows(), x.Cols()};
+
+  for (int row = 0; row < result.Rows(); ++row) {
+    for (int col = 0; col < result.Cols(); ++col) {
+      result(row, col) = sleipnir::log(x(row, col));
+    }
+  }
+
+  return result;
+}
 
 /**
  * std::log10() for VariableMatrices.
@@ -445,7 +657,17 @@ Mat log(const VariableBlock<Mat>& x);
  * @param x The argument.
  */
 template <typename Mat>
-Mat log10(const VariableBlock<Mat>& x);
+Mat log10(const VariableBlock<Mat>& x) {
+  std::remove_cv_t<Mat> result{x.Rows(), x.Cols()};
+
+  for (int row = 0; row < result.Rows(); ++row) {
+    for (int col = 0; col < result.Cols(); ++col) {
+      result(row, col) = sleipnir::log10(x(row, col));
+    }
+  }
+
+  return result;
+}
 
 /**
  * std::pow() for VariableMatrices.
@@ -456,7 +678,17 @@ Mat log10(const VariableBlock<Mat>& x);
  * @param power The power.
  */
 template <typename Mat>
-Mat pow(const VariableBlock<Mat>& base, const VariableBlock<Mat>& power);
+Mat pow(const VariableBlock<Mat>& base, const VariableBlock<Mat>& power) {
+  Mat result{base.Rows(), base.Cols()};
+
+  for (int row = 0; row < result.Rows(); ++row) {
+    for (int col = 0; col < result.Cols(); ++col) {
+      result(row, col) = sleipnir::pow(base(row, col), power(row, col));
+    }
+  }
+
+  return result;
+}
 
 /**
  * std::sin() for VariableMatrices.
@@ -466,7 +698,17 @@ Mat pow(const VariableBlock<Mat>& base, const VariableBlock<Mat>& power);
  * @param x The argument.
  */
 template <typename Mat>
-Mat sin(const VariableBlock<Mat>& x);
+Mat sin(const VariableBlock<Mat>& x) {
+  std::remove_cv_t<Mat> result{x.Rows(), x.Cols()};
+
+  for (int row = 0; row < result.Rows(); ++row) {
+    for (int col = 0; col < result.Cols(); ++col) {
+      result(row, col) = sleipnir::sin(x(row, col));
+    }
+  }
+
+  return result;
+}
 
 /**
  * std::sinh() for VariableMatrices.
@@ -476,7 +718,17 @@ Mat sin(const VariableBlock<Mat>& x);
  * @param x The argument.
  */
 template <typename Mat>
-Mat sinh(const VariableBlock<Mat>& x);
+Mat sinh(const VariableBlock<Mat>& x) {
+  std::remove_cv_t<Mat> result{x.Rows(), x.Cols()};
+
+  for (int row = 0; row < result.Rows(); ++row) {
+    for (int col = 0; col < result.Cols(); ++col) {
+      result(row, col) = sleipnir::sinh(x(row, col));
+    }
+  }
+
+  return result;
+}
 
 /**
  * std::sqrt() for VariableMatrices.
@@ -486,7 +738,17 @@ Mat sinh(const VariableBlock<Mat>& x);
  * @param x The argument.
  */
 template <typename Mat>
-Mat sqrt(const VariableBlock<Mat>& x);
+Mat sqrt(const VariableBlock<Mat>& x) {
+  std::remove_cv_t<Mat> result{x.Rows(), x.Cols()};
+
+  for (int row = 0; row < result.Rows(); ++row) {
+    for (int col = 0; col < result.Cols(); ++col) {
+      result(row, col) = sleipnir::sqrt(x(row, col));
+    }
+  }
+
+  return result;
+}
 
 /**
  * std::tan() for VariableMatrices.
@@ -496,7 +758,17 @@ Mat sqrt(const VariableBlock<Mat>& x);
  * @param x The argument.
  */
 template <typename Mat>
-Mat tan(const VariableBlock<Mat>& x);
+Mat tan(const VariableBlock<Mat>& x) {
+  std::remove_cv_t<Mat> result{x.Rows(), x.Cols()};
+
+  for (int row = 0; row < result.Rows(); ++row) {
+    for (int col = 0; col < result.Cols(); ++col) {
+      result(row, col) = sleipnir::tan(x(row, col));
+    }
+  }
+
+  return result;
+}
 
 /**
  * std::tanh() for VariableMatrices.
@@ -506,8 +778,16 @@ Mat tan(const VariableBlock<Mat>& x);
  * @param x The argument.
  */
 template <typename Mat>
-Mat tanh(const VariableBlock<Mat>& x);
+Mat tanh(const VariableBlock<Mat>& x) {
+  std::remove_cv_t<Mat> result{x.Rows(), x.Cols()};
+
+  for (int row = 0; row < result.Rows(); ++row) {
+    for (int col = 0; col < result.Cols(); ++col) {
+      result(row, col) = sleipnir::tanh(x(row, col));
+    }
+  }
+
+  return result;
+}
 
 }  // namespace sleipnir
-
-#include "sleipnir/autodiff/VariableBlock.inc"
