@@ -844,7 +844,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
 
       if (m_config.diagnostics) {
         if (iterations % 20 == 0) {
-          fmt::print("iter  duration (ms)    error      feasibility\n");
+          fmt::print("iter  duration (ms)    error     infeasibility\n");
           fmt::print("=============================================\n");
         }
         fmt::print("{:>4} {:>10}      {:>9.3e}     {:>9.3e}\n",
