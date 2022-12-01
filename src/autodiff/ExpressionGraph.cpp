@@ -86,7 +86,7 @@ void ExpressionGraph::Update() {
 }
 
 VectorXvar ExpressionGraph::GenerateGradientTree(Eigen::Ref<VectorXvar> wrt) {
-  // Read wpimath/README.md#Reverse_accumulation_automatic_differentiation for
+  // Read docs/algorithms.md#Reverse_accumulation_automatic_differentiation for
   // background on reverse accumulation automatic differentiation.
 
   for (int row = 0; row < wrt.rows(); ++row) {
