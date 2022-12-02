@@ -570,22 +570,19 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       }
       fmt::print("\n");
 
-      fmt::print("autodiff  setup (ms)  avg solve (ms)  solves\n");
+      constexpr auto format = "{:>8}  {:>10}  {:>14}  {:>6}\n";
+      fmt::print(format, "autodiff", "setup (ms)", "avg solve (ms)", "solves");
       fmt::print("============================================\n");
-      fmt::print("   ∇f(x)  {:>10}  {:>14}  {:>6}\n",
-                 gradientF.GetProfiler().SetupDuration(),
+      fmt::print(format, "∇f(x)", gradientF.GetProfiler().SetupDuration(),
                  gradientF.GetProfiler().AverageSolveDuration(),
                  gradientF.GetProfiler().SolveMeasurements());
-      fmt::print("   ∇²ₓₓL  {:>10}  {:>14}  {:>6}\n",
-                 hessianL.GetProfiler().SetupDuration(),
+      fmt::print(format, "∇²ₓₓL", hessianL.GetProfiler().SetupDuration(),
                  hessianL.GetProfiler().AverageSolveDuration(),
                  hessianL.GetProfiler().SolveMeasurements());
-      fmt::print("  ∂cₑ/∂x  {:>10}  {:>14}  {:>6}\n",
-                 jacobianCe.GetProfiler().SetupDuration(),
+      fmt::print(format, "∂cₑ/∂x", jacobianCe.GetProfiler().SetupDuration(),
                  jacobianCe.GetProfiler().AverageSolveDuration(),
                  jacobianCe.GetProfiler().SolveMeasurements());
-      fmt::print("  ∂cᵢ/∂x  {:>10}  {:>14}  {:>6}\n",
-                 jacobianCi.GetProfiler().SetupDuration(),
+      fmt::print(format, "∂cᵢ/∂x", jacobianCi.GetProfiler().SetupDuration(),
                  jacobianCi.GetProfiler().AverageSolveDuration(),
                  jacobianCi.GetProfiler().SolveMeasurements());
       fmt::print("\n");
@@ -844,10 +841,11 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
 
       if (m_config.diagnostics) {
         if (iterations % 20 == 0) {
-          fmt::print("iter  duration (ms)    error     infeasibility\n");
-          fmt::print("==============================================\n");
+          fmt::print("{:>4}  {:>9}  {:>9}  {:>13}\n", "iter", "time (ms)",
+                     "error", "infeasibility");
+          fmt::print("=========================================\n");
         }
-        fmt::print("{:>4} {:>10}      {:>9.3e}     {:>9.3e}\n", iterations,
+        fmt::print("{:>4}  {:>9}  {:>9.3e}  {:>13.3e}\n", iterations,
                    ToMilliseconds(innerIterEndTime - innerIterStartTime), E_mu,
                    c_e.lpNorm<1>() + (c_i - s).lpNorm<1>());
       }
