@@ -52,7 +52,7 @@ TEST(FlywheelProblemTest, DirectTranscription) {
   Eigen::Matrix<double, 1, 1> r{10.0};
   sleipnir::VariableMatrix J = 0.0;
   for (int k = 0; k < N + 1; ++k) {
-    J += ((r - X.Col(k)).T() * (r - X.Col(k)));
+    J += (r - X.Col(k)).T() * (r - X.Col(k));
   }
   problem.Minimize(J);
 
