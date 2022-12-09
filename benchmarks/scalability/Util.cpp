@@ -48,9 +48,7 @@ int RunBenchmarksAndLog(
     RunBenchmark<sleipnir::OptimizationProblem>(
         results, [=] { return sleipnirSetup(dt, N); },
         [=](sleipnir::OptimizationProblem& problem) {
-          sleipnir::SolverConfig config;
-          config.diagnostics = diagnostics;
-          problem.Solve(config);
+          problem.Solve({.diagnostics = diagnostics});
         });
     fmt::print(stderr, " done.\n");
 

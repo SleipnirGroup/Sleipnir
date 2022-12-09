@@ -17,10 +17,7 @@ TEST(SolverExitConditionTest, TooFewDOFs) {
   problem.SubjectTo(y == 1);
   problem.SubjectTo(z == 1);
 
-  sleipnir::SolverConfig config;
-  config.diagnostics = true;
-
-  auto status = problem.Solve(config);
+  auto status = problem.Solve({.diagnostics = true});
 
   EXPECT_EQ(sleipnir::ExpressionType::kNone, status.costFunctionType);
   EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.equalityConstraintType);
@@ -41,10 +38,7 @@ TEST(SolverExitConditionTest, LocallyInfeasible) {
     problem.SubjectTo(y == z + 1);
     problem.SubjectTo(z == x + 1);
 
-    sleipnir::SolverConfig config;
-    config.diagnostics = true;
-
-    auto status = problem.Solve(config);
+    auto status = problem.Solve({.diagnostics = true});
 
     EXPECT_EQ(sleipnir::ExpressionType::kNone, status.costFunctionType);
     EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.equalityConstraintType);
@@ -65,10 +59,7 @@ TEST(SolverExitConditionTest, LocallyInfeasible) {
     problem.SubjectTo(y >= z + 1);
     problem.SubjectTo(z >= x + 1);
 
-    sleipnir::SolverConfig config;
-    config.diagnostics = true;
-
-    auto status = problem.Solve(config);
+    auto status = problem.Solve({.diagnostics = true});
 
     EXPECT_EQ(sleipnir::ExpressionType::kNone, status.costFunctionType);
     EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
@@ -86,11 +77,7 @@ TEST(SolverExitConditionTest, MaxIterations) {
   x = 0.0;
   problem.Minimize(x);
 
-  sleipnir::SolverConfig config;
-  config.diagnostics = true;
-  config.maxIterations = 0;
-
-  auto status = problem.Solve(config);
+  auto status = problem.Solve({.maxIterations = 0, .diagnostics = true});
 
   EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.costFunctionType);
   EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
@@ -108,11 +95,7 @@ TEST(SolverExitConditionTest, Timeout) {
   x = 0.0;
   problem.Minimize(x);
 
-  sleipnir::SolverConfig config;
-  config.diagnostics = true;
-  config.timeout = 0s;
-
-  auto status = problem.Solve(config);
+  auto status = problem.Solve({.timeout = 0s, .diagnostics = true});
 
   EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.costFunctionType);
   EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
