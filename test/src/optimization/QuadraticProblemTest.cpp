@@ -11,10 +11,7 @@ TEST(QuadraticProblemTest, Unconstrained1d) {
 
   problem.Minimize(x * x - 6.0 * x);
 
-  sleipnir::SolverConfig config;
-  config.diagnostics = true;
-
-  auto status = problem.Solve(config);
+  auto status = problem.Solve({.diagnostics = true});
 
   EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
   EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
@@ -35,10 +32,7 @@ TEST(QuadraticProblemTest, Unconstrained2d) {
 
     problem.Minimize(x * x + y * y);
 
-    sleipnir::SolverConfig config;
-    config.diagnostics = true;
-
-    auto status = problem.Solve(config);
+    auto status = problem.Solve({.diagnostics = true});
 
     EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
     EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
@@ -58,10 +52,7 @@ TEST(QuadraticProblemTest, Unconstrained2d) {
 
     problem.Minimize(x.T() * x);
 
-    sleipnir::SolverConfig config;
-    config.diagnostics = true;
-
-    auto status = problem.Solve(config);
+    auto status = problem.Solve({.diagnostics = true});
 
     EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
     EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
@@ -122,10 +113,7 @@ TEST(QuadraticProblemTest, EqualityConstrained) {
 
     problem.SubjectTo(x + 3 * y == 36);
 
-    sleipnir::SolverConfig config;
-    config.diagnostics = true;
-
-    auto status = problem.Solve(config);
+    auto status = problem.Solve({.diagnostics = true});
 
     EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
     EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.equalityConstraintType);
@@ -147,10 +135,7 @@ TEST(QuadraticProblemTest, EqualityConstrained) {
 
     problem.SubjectTo(x == Eigen::Matrix<double, 2, 1>{{3.0, 3.0}});
 
-    sleipnir::SolverConfig config;
-    config.diagnostics = true;
-
-    auto status = problem.Solve(config);
+    auto status = problem.Solve({.diagnostics = true});
 
     EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
     EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.equalityConstraintType);

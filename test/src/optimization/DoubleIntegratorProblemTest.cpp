@@ -68,10 +68,7 @@ TEST(DoubleIntegratorProblemTest, MinimumTime) {
   fmt::print("Setup time: {} ms\n\n",
              duration_cast<microseconds>(end1 - start).count() / 1000.0);
 
-  sleipnir::SolverConfig config;
-  config.diagnostics = true;
-
-  auto status = problem.Solve(config);
+  auto status = problem.Solve({.diagnostics = true});
 
   EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
   EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.equalityConstraintType);

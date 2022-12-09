@@ -27,10 +27,7 @@ TEST(NonlinearProblemTest, Quartic) {
 
   problem.SubjectTo(x >= 1);
 
-  sleipnir::SolverConfig config;
-  config.diagnostics = true;
-
-  auto status = problem.Solve(config);
+  auto status = problem.Solve({.diagnostics = true});
 
   EXPECT_EQ(sleipnir::ExpressionType::kNonlinear, status.costFunctionType);
   EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
