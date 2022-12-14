@@ -49,24 +49,30 @@ subject to cₑ(x) = 0
  * velocity] and u is the acceleration. The velocity constraints are -1 ≤ x(1)
  * ≤ 1 and the acceleration constraints are -1 ≤ u ≤ 1.
  *
+ * ### Initializing a problem instance
+ *
+ * First, we need to make a problem instance.
+ * @code{.cpp}
+ * #include <Eigen/Core>
+ * #include <sleipnir/optimization/OptimizationProblem.hpp>
+ *
+ * int main() {
+ *   constexpr auto T = 5s;
+ *   constexpr auto dt = 5ms;
+ *   constexpr int N = T / dt;
+ *
+ *   sleipnir::OptimizationProblem problem;
+ * @endcode
+ *
  * ### Creating decision variables
  *
  * First, we need to make decision variables for our state and input.
  * @code{.cpp}
- * #include <Eigen/Core>
- * #include <sleipnir/optimization/OptimizationProblem.h>
+ *   // 2x1 state vector with N + 1 timesteps (includes last state)
+ *   auto X = problem.DecisionVariable(2, N + 1);
  *
- * constexpr auto T = 5s;
- * constexpr auto dt = 5ms;
- * constexpr int N = T / dt;
- *
- * sleipnir::OptimizationProblem problem;
- *
- * // 2x1 state vector with N + 1 timesteps (includes last state)
- * auto X = problem.DecisionVariable(2, N + 1);
- *
- * // 1x1 input vector with N timesteps (input at last state doesn't matter)
- * auto U = problem.DecisionVariable(1, N);
+ *   // 1x1 input vector with N timesteps (input at last state doesn't matter)
+ *   auto U = problem.DecisionVariable(1, N);
  * @endcode
  * By convention, we use capital letters for the variables to designate
  * matrices.
@@ -77,7 +83,7 @@ subject to cₑ(x) = 0
  * @code{.cpp}
  * // Kinematics constraint assuming constant acceleration between timesteps
  * for (int k = 0; k < N; ++k) {
- *   constexpr double t = dt.value();
+ *   constexpr double t = std::chrono::duration<double>(dt).count();
  *   auto p_k1 = X(0, k + 1);
  *   auto v_k1 = X(1, k + 1);
  *   auto p_k = X(0, k);
