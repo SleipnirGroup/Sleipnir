@@ -36,19 +36,18 @@ subject to cₑ(x) = 0
  *
  * The nice thing about this class is users don't have to put their system in
  * the form shown above manually; they can write it in natural mathematical form
- * and it'll be converted for them.
+ * and it'll be converted for them. We'll cover some examples next.
  *
- * ## Example problem
+ * ## Double integrator minimum time
  *
- * To motivate this class, we'll use the hypothetical problem of making a double
- * integrator (a system with position and velocity states and an acceleration
- * input) move from x=0 to x=10 in the minimum time with some velocity and
- * acceleration limits.
+ * A system with position and velocity states and an acceleration input is an
+ * example of a double integrator. We want to go from 0 m at rest to 10 m at
+ * rest in the minimum time while obeying the velocity limit (-1, 1) and the
+ * acceleration limit (-1, 1).
  *
  * The model for our double integrator is ẍ=u where x is the vector [position;
- * velocity] and u is the scalar acceleration. We want to go from 0 m at rest to
- * 10 m at rest while obeying the velocity limit -1 ≤ x(1) ≤ 1 and the
- * acceleration limit -1 ≤ u ≤ 1.
+ * velocity] and u is the acceleration. The velocity constraints are -1 ≤ x(1)
+ * ≤ 1 and the acceleration constraints are -1 ≤ u ≤ 1.
  *
  * ### Creating decision variables
  *
@@ -136,15 +135,17 @@ subject to cₑ(x) = 0
  *
  * You can obtain the solution by querying the values of the variables like so.
  * @code{.cpp}
- * double input = U.Value(0);
+ * double position = X.Value(0, 0);
+ * double velocity = X.Value(1, 0);
+ * double acceleration = U.Value(0);
  * @endcode
  *
  * ### Other applications
  *
  * In retrospect, the solution here seems obvious: if you want to reach the
- * desired position in minimal time, you just apply max input to move toward it,
- * then stop applying input once you get there. OptimizationProblems can get
- * more complex than this though. In fact, we can use this same framework to
+ * desired position in the minimum time, you just apply max input to move toward
+ * it, then stop applying input once you get there. Optimization problems can
+ * get more complex than this though. In fact, we can use this same framework to
  * design optimal trajectories for a drivetrain while satisfying dynamics
  * constraints, avoiding obstacles, and driving through points of interest.
  *
