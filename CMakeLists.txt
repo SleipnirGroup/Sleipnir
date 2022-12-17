@@ -138,13 +138,18 @@ endif()
 
 include(CMakePackageConfigHelpers)
 
-# Generate the config file that is includes the exports
+# Generate the config file that includes the exports
 configure_package_config_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/SleipnirConfig.cmake.in
   ${CMAKE_CURRENT_BINARY_DIR}/SleipnirConfig.cmake
   INSTALL_DESTINATION "lib/cmake/Sleipnir"
   NO_SET_AND_CHECK_MACRO
   NO_CHECK_REQUIRED_COMPONENTS_MACRO)
+
+# Install the config file
+install(FILES
+  ${CMAKE_CURRENT_BINARY_DIR}/SleipnirConfig.cmake
+  DESTINATION lib/cmake/Sleipnir)
 
 # Add benchmark executables if CasADi exists
 find_package(casadi QUIET)
