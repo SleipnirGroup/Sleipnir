@@ -56,20 +56,24 @@ VariableMatrix::VariableMatrix(
 }
 
 Variable& VariableMatrix::operator()(int row, int col) {
-  assert(row < Rows() && col < Cols());
+  assert(row >= 0 && row < Rows());
+  assert(col >= 0 && col < Cols());
   return m_storage[row * Cols() + col];
 }
 
 const Variable& VariableMatrix::operator()(int row, int col) const {
-  assert(row < Rows() && col < Cols());
+  assert(row >= 0 && row < Rows());
+  assert(col >= 0 && col < Cols());
   return m_storage[row * Cols() + col];
 }
 
 Variable& VariableMatrix::operator()(int row) {
+  assert(row >= 0 && row < Rows() * Cols());
   return m_storage[row * Cols()];
 }
 
 const Variable& VariableMatrix::operator()(int row) const {
+  assert(row >= 0 && row < Rows() * Cols());
   return m_storage[row * Cols()];
 }
 
@@ -77,36 +81,52 @@ VariableBlock<VariableMatrix> VariableMatrix::Block(int rowOffset,
                                                     int colOffset,
                                                     int blockRows,
                                                     int blockCols) {
+  assert(rowOffset >= 0 && rowOffset < Rows());
+  assert(colOffset >= 0 && colOffset < Cols());
+  assert(blockRows >= 0 && blockRows <= Rows() - rowOffset);
+  assert(blockCols >= 0 && blockCols <= Cols() - colOffset);
   return VariableBlock{*this, rowOffset, colOffset, blockRows, blockCols};
 }
 
 const VariableBlock<const VariableMatrix> VariableMatrix::Block(
     int rowOffset, int colOffset, int blockRows, int blockCols) const {
+  assert(rowOffset >= 0 && rowOffset < Rows());
+  assert(colOffset >= 0 && colOffset < Cols());
+  assert(blockRows >= 0 && blockRows <= Rows() - rowOffset);
+  assert(blockCols >= 0 && blockCols <= Cols() - colOffset);
   return VariableBlock{*this, rowOffset, colOffset, blockRows, blockCols};
 }
 
 VariableBlock<VariableMatrix> VariableMatrix::Segment(int offset, int length) {
+  assert(offset >= 0 && offset < Rows() * Cols());
+  assert(length >= 0 && length <= Rows() * Cols() - offset);
   return Block(offset, 0, length, 1);
 }
 
 const VariableBlock<const VariableMatrix> VariableMatrix::Segment(
     int offset, int length) const {
+  assert(offset >= 0 && offset < Rows() * Cols());
+  assert(length >= 0 && length <= Rows() * Cols() - offset);
   return Block(offset, 0, length, 1);
 }
 
 VariableBlock<VariableMatrix> VariableMatrix::Row(int row) {
+  assert(row >= 0 && row < Rows());
   return Block(row, 0, 1, Cols());
 }
 
 const VariableBlock<const VariableMatrix> VariableMatrix::Row(int row) const {
+  assert(row >= 0 && row < Rows());
   return Block(row, 0, 1, Cols());
 }
 
 VariableBlock<VariableMatrix> VariableMatrix::Col(int col) {
+  assert(col >= 0 && col < Cols());
   return Block(0, col, Rows(), 1);
 }
 
 const VariableBlock<const VariableMatrix> VariableMatrix::Col(int col) const {
+  assert(col >= 0 && col < Cols());
   return Block(0, col, Rows(), 1);
 }
 
@@ -310,10 +330,13 @@ int VariableMatrix::Cols() const {
 }
 
 double VariableMatrix::Value(int row, int col) const {
+  assert(row >= 0 && row < Rows());
+  assert(col >= 0 && col < Cols());
   return m_storage[row * Cols() + col].Value();
 }
 
 double VariableMatrix::Value(int index) const {
+  assert(index >= 0 && index < Rows() * Cols());
   return m_storage[index].Value();
 }
 
