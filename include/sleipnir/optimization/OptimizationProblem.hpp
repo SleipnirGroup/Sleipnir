@@ -149,8 +149,9 @@ subject to cₑ(x) = 0
  * ### Other applications
  *
  * In retrospect, the solution here seems obvious: if you want to reach the
- * desired position in the minimum time, you just apply max input to move toward
- * it, then stop applying input once you get there. Optimization problems can
+ * desired position in the minimum time, you just apply positive max input to
+ * accelerate to the max speed, coast for a while, then apply negative max input
+ * to decelerate to a stop at the desired position. Optimization problems can
  * get more complex than this though. In fact, we can use this same framework to
  * design optimal trajectories for a drivetrain while satisfying dynamics
  * constraints, avoiding obstacles, and driving through points of interest.
