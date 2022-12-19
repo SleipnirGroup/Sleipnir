@@ -6,6 +6,8 @@
 
 namespace sleipnir {
 
+VariableMatrix::VariableMatrix() {};
+
 VariableMatrix::VariableMatrix(int rows, int cols)
     : m_rows{rows}, m_cols{cols} {
   for (int row = 0; row < rows; ++row) {
