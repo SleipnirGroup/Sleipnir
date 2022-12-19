@@ -19,6 +19,7 @@ namespace sleipnir {
  */
 class SLEIPNIR_DLLEXPORT VariableMatrix {
  public:
+  VariableMatrix();
   /**
    * Constructs a VariableMatrix with the given dimensions.
    *
