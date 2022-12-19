@@ -1,4 +1,4 @@
-// Copyright (c) Joshua Nichols and Tyler Veness
+// Copyright (c) Sleipnir contributors
 
 #include <Eigen/Core>
 #include <gtest/gtest.h>
