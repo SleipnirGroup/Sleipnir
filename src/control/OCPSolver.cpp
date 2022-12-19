@@ -29,11 +29,16 @@ void FixedStepOCPSolver::DirectTranscriptionLinearDiscrete() {
 }
 
 void FixedStepOCPSolver::ConstrainAlways(FixedStepConstraintFunction constraintFunction) {
-  for (int i = 0; i < m_numSteps + 1; ++i) {
+  // TODO: this kinda sucks and relies on the user to not add any constraints on U when i == m_numSteps
+  // a simpler way is to not add the "always" constraints to the last step but that would be an even
+  // worse footgun
+  for (int i = 0; i < m_numSteps; ++i) {
     auto x = X().Col(i);
     auto u = U().Col(i);
-    constraintFunction(x, u, i == m_numSteps);
+    constraintFunction(x, u, false);
   }
+  VariableMatrix fakeU{M, 1};
+  constraintFunction(X().Col(m_numSteps, fakeU, true));
 }
 
 SolverStatus FixedStepOCPSolver::Solve() {

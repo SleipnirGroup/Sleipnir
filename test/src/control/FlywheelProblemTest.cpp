@@ -112,7 +112,7 @@ TEST(ControlFlywheelProblemTest, ControlDirectTranscription) {
   EXPECT_NEAR(r(0), solver.X().Value(0, N - 1), 1e-2);
 
   // Log states for offline viewing
-  std::ofstream states{"Control Flywheel states.csv"};
+  std::ofstream states{"ControlFlywheel states.csv"};
   if (states.is_open()) {
     states << "Time (s),Velocity (rad/s)\n";
 
@@ -123,7 +123,7 @@ TEST(ControlFlywheelProblemTest, ControlDirectTranscription) {
   }
 
   // Log inputs for offline viewing
-  std::ofstream inputs{"Control Flywheel inputs.csv"};
+  std::ofstream inputs{"ControlFlywheel inputs.csv"};
   if (inputs.is_open()) {
     inputs << "Time (s),Voltage (V)\n";
 
