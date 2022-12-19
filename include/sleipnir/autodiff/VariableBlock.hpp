@@ -166,7 +166,8 @@ class VariableBlock {
   template <typename Mat2 = Mat,
             std::enable_if_t<!std::is_const_v<Mat2>, bool> = true>
   Variable& operator()(int row, int col) {
-    assert(row < Rows() && col < Cols());
+    assert(row >= 0 && row < Rows());
+    assert(col >= 0 && col < Cols());
     return (*m_mat)(m_rowOffset + row, m_colOffset + col);
   }
 
@@ -177,7 +178,8 @@ class VariableBlock {
    * @param col The scalar subblock's column.
    */
   const Variable& operator()(int row, int col) const {
-    assert(row < Rows() && col < Cols());
+    assert(row >= 0 && row < Rows());
+    assert(col >= 0 && col < Cols());
     return (*m_mat)(m_rowOffset + row, m_colOffset + col);
   }
 
@@ -189,6 +191,7 @@ class VariableBlock {
   template <typename Mat2 = Mat,
             std::enable_if_t<!std::is_const_v<Mat2>, bool> = true>
   Variable& operator()(int row) {
+    assert(row >= 0 && row < Rows() * Cols());
     return (*m_mat)(row);
   }
 
@@ -197,7 +200,10 @@ class VariableBlock {
    *
    * @param row The scalar subblock's row.
    */
-  const Variable& operator()(int row) const { return (*m_mat)(row); }
+  const Variable& operator()(int row) const {
+    assert(row >= 0 && row < Rows() * Cols());
+    return (*m_mat)(row);
+  }
 
   /**
    * Returns a block slice of the variable matrix.
@@ -209,6 +215,10 @@ class VariableBlock {
    */
   VariableBlock<Mat> Block(int rowOffset, int colOffset, int blockRows,
                            int blockCols) {
+    assert(rowOffset >= 0 && rowOffset < Rows());
+    assert(colOffset >= 0 && colOffset < Cols());
+    assert(blockRows >= 0 && blockRows <= Rows() - rowOffset);
+    assert(blockCols >= 0 && blockCols <= Cols() - colOffset);
     return VariableBlock{*m_mat, rowOffset, colOffset, blockRows, blockCols};
   }
 
@@ -222,6 +232,10 @@ class VariableBlock {
    */
   const VariableBlock<const Mat> Block(int rowOffset, int colOffset,
                                        int blockRows, int blockCols) const {
+    assert(rowOffset >= 0 && rowOffset < Rows());
+    assert(colOffset >= 0 && colOffset < Cols());
+    assert(blockRows >= 0 && blockRows <= Rows() - rowOffset);
+    assert(blockCols >= 0 && blockCols <= Cols() - colOffset);
     return VariableBlock{*m_mat, rowOffset, colOffset, blockRows, blockCols};
   }
 
@@ -230,7 +244,10 @@ class VariableBlock {
    *
    * @param row The row to slice.
    */
-  VariableBlock<Mat> Row(int row) { return Block(row, 0, 1, Cols()); }
+  VariableBlock<Mat> Row(int row) {
+    assert(row >= 0 && row < Rows());
+    return Block(row, 0, 1, Cols());
+  }
 
   /**
    * Returns a row slice of the variable matrix.
@@ -238,6 +255,7 @@ class VariableBlock {
    * @param row The row to slice.
    */
   VariableBlock<const Mat> Row(int row) const {
+    assert(row >= 0 && row < Rows());
     return Block(row, 0, 1, Cols());
   }
 
@@ -246,7 +264,10 @@ class VariableBlock {
    *
    * @param col The column to slice.
    */
-  VariableBlock<Mat> Col(int col) { return Block(0, col, Rows(), 1); }
+  VariableBlock<Mat> Col(int col) {
+    assert(col >= 0 && col < Cols());
+    return Block(0, col, Rows(), 1);
+  }
 
   /**
    * Returns a column slice of the variable matrix.
@@ -254,6 +275,7 @@ class VariableBlock {
    * @param col The column to slice.
    */
   VariableBlock<const Mat> Col(int col) const {
+    assert(col >= 0 && col < Cols());
     return Block(0, col, Rows(), 1);
   }
 
@@ -390,6 +412,8 @@ class VariableBlock {
    * @param col The column of the element to return.
    */
   double Value(int row, int col) const {
+    assert(row >= 0 && row < Rows());
+    assert(col >= 0 && col < Cols());
     return (*m_mat)(m_rowOffset + row, m_colOffset + col).Value();
   }
 
@@ -399,6 +423,7 @@ class VariableBlock {
    * @param index The index of the element to return.
    */
   double Value(int index) const {
+    assert(index >= 0 && index < Rows() * Cols());
     return (*m_mat)(m_rowOffset + index / m_blockCols,
                     m_colOffset + index % m_blockCols)
         .Value();
