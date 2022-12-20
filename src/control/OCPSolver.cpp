@@ -76,7 +76,21 @@ void FixedStepOCPSolver::ConstrainDirectTranscription() {
 }
 
 void FixedStepOCPSolver::ConstrainSingleShooting() {
-  ConstrainDirectTranscription();
+  for (int i = 0; i < m_numSteps; ++i) {
+    auto x_begin = X().Col(i);
+    auto x_end = X().Col(i + 1);
+    auto u = U().Col(i);
+    auto t = m_dt * i;
+    if (m_dynamicsType == kExplicitODE) {
+      x_end = RK4<const DynamicsFunction&, VariableMatrix, VariableMatrix, const double&>(m_dynamicsFunction, x_begin, u, t, m_dt);
+    }
+    else if (m_dynamicsType == kDiscrete) {
+      x_end = m_dynamicsFunction(t, x_begin, u);
+    }
+    else if (m_dynamicsType == kImplicitODE) {
+      // TODO
+    }
+  }
 }
 
 void FixedStepOCPSolver::ConstrainAlways(const FixedStepConstraintFunction& constraintFunction) {
