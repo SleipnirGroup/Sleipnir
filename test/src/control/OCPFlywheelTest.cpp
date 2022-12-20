@@ -22,7 +22,7 @@ bool Near(double expected, double actual, double tolerance) {
 }
 }  // namespace
 
-TEST(ControlFlywheelProblemTest, ControlDirectTranscription) {
+void TestFlywheel(std::string test_name, Eigen::Matrix<double, 1, 1> A, Eigen::Matrix<double, 1, 1> B, const sleipnir::DynamicsFunction& F, sleipnir::DynamicsType dynamicsType, sleipnir::TranscriptionMethod method) {
   auto start = std::chrono::system_clock::now();
 
   constexpr auto T = 5_s;
@@ -32,27 +32,22 @@ TEST(ControlFlywheelProblemTest, ControlDirectTranscription) {
   // Flywheel model:
   // States: [velocity]
   // Inputs: [voltage]
-  Eigen::Matrix<double, 1, 1> A{-1.};
-  Eigen::Matrix<double, 1, 1> B{1.};
-  Eigen::Matrix<double, 1, 1> A_discrete{std::exp(-dt.value())};
-  Eigen::Matrix<double, 1, 1> B_discrete{1 - std::exp(-dt.value())};
+  Eigen::Matrix<double, 1, 1> A_discrete{std::exp(A(0) * dt.value())};
+  Eigen::Matrix<double, 1, 1> B_discrete{(1.0 - A_discrete(0)) * B(0)};
   Eigen::Matrix<double, 1, 1> r{10.0};
 
-  sleipnir::FixedStepOCPSolver solver(1, 1, dt.value(), N);
-  solver.SetExplicitF([=](double t, sleipnir::VariableMatrix x, sleipnir::VariableMatrix u) {
-    return A*x + B*u;
-  });
-  solver.DirectTranscription();
-  /*solver.SetLinearDiscrete(A_discrete, B_discrete);
-  solver.DirectTranscriptionLinearDiscrete();*/
-  solver.ConstrainInitialState(0.0);
-  solver.SetUpperUBound(12);
-  solver.SetLowerUBound(-12);
-  solver.SetObjective([=](sleipnir::VariableMatrix X, sleipnir::VariableMatrix U) {
+  
+  auto objective = [=](sleipnir::VariableMatrix X, sleipnir::VariableMatrix U) {
     Eigen::Matrix<double,1,N+1> r_mat = r * Eigen::Matrix<double, 1, N+1>::Ones();
     sleipnir::VariableMatrix r_mat_vmat{r_mat};
     return (r_mat_vmat - X) * (r_mat_vmat - X).T();
-  });
+  };
+
+  sleipnir::FixedStepOCPSolver solver(1, 1, dt.value(), N, F, dynamicsType, method);
+  solver.ConstrainInitialState(0.0);
+  solver.SetUpperInputBound(12);
+  solver.SetLowerInputBound(-12);
+  solver.SetObjective(objective);
 
   auto end1 = std::chrono::system_clock::now();
   using std::chrono::duration_cast;
@@ -112,7 +107,7 @@ TEST(ControlFlywheelProblemTest, ControlDirectTranscription) {
   EXPECT_NEAR(r(0), solver.X().Value(0, N - 1), 1e-2);
 
   // Log states for offline viewing
-  std::ofstream states{"ControlFlywheel states.csv"};
+  std::ofstream states{fmt::format("{} Flywheel states.csv", test_name)};
   if (states.is_open()) {
     states << "Time (s),Velocity (rad/s)\n";
 
@@ -123,7 +118,7 @@ TEST(ControlFlywheelProblemTest, ControlDirectTranscription) {
   }
 
   // Log inputs for offline viewing
-  std::ofstream inputs{"ControlFlywheel inputs.csv"};
+  std::ofstream inputs{fmt::format("{} Flywheel inputs.csv", test_name)};
   if (inputs.is_open()) {
     inputs << "Time (s),Voltage (V)\n";
 
@@ -135,4 +130,28 @@ TEST(ControlFlywheelProblemTest, ControlDirectTranscription) {
       }
     }
   }
+}
+
+TEST(OCPSolver, FlywheelExplicit) {
+  Eigen::Matrix<double, 1, 1> A{-1.};
+  Eigen::Matrix<double, 1, 1> B{1.};
+  auto f_ode = [=](double t, sleipnir::VariableMatrix x, sleipnir::VariableMatrix u) {
+    return A*x + B*u;
+  };
+  TestFlywheel("Explicit Collocation", A, B, f_ode, sleipnir::DynamicsType::kExplicitODE, sleipnir::TranscriptionMethod::kDirectCollocation);
+  TestFlywheel("Explicit Transcription", A, B, f_ode, sleipnir::DynamicsType::kExplicitODE, sleipnir::TranscriptionMethod::kDirectTranscription);
+  TestFlywheel("Explicit Single-Shooting", A, B, f_ode, sleipnir::DynamicsType::kExplicitODE, sleipnir::TranscriptionMethod::kSingleShooting);
+}
+
+TEST(OCPSolver, FlywheelDiscrete) {
+  Eigen::Matrix<double, 1, 1> A{-1.};
+  Eigen::Matrix<double, 1, 1> B{1.};
+  auto dt = 5_ms;
+  Eigen::Matrix<double, 1, 1> A_discrete{std::exp(A(0) * dt.value())};
+  Eigen::Matrix<double, 1, 1> B_discrete{(1.0 - A_discrete(0)) * B(0)};
+  auto f_discrete = [=](double t, sleipnir::VariableMatrix x, sleipnir::VariableMatrix u) {
+    return A_discrete*x + B_discrete*u;
+  };
+  TestFlywheel("Discrete Transcription", A, B, f_discrete, sleipnir::DynamicsType::kDiscrete, sleipnir::TranscriptionMethod::kDirectTranscription);
+  TestFlywheel("Discrete Single-Shooting", A, B, f_discrete, sleipnir::DynamicsType::kDiscrete, sleipnir::TranscriptionMethod::kSingleShooting);
 }

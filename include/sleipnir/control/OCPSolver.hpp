@@ -10,9 +10,23 @@
 
 namespace sleipnir {
 
-typedef std::function<VariableMatrix(double, VariableMatrix, VariableMatrix)> FixedStepODE;
-typedef std::function<VariableMatrix(VariableMatrix, VariableMatrix)> FixedStepObjective;
-typedef std::function<void(VariableMatrix, VariableMatrix, bool)> FixedStepConstraintFunction;
+/**
+ * Function representing an explicit or implicit ODE, or a discrete state transition function.
+ * Explicit: dx/dt = f(t, x, u) 
+ * Implicit: f(t, [x dx/dt]', u) = 0
+ * State transition: xₖ₊₁ = f(t, xₖ, u)
+ */
+using DynamicsFunction = std::function<VariableMatrix(const double&, const VariableMatrix&, const VariableMatrix&)>;
+/**
+ * Objective function for optimal control problems. Inputs are X := (numStates)x(numSteps + 1) and U := (numInputs)x(numSteps).
+ * Return value is 1x1 cost function.
+ */
+using FixedStepObjective = std::function<VariableMatrix(const VariableMatrix&, const VariableMatrix&)>;
+/**
+ * Constrain a fixed step OCP. This function is called numSteps + 1 times, once for each step.
+ * The arguments are X_i (numStates)x1, U_i (numInputs)x1, and then true if this is the last step and has no associated input, otherwise false. 
+ */
+using FixedStepConstraintFunction = std::function<void(const VariableMatrix&, const VariableMatrix&, const bool&)>;
 
 /**
  * Performs 4th order Runge-Kutta integration of dx/dt = f(t, x, u) for dt.
@@ -23,54 +37,93 @@ typedef std::function<void(VariableMatrix, VariableMatrix, bool)> FixedStepConst
  * @param t0 The initial time.
  * @param dt The time over which to integrate.
  */
-template <typename T, typename U, typename V>
-T RK4(std::function<T(V,T,U)> f, T x, U u, V t0, V dt) {
+template <typename F, typename State, typename Input, typename Time>
+State RK4(F&& f, State x, Input u, Time t0, Time dt) {
   auto halfdt = dt * 0.5;
-  T k1 = f(t0, x, u);
-  T k2 = f(t0 + halfdt, x + halfdt * k1, u);
-  T k3 = f(t0 + halfdt, x + halfdt * k2, u);
-  T k4 = f(t0 + dt, x + dt * k3, u);
+  State k1 = f(t0, x, u);
+  State k2 = f(t0 + halfdt, x + halfdt * k1, u);
+  State k3 = f(t0 + halfdt, x + halfdt * k2, u);
+  State k4 = f(t0 + dt, x + dt * k3, u);
 
-  return x + (k1 + k2 * 2. + k3 * 2. + k4) * (dt / 6.0);
+  return x + (k1 + k2 * 2.0 + k3 * 2.0 + k4) * (dt / 6.0);
 }
 
-class SLEIPNIR_DLLEXPORT FixedStepOCPSolver {
+enum TranscriptionMethod {
+  kDirectTranscription,
+  kDirectCollocation,
+  kSingleShooting
+};
+
+enum DynamicsType {
+  kExplicitODE,
+  kImplicitODE,
+  kDiscrete
+};
+
+/**
+ * This class allows the user to pose and solve a constrained optimal control problem (OCP) in a variety of ways.
+ */
+class SLEIPNIR_DLLEXPORT FixedStepOCPSolver : public OptimizationProblem {
   public:
-  FixedStepOCPSolver(int N, int M, double dt, int numSteps) noexcept;
-  void SetExplicitF(FixedStepODE f) { m_F = f; };
-  void SetLinearDiscrete(Eigen::MatrixXd Ad, Eigen::MatrixXd Bd) { m_Ad = Ad; m_Bd = Bd; };
-  void ConstrainInitialState(const VariableMatrix initialState) { m_problem.SubjectTo(X().Col(0) == initialState); };
-  void ConstrainFinalState(const VariableMatrix finalState) { m_problem.SubjectTo(X().Col(m_numSteps) == finalState); };
-  void ConstrainAlways(FixedStepConstraintFunction constraintFunction);
-  void SetObjective(FixedStepObjective objective) { m_problem.Minimize(objective(X(), U())); };
-  void SetLowerUBound(VariableMatrix lowerBound) { m_problem.SubjectTo(U() >= lowerBound); };
-  void SetUpperUBound(VariableMatrix upperBound) { m_problem.SubjectTo(U() <= upperBound); };
-  void DirectTranscriptionLinearDiscrete();
-  void DirectTranscription();
-  SolverStatus Solve();
-  SolverStatus Solve(SolverConfig config);
+  /**
+   * 
+   * @param numStates The number of system states.
+   * @param numInputs The number of system inputs.
+   * @param dt The timestep for integration. Must be in seconds.
+   * @param numSteps The number of control points.
+   * @param dynamics The system evolution function, either an implicit or explicit ODE or a discrete state transition function.
+   * @param dynamicsType The type of system evolution function.
+   * @param method The transcription method.
+   */
+  FixedStepOCPSolver(int numStates, int numInputs, double dt, int numSteps, const DynamicsFunction& dynamics, DynamicsType dynamicsType = kExplicitODE, TranscriptionMethod method = kDirectTranscription);
+  
+  /**
+   * Utility function to constrain the initial state.
+   * 
+   * @param initialState the initial state to constrain to.
+   */
+  void ConstrainInitialState(const VariableMatrix& initialState);
+
+  /**
+   * Utility function to constrain the final state.
+   * 
+   * @param initialState the final state to constrain to.
+   */
+
+  void ConstrainFinalState(const VariableMatrix& finalState);
+
+  /**
+   * Set the constraint evaluation function. This function is called `numSteps+1` times, with the corresponding state and input VariableMatrices. 
+   * 
+   * @param constraintFunction the constraint function.
+   */
+  void ConstrainAlways(const FixedStepConstraintFunction& constraintFunction);
+  void SetObjective(const FixedStepObjective& objective) { Minimize(objective(X(), U())); };
+  void SetLowerInputBound(const VariableMatrix& lowerBound) { SubjectTo(U() >= lowerBound); };
+  void SetUpperInputBound(const VariableMatrix& upperBound) { SubjectTo(U() <= upperBound); };
 
   VariableMatrix& X() {return m_X;};
-  VariableMatrix& U() {return m_U;}; 
+  VariableMatrix& U() {return m_U;};
+  VariableMatrix InitialState() {return m_X.Col(0);}
+  VariableMatrix FinalState() {return m_X.Col(m_numSteps + 1);}
 
   private:
-  int m_N;
-  int m_M;
+  void ConstrainDirectCollocation();
+  void ConstrainDirectTranscription();
+  void ConstrainSingleShooting();
+
+  int m_numStates;
+  int m_numInputs;
   double m_dt;
   int m_numSteps;
-  OptimizationProblem m_problem;
+  TranscriptionMethod m_transcriptionMethod;
+
+  DynamicsType m_dynamicsType;
+  const DynamicsFunction& m_dynamicsFunction;
+
   VariableMatrix m_X;
   VariableMatrix m_U;
-  FixedStepODE m_F;
-  Eigen::MatrixXd m_Ad;
-  Eigen::MatrixXd m_Bd;
-  FixedStepObjective m_objective = [](VariableMatrix, VariableMatrix) {return VariableMatrix(0);};
   FixedStepConstraintFunction m_constraintFunction = [](VariableMatrix, VariableMatrix, bool) {};
-  bool m_initialStateConstrained = false;
-  bool m_finalStateConstrained = false;
-  VariableMatrix m_initialState;
-  VariableMatrix m_finalState;
-
 };
 
 }

@@ -1,50 +1,96 @@
 
-
+#include <iostream>
 #include "sleipnir/control/OCPSolver.hpp"
 
 using namespace sleipnir;
 
-FixedStepOCPSolver::FixedStepOCPSolver(int N, int M, double dt, int numSteps) noexcept: m_N(N), m_M(M), m_dt(dt), m_numSteps(numSteps) {
-  m_X = m_problem.DecisionVariable(m_N, m_numSteps + 1);
-  m_U = m_problem.DecisionVariable(m_M, m_numSteps);
+FixedStepOCPSolver::FixedStepOCPSolver(int numStates, int numInputs, double dt, int numSteps, 
+    const DynamicsFunction& dynamics, 
+    DynamicsType dynamicsType, 
+    TranscriptionMethod method): m_numStates(numStates), m_numInputs(numInputs), m_dt(dt), m_numSteps(numSteps), 
+    m_transcriptionMethod(method), m_dynamicsType(dynamicsType), m_dynamicsFunction(dynamics) {
+  switch(m_transcriptionMethod) {
+    case kDirectCollocation:
+      m_X = DecisionVariable(m_numStates, m_numSteps + 1);
+      break;
+    case kSingleShooting:
+      m_X = VariableMatrix(m_numStates, m_numSteps + 1);
+      break;
+    default:
+    case kDirectTranscription:
+      m_X = DecisionVariable(m_numStates, m_numSteps + 1);
+  }
+  // u is numSteps + 1 so that the final constraintFunction evaluation works
+  // Not sure what the best way to do this is
+  m_U = DecisionVariable(m_numInputs, m_numSteps + 1);
+  
+  if (m_transcriptionMethod == kDirectTranscription) {
+    ConstrainDirectTranscription();
+  }
+  else if (m_transcriptionMethod == kDirectCollocation) {
+    ConstrainDirectCollocation();
+  }
+  else if (m_transcriptionMethod == kSingleShooting) {
+    ConstrainSingleShooting();
+  }
 }
 
-void FixedStepOCPSolver::DirectTranscription() {
+void FixedStepOCPSolver::ConstrainDirectCollocation() {
+  if (m_dynamicsType != kExplicitODE) {
+    throw std::runtime_error("Direct Collocation requires an explicit ODE");
+  }
+  for (int i = 0; i < m_numSteps; ++i) {
+    auto x_begin = X().Col(i);
+    auto x_end = X().Col(i + 1);
+    auto u_begin = U().Col(i);
+    auto t_begin = m_dt * i;
+    auto t_end = m_dt * (i + 1);
+    auto t_c = t_begin + m_dt / 2.0;
+
+    // Use u_begin on the end point as well because we are approaching a discontinuity from the left
+    auto f_begin = m_dynamicsFunction(t_begin, x_begin, u_begin);
+    auto f_end = m_dynamicsFunction(t_end, x_end, u_begin);
+    auto x_c = (x_begin + x_end) / 2.0 + (m_dt / 8.0) * (f_begin - f_end);
+    auto xprime_c = (-3.0/(2.0 * m_dt)) * (x_begin - x_end) - (f_begin + f_end) / 4.0;
+    auto f_c = m_dynamicsFunction(t_c, x_c, u_begin);
+    SubjectTo(f_c == xprime_c);
+  }
+}
+
+void FixedStepOCPSolver::ConstrainDirectTranscription() {
   for (int i = 0; i < m_numSteps; ++i) {
     auto x_begin = X().Col(i);
     auto x_end = X().Col(i + 1);
     auto u = U().Col(i);
     auto t = m_dt * i;
-    m_problem.SubjectTo(x_end == RK4<VariableMatrix, VariableMatrix, double>(m_F, x_begin, u, t, m_dt));
+    if (m_dynamicsType == kExplicitODE) {
+      SubjectTo(x_end == RK4<const DynamicsFunction&, VariableMatrix, VariableMatrix, const double&>(m_dynamicsFunction, x_begin, u, t, m_dt));
+    }
+    else if (m_dynamicsType == kDiscrete) {
+      SubjectTo(x_end == m_dynamicsFunction(t, x_begin, u));
+    }
+    else if (m_dynamicsType == kImplicitODE) {
+      // TODO
+    }
   }
 }
 
-void FixedStepOCPSolver::DirectTranscriptionLinearDiscrete() {
-  for (int i = 0; i < m_numSteps; ++i) {
-    auto x_begin = X().Col(i);
-    auto x_end = X().Col(i + 1);
-    auto u = U().Col(i);
-    m_problem.SubjectTo(x_end == m_Ad * x_begin + m_Bd * u);
-  }
+void FixedStepOCPSolver::ConstrainSingleShooting() {
+  ConstrainDirectTranscription();
 }
 
-void FixedStepOCPSolver::ConstrainAlways(FixedStepConstraintFunction constraintFunction) {
-  // TODO: this kinda sucks and relies on the user to not add any constraints on U when i == m_numSteps
-  // a simpler way is to not add the "always" constraints to the last step but that would be an even
-  // worse footgun
-  for (int i = 0; i < m_numSteps; ++i) {
+void FixedStepOCPSolver::ConstrainAlways(const FixedStepConstraintFunction& constraintFunction) {
+  for (int i = 0; i < m_numSteps + 1; ++i) {
     auto x = X().Col(i);
     auto u = U().Col(i);
-    constraintFunction(x, u, false);
+    constraintFunction(x, u, i == m_numSteps);
   }
-  VariableMatrix fakeU{M, 1};
-  constraintFunction(X().Col(m_numSteps, fakeU, true));
 }
 
-SolverStatus FixedStepOCPSolver::Solve() {
-  return m_problem.Solve();
+void FixedStepOCPSolver::ConstrainInitialState(const VariableMatrix& initialState) {
+  SubjectTo(InitialState() == initialState);
 }
 
-SolverStatus FixedStepOCPSolver::Solve(SolverConfig config) {
-  return m_problem.Solve(config);
+void FixedStepOCPSolver::ConstrainFinalState(const VariableMatrix& finalState) {
+  SubjectTo(FinalState() == finalState);
 }
