@@ -140,7 +140,7 @@ TEST(OCPSolver, FlywheelExplicit) {
   };
   TestFlywheel("Explicit Collocation", A, B, f_ode, sleipnir::DynamicsType::kExplicitODE, sleipnir::TranscriptionMethod::kDirectCollocation);
   TestFlywheel("Explicit Transcription", A, B, f_ode, sleipnir::DynamicsType::kExplicitODE, sleipnir::TranscriptionMethod::kDirectTranscription);
-  //TestFlywheel("Explicit Single-Shooting", A, B, f_ode, sleipnir::DynamicsType::kExplicitODE, sleipnir::TranscriptionMethod::kSingleShooting);
+  TestFlywheel("Explicit Single-Shooting", A, B, f_ode, sleipnir::DynamicsType::kExplicitODE, sleipnir::TranscriptionMethod::kSingleShooting);
 }
 
 TEST(OCPSolver, FlywheelDiscrete) {
@@ -153,5 +153,5 @@ TEST(OCPSolver, FlywheelDiscrete) {
     return A_discrete*x + B_discrete*u;
   };
   TestFlywheel("Discrete Transcription", A, B, f_discrete, sleipnir::DynamicsType::kDiscrete, sleipnir::TranscriptionMethod::kDirectTranscription);
-  //TestFlywheel("Discrete Single-Shooting", A, B, f_discrete, sleipnir::DynamicsType::kDiscrete, sleipnir::TranscriptionMethod::kSingleShooting);
+  TestFlywheel("Discrete Single-Shooting", A, B, f_discrete, sleipnir::DynamicsType::kDiscrete, sleipnir::TranscriptionMethod::kSingleShooting);
 }
