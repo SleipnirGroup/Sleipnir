@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <chrono>
+
 #include <Eigen/Core>
 
 #include "sleipnir/SymbolExports.hpp"
@@ -15,8 +17,9 @@ namespace sleipnir {
  * transition function. Explicit: dx/dt = f(t, x, u) Implicit: f(t, [x dx/dt]',
  * u) = 0 State transition: xₖ₊₁ = f(t, xₖ, u)
  */
-using DynamicsFunction = std::function<VariableMatrix(
-    double, const VariableMatrix&, const VariableMatrix&)>;
+using DynamicsFunction =
+    std::function<VariableMatrix(std::chrono::duration<double>,
+                                 const VariableMatrix&, const VariableMatrix&)>;
 
 /**
  * Constrain a fixed step OCP. This function is called numSteps + 1 times, once
@@ -40,17 +43,17 @@ template <typename F, typename State, typename Input, typename Time>
 State RK4(F&& f, State x, Input u, Time t0, Time dt) {
   auto halfdt = dt * 0.5;
   State k1 = f(t0, x, u);
-  State k2 = f(t0 + halfdt, x + halfdt * k1, u);
-  State k3 = f(t0 + halfdt, x + halfdt * k2, u);
-  State k4 = f(t0 + dt, x + dt * k3, u);
+  State k2 = f(t0 + halfdt, x + halfdt.count() * k1, u);
+  State k3 = f(t0 + halfdt, x + halfdt.count() * k2, u);
+  State k4 = f(t0 + dt, x + dt.count() * k3, u);
 
-  return x + (k1 + k2 * 2.0 + k3 * 2.0 + k4) * (dt / 6.0);
+  return x + (k1 + k2 * 2.0 + k3 * 2.0 + k4) * (dt.count() / 6.0);
 }
 
 /**
  * Enum describing an OCP transcription method.
  */
-enum TranscriptionMethod {
+enum class TranscriptionMethod {
   kDirectTranscription,
   kDirectCollocation,
   kSingleShooting
@@ -59,7 +62,7 @@ enum TranscriptionMethod {
 /**
  * Enum describing a type of system dynamics constraints.
  */
-enum DynamicsType { kExplicitODE, kDiscrete };
+enum class DynamicsType { kExplicitODE, kDiscrete };
 
 /**
  * This class allows the user to pose and solve a constrained optimal control
@@ -100,10 +103,11 @@ class SLEIPNIR_DLLEXPORT FixedStepOCPSolver : public OptimizationProblem {
    * @param dynamicsType The type of system evolution function.
    * @param method The transcription method.
    */
-  FixedStepOCPSolver(int numStates, int numInputs, double dt, int numSteps,
-                     const DynamicsFunction& dynamics,
-                     DynamicsType dynamicsType = kExplicitODE,
-                     TranscriptionMethod method = kDirectTranscription);
+  FixedStepOCPSolver(
+      int numStates, int numInputs, std::chrono::duration<double> dt,
+      int numSteps, const DynamicsFunction& dynamics,
+      DynamicsType dynamicsType = DynamicsType::kExplicitODE,
+      TranscriptionMethod method = TranscriptionMethod::kDirectTranscription);
 
   /**
    * Utility function to constrain the initial state.
@@ -142,7 +146,7 @@ class SLEIPNIR_DLLEXPORT FixedStepOCPSolver : public OptimizationProblem {
   /**
    * Convenience function to set an upper bound on the input.
    *
-   * @param lowerBound The upper bound that inputs must always be below. Must be
+   * @param upperBound The upper bound that inputs must always be below. Must be
    * shaped (numInputs)x1.
    */
   void SetUpperInputBound(const VariableMatrix& upperBound) {
@@ -191,7 +195,7 @@ class SLEIPNIR_DLLEXPORT FixedStepOCPSolver : public OptimizationProblem {
 
   int m_numStates;
   int m_numInputs;
-  double m_dt;
+  std::chrono::duration<double> m_dt;
   int m_numSteps;
   TranscriptionMethod m_transcriptionMethod;
 
