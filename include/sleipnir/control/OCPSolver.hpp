@@ -13,13 +13,17 @@
 namespace sleipnir {
 
 /**
+ * @todo these typedefs are not picked up by doxygen correctly.
+ *
  * Function representing an explicit or implicit ODE, or a discrete state
- * transition function. Explicit: dx/dt = f(t, x, u) Implicit: f(t, [x dx/dt]',
- * u) = 0 State transition: xₖ₊₁ = f(t, xₖ, u)
+ * transition function.
+ * - Explicit: dx/dt = f(t, x, u, *)
+ * - Implicit: f(t, [x dx/dt]', u, *) = 0
+ * - State transition: xₖ₊₁ = f(t, xₖ, u, dt)
  */
 using DynamicsFunction =
-    std::function<VariableMatrix(std::chrono::duration<double>,
-                                 const VariableMatrix&, const VariableMatrix&)>;
+    std::function<VariableMatrix(const Variable&, const VariableMatrix&,
+                                 const VariableMatrix&, const Variable&)>;
 
 /**
  * Constrain a fixed step OCP. This function is called numSteps + 1 times, once
@@ -42,12 +46,12 @@ using FixedStepConstraintFunction =
 template <typename F, typename State, typename Input, typename Time>
 State RK4(F&& f, State x, Input u, Time t0, Time dt) {
   auto halfdt = dt * 0.5;
-  State k1 = f(t0, x, u);
-  State k2 = f(t0 + halfdt, x + halfdt.count() * k1, u);
-  State k3 = f(t0 + halfdt, x + halfdt.count() * k2, u);
-  State k4 = f(t0 + dt, x + dt.count() * k3, u);
+  State k1 = f(t0, x, u, dt);
+  State k2 = f(t0 + halfdt, x + halfdt * k1, u, dt);
+  State k3 = f(t0 + halfdt, x + halfdt * k2, u, dt);
+  State k4 = f(t0 + dt, x + dt * k3, u, dt);
 
-  return x + (k1 + k2 * 2.0 + k3 * 2.0 + k4) * (dt.count() / 6.0);
+  return x + (k1 + k2 * 2.0 + k3 * 2.0 + k4) * (dt / 6.0);
 }
 
 /**
@@ -65,6 +69,11 @@ enum class TranscriptionMethod {
 enum class DynamicsType { kExplicitODE, kDiscrete };
 
 /**
+ * Enum describing the type of system timestep.
+ */
+enum class TimestepMethod { kFixed, kVariable, kVariableSingle };
+
+/**
  * This class allows the user to pose and solve a constrained optimal control
  * problem (OCP) in a variety of ways.
  *
@@ -73,7 +82,7 @@ enum class DynamicsType { kExplicitODE, kDiscrete };
  * added.
  *
  * @todo expand this explanation more.
- * 
+ *
  * In single-shooting, states depend explicitly as a function of all previous
  * states and all previous inputs. In direct transcription, each state is a
  * decision variable constrained to the integrated dynamics of the previous
@@ -89,7 +98,7 @@ enum class DynamicsType { kExplicitODE, kDiscrete };
  * Direct collocation requires an explicit ODE. Direct transcription and
  * single-shooting can use either an ODE or state transition function.
  */
-class SLEIPNIR_DLLEXPORT FixedStepOCPSolver : public OptimizationProblem {
+class SLEIPNIR_DLLEXPORT OCPSolver : public OptimizationProblem {
  public:
   /**
    * Build an optimization problem using a system evolution function (explicit
@@ -97,17 +106,19 @@ class SLEIPNIR_DLLEXPORT FixedStepOCPSolver : public OptimizationProblem {
    *
    * @param numStates The number of system states.
    * @param numInputs The number of system inputs.
-   * @param dt The timestep for integration. Must be in seconds.
+   * @param dt The timestep for fixed-step integration.
    * @param numSteps The number of control points.
    * @param dynamics The system evolution function, either an explicit ODE or a
    * discrete state transition function.
    * @param dynamicsType The type of system evolution function.
+   * @param timestepMethod The timestep method.
    * @param method The transcription method.
    */
-  FixedStepOCPSolver(
+  OCPSolver(
       int numStates, int numInputs, std::chrono::duration<double> dt,
       int numSteps, const DynamicsFunction& dynamics,
       DynamicsType dynamicsType = DynamicsType::kExplicitODE,
+      TimestepMethod timestepMethod = TimestepMethod::kFixed,
       TranscriptionMethod method = TranscriptionMethod::kDirectTranscription);
 
   /**
@@ -155,6 +166,15 @@ class SLEIPNIR_DLLEXPORT FixedStepOCPSolver : public OptimizationProblem {
   }
 
   /**
+   * Convenience function to set an upper bound on the timestep.
+   *
+   * @param maxTimestep The maximum timestep.
+   */
+  void SetUpperInputBound(std::chrono::duration<double> maxTimestep) {
+    SubjectTo(DT() <= maxTimestep.count());
+  }
+
+  /**
    * Get the state variables. After the problem is solved, this will contain the
    * optimized trajectory.
    *
@@ -174,6 +194,17 @@ class SLEIPNIR_DLLEXPORT FixedStepOCPSolver : public OptimizationProblem {
    * @returns The input variable matrix.
    */
   VariableMatrix& U() { return m_U; };
+
+  /**
+   * Get the timestep variables. After the problem is solved, this will contain
+   * the timesteps corresponding to the optimized trajectory.
+   *
+   * Shaped 1x(numSteps+1), although the last timestep is unused in
+   * the trajectory.
+   *
+   * @returns The timestep variable matrix.
+   */
+  VariableMatrix& DT() { return m_DT; };
 
   /**
    * Convenience function to get the initial state in the trajectory.
@@ -203,8 +234,11 @@ class SLEIPNIR_DLLEXPORT FixedStepOCPSolver : public OptimizationProblem {
   DynamicsType m_dynamicsType;
   const DynamicsFunction& m_dynamicsFunction;
 
+  TimestepMethod m_timestepMethod;
+
   VariableMatrix m_X;
   VariableMatrix m_U;
+  VariableMatrix m_DT;
 };
 
 }  // namespace sleipnir

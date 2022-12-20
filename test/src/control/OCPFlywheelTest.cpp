@@ -40,9 +40,9 @@ void TestFlywheel(std::string test_name, Eigen::Matrix<double, 1, 1> A,
   Eigen::Matrix<double, 1, 1> B_discrete{(1.0 - A_discrete(0)) * B(0)};
   Eigen::Matrix<double, 1, 1> r{10.0};
 
-  sleipnir::FixedStepOCPSolver solver(1, 1,
-                                      std::chrono::duration<double>(dt.value()),
-                                      N, F, dynamicsType, method);
+  sleipnir::OCPSolver solver(1, 1, std::chrono::duration<double>(dt.value()), N,
+                             F, dynamicsType, sleipnir::TimestepMethod::kFixed,
+                             method);
   solver.ConstrainInitialState(0.0);
   solver.SetUpperInputBound(12);
   solver.SetLowerInputBound(-12);
@@ -145,8 +145,9 @@ void TestFlywheel(std::string test_name, Eigen::Matrix<double, 1, 1> A,
 TEST(OCPSolverTest, FlywheelExplicit) {
   Eigen::Matrix<double, 1, 1> A{-1.0};
   Eigen::Matrix<double, 1, 1> B{1.0};
-  auto f_ode = [=](std::chrono::duration<double> t, sleipnir::VariableMatrix x,
-                   sleipnir::VariableMatrix u) { return A * x + B * u; };
+  auto f_ode = [=](sleipnir::Variable t, sleipnir::VariableMatrix x,
+                   sleipnir::VariableMatrix u,
+                   sleipnir::Variable dt) { return A * x + B * u; };
   TestFlywheel("Explicit Collocation", A, B, f_ode,
                sleipnir::DynamicsType::kExplicitODE,
                sleipnir::TranscriptionMethod::kDirectCollocation);
@@ -164,9 +165,8 @@ TEST(OCPSolverTest, FlywheelDiscrete) {
   units::second_t dt = 5_ms;
   Eigen::Matrix<double, 1, 1> A_discrete{std::exp(A(0) * dt.value())};
   Eigen::Matrix<double, 1, 1> B_discrete{(1.0 - A_discrete(0)) * B(0)};
-  auto f_discrete = [=](std::chrono::duration<double> t,
-                        sleipnir::VariableMatrix x,
-                        sleipnir::VariableMatrix u) {
+  auto f_discrete = [=](sleipnir::Variable t, sleipnir::VariableMatrix x,
+                        sleipnir::VariableMatrix u, sleipnir::Variable dt) {
     return A_discrete * x + B_discrete * u;
   };
   TestFlywheel("Discrete Transcription", A, B, f_discrete,
