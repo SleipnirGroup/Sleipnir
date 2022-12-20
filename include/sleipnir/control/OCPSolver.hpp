@@ -73,6 +73,7 @@ enum class DynamicsType { kExplicitODE, kDiscrete };
  * added.
  *
  * @todo expand this explanation more.
+ * 
  * In single-shooting, states depend explicitly as a function of all previous
  * states and all previous inputs. In direct transcription, each state is a
  * decision variable constrained to the integrated dynamics of the previous
@@ -119,7 +120,7 @@ class SLEIPNIR_DLLEXPORT FixedStepOCPSolver : public OptimizationProblem {
   /**
    * Utility function to constrain the final state.
    *
-   * @param initialState the final state to constrain to.
+   * @param finalState the final state to constrain to.
    */
 
   void ConstrainFinalState(const VariableMatrix& finalState);
