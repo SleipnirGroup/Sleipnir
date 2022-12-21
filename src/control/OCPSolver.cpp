@@ -29,7 +29,6 @@ OCPSolver::OCPSolver(int numStates, int numInputs,
     Variable DT = DecisionVariable(1, 1)(0, 0);
     // Initial guess
     DT = m_dt.count();
-    SubjectTo(DT > 0);
     m_DT = VariableMatrix(1, m_numSteps + 1);
     // Set the member variable matrix to track the decision variable
     for (int i = 0; i < numSteps + 1; ++i) {
@@ -40,7 +39,6 @@ OCPSolver::OCPSolver(int numStates, int numInputs,
     for (int i = 0; i < numSteps + 1; ++i) {
       m_DT(0, i) = m_dt.count();
     }
-    SubjectTo(m_DT > 0);
   }
 
   if (m_transcriptionMethod == TranscriptionMethod::kDirectTranscription) {
