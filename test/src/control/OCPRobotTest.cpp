@@ -39,7 +39,7 @@ TEST(OCPSolverTest, Robot) {
   Eigen::Matrix<double, 3, 1> initialState{0.0, 0.0, 0.0};
   Eigen::Matrix<double, 3, 1> finalState{10.0, 10.0, 0.0};
   Eigen::Matrix<double, 2, 1> inputMax{1.0, 1.0};
-  Eigen::Matrix<double, 2, 1> inputMin = -inputMax;
+  Eigen::Matrix<double, 2, 1> inputMin{0.0, 0.0};
   for (int i = 0; i < N; ++i) {
     solverFixedTime.U()(0, i) = 1.0;
     solverFixedTime.U()(1, i) = 1.0;
@@ -75,9 +75,12 @@ TEST(OCPSolverTest, Robot) {
   // minTimestep.value()));
 
   // Set up objective
-  Eigen::Matrix<double, N + 1, 1> ones =
-      Eigen::Matrix<double, N + 1, 1>::Ones();
-  auto J = solverMinTime.DT() * sleipnir::VariableMatrix{ones};
+  sleipnir::VariableMatrix ones(N+1, 1);
+  sleipnir::Variable one{sleipnir::MakeConstant(1.0)};
+  for (int i = 0; i < N+1; ++i) {
+    ones(i, 0) = one;
+  }
+  auto J = solverMinTime.DT() * ones;
   solverMinTime.Minimize(J);
 
   auto end1 = std::chrono::system_clock::now();
@@ -88,8 +91,7 @@ TEST(OCPSolverTest, Robot) {
 
   status = solverMinTime.Solve({.diagnostics = true});
 
-  // TODO shouldn't the cost function be linear as it's a sum of dt steps?
-  EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
+  EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.costFunctionType);
   EXPECT_EQ(sleipnir::ExpressionType::kNonlinear,
             status.equalityConstraintType);
   EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.inequalityConstraintType);
