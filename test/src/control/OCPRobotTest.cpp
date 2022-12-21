@@ -1,0 +1,130 @@
+// Copyright (c) Sleipnir contributors
+
+#include <chrono>
+#include <cmath>
+#include <fstream>
+
+#include <Eigen/Core>
+#include <fmt/core.h>
+#include <gtest/gtest.h>
+#include <sleipnir/control/OCPSolver.hpp>
+#include <units/time.h>
+
+TEST(OCPSolverTest, Robot) {
+  auto start = std::chrono::system_clock::now();
+
+  constexpr int N = 50;
+
+  auto dynamicsFunction = [=](sleipnir::Variable t, sleipnir::VariableMatrix x,
+                              sleipnir::VariableMatrix u,
+                              sleipnir::Variable dt) {
+    sleipnir::Variable theta = x(2, 0);
+    sleipnir::Variable Vc = 0.5 * (u(0, 0) + u(1, 0));
+    sleipnir::Variable w = 0.5 * (u(0, 0) - u(1, 0));
+    auto Vx = Vc * sleipnir::cos(theta);
+    auto Vy = Vc * sleipnir::sin(theta);
+    sleipnir::VariableMatrix xdot{3, 1};
+    xdot(0, 0) = Vx;
+    xdot(1, 0) = Vy;
+    xdot(2, 0) = w;
+    return xdot;
+  };
+  units::second_t minTimestep = 500_ms;
+
+  sleipnir::OCPSolver solverFixedTime(
+      3, 2, std::chrono::duration<double>(minTimestep.value()), N,
+      dynamicsFunction, sleipnir::DynamicsType::kExplicitODE,
+      sleipnir::TimestepMethod::kFixed,
+      sleipnir::TranscriptionMethod::kDirectTranscription);
+  Eigen::Matrix<double, 3, 1> initialState{0.0, 0.0, 0.0};
+  Eigen::Matrix<double, 3, 1> finalState{10.0, 10.0, 0.0};
+  Eigen::Matrix<double, 2, 1> inputMax{1.0, 1.0};
+  Eigen::Matrix<double, 2, 1> inputMin = -inputMax;
+  for (int i = 0; i < N; ++i) {
+    solverFixedTime.U()(0, i) = 1.0;
+    solverFixedTime.U()(1, i) = 1.0;
+  }
+  solverFixedTime.ConstrainInitialState(initialState);
+  solverFixedTime.ConstrainFinalState(finalState);
+  solverFixedTime.SetUpperInputBound(inputMax);
+  solverFixedTime.SetLowerInputBound(inputMin);
+  auto status = solverFixedTime.Solve({.diagnostics = true});
+  EXPECT_EQ(sleipnir::SolverExitCondition::kOk, status.exitCondition);
+  sleipnir::OCPSolver solverMinTime(
+      3, 2, std::chrono::duration<double>(minTimestep.value()), N,
+      dynamicsFunction, sleipnir::DynamicsType::kExplicitODE,
+      sleipnir::TimestepMethod::kVariable,
+      sleipnir::TranscriptionMethod::kDirectTranscription);
+  // Seed the min time formulation with a valid trajectory from the fixed time
+  // formulation
+  for (int i = 0; i < N + 1; ++i) {
+    solverMinTime.U()(0, i) = solverFixedTime.U().Value(0, i);
+    solverMinTime.U()(1, i) = solverFixedTime.U().Value(1, i);
+    solverMinTime.X()(0, i) = solverFixedTime.X().Value(0, i);
+    solverMinTime.X()(1, i) = solverFixedTime.X().Value(1, i);
+    solverMinTime.X()(2, i) = solverFixedTime.X().Value(2, i);
+  }
+  solverMinTime.ConstrainInitialState(initialState);
+  solverMinTime.ConstrainFinalState(finalState);
+  solverMinTime.SetUpperInputBound(inputMax);
+  solverMinTime.SetLowerInputBound(inputMin);
+  solverMinTime.SetMaxTimestep(std::chrono::duration<double>(3.0));
+  // todo solver is unhappy when more than one minimum timestep is constrained
+  // either detect this in OptimizationProblem or in OCPSolver
+  // solverMinTime.SetMinTimestep(std::chrono::duration<double>(0.1 *
+  // minTimestep.value()));
+
+  // Set up objective
+  Eigen::Matrix<double, N + 1, 1> ones =
+      Eigen::Matrix<double, N + 1, 1>::Ones();
+  auto J = solverMinTime.DT() * sleipnir::VariableMatrix{ones};
+  solverMinTime.Minimize(J);
+
+  auto end1 = std::chrono::system_clock::now();
+  using std::chrono::duration_cast;
+  using std::chrono::microseconds;
+  fmt::print("Setup time: {} ms\n\n",
+             duration_cast<microseconds>(end1 - start).count() / 1000.0);
+
+  status = solverMinTime.Solve({.diagnostics = true});
+
+  // TODO shouldn't the cost function be linear as it's a sum of dt steps?
+  EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
+  EXPECT_EQ(sleipnir::ExpressionType::kNonlinear,
+            status.equalityConstraintType);
+  EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.inequalityConstraintType);
+  EXPECT_EQ(sleipnir::SolverExitCondition::kOk, status.exitCondition);
+
+  // Log states for offline viewing
+  std::ofstream states{"Robot states.csv"};
+  double time = 0.0;
+  if (states.is_open()) {
+    states << "Time (s),X estimate (m),Y estimate (m),Theta (rad),X reference "
+              "(m),Y reference (m)\n";
+
+    for (int k = 0; k < N + 1; ++k) {
+      states << fmt::format("{},{},{},{},{},{}\n", time,
+                            solverMinTime.X().Value(0, k),
+                            solverMinTime.X().Value(1, k),
+                            solverMinTime.X().Value(2, k), 0.0, 0.0);
+      time += solverMinTime.DT().Value(0, k);
+    }
+  }
+
+  time = 0.0;
+  // Log inputs for offline viewing
+  std::ofstream inputs{"Robot inputs.csv"};
+  if (inputs.is_open()) {
+    inputs << "Time (s),Velocity Right (m/s),Velocity Left (m/s)\n";
+
+    for (int k = 0; k < N + 1; ++k) {
+      if (k < N) {
+        inputs << fmt::format("{},{},{}\n", time, solverMinTime.U().Value(0, k),
+                              solverMinTime.U().Value(1, k));
+      } else {
+        inputs << fmt::format("{},{},{}\n", time, 0.0, 0.0);
+      }
+      time += solverMinTime.DT().Value(0, k);
+    }
+  }
+}

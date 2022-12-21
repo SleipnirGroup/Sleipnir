@@ -152,7 +152,9 @@ class SLEIPNIR_DLLEXPORT OCPSolver : public OptimizationProblem {
    * shaped (numInputs)x1.
    */
   void SetLowerInputBound(const VariableMatrix& lowerBound) {
-    SubjectTo(U() >= lowerBound);
+    for (int i = 0; i < m_numSteps + 1; ++i) {
+      SubjectTo(U().Col(i) >= lowerBound);
+    }
   }
 
   /**
@@ -162,7 +164,9 @@ class SLEIPNIR_DLLEXPORT OCPSolver : public OptimizationProblem {
    * shaped (numInputs)x1.
    */
   void SetUpperInputBound(const VariableMatrix& upperBound) {
-    SubjectTo(U() <= upperBound);
+    for (int i = 0; i < m_numSteps + 1; ++i) {
+      SubjectTo(U().Col(i) <= upperBound);
+    }
   }
 
   /**
