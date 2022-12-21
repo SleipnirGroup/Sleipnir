@@ -99,7 +99,7 @@ class RegularizedLDLT {
       // Regularize lhs by adding a multiple of the identity matrix
       //
       // lhs = [H + AᵢᵀΣAᵢ + δI   Aₑᵀ]
-      //       [       Aₑ        −δI ]
+      //       [       Aₑ        −γI ]
       Eigen::SparseMatrix<double> regularization{lhs.rows(), lhs.cols()};
       m_triplets.clear();
       for (size_t row = 0; row < lhs.rows() - numEqualityConstraints; ++row) {
