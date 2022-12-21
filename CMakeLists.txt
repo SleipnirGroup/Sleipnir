@@ -147,9 +147,11 @@ configure_package_config_file(
   NO_CHECK_REQUIRED_COMPONENTS_MACRO)
 
 # Install the config file
-install(FILES
-  ${CMAKE_CURRENT_BINARY_DIR}/SleipnirConfig.cmake
-  DESTINATION lib/cmake/Sleipnir)
+if (INSTALL_SLEIPNIR)
+  install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/SleipnirConfig.cmake
+    DESTINATION lib/cmake/Sleipnir)
+endif()
 
 # Add benchmark executables if CasADi exists
 find_package(casadi QUIET)
