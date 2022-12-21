@@ -71,8 +71,7 @@ TEST(OCPSolverTest, Robot) {
   solverMinTime.SetMaxTimestep(std::chrono::duration<double>(3.0));
   // todo solver is unhappy when more than one minimum timestep is constrained
   // either detect this in OptimizationProblem or in OCPSolver
-  // solverMinTime.SetMinTimestep(std::chrono::duration<double>(0.1 *
-  // minTimestep.value()));
+  solverMinTime.SetMinTimestep(std::chrono::duration<double>(0.1 * minTimestep.value()));
 
   // Set up objective
   sleipnir::VariableMatrix ones(N+1, 1);
