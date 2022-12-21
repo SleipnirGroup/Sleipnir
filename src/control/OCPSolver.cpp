@@ -22,17 +22,25 @@ OCPSolver::OCPSolver(int numStates, int numInputs,
 
   if (m_timestepMethod == TimestepMethod::kFixed) {
     m_DT = VariableMatrix(1, m_numSteps + 1);
+    for (int i = 0; i < numSteps + 1; ++i) {
+      m_DT(0, i) = Variable(MakeConstant(m_dt.count()));
+    }
   } else if (m_timestepMethod == TimestepMethod::kVariableSingle) {
-    // todo maybe reconfigure this, will either not work at all or cause a lot
-    // of redundant constraints
-    VariableMatrix DT = DecisionVariable(1, 1);
+    Variable DT = DecisionVariable(1, 1)(0, 0);
+    // Initial guess
+    DT = m_dt.count();
+    SubjectTo(DT > 0);
     m_DT = VariableMatrix(1, m_numSteps + 1);
-    m_DT = DT;
+    // Set the member variable matrix to track the decision variable
+    for (int i = 0; i < numSteps + 1; ++i) {
+      m_DT(0, i) = DT;
+    }
   } else if (m_timestepMethod == TimestepMethod::kVariable) {
     m_DT = DecisionVariable(1, m_numSteps + 1);
-  }
-  for (int i = 0; i < numSteps + 1; ++i) {
-    m_DT(0, i) = m_dt.count();
+    for (int i = 0; i < numSteps + 1; ++i) {
+      m_DT(0, i) = m_dt.count();
+    }
+    SubjectTo(m_DT > 0);
   }
 
   if (m_transcriptionMethod == TranscriptionMethod::kDirectTranscription) {
@@ -68,10 +76,9 @@ void OCPSolver::ConstrainDirectCollocation() {
     // discontinuity from the left
     auto f_begin = m_dynamicsFunction(t_begin, x_begin, u_begin, dt);
     auto f_end = m_dynamicsFunction(t_end, x_end, u_begin, dt);
-    auto x_c =
-        (x_begin + x_end) / 2.0 + (m_dt.count() / 8.0) * (f_begin - f_end);
-    auto xprime_c = (-3.0 / (2.0 * m_dt.count())) * (x_begin - x_end) -
-                    (f_begin + f_end) / 4.0;
+    auto x_c = (x_begin + x_end) / 2.0 + (f_begin - f_end) * (dt / 8.0);
+    auto xprime_c =
+        (x_begin - x_end) * (-3.0 / (2.0 * dt)) - (f_begin + f_end) / 4.0;
     auto f_c = m_dynamicsFunction(t_c, x_c, u_begin, dt);
     SubjectTo(f_c == xprime_c);
   }
@@ -83,7 +90,7 @@ void OCPSolver::ConstrainDirectTranscription() {
     auto x_begin = X().Col(i);
     auto x_end = X().Col(i + 1);
     auto u = U().Col(i);
-    auto dt = DT()(0, i);
+    Variable dt = DT()(0, i);
 
     if (m_dynamicsType == DynamicsType::kExplicitODE) {
       SubjectTo(x_end ==
@@ -102,7 +109,8 @@ void OCPSolver::ConstrainSingleShooting() {
     auto x_begin = X().Col(i);
     auto x_end = X().Col(i + 1);
     auto u = U().Col(i);
-    auto dt = DT()(0, i);
+    Variable dt = DT()(0, i);
+
     if (m_dynamicsType == DynamicsType::kExplicitODE) {
       x_end = RK4<const DynamicsFunction&, VariableMatrix, VariableMatrix,
                   Variable>(m_dynamicsFunction, x_begin, u, time, dt);
@@ -114,11 +122,14 @@ void OCPSolver::ConstrainSingleShooting() {
 }
 
 void OCPSolver::ConstrainAlways(
-    const FixedStepConstraintFunction& constraintFunction) {
+    const OCPConstraintCallback& constraintFunction) {
+  Variable time{0.0};
   for (int i = 0; i < m_numSteps + 1; ++i) {
     auto x = X().Col(i);
     auto u = U().Col(i);
-    constraintFunction(x, u);
+    auto dt = DT()(0, i);
+    constraintFunction(time, x, u, dt);
+    time += dt;
   }
 }
 
