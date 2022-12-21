@@ -27,12 +27,12 @@ using DynamicsFunction =
 
 /**
  * Constrain a fixed step OCP. This function is called numSteps + 1 times, once
- * for each step. The arguments are X_i (numStates)x1, U_i (numInputs)x1, and
- * then true if this is the last step and has no associated input, otherwise
- * false.
+ * for each step. The arguments are time, X_i (numStates)x1, U_i (numInputs)x1,
+ * and the timestep of this segment.
  */
-using FixedStepConstraintFunction =
-    std::function<void(const VariableMatrix&, const VariableMatrix&)>;
+using OCPConstraintCallback =
+    std::function<void(const Variable&, const VariableMatrix&,
+                       const VariableMatrix&, const Variable&)>;
 
 /**
  * Performs 4th order Runge-Kutta integration of dx/dt = f(t, x, u) for dt.
@@ -47,9 +47,9 @@ template <typename F, typename State, typename Input, typename Time>
 State RK4(F&& f, State x, Input u, Time t0, Time dt) {
   auto halfdt = dt * 0.5;
   State k1 = f(t0, x, u, dt);
-  State k2 = f(t0 + halfdt, x + halfdt * k1, u, dt);
-  State k3 = f(t0 + halfdt, x + halfdt * k2, u, dt);
-  State k4 = f(t0 + dt, x + dt * k3, u, dt);
+  State k2 = f(t0 + halfdt, x + k1 * halfdt, u, dt);
+  State k3 = f(t0 + halfdt, x + k2 * halfdt, u, dt);
+  State k4 = f(t0 + dt, x + k3 * dt, u, dt);
 
   return x + (k1 + k2 * 2.0 + k3 * 2.0 + k4) * (dt / 6.0);
 }
@@ -143,7 +143,7 @@ class SLEIPNIR_DLLEXPORT OCPSolver : public OptimizationProblem {
    *
    * @param constraintFunction the constraint function.
    */
-  void ConstrainAlways(const FixedStepConstraintFunction& constraintFunction);
+  void ConstrainAlways(const OCPConstraintCallback& constraintFunction);
 
   /**
    * Convenience function to set a lower bound on the input.
@@ -170,8 +170,17 @@ class SLEIPNIR_DLLEXPORT OCPSolver : public OptimizationProblem {
    *
    * @param maxTimestep The maximum timestep.
    */
-  void SetUpperInputBound(std::chrono::duration<double> maxTimestep) {
+  void SetMaxTimestep(std::chrono::duration<double> maxTimestep) {
     SubjectTo(DT() <= maxTimestep.count());
+  }
+
+  /**
+   * Convenience function to set a lower bound on the timestep.
+   *
+   * @param minTimestep The minimum timestep.
+   */
+  void SetMinTimestep(std::chrono::duration<double> minTimestep) {
+    SubjectTo(DT() >= minTimestep.count());
   }
 
   /**
@@ -218,7 +227,7 @@ class SLEIPNIR_DLLEXPORT OCPSolver : public OptimizationProblem {
    *
    * @returns The final state of the trajectory.
    */
-  VariableMatrix FinalState() { return m_X.Col(m_numSteps + 1); }
+  VariableMatrix FinalState() { return m_X.Col(m_numSteps); }
 
  private:
   void ConstrainDirectCollocation();
