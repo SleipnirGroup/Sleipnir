@@ -119,7 +119,7 @@ subject to cₑ(x) = 0
  * Next, we'll create a cost function for minimizing position error.
  * @code{.cpp}
  * // Cost function - minimize position error
- * sleipnir::VariableMatrix J = 0.0;
+ * sleipnir::Variable J = 0.0;
  * for (int k = 0; k < N + 1; ++k) {
  *   J += sleipnir::pow(10.0 - X(0, k), 2);
  * }
@@ -213,12 +213,17 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
   OptimizationProblem() noexcept;
 
   /**
+   * Create a decision variable in the optimization problem.
+   */
+  [[nodiscard]] Variable DecisionVariable();
+
+  /**
    * Create a matrix of decision variables in the optimization problem.
    *
    * @param rows Number of matrix rows.
    * @param cols Number of matrix columns.
    */
-  [[nodiscard]] VariableMatrix DecisionVariable(int rows = 1, int cols = 1);
+  [[nodiscard]] VariableMatrix DecisionVariable(int rows, int cols = 1);
 
   /**
    * Tells the solver to minimize the output of the given cost function.
@@ -227,9 +232,9 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
    * will find the closest solution to the initial conditions that's in the
    * feasible set.
    *
-   * @param cost The cost function to minimize. It must return a 1x1 matrix.
+   * @param cost The cost function to minimize.
    */
-  void Minimize(const VariableMatrix& cost);
+  void Minimize(const Variable& cost);
 
   /**
    * Tells the solver to minimize the output of the given cost function.
@@ -238,9 +243,9 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
    * will find the closest solution to the initial conditions that's in the
    * feasible set.
    *
-   * @param cost The cost function to minimize. It must return a 1x1 matrix.
+   * @param cost The cost function to minimize.
    */
-  void Minimize(VariableMatrix&& cost);
+  void Minimize(Variable&& cost);
 
   /**
    * Tells the solver to maximize the output of the given objective function.
@@ -249,10 +254,9 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
    * will find the closest solution to the initial conditions that's in the
    * feasible set.
    *
-   * @param objective The objective function to maximize. It must return a 1x1
-   *                  matrix.
+   * @param objective The objective function to maximize.
    */
-  void Maximize(const VariableMatrix& objective);
+  void Maximize(const Variable& objective);
 
   /**
    * Tells the solver to maximize the output of the given objective function.
@@ -261,10 +265,9 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
    * will find the closest solution to the initial conditions that's in the
    * feasible set.
    *
-   * @param objective The objective function to maximize. It must return a 1x1
-   *                  matrix.
+   * @param objective The objective function to maximize.
    */
-  void Maximize(VariableMatrix&& objective);
+  void Maximize(Variable&& objective);
 
   /**
    * Tells the solver to solve the problem while satisfying the given equality

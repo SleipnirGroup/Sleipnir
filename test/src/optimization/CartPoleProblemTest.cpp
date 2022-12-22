@@ -237,7 +237,7 @@ TEST(CartPoleProblemTest, DirectTranscription) {
   }
 
   // Minimize sum squared inputs
-  sleipnir::VariableMatrix J = 0.0;
+  sleipnir::Variable J = 0.0;
   for (int k = 0; k < N; ++k) {
     J += U.Col(k).T() * U.Col(k);
   }

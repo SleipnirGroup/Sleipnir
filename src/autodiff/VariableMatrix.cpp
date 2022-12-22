@@ -321,6 +321,11 @@ VariableMatrix VariableMatrix::T() const {
   return result;
 }
 
+VariableMatrix::operator Variable() const {
+  assert(Rows() == 1 && Cols() == 1);
+  return (*this)(0, 0);
+}
+
 int VariableMatrix::Rows() const {
   return m_rows;
 }

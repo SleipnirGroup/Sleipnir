@@ -16,8 +16,8 @@ CurrentManager::CurrentManager(
     m_desiredCurrents(row) = 0.0;
   }
 
-  sleipnir::VariableMatrix J = 0.0;
-  sleipnir::VariableMatrix currentSum = 0.0;
+  sleipnir::Variable J = 0.0;
+  sleipnir::Variable currentSum = 0.0;
   for (size_t i = 0; i < currentTolerances.size(); ++i) {
     // The weight is 1/tolᵢ² where tolᵢ is the tolerance between the desired
     // and allocated current for subsystem i

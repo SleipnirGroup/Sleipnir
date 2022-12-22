@@ -125,6 +125,11 @@ OptimizationProblem::OptimizationProblem() noexcept {
   m_inequalityConstraints.reserve(1024);
 }
 
+Variable OptimizationProblem::DecisionVariable() {
+  m_decisionVariables.emplace_back(0.0);
+  return m_decisionVariables.back();
+}
+
 VariableMatrix OptimizationProblem::DecisionVariable(int rows, int cols) {
   m_decisionVariables.reserve(m_decisionVariables.size() + rows * cols);
 
@@ -140,28 +145,22 @@ VariableMatrix OptimizationProblem::DecisionVariable(int rows, int cols) {
   return vars;
 }
 
-void OptimizationProblem::Minimize(const VariableMatrix& cost) {
-  assert(cost.Rows() == 1 && cost.Cols() == 1);
-  m_f = cost(0, 0);
+void OptimizationProblem::Minimize(const Variable& cost) {
+  m_f = cost;
 }
 
-void OptimizationProblem::Minimize(VariableMatrix&& cost) {
-  assert(cost.Rows() == 1 && cost.Cols() == 1);
-  m_f = std::move(cost(0, 0));
+void OptimizationProblem::Minimize(Variable&& cost) {
+  m_f = std::move(cost);
 }
 
-void OptimizationProblem::Maximize(const VariableMatrix& objective) {
-  assert(objective.Rows() == 1 && objective.Cols() == 1);
-
+void OptimizationProblem::Maximize(const Variable& objective) {
   // Maximizing an objective function is the same as minimizing its negative
-  m_f = -objective(0, 0);
+  m_f = -objective;
 }
 
-void OptimizationProblem::Maximize(VariableMatrix&& objective) {
-  assert(objective.Rows() == 1 && objective.Cols() == 1);
-
+void OptimizationProblem::Maximize(Variable&& objective) {
   // Maximizing an objective function is the same as minimizing its negative
-  m_f = -std::move(objective(0, 0));
+  m_f = -std::move(objective);
 }
 
 void OptimizationProblem::SubjectTo(EqualityConstraints&& constraint) {
