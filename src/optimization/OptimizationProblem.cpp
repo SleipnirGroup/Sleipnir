@@ -126,15 +126,14 @@ OptimizationProblem::OptimizationProblem() noexcept {
 }
 
 VariableMatrix OptimizationProblem::DecisionVariable(int rows, int cols) {
-  VariableMatrix vars{rows, cols};
-  int oldSize = m_decisionVariables.size();
-
   m_decisionVariables.reserve(m_decisionVariables.size() + rows * cols);
+
+  VariableMatrix vars{rows, cols};
 
   for (int row = 0; row < rows; ++row) {
     for (int col = 0; col < cols; ++col) {
       m_decisionVariables.emplace_back(0.0);
-      vars(row, col) = m_decisionVariables[oldSize + row * cols + col];
+      vars(row, col) = m_decisionVariables.back();
     }
   }
 
