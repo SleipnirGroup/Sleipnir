@@ -9,13 +9,13 @@ TEST(DecisionVariableTest, ScalarInitAssign) {
 
   // Scalar zero init
   auto x = problem.DecisionVariable();
-  EXPECT_DOUBLE_EQ(0.0, x.Value(0));
+  EXPECT_DOUBLE_EQ(0.0, x.Value());
 
   // Scalar assignment
   x = 1.0;
-  EXPECT_DOUBLE_EQ(1.0, x.Value(0));
+  EXPECT_DOUBLE_EQ(1.0, x.Value());
   x = 2.0;
-  EXPECT_DOUBLE_EQ(2.0, x.Value(0));
+  EXPECT_DOUBLE_EQ(2.0, x.Value());
 }
 
 TEST(DecisionVariableTest, VectorInitAssign) {

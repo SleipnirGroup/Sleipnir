@@ -543,6 +543,11 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
   friend SLEIPNIR_DLLEXPORT VariableMatrix operator-(const VariableMatrix& lhs);
 
   /**
+   * Implicit conversion operator from 1x1 VariableMatrix to Variable.
+   */
+  operator Variable() const;  // NOLINT
+
+  /**
    * Returns the transpose of the variable matrix.
    */
   VariableMatrix T() const;

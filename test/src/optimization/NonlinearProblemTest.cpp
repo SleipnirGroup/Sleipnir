@@ -34,7 +34,7 @@ TEST(NonlinearProblemTest, Quartic) {
   EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.inequalityConstraintType);
   EXPECT_EQ(sleipnir::SolverExitCondition::kOk, status.exitCondition);
 
-  EXPECT_NEAR(1.0, x.Value(0), 1e-6);
+  EXPECT_NEAR(1.0, x.Value(), 1e-6);
 }
 
 TEST(NonlinearProblemTest, RosenbrockWithCubicAndLineConstraint) {
@@ -68,12 +68,12 @@ TEST(NonlinearProblemTest, RosenbrockWithCubicAndLineConstraint) {
 
       // Local minimum at (0.0, 0.0)
       // Global minimum at (1.0, 1.0)
-      EXPECT_TRUE(Near(0.0, x.Value(0), 1e-2) || Near(1.0, x.Value(0), 1e-2))
+      EXPECT_TRUE(Near(0.0, x.Value(), 1e-2) || Near(1.0, x.Value(), 1e-2))
           << fmt::format("  (x₀, y₀) = ({}, {})\n", x0, y0)
-          << fmt::format("  x.Value(0) = {}", x.Value(0));
-      EXPECT_TRUE(Near(0.0, y.Value(0), 1e-2) || Near(1.0, y.Value(0), 1e-2))
+          << fmt::format("  x.Value(0) = {}", x.Value());
+      EXPECT_TRUE(Near(0.0, y.Value(), 1e-2) || Near(1.0, y.Value(), 1e-2))
           << fmt::format("  (x₀, y₀) = ({}, {})\n", x0, y0)
-          << fmt::format("  y.Value(0) = {}", y.Value(0));
+          << fmt::format("  y.Value(0) = {}", y.Value());
     }
   }
 }
@@ -102,12 +102,12 @@ TEST(NonlinearProblemTest, RosenbrockWithDiskConstraint) {
                 status.inequalityConstraintType);
       EXPECT_EQ(sleipnir::SolverExitCondition::kOk, status.exitCondition);
 
-      EXPECT_NEAR(1.0, x.Value(0), 1e-1)
+      EXPECT_NEAR(1.0, x.Value(), 1e-1)
           << fmt::format("  (x₀, y₀) = ({}, {})\n", x0, y0)
-          << fmt::format("  x.Value(0) = {}", x.Value(0));
-      EXPECT_NEAR(1.0, y.Value(0), 1e-1)
+          << fmt::format("  x.Value(0) = {}", x.Value());
+      EXPECT_NEAR(1.0, y.Value(), 1e-1)
           << fmt::format("  (x₀, y₀) = ({}, {})\n", x0, y0)
-          << fmt::format("  x.Value(0) = {}", x.Value(0));
+          << fmt::format("  x.Value(0) = {}", x.Value());
     }
   }
 }

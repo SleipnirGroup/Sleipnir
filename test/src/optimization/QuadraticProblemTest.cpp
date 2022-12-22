@@ -18,7 +18,7 @@ TEST(QuadraticProblemTest, Unconstrained1d) {
   EXPECT_EQ(sleipnir::ExpressionType::kNone, status.inequalityConstraintType);
   EXPECT_EQ(sleipnir::SolverExitCondition::kOk, status.exitCondition);
 
-  EXPECT_NEAR(3.0, x.Value(0), 1e-6);
+  EXPECT_NEAR(3.0, x.Value(), 1e-6);
 }
 
 TEST(QuadraticProblemTest, Unconstrained2d) {
@@ -39,8 +39,8 @@ TEST(QuadraticProblemTest, Unconstrained2d) {
     EXPECT_EQ(sleipnir::ExpressionType::kNone, status.inequalityConstraintType);
     EXPECT_EQ(sleipnir::SolverExitCondition::kOk, status.exitCondition);
 
-    EXPECT_NEAR(0.0, x.Value(0), 1e-6);
-    EXPECT_NEAR(0.0, y.Value(0), 1e-6);
+    EXPECT_NEAR(0.0, x.Value(), 1e-6);
+    EXPECT_NEAR(0.0, y.Value(), 1e-6);
   }
 
   {
@@ -120,8 +120,8 @@ TEST(QuadraticProblemTest, EqualityConstrained) {
     EXPECT_EQ(sleipnir::ExpressionType::kNone, status.inequalityConstraintType);
     EXPECT_EQ(sleipnir::SolverExitCondition::kOk, status.exitCondition);
 
-    EXPECT_NEAR(18.0, x.Value(0), 1e-5);
-    EXPECT_NEAR(6.0, y.Value(0), 1e-5);
+    EXPECT_NEAR(18.0, x.Value(), 1e-5);
+    EXPECT_NEAR(6.0, y.Value(), 1e-5);
   }
 
   {
