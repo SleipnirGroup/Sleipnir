@@ -190,7 +190,7 @@ sleipnir::VariableMatrix CartPoleDynamics(const sleipnir::VariableMatrix& x,
 
 TEST(OCPSolverTest, CartPoleProblem) {
   constexpr auto T = 5_s;
-  constexpr units::second_t dt = 50_ms;
+  constexpr units::second_t dt = 20_ms;
   constexpr int N = T / dt;
 
   constexpr auto u_max = 20_N;
@@ -207,7 +207,7 @@ TEST(OCPSolverTest, CartPoleProblem) {
 
   sleipnir::OCPSolver problem(
       4, 1, std::chrono::duration<double>(dt.value()), N, dynamicsFunction,
-      sleipnir::DynamicsType::kExplicitODE, sleipnir::TimestepMethod::kFixed,
+      sleipnir::DynamicsType::kExplicitODE, sleipnir::TimestepMethod::kVariableSingle,
       sleipnir::TranscriptionMethod::kDirectCollocation);
 
   problem.ConstrainInitialState(
