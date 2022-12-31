@@ -167,9 +167,9 @@ if (BUILD_BENCHMARKING)
                     ${${benchmark}ScalabilityBenchmark_src})
       sleipnir_compiler_flags(${benchmark}ScalabilityBenchmark)
       target_include_directories(${benchmark}ScalabilityBenchmark
-                                PRIVATE
-                                ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/scalability
-                                ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/units/include)
+                                 PRIVATE
+                                 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/scalability
+                                 ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/units/include)
       target_link_libraries(${benchmark}ScalabilityBenchmark
                             PRIVATE
                             Sleipnir
