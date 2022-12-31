@@ -153,7 +153,7 @@ if (INSTALL_SLEIPNIR)
     DESTINATION lib/cmake/Sleipnir)
 endif()
 
-option(BUILD_BENCHMARKING "Build CasADi and Sleipnir benchmarks" OFF)
+option(BUILD_BENCHMARKING "Build CasADi and Sleipnir benchmarks" ON)
 
 # Add benchmark executables if CasADi exists
 if (BUILD_BENCHMARKING)
