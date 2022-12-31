@@ -155,8 +155,8 @@ endif()
 
 option(BUILD_BENCHMARKING "Build CasADi and Sleipnir benchmarks" OFF)
 
+# Add benchmark executables if CasADi exists
 if (BUILD_BENCHMARKING)
-  # Add benchmark executables if CasADi exists
   find_package(casadi QUIET)
   if (casadi_FOUND)
     foreach (benchmark "CartPole" "Flywheel")
