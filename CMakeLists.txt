@@ -176,7 +176,7 @@ if (BUILD_BENCHMARKING)
                             fmt
                             casadi)
     endforeach()
-endif()
+  endif()
 endif()
 
 # GoogleTest dependency (static linkage)
