@@ -164,7 +164,7 @@ if (BUILD_BENCHMARKING)
         benchmarks/scalability/*.cpp
         benchmarks/scalability/${benchmark}/*.cpp)
       add_executable(${benchmark}ScalabilityBenchmark
-                    ${${benchmark}ScalabilityBenchmark_src})
+                     ${${benchmark}ScalabilityBenchmark_src})
       sleipnir_compiler_flags(${benchmark}ScalabilityBenchmark)
       target_include_directories(${benchmark}ScalabilityBenchmark
                                  PRIVATE
