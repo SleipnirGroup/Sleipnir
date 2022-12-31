@@ -153,26 +153,30 @@ if (INSTALL_SLEIPNIR)
     DESTINATION lib/cmake/Sleipnir)
 endif()
 
-# Add benchmark executables if CasADi exists
-find_package(casadi QUIET)
-if (casadi_FOUND)
-  foreach (benchmark "CartPole" "Flywheel")
-    file(GLOB ${benchmark}ScalabilityBenchmark_src
-      benchmarks/scalability/*.cpp
-      benchmarks/scalability/${benchmark}/*.cpp)
-    add_executable(${benchmark}ScalabilityBenchmark
-                   ${${benchmark}ScalabilityBenchmark_src})
-    sleipnir_compiler_flags(${benchmark}ScalabilityBenchmark)
-    target_include_directories(${benchmark}ScalabilityBenchmark
-                               PRIVATE
-                               ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/scalability
-                               ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/units/include)
-    target_link_libraries(${benchmark}ScalabilityBenchmark
-                          PRIVATE
-                          Sleipnir
-                          fmt
-                          casadi)
-  endforeach()
+option(BUILD_BENCHMARKING "Build CasADi and Sleipnir benchmarks" OFF)
+
+if (BUILD_BENCHMARKING)
+  # Add benchmark executables if CasADi exists
+  find_package(casadi QUIET)
+  if (casadi_FOUND)
+    foreach (benchmark "CartPole" "Flywheel")
+      file(GLOB ${benchmark}ScalabilityBenchmark_src
+        benchmarks/scalability/*.cpp
+        benchmarks/scalability/${benchmark}/*.cpp)
+      add_executable(${benchmark}ScalabilityBenchmark
+                    ${${benchmark}ScalabilityBenchmark_src})
+      sleipnir_compiler_flags(${benchmark}ScalabilityBenchmark)
+      target_include_directories(${benchmark}ScalabilityBenchmark
+                                PRIVATE
+                                ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/scalability
+                                ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/units/include)
+      target_link_libraries(${benchmark}ScalabilityBenchmark
+                            PRIVATE
+                            Sleipnir
+                            fmt
+                            casadi)
+    endforeach()
+endif()
 endif()
 
 # GoogleTest dependency (static linkage)
