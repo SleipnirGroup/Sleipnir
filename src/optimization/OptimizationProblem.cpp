@@ -9,6 +9,9 @@
 #include <limits>
 #include <string>
 #include <vector>
+#include <array>
+#include <algorithm>
+#include <iostream>
 
 #include <Eigen/SparseCore>
 #include <fmt/core.h>
@@ -486,6 +489,18 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
 
   // Equality constraints cₑ
   Eigen::VectorXd c_e{m_equalityConstraints.size()};
+  for (size_t row = 0; row < m_equalityConstraints.size(); row++) {
+    c_e(row) = m_equalityConstraints[row].Value();
+  }
+
+  // Inequality constraints cᵢ
+  Eigen::VectorXd c_i{m_inequalityConstraints.size()};
+  for (size_t row = 0; row < m_inequalityConstraints.size(); row++) {
+    c_i(row) = m_inequalityConstraints[row].Value();
+  }
+
+  std::vector<std::array<double, 2>> filter;
+  filter.push_back({m_f.value().Value(), c_e.lpNorm<1>() + c_i.lpNorm<1>()});
 
   // Equality constraint Jacobian Aₑ
   //
@@ -494,9 +509,6 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   //         [    ⋮    ]
   //         [∇ᵀcₑₘ(x)ₖ]
   Eigen::SparseMatrix<double> A_e = jacobianCe.Calculate();
-
-  // Inequality constraints cᵢ
-  Eigen::VectorXd c_i{m_inequalityConstraints.size()};
 
   // Inequality constraint Jacobian Aᵢ
   //
@@ -808,6 +820,40 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       // αₖᶻ = max(α ∈ (0, 1] : zₖ + αpₖᶻ ≥ (1−τⱼ)zₖ)
       double alpha_z = FractionToTheBoundaryRule(z, p_z, tau);
 
+      std::array<double, 2> currentFilterPair;
+      while (true) {
+        Eigen::VectorXd x_k1 = x + alpha_max * p_x;
+        Eigen::VectorXd s_k1 = s + alpha_max * p_s;
+        SetAD(xAD, x_k1);
+        SetAD(sAD, s_k1);
+        graphL.Update();
+
+        // Equality constraints cₑ
+        for (size_t row = 0; row < m_equalityConstraints.size(); row++) {
+          c_e(row) = m_equalityConstraints[row].Value();
+        }
+
+        // Inequality constraints cᵢ
+        for (size_t row = 0; row < m_inequalityConstraints.size(); row++) {
+          c_i(row) = m_inequalityConstraints[row].Value();
+        }
+
+        currentFilterPair = {m_f.value().Value() - mu * s_k1.array().log().sum(), c_e.lpNorm<1>() + (c_i - s_k1).lpNorm<1>()};
+        bool dominated = false;
+        for (auto filterPair : filter) {
+          if (std::get<0>(currentFilterPair) > std::get<0>(filterPair) &&
+              std::get<1>(currentFilterPair) > std::get<1>(filterPair)) {
+            dominated = true;
+          }
+        }
+        if (!dominated) {
+          break;
+        }
+        alpha_max *= 0.9;
+        // std::cout << "dominated: " << dominated << std::endl;
+      }
+      filter.push_back(currentFilterPair);
+
       // xₖ₊₁ = xₖ + αₖᵐᵃˣpₖˣ
       // sₖ₊₁ = xₖ + αₖᵐᵃˣpₖˢ
       // yₖ₊₁ = xₖ + αₖᶻpₖʸ
@@ -839,13 +885,14 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
 
       if (m_config.diagnostics) {
         if (iterations % 20 == 0) {
-          fmt::print("{:>4}  {:>9}  {:>9}  {:>13}\n", "iter", "time (ms)",
-                     "error", "infeasibility");
-          fmt::print("{:=^41}\n", "");
+          fmt::print("{:>4}   {:>10}  {:>10}   {:>16}  {:>19}\n", "iter", "time (ms)",
+                     "error", "objective", "infeasibility");
+          fmt::print("{:=^70}\n", "");
         }
-        fmt::print("{:>4}  {:>9}  {:>9.3e}  {:>13.3e}\n", iterations,
+        fmt::print("{:>4}  {:>9}  {:>15e}  {:>16e}   {:>16e}\n", iterations,
                    ToMilliseconds(innerIterEndTime - innerIterStartTime), E_mu,
-                   c_e.lpNorm<1>() + (c_i - s).lpNorm<1>());
+                   std::get<0>(currentFilterPair),
+                   std::get<1>(currentFilterPair));
       }
 
       ++iterations;
@@ -875,6 +922,10 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
     //
     // See equation (8) in [2].
     tau = std::max(tau_min, 1.0 - mu);
+
+    // Reset the filter when the barrier parameter is changed.
+    filter.clear();
+    filter.push_back({m_f.value().Value() - mu * s.array().log().sum(), c_e.lpNorm<1>() + (c_i - s).lpNorm<1>()});
   }
 
   return x;
