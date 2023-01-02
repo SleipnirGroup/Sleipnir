@@ -33,8 +33,8 @@ struct FilterEntry {
   /// The objective function's value
   double objective = 0.0;
 
-  /// The maximum constraint violation
-  double maxConstraintViolation = 0.0;
+  /// The constraint violation
+  double constraintViolation = 0.0;
 
   constexpr FilterEntry() = default;
 
@@ -50,7 +50,7 @@ struct FilterEntry {
   FilterEntry(const Variable& f, double mu, Eigen::VectorXd& s,
               const Eigen::VectorXd& c_e, const Eigen::VectorXd& c_i)
       : objective{f.Value() - mu * s.array().log().sum()},
-        maxConstraintViolation{c_e.lpNorm<1>() + (c_i - s).lpNorm<1>()} {}
+        constraintViolation{c_e.lpNorm<1>() + (c_i - s).lpNorm<1>()} {}
 };
 
 /**
@@ -530,6 +530,9 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   std::vector<FilterEntry> filter;
   filter.emplace_back(m_f.value(), mu, s, c_e, c_i);
 
+  // Maximum allowable constraint violation, this is set when the filter is initialized.
+  double maxConstraintViolation = filter[0].constraintViolation;
+
   // Equality constraint Jacobian Aₑ
   //
   //         [∇ᵀcₑ₁(x)ₖ]
@@ -871,9 +874,10 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
         currentFilterEntry = FilterEntry{m_f.value(), mu, s_k1, c_e, c_i};
         if (std::all_of(filter.begin(), filter.end(), [&](const auto& entry) {
               return currentFilterEntry.objective <= entry.objective ||
-                     currentFilterEntry.maxConstraintViolation <=
-                         entry.maxConstraintViolation;
-            })) {
+                     currentFilterEntry.constraintViolation <=
+                         entry.constraintViolation;
+            }) &&
+            currentFilterEntry.constraintViolation < maxConstraintViolation) {
           break;
         }
         alpha_max *= 0.9;
@@ -918,7 +922,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
         fmt::print("{:>4}  {:>9}  {:>15e}  {:>16e}   {:>16e}\n", iterations,
                    ToMilliseconds(innerIterEndTime - innerIterStartTime), E_mu,
                    currentFilterEntry.objective,
-                   currentFilterEntry.maxConstraintViolation);
+                   currentFilterEntry.constraintViolation);
       }
 
       ++iterations;
@@ -952,6 +956,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
     // Reset the filter when the barrier parameter is updated.
     filter.clear();
     filter.emplace_back(FilterEntry(m_f.value(), mu, s, c_e, c_i));
+    maxConstraintViolation = filter[0].constraintViolation;
   }
 
   return x;
