@@ -883,7 +883,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
             currentFilterEntry.constraintViolation < maxConstraintViolation) {
           break;
         }
-        alpha_max *= 0.9;
+        alpha_max *= 0.5;
       }
       filter.emplace_back(currentFilterEntry);
 
