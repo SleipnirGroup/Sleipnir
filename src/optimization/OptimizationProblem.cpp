@@ -530,7 +530,8 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   std::vector<FilterEntry> filter;
   filter.emplace_back(m_f.value(), mu, s, c_e, c_i);
 
-  // Maximum allowable constraint violation, this is set when the filter is initialized.
+  // Maximum allowable constraint violation. This is set when the filter is
+  // initialized.
   double maxConstraintViolation = filter[0].constraintViolation;
 
   // Equality constraint Jacobian Aₑ
@@ -872,11 +873,13 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
         // If current filter entry is better than all prior ones in some
         // respect, accept it
         currentFilterEntry = FilterEntry{m_f.value(), mu, s_k1, c_e, c_i};
-        if (std::all_of(filter.begin(), filter.end(), [&](const auto& entry) {
-              return currentFilterEntry.objective <= entry.objective ||
-                     currentFilterEntry.constraintViolation <=
-                         entry.constraintViolation;
-            }) &&
+        if (std::all_of(filter.begin(), filter.end(),
+                        [&](const auto& entry) {
+                          return currentFilterEntry.objective <=
+                                     entry.objective ||
+                                 currentFilterEntry.constraintViolation <=
+                                     entry.constraintViolation;
+                        }) &&
             currentFilterEntry.constraintViolation < maxConstraintViolation) {
           break;
         }
