@@ -2,6 +2,7 @@
 
 #include "sleipnir/optimization/OptimizationProblem.hpp"
 
+#include <algorithm>
 #include <array>
 #include <cassert>
 #include <chrono>
@@ -9,9 +10,6 @@
 #include <limits>
 #include <string>
 #include <vector>
-#include <array>
-#include <algorithm>
-#include <iostream>
 
 #include <Eigen/SparseCore>
 #include <fmt/core.h>
@@ -28,6 +26,33 @@
 using namespace sleipnir;
 
 namespace {
+/**
+ * Filter entry consisting of objective value and constraint value.
+ */
+struct FilterEntry {
+  /// The objective function's value
+  double objective = 0.0;
+
+  /// The maximum constraint violation
+  double maxConstraintViolation = 0.0;
+
+  constexpr FilterEntry() = default;
+
+  /**
+   * Constructs a FilterEntry.
+   *
+   * @param f The objective function.
+   * @param mu The barrier parameter.
+   * @param s The inequality constraint slack variables.
+   * @param c_e The equality constraint values (nonzero means violation).
+   * @param c_i The inequality constraint values (negative means violation).
+   */
+  FilterEntry(const Variable& f, double mu, Eigen::VectorXd& s,
+              const Eigen::VectorXd& c_e, const Eigen::VectorXd& c_i)
+      : objective{f.Value() - mu * s.array().log().sum()},
+        maxConstraintViolation{c_e.lpNorm<1>() + (c_i - s).lpNorm<1>()} {}
+};
+
 /**
  * Assigns the contents of a double vector to an autodiff vector.
  *
@@ -499,17 +524,8 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
     c_i(row) = m_inequalityConstraints[row].Value();
   }
 
-  auto evaluateFilterPair = [&](double mu, 
-                                Eigen::VectorXd& s, 
-                                Eigen::VectorXd& c_e, 
-                                Eigen::VectorXd& c_i) -> std::array<double, 2> { 
-    return {m_f.value().Value() - mu * s.array().log().sum(), c_e.lpNorm<1>() +(c_i - s).lpNorm<1>()}; 
-  };
-
-  std::vector<std::array<double, 2>> filter;
-  filter.push_back(evaluateFilterPair(mu, s, c_e, c_i));
-
-  double maxConstraintViolation = std::get<1>(filter[0]);
+  std::vector<FilterEntry> filter;
+  filter.emplace_back(m_f.value(), mu, s, c_e, c_i);
 
   // Equality constraint Jacobian Aₑ
   //
@@ -829,7 +845,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       // αₖᶻ = max(α ∈ (0, 1] : zₖ + αpₖᶻ ≥ (1−τⱼ)zₖ)
       double alpha_z = FractionToTheBoundaryRule(z, p_z, tau);
 
-      std::array<double, 2> currentFilterPair;
+      FilterEntry currentFilterEntry;
       while (true) {
         Eigen::VectorXd x_k1 = x + alpha_max * p_x;
         Eigen::VectorXd s_k1 = s + alpha_max * p_s;
@@ -847,21 +863,19 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
           c_i(row) = m_inequalityConstraints[row].Value();
         }
 
-        currentFilterPair = evaluateFilterPair(mu, s_k1, c_e, c_i);
-        bool acceptablePair = std::get<1>(currentFilterPair) < maxConstraintViolation;
-        for (auto& [objective, constraint] : filter) {
-          if (std::get<0>(currentFilterPair) > objective &&
-              std::get<1>(currentFilterPair) > constraint) {
-            acceptablePair = false;
-          }
-        }
-        if (acceptablePair) {
+        // If current filter entry is better than all prior ones in some
+        // respect, accept it
+        currentFilterEntry = FilterEntry{m_f.value(), mu, s_k1, c_e, c_i};
+        if (std::all_of(filter.begin(), filter.end(), [&](const auto& entry) {
+              return currentFilterEntry.objective <= entry.objective ||
+                     currentFilterEntry.maxConstraintViolation <=
+                         entry.maxConstraintViolation;
+            })) {
           break;
         }
         alpha_max *= 0.9;
-        // std::cout << "dominated: " << dominated << std::endl;
       }
-      filter.push_back(currentFilterPair);
+      filter.emplace_back(currentFilterEntry);
 
       // xₖ₊₁ = xₖ + αₖᵐᵃˣpₖˣ
       // sₖ₊₁ = xₖ + αₖᵐᵃˣpₖˢ
@@ -894,14 +908,14 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
 
       if (m_config.diagnostics) {
         if (iterations % 20 == 0) {
-          fmt::print("{:>4}   {:>10}  {:>10}   {:>16}  {:>19}\n", "iter", "time (ms)",
-                     "error", "objective", "infeasibility");
+          fmt::print("{:>4}   {:>10}  {:>10}   {:>16}  {:>19}\n", "iter",
+                     "time (ms)", "error", "objective", "infeasibility");
           fmt::print("{:=^70}\n", "");
         }
         fmt::print("{:>4}  {:>9}  {:>15e}  {:>16e}   {:>16e}\n", iterations,
                    ToMilliseconds(innerIterEndTime - innerIterStartTime), E_mu,
-                   std::get<0>(currentFilterPair),
-                   std::get<1>(currentFilterPair));
+                   currentFilterEntry.objective,
+                   currentFilterEntry.maxConstraintViolation);
       }
 
       ++iterations;
@@ -934,8 +948,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
 
     // Reset the filter when the barrier parameter is updated.
     filter.clear();
-    filter.push_back(evaluateFilterPair(mu, s, c_e, c_i));
-    maxConstraintViolation = std::get<1>(filter[0]);
+    filter.emplace_back(FilterEntry(m_f.value(), mu, s, c_e, c_i));
   }
 
   return x;
