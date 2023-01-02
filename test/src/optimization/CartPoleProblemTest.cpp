@@ -255,10 +255,7 @@ TEST(CartPoleProblemTest, DirectTranscription) {
   EXPECT_EQ(sleipnir::ExpressionType::kNonlinear,
             status.equalityConstraintType);
   EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.inequalityConstraintType);
-  // FIXME
-#if 0
   EXPECT_EQ(sleipnir::SolverExitCondition::kOk, status.exitCondition);
-#endif
 
   // Log states from input-replay for offline viewing
   std::ofstream inputReplayStates{"Cart-pole input-replay states.csv"};
