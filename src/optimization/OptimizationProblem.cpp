@@ -499,8 +499,17 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
     c_i(row) = m_inequalityConstraints[row].Value();
   }
 
+  auto evaluateFilterPair = [&](double mu, 
+                                Eigen::VectorXd& s, 
+                                Eigen::VectorXd& c_e, 
+                                Eigen::VectorXd& c_i) -> std::array<double, 2> { 
+    return {m_f.value().Value() - mu * s.array().log().sum(), c_e.lpNorm<1>() +(c_i - s).lpNorm<1>()}; 
+  };
+
   std::vector<std::array<double, 2>> filter;
-  filter.push_back({m_f.value().Value(), c_e.lpNorm<1>() + c_i.lpNorm<1>()});
+  filter.push_back(evaluateFilterPair(mu, s, c_e, c_i));
+
+  double maxConstraintViolation = std::get<1>(filter[0]);
 
   // Equality constraint Jacobian Aₑ
   //
@@ -838,15 +847,15 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
           c_i(row) = m_inequalityConstraints[row].Value();
         }
 
-        currentFilterPair = {m_f.value().Value() - mu * s_k1.array().log().sum(), c_e.lpNorm<1>() + (c_i - s_k1).lpNorm<1>()};
-        bool dominated = false;
-        for (auto filterPair : filter) {
-          if (std::get<0>(currentFilterPair) > std::get<0>(filterPair) &&
-              std::get<1>(currentFilterPair) > std::get<1>(filterPair)) {
-            dominated = true;
+        currentFilterPair = evaluateFilterPair(mu, s_k1, c_e, c_i);
+        bool acceptablePair = std::get<1>(currentFilterPair) < maxConstraintViolation;
+        for (auto& [objective, constraint] : filter) {
+          if (std::get<0>(currentFilterPair) > objective &&
+              std::get<1>(currentFilterPair) > constraint) {
+            acceptablePair = false;
           }
         }
-        if (!dominated) {
+        if (acceptablePair) {
           break;
         }
         alpha_max *= 0.9;
@@ -923,9 +932,10 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
     // See equation (8) in [2].
     tau = std::max(tau_min, 1.0 - mu);
 
-    // Reset the filter when the barrier parameter is changed.
+    // Reset the filter when the barrier parameter is updated.
     filter.clear();
-    filter.push_back({m_f.value().Value() - mu * s.array().log().sum(), c_e.lpNorm<1>() + (c_i - s).lpNorm<1>()});
+    filter.push_back(evaluateFilterPair(mu, s, c_e, c_i));
+    maxConstraintViolation = std::get<1>(filter[0]);
   }
 
   return x;
