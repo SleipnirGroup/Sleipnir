@@ -96,7 +96,8 @@ double FractionToTheBoundaryRule(const Eigen::Ref<const Eigen::VectorXd>& x,
                                  const Eigen::Ref<const Eigen::VectorXd>& p,
                                  double tau) {
   // αᵐᵃˣ = max(α ∈ (0, 1] : x + αp ≥ (1−τ)x)
-  double alpha = 1;
+  //      = max(α ∈ (0, 1] : αp ≥ −τx)
+  double alpha = 1.0;
   for (int i = 0; i < x.rows(); ++i) {
     if (p(i) != 0.0) {
       while (alpha * p(i) < -tau * x(i)) {
@@ -417,7 +418,9 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   // shown in equations (15a) and (15b) of [2].
   //
   //   αₖᵐᵃˣ = max(α ∈ (0, 1] : sₖ + αpₖˢ ≥ (1−τⱼ)sₖ)
+  //         = max(α ∈ (0, 1] : αpₖˢ ≥ −τⱼsₖ)
   //   αₖᶻ = max(α ∈ (0, 1] : zₖ + αpₖᶻ ≥ (1−τⱼ)zₖ)
+  //       = max(α ∈ (0, 1] : αpₖᶻ ≥ −τⱼzₖ)
   //
   // [1] Nocedal, J. and Wright, S. "Numerical Optimization", 2nd. ed., Ch. 19.
   //     Springer, 2006.
