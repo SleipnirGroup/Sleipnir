@@ -483,6 +483,20 @@ SLEIPNIR_DLLEXPORT Variable pow(const Variable& base, double power);
 SLEIPNIR_DLLEXPORT Variable pow(const Variable& base, const Variable& power);
 
 /**
+ * sign() for Variables.
+ *
+ * @param x The argument.
+ */
+SLEIPNIR_DLLEXPORT Variable sign(double x);
+
+/**
+ * sign() for Variables.
+ *
+ * @param x The argument.
+ */
+SLEIPNIR_DLLEXPORT Variable sign(const Variable& x);
+
+/**
  * std::sin() for Variables.
  *
  * @param x The argument.

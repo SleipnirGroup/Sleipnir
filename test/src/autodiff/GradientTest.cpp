@@ -378,3 +378,28 @@ TEST(GradientTest, Reuse) {
   g = gradient.Calculate();
   EXPECT_DOUBLE_EQ(10.0, g(0));
 }
+
+TEST(GradientTest, Sign) {
+  auto sign = [](double x) {
+    if (x < 0.0) {
+      return -1.0;
+    } else if (x == 0.0) {
+      return 0.0;
+    } else {
+      return 1.0;
+    }
+  };
+
+  sleipnir::Variable x = 1.0;
+  EXPECT_DOUBLE_EQ(sign(x.Value()), sleipnir::sign(x).Value());
+  EXPECT_DOUBLE_EQ(
+      0.0, sleipnir::Gradient(sleipnir::sign(x), x).Calculate().coeff(0));
+  x = -1.0;
+  EXPECT_DOUBLE_EQ(sign(x.Value()), sleipnir::sign(x).Value());
+  EXPECT_DOUBLE_EQ(
+      0.0, sleipnir::Gradient(sleipnir::sign(x), x).Calculate().coeff(0));
+  x = 0.0;
+  EXPECT_DOUBLE_EQ(sign(x.Value()), sleipnir::sign(x).Value());
+  EXPECT_DOUBLE_EQ(
+      0.0, sleipnir::Gradient(sleipnir::sign(x), x).Calculate().coeff(0));
+}

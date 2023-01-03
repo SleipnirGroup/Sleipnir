@@ -539,6 +539,18 @@ VariableMatrix pow(const VariableMatrix& base, const VariableMatrix& power) {
   return result;
 }
 
+VariableMatrix sign(const VariableMatrix& x) {
+  VariableMatrix result{x.Rows(), x.Cols()};
+
+  for (int row = 0; row < result.Rows(); ++row) {
+    for (int col = 0; col < result.Cols(); ++col) {
+      result(row, col) = sleipnir::sign(x(row, col));
+    }
+  }
+
+  return result;
+}
+
 VariableMatrix sin(const VariableMatrix& x) {
   VariableMatrix result{x.Rows(), x.Cols()};
 

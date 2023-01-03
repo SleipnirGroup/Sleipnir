@@ -860,6 +860,39 @@ IntrusiveSharedPtr<Expression> pow(  // NOLINT
       base, power);
 }
 
+IntrusiveSharedPtr<Expression> sign(const IntrusiveSharedPtr<Expression>& x) {
+  if (x == Zero()) {
+    return Zero();
+  }
+
+  // Evaluate the expression's type
+  ExpressionType type;
+  if (x->type == ExpressionType::kConstant) {
+    type = ExpressionType::kConstant;
+  } else {
+    type = ExpressionType::kNonlinear;
+  }
+
+  return AllocateIntrusiveShared<Expression>(
+      GlobalPoolAllocator<Expression>(), type,
+      [](double x, double) {
+        if (x < 0.0) {
+          return -1.0;
+        } else if (x == 0.0) {
+          return 0.0;
+        } else {
+          return 1.0;
+        }
+      },
+      [](double x, double, double parentAdjoint) { return 0.0; },
+      [](const IntrusiveSharedPtr<Expression>& x,
+         const IntrusiveSharedPtr<Expression>&,
+         const IntrusiveSharedPtr<Expression>& parentAdjoint) {
+        return Zero();
+      },
+      x);
+}
+
 IntrusiveSharedPtr<Expression> sin(  // NOLINT
     const IntrusiveSharedPtr<Expression>& x) {
   if (x == Zero()) {
