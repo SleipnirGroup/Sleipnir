@@ -84,20 +84,35 @@ void SetAD(Eigen::Ref<VectorXvar> dest,
 }
 
 /**
+ * Gets the contents of a autodiff vector as a double vector.
+ *
+ * @param src The autodiff vector.
+ */
+Eigen::VectorXd GetAD(std::vector<Variable> src) {
+  Eigen::VectorXd dest{src.size()};
+  for (int row = 0; row < dest.size(); ++row) {
+    dest(row) = src[row].Value();
+  }
+  return dest;
+}
+
+/**
  * Applies fraction-to-the-boundary rule to a variable and its iterate, then
  * returns a fraction of the iterate step size within (0, 1].
  *
  * @param x The variable.
  * @param p The iterate on the variable.
  * @param tau Fraction-to-the-boundary rule scaling factor.
+ * @param max_alpha Maximum allowable step size.
  * @return Fraction of the iterate step size within (0, 1].
  */
 double FractionToTheBoundaryRule(const Eigen::Ref<const Eigen::VectorXd>& x,
                                  const Eigen::Ref<const Eigen::VectorXd>& p,
-                                 double tau) {
+                                 double tau,
+                                 double max_alpha) {
   // αᵐᵃˣ = max(α ∈ (0, 1] : x + αp ≥ (1−τ)x)
   //      = max(α ∈ (0, 1] : αp ≥ −τx)
-  double alpha = 1.0;
+  double alpha = max_alpha;
   for (int i = 0; i < x.rows(); ++i) {
     if (p(i) != 0.0) {
       while (alpha * p(i) < -tau * x(i)) {
@@ -516,16 +531,10 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   Eigen::SparseMatrix<double> H = hessianL.Calculate();
 
   // Equality constraints cₑ
-  Eigen::VectorXd c_e{m_equalityConstraints.size()};
-  for (size_t row = 0; row < m_equalityConstraints.size(); row++) {
-    c_e(row) = m_equalityConstraints[row].Value();
-  }
+  Eigen::VectorXd c_e = GetAD(m_equalityConstraints);
 
   // Inequality constraints cᵢ
-  Eigen::VectorXd c_i{m_inequalityConstraints.size()};
-  for (size_t row = 0; row < m_inequalityConstraints.size(); row++) {
-    c_i(row) = m_inequalityConstraints[row].Value();
-  }
+  Eigen::VectorXd c_i = GetAD(m_inequalityConstraints);
 
   std::vector<FilterEntry> filter;
   filter.emplace_back(m_f.value(), mu, s, c_e, c_i);
@@ -661,12 +670,8 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       A_i = jacobianCi.Calculate();
 
       // Update cₑ and cᵢ
-      for (size_t row = 0; row < m_equalityConstraints.size(); row++) {
-        c_e(row) = m_equalityConstraints[row].Value();
-      }
-      for (size_t row = 0; row < m_inequalityConstraints.size(); row++) {
-        c_i(row) = m_inequalityConstraints[row].Value();
-      }
+      c_e = GetAD(m_equalityConstraints);
+      c_i = GetAD(m_inequalityConstraints);
 
       // Check for problem local infeasibility. The problem is locally
       // infeasible if
@@ -832,7 +837,8 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       rhs.bottomRows(y.rows()) = c_e;
 
       // Solve the Newton-KKT system
-      step = solver.Solve(lhs, -rhs, m_equalityConstraints.size(), mu);
+      solver.Compute(lhs, m_equalityConstraints.size(), mu);
+      step = solver.Solve(-rhs);
 
       // step = [ pₖˣ]
       //        [−pₖʸ]
@@ -846,53 +852,45 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       // pₖˢ = μZ⁻¹e − s − Σ⁻¹pₖᶻ
       Eigen::VectorXd p_s = mu * inverseZ * e - s - inverseSigma * p_z;
 
-      // αₖᵐᵃˣ = max(α ∈ (0, 1] : sₖ + αpₖˢ ≥ (1−τⱼ)sₖ)
-      double alpha_max = FractionToTheBoundaryRule(s, p_s, tau);
-
-      // αₖᶻ = max(α ∈ (0, 1] : zₖ + αpₖᶻ ≥ (1−τⱼ)zₖ)
-      double alpha_z = FractionToTheBoundaryRule(z, p_z, tau);
+      double alpha_max = 1.0;
 
       FilterEntry currentFilterEntry;
       while (true) {
-        Eigen::VectorXd x_k1 = x + alpha_max * p_x;
-        Eigen::VectorXd s_k1 = s + alpha_max * p_s;
-        SetAD(xAD, x_k1);
-        SetAD(sAD, s_k1);
+        double trial_alpha = FractionToTheBoundaryRule(s, p_s, tau, alpha_max);
+        Eigen::VectorXd trial_x = x + trial_alpha * p_x;
+        Eigen::VectorXd trial_s = s + trial_alpha * p_s;
+        SetAD(xAD, trial_x);
+        SetAD(sAD, trial_s);
         graphL.Update();
 
-        // Equality constraints cₑ
-        for (size_t row = 0; row < m_equalityConstraints.size(); row++) {
-          c_e(row) = m_equalityConstraints[row].Value();
-        }
-
-        // Inequality constraints cᵢ
-        for (size_t row = 0; row < m_inequalityConstraints.size(); row++) {
-          c_i(row) = m_inequalityConstraints[row].Value();
-        }
+        c_e = GetAD(m_equalityConstraints);
+        c_i = GetAD(m_inequalityConstraints);
 
         // If current filter entry is better than all prior ones in some
-        // respect, accept it
-        currentFilterEntry = FilterEntry{m_f.value(), mu, s_k1, c_e, c_i};
-        if (std::all_of(filter.begin(), filter.end(),
-                        [&](const auto& entry) {
-                          return currentFilterEntry.objective <=
-                                     entry.objective ||
-                                 currentFilterEntry.constraintViolation <=
-                                     entry.constraintViolation;
-                        }) &&
+        // respect, accept it.
+        currentFilterEntry = FilterEntry{m_f.value(), mu, trial_s, c_e, c_i};
+        if (std::all_of(filter.begin(), filter.end(), [&](const auto& entry) {
+              return currentFilterEntry.objective <= entry.objective ||
+                     currentFilterEntry.constraintViolation <=
+                         entry.constraintViolation;
+            }) &&
             currentFilterEntry.constraintViolation < maxConstraintViolation) {
+          // xₖ₊₁ = xₖ + αₖpₖˣ
+          // sₖ₊₁ = xₖ + αₖpₖˢ
+          x = trial_x;
+          s = trial_s;
           break;
         }
+        alpha_max *= 0.5;
         alpha_max *= 0.5;
       }
       filter.emplace_back(currentFilterEntry);
 
-      // xₖ₊₁ = xₖ + αₖᵐᵃˣpₖˣ
-      // sₖ₊₁ = xₖ + αₖᵐᵃˣpₖˢ
+      // αₖᶻ = max(α ∈ (0, 1] : zₖ + αpₖᶻ ≥ (1−τⱼ)zₖ)
+      double alpha_z = FractionToTheBoundaryRule(z, p_z, tau, 1.0);
+
       // yₖ₊₁ = xₖ + αₖᶻpₖʸ
       // zₖ₊₁ = xₖ + αₖᶻpₖᶻ
-      x += alpha_max * p_x;
-      s += alpha_max * p_s;
       y += alpha_z * p_y;
       z += alpha_z * p_z;
 
