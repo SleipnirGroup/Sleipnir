@@ -14,6 +14,7 @@
 #include <Eigen/SparseCore>
 #include <fmt/core.h>
 
+#include "Eigen/src/SparseCore/SparseMatrix.h"
 #include "RegularizedLDLT.hpp"
 #include "ScopeExit.hpp"
 #include "sleipnir/autodiff/Expression.hpp"
@@ -57,13 +58,17 @@ struct Filter {
   std::vector<FilterEntry> filter;
 
   double maxConstraintViolation;
-
   double minConstraintViolation;
+
+  // double gamma_constraint = 1e-5;
+  // double gamma_objective = 1e-5;
+  double gamma_constraint = 0;
+  double gamma_objective = 0;
 
   explicit Filter(FilterEntry pair) {
     filter.push_back(pair);
     minConstraintViolation = 1e-4 * std::max(1.0, pair.constraintViolation);
-    maxConstraintViolation = pair.constraintViolation;
+    maxConstraintViolation = 1e4 * std::max(1.0, pair.constraintViolation);
   }
 
   void PushBack(FilterEntry pair) {
@@ -73,7 +78,6 @@ struct Filter {
   void ResetFilter(FilterEntry pair) {
     filter.clear();
     filter.push_back(pair);
-    maxConstraintViolation = pair.constraintViolation;
   }
 
   bool IsStepAcceptable(Eigen::VectorXd x, 
@@ -82,8 +86,8 @@ struct Filter {
                         Eigen::VectorXd p_s,
                         FilterEntry pair) {
     if (std::all_of(filter.begin(), filter.end(), [&](const auto& entry) {
-              return pair.objective <= entry.objective ||
-                     pair.constraintViolation <= entry.constraintViolation;
+              return pair.objective <= entry.objective - gamma_objective * entry.constraintViolation ||
+                     pair.constraintViolation <= (1 - gamma_constraint) * entry.constraintViolation;
         }) && pair.constraintViolation < maxConstraintViolation) {
       return true;
     }
@@ -131,6 +135,16 @@ Eigen::VectorXd GetAD(std::vector<Variable> src) {
   for (int row = 0; row < dest.size(); ++row) {
     dest(row) = src[row].Value();
   }
+  return dest;
+}
+
+Eigen::SparseMatrix<double> SparseDiagonal(const Eigen::VectorXd& src) {
+  std::vector<Eigen::Triplet<double>> triplets;
+  for (int row = 0; row < src.rows(); ++row) {
+    triplets.emplace_back(row, row, src(row));
+  }
+  Eigen::SparseMatrix<double> dest{src.rows(), src.rows()};
+  dest.setFromTriplets(triplets.begin(), triplets.end());
   return dest;
 }
 
@@ -683,12 +697,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       // S = [0  ⋱   ⋮ ]
       //     [⋮    ⋱ 0 ]
       //     [0  ⋯ 0 sₘ]
-      triplets.clear();
-      for (int k = 0; k < s.rows(); k++) {
-        triplets.emplace_back(k, k, s[k]);
-      }
-      Eigen::SparseMatrix<double> S{s.rows(), s.rows()};
-      S.setFromTriplets(triplets.begin(), triplets.end());
+      Eigen::SparseMatrix<double> S = SparseDiagonal(s);
 
       //         [∇ᵀcₑ₁(x)ₖ]
       // Aₑ(x) = [∇ᵀcₑ₂(x)ₖ]
@@ -806,28 +815,14 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
         break;
       }
 
-      // S⁻¹
-      Eigen::SparseMatrix<double> inverseS = S.cwiseInverse();
-
       //     [z₁ 0 ⋯ 0 ]
       // Z = [0  ⋱   ⋮ ]
       //     [⋮    ⋱ 0 ]
       //     [0  ⋯ 0 zₘ]
-      triplets.clear();
-      for (int k = 0; k < s.rows(); k++) {
-        triplets.emplace_back(k, k, z[k]);
-      }
-      Eigen::SparseMatrix<double> Z{z.rows(), z.rows()};
-      Z.setFromTriplets(triplets.begin(), triplets.end());
-
-      // Z⁻¹
-      Eigen::SparseMatrix<double> inverseZ = Z.cwiseInverse();
+      Eigen::SparseMatrix<double> Z = SparseDiagonal(z);
 
       // Σ = S⁻¹Z
-      Eigen::SparseMatrix<double> sigma = inverseS * Z;
-
-      // Σ⁻¹ = SZ⁻¹
-      Eigen::SparseMatrix<double> inverseSigma = S * inverseZ;
+      Eigen::SparseMatrix<double> sigma = S.cwiseInverse() * Z;
 
       // Hₖ = ∇²ₓₓL(x, s, y, z)ₖ
       H = hessianL.Calculate();
@@ -865,7 +860,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       }
       if (m_inequalityConstraints.size() > 0) {
         rhs.topRows(x.rows()) +=
-            A_i.transpose() * (sigma * c_i - mu * inverseS * e - z);
+            A_i.transpose() * (sigma * c_i - mu * S.cwiseInverse() * e - z);
       }
       rhs.bottomRows(y.rows()) = c_e;
 
@@ -880,10 +875,10 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
 
       // pₖᶻ = −Σcᵢ + μS⁻¹e − ΣAᵢpₖˣ
       Eigen::VectorXd p_z =
-          -sigma * c_i + mu * inverseS * e - sigma * A_i * p_x;
+          -sigma * c_i + mu * S.cwiseInverse() * e - sigma * A_i * p_x;
 
       // pₖˢ = μZ⁻¹e − s − Σ⁻¹pₖᶻ
-      Eigen::VectorXd p_s = mu * inverseZ * e - s - inverseSigma * p_z;
+      Eigen::VectorXd p_s = mu * Z.cwiseInverse() * e - s - sigma.cwiseInverse() * p_z;
 
       double alpha_max = 1.0;
 
