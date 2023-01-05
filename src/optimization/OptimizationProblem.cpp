@@ -80,19 +80,18 @@ struct Filter {
   bool IsStepAcceptable(Eigen::VectorXd x, Eigen::VectorXd s,
                         Eigen::VectorXd p_x, Eigen::VectorXd p_s,
                         FilterEntry pair) {
-    if (std::all_of(
-            filter.begin(), filter.end(),
-            [&](const auto& entry) {
-              return pair.objective <=
-                         entry.objective -
-                             gamma_objective * entry.constraintViolation ||
-                     pair.constraintViolation <=
-                         (1 - gamma_constraint) * entry.constraintViolation;
-            }) &&
-        pair.constraintViolation < maxConstraintViolation) {
-      return true;
-    }
-    return false;
+    // If current filter entry is better than all prior ones in some respect,
+    // accept it
+    return std::all_of(
+               filter.begin(), filter.end(),
+               [&](const auto& entry) {
+                 return pair.objective <=
+                            entry.objective -
+                                gamma_objective * entry.constraintViolation ||
+                        pair.constraintViolation <=
+                            (1 - gamma_constraint) * entry.constraintViolation;
+               }) &&
+           pair.constraintViolation < maxConstraintViolation;
   }
 };
 
@@ -943,8 +942,6 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
         c_e = GetAD(m_equalityConstraints);
         c_i = GetAD(m_inequalityConstraints);
 
-        // If current filter entry is better than all prior ones in some
-        // respect, accept it.
         currentFilterEntry = FilterEntry{m_f.value(), mu, trial_s, c_e, c_i};
         if (filter.IsStepAcceptable(x, s, p_x, p_s, currentFilterEntry)) {
           break;
