@@ -12,9 +12,9 @@
 #include <vector>
 
 #include <Eigen/SparseCore>
+#include <Eigen/src/SparseCore/SparseMatrix.h>
 #include <fmt/core.h>
 
-#include "Eigen/src/SparseCore/SparseMatrix.h"
 #include "RegularizedLDLT.hpp"
 #include "ScopeExit.hpp"
 #include "sleipnir/autodiff/Expression.hpp"
@@ -71,24 +71,26 @@ struct Filter {
     maxConstraintViolation = 1e4 * std::max(1.0, pair.constraintViolation);
   }
 
-  void PushBack(FilterEntry pair) {
-    filter.push_back(pair);
-  }
+  void PushBack(FilterEntry pair) { filter.push_back(pair); }
 
   void ResetFilter(FilterEntry pair) {
     filter.clear();
     filter.push_back(pair);
   }
 
-  bool IsStepAcceptable(Eigen::VectorXd x, 
-                        Eigen::VectorXd s, 
-                        Eigen::VectorXd p_x, 
-                        Eigen::VectorXd p_s,
+  bool IsStepAcceptable(Eigen::VectorXd x, Eigen::VectorXd s,
+                        Eigen::VectorXd p_x, Eigen::VectorXd p_s,
                         FilterEntry pair) {
-    if (std::all_of(filter.begin(), filter.end(), [&](const auto& entry) {
-              return pair.objective <= entry.objective - gamma_objective * entry.constraintViolation ||
-                     pair.constraintViolation <= (1 - gamma_constraint) * entry.constraintViolation;
-        }) && pair.constraintViolation < maxConstraintViolation) {
+    if (std::all_of(
+            filter.begin(), filter.end(),
+            [&](const auto& entry) {
+              return pair.objective <=
+                         entry.objective -
+                             gamma_objective * entry.constraintViolation ||
+                     pair.constraintViolation <=
+                         (1 - gamma_constraint) * entry.constraintViolation;
+            }) &&
+        pair.constraintViolation < maxConstraintViolation) {
       return true;
     }
     return false;
@@ -877,8 +879,8 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
           -sigma * c_i + mu * S.cwiseInverse() * e - sigma * A_i * p_x;
 
       // pₖˢ = μZ⁻¹e − s − Σ⁻¹pₖᶻ
-      Eigen::VectorXd p_s = mu * Z.cwiseInverse() * e - s - S * Z.cwiseInverse() * p_z;
-
+      Eigen::VectorXd p_s =
+          mu * Z.cwiseInverse() * e - s - S * Z.cwiseInverse() * p_z;
 
       FilterEntry currentFilterEntry;
 
@@ -916,7 +918,8 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
         }
         if (m_inequalityConstraints.size() > 0) {
           rhs.topRows(x.rows()) +=
-              A_i.transpose() * (SparseDiagonal(s_soc).cwiseInverse() * (Z * c_i - mu * e) - z);
+              A_i.transpose() *
+              (SparseDiagonal(s_soc).cwiseInverse() * (Z * c_i - mu * e) - z);
         }
         rhs.bottomRows(y.rows()) = c_e;
 
@@ -925,10 +928,12 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
 
         p_x_soc = step.segment(0, x.rows());
         p_y_soc = -step.segment(x.rows(), y.rows());
-        p_z_soc = -sigma * c_i + mu * S.cwiseInverse() * e - sigma * A_i * p_x_soc;
-        p_s_soc = mu * Z.cwiseInverse() * e - s - sigma.cwiseInverse() * p_z_soc;
+        p_z_soc =
+            -sigma * c_i + mu * S.cwiseInverse() * e - sigma * A_i * p_x_soc;
+        p_s_soc =
+            mu * Z.cwiseInverse() * e - s - sigma.cwiseInverse() * p_z_soc;
       }
-      
+
       while (!stepAcceptable) {
         Eigen::VectorXd trial_x = x + alpha_max * p_x;
         Eigen::VectorXd trial_s = s + alpha_max * p_s;

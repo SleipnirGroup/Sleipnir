@@ -62,8 +62,7 @@ class RegularizedLDLT {
    * @param mu The barrier parameter for the current interior-point iteration.
    */
   void Compute(const Eigen::SparseMatrix<double>& lhs,
-               size_t numEqualityConstraints,
-               double mu) {
+               size_t numEqualityConstraints, double mu) {
     // The regularization procedure is based on algorithm B.1 of [1].
     //
     // [1] Nocedal, J. and Wright, S. "Numerical Optimization", 2nd. ed.,
@@ -123,7 +122,7 @@ class RegularizedLDLT {
     return;
   }
 
-  template <typename Rhs> 
+  template <typename Rhs>
   auto Solve(const Eigen::MatrixBase<Rhs>& rhs) {
     return m_solver.solve(rhs);
   }
