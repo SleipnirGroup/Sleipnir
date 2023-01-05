@@ -111,7 +111,7 @@ TEST(FlywheelProblemTest, DirectTranscription) {
   }
 
   // Verify final state
-  EXPECT_NEAR(r(0), X.Value(0, N - 1), 1e-2);
+  EXPECT_NEAR(r(0), X.Value(0, N), 1e-2);
 
   // Log states for offline viewing
   std::ofstream states{"Flywheel states.csv"};
