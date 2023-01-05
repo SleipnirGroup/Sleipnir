@@ -117,8 +117,8 @@ TEST(DoubleIntegratorProblemTest, MinimumTime) {
   }
 
   // Verify final state
-  EXPECT_NEAR(r, X.Value(0, N - 1), 1e-2);
-  EXPECT_NEAR(0.0, X.Value(1, N - 1), 1e-2);
+  EXPECT_NEAR(r, X.Value(0, N), 1e-2);
+  EXPECT_NEAR(0.0, X.Value(1, N), 1e-2);
 
   // Log states for offline viewing
   std::ofstream states{"Double integrator states.csv"};
