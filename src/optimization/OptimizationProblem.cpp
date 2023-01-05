@@ -12,7 +12,6 @@
 #include <vector>
 
 #include <Eigen/SparseCore>
-#include <Eigen/src/SparseCore/SparseMatrix.h>
 #include <fmt/core.h>
 
 #include "RegularizedLDLT.hpp"
