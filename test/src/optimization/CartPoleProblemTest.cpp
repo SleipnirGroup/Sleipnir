@@ -217,8 +217,8 @@ TEST(CartPoleProblemTest, DirectTranscription) {
                     Eigen::Matrix<double, 4, 1>{0.0, 0.0, 0.0, 0.0});
 
   // Final conditions
-  problem.SubjectTo(
-      X.Col(N) == Eigen::Matrix<double, 4, 1>{1.0, std::numbers::pi, 0.0, 0.0});
+  problem.SubjectTo(X.Col(N) == Eigen::Matrix<double, 4, 1>{
+                                    d.value(), std::numbers::pi, 0.0, 0.0});
 
   // Cart position constraints
   problem.SubjectTo(X.Row(0) >= 0.0);
@@ -286,7 +286,7 @@ TEST(CartPoleProblemTest, DirectTranscription) {
   }
 
   // Verify final state
-  EXPECT_NEAR(1.0, X.Value(0, N), 1e-2);
+  EXPECT_NEAR(d.value(), X.Value(0, N), 1e-2);
   EXPECT_NEAR(std::numbers::pi, X.Value(1, N), 1e-2);
   EXPECT_NEAR(0.0, X.Value(2, N), 1e-2);
   EXPECT_NEAR(0.0, X.Value(3, N), 1e-2);
