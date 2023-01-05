@@ -469,6 +469,14 @@ SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> pow(  // NOLINT
     const IntrusiveSharedPtr<Expression>& power);
 
 /**
+ * sign() for Expressions.
+ *
+ * @param x The argument.
+ */
+SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> sign(
+    const IntrusiveSharedPtr<Expression>& x);
+
+/**
  * std::sin() for Expressions.
  *
  * @param x The argument.

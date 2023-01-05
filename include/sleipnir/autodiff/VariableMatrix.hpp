@@ -732,6 +732,15 @@ SLEIPNIR_DLLEXPORT VariableMatrix pow(const VariableMatrix& base,
                                       const VariableMatrix& power);
 
 /**
+ * sign() for VariableMatrices.
+ *
+ * The function is applied element-wise to the argument.
+ *
+ * @param x The argument.
+ */
+SLEIPNIR_DLLEXPORT VariableMatrix sign(const VariableMatrix& x);
+
+/**
  * std::sin() for VariableMatrices.
  *
  * The function is applied element-wise to the argument.

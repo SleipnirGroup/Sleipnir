@@ -285,6 +285,14 @@ Variable pow(const Variable& base, const Variable& power) {
   return Variable{pow(base.expr, power.expr)};
 }
 
+Variable sign(double x) {
+  return Variable{sleipnir::sign(MakeConstant(x))};
+}
+
+Variable sign(const Variable& x) {
+  return Variable{sign(x.expr)};
+}
+
 Variable sin(double x) {
   return Variable{sleipnir::sin(MakeConstant(x))};
 }
