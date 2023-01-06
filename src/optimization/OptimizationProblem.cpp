@@ -2,6 +2,7 @@
 
 #include "sleipnir/optimization/OptimizationProblem.hpp"
 
+#include <algorithm>
 #include <array>
 #include <cassert>
 #include <chrono>
@@ -25,6 +26,73 @@
 using namespace sleipnir;
 
 namespace {
+/**
+ * Filter entry consisting of objective value and constraint value.
+ */
+struct FilterEntry {
+  /// The objective function's value
+  double objective = 0.0;
+
+  /// The constraint violation
+  double constraintViolation = 0.0;
+
+  constexpr FilterEntry() = default;
+
+  /**
+   * Constructs a FilterEntry.
+   *
+   * @param f The objective function.
+   * @param mu The barrier parameter.
+   * @param s The inequality constraint slack variables.
+   * @param c_e The equality constraint values (nonzero means violation).
+   * @param c_i The inequality constraint values (negative means violation).
+   */
+  FilterEntry(const Variable& f, double mu, Eigen::VectorXd& s,
+              const Eigen::VectorXd& c_e, const Eigen::VectorXd& c_i)
+      : objective{f.Value() - mu * s.array().log().sum()},
+        constraintViolation{c_e.lpNorm<1>() + (c_i - s).lpNorm<1>()} {}
+};
+
+struct Filter {
+  std::vector<FilterEntry> filter;
+
+  double maxConstraintViolation;
+  double minConstraintViolation;
+
+  double gamma_constraint = 0;
+  double gamma_objective = 0;
+
+  explicit Filter(FilterEntry pair) {
+    filter.push_back(pair);
+    minConstraintViolation = 1e-4 * std::max(1.0, pair.constraintViolation);
+    maxConstraintViolation = 1e4 * std::max(1.0, pair.constraintViolation);
+  }
+
+  void PushBack(FilterEntry pair) { filter.push_back(pair); }
+
+  void ResetFilter(FilterEntry pair) {
+    filter.clear();
+    filter.push_back(pair);
+  }
+
+  bool IsStepAcceptable(Eigen::VectorXd x, Eigen::VectorXd s,
+                        Eigen::VectorXd p_x, Eigen::VectorXd p_s,
+                        FilterEntry pair) {
+    // If current filter entry is better than all prior ones in some respect,
+    // accept it
+    return std::all_of(
+               filter.begin(), filter.end(),
+               [&](const auto& entry) {
+                 return pair.objective <=
+                            entry.objective -
+                                gamma_objective * entry.constraintViolation ||
+                        pair.constraintViolation <=
+                            (1 - gamma_constraint) * entry.constraintViolation;
+               }) &&
+           pair.constraintViolation < maxConstraintViolation;
+  }
+};
+
 /**
  * Assigns the contents of a double vector to an autodiff vector.
  *
@@ -53,6 +121,29 @@ void SetAD(Eigen::Ref<VectorXvar> dest,
   for (int row = 0; row < dest.rows(); ++row) {
     dest(row) = src(row);
   }
+}
+
+/**
+ * Gets the contents of a autodiff vector as a double vector.
+ *
+ * @param src The autodiff vector.
+ */
+Eigen::VectorXd GetAD(std::vector<Variable> src) {
+  Eigen::VectorXd dest{src.size()};
+  for (int row = 0; row < dest.size(); ++row) {
+    dest(row) = src[row].Value();
+  }
+  return dest;
+}
+
+Eigen::SparseMatrix<double> SparseDiagonal(const Eigen::VectorXd& src) {
+  std::vector<Eigen::Triplet<double>> triplets;
+  for (int row = 0; row < src.rows(); ++row) {
+    triplets.emplace_back(row, row, src(row));
+  }
+  Eigen::SparseMatrix<double> dest{src.rows(), src.rows()};
+  dest.setFromTriplets(triplets.begin(), triplets.end());
+  return dest;
 }
 
 /**
@@ -370,8 +461,8 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   //
   // Eliminate the third row and column.
   //
-  //   [H + AᵢᵀΣAᵢ  Aₑᵀ][ pₖˣ] = −[∇f(x) − Aₑᵀy + Aᵢᵀ(Σcᵢ − μS⁻¹e − z)]
-  //   [    Aₑ       0 ][−pₖʸ]    [                cₑ                 ]
+  //   [H + AᵢᵀΣAᵢ  Aₑᵀ][ pₖˣ] = −[∇f − Aₑᵀy + Aᵢᵀ(S⁻¹(Zcᵢ − μe) − z)]
+  //   [    Aₑ       0 ][−pₖʸ]    [                cₑ                ]
   //
   // This reduced 2x2 block system gives the iterates pₖˣ and pₖʸ with the
   // iterates pₖᶻ and pₖˢ given by
@@ -488,7 +579,12 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   Eigen::SparseMatrix<double> H = hessianL.Calculate();
 
   // Equality constraints cₑ
-  Eigen::VectorXd c_e{m_equalityConstraints.size()};
+  Eigen::VectorXd c_e = GetAD(m_equalityConstraints);
+
+  // Inequality constraints cᵢ
+  Eigen::VectorXd c_i = GetAD(m_inequalityConstraints);
+
+  Filter filter{FilterEntry(m_f.value(), mu, s, c_e, c_i)};
 
   // Equality constraint Jacobian Aₑ
   //
@@ -497,9 +593,6 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   //         [    ⋮    ]
   //         [∇ᵀcₑₘ(x)ₖ]
   Eigen::SparseMatrix<double> A_e = jacobianCe.Calculate();
-
-  // Inequality constraints cᵢ
-  Eigen::VectorXd c_i{m_inequalityConstraints.size()};
 
   // Inequality constraint Jacobian Aᵢ
   //
@@ -600,12 +693,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       // S = [0  ⋱   ⋮ ]
       //     [⋮    ⋱ 0 ]
       //     [0  ⋯ 0 sₘ]
-      triplets.clear();
-      for (int k = 0; k < s.rows(); k++) {
-        triplets.emplace_back(k, k, s[k]);
-      }
-      Eigen::SparseMatrix<double> S{s.rows(), s.rows()};
-      S.setFromTriplets(triplets.begin(), triplets.end());
+      Eigen::SparseMatrix<double> S = SparseDiagonal(s);
 
       //         [∇ᵀcₑ₁(x)ₖ]
       // Aₑ(x) = [∇ᵀcₑ₂(x)ₖ]
@@ -620,12 +708,8 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       A_i = jacobianCi.Calculate();
 
       // Update cₑ and cᵢ
-      for (size_t row = 0; row < m_equalityConstraints.size(); row++) {
-        c_e(row) = m_equalityConstraints[row].Value();
-      }
-      for (size_t row = 0; row < m_inequalityConstraints.size(); row++) {
-        c_i(row) = m_inequalityConstraints[row].Value();
-      }
+      c_e = GetAD(m_equalityConstraints);
+      c_i = GetAD(m_inequalityConstraints);
 
       // Check for problem local infeasibility. The problem is locally
       // infeasible if
@@ -727,28 +811,14 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
         break;
       }
 
-      // S⁻¹
-      Eigen::SparseMatrix<double> inverseS = S.cwiseInverse();
-
       //     [z₁ 0 ⋯ 0 ]
       // Z = [0  ⋱   ⋮ ]
       //     [⋮    ⋱ 0 ]
       //     [0  ⋯ 0 zₘ]
-      triplets.clear();
-      for (int k = 0; k < s.rows(); k++) {
-        triplets.emplace_back(k, k, z[k]);
-      }
-      Eigen::SparseMatrix<double> Z{z.rows(), z.rows()};
-      Z.setFromTriplets(triplets.begin(), triplets.end());
-
-      // Z⁻¹
-      Eigen::SparseMatrix<double> inverseZ = Z.cwiseInverse();
+      Eigen::SparseMatrix<double> Z = SparseDiagonal(z);
 
       // Σ = S⁻¹Z
-      Eigen::SparseMatrix<double> sigma = inverseS * Z;
-
-      // Σ⁻¹ = SZ⁻¹
-      Eigen::SparseMatrix<double> inverseSigma = S * inverseZ;
+      Eigen::SparseMatrix<double> sigma = S.cwiseInverse() * Z;
 
       // Hₖ = ∇²ₓₓL(x, s, y, z)ₖ
       H = hessianL.Calculate();
@@ -775,7 +845,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
 
       g = gradientF.Calculate();
 
-      // rhs = −[∇f − Aₑᵀy + Aᵢᵀ(Σcᵢ − μS⁻¹e − z)]
+      // rhs = −[∇f − Aₑᵀy + Aᵢᵀ(S⁻¹(Zcᵢ − μe) − z)]
       //        [               cₑ               ]
       //
       // The outer negative sign is applied in the solve() call.
@@ -786,12 +856,13 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       }
       if (m_inequalityConstraints.size() > 0) {
         rhs.topRows(x.rows()) +=
-            A_i.transpose() * (sigma * c_i - mu * inverseS * e - z);
+            A_i.transpose() * (S.cwiseInverse() * (Z * c_i - mu * e) - z);
       }
       rhs.bottomRows(y.rows()) = c_e;
 
       // Solve the Newton-KKT system
-      step = solver.Solve(lhs, -rhs, m_equalityConstraints.size(), mu);
+      solver.Compute(lhs, m_equalityConstraints.size(), mu);
+      step = solver.Solve(-rhs);
 
       // step = [ pₖˣ]
       //        [−pₖʸ]
@@ -800,19 +871,87 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
 
       // pₖᶻ = −Σcᵢ + μS⁻¹e − ΣAᵢpₖˣ
       Eigen::VectorXd p_z =
-          -sigma * c_i + mu * inverseS * e - sigma * A_i * p_x;
+          -sigma * c_i + mu * S.cwiseInverse() * e - sigma * A_i * p_x;
 
       // pₖˢ = μZ⁻¹e − s − Σ⁻¹pₖᶻ
-      Eigen::VectorXd p_s = mu * inverseZ * e - s - inverseSigma * p_z;
+      Eigen::VectorXd p_s =
+          mu * Z.cwiseInverse() * e - s - S * Z.cwiseInverse() * p_z;
 
-      // αₖᵐᵃˣ = max(α ∈ (0, 1] : sₖ + αpₖˢ ≥ (1−τⱼ)sₖ)
+      FilterEntry currentFilterEntry;
+
+      bool stepAcceptable = false;
+
       double alpha_max = FractionToTheBoundaryRule(s, p_s, tau);
+
+      // Apply second order corrections. See section 2.4 of [2].
+      Eigen::VectorXd p_x_soc = p_x;
+      Eigen::VectorXd p_s_soc = p_s;
+      Eigen::VectorXd p_y_soc, p_z_soc;
+      for (int soc_iteration = 0; soc_iteration < 5; ++soc_iteration) {
+        double alpha_soc = FractionToTheBoundaryRule(s, p_s_soc, tau);
+        Eigen::VectorXd x_soc = x + alpha_soc * p_x_soc;
+        Eigen::VectorXd s_soc = s + alpha_soc * p_s_soc;
+        SetAD(xAD, x_soc);
+        SetAD(sAD, s_soc);
+        graphL.Update();
+        c_e = GetAD(m_equalityConstraints);
+        c_i = GetAD(m_inequalityConstraints);
+
+        currentFilterEntry = FilterEntry(m_f.value(), mu, s_soc, c_e, c_i);
+        if (filter.IsStepAcceptable(x, s, p_x, p_s, currentFilterEntry)) {
+          p_x = p_x_soc;
+          p_s = p_s_soc;
+          alpha_max = alpha_soc;
+          stepAcceptable = true;
+          break;
+        }
+
+        // Rebuild Newton-KKT rhs with updated constraint values.
+        rhs.topRows(x.rows()) = g;
+        if (m_equalityConstraints.size() > 0) {
+          rhs.topRows(x.rows()) -= A_e.transpose() * y;
+        }
+        if (m_inequalityConstraints.size() > 0) {
+          rhs.topRows(x.rows()) +=
+              A_i.transpose() *
+              (SparseDiagonal(s_soc).cwiseInverse() * (Z * c_i - mu * e) - z);
+        }
+        rhs.bottomRows(y.rows()) = c_e;
+
+        // Solve the Newton-KKT system
+        step = solver.Solve(-rhs);
+
+        p_x_soc = step.segment(0, x.rows());
+        p_y_soc = -step.segment(x.rows(), y.rows());
+        p_z_soc =
+            -sigma * c_i + mu * S.cwiseInverse() * e - sigma * A_i * p_x_soc;
+        p_s_soc =
+            mu * Z.cwiseInverse() * e - s - sigma.cwiseInverse() * p_z_soc;
+      }
+
+      while (!stepAcceptable) {
+        Eigen::VectorXd trial_x = x + alpha_max * p_x;
+        Eigen::VectorXd trial_s = s + alpha_max * p_s;
+        SetAD(xAD, trial_x);
+        SetAD(sAD, trial_s);
+        graphL.Update();
+
+        c_e = GetAD(m_equalityConstraints);
+        c_i = GetAD(m_inequalityConstraints);
+
+        currentFilterEntry = FilterEntry{m_f.value(), mu, trial_s, c_e, c_i};
+        if (filter.IsStepAcceptable(x, s, p_x, p_s, currentFilterEntry)) {
+          break;
+        }
+        alpha_max *= 0.5;
+      }
+      filter.PushBack(currentFilterEntry);
 
       // αₖᶻ = max(α ∈ (0, 1] : zₖ + αpₖᶻ ≥ (1−τⱼ)zₖ)
       double alpha_z = FractionToTheBoundaryRule(z, p_z, tau);
 
-      // xₖ₊₁ = xₖ + αₖᵐᵃˣpₖˣ
-      // sₖ₊₁ = xₖ + αₖᵐᵃˣpₖˢ
+      // xₖ₊₁ = xₖ + αₖpₖˣ
+      // sₖ₊₁ = xₖ + αₖpₖˢ
       // yₖ₊₁ = xₖ + αₖᶻpₖʸ
       // zₖ₊₁ = xₖ + αₖᶻpₖᶻ
       x += alpha_max * p_x;
@@ -842,13 +981,14 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
 
       if (m_config.diagnostics) {
         if (iterations % 20 == 0) {
-          fmt::print("{:>4}  {:>9}  {:>9}  {:>13}\n", "iter", "time (ms)",
-                     "error", "infeasibility");
-          fmt::print("{:=^41}\n", "");
+          fmt::print("{:>4}   {:>10}  {:>10}   {:>16}  {:>19}\n", "iter",
+                     "time (ms)", "error", "objective", "infeasibility");
+          fmt::print("{:=^70}\n", "");
         }
-        fmt::print("{:>4}  {:>9}  {:>9.3e}  {:>13.3e}\n", iterations,
+        fmt::print("{:>4}  {:>9}  {:>15e}  {:>16e}   {:>16e}\n", iterations,
                    ToMilliseconds(innerIterEndTime - innerIterStartTime), E_mu,
-                   c_e.lpNorm<1>() + (c_i - s).lpNorm<1>());
+                   currentFilterEntry.objective,
+                   currentFilterEntry.constraintViolation);
       }
 
       ++iterations;
@@ -878,6 +1018,9 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
     //
     // See equation (8) in [2].
     tau = std::max(tau_min, 1.0 - mu);
+
+    // Reset the filter when the barrier parameter is updated.
+    filter.ResetFilter(FilterEntry(m_f.value(), mu, s, c_e, c_i));
   }
 
   return x;

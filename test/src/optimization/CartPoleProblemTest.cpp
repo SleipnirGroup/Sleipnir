@@ -217,8 +217,8 @@ TEST(CartPoleProblemTest, DirectTranscription) {
                     Eigen::Matrix<double, 4, 1>{0.0, 0.0, 0.0, 0.0});
 
   // Final conditions
-  problem.SubjectTo(
-      X.Col(N) == Eigen::Matrix<double, 4, 1>{1.0, std::numbers::pi, 0.0, 0.0});
+  problem.SubjectTo(X.Col(N) == Eigen::Matrix<double, 4, 1>{
+                                    d.value(), std::numbers::pi, 0.0, 0.0});
 
   // Cart position constraints
   problem.SubjectTo(X.Row(0) >= 0.0);
@@ -255,50 +255,41 @@ TEST(CartPoleProblemTest, DirectTranscription) {
   EXPECT_EQ(sleipnir::ExpressionType::kNonlinear,
             status.equalityConstraintType);
   EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.inequalityConstraintType);
-  // FIXME
-#if 0
   EXPECT_EQ(sleipnir::SolverExitCondition::kOk, status.exitCondition);
-#endif
 
-  // Log states from input-replay for offline viewing
-  std::ofstream inputReplayStates{"Cart-pole input-replay states.csv"};
-  if (inputReplayStates.is_open()) {
-    inputReplayStates << "Time (s),Cart position (m),Pole angle (rad),"
-                         "Cart velocity (m/s),Pole angular velocity (rad/s)\n";
-  }
+  // Verify initial state
+  EXPECT_NEAR(0.0, X.Value(0, 0), 1e-2);
+  EXPECT_NEAR(0.0, X.Value(1, 0), 1e-2);
+  EXPECT_NEAR(0.0, X.Value(2, 0), 1e-2);
+  EXPECT_NEAR(0.0, X.Value(3, 0), 1e-2);
 
   // Verify solution
-  Eigen::Matrix<double, 4, 1> x{0.0, 0.0, 0.0, 0.0};
-  Eigen::Matrix<double, 1, 1> u{0.0};
   for (int k = 0; k < N; ++k) {
-    u = U.Col(k).Value();
+    // Cart position constraints
+    EXPECT_GE(X.Row(0).Value(k), 0.0);
+    EXPECT_LE(X.Row(0).Value(k), d_max.value());
 
-    if (inputReplayStates.is_open()) {
-      inputReplayStates << fmt::format("{},{},{},{},{}\n", k * dt.value(), x(0),
-                                       x(1), x(2), x(3));
+    // Input constraints
+    EXPECT_GE(U.Col(k).Value(0), -u_max.value());
+    EXPECT_LE(U.Col(k).Value(0), u_max.value());
+
+    // Dynamics constraints
+    // FIXME: The tolerance here is too large. It should be 1e-6 based on the
+    // fact the solver claimed to converge to an infeasibility lower than that
+    Eigen::VectorXd expected_x_k1 =
+        RK4(CartPoleDynamicsDouble, X.Col(k).Value(), U.Col(k).Value(), dt);
+    Eigen::VectorXd actual_x_k1 = X.Col(k + 1).Value();
+    for (int row = 0; row < actual_x_k1.rows(); ++row) {
+      EXPECT_NEAR(expected_x_k1(row), actual_x_k1(row), 2e-1)
+          << "  x(" << row << ") @ k = " << k;
     }
-
-    // Verify state
-    // FIXME
-#if 0
-    EXPECT_NEAR(x(0), X.Value(0, k), 1e-2) << fmt::format("  k = {}", k);
-    EXPECT_NEAR(x(1), X.Value(1, k), 1e-2) << fmt::format("  k = {}", k);
-    EXPECT_NEAR(x(2), X.Value(2, k), 1e-2) << fmt::format("  k = {}", k);
-    EXPECT_NEAR(x(3), X.Value(3, k), 1e-2) << fmt::format("  k = {}", k);
-#endif
-
-    // Project state forward
-    x = RK4(CartPoleDynamicsDouble, x, u, dt);
   }
 
   // Verify final state
-  // FIXME
-#if 0
-  EXPECT_NEAR(1.0, X.Value(0, N - 1), 1e-2);
-  EXPECT_NEAR(std::numbers::pi, X.Value(1, N - 1), 1e-2);
-  EXPECT_NEAR(0.0, X.Value(2, N - 1), 1e-2);
-  EXPECT_NEAR(0.0, X.Value(3, N - 1), 1e-2);
-#endif
+  EXPECT_NEAR(d.value(), X.Value(0, N), 1e-2);
+  EXPECT_NEAR(std::numbers::pi, X.Value(1, N), 1e-2);
+  EXPECT_NEAR(0.0, X.Value(2, N), 1e-2);
+  EXPECT_NEAR(0.0, X.Value(3, N), 1e-2);
 
   // Log states for offline viewing
   std::ofstream states{"Cart-pole states.csv"};

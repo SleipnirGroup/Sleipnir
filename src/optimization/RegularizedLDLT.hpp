@@ -53,18 +53,15 @@ class RegularizedLDLT {
   explicit RegularizedLDLT(double theta_mu) : m_theta_mu{theta_mu} {}
 
   /**
-   * Solve the system of equations using a regularized LDLT factorization.
+   * Computes the regularized LDLT factorization of a matrix.
    *
    * @param lhs Left-hand side of the system.
-   * @param rhs Right-hand side of the system.
    * @param numEqualityConstraints The number of equality constraints in the
    *   system.
    * @param mu The barrier parameter for the current interior-point iteration.
    */
-  template <typename Rhs>
-  auto Solve(const Eigen::SparseMatrix<double>& lhs,
-             const Eigen::MatrixBase<Rhs>& rhs, size_t numEqualityConstraints,
-             double mu) {
+  void Compute(const Eigen::SparseMatrix<double>& lhs,
+               size_t numEqualityConstraints, double mu) {
     // The regularization procedure is based on algorithm B.1 of [1].
     //
     // [1] Nocedal, J. and Wright, S. "Numerical Optimization", 2nd. ed.,
@@ -79,7 +76,7 @@ class RegularizedLDLT {
     if (m_solver.info() == Eigen::Success) {
       Inertia inertia = ComputeInertia(m_solver);
       if (inertia == idealInertia) {
-        return m_solver.solve(rhs);
+        return;
       }
 
       if (inertia.zero > 0) {
@@ -115,12 +112,20 @@ class RegularizedLDLT {
       Inertia inertia = ComputeInertia(m_solver);
       if (inertia == idealInertia) {
         m_deltaOld = delta;
-        return m_solver.solve(rhs);
+        return;
       } else {
         delta *= 10.0;
       }
     }
+  }
 
+  /**
+   * Solve the system of equations using a regularized LDLT factorization.
+   *
+   * @param rhs Right-hand side of the system.
+   */
+  template <typename Rhs>
+  auto Solve(const Eigen::MatrixBase<Rhs>& rhs) {
     return m_solver.solve(rhs);
   }
 
