@@ -59,8 +59,6 @@ struct Filter {
   double maxConstraintViolation;
   double minConstraintViolation;
 
-  // double gamma_constraint = 1e-5;
-  // double gamma_objective = 1e-5;
   double gamma_constraint = 0;
   double gamma_objective = 0;
 
@@ -156,7 +154,6 @@ Eigen::SparseMatrix<double> SparseDiagonal(const Eigen::VectorXd& src) {
  * @param p The iterate on the variable.
  * @param tau Fraction-to-the-boundary rule scaling factor.
  * @param max_alpha Maximum allowable step size.
- * @return Fraction of the iterate step size within (0, 1].
  */
 double FractionToTheBoundaryRule(const Eigen::Ref<const Eigen::VectorXd>& x,
                                  const Eigen::Ref<const Eigen::VectorXd>& p,
@@ -464,8 +461,8 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   //
   // Eliminate the third row and column.
   //
-  //   [H + AᵢᵀΣAᵢ  Aₑᵀ][ pₖˣ] = −[∇f(x) − Aₑᵀy + Aᵢᵀ(Σcᵢ − μS⁻¹e − z)]
-  //   [    Aₑ       0 ][−pₖʸ]    [                cₑ                 ]
+  //   [H + AᵢᵀΣAᵢ  Aₑᵀ][ pₖˣ] = −[∇f − Aₑᵀy + Aᵢᵀ(S⁻¹(Zcᵢ − μe) − z)]
+  //   [    Aₑ       0 ][−pₖʸ]    [                cₑ                ]
   //
   // This reduced 2x2 block system gives the iterates pₖˣ and pₖʸ with the
   // iterates pₖᶻ and pₖˢ given by
@@ -886,7 +883,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
 
       double alpha_max = FractionToTheBoundaryRule(s, p_s, tau);
 
-      // Apply second order corrections.
+      // Apply second order corrections. See section 2.4 of [2].
       Eigen::VectorXd p_x_soc = p_x;
       Eigen::VectorXd p_s_soc = p_s;
       Eigen::VectorXd p_y_soc, p_z_soc;
