@@ -716,6 +716,26 @@ Mat pow(const VariableBlock<Mat>& base, const VariableBlock<Mat>& power) {
 }
 
 /**
+ * sign() for VariableMatrices.
+ *
+ * The function is applied element-wise to the argument.
+ *
+ * @param x The argument.
+ */
+template <typename Mat>
+Mat sign(const VariableBlock<Mat>& x) {
+  std::remove_cv_t<Mat> result{x.Rows(), x.Cols()};
+
+  for (int row = 0; row < result.Rows(); ++row) {
+    for (int col = 0; col < result.Cols(); ++col) {
+      result(row, col) = sleipnir::sign(x(row, col));
+    }
+  }
+
+  return result;
+}
+
+/**
  * std::sin() for VariableMatrices.
  *
  * The function is applied element-wise to the argument.
