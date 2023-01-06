@@ -153,7 +153,7 @@ Eigen::SparseMatrix<double> SparseDiagonal(const Eigen::VectorXd& src) {
  * @param x The variable.
  * @param p The iterate on the variable.
  * @param tau Fraction-to-the-boundary rule scaling factor.
- * @param max_alpha Maximum allowable step size.
+ * @return Fraction of the iterate step size within (0, 1].
  */
 double FractionToTheBoundaryRule(const Eigen::Ref<const Eigen::VectorXd>& x,
                                  const Eigen::Ref<const Eigen::VectorXd>& p,

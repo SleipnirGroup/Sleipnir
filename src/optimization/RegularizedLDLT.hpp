@@ -52,15 +52,14 @@ class RegularizedLDLT {
    */
   explicit RegularizedLDLT(double theta_mu) : m_theta_mu{theta_mu} {}
 
-
-   /**
+  /**
    * Computes the regularized LDLT factorization of a matrix.
    *
    * @param lhs Left-hand side of the system.
    * @param numEqualityConstraints The number of equality constraints in the
    *   system.
    * @param mu The barrier parameter for the current interior-point iteration.
-   */  
+   */
   void Compute(const Eigen::SparseMatrix<double>& lhs,
                size_t numEqualityConstraints, double mu) {
     // The regularization procedure is based on algorithm B.1 of [1].
@@ -118,8 +117,6 @@ class RegularizedLDLT {
         delta *= 10.0;
       }
     }
-
-    return;
   }
 
   /**
@@ -127,7 +124,7 @@ class RegularizedLDLT {
    *
    * @param rhs Right-hand side of the system.
    */
-  template <typename Rhs> 
+  template <typename Rhs>
   auto Solve(const Eigen::MatrixBase<Rhs>& rhs) {
     return m_solver.solve(rhs);
   }
