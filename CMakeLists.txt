@@ -56,7 +56,6 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
 
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
-set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS FALSE)
 
@@ -70,7 +69,9 @@ target_include_directories(Sleipnir
                            ${CMAKE_CURRENT_SOURCE_DIR}/src
                            ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/llvm/include)
 
-option(INSTALL_SLEIPNIR "Install Sleipnir" ON)
+include(CMakeDependentOption)
+
+cmake_dependent_option(INSTALL_SLEIPNIR "Install Sleipnir." ON "PROJECT_IS_TOP_LEVEL" OFF)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 
@@ -81,16 +82,13 @@ target_compile_definitions(Sleipnir PRIVATE SLEIPNIR_EXPORTS)
 
 include(FetchContent)
 
-# Eigen dependency (static linkage)
-set(BUILD_SHARED_LIBS_SAVE ${BUILD_SHARED_LIBS})
-set(BUILD_SHARED_LIBS OFF)
+# Eigen dependency
 FetchContent_Declare(
   Eigen3
   GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
   GIT_TAG        3.4.0
 )
 FetchContent_MakeAvailable(Eigen3)
-set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_SAVE})
 
 target_link_libraries(Sleipnir PUBLIC Eigen3::Eigen)
 
@@ -102,16 +100,14 @@ add_custom_command(
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-# fmt dependency (static linkage)
-set(BUILD_SHARED_LIBS_SAVE ${BUILD_SHARED_LIBS})
-set(BUILD_SHARED_LIBS OFF)
+# fmt dependency
+set(FMT_INSTALL ON)
 FetchContent_Declare(
   fmt
   GIT_REPOSITORY https://github.com/fmtlib/fmt.git
   GIT_TAG        9.1.0
 )
 FetchContent_MakeAvailable(fmt)
-set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_SAVE})
 
 target_link_libraries(Sleipnir PRIVATE fmt)
 
