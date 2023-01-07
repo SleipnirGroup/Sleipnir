@@ -2,8 +2,10 @@
 
 #pragma once
 
+#ifdef _WIN32
 #ifdef _MSC_VER
 #pragma warning(disable : 4251)
+#endif
 
 #ifdef SLEIPNIR_EXPORTS
 #ifdef __GNUC__
@@ -24,7 +26,7 @@
 #define SLEIPNIR_DLLEXPORT
 #endif
 
-#else  // _MSC_VER
+#else  // _WIN32
 
 #ifdef SLEIPNIR_EXPORTS
 #define SLEIPNIR_DLLEXPORT __attribute__((visibility("default")))
@@ -32,7 +34,7 @@
 #define SLEIPNIR_DLLEXPORT
 #endif
 
-#endif  // _MSC_VER
+#endif  // _WIN32
 
 // Synopsis
 //
