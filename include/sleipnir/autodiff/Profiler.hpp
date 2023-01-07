@@ -4,13 +4,15 @@
 
 #include <chrono>
 
+#include "sleipnir/SymbolExports.hpp"
+
 namespace sleipnir {
 
 /**
  * Records the number of profiler measurements (start/stop pairs) and the
  * average duration between each start and stop call.
  */
-class Profiler {
+class SLEIPNIR_DLLEXPORT Profiler {
  public:
   /**
    * Tell the profiler to start measuring setup time.
