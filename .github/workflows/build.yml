@@ -30,9 +30,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: ilammy/msvc-dev-cmd@v1.12.0
-        if: matrix.artifact-name == 'Windows'
-
       - name: configure
         run: ${{ matrix.cmake-config-env-vars }} cmake -B build -S .
 
