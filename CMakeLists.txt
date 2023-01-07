@@ -13,10 +13,6 @@ project(Sleipnir)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-
 # Use, i.e. don't skip the full RPATH for the build tree
 set(CMAKE_SKIP_BUILD_RPATH FALSE)
 
@@ -63,15 +59,12 @@ include(SleipnirCompilerFlags)
 
 file(GLOB_RECURSE Sleipnir_src src/*.cpp thirdparty/llvm/src/*.cpp)
 add_library(Sleipnir ${Sleipnir_src})
+add_library(Sleipnir::Sleipnir ALIAS Sleipnir)
 sleipnir_compiler_flags(Sleipnir)
 target_include_directories(Sleipnir
                            PRIVATE
                            ${CMAKE_CURRENT_SOURCE_DIR}/src
                            ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/llvm/include)
-
-include(CMakeDependentOption)
-
-cmake_dependent_option(INSTALL_SLEIPNIR "Install Sleipnir." ON "PROJECT_IS_TOP_LEVEL" OFF)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 
@@ -116,13 +109,20 @@ target_include_directories(Sleipnir
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
                            $<INSTALL_INTERFACE:include/Sleipnir>)
 
-if (INSTALL_SLEIPNIR)
-  install(TARGETS Sleipnir EXPORT Sleipnir DESTINATION lib)
-  install(DIRECTORY include/ DESTINATION "include/Sleipnir")
-  install(EXPORT Sleipnir
-    FILE Sleipnir.cmake
-    DESTINATION lib/cmake/Sleipnir)
-endif()
+install(TARGETS Sleipnir
+        EXPORT SleipnirTargets
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        RUNTIME DESTINATION bin
+        INCLUDES DESTINATION include)
+export(TARGETS Sleipnir
+       FILE Sleipnir.cmake
+       NAMESPACE Sleipnir::)
+install(DIRECTORY include/ DESTINATION "include/Sleipnir")
+install(EXPORT SleipnirTargets
+        FILE Sleipnir.cmake
+        NAMESPACE Sleipnir::
+        DESTINATION lib/cmake/Sleipnir)
 
 include(CMakePackageConfigHelpers)
 
@@ -135,11 +135,9 @@ configure_package_config_file(
   NO_CHECK_REQUIRED_COMPONENTS_MACRO)
 
 # Install the config file
-if (INSTALL_SLEIPNIR)
-  install(FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/SleipnirConfig.cmake
-    DESTINATION lib/cmake/Sleipnir)
-endif()
+install(FILES
+  ${CMAKE_CURRENT_BINARY_DIR}/SleipnirConfig.cmake
+  DESTINATION lib/cmake/Sleipnir)
 
 option(BUILD_BENCHMARKING "Build CasADi and Sleipnir benchmarks" ON)
 
