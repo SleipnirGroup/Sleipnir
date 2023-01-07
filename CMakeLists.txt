@@ -223,7 +223,7 @@ endif()
 
 # Build examples and example tests
 include(SleipnirSubdirList)
-sleipnir_subdir_list(EXAMPLES ${CMAKE_SOURCE_DIR}/examples)
+sleipnir_subdir_list(EXAMPLES ${CMAKE_CURRENT_SOURCE_DIR}/examples)
 foreach(example ${EXAMPLES})
   # Build example
   file(GLOB_RECURSE sources examples/${example}/src/*.cpp)
@@ -239,7 +239,7 @@ foreach(example ${EXAMPLES})
                         fmt)
 
   # Build example test if files exist for it
-  if (BUILD_TESTING AND EXISTS ${CMAKE_SOURCE_DIR}/examples/${example}/test)
+  if (BUILD_TESTING AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/examples/${example}/test)
     file(GLOB_RECURSE test_sources examples/${example}/test/*.cpp)
     add_executable(${example}Test ${sources} ${test_sources})
     target_include_directories(${example}Test
