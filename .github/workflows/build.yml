@@ -33,12 +33,6 @@ jobs:
       - uses: ilammy/msvc-dev-cmd@v1.12.0
         if: matrix.artifact-name == 'Windows'
 
-      - name: Setup cmake
-        uses: jwlawson/actions-setup-cmake@v1.13
-        with:
-          cmake-version: latest
-        if: matrix.artifact-name == 'Windows'
-
       - name: configure
         run: ${{ matrix.cmake-config-env-vars }} cmake -B build -S .
 
