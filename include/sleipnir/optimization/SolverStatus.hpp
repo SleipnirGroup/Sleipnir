@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "sleipnir/SymbolExports.hpp"
 #include "sleipnir/autodiff/Expression.hpp"
 #include "sleipnir/optimization/SolverExitCondition.hpp"
 
@@ -11,7 +12,7 @@ namespace sleipnir {
  * Return value of OptimizationProblem::Solve() containing the cost function and
  * constraint types and solver's exit condition.
  */
-struct SolverStatus {
+struct SLEIPNIR_DLLEXPORT SolverStatus {
   /// The cost function type detected by the solver.
   ExpressionType costFunctionType = ExpressionType::kNone;
 

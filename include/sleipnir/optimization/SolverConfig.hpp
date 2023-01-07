@@ -5,12 +5,14 @@
 #include <chrono>
 #include <limits>
 
+#include "sleipnir/SymbolExports.hpp"
+
 namespace sleipnir {
 
 /**
  * Solver configuration.
  */
-struct SolverConfig {
+struct SLEIPNIR_DLLEXPORT SolverConfig {
   /// The solver will stop once the error is below this tolerance.
   double tolerance = 1e-6;
 

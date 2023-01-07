@@ -125,11 +125,6 @@ if (INSTALL_SLEIPNIR)
   install(DIRECTORY include/ DESTINATION "include/Sleipnir")
 endif()
 
-target_include_directories(Sleipnir
-                           INTERFACE
-                           $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-                           $<INSTALL_INTERFACE:include>)
-
 if (INSTALL_SLEIPNIR)
   install(EXPORT Sleipnir
     FILE Sleipnir.cmake
