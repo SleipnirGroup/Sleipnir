@@ -123,9 +123,6 @@ target_include_directories(Sleipnir
 if (INSTALL_SLEIPNIR)
   install(TARGETS Sleipnir EXPORT Sleipnir DESTINATION lib)
   install(DIRECTORY include/ DESTINATION "include/Sleipnir")
-endif()
-
-if (INSTALL_SLEIPNIR)
   install(EXPORT Sleipnir
     FILE Sleipnir.cmake
     DESTINATION lib/cmake/Sleipnir)
