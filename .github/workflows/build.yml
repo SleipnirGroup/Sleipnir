@@ -15,15 +15,12 @@ jobs:
           - artifact-name: Windows
             cmake-config-env-vars:
             os: windows-2022
-            target: ALL_BUILD
           - artifact-name: Linux
             cmake-config-env-vars:
             os: macOS-11
-            target: all
           - artifact-name: macOS
             cmake-config-env-vars: CFLAGS="$CFLAGS -arch x86_64 -arch arm64" CXXFLAGS="$CXXFLAGS -arch x86_64 -arch arm64"
             os: macOS-11
-            target: all
 
     name: "${{ matrix.artifact-name }}"
     runs-on: ${{ matrix.os }}
@@ -34,7 +31,7 @@ jobs:
         run: ${{ matrix.cmake-config-env-vars }} cmake -B build -S .
 
       - name: build
-        run: cmake --build build --target ${{ matrix.target }} --config RelWithDebInfo --parallel $(nproc)
+        run: cmake --build build --config RelWithDebInfo --parallel $(nproc)
 
       - name: test
         working-directory: build
