@@ -20,6 +20,11 @@ namespace sleipnir {
 class SLEIPNIR_DLLEXPORT VariableMatrix {
  public:
   /**
+   * Constructs an empty VariableMatrix.
+   */
+  VariableMatrix() = default;
+
+  /**
    * Constructs a VariableMatrix with the given dimensions.
    *
    * The internal storage is uninitialized until it's assigned.
