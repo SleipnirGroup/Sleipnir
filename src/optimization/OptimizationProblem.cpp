@@ -432,7 +432,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   //
   // Eliminate the second row and column.
   //
-  //   [H   Aₑᵀ   Aᵢ ][ pₖˣ]    [∇f(x) − Aₑᵀy − Aᵢᵀz]
+  //   [H   Aₑᵀ  Aᵢᵀ ][ pₖˣ]    [∇f(x) − Aₑᵀy − Aᵢᵀz]
   //   [Aₑ   0    0  ][−pₖʸ] = −[        cₑ         ]
   //   [Aᵢ   0   −Σ⁻¹][−pₖᶻ]    [    cᵢ − μZ⁻¹e     ]
   //
