@@ -75,9 +75,7 @@ struct Filter {
     filter.push_back(pair);
   }
 
-  bool IsStepAcceptable(Eigen::VectorXd x, Eigen::VectorXd s,
-                        Eigen::VectorXd p_x, Eigen::VectorXd p_s,
-                        FilterEntry pair) {
+  bool IsStepAcceptable(const FilterEntry& pair) {
     // If current filter entry is better than all prior ones in some respect,
     // accept it
     return std::all_of(
@@ -898,7 +896,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
         c_i = GetAD(m_inequalityConstraints);
 
         currentFilterEntry = FilterEntry(m_f.value(), mu, s_soc, c_e, c_i);
-        if (filter.IsStepAcceptable(x, s, p_x, p_s, currentFilterEntry)) {
+        if (filter.IsStepAcceptable(currentFilterEntry)) {
           p_x = p_x_soc;
           p_s = p_s_soc;
           alpha_max = alpha_soc;
@@ -940,7 +938,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
         c_i = GetAD(m_inequalityConstraints);
 
         currentFilterEntry = FilterEntry{m_f.value(), mu, trial_s, c_e, c_i};
-        if (filter.IsStepAcceptable(x, s, p_x, p_s, currentFilterEntry)) {
+        if (filter.IsStepAcceptable(currentFilterEntry)) {
           break;
         }
         alpha_max *= 0.5;
