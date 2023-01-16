@@ -153,7 +153,7 @@ SLEIPNIR_DLLEXPORT VariableMatrix operator*(const VariableMatrix& lhs,
                                             double rhs) {
   VariableMatrix result{lhs.Rows(), lhs.Cols()};
 
-  Variable rhsVar{MakeConstant(rhs)};
+  Variable rhsVar = Constant(rhs);
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
       result(row, col) = lhs(row, col) * rhsVar;
@@ -167,7 +167,7 @@ SLEIPNIR_DLLEXPORT VariableMatrix operator*(double lhs,
                                             const VariableMatrix& rhs) {
   VariableMatrix result{rhs.Rows(), rhs.Cols()};
 
-  Variable lhsVar{MakeConstant(lhs)};
+  Variable lhsVar = Constant(lhs);
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
       result(row, col) = rhs(row, col) * lhsVar;
@@ -196,7 +196,7 @@ VariableMatrix& VariableMatrix::operator*=(const VariableMatrix& rhs) {
 VariableMatrix& VariableMatrix::operator*=(double rhs) {
   for (int row = 0; row < Rows(); ++row) {
     for (int col = 0; col < Cols(); ++col) {
-      (*this)(row, col) *= Variable{MakeConstant(rhs)};
+      (*this)(row, col) *= Constant(rhs);
     }
   }
 
@@ -224,7 +224,7 @@ SLEIPNIR_DLLEXPORT VariableMatrix operator/(const VariableMatrix& lhs,
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result(row, col) = lhs(row, col) / Variable{MakeConstant(rhs)};
+      result(row, col) = lhs(row, col) / Constant(rhs);
     }
   }
 
@@ -244,7 +244,7 @@ VariableMatrix& VariableMatrix::operator/=(const VariableMatrix& rhs) {
 VariableMatrix& VariableMatrix::operator/=(double rhs) {
   for (int row = 0; row < Rows(); ++row) {
     for (int col = 0; col < Cols(); ++col) {
-      (*this)(row, col) /= Variable{MakeConstant(rhs)};
+      (*this)(row, col) /= Constant(rhs);
     }
   }
 
@@ -506,8 +506,7 @@ VariableMatrix pow(double base, const VariableMatrix& power) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result(row, col) =
-          sleipnir::pow(Variable{MakeConstant(base)}, power(row, col));
+      result(row, col) = sleipnir::pow(Constant(base), power(row, col));
     }
   }
 
@@ -519,8 +518,7 @@ VariableMatrix pow(const VariableMatrix& base, double power) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result(row, col) =
-          sleipnir::pow(base(row, col), Variable{MakeConstant(power)});
+      result(row, col) = sleipnir::pow(base(row, col), Constant(power));
     }
   }
 

@@ -70,7 +70,7 @@ SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator*(
     return rhs;
   }
 
-  return MakeConstant(lhs) * rhs;
+  return ConstantExpr(lhs) * rhs;
 }
 
 SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator*(
@@ -81,7 +81,7 @@ SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator*(
     return lhs;
   }
 
-  return lhs * MakeConstant(rhs);
+  return lhs * ConstantExpr(rhs);
 }
 
 SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator*(
@@ -148,12 +148,12 @@ SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator/(
     return Zero();
   }
 
-  return MakeConstant(lhs) / rhs;
+  return ConstantExpr(lhs) / rhs;
 }
 
 SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator/(
     const IntrusiveSharedPtr<Expression>& lhs, double rhs) {
-  return lhs / MakeConstant(rhs);
+  return lhs / ConstantExpr(rhs);
 }
 
 SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator/(
@@ -199,7 +199,7 @@ SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator+(
     return rhs;
   }
 
-  return MakeConstant(lhs) + rhs;
+  return ConstantExpr(lhs) + rhs;
 }
 
 SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator+(
@@ -208,7 +208,7 @@ SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator+(
     return lhs;
   }
 
-  return lhs + MakeConstant(rhs);
+  return lhs + ConstantExpr(rhs);
 }
 
 SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator+(
@@ -250,7 +250,7 @@ SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression>& operator+=(
     return lhs;
   }
 
-  return lhs += MakeConstant(rhs);
+  return lhs += ConstantExpr(rhs);
 }
 
 SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression>& operator+=(
@@ -273,7 +273,7 @@ SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator-(
     return -rhs;
   }
 
-  return MakeConstant(lhs) - rhs;
+  return ConstantExpr(lhs) - rhs;
 }
 
 SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator-(
@@ -282,7 +282,7 @@ SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator-(
     return lhs;
   }
 
-  return lhs - MakeConstant(rhs);
+  return lhs - ConstantExpr(rhs);
 }
 
 SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator-(
@@ -358,7 +358,7 @@ SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator+(
       lhs);
 }
 
-IntrusiveSharedPtr<Expression> MakeConstant(double x) {
+IntrusiveSharedPtr<Expression> ConstantExpr(double x) {
   return AllocateIntrusiveShared<Expression>(GlobalPoolAllocator<Expression>(),
                                              x, ExpressionType::kConstant);
 }
@@ -406,7 +406,7 @@ IntrusiveSharedPtr<Expression> abs(  // NOLINT
 IntrusiveSharedPtr<Expression> acos(  // NOLINT
     const IntrusiveSharedPtr<Expression>& x) {
   if (x == Zero()) {
-    return MakeConstant(std::numbers::pi / 2.0);
+    return ConstantExpr(std::numbers::pi / 2.0);
   }
 
   // Evaluate the expression's type
@@ -493,7 +493,7 @@ IntrusiveSharedPtr<Expression> atan2(  // NOLINT
   if (y == Zero()) {
     return Zero();
   } else if (x == Zero()) {
-    return MakeConstant(std::numbers::pi / 2.0);
+    return ConstantExpr(std::numbers::pi / 2.0);
   }
 
   // Evaluate the expression's type
@@ -530,7 +530,7 @@ IntrusiveSharedPtr<Expression> atan2(  // NOLINT
 IntrusiveSharedPtr<Expression> cos(  // NOLINT
     const IntrusiveSharedPtr<Expression>& x) {
   if (x == Zero()) {
-    return MakeConstant(1.0);
+    return ConstantExpr(1.0);
   }
 
   // Evaluate the expression's type
@@ -558,7 +558,7 @@ IntrusiveSharedPtr<Expression> cos(  // NOLINT
 IntrusiveSharedPtr<Expression> cosh(  // NOLINT
     const IntrusiveSharedPtr<Expression>& x) {
   if (x == Zero()) {
-    return MakeConstant(1.0);
+    return ConstantExpr(1.0);
   }
 
   // Evaluate the expression's type
@@ -617,7 +617,7 @@ IntrusiveSharedPtr<Expression> erf(  // NOLINT
 IntrusiveSharedPtr<Expression> exp(  // NOLINT
     const IntrusiveSharedPtr<Expression>& x) {
   if (x == Zero()) {
-    return MakeConstant(1.0);
+    return ConstantExpr(1.0);
   }
 
   // Evaluate the expression's type
@@ -677,7 +677,7 @@ IntrusiveSharedPtr<Expression> hypot(  // NOLINT
            const IntrusiveSharedPtr<Expression>& parentAdjoint) {
           return parentAdjoint * y / sleipnir::hypot(x, y);
         },
-        MakeConstant(0.0), y);
+        ConstantExpr(0.0), y);
   } else if (x != Zero() && y == Zero()) {
     // Evaluate the expression's type
     ExpressionType type;
@@ -706,7 +706,7 @@ IntrusiveSharedPtr<Expression> hypot(  // NOLINT
            const IntrusiveSharedPtr<Expression>& parentAdjoint) {
           return parentAdjoint * y / sleipnir::hypot(x, y);
         },
-        x, MakeConstant(0.0));
+        x, ConstantExpr(0.0));
   } else {
     // Evaluate the expression's type
     ExpressionType type;
@@ -803,7 +803,7 @@ IntrusiveSharedPtr<Expression> pow(  // NOLINT
     return Zero();
   }
   if (power == Zero()) {
-    return MakeConstant(1.0);
+    return ConstantExpr(1.0);
   }
 
   // Evaluate the expression's type

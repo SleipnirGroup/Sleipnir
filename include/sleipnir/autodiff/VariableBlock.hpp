@@ -309,7 +309,7 @@ class VariableBlock {
   VariableBlock& operator*=(double rhs) {
     for (int row = 0; row < Rows(); ++row) {
       for (int col = 0; col < Cols(); ++col) {
-        (*this)(row, col) *= Variable{MakeConstant(rhs)};
+        (*this)(row, col) *= Constant(rhs);
       }
     }
 
@@ -343,7 +343,7 @@ class VariableBlock {
   VariableBlock<Mat>& operator/=(double rhs) {
     for (int row = 0; row < Rows(); ++row) {
       for (int col = 0; col < Cols(); ++col) {
-        (*this)(row, col) /= Variable{MakeConstant(rhs)};
+        (*this)(row, col) /= Constant(rhs);
       }
     }
 
