@@ -356,7 +356,7 @@ inline void IntrusiveSharedPtrDecRefCount(Expression* expr) {
  *
  * @param x The constant.
  */
-SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> MakeConstant(double x);
+SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> ConstantExpr(double x);
 
 /**
  * std::abs() for Expressions.
