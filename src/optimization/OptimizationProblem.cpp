@@ -1021,5 +1021,11 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
     filter.ResetFilter(FilterEntry(m_f.value(), mu, s, c_e, c_i));
   }
 
+  if (m_config.diagnostics) {
+    fmt::print("{:>4}  {:>9}  {:>15e}  {:>16e}   {:>16e}\n", iterations, 0.0,
+               E_mu, m_f.value().Value() - mu * s.array().log().sum(),
+               c_e.lpNorm<1>() + (c_i - s).lpNorm<1>());
+  }
+
   return x;
 }
