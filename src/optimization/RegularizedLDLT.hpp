@@ -9,36 +9,9 @@
 #include <Eigen/SparseCholesky>
 #include <Eigen/SparseCore>
 
+#include "Inertia.hpp"
+
 namespace sleipnir {
-
-/**
- * Represents the inertia of a matrix (the number of positive, negative, and
- * zero eigenvalues).
- */
-class Inertia {
- public:
-  size_t positive = 0;
-  size_t negative = 0;
-  size_t zero = 0;
-
-  constexpr Inertia() = default;
-
-  /**
-   * Constructs the Inertia type with the given number of positive, negative,
-   * and zero eigenvalues.
-   *
-   * @param positive The number of positive eigenvalues.
-   * @param negative The number of negative eigenvalues.
-   * @param zero The number of zero eigenvalues.
-   */
-  constexpr Inertia(size_t positive, size_t negative, size_t zero)
-      : positive{positive}, negative{negative}, zero{zero} {}
-
-  friend bool operator==(const Inertia& lhs, const Inertia& rhs) {
-    return lhs.positive == rhs.positive && lhs.negative == rhs.negative &&
-           lhs.zero == rhs.zero;
-  }
-};
 
 /**
  * Solves systems of linear equations using a regularized LDLT factorization.
@@ -74,7 +47,7 @@ class RegularizedLDLT {
 
     m_solver.compute(lhs);
     if (m_solver.info() == Eigen::Success) {
-      Inertia inertia = ComputeInertia(m_solver);
+      Inertia inertia{m_solver};
       if (inertia == idealInertia) {
         return;
       }
@@ -109,7 +82,7 @@ class RegularizedLDLT {
       regularization.setFromTriplets(m_triplets.begin(), m_triplets.end());
       m_solver.compute(lhs + regularization);
 
-      Inertia inertia = ComputeInertia(m_solver);
+      Inertia inertia{m_solver};
       if (inertia == idealInertia) {
         m_deltaOld = delta;
         return;
@@ -137,24 +110,6 @@ class RegularizedLDLT {
   double m_deltaOld = 0.0;
 
   std::vector<Eigen::Triplet<double>> m_triplets;
-
-  static Inertia ComputeInertia(
-      const Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>>& solver) {
-    Inertia inertia;
-
-    auto D = solver.vectorD();
-    for (int row = 0; row < D.rows(); ++row) {
-      if (D(row) > 0.0) {
-        ++inertia.positive;
-      } else if (D(row) < 0.0) {
-        ++inertia.negative;
-      } else {
-        ++inertia.zero;
-      }
-    }
-
-    return inertia;
-  }
 };
 
 }  // namespace sleipnir
