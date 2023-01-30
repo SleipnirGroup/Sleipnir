@@ -495,6 +495,8 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   auto solveStartTime = std::chrono::system_clock::now();
 
   if (m_config.diagnostics) {
+    fmt::print("Number of decision variables: {}\n",
+               m_decisionVariables.size());
     fmt::print("Number of equality constraints: {}\n",
                m_equalityConstraints.size());
     fmt::print("Number of inequality constraints: {}\n\n",
