@@ -20,10 +20,8 @@ class RegularizedLDLT {
  public:
   /**
    * Constructs a RegularizedLDLT instance.
-   *
-   * @param theta_mu Barrier parameter superlinear decrease power (1, 2)
    */
-  explicit RegularizedLDLT(double theta_mu) : m_theta_mu{theta_mu} {}
+  RegularizedLDLT() = default;
 
   /**
    * Computes the regularized LDLT factorization of a matrix.
@@ -53,10 +51,10 @@ class RegularizedLDLT {
       }
 
       if (inertia.zero > 0) {
-        gamma = 1e-8 * std::pow(mu, m_theta_mu);
+        gamma = 1e-8 * std::pow(mu, 0.25);
       }
     } else {
-      gamma = 1e-8 * std::pow(mu, m_theta_mu);
+      gamma = 1e-8 * std::pow(mu, 0.25);
     }
 
     if (m_deltaOld == 0.0) {
@@ -104,8 +102,6 @@ class RegularizedLDLT {
 
  private:
   Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>> m_solver;
-
-  double m_theta_mu;
 
   double m_deltaOld = 0.0;
 
