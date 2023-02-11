@@ -102,7 +102,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(fmt)
 
-target_link_libraries(Sleipnir PRIVATE fmt)
+target_link_libraries(Sleipnir PRIVATE fmt::fmt)
 
 target_include_directories(Sleipnir
                            PUBLIC
@@ -159,7 +159,7 @@ if (BUILD_BENCHMARKING)
       target_link_libraries(${benchmark}ScalabilityBenchmark
                             PRIVATE
                             Sleipnir
-                            fmt
+                            fmt::fmt
                             casadi)
     endforeach()
   endif()
