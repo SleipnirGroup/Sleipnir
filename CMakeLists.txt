@@ -102,7 +102,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(fmt)
 
-target_link_libraries(Sleipnir PRIVATE fmt)
+target_link_libraries(Sleipnir PRIVATE fmt::fmt)
 
 target_include_directories(Sleipnir
                            PUBLIC
@@ -159,7 +159,7 @@ if (BUILD_BENCHMARKING)
       target_link_libraries(${benchmark}ScalabilityBenchmark
                             PRIVATE
                             Sleipnir
-                            fmt
+                            fmt::fmt
                             casadi)
     endforeach()
   endif()
@@ -199,7 +199,7 @@ if (BUILD_TESTING)
   target_link_libraries(SleipnirTest
                         PRIVATE
                         Sleipnir
-                        fmt
+                        fmt::fmt
                         GTest::gtest
                         GTest::gtest_main)
   if (NOT CMAKE_TOOLCHAIN_FILE)
@@ -222,7 +222,7 @@ foreach(example ${EXAMPLES})
   target_link_libraries(${example}
                         PRIVATE
                         Sleipnir
-                        fmt)
+                        fmt::fmt)
 
   # Build example test if files exist for it
   if (BUILD_TESTING AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/examples/${example}/test)
@@ -242,7 +242,7 @@ foreach(example ${EXAMPLES})
     target_link_libraries(${example}Test
                           PRIVATE
                           Sleipnir
-                          fmt
+                          fmt::fmt
                           GTest::gtest
                           GTest::gtest_main)
     if (NOT CMAKE_TOOLCHAIN_FILE)
