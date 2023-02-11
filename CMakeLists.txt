@@ -199,7 +199,7 @@ if (BUILD_TESTING)
   target_link_libraries(SleipnirTest
                         PRIVATE
                         Sleipnir
-                        fmt
+                        fmt::fmt
                         GTest::gtest
                         GTest::gtest_main)
   if (NOT CMAKE_TOOLCHAIN_FILE)
@@ -222,7 +222,7 @@ foreach(example ${EXAMPLES})
   target_link_libraries(${example}
                         PRIVATE
                         Sleipnir
-                        fmt)
+                        fmt::fmt)
 
   # Build example test if files exist for it
   if (BUILD_TESTING AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/examples/${example}/test)
@@ -242,7 +242,7 @@ foreach(example ${EXAMPLES})
     target_link_libraries(${example}Test
                           PRIVATE
                           Sleipnir
-                          fmt
+                          fmt::fmt
                           GTest::gtest
                           GTest::gtest_main)
     if (NOT CMAKE_TOOLCHAIN_FILE)
