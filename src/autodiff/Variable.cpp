@@ -2,10 +2,6 @@
 
 #include "sleipnir/autodiff/Variable.hpp"
 
-#include <cmath>
-#include <tuple>
-#include <vector>
-
 #include <fmt/core.h>
 
 #include "sleipnir/SymbolExports.hpp"
