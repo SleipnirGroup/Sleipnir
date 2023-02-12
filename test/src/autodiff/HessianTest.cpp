@@ -151,7 +151,7 @@ TEST(HessianTest, SumOfSquaredResiduals) {
   x(4) = 1;
 
   // y = sum(diff(x).^2)
-  y = (x.head(4) - x.tail(4)).array().pow(2).sum();
+  y = (x.head(4) - x.tail(4)).array().square().sum();
   g = sleipnir::Gradient{y, x}.Calculate();
 
   EXPECT_DOUBLE_EQ(0.0, y.Value());
