@@ -59,6 +59,9 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    */
   template <typename Derived>
   VariableMatrix& operator=(const Eigen::MatrixBase<Derived>& values) {
+    assert(Rows() == values.rows());
+    assert(Cols() == values.cols());
+
     for (int row = 0; row < values.rows(); ++row) {
       for (int col = 0; col < values.cols(); ++col) {
         (*this)(row, col) = values(row, col);
