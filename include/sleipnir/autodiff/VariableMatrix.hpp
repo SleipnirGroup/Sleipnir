@@ -687,4 +687,19 @@ SLEIPNIR_DLLEXPORT VariableMatrix tan(const VariableMatrix& x);
  */
 SLEIPNIR_DLLEXPORT VariableMatrix tanh(const VariableMatrix& x);
 
+SLEIPNIR_DLLEXPORT EqualityConstraints operator==(const VariableMatrix& lhs,
+                                                  const VariableMatrix& rhs);
+
+SLEIPNIR_DLLEXPORT InequalityConstraints operator<(const VariableMatrix& lhs,
+                                                   const VariableMatrix& rhs);
+
+SLEIPNIR_DLLEXPORT InequalityConstraints operator<=(const VariableMatrix& lhs,
+                                                    const VariableMatrix& rhs);
+
+SLEIPNIR_DLLEXPORT InequalityConstraints operator>(const VariableMatrix& lhs,
+                                                   const VariableMatrix& rhs);
+
+SLEIPNIR_DLLEXPORT InequalityConstraints operator>=(const VariableMatrix& lhs,
+                                                    const VariableMatrix& rhs);
+
 }  // namespace sleipnir
