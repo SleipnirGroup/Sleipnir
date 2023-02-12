@@ -40,125 +40,28 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
   VariableMatrix& operator=(double value);
 
   /**
-   * Constructs a VariableMatrix from an Eigen matrix of doubles.
+   * Constructs a VariableMatrix from an Eigen matrix.
    */
-  template <int _Rows, int _Cols, int... Args>
-  VariableMatrix(  // NOLINT
-      const Eigen::Matrix<double, _Rows, _Cols, Args...>& values)
-      : m_rows{_Rows}, m_cols{_Cols} {
-    m_storage.reserve(_Rows * _Cols);
-    for (size_t row = 0; row < _Rows; ++row) {
-      for (size_t col = 0; col < _Cols; ++col) {
+  template <typename Derived>
+  VariableMatrix(const Eigen::MatrixBase<Derived>& values)  // NOLINT
+      : m_rows{static_cast<int>(values.rows())},
+        m_cols{static_cast<int>(values.cols())} {
+    m_storage.reserve(values.rows() * values.cols());
+    for (int row = 0; row < values.rows(); ++row) {
+      for (int col = 0; col < values.cols(); ++col) {
         m_storage.emplace_back(values(row, col));
       }
     }
   }
 
   /**
-   * Constructs a VariableMatrix from an Eigen matrix of doubles.
+   * Constructs a VariableMatrix from an Eigen matrix.
    */
-  template <int _Rows, int _Cols, int... Args>
-  VariableMatrix& operator=(
-      const Eigen::Matrix<double, _Rows, _Cols, Args...>& values) {
-    for (size_t row = 0; row < _Rows; ++row) {
-      for (size_t col = 0; col < _Cols; ++col) {
+  template <typename Derived>
+  VariableMatrix& operator=(const Eigen::MatrixBase<Derived>& values) {
+    for (int row = 0; row < values.rows(); ++row) {
+      for (int col = 0; col < values.cols(); ++col) {
         (*this)(row, col) = values(row, col);
-      }
-    }
-
-    return *this;
-  }
-
-  /**
-   * Constructs a VariableMatrix from an Eigen matrix of doubles.
-   */
-  template <int _Rows, int _Cols, int... Args>
-  explicit VariableMatrix(Eigen::Matrix<double, _Rows, _Cols, Args...>&& values)
-      : m_rows{_Rows}, m_cols{_Cols} {
-    m_storage.clear();
-    m_storage.reserve(_Rows * _Cols);
-    for (size_t row = 0; row < _Rows; ++row) {
-      for (size_t col = 0; col < _Cols; ++col) {
-        m_storage.emplace_back(values(row, col));
-      }
-    }
-  }
-
-  /**
-   * Constructs a VariableMatrix from an Eigen matrix of doubles.
-   */
-  template <int _Rows, int _Cols, int... Args>
-  VariableMatrix& operator=(
-      Eigen::Matrix<double, _Rows, _Cols, Args...>&& values) {
-    for (size_t row = 0; row < _Rows; ++row) {
-      for (size_t col = 0; col < _Cols; ++col) {
-        (*this)(row, col) = values(row, col);
-      }
-    }
-
-    return *this;
-  }
-
-  /**
-   * Constructs a VariableMatrix from an Eigen matrix of Variables.
-   */
-  template <int _Rows, int _Cols, int... Args>
-  explicit VariableMatrix(
-      const Eigen::Matrix<Variable, _Rows, _Cols, Args...>& values)
-      : m_rows{_Rows}, m_cols{_Cols} {
-    m_storage.clear();
-    m_storage.reserve(_Rows * _Cols);
-    for (size_t row = 0; row < _Rows; ++row) {
-      for (size_t col = 0; col < _Cols; ++col) {
-        m_storage.emplace_back(values(row, col));
-      }
-    }
-  }
-
-  /**
-   * Constructs a VariableMatrix from an Eigen matrix of Variables.
-   */
-  template <int _Rows, int _Cols, int... Args>
-  VariableMatrix& operator=(
-      const Eigen::Matrix<Variable, _Rows, _Cols, Args...>& values) {
-    m_storage.clear();
-    m_storage.reserve(_Rows * _Cols);
-    for (size_t row = 0; row < _Rows; ++row) {
-      for (size_t col = 0; col < _Cols; ++col) {
-        m_storage.emplace_back(values(row, col));
-      }
-    }
-
-    return *this;
-  }
-
-  /**
-   * Constructs a VariableMatrix from an Eigen matrix of Variables.
-   */
-  template <int _Rows, int _Cols, int... Args>
-  explicit VariableMatrix(
-      Eigen::Matrix<Variable, _Rows, _Cols, Args...>&& values)
-      : m_rows{_Rows}, m_cols{_Cols} {
-    m_storage.clear();
-    m_storage.reserve(_Rows * _Cols);
-    for (size_t row = 0; row < _Rows; ++row) {
-      for (size_t col = 0; col < _Cols; ++col) {
-        m_storage.emplace_back(std::move(values(row, col)));
-      }
-    }
-  }
-
-  /**
-   * Constructs a VariableMatrix from an Eigen matrix of Variables.
-   */
-  template <int _Rows, int _Cols, int... Args>
-  VariableMatrix& operator=(
-      Eigen::Matrix<Variable, _Rows, _Cols, Args...>&& values) {
-    m_storage.clear();
-    m_storage.reserve(_Rows * _Cols);
-    for (size_t row = 0; row < _Rows; ++row) {
-      for (size_t col = 0; col < _Cols; ++col) {
-        m_storage.emplace_back(std::move(values(row, col)));
       }
     }
 
