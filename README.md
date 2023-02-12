@@ -81,9 +81,13 @@ See the [examples](https://github.com/SleipnirGroup/Sleipnir/tree/main/examples)
 ## Dependencies
 
 * C++20 compiler
-  * On Linux, install GCC 11 or greater
   * On Windows, install [Visual Studio Community 2022](https://visualstudio.microsoft.com/vs/community/) and select the C++ programming language during installation
-  * On macOS, install the Xcode command-line build tools via `xcode-select --install`
+  * On Linux, install GCC 11 or greater via the OS package manager
+  * On macOS, install Xcode command-line build tools 13 or greater via `xcode-select --install`
+* CMake 3.21 or greater
+  * On Windows, install [Visual Studio Community 2022](https://visualstudio.microsoft.com/vs/community/) and select the C++ programming language during installation
+  * On Linux, install via the OS package manager
+  * On macOS, install via `brew install cmake`
 * [Eigen](https://gitlab.com/libeigen/eigen)
 * [fmtlib](https://github.com/fmtlib/fmt) (internal only)
 * [googletest](https://github.com/google/googletest) (tests only)
@@ -94,27 +98,30 @@ If [CasADi](https://github.com/casadi/casadi) is installed locally, the benchmar
 
 ## Build instructions
 
-Starting from the repository root, run the configure step:
+On Windows, open a [Developer PowerShell](https://learn.microsoft.com/en-us/visualstudio/ide/reference/command-prompt-powershell?view=vs-2022). On Linux or macOS, open a Bash shell.
+
 ```bash
+git clone git@github.com:SleipnirGroup/Sleipnir
+cd Sleipnir
+
+# Configure; automatically downloads library dependencies
 cmake -B build -S .
-```
 
-This will automatically download library dependencies.
-
-Run the build step:
-```bash
+# Build
 cmake --build build
-```
 
-Run the tests:
-```bash
+# Test
 cd build
 ctest
+cd ..
+
+# Install
+cmake --install build --prefix pkgdir
 ```
 
 ### Supported build types
 
-The following build types can be specified via `-DCMAKE_BUILD_TYPE`:
+The following build types can be specified via `-DCMAKE_BUILD_TYPE` during CMake configure:
 
 * Debug
   * Optimizations off
