@@ -189,6 +189,27 @@ TEST(HessianTest, SumOfSquaredResiduals) {
   EXPECT_DOUBLE_EQ(2.0, H(4, 4));
 }
 
+TEST(HessianTest, SumOfSquares) {
+  sleipnir::VectorXvar r{{25.0, 10.0, 5.0, 0.0}};
+  sleipnir::VectorXvar x{{0.0, 0.0, 0.0, 0.0}};
+
+  sleipnir::Variable J = 0.0;
+  for (int i = 0; i < 4; ++i) {
+    J += (r(i) - x(i)) * (r(i) - x(i));
+  }
+
+  Eigen::MatrixXd H = sleipnir::Hessian{J, x}.Calculate();
+  for (int row = 0; row < 4; ++row) {
+    for (int col = 0; col < 4; ++col) {
+      if (row == col) {
+        EXPECT_DOUBLE_EQ(2.0, H(row, col));
+      } else {
+        EXPECT_DOUBLE_EQ(0.0, H(row, col));
+      }
+    }
+  }
+}
+
 TEST(HessianTest, Reuse) {
   sleipnir::Variable y;
   sleipnir::VectorXvar x{1};
