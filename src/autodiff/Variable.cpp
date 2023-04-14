@@ -2,6 +2,8 @@
 
 #include "sleipnir/autodiff/Variable.hpp"
 
+#include <algorithm>
+
 #include <fmt/core.h>
 
 #include "sleipnir/SymbolExports.hpp"
@@ -332,6 +334,42 @@ Variable tanh(double x) {
 
 Variable tanh(const Variable& x) {
   return Variable{tanh(x.expr)};
+}
+
+EqualityConstraints::operator bool() const {
+  return std::all_of(
+      constraints.begin(), constraints.end(),
+      [](const auto& constraint) { return constraint.Value() == 0.0; });
+}
+
+InequalityConstraints::operator bool() const {
+  return std::all_of(
+      constraints.begin(), constraints.end(),
+      [](const auto& constraint) { return constraint.Value() >= 0.0; });
+}
+
+EqualityConstraints operator==(const Variable& lhs, const Variable& rhs) {
+  // The standard form for equality constraints is c(x) = 0. This function takes
+  // a constraint of the form lhs = rhs and converts it to lhs - rhs = 0.
+  return EqualityConstraints{{lhs - rhs}};
+}
+
+InequalityConstraints operator<(const Variable& lhs, const Variable& rhs) {
+  return rhs >= lhs;
+}
+
+InequalityConstraints operator<=(const Variable& lhs, const Variable& rhs) {
+  return rhs >= lhs;
+}
+
+InequalityConstraints operator>(const Variable& lhs, const Variable& rhs) {
+  return lhs >= rhs;
+}
+
+InequalityConstraints operator>=(const Variable& lhs, const Variable& rhs) {
+  // The standard form for inequality constraints is c(x) ≥ 0. This function
+  // takes a constraints of the form lhs ≥ rhs and converts it to lhs - rhs ≥ 0.
+  return InequalityConstraints{{lhs - rhs}};
 }
 
 }  // namespace sleipnir
