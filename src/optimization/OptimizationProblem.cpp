@@ -716,7 +716,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       //
       //   Aₑᵀcₑ → 0
       //   Aᵢᵀcᵢ⁺ → 0
-      //   ||(cₑ, cᵢ⁺)|| > ε
+      //   ‖(cₑ, cᵢ⁺)‖ > ε
       //
       // where cᵢ⁺ = min(cᵢ, 0).
       //
@@ -764,14 +764,14 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
         }
       }
 
-      // s_d = max(sₘₐₓ, (||y||₁ + ||z||₁) / (m + n)) / sₘₐₓ
+      // s_d = max(sₘₐₓ, (‖y‖₁ + ‖z‖₁) / (m + n)) / sₘₐₓ
       constexpr double s_max = 100.0;
       double s_d = std::max(s_max, (y.lpNorm<1>() + z.lpNorm<1>()) /
                                        (m_equalityConstraints.size() +
                                         m_inequalityConstraints.size())) /
                    s_max;
 
-      // s_c = max(sₘₐₓ, ||z||₁ / n) / sₘₐₓ
+      // s_c = max(sₘₐₓ, ‖z‖₁ / n) / sₘₐₓ
       double s_c =
           std::max(s_max, z.lpNorm<1>() / m_inequalityConstraints.size()) /
           s_max;
@@ -787,10 +787,10 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       // The error tolerance is the max of the following infinity norms scaled
       // by s_d and s_c (see equation (5) in [2]).
       //
-      //   ||∇f − Aₑᵀy − Aᵢᵀz||_∞ / s_d
-      //   ||Sz − μe||_∞ / s_c
-      //   ||cₑ||_∞
-      //   ||cᵢ − s||_∞
+      //   ‖∇f − Aₑᵀy − Aᵢᵀz‖_∞ / s_d
+      //   ‖Sz − μe‖_∞ / s_c
+      //   ‖cₑ‖_∞
+      //   ‖cᵢ − s‖_∞
       Eigen::VectorXd eq1 = g;
       if (m_equalityConstraints.size() > 0) {
         eq1 -= A_e.transpose() * y;
