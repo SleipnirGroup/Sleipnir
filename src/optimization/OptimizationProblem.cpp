@@ -846,7 +846,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       g = gradientF.Calculate();
 
       // rhs = −[∇f − Aₑᵀy + Aᵢᵀ(S⁻¹(Zcᵢ − μe) − z)]
-      //        [               cₑ               ]
+      //        [                cₑ                ]
       //
       // The outer negative sign is applied in the solve() call.
       Eigen::VectorXd rhs{x.rows() + y.rows()};
