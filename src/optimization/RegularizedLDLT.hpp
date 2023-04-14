@@ -24,6 +24,11 @@ class RegularizedLDLT {
   RegularizedLDLT() = default;
 
   /**
+   * Reports whether previous computation was successful.
+   */
+  Eigen::ComputationInfo Info() { return m_info; }
+
+  /**
    * Computes the regularized LDLT factorization of a matrix.
    *
    * @param lhs Left-hand side of the system.
@@ -47,6 +52,7 @@ class RegularizedLDLT {
     if (m_solver.info() == Eigen::Success) {
       Inertia inertia{m_solver};
       if (inertia == idealInertia) {
+        m_info = Eigen::Success;
         return;
       }
 
@@ -83,9 +89,18 @@ class RegularizedLDLT {
       Inertia inertia{m_solver};
       if (inertia == idealInertia) {
         m_deltaOld = delta;
+        m_info = Eigen::Success;
         return;
       } else {
         delta *= 10.0;
+
+        // If the Hessian perturbation is too high, report failure. This can
+        // happen due to a rank-deficient equality constraint Jacobian with
+        // linearly dependent constraints.
+        if (delta > 1e20) {
+          m_info = Eigen::NumericalIssue;
+          return;
+        }
       }
     }
   }
@@ -102,6 +117,8 @@ class RegularizedLDLT {
 
  private:
   Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>> m_solver;
+
+  Eigen::ComputationInfo m_info = Eigen::Success;
 
   double m_deltaOld = 0.0;
 

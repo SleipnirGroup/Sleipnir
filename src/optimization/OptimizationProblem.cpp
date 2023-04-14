@@ -862,7 +862,15 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
 
       // Solve the Newton-KKT system
       solver.Compute(lhs, m_equalityConstraints.size(), mu);
-      step = solver.Solve(-rhs);
+      if (solver.Info() == Eigen::Success) {
+        step = solver.Solve(-rhs);
+      } else {
+        // The regularization procedure failed due to a rank-deficient equality
+        // constraint Jacobian with linearly dependent constraints. Set the step
+        // length to zero and let second-order corrections attempt to restore
+        // feasibility.
+        step.setZero();
+      }
 
       // step = [ pₖˣ]
       //        [−pₖʸ]
