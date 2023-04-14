@@ -6,10 +6,8 @@
 #include <array>
 #include <cassert>
 #include <chrono>
-#include <cmath>
 #include <limits>
 #include <string>
-#include <vector>
 
 #include <Eigen/SparseCore>
 #include <fmt/core.h>
