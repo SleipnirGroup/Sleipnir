@@ -889,7 +889,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
 
       double alpha_max = FractionToTheBoundaryRule(s, p_s, tau);
 
-      // Apply second order corrections. See section 2.4 of [2].
+      // Apply second-order corrections. See section 2.4 of [2].
       Eigen::VectorXd p_x_soc = p_x;
       Eigen::VectorXd p_s_soc = p_s;
       Eigen::VectorXd p_y_soc, p_z_soc;
