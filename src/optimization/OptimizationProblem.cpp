@@ -888,6 +888,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       bool stepAcceptable = false;
 
       double alpha_max = FractionToTheBoundaryRule(s, p_s, tau);
+      double alpha = alpha_max;
 
       // Apply second-order corrections. See section 2.4 of [2].
       Eigen::VectorXd p_x_soc = p_x;
@@ -907,7 +908,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
         if (filter.IsStepAcceptable(currentFilterEntry)) {
           p_x = p_x_soc;
           p_s = p_s_soc;
-          alpha_max = alpha_soc;
+          alpha = alpha_soc;
           stepAcceptable = true;
           break;
         }
@@ -936,8 +937,8 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       }
 
       while (!stepAcceptable) {
-        Eigen::VectorXd trial_x = x + alpha_max * p_x;
-        Eigen::VectorXd trial_s = s + alpha_max * p_s;
+        Eigen::VectorXd trial_x = x + alpha * p_x;
+        Eigen::VectorXd trial_s = s + alpha * p_s;
         SetAD(xAD, trial_x);
         SetAD(sAD, trial_s);
         graphL.Update();
@@ -949,7 +950,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
         if (filter.IsStepAcceptable(currentFilterEntry)) {
           break;
         }
-        alpha_max *= 0.5;
+        alpha *= 0.5;
       }
       filter.PushBack(currentFilterEntry);
 
@@ -960,8 +961,8 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       // sₖ₊₁ = xₖ + αₖpₖˢ
       // yₖ₊₁ = xₖ + αₖᶻpₖʸ
       // zₖ₊₁ = xₖ + αₖᶻpₖᶻ
-      x += alpha_max * p_x;
-      s += alpha_max * p_s;
+      x += alpha * p_x;
+      s += alpha * p_s;
       y += alpha_z * p_y;
       z += alpha_z * p_z;
 
