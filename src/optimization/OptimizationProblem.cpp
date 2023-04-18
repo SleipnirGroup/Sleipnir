@@ -683,6 +683,8 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
 
   RegularizedLDLT solver;
 
+  int allowedFullStepCounter = 0;
+
   while (E_mu > m_config.tolerance) {
     while (true) {
       auto innerIterStartTime = std::chrono::system_clock::now();
@@ -957,6 +959,22 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       // αₖᶻ = max(α ∈ (0, 1] : zₖ + αpₖᶻ ≥ (1−τⱼ)zₖ)
       double alpha_z = FractionToTheBoundaryRule(z, p_z, tau);
 
+      // Handle very small search directions by letting αₖ = αₖᵐᵃˣ when
+      // max(|pₖˣ(i)|/(1 + |xₖ(i)|)) < 10ε_mach.
+      //
+      // See section 3.9 of [2].
+      double maxStepScaled = 0.0;
+      for (int row = 0; row < x.rows(); ++row) {
+        maxStepScaled = std::max(maxStepScaled,
+                                 std::abs(p_x(row)) / (1.0 + std::abs(x(row))));
+      }
+      if (maxStepScaled < 10.0 * std::numeric_limits<double>::epsilon()) {
+        alpha = alpha_max;
+        ++allowedFullStepCounter;
+      } else {
+        allowedFullStepCounter = 0;
+      }
+
       // xₖ₊₁ = xₖ + αₖpₖˣ
       // sₖ₊₁ = xₖ + αₖpₖˢ
       // yₖ₊₁ = xₖ + αₖᶻpₖʸ
@@ -1007,6 +1025,15 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       if (innerIterEndTime - solveStartTime > m_config.timeout) {
         status->exitCondition = SolverExitCondition::kTimeout;
         return x;
+      }
+
+      // The search direction has been very small twice, so assume the problem
+      // has been solved as well as possible given finite precision and reduce
+      // the barrier parameter.
+      //
+      // See section 3.9 of [2].
+      if (allowedFullStepCounter == 2) {
+        break;
       }
     }
 
