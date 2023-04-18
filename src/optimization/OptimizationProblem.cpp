@@ -777,7 +777,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
           s_max;
 
       // Update the error estimate using the KKT conditions from equations
-      // (19.5a) through (19.5d) in [1].
+      // (19.5a) through (19.5d) of [1].
       //
       //   ∇f − Aₑᵀy − Aᵢᵀz = 0
       //   Sz − μe = 0
@@ -785,7 +785,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       //   cᵢ − s = 0
       //
       // The error tolerance is the max of the following infinity norms scaled
-      // by s_d and s_c (see equation (5) in [2]).
+      // by s_d and s_c (see equation (5) of [2]).
       //
       //   ‖∇f − Aₑᵀy − Aᵢᵀz‖_∞ / s_d
       //   ‖Sz − μe‖_∞ / s_c
@@ -990,7 +990,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       //
       //   zₖ₊₁⁽ⁱ⁾ = max(min(zₖ₊₁⁽ⁱ⁾, κ_Σ μⱼ/sₖ₊₁⁽ⁱ⁾), μⱼ/(κ_Σ sₖ₊₁⁽ⁱ⁾))
       //
-      // for some fixed κ_Σ ≥ 1 after each step. See equation (16) in [2].
+      // for some fixed κ_Σ ≥ 1 after each step. See equation (16) of [2].
       for (int row = 0; row < z.rows(); ++row) {
         z(row) = std::max(std::min(z(row), kappa_sigma * mu / s(row)),
                           mu / (kappa_sigma * s(row)));
@@ -1041,7 +1041,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
     //
     //   μⱼ₊₁ = max(εₜₒₗ/10, min(κ_μ μⱼ, μⱼ^θ_μ))
     //
-    // See equation (7) in [2].
+    // See equation (7) of [2].
     old_mu = mu;
     mu = std::max(m_config.tolerance / 10.0,
                   std::min(kappa_mu * mu, std::pow(mu, theta_mu)));
@@ -1050,7 +1050,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
     //
     //   τⱼ = max(τₘᵢₙ, 1 − μⱼ)
     //
-    // See equation (8) in [2].
+    // See equation (8) of [2].
     tau = std::max(tau_min, 1.0 - mu);
 
     // Reset the filter when the barrier parameter is updated.
