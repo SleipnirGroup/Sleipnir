@@ -9,36 +9,9 @@
 #include <Eigen/SparseCholesky>
 #include <Eigen/SparseCore>
 
+#include "Inertia.hpp"
+
 namespace sleipnir {
-
-/**
- * Represents the inertia of a matrix (the number of positive, negative, and
- * zero eigenvalues).
- */
-class Inertia {
- public:
-  size_t positive = 0;
-  size_t negative = 0;
-  size_t zero = 0;
-
-  constexpr Inertia() = default;
-
-  /**
-   * Constructs the Inertia type with the given number of positive, negative,
-   * and zero eigenvalues.
-   *
-   * @param positive The number of positive eigenvalues.
-   * @param negative The number of negative eigenvalues.
-   * @param zero The number of zero eigenvalues.
-   */
-  constexpr Inertia(size_t positive, size_t negative, size_t zero)
-      : positive{positive}, negative{negative}, zero{zero} {}
-
-  friend bool operator==(const Inertia& lhs, const Inertia& rhs) {
-    return lhs.positive == rhs.positive && lhs.negative == rhs.negative &&
-           lhs.zero == rhs.zero;
-  }
-};
 
 /**
  * Solves systems of linear equations using a regularized LDLT factorization.
@@ -47,10 +20,13 @@ class RegularizedLDLT {
  public:
   /**
    * Constructs a RegularizedLDLT instance.
-   *
-   * @param theta_mu Barrier parameter superlinear decrease power (1, 2)
    */
-  explicit RegularizedLDLT(double theta_mu) : m_theta_mu{theta_mu} {}
+  RegularizedLDLT() = default;
+
+  /**
+   * Reports whether previous computation was successful.
+   */
+  Eigen::ComputationInfo Info() { return m_info; }
 
   /**
    * Computes the regularized LDLT factorization of a matrix.
@@ -74,16 +50,17 @@ class RegularizedLDLT {
 
     m_solver.compute(lhs);
     if (m_solver.info() == Eigen::Success) {
-      Inertia inertia = ComputeInertia(m_solver);
+      Inertia inertia{m_solver};
       if (inertia == idealInertia) {
+        m_info = Eigen::Success;
         return;
       }
 
       if (inertia.zero > 0) {
-        gamma = 1e-8 * std::pow(mu, m_theta_mu);
+        gamma = 1e-8 * std::pow(mu, 0.25);
       }
     } else {
-      gamma = 1e-8 * std::pow(mu, m_theta_mu);
+      gamma = 1e-8 * std::pow(mu, 0.25);
     }
 
     if (m_deltaOld == 0.0) {
@@ -109,12 +86,21 @@ class RegularizedLDLT {
       regularization.setFromTriplets(m_triplets.begin(), m_triplets.end());
       m_solver.compute(lhs + regularization);
 
-      Inertia inertia = ComputeInertia(m_solver);
+      Inertia inertia{m_solver};
       if (inertia == idealInertia) {
         m_deltaOld = delta;
+        m_info = Eigen::Success;
         return;
       } else {
         delta *= 10.0;
+
+        // If the Hessian perturbation is too high, report failure. This can
+        // happen due to a rank-deficient equality constraint Jacobian with
+        // linearly dependent constraints.
+        if (delta > 1e20) {
+          m_info = Eigen::NumericalIssue;
+          return;
+        }
       }
     }
   }
@@ -132,29 +118,11 @@ class RegularizedLDLT {
  private:
   Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>> m_solver;
 
-  double m_theta_mu;
+  Eigen::ComputationInfo m_info = Eigen::Success;
 
   double m_deltaOld = 0.0;
 
   std::vector<Eigen::Triplet<double>> m_triplets;
-
-  static Inertia ComputeInertia(
-      const Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>>& solver) {
-    Inertia inertia;
-
-    auto D = solver.vectorD();
-    for (int row = 0; row < D.rows(); ++row) {
-      if (D(row) > 0.0) {
-        ++inertia.positive;
-      } else if (D(row) < 0.0) {
-        ++inertia.negative;
-      } else {
-        ++inertia.zero;
-      }
-    }
-
-    return inertia;
-  }
 };
 
 }  // namespace sleipnir

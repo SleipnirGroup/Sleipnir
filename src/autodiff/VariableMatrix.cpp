@@ -2,6 +2,8 @@
 
 #include "sleipnir/autodiff/VariableMatrix.hpp"
 
+#include <cassert>
+
 #include "sleipnir/autodiff/Expression.hpp"
 
 namespace sleipnir {
@@ -153,7 +155,7 @@ SLEIPNIR_DLLEXPORT VariableMatrix operator*(const VariableMatrix& lhs,
                                             double rhs) {
   VariableMatrix result{lhs.Rows(), lhs.Cols()};
 
-  Variable rhsVar{MakeConstant(rhs)};
+  Variable rhsVar = Constant(rhs);
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
       result(row, col) = lhs(row, col) * rhsVar;
@@ -167,7 +169,7 @@ SLEIPNIR_DLLEXPORT VariableMatrix operator*(double lhs,
                                             const VariableMatrix& rhs) {
   VariableMatrix result{rhs.Rows(), rhs.Cols()};
 
-  Variable lhsVar{MakeConstant(lhs)};
+  Variable lhsVar = Constant(lhs);
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
       result(row, col) = rhs(row, col) * lhsVar;
@@ -196,7 +198,7 @@ VariableMatrix& VariableMatrix::operator*=(const VariableMatrix& rhs) {
 VariableMatrix& VariableMatrix::operator*=(double rhs) {
   for (int row = 0; row < Rows(); ++row) {
     for (int col = 0; col < Cols(); ++col) {
-      (*this)(row, col) *= Variable{MakeConstant(rhs)};
+      (*this)(row, col) *= Constant(rhs);
     }
   }
 
@@ -224,7 +226,7 @@ SLEIPNIR_DLLEXPORT VariableMatrix operator/(const VariableMatrix& lhs,
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result(row, col) = lhs(row, col) / Variable{MakeConstant(rhs)};
+      result(row, col) = lhs(row, col) / Constant(rhs);
     }
   }
 
@@ -244,7 +246,7 @@ VariableMatrix& VariableMatrix::operator/=(const VariableMatrix& rhs) {
 VariableMatrix& VariableMatrix::operator/=(double rhs) {
   for (int row = 0; row < Rows(); ++row) {
     for (int col = 0; col < Cols(); ++col) {
-      (*this)(row, col) /= Variable{MakeConstant(rhs)};
+      (*this)(row, col) /= Constant(rhs);
     }
   }
 
@@ -506,8 +508,7 @@ VariableMatrix pow(double base, const VariableMatrix& power) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result(row, col) =
-          sleipnir::pow(Variable{MakeConstant(base)}, power(row, col));
+      result(row, col) = sleipnir::pow(Constant(base), power(row, col));
     }
   }
 
@@ -519,8 +520,7 @@ VariableMatrix pow(const VariableMatrix& base, double power) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result(row, col) =
-          sleipnir::pow(base(row, col), Variable{MakeConstant(power)});
+      result(row, col) = sleipnir::pow(base(row, col), Constant(power));
     }
   }
 
@@ -609,6 +609,80 @@ VariableMatrix tanh(const VariableMatrix& x) {
   }
 
   return result;
+}
+
+namespace {
+
+/**
+ * Make a list of constraints.
+ *
+ * The standard form for equality constraints is c(x) = 0, and the standard form
+ * for inequality constraints is c(x) ≥ 0. This function takes constraints of
+ * the form lhs = rhs or lhs ≥ rhs and converts them to lhs - rhs = 0 or
+ * lhs - rhs ≥ 0.
+ */
+std::vector<Variable> MakeConstraints(const VariableMatrix& lhs,
+                                      const VariableMatrix& rhs) {
+  std::vector<Variable> constraints;
+
+  if (lhs.Rows() == 1 && lhs.Cols() == 1) {
+    constraints.reserve(rhs.Rows() * rhs.Cols());
+
+    for (int row = 0; row < rhs.Rows(); ++row) {
+      for (int col = 0; col < rhs.Cols(); ++col) {
+        // Make right-hand side zero
+        constraints.emplace_back(lhs(0, 0) - rhs(row, col));
+      }
+    }
+  } else if (rhs.Rows() == 1 && rhs.Cols() == 1) {
+    constraints.reserve(lhs.Rows() * lhs.Cols());
+
+    for (int row = 0; row < lhs.Rows(); ++row) {
+      for (int col = 0; col < lhs.Cols(); ++col) {
+        // Make right-hand side zero
+        constraints.emplace_back(lhs(row, col) - rhs(0, 0));
+      }
+    }
+  } else {
+    assert(lhs.Rows() == rhs.Rows() && lhs.Cols() == rhs.Cols());
+    constraints.reserve(lhs.Rows() * lhs.Cols());
+
+    for (int row = 0; row < lhs.Rows(); ++row) {
+      for (int col = 0; col < lhs.Cols(); ++col) {
+        // Make right-hand side zero
+        constraints.emplace_back(lhs(row, col) - rhs(row, col));
+      }
+    }
+  }
+
+  return constraints;
+}
+
+}  // namespace
+
+EqualityConstraints operator==(const VariableMatrix& lhs,
+                               const VariableMatrix& rhs) {
+  return EqualityConstraints{MakeConstraints(lhs, rhs)};
+}
+
+InequalityConstraints operator<(const VariableMatrix& lhs,
+                                const VariableMatrix& rhs) {
+  return lhs <= rhs;
+}
+
+InequalityConstraints operator<=(const VariableMatrix& lhs,
+                                 const VariableMatrix& rhs) {
+  return rhs >= lhs;
+}
+
+InequalityConstraints operator>(const VariableMatrix& lhs,
+                                const VariableMatrix& rhs) {
+  return lhs >= rhs;
+}
+
+InequalityConstraints operator>=(const VariableMatrix& lhs,
+                                 const VariableMatrix& rhs) {
+  return InequalityConstraints{MakeConstraints(lhs, rhs)};
 }
 
 }  // namespace sleipnir

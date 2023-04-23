@@ -76,60 +76,19 @@ class VariableBlock {
   }
 
   /**
-   * Assigns an Eigen matrix of doubles to the block.
+   * Assigns an Eigen matrix to the block.
    */
-  template <int _Rows, int _Cols, int... Args>
-  VariableBlock<Mat>& operator=(
-      const Eigen::Matrix<double, _Rows, _Cols, Args...>& values) {
-    for (size_t row = 0; row < _Rows; ++row) {
-      for (size_t col = 0; col < _Cols; ++col) {
+  template <typename Derived>
+  VariableBlock<Mat>& operator=(const Eigen::MatrixBase<Derived>& values) {
+    assert(Rows() == values.rows());
+    assert(Cols() == values.cols());
+
+    for (int row = 0; row < values.rows(); ++row) {
+      for (int col = 0; col < values.cols(); ++col) {
         (*this)(row, col) = values(row, col);
       }
     }
 
-    return *this;
-  }
-
-  /**
-   * Assigns an Eigen matrix of doubles to the block.
-   */
-  template <int _Rows, int _Cols, int... Args>
-  VariableBlock<Mat>& operator=(
-      Eigen::Matrix<double, _Rows, _Cols, Args...>&& values) {
-    for (size_t row = 0; row < _Rows; ++row) {
-      for (size_t col = 0; col < _Cols; ++col) {
-        (*this)(row, col) = values(row, col);
-      }
-    }
-
-    return *this;
-  }
-
-  /**
-   * Assigns an Eigen matrix of Variables to the block.
-   */
-  template <int _Rows, int _Cols, int... Args>
-  VariableBlock<Mat>& operator=(
-      const Eigen::Matrix<Variable, _Rows, _Cols, Args...>& values) {
-    for (int row = 0; row < m_blockRows; ++row) {
-      for (int col = 0; col < m_blockCols; ++col) {
-        (*this)(row, col) = values(row, col);
-      }
-    }
-    return *this;
-  }
-
-  /**
-   * Assigns an Eigen matrix of Variables to the block.
-   */
-  template <int _Rows, int _Cols, int... Args>
-  VariableBlock<Mat>& operator=(
-      Eigen::Matrix<Variable, _Rows, _Cols, Args...>&& values) {
-    for (int row = 0; row < m_blockRows; ++row) {
-      for (int col = 0; col < m_blockCols; ++col) {
-        (*this)(row, col) = std::move(values(row, col));
-      }
-    }
     return *this;
   }
 
@@ -309,7 +268,7 @@ class VariableBlock {
   VariableBlock& operator*=(double rhs) {
     for (int row = 0; row < Rows(); ++row) {
       for (int col = 0; col < Cols(); ++col) {
-        (*this)(row, col) *= Variable{MakeConstant(rhs)};
+        (*this)(row, col) *= Constant(rhs);
       }
     }
 
@@ -343,7 +302,7 @@ class VariableBlock {
   VariableBlock<Mat>& operator/=(double rhs) {
     for (int row = 0; row < Rows(); ++row) {
       for (int col = 0; col < Cols(); ++col) {
-        (*this)(row, col) /= Variable{MakeConstant(rhs)};
+        (*this)(row, col) /= Constant(rhs);
       }
     }
 

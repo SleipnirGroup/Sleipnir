@@ -2,13 +2,12 @@
 
 #include "sleipnir/autodiff/Variable.hpp"
 
-#include <cmath>
-#include <tuple>
-#include <vector>
+#include <algorithm>
 
 #include <fmt/core.h>
 
 #include "sleipnir/SymbolExports.hpp"
+#include "sleipnir/autodiff/Expression.hpp"
 #include "sleipnir/autodiff/ExpressionGraph.hpp"
 
 namespace sleipnir {
@@ -169,8 +168,12 @@ void Variable::Update() {
   }
 }
 
+Variable Constant(double x) {
+  return Variable{ConstantExpr(x)};
+}
+
 Variable abs(double x) {
-  return Variable{sleipnir::abs(MakeConstant(x))};
+  return Variable{sleipnir::abs(ConstantExpr(x))};
 }
 
 Variable abs(const Variable& x) {
@@ -178,7 +181,7 @@ Variable abs(const Variable& x) {
 }
 
 Variable acos(double x) {
-  return Variable{sleipnir::cos(MakeConstant(x))};
+  return Variable{sleipnir::cos(ConstantExpr(x))};
 }
 
 Variable acos(const Variable& x) {
@@ -186,7 +189,7 @@ Variable acos(const Variable& x) {
 }
 
 Variable asin(double x) {
-  return Variable{sleipnir::asin(MakeConstant(x))};
+  return Variable{sleipnir::asin(ConstantExpr(x))};
 }
 
 Variable asin(const Variable& x) {
@@ -194,7 +197,7 @@ Variable asin(const Variable& x) {
 }
 
 Variable atan(double x) {
-  return Variable{sleipnir::atan(MakeConstant(x))};
+  return Variable{sleipnir::atan(ConstantExpr(x))};
 }
 
 Variable atan(const Variable& x) {
@@ -202,11 +205,11 @@ Variable atan(const Variable& x) {
 }
 
 Variable atan2(double y, const Variable& x) {
-  return Variable{sleipnir::atan2(MakeConstant(y), x.expr)};
+  return Variable{sleipnir::atan2(ConstantExpr(y), x.expr)};
 }
 
 Variable atan2(const Variable& y, double x) {
-  return Variable{sleipnir::atan2(y.expr, MakeConstant(x))};
+  return Variable{sleipnir::atan2(y.expr, ConstantExpr(x))};
 }
 
 Variable atan2(const Variable& y, const Variable& x) {
@@ -214,7 +217,7 @@ Variable atan2(const Variable& y, const Variable& x) {
 }
 
 Variable cos(double x) {
-  return Variable{sleipnir::cos(MakeConstant(x))};
+  return Variable{sleipnir::cos(ConstantExpr(x))};
 }
 
 Variable cos(const Variable& x) {
@@ -222,7 +225,7 @@ Variable cos(const Variable& x) {
 }
 
 Variable cosh(double x) {
-  return Variable{sleipnir::cosh(MakeConstant(x))};
+  return Variable{sleipnir::cosh(ConstantExpr(x))};
 }
 
 Variable cosh(const Variable& x) {
@@ -230,7 +233,7 @@ Variable cosh(const Variable& x) {
 }
 
 Variable erf(double x) {
-  return Variable{sleipnir::erf(MakeConstant(x))};
+  return Variable{sleipnir::erf(ConstantExpr(x))};
 }
 
 Variable erf(const Variable& x) {
@@ -238,7 +241,7 @@ Variable erf(const Variable& x) {
 }
 
 Variable exp(double x) {
-  return Variable{sleipnir::exp(MakeConstant(x))};
+  return Variable{sleipnir::exp(ConstantExpr(x))};
 }
 
 Variable exp(const Variable& x) {
@@ -246,11 +249,11 @@ Variable exp(const Variable& x) {
 }
 
 Variable hypot(double x, const Variable& y) {
-  return Variable{sleipnir::hypot(MakeConstant(x), y.expr)};
+  return Variable{sleipnir::hypot(ConstantExpr(x), y.expr)};
 }
 
 Variable hypot(const Variable& x, double y) {
-  return Variable{sleipnir::hypot(x.expr, MakeConstant(y))};
+  return Variable{sleipnir::hypot(x.expr, ConstantExpr(y))};
 }
 
 Variable hypot(const Variable& x, const Variable& y) {
@@ -258,7 +261,7 @@ Variable hypot(const Variable& x, const Variable& y) {
 }
 
 Variable log(double x) {
-  return Variable{sleipnir::log(MakeConstant(x))};
+  return Variable{sleipnir::log(ConstantExpr(x))};
 }
 
 Variable log(const Variable& x) {
@@ -266,7 +269,7 @@ Variable log(const Variable& x) {
 }
 
 Variable log10(double x) {
-  return Variable{sleipnir::log10(MakeConstant(x))};
+  return Variable{sleipnir::log10(ConstantExpr(x))};
 }
 
 Variable log10(const Variable& x) {
@@ -274,11 +277,11 @@ Variable log10(const Variable& x) {
 }
 
 Variable pow(double base, const Variable& power) {
-  return Variable{sleipnir::pow(MakeConstant(base), power.expr)};
+  return Variable{sleipnir::pow(ConstantExpr(base), power.expr)};
 }
 
 Variable pow(const Variable& base, double power) {
-  return Variable{sleipnir::pow(base.expr, MakeConstant(power))};
+  return Variable{sleipnir::pow(base.expr, ConstantExpr(power))};
 }
 
 Variable pow(const Variable& base, const Variable& power) {
@@ -286,7 +289,7 @@ Variable pow(const Variable& base, const Variable& power) {
 }
 
 Variable sign(double x) {
-  return Variable{sleipnir::sign(MakeConstant(x))};
+  return Variable{sleipnir::sign(ConstantExpr(x))};
 }
 
 Variable sign(const Variable& x) {
@@ -294,7 +297,7 @@ Variable sign(const Variable& x) {
 }
 
 Variable sin(double x) {
-  return Variable{sleipnir::sin(MakeConstant(x))};
+  return Variable{sleipnir::sin(ConstantExpr(x))};
 }
 
 Variable sin(const Variable& x) {
@@ -302,7 +305,7 @@ Variable sin(const Variable& x) {
 }
 
 Variable sinh(double x) {
-  return Variable{sleipnir::sinh(MakeConstant(x))};
+  return Variable{sleipnir::sinh(ConstantExpr(x))};
 }
 
 Variable sinh(const Variable& x) {
@@ -310,7 +313,7 @@ Variable sinh(const Variable& x) {
 }
 
 Variable sqrt(double x) {
-  return Variable{sleipnir::sqrt(MakeConstant(x))};
+  return Variable{sleipnir::sqrt(ConstantExpr(x))};
 }
 
 Variable sqrt(const Variable& x) {
@@ -318,7 +321,7 @@ Variable sqrt(const Variable& x) {
 }
 
 Variable tan(double x) {
-  return Variable{sleipnir::tan(MakeConstant(x))};
+  return Variable{sleipnir::tan(ConstantExpr(x))};
 }
 
 Variable tan(const Variable& x) {
@@ -326,11 +329,47 @@ Variable tan(const Variable& x) {
 }
 
 Variable tanh(double x) {
-  return Variable{sleipnir::tanh(MakeConstant(x))};
+  return Variable{sleipnir::tanh(ConstantExpr(x))};
 }
 
 Variable tanh(const Variable& x) {
   return Variable{tanh(x.expr)};
+}
+
+EqualityConstraints::operator bool() const {
+  return std::all_of(
+      constraints.begin(), constraints.end(),
+      [](const auto& constraint) { return constraint.Value() == 0.0; });
+}
+
+InequalityConstraints::operator bool() const {
+  return std::all_of(
+      constraints.begin(), constraints.end(),
+      [](const auto& constraint) { return constraint.Value() >= 0.0; });
+}
+
+EqualityConstraints operator==(const Variable& lhs, const Variable& rhs) {
+  // The standard form for equality constraints is c(x) = 0. This function takes
+  // a constraint of the form lhs = rhs and converts it to lhs - rhs = 0.
+  return EqualityConstraints{{lhs - rhs}};
+}
+
+InequalityConstraints operator<(const Variable& lhs, const Variable& rhs) {
+  return rhs >= lhs;
+}
+
+InequalityConstraints operator<=(const Variable& lhs, const Variable& rhs) {
+  return rhs >= lhs;
+}
+
+InequalityConstraints operator>(const Variable& lhs, const Variable& rhs) {
+  return lhs >= rhs;
+}
+
+InequalityConstraints operator>=(const Variable& lhs, const Variable& rhs) {
+  // The standard form for inequality constraints is c(x) ≥ 0. This function
+  // takes a constraints of the form lhs ≥ rhs and converts it to lhs - rhs ≥ 0.
+  return InequalityConstraints{{lhs - rhs}};
 }
 
 }  // namespace sleipnir

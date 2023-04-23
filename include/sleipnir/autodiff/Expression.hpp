@@ -6,6 +6,7 @@
 
 #include <array>
 #include <memory>
+#include <vector>
 
 #include "sleipnir/IntrusiveSharedPtr.hpp"
 #include "sleipnir/Pool.hpp"
@@ -343,11 +344,35 @@ inline void IntrusiveSharedPtrIncRefCount(Expression* expr) {
  * @param expr The shared pointer's managed object.
  */
 inline void IntrusiveSharedPtrDecRefCount(Expression* expr) {
-  if (--expr->refCount == 0) {
-    auto alloc = GlobalPoolAllocator<Expression>();
-    std::allocator_traits<decltype(alloc)>::destroy(alloc, expr);
-    std::allocator_traits<decltype(alloc)>::deallocate(alloc, expr,
-                                                       sizeof(Expression));
+  // If a deeply nested tree is being deallocated all at once, calling the
+  // Expression destructor when expr's refcount reaches zero can cause a stack
+  // overflow. Instead, we iterate over its children to decrement their
+  // refcounts and deallocate them.
+  std::vector<Expression*> stack;
+  stack.emplace_back(expr);
+
+  while (!stack.empty()) {
+    auto elem = stack.back();
+    stack.pop_back();
+
+    // Decrement the current node's refcount. If it reaches zero, deallocate the
+    // node and enqueue its children so their refcounts are decremented too.
+    if (--elem->refCount == 0) {
+      if (elem->adjointExpr != nullptr) {
+        stack.emplace_back(elem->adjointExpr.Get());
+      }
+      for (auto&& arg : elem->args) {
+        if (arg != nullptr) {
+          stack.emplace_back(arg.Get());
+        }
+      }
+
+      // Not calling the destructor here is safe because it only decrements
+      // refcounts, which was already done above.
+      auto alloc = GlobalPoolAllocator<Expression>();
+      std::allocator_traits<decltype(alloc)>::deallocate(alloc, elem,
+                                                         sizeof(Expression));
+    }
   }
 }
 
@@ -356,7 +381,7 @@ inline void IntrusiveSharedPtrDecRefCount(Expression* expr) {
  *
  * @param x The constant.
  */
-SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> MakeConstant(double x);
+SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> ConstantExpr(double x);
 
 /**
  * std::abs() for Expressions.

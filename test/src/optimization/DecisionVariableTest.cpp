@@ -37,7 +37,7 @@ TEST(DecisionVariableTest, VectorInitAssign) {
   EXPECT_DOUBLE_EQ(4.0, y.Value(1));
 }
 
-TEST(DecisionVariableTest, MatrixInitAssign) {
+TEST(DecisionVariableTest, StaticMatrixInitAssign) {
   sleipnir::OptimizationProblem problem;
 
   // Matrix zero init
@@ -96,6 +96,78 @@ TEST(DecisionVariableTest, MatrixInitAssign) {
 
     Eigen::Matrix<double, 3, 2> expectedResult{
         {1.0, 8.0}, {1.0, 10.0}, {11.0, 12.0}};
+    EXPECT_EQ(expectedResult, z.Value());
+  }
+}
+
+TEST(DecisionVariableTest, DynamicMatrixInitAssign) {
+  sleipnir::OptimizationProblem problem;
+
+  // Matrix zero init
+  auto z = problem.DecisionVariable(3, 2);
+  EXPECT_DOUBLE_EQ(0.0, z.Value(0, 0));
+  EXPECT_DOUBLE_EQ(0.0, z.Value(0, 1));
+  EXPECT_DOUBLE_EQ(0.0, z.Value(1, 0));
+  EXPECT_DOUBLE_EQ(0.0, z.Value(1, 1));
+  EXPECT_DOUBLE_EQ(0.0, z.Value(2, 0));
+  EXPECT_DOUBLE_EQ(0.0, z.Value(2, 1));
+
+  // Matrix assignment; element comparison
+  {
+    Eigen::MatrixXd expected{3, 2};
+    expected << 1.0, 2.0, 3.0, 4.0, 5.0, 6.0;
+    z = expected;
+    EXPECT_DOUBLE_EQ(1.0, z.Value(0, 0));
+    EXPECT_DOUBLE_EQ(2.0, z.Value(0, 1));
+    EXPECT_DOUBLE_EQ(3.0, z.Value(1, 0));
+    EXPECT_DOUBLE_EQ(4.0, z.Value(1, 1));
+    EXPECT_DOUBLE_EQ(5.0, z.Value(2, 0));
+    EXPECT_DOUBLE_EQ(6.0, z.Value(2, 1));
+  }
+
+  // Matrix assignment; matrix comparison
+  {
+    Eigen::MatrixXd expected{3, 2};
+    expected << 7.0, 8.0, 9.0, 10.0, 11.0, 12.0;
+    z = expected;
+    EXPECT_EQ(expected, z.Value());
+  }
+
+  // Block assignment
+  {
+    sleipnir::OptimizationProblem problem;
+
+    Eigen::MatrixXd expected{3, 2};
+    expected << 7.0, 8.0, 9.0, 10.0, 11.0, 12.0;
+
+    Eigen::MatrixXd expectedBlock{2, 1};
+    expectedBlock << 1.0, 1.0;
+    z.Block(0, 0, 2, 1) = expectedBlock;
+    expected.block<2, 1>(0, 0) = expectedBlock;
+
+    EXPECT_EQ(expected, z.Value());
+
+    Eigen::MatrixXd expectedResult{3, 2};
+    expectedResult << 1.0, 8.0, 1.0, 10.0, 11.0, 12.0;
+    EXPECT_EQ(expectedResult, z.Value());
+  }
+
+  // Segment assignment
+  {
+    sleipnir::OptimizationProblem problem;
+
+    Eigen::MatrixXd expected{3, 2};
+    expected << 7.0, 8.0, 9.0, 10.0, 11.0, 12.0;
+
+    Eigen::MatrixXd expectedBlock{2, 1};
+    expectedBlock << 1.0, 1.0;
+    z.Segment(0, 2) = expectedBlock;
+    expected.block<2, 1>(0, 0) = expectedBlock;
+
+    EXPECT_EQ(expected, z.Value());
+
+    Eigen::MatrixXd expectedResult{3, 2};
+    expectedResult << 1.0, 8.0, 1.0, 10.0, 11.0, 12.0;
     EXPECT_EQ(expectedResult, z.Value());
   }
 }

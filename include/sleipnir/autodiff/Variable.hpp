@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <vector>
+
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
 
@@ -269,6 +271,13 @@ class SLEIPNIR_DLLEXPORT Variable {
 
 using VectorXvar = Eigen::Vector<Variable, Eigen::Dynamic>;
 using MapVectorXvar = Eigen::Map<VectorXvar>;
+
+/**
+ * Returns a Variable representing a constant.
+ *
+ * @param x The constant.
+ */
+SLEIPNIR_DLLEXPORT Variable Constant(double x);
 
 /**
  * std::abs() for Variables.
@@ -565,5 +574,46 @@ SLEIPNIR_DLLEXPORT Variable tanh(double x);
  * @param x The argument.
  */
 SLEIPNIR_DLLEXPORT Variable tanh(const Variable& x);
+
+/**
+ * A vector of equality constraints of the form cₑ(x) = 0.
+ */
+struct SLEIPNIR_DLLEXPORT EqualityConstraints {
+  /// A vector of scalar equality constraints.
+  std::vector<Variable> constraints;
+
+  /**
+   * Implicit conversion operator to bool.
+   */
+  operator bool() const;  // NOLINT
+};
+
+/**
+ * A vector of inequality constraints of the form cᵢ(x) ≥ 0.
+ */
+struct SLEIPNIR_DLLEXPORT InequalityConstraints {
+  /// A vector of scalar inequality constraints.
+  std::vector<Variable> constraints;
+
+  /**
+   * Implicit conversion operator to bool.
+   */
+  operator bool() const;  // NOLINT
+};
+
+SLEIPNIR_DLLEXPORT EqualityConstraints operator==(const Variable& lhs,
+                                                  const Variable& rhs);
+
+SLEIPNIR_DLLEXPORT InequalityConstraints operator<(const Variable& lhs,
+                                                   const Variable& rhs);
+
+SLEIPNIR_DLLEXPORT InequalityConstraints operator<=(const Variable& lhs,
+                                                    const Variable& rhs);
+
+SLEIPNIR_DLLEXPORT InequalityConstraints operator>(const Variable& lhs,
+                                                   const Variable& rhs);
+
+SLEIPNIR_DLLEXPORT InequalityConstraints operator>=(const Variable& lhs,
+                                                    const Variable& rhs);
 
 }  // namespace sleipnir

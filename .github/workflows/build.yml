@@ -15,35 +15,23 @@ jobs:
           - artifact-name: Windows
             cmake-config-env-vars:
             os: windows-2022
-            target: ALL_BUILD
           - artifact-name: Linux
             cmake-config-env-vars:
             os: macOS-11
-            target: all
           - artifact-name: macOS
             cmake-config-env-vars: CFLAGS="$CFLAGS -arch x86_64 -arch arm64" CXXFLAGS="$CXXFLAGS -arch x86_64 -arch arm64"
             os: macOS-11
-            target: all
 
     name: "${{ matrix.artifact-name }}"
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
 
-      - uses: ilammy/msvc-dev-cmd@v1.12.0
-        if: matrix.artifact-name == 'Windows'
-
-      - name: Setup cmake
-        uses: jwlawson/actions-setup-cmake@v1.13
-        with:
-          cmake-version: latest
-        if: matrix.artifact-name == 'Windows'
-
       - name: configure
         run: ${{ matrix.cmake-config-env-vars }} cmake -B build -S .
 
       - name: build
-        run: cmake --build build --target ${{ matrix.target }} --config RelWithDebInfo --parallel $(nproc)
+        run: cmake --build build --config RelWithDebInfo --parallel $(nproc)
 
       - name: test
         working-directory: build
@@ -96,7 +84,7 @@ jobs:
         uses: numworks/setup-emscripten@latest
 
       - name: configure
-        run: emcmake cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DBUILD_BENCHMARKING=OFF -DBUILD_TESTING=OFF -DFMT_INSTALL=ON
+        run: emcmake cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DBUILD_BENCHMARKING=OFF -DBUILD_TESTING=OFF
 
       - name: build
         run: cmake --build build --config Release --parallel $(nproc)

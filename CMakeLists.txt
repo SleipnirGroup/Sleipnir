@@ -13,10 +13,6 @@ project(Sleipnir)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-
 # Use, i.e. don't skip the full RPATH for the build tree
 set(CMAKE_SKIP_BUILD_RPATH FALSE)
 
@@ -56,7 +52,6 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
 
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
-set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS FALSE)
 
@@ -64,13 +59,12 @@ include(SleipnirCompilerFlags)
 
 file(GLOB_RECURSE Sleipnir_src src/*.cpp thirdparty/llvm/src/*.cpp)
 add_library(Sleipnir ${Sleipnir_src})
+add_library(Sleipnir::Sleipnir ALIAS Sleipnir)
 sleipnir_compiler_flags(Sleipnir)
 target_include_directories(Sleipnir
                            PRIVATE
                            ${CMAKE_CURRENT_SOURCE_DIR}/src
                            ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/llvm/include)
-
-option(INSTALL_SLEIPNIR "Install Sleipnir" ON)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 
@@ -81,16 +75,13 @@ target_compile_definitions(Sleipnir PRIVATE SLEIPNIR_EXPORTS)
 
 include(FetchContent)
 
-# Eigen dependency (static linkage)
-set(BUILD_SHARED_LIBS_SAVE ${BUILD_SHARED_LIBS})
-set(BUILD_SHARED_LIBS OFF)
+# Eigen dependency
 FetchContent_Declare(
   Eigen3
   GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
   GIT_TAG        3.4.0
 )
 FetchContent_MakeAvailable(Eigen3)
-set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_SAVE})
 
 target_link_libraries(Sleipnir PUBLIC Eigen3::Eigen)
 
@@ -102,39 +93,36 @@ add_custom_command(
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-# fmt dependency (static linkage)
-set(BUILD_SHARED_LIBS_SAVE ${BUILD_SHARED_LIBS})
-set(BUILD_SHARED_LIBS OFF)
+# fmt dependency
+set(FMT_INSTALL ON)
 FetchContent_Declare(
   fmt
   GIT_REPOSITORY https://github.com/fmtlib/fmt.git
   GIT_TAG        9.1.0
 )
 FetchContent_MakeAvailable(fmt)
-set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_SAVE})
 
-target_link_libraries(Sleipnir PRIVATE fmt)
+target_link_libraries(Sleipnir PRIVATE fmt::fmt)
 
 target_include_directories(Sleipnir
                            PUBLIC
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
                            $<INSTALL_INTERFACE:include/Sleipnir>)
 
-if (INSTALL_SLEIPNIR)
-  install(TARGETS Sleipnir EXPORT Sleipnir DESTINATION lib)
-  install(DIRECTORY include/ DESTINATION "include/Sleipnir")
-endif()
-
-target_include_directories(Sleipnir
-                           INTERFACE
-                           $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-                           $<INSTALL_INTERFACE:include>)
-
-if (INSTALL_SLEIPNIR)
-  install(EXPORT Sleipnir
-    FILE Sleipnir.cmake
-    DESTINATION lib/cmake/Sleipnir)
-endif()
+install(TARGETS Sleipnir
+        EXPORT SleipnirTargets
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        RUNTIME DESTINATION bin
+        INCLUDES DESTINATION include)
+export(TARGETS Sleipnir
+       FILE Sleipnir.cmake
+       NAMESPACE Sleipnir::)
+install(DIRECTORY include/ DESTINATION "include/Sleipnir")
+install(EXPORT SleipnirTargets
+        FILE Sleipnir.cmake
+        NAMESPACE Sleipnir::
+        DESTINATION lib/cmake/Sleipnir)
 
 include(CMakePackageConfigHelpers)
 
@@ -147,11 +135,9 @@ configure_package_config_file(
   NO_CHECK_REQUIRED_COMPONENTS_MACRO)
 
 # Install the config file
-if (INSTALL_SLEIPNIR)
-  install(FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/SleipnirConfig.cmake
-    DESTINATION lib/cmake/Sleipnir)
-endif()
+install(FILES
+  ${CMAKE_CURRENT_BINARY_DIR}/SleipnirConfig.cmake
+  DESTINATION lib/cmake/Sleipnir)
 
 option(BUILD_BENCHMARKING "Build CasADi and Sleipnir benchmarks" ON)
 
@@ -173,7 +159,7 @@ if (BUILD_BENCHMARKING)
       target_link_libraries(${benchmark}ScalabilityBenchmark
                             PRIVATE
                             Sleipnir
-                            fmt
+                            fmt::fmt
                             casadi)
     endforeach()
   endif()
@@ -213,7 +199,7 @@ if (BUILD_TESTING)
   target_link_libraries(SleipnirTest
                         PRIVATE
                         Sleipnir
-                        fmt
+                        fmt::fmt
                         GTest::gtest
                         GTest::gtest_main)
   if (NOT CMAKE_TOOLCHAIN_FILE)
@@ -223,7 +209,7 @@ endif()
 
 # Build examples and example tests
 include(SleipnirSubdirList)
-sleipnir_subdir_list(EXAMPLES ${CMAKE_SOURCE_DIR}/examples)
+sleipnir_subdir_list(EXAMPLES ${CMAKE_CURRENT_SOURCE_DIR}/examples)
 foreach(example ${EXAMPLES})
   # Build example
   file(GLOB_RECURSE sources examples/${example}/src/*.cpp)
@@ -236,10 +222,10 @@ foreach(example ${EXAMPLES})
   target_link_libraries(${example}
                         PRIVATE
                         Sleipnir
-                        fmt)
+                        fmt::fmt)
 
   # Build example test if files exist for it
-  if (BUILD_TESTING AND EXISTS ${CMAKE_SOURCE_DIR}/examples/${example}/test)
+  if (BUILD_TESTING AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/examples/${example}/test)
     file(GLOB_RECURSE test_sources examples/${example}/test/*.cpp)
     add_executable(${example}Test ${sources} ${test_sources})
     target_include_directories(${example}Test
@@ -256,7 +242,7 @@ foreach(example ${EXAMPLES})
     target_link_libraries(${example}Test
                           PRIVATE
                           Sleipnir
-                          fmt
+                          fmt::fmt
                           GTest::gtest
                           GTest::gtest_main)
     if (NOT CMAKE_TOOLCHAIN_FILE)
