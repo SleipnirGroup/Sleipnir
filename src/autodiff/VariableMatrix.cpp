@@ -152,13 +152,30 @@ SLEIPNIR_DLLEXPORT VariableMatrix operator*(const VariableMatrix& lhs,
 }
 
 SLEIPNIR_DLLEXPORT VariableMatrix operator*(const VariableMatrix& lhs,
-                                            double rhs) {
+                                            const Variable& rhs) {
   VariableMatrix result{lhs.Rows(), lhs.Cols()};
 
-  Variable rhsVar = Constant(rhs);
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result(row, col) = lhs(row, col) * rhsVar;
+      result(row, col) = lhs(row, col) * rhs;
+    }
+  }
+
+  return result;
+}
+
+SLEIPNIR_DLLEXPORT VariableMatrix operator*(const VariableMatrix& lhs,
+                                            double rhs) {
+  return lhs * Constant(rhs);
+}
+
+SLEIPNIR_DLLEXPORT VariableMatrix operator*(const Variable& lhs,
+                                            const VariableMatrix& rhs) {
+  VariableMatrix result{rhs.Rows(), rhs.Cols()};
+
+  for (int row = 0; row < result.Rows(); ++row) {
+    for (int col = 0; col < result.Cols(); ++col) {
+      result(row, col) = rhs(row, col) * lhs;
     }
   }
 
@@ -167,16 +184,7 @@ SLEIPNIR_DLLEXPORT VariableMatrix operator*(const VariableMatrix& lhs,
 
 SLEIPNIR_DLLEXPORT VariableMatrix operator*(double lhs,
                                             const VariableMatrix& rhs) {
-  VariableMatrix result{rhs.Rows(), rhs.Cols()};
-
-  Variable lhsVar = Constant(lhs);
-  for (int row = 0; row < result.Rows(); ++row) {
-    for (int col = 0; col < result.Cols(); ++col) {
-      result(row, col) = rhs(row, col) * lhsVar;
-    }
-  }
-
-  return result;
+  return Constant(lhs) * rhs;
 }
 
 VariableMatrix& VariableMatrix::operator*=(const VariableMatrix& rhs) {

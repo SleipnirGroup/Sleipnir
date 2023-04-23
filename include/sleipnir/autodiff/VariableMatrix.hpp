@@ -264,7 +264,25 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param rhs Operator right-hand side.
    */
   friend SLEIPNIR_DLLEXPORT VariableMatrix operator*(const VariableMatrix& lhs,
+                                                     const Variable& rhs);
+
+  /**
+   * Matrix-scalar multiplication operator.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
+  friend SLEIPNIR_DLLEXPORT VariableMatrix operator*(const VariableMatrix& lhs,
                                                      double rhs);
+
+  /**
+   * Scalar-matrix multiplication operator.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
+  friend SLEIPNIR_DLLEXPORT VariableMatrix operator*(const Variable& lhs,
+                                                     const VariableMatrix& rhs);
 
   /**
    * Scalar-matrix multiplication operator.
