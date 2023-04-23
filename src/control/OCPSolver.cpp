@@ -23,7 +23,7 @@ OCPSolver::OCPSolver(int numStates, int numInputs,
   if (m_timestepMethod == TimestepMethod::kFixed) {
     m_DT = VariableMatrix(1, m_numSteps + 1);
     for (int i = 0; i < numSteps + 1; ++i) {
-      m_DT(0, i) = Variable(MakeConstant(m_dt.count()));
+      m_DT(0, i) = Constant(m_dt.count());
     }
   } else if (m_timestepMethod == TimestepMethod::kVariableSingle) {
     Variable DT = DecisionVariable(1, 1)(0, 0);

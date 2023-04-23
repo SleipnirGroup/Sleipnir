@@ -41,8 +41,8 @@ TEST(OCPSolverTest, Robot) {
       sleipnir::TranscriptionMethod::kDirectTranscription);
   // Seed the min time formulation with lerp between waypoints
   for (int i = 0; i < N + 1; ++i) {
-    solverMinTime.X()(0, i) = ((double)i)/(N+1);
-    solverMinTime.X()(1, i) = ((double)i)/(N+1);
+    solverMinTime.X()(0, i) = static_cast<double>(i) / (N + 1);
+    solverMinTime.X()(1, i) = static_cast<double>(i) / (N + 1);
   }
   solverMinTime.ConstrainInitialState(initialState);
   solverMinTime.ConstrainFinalState(finalState);
@@ -51,12 +51,13 @@ TEST(OCPSolverTest, Robot) {
   solverMinTime.SetMaxTimestep(std::chrono::duration<double>(3.0));
   // todo solver is unhappy when more than one minimum timestep is constrained
   // either detect this in OptimizationProblem or in OCPSolver
-  solverMinTime.SetMinTimestep(std::chrono::duration<double>(minTimestep.value()));
+  solverMinTime.SetMinTimestep(
+      std::chrono::duration<double>(minTimestep.value()));
 
   // Set up objective
-  sleipnir::VariableMatrix ones(N+1, 1);
-  sleipnir::Variable one{sleipnir::MakeConstant(1.0)};
-  for (int i = 0; i < N+1; ++i) {
+  sleipnir::VariableMatrix ones(N + 1, 1);
+  sleipnir::Variable one = sleipnir::Constant(1.0);
+  for (int i = 0; i < N + 1; ++i) {
     ones(i, 0) = one;
   }
   auto J = solverMinTime.DT() * ones;
@@ -68,7 +69,8 @@ TEST(OCPSolverTest, Robot) {
   fmt::print("Setup time: {} ms\n\n",
              duration_cast<microseconds>(end1 - start).count() / 1000.0);
 
-  auto status = solverMinTime.Solve({.maxIterations = 1000, .diagnostics = true});
+  auto status =
+      solverMinTime.Solve({.maxIterations = 1000, .diagnostics = true});
 
   EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.costFunctionType);
   EXPECT_EQ(sleipnir::ExpressionType::kNonlinear,

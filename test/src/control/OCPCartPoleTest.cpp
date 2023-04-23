@@ -207,7 +207,8 @@ TEST(OCPSolverTest, CartPoleProblem) {
 
   sleipnir::OCPSolver problem(
       4, 1, std::chrono::duration<double>(dt.value()), N, dynamicsFunction,
-      sleipnir::DynamicsType::kExplicitODE, sleipnir::TimestepMethod::kVariableSingle,
+      sleipnir::DynamicsType::kExplicitODE,
+      sleipnir::TimestepMethod::kVariableSingle,
       sleipnir::TranscriptionMethod::kDirectCollocation);
 
   problem.ConstrainInitialState(
