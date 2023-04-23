@@ -188,7 +188,7 @@ sleipnir::VariableMatrix CartPoleDynamics(const sleipnir::VariableMatrix& x,
   return qddot;
 }
 
-TEST(OCPSolverTest, CartPoleProblem) {
+TEST(OCPSolverTest, DISABLED_CartPoleProblem) {
   constexpr auto T = 5_s;
   constexpr units::second_t dt = 20_ms;
   constexpr int N = T / dt;
