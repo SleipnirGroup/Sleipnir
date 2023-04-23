@@ -532,7 +532,8 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   Eigen::VectorXd s = Eigen::VectorXd::Ones(m_inequalityConstraints.size());
   VectorXvar sAD = VectorXvar::Ones(m_inequalityConstraints.size());
 
-  Eigen::VectorXd y = Eigen::VectorXd::Zero(m_equalityConstraints.size());
+  // Initialization of y is deferred
+  Eigen::VectorXd y;
   VectorXvar yAD = VectorXvar::Zero(m_equalityConstraints.size());
 
   Eigen::VectorXd z = Eigen::VectorXd::Ones(m_inequalityConstraints.size());
@@ -599,6 +600,45 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   //         [    ⋮    ]
   //         [∇ᵀcᵢₘ(x)ₖ]
   Eigen::SparseMatrix<double> A_i = jacobianCi.Calculate();
+
+  // Initialize y
+  //
+  //   [  I     Aₑᵀ(x₀)][w] = −[∇f(x₀)]
+  //   [Aₑ(x₀)     0   ][y]    [  0   ]
+  //
+  // See equation (36) of [2].
+  {
+    // Assign top-left quadrant
+    triplets.clear();
+    for (size_t row = 0; row < m_decisionVariables.size(); ++row) {
+      triplets.emplace_back(row, row, 1.0);
+    }
+    // Assign bottom-left quadrant
+    AssignSparseBlock(triplets, m_decisionVariables.size(), 0, A_e);
+    // Assign top-right quadrant
+    AssignSparseBlock(triplets, 0, m_decisionVariables.size(), A_e, true);
+
+    // [  I     Aₑᵀ(x₀)]
+    // [Aₑ(x₀)     0   ]
+    Eigen::SparseMatrix<double> lhs{x.rows() + A_e.rows(),
+                                    x.rows() + A_e.rows()};
+    lhs.setFromTriplets(triplets.begin(), triplets.end());
+
+    // −[∇f(x₀)]
+    //  [  0   ]
+    Eigen::VectorXd rhs{x.rows() + A_e.rows()};
+    rhs.block(0, 0, x.rows(), 1) = -g;
+    rhs.block(x.rows(), 0, A_e.rows(), 1).setZero();
+
+    y = Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>>{lhs}
+            .solve(rhs)
+            .block(x.rows(), 0, A_e.rows(), 1);
+    if (y.lpNorm<Eigen::Infinity>() > 1e3) {
+      y.setZero();
+    } else {
+      SetAD(yAD, y);
+    }
+  }
 
   auto iterationsStartTime = std::chrono::system_clock::now();
 
