@@ -343,6 +343,10 @@ SolverStatus OptimizationProblem::Solve(const SolverConfig& config) {
     } else if (status.exitCondition ==
                SolverExitCondition::kLocallyInfeasible) {
       fmt::print("problem is locally infeasible");
+    } else if (status.exitCondition == SolverExitCondition::kNumericalIssue) {
+      fmt::print(
+          "solver failed to reach the desired tolerance due to a numerical "
+          "issue");
     } else if (status.exitCondition == SolverExitCondition::kMaxIterations) {
       fmt::print("maximum iterations exceeded");
     } else if (status.exitCondition == SolverExitCondition::kTimeout) {
@@ -516,6 +520,9 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
 
   // Barrier parameter superlinear decrease power in "μ^(θ_μ)". Range of (1, 2).
   constexpr double theta_mu = 1.5;
+
+  // Barrier parameter minimum
+  double mu_min = m_config.tolerance / 10.0;
 
   // Barrier parameter μ
   double mu = 0.1;
@@ -1073,7 +1080,12 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       //
       // See section 3.9 of [2].
       if (allowedFullStepCounter == 2) {
-        break;
+        if (mu > mu_min) {
+          break;
+        } else {
+          status->exitCondition = SolverExitCondition::kNumericalIssue;
+          return x;
+        }
       }
     }
 
@@ -1083,8 +1095,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
     //
     // See equation (7) of [2].
     old_mu = mu;
-    mu = std::max(m_config.tolerance / 10.0,
-                  std::min(kappa_mu * mu, std::pow(mu, theta_mu)));
+    mu = std::max(mu_min, std::min(kappa_mu * mu, std::pow(mu, theta_mu)));
 
     // Update the fraction-to-the-boundary rule scaling factor.
     //

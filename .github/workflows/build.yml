@@ -8,6 +8,7 @@ concurrency:
 
 jobs:
   build-native:
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
