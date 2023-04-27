@@ -14,6 +14,8 @@ enum class SolverExitCondition {
   kTooFewDOFs,
   /// The solver determined the problem to be locally infeasible and gave up.
   kLocallyInfeasible,
+  /// The solver failed to reach the desired tolerance due to a numerical issue.
+  kNumericalIssue,
   /// The solver returned its solution so far after exceeding the maximum number
   /// of iterations.
   kMaxIterations,
