@@ -469,6 +469,8 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   //
   //   pₖᶻ = −Σcᵢ + μS⁻¹e − ΣAᵢpₖˣ
   //   pₖˢ = μZ⁻¹e − s − Σ⁻¹pₖᶻ
+  //       = μZ⁻¹e − s − (S⁻¹Z)⁻¹pₖᶻ
+  //       = μZ⁻¹e − s − Z⁻¹Spₖᶻ
   //
   // The iterates are applied like so
   //
@@ -928,9 +930,9 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       Eigen::VectorXd p_z =
           -sigma * c_i + mu * S.cwiseInverse() * e - sigma * A_i * p_x;
 
-      // pₖˢ = μZ⁻¹e − s − Σ⁻¹pₖᶻ
+      // pₖˢ = μZ⁻¹e − s − Z⁻¹Spₖᶻ
       Eigen::VectorXd p_s =
-          mu * Z.cwiseInverse() * e - s - S * Z.cwiseInverse() * p_z;
+          mu * Z.cwiseInverse() * e - s - Z.cwiseInverse() * S * p_z;
 
       FilterEntry currentFilterEntry;
 
@@ -979,10 +981,14 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
 
         p_x_soc = step.segment(0, x.rows());
         p_y_soc = -step.segment(x.rows(), y.rows());
+
+        // pₖᶻ = −Σcᵢ + μS⁻¹e − ΣAᵢpₖˣ
         p_z_soc =
             -sigma * c_i + mu * S.cwiseInverse() * e - sigma * A_i * p_x_soc;
+
+        // pₖˢ = μZ⁻¹e − s − Z⁻¹Spₖᶻ
         p_s_soc =
-            mu * Z.cwiseInverse() * e - s - sigma.cwiseInverse() * p_z_soc;
+            mu * Z.cwiseInverse() * e - s - Z.cwiseInverse() * S * p_z_soc;
       }
 
       while (!stepAcceptable) {
