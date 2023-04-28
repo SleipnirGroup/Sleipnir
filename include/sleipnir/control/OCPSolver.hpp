@@ -13,13 +13,12 @@
 namespace sleipnir {
 
 /**
- * @todo these typedefs are not picked up by doxygen correctly.
- *
  * Function representing an explicit or implicit ODE, or a discrete state
  * transition function.
+ *
  * - Explicit: dx/dt = f(t, x, u, *)
  * - Implicit: f(t, [x dx/dt]', u, *) = 0
- * - State transition: xₖ₊₁ = f(t, xₖ, u, dt)
+ * - State transition: xₖ₊₁ = f(t, xₖ, uₖ, dt)
  */
 using DynamicsFunction =
     std::function<VariableMatrix(const Variable&, const VariableMatrix&,
@@ -81,8 +80,6 @@ enum class TimestepMethod { kFixed, kVariable, kVariableSingle };
  * direct transcription, or single-shooting) and additional constraints can be
  * added.
  *
- * @todo expand this explanation more.
- *
  * In single-shooting, states depend explicitly as a function of all previous
  * states and all previous inputs. In direct transcription, each state is a
  * decision variable constrained to the integrated dynamics of the previous
@@ -93,10 +90,13 @@ enum class TimestepMethod { kFixed, kVariable, kVariableSingle };
  *
  * For explicit ODEs, the function must be in the form dx/dt = f(t, x, u).
  * For discrete state transition functions, the function must be in the form
- * xₖ₊₁ = f(t, xₖ, u).
+ * xₖ₊₁ = f(t, xₖ, uₖ).
  *
  * Direct collocation requires an explicit ODE. Direct transcription and
  * single-shooting can use either an ODE or state transition function.
+ *
+ * https://underactuated.mit.edu/trajopt.html goes into more detail on each
+ * transcription method.
  */
 class SLEIPNIR_DLLEXPORT OCPSolver : public OptimizationProblem {
  public:
