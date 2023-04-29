@@ -459,6 +459,9 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   // Barrier parameter superlinear decrease power in "μ^(θ_μ)". Range of (1, 2).
   constexpr double theta_mu = 1.5;
 
+  // Safety factor for the minimal step size
+  constexpr double alpha_min_frac = 0.05;
+
   // Barrier parameter minimum
   double mu_min = m_config.tolerance / 10.0;
 
@@ -941,7 +944,17 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
           filter.Add(std::move(entry));
           break;
         }
+
         alpha *= 0.5;
+
+        if (alpha < alpha_min_frac * 1e-5) {
+          if (mu > mu_min) {
+            break;
+          } else {
+            status->exitCondition = SolverExitCondition::kNumericalIssue;
+            return x;
+          }
+        }
       }
 
       // αₖᶻ = max(α ∈ (0, 1] : zₖ + αpₖᶻ ≥ (1−τⱼ)zₖ)
