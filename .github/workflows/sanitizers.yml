@@ -16,9 +16,10 @@ jobs:
           - name: asan
             cmake-flags: "-DCMAKE_BUILD_TYPE=Asan"
             ctest-env: ""
-          - name: tsan
-            cmake-flags: "-DCMAKE_BUILD_TYPE=Tsan"
-            ctest-env: "TSAN_OPTIONS=second_deadlock_stack=1"
+          # tsan takes a long time, and we don't currently use threading
+          #- name: tsan
+          #  cmake-flags: "-DCMAKE_BUILD_TYPE=Tsan"
+          #  ctest-env: "TSAN_OPTIONS=second_deadlock_stack=1"
           - name: ubsan
             cmake-flags: "-DCMAKE_BUILD_TYPE=Ubsan"
             ctest-env: ""
