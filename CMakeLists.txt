@@ -75,6 +75,9 @@ target_compile_definitions(Sleipnir PRIVATE SLEIPNIR_EXPORTS)
 
 include(FetchContent)
 
+# Disable Eigen's Fortran compiler check, which takes a long time in Windows CI
+set(CMAKE_Fortran_COMPILER "" CACHE STRING "" FORCE)
+
 # Eigen dependency
 FetchContent_Declare(
   Eigen3
