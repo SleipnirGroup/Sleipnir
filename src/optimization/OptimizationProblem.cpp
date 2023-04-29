@@ -878,71 +878,104 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       double alpha_max = FractionToTheBoundaryRule(s, p_s, tau);
       double alpha = alpha_max;
 
-      // Apply second-order corrections. See section 2.4 of [2].
-      Eigen::VectorXd p_x_soc = p_x;
-      Eigen::VectorXd p_s_soc = p_s;
-      Eigen::VectorXd p_y_soc, p_z_soc;
-      for (int soc_iteration = 0; soc_iteration < 5; ++soc_iteration) {
-        double alpha_soc = FractionToTheBoundaryRule(s, p_s_soc, tau);
-        Eigen::VectorXd x_soc = x + alpha_soc * p_x_soc;
-        Eigen::VectorXd s_soc = s + alpha_soc * p_s_soc;
-        SetAD(xAD, x_soc);
-        SetAD(sAD, s_soc);
-        graphL.Update();
-        c_e = GetAD(m_equalityConstraints);
-        c_i = GetAD(m_inequalityConstraints);
-
-        FilterEntry entry{m_f.value(), mu, s_soc, c_e, c_i};
-        if (filter.IsAcceptable(entry)) {
-          p_x = p_x_soc;
-          p_s = p_s_soc;
-          alpha = alpha_soc;
-          stepAcceptable = true;
-          filter.Add(std::move(entry));
-          break;
-        }
-
-        // Rebuild Newton-KKT rhs with updated constraint values.
-        rhs.topRows(x.rows()) = g;
-        if (m_equalityConstraints.size() > 0) {
-          rhs.topRows(x.rows()) -= A_e.transpose() * y;
-        }
-        if (m_inequalityConstraints.size() > 0) {
-          rhs.topRows(x.rows()) +=
-              A_i.transpose() *
-              (SparseDiagonal(s_soc).cwiseInverse() * (Z * c_i - mu * e) - z);
-        }
-        rhs.bottomRows(y.rows()) = c_e;
-
-        // Solve the Newton-KKT system
-        step = solver.Solve(-rhs);
-
-        p_x_soc = step.segment(0, x.rows());
-        p_y_soc = -step.segment(x.rows(), y.rows());
-
-        // pₖᶻ = −Σcᵢ + μS⁻¹e − ΣAᵢpₖˣ
-        p_z_soc =
-            -sigma * c_i + mu * S.cwiseInverse() * e - sigma * A_i * p_x_soc;
-
-        // pₖˢ = μZ⁻¹e − s − Z⁻¹Spₖᶻ
-        p_s_soc =
-            mu * Z.cwiseInverse() * e - s - Z.cwiseInverse() * S * p_z_soc;
-      }
-
       while (!stepAcceptable) {
         Eigen::VectorXd trial_x = x + alpha * p_x;
         Eigen::VectorXd trial_s = s + alpha * p_s;
+
+        double alpha_z = FractionToTheBoundaryRule(z, p_z, tau);
+        Eigen::VectorXd trial_y = y + alpha_z * p_y;
+        Eigen::VectorXd trial_z = z + alpha_z * p_z;
+
         SetAD(xAD, trial_x);
+        SetAD(yAD, trial_y);
+        SetAD(zAD, trial_z);
         SetAD(sAD, trial_s);
         graphL.Update();
 
-        c_e = GetAD(m_equalityConstraints);
-        c_i = GetAD(m_inequalityConstraints);
+        Eigen::VectorXd trial_c_e = GetAD(m_equalityConstraints);
+        Eigen::VectorXd trial_c_i = GetAD(m_inequalityConstraints);
 
-        FilterEntry entry{m_f.value(), mu, trial_s, c_e, c_i};
+        FilterEntry entry{m_f.value(), mu, trial_s, trial_c_e, trial_c_i};
         if (filter.IsAcceptable(entry)) {
+          stepAcceptable = true;
           filter.Add(std::move(entry));
-          break;
+          continue;
+        }
+
+        double prevConstraintViolation =
+            c_e.lpNorm<1>() + (c_i - s).lpNorm<1>();
+        double nextConstraintViolation =
+            trial_c_e.lpNorm<1>() + (trial_c_i - trial_s).lpNorm<1>();
+
+        // If first trial point was rejected and constraint violation stayed the
+        // same or went up, apply second-order corrections
+        if (nextConstraintViolation >= prevConstraintViolation) {
+          // Apply second-order corrections. See section 2.4 of [2].
+          Eigen::VectorXd p_x_cor = p_x;
+          Eigen::VectorXd p_y_soc = p_y;
+          Eigen::VectorXd p_z_soc = p_z;
+          Eigen::VectorXd p_s_soc = p_s;
+
+          double alpha_soc = alpha;
+          Eigen::VectorXd c_e_soc = c_e;
+
+          for (int soc_iteration = 0; soc_iteration < 5 && !stepAcceptable;
+               ++soc_iteration) {
+            // Rebuild Newton-KKT rhs with updated constraint values.
+            //
+            // rhs = −[∇f − Aₑᵀy + Aᵢᵀ(S⁻¹(Zcᵢ − μe) − z)]
+            //        [              cₑˢᵒᶜ               ]
+            //
+            // where cₑˢᵒᶜ = αc(xₖ) + c(xₖ + αp_x)
+            //
+            // The outer negative sign is applied in the solve() call.
+            c_e_soc = alpha_soc * c_e_soc + trial_c_e;
+            rhs.bottomRows(y.rows()) = c_e_soc;
+
+            // Solve the Newton-KKT system
+            step = solver.Solve(-rhs);
+
+            p_x_cor = step.segment(0, x.rows());
+            p_y_soc = -step.segment(x.rows(), y.rows());
+
+            // pₖᶻ = −Σcᵢ + μS⁻¹e − ΣAᵢpₖˣ
+            p_z_soc = -sigma * c_i + mu * S.cwiseInverse() * e -
+                      sigma * A_i * p_x_cor;
+
+            // pₖˢ = μZ⁻¹e − s − Z⁻¹Spₖᶻ
+            p_s_soc =
+                mu * Z.cwiseInverse() * e - s - Z.cwiseInverse() * S * p_z_soc;
+
+            alpha_soc = FractionToTheBoundaryRule(s, p_s_soc, tau);
+            trial_x = x + alpha_soc * p_x_cor;
+            trial_s = s + alpha_soc * p_s_soc;
+
+            // αₖᶻ = max(α ∈ (0, 1] : zₖ + αpₖᶻ ≥ (1−τⱼ)zₖ)
+            alpha_z = FractionToTheBoundaryRule(z, p_z_soc, tau);
+            trial_y = y + alpha_z * p_y_soc;
+            trial_z = z + alpha_z * p_z_soc;
+
+            SetAD(xAD, trial_x);
+            SetAD(yAD, trial_y);
+            SetAD(zAD, trial_z);
+            SetAD(sAD, trial_s);
+            graphL.Update();
+
+            trial_c_e = GetAD(m_equalityConstraints);
+            trial_c_i = GetAD(m_inequalityConstraints);
+
+            entry = FilterEntry{m_f.value(), mu, trial_s, trial_c_e, trial_c_i};
+            if (filter.IsAcceptable(entry)) {
+              p_x = p_x_cor;
+              p_y = p_y_soc;
+              p_z = p_z_soc;
+              p_s = p_s_soc;
+              alpha = alpha_soc;
+              stepAcceptable = true;
+              filter.Add(std::move(entry));
+              break;
+            }
+          }
         }
 
         alpha *= 0.5;
@@ -956,9 +989,6 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
           }
         }
       }
-
-      // αₖᶻ = max(α ∈ (0, 1] : zₖ + αpₖᶻ ≥ (1−τⱼ)zₖ)
-      double alpha_z = FractionToTheBoundaryRule(z, p_z, tau);
 
       // Handle very small search directions by letting αₖ = αₖᵐᵃˣ when
       // max(|pₖˣ(i)|/(1 + |xₖ(i)|)) < 10ε_mach.
@@ -975,6 +1005,9 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       } else {
         allowedFullStepCounter = 0;
       }
+
+      // αₖᶻ = max(α ∈ (0, 1] : zₖ + αpₖᶻ ≥ (1−τⱼ)zₖ)
+      double alpha_z = FractionToTheBoundaryRule(z, p_z, tau);
 
       // xₖ₊₁ = xₖ + αₖpₖˣ
       // sₖ₊₁ = xₖ + αₖpₖˢ

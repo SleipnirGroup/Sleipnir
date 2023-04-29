@@ -110,15 +110,14 @@ class Filter {
   bool IsAcceptable(const FilterEntry& entry) {
     // If current filter entry is better than all prior ones in some respect,
     // accept it
-    return std::all_of(m_filter.begin(), m_filter.end(),
-                       [&](const auto& elem) {
-                         return entry.cost <=
-                                    elem.cost - kGammaObjective *
-                                                    elem.constraintViolation ||
-                                entry.constraintViolation <=
-                                    (1.0 - kGammaConstraint) *
-                                        elem.constraintViolation;
-                       }) &&
+    return std::all_of(
+               m_filter.begin(), m_filter.end(),
+               [&](const auto& elem) {
+                 return entry.cost <=
+                            elem.cost - kGammaCost * elem.constraintViolation ||
+                        entry.constraintViolation <=
+                            (1.0 - kGammaConstraint) * elem.constraintViolation;
+               }) &&
            entry.constraintViolation < m_maxConstraintViolation;
   }
 
@@ -127,8 +126,8 @@ class Filter {
 
   double m_maxConstraintViolation = 1e4;
 
-  static constexpr double kGammaObjective = 0.0;
-  static constexpr double kGammaConstraint = 0.0;
+  static constexpr double kGammaCost = 1e-8;
+  static constexpr double kGammaConstraint = 1e-5;
 };
 
 }  // namespace sleipnir
