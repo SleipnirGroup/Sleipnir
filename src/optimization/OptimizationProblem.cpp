@@ -68,6 +68,11 @@ Eigen::VectorXd GetAD(std::vector<Variable> src) {
   return dest;
 }
 
+/**
+ * Converts dense column vector into sparse diagonal matrix.
+ *
+ * @param src Column vector.
+ */
 Eigen::SparseMatrix<double> SparseDiagonal(const Eigen::VectorXd& src) {
   std::vector<Eigen::Triplet<double>> triplets;
   for (int row = 0; row < src.rows(); ++row) {
