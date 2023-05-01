@@ -788,10 +788,10 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       AssignSparseBlock(triplets, 0, 0, tmp);
       if (m_equalityConstraints.size() > 0) {
         // Assign bottom-left quadrant
-        AssignSparseBlock(triplets, tmp.rows(), 0, A_e);
+        AssignSparseBlock(triplets, H.rows(), 0, A_e);
 
         // Assign top-right quadrant
-        AssignSparseBlock(triplets, 0, tmp.rows(), A_e, true);
+        AssignSparseBlock(triplets, 0, H.rows(), A_e, true);
       }
       Eigen::SparseMatrix<double> lhs{H.rows() + A_e.rows(),
                                       H.cols() + A_e.rows()};
