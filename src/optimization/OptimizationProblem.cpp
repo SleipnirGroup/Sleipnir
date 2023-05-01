@@ -21,6 +21,7 @@
 #include "sleipnir/autodiff/Hessian.hpp"
 #include "sleipnir/autodiff/Jacobian.hpp"
 #include "sleipnir/autodiff/Variable.hpp"
+#include "sleipnir/optimization/SparseUtil.hpp"
 
 using namespace sleipnir;
 
@@ -69,21 +70,6 @@ Eigen::VectorXd GetAD(std::vector<Variable> src) {
 }
 
 /**
- * Converts dense column vector into sparse diagonal matrix.
- *
- * @param src Column vector.
- */
-Eigen::SparseMatrix<double> SparseDiagonal(const Eigen::VectorXd& src) {
-  std::vector<Eigen::Triplet<double>> triplets;
-  for (int row = 0; row < src.rows(); ++row) {
-    triplets.emplace_back(row, row, src(row));
-  }
-  Eigen::SparseMatrix<double> dest{src.rows(), src.rows()};
-  dest.setFromTriplets(triplets.begin(), triplets.end());
-  return dest;
-}
-
-/**
  * Applies fraction-to-the-boundary rule to a variable and its iterate, then
  * returns a fraction of the iterate step size within (0, 1].
  *
@@ -107,33 +93,6 @@ double FractionToTheBoundaryRule(const Eigen::Ref<const Eigen::VectorXd>& x,
   }
 
   return alpha;
-}
-
-/**
- * Adds a sparse matrix to the list of triplets with the given row and column
- * offset.
- *
- * @param[out] triplets The triplet storage.
- * @param[in] rowOffset The row offset for each triplet.
- * @param[in] colOffset The column offset for each triplet.
- * @param[in] mat The matrix to iterate over.
- * @param[in] transpose Whether to transpose mat.
- */
-void AssignSparseBlock(std::vector<Eigen::Triplet<double>>& triplets,
-                       int rowOffset, int colOffset,
-                       const Eigen::SparseMatrix<double>& mat,
-                       bool transpose = false) {
-  for (int k = 0; k < mat.outerSize(); ++k) {
-    for (Eigen::SparseMatrix<double>::InnerIterator it{mat, k}; it; ++it) {
-      if (transpose) {
-        triplets.emplace_back(rowOffset + it.col(), colOffset + it.row(),
-                              it.value());
-      } else {
-        triplets.emplace_back(rowOffset + it.row(), colOffset + it.col(),
-                              it.value());
-      }
-    }
-  }
 }
 
 /**
