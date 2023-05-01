@@ -462,13 +462,8 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   const Eigen::VectorXd e = Eigen::VectorXd::Ones(s.rows());
 
   // L(x, s, y, z)ₖ = f(x)ₖ − yₖᵀcₑ(x)ₖ − zₖᵀ(cᵢ(x)ₖ − sₖ)
-  Variable L = m_f.value();
-  if (m_equalityConstraints.size() > 0) {
-    L -= yAD.transpose() * c_eAD;
-  }
-  if (m_inequalityConstraints.size() > 0) {
-    L -= zAD.transpose() * (c_iAD - sAD);
-  }
+  Variable L =
+      m_f.value() - yAD.transpose() * c_eAD - zAD.transpose() * (c_iAD - sAD);
   ExpressionGraph graphL{L};
 
   Eigen::VectorXd step = Eigen::VectorXd::Zero(x.rows());
@@ -523,15 +518,15 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   //
   // See equation (36) of [2].
   {
-    // Assign top-left quadrant
     triplets.clear();
-    for (size_t row = 0; row < m_decisionVariables.size(); ++row) {
-      triplets.emplace_back(row, row, 1.0);
-    }
+    // Assign top-left quadrant
+    AssignSparseBlock(
+        triplets, 0, 0,
+        SparseIdentity(m_decisionVariables.size(), m_decisionVariables.size()));
     // Assign bottom-left quadrant
     AssignSparseBlock(triplets, m_decisionVariables.size(), 0, A_e);
     // Assign top-right quadrant
-    AssignSparseBlock(triplets, 0, m_decisionVariables.size(), A_e, true);
+    AssignSparseBlock(triplets, 0, m_decisionVariables.size(), A_e.transpose());
 
     // [  I     Aₑᵀ(x₀)]
     // [Aₑ(x₀)     0   ]
@@ -696,19 +691,12 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       // lhs = [H + AᵢᵀΣAᵢ  Aₑᵀ]
       //       [    Aₑ       0 ]
       triplets.clear();
-      Eigen::SparseMatrix<double> tmp = H;
-      if (m_inequalityConstraints.size() > 0) {
-        tmp += A_i.transpose() * sigma * A_i;
-      }
       // Assign top-left quadrant
-      AssignSparseBlock(triplets, 0, 0, tmp);
-      if (m_equalityConstraints.size() > 0) {
-        // Assign bottom-left quadrant
-        AssignSparseBlock(triplets, H.rows(), 0, A_e);
-
-        // Assign top-right quadrant
-        AssignSparseBlock(triplets, 0, H.rows(), A_e, true);
-      }
+      AssignSparseBlock(triplets, 0, 0, H + A_i.transpose() * sigma * A_i);
+      // Assign bottom-left quadrant
+      AssignSparseBlock(triplets, H.rows(), 0, A_e);
+      // Assign top-right quadrant
+      AssignSparseBlock(triplets, 0, H.rows(), A_e.transpose());
       Eigen::SparseMatrix<double> lhs{H.rows() + A_e.rows(),
                                       H.cols() + A_e.rows()};
       lhs.setFromTriplets(triplets.begin(), triplets.end());
@@ -718,15 +706,10 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       //
       // The outer negative sign is applied in the solve() call.
       Eigen::VectorXd rhs{x.rows() + y.rows()};
-      rhs.topRows(x.rows()) = g;
-      if (m_equalityConstraints.size() > 0) {
-        rhs.topRows(x.rows()) -= A_e.transpose() * y;
-      }
-      if (m_inequalityConstraints.size() > 0) {
-        rhs.topRows(x.rows()) +=
-            A_i.transpose() * (S.cwiseInverse() * (Z * c_i - mu * e) - z);
-      }
-      rhs.bottomRows(y.rows()) = c_e;
+      rhs.segment(0, x.rows()) =
+          g - A_e.transpose() * y +
+          A_i.transpose() * (S.cwiseInverse() * (Z * c_i - mu * e) - z);
+      rhs.segment(x.rows(), y.rows()) = c_e;
 
       // Solve the Newton-KKT system
       solver.Compute(lhs, m_equalityConstraints.size(), mu);
@@ -1074,15 +1057,9 @@ double OptimizationProblem::ErrorEstimate(
 
   const Eigen::VectorXd e = Eigen::VectorXd::Ones(s.rows());
 
-  Eigen::VectorXd eq1 = g;
-  if (m_equalityConstraints.size() > 0) {
-    eq1 -= A_e.transpose() * y;
-  }
-  if (m_inequalityConstraints.size() > 0) {
-    eq1 -= A_i.transpose() * z;
-  }
-
-  double E_mu = std::max(eq1.lpNorm<Eigen::Infinity>() / s_d,
+  double E_mu = std::max((g - A_e.transpose() * y - A_i.transpose() * z)
+                                 .lpNorm<Eigen::Infinity>() /
+                             s_d,
                          (S * z - mu * e).lpNorm<Eigen::Infinity>() / s_c);
   if (m_equalityConstraints.size() > 0) {
     E_mu = std::max(E_mu, c_e.lpNorm<Eigen::Infinity>());

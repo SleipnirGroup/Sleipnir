@@ -10,6 +10,7 @@
 #include <Eigen/SparseCore>
 
 #include "Inertia.hpp"
+#include "sleipnir/optimization/SparseUtil.hpp"
 
 namespace sleipnir {
 
@@ -45,6 +46,8 @@ class RegularizedLDLT {
     double delta = 0.0;
     double gamma = 0.0;
 
+    size_t numDecisionVariables = lhs.rows() - numEqualityConstraints;
+
     Inertia idealInertia{lhs.rows() - numEqualityConstraints,
                          numEqualityConstraints, 0};
 
@@ -76,13 +79,12 @@ class RegularizedLDLT {
       //       [       Aₑ        −γI ]
       Eigen::SparseMatrix<double> regularization{lhs.rows(), lhs.cols()};
       m_triplets.clear();
-      for (size_t row = 0; row < lhs.rows() - numEqualityConstraints; ++row) {
-        m_triplets.emplace_back(row, row, delta);
-      }
-      for (int row = lhs.rows() - numEqualityConstraints; row < lhs.rows();
-           ++row) {
-        m_triplets.emplace_back(row, row, -gamma);
-      }
+      AssignSparseBlock(
+          m_triplets, 0, 0,
+          delta * SparseIdentity(numDecisionVariables, numDecisionVariables));
+      AssignSparseBlock(m_triplets, numDecisionVariables, numDecisionVariables,
+                        -gamma * SparseIdentity(numEqualityConstraints,
+                                                numEqualityConstraints));
       regularization.setFromTriplets(m_triplets.begin(), m_triplets.end());
       m_solver.compute(lhs + regularization);
 
