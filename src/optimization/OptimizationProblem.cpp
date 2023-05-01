@@ -25,6 +25,17 @@
 
 using namespace sleipnir;
 
+// Works cited:
+//
+// [1] Nocedal, J. and Wright, S. "Numerical Optimization", 2nd. ed., Ch. 19.
+//     Springer, 2006.
+// [2] Wächter, A. and Biegler, L. "On the implementation of an interior-point
+//     filter line-search algorithm for large-scale nonlinear programming",
+//     2005. http://cepac.cheme.cmu.edu/pasilectures/biegler/ipopt.pdf
+// [3] Byrd, R. and Nocedal J. and Waltz R. "KNITRO: An Integrated Package for
+//     Nonlinear Optimization", 2005.
+//     https://users.iems.northwestern.edu/~nocedal/PDFfiles/integrated.pdf
+
 namespace {
 
 /**
@@ -388,15 +399,6 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   //         = max(α ∈ (0, 1] : αpₖˢ ≥ −τⱼsₖ)
   //   αₖᶻ = max(α ∈ (0, 1] : zₖ + αpₖᶻ ≥ (1−τⱼ)zₖ)
   //       = max(α ∈ (0, 1] : αpₖᶻ ≥ −τⱼzₖ)
-  //
-  // [1] Nocedal, J. and Wright, S. "Numerical Optimization", 2nd. ed., Ch. 19.
-  //     Springer, 2006.
-  // [2] Wächter, A. and Biegler, L. "On the implementation of an interior-point
-  //     filter line-search algorithm for large-scale nonlinear programming",
-  //     2005. http://cepac.cheme.cmu.edu/pasilectures/biegler/ipopt.pdf
-  // [3] Byrd, R. and Nocedal J. and Waltz R. "KNITRO: An Integrated Package for
-  //     Nonlinear Optimization", 2005.
-  //     https://users.iems.northwestern.edu/~nocedal/PDFfiles/integrated.pdf
 
   auto solveStartTime = std::chrono::system_clock::now();
 
@@ -458,7 +460,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   MapVectorXvar c_iAD(m_inequalityConstraints.data(),
                       m_inequalityConstraints.size());
 
-  const Eigen::MatrixXd e = Eigen::VectorXd::Ones(s.rows());
+  const Eigen::VectorXd e = Eigen::VectorXd::Ones(s.rows());
 
   // L(x, s, y, z)ₖ = f(x)ₖ − yₖᵀcₑ(x)ₖ − zₖᵀ(cᵢ(x)ₖ − sₖ)
   Variable L = m_f.value();
@@ -665,102 +667,15 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       c_e = GetAD(m_equalityConstraints);
       c_i = GetAD(m_inequalityConstraints);
 
-      // Check for problem local infeasibility. The problem is locally
-      // infeasible if
-      //
-      //   Aₑᵀcₑ → 0
-      //   Aᵢᵀcᵢ⁺ → 0
-      //   ‖(cₑ, cᵢ⁺)‖ > ε
-      //
-      // where cᵢ⁺ = min(cᵢ, 0).
-      //
-      // See "Infeasibility detection" in section 6 of [3].
-      //
-      // cᵢ⁺ is used instead of cᵢ⁻ from the paper to follow the convention that
-      // feasible inequality constraints are ≥ 0.
-      if (m_equalityConstraints.size() > 0 &&
-          (A_e.transpose() * c_e).norm() < 1e-6 && c_e.norm() > 1e-2) {
-        if (m_config.diagnostics) {
-          fmt::print(
-              "The problem is locally infeasible due to violated equality "
-              "constraints.\n");
-          fmt::print(
-              "Violated constraints (cₑ(x) = 0) in order of declaration:\n");
-          for (int row = 0; row < c_e.rows(); ++row) {
-            if (c_e(row) < 0.0) {
-              fmt::print("  {}/{}: {} = 0\n", row + 1, c_e.rows(), c_e(row));
-            }
-          }
-        }
-
+      // Check for local infeasibility
+      if (!IsLocallyFeasible(A_e, c_e, A_i, c_i)) {
         status->exitCondition = SolverExitCondition::kLocallyInfeasible;
         return x;
       }
-      if (m_inequalityConstraints.size() > 0) {
-        Eigen::VectorXd c_i_plus = c_i.cwiseMin(0.0);
-        if ((A_i.transpose() * c_i_plus).norm() < 1e-6 &&
-            c_i_plus.norm() > 1e-6) {
-          if (m_config.diagnostics) {
-            fmt::print(
-                "The problem is infeasible due to violated inequality "
-                "constraints.\n");
-            fmt::print(
-                "Violated constraints (cᵢ(x) ≥ 0) in order of declaration:\n");
-            for (int row = 0; row < c_i.rows(); ++row) {
-              if (c_i(row) < 0.0) {
-                fmt::print("  {}/{}: {} ≥ 0\n", row + 1, c_i.rows(), c_i(row));
-              }
-            }
-          }
 
-          status->exitCondition = SolverExitCondition::kLocallyInfeasible;
-          return x;
-        }
-      }
-
-      // s_d = max(sₘₐₓ, (‖y‖₁ + ‖z‖₁) / (m + n)) / sₘₐₓ
-      constexpr double s_max = 100.0;
-      double s_d = std::max(s_max, (y.lpNorm<1>() + z.lpNorm<1>()) /
-                                       (m_equalityConstraints.size() +
-                                        m_inequalityConstraints.size())) /
-                   s_max;
-
-      // s_c = max(sₘₐₓ, ‖z‖₁ / n) / sₘₐₓ
-      double s_c =
-          std::max(s_max, z.lpNorm<1>() / m_inequalityConstraints.size()) /
-          s_max;
-
-      // Update the error estimate using the KKT conditions from equations
-      // (19.5a) through (19.5d) of [1].
-      //
-      //   ∇f − Aₑᵀy − Aᵢᵀz = 0
-      //   Sz − μe = 0
-      //   cₑ = 0
-      //   cᵢ − s = 0
-      //
-      // The error tolerance is the max of the following infinity norms scaled
-      // by s_d and s_c (see equation (5) of [2]).
-      //
-      //   ‖∇f − Aₑᵀy − Aᵢᵀz‖_∞ / s_d
-      //   ‖Sz − μe‖_∞ / s_c
-      //   ‖cₑ‖_∞
-      //   ‖cᵢ − s‖_∞
-      Eigen::VectorXd eq1 = g;
-      if (m_equalityConstraints.size() > 0) {
-        eq1 -= A_e.transpose() * y;
-      }
-      if (m_inequalityConstraints.size() > 0) {
-        eq1 -= A_i.transpose() * z;
-      }
-      E_mu = std::max(eq1.lpNorm<Eigen::Infinity>() / s_d,
-                      (S * z - old_mu * e).lpNorm<Eigen::Infinity>() / s_c);
-      if (m_equalityConstraints.size() > 0) {
-        E_mu = std::max(E_mu, c_e.lpNorm<Eigen::Infinity>());
-      }
-      if (m_inequalityConstraints.size() > 0) {
-        E_mu = std::max(E_mu, (c_i - s).lpNorm<Eigen::Infinity>());
-      }
-
+      // If the error estimate is below the desired threshold for this barrier
+      // parameter value, break out of the loop so it's decreased further
+      E_mu = ErrorEstimate(g, A_e, c_e, A_i, c_i, s, S, y, z, old_mu);
       if (E_mu <= kappa_epsilon * old_mu) {
         break;
       }
@@ -1068,4 +983,115 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   }
 
   return x;
+}
+
+bool OptimizationProblem::IsLocallyFeasible(
+    const Eigen::SparseMatrix<double>& A_e, const Eigen::VectorXd& c_e,
+    const Eigen::SparseMatrix<double>& A_i, const Eigen::VectorXd& c_i) const {
+  // Check for problem local infeasibility. The problem is locally infeasible if
+  //
+  //   Aₑᵀcₑ → 0
+  //   Aᵢᵀcᵢ⁺ → 0
+  //   ‖(cₑ, cᵢ⁺)‖ > ε
+  //
+  // where cᵢ⁺ = min(cᵢ, 0).
+  //
+  // See "Infeasibility detection" in section 6 of [3].
+  //
+  // cᵢ⁺ is used instead of cᵢ⁻ from the paper to follow the convention that
+  // feasible inequality constraints are ≥ 0.
+
+  if (m_equalityConstraints.size() > 0 &&
+      (A_e.transpose() * c_e).norm() < 1e-6 && c_e.norm() > 1e-2) {
+    if (m_config.diagnostics) {
+      fmt::print(
+          "The problem is locally infeasible due to violated equality "
+          "constraints.\n");
+      fmt::print("Violated constraints (cₑ(x) = 0) in order of declaration:\n");
+      for (int row = 0; row < c_e.rows(); ++row) {
+        if (c_e(row) < 0.0) {
+          fmt::print("  {}/{}: {} = 0\n", row + 1, c_e.rows(), c_e(row));
+        }
+      }
+    }
+
+    return false;
+  }
+
+  if (m_inequalityConstraints.size() > 0) {
+    Eigen::VectorXd c_i_plus = c_i.cwiseMin(0.0);
+    if ((A_i.transpose() * c_i_plus).norm() < 1e-6 && c_i_plus.norm() > 1e-6) {
+      if (m_config.diagnostics) {
+        fmt::print(
+            "The problem is infeasible due to violated inequality "
+            "constraints.\n");
+        fmt::print(
+            "Violated constraints (cᵢ(x) ≥ 0) in order of declaration:\n");
+        for (int row = 0; row < c_i.rows(); ++row) {
+          if (c_i(row) < 0.0) {
+            fmt::print("  {}/{}: {} ≥ 0\n", row + 1, c_i.rows(), c_i(row));
+          }
+        }
+      }
+
+      return false;
+    }
+  }
+
+  return true;
+}
+
+double OptimizationProblem::ErrorEstimate(
+    const Eigen::VectorXd& g, const Eigen::SparseMatrix<double>& A_e,
+    const Eigen::VectorXd& c_e, const Eigen::SparseMatrix<double>& A_i,
+    const Eigen::VectorXd& c_i, const Eigen::VectorXd& s,
+    const Eigen::SparseMatrix<double>& S, const Eigen::VectorXd& y,
+    const Eigen::VectorXd& z, double mu) const {
+  // Update the error estimate using the KKT conditions from equations (19.5a)
+  // through (19.5d) of [1].
+  //
+  //   ∇f − Aₑᵀy − Aᵢᵀz = 0
+  //   Sz − μe = 0
+  //   cₑ = 0
+  //   cᵢ − s = 0
+  //
+  // The error tolerance is the max of the following infinity norms scaled by
+  // s_d and s_c (see equation (5) of [2]).
+  //
+  //   ‖∇f − Aₑᵀy − Aᵢᵀz‖_∞ / s_d
+  //   ‖Sz − μe‖_∞ / s_c
+  //   ‖cₑ‖_∞
+  //   ‖cᵢ − s‖_∞
+
+  // s_d = max(sₘₐₓ, (‖y‖₁ + ‖z‖₁) / (m + n)) / sₘₐₓ
+  constexpr double s_max = 100.0;
+  double s_d = std::max(s_max, (y.lpNorm<1>() + z.lpNorm<1>()) /
+                                   (m_equalityConstraints.size() +
+                                    m_inequalityConstraints.size())) /
+               s_max;
+
+  // s_c = max(sₘₐₓ, ‖z‖₁ / n) / sₘₐₓ
+  double s_c =
+      std::max(s_max, z.lpNorm<1>() / m_inequalityConstraints.size()) / s_max;
+
+  const Eigen::VectorXd e = Eigen::VectorXd::Ones(s.rows());
+
+  Eigen::VectorXd eq1 = g;
+  if (m_equalityConstraints.size() > 0) {
+    eq1 -= A_e.transpose() * y;
+  }
+  if (m_inequalityConstraints.size() > 0) {
+    eq1 -= A_i.transpose() * z;
+  }
+
+  double E_mu = std::max(eq1.lpNorm<Eigen::Infinity>() / s_d,
+                         (S * z - mu * e).lpNorm<Eigen::Infinity>() / s_c);
+  if (m_equalityConstraints.size() > 0) {
+    E_mu = std::max(E_mu, c_e.lpNorm<Eigen::Infinity>());
+  }
+  if (m_inequalityConstraints.size() > 0) {
+    E_mu = std::max(E_mu, (c_i - s).lpNorm<Eigen::Infinity>());
+  }
+
+  return E_mu;
 }
