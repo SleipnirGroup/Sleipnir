@@ -39,6 +39,8 @@ sleipnir::VariableMatrix CartPoleDynamics(const sleipnir::VariableMatrix& x,
                                           const sleipnir::VariableMatrix& u) {
   // https://underactuated.mit.edu/acrobot.html#cart_pole
   //
+  // θ is CCW+ measured from negative y-axis.
+  //
   // q = [x, θ]ᵀ
   // q̇ = [ẋ, θ̇]ᵀ
   // u = f_x
@@ -58,8 +60,8 @@ sleipnir::VariableMatrix CartPoleDynamics(const sleipnir::VariableMatrix& x,
   //
   //     [1]
   // B = [0]
-  constexpr double m_c = (1_kg).value();        // Cart mass
-  constexpr double m_p = (0.3_kg).value();      // Pole mass
+  constexpr double m_c = (5_kg).value();        // Cart mass
+  constexpr double m_p = (0.5_kg).value();      // Pole mass
   constexpr double l = (0.5_m).value();         // Pole length
   constexpr double g = (9.806_mps_sq).value();  // Acceleration due to gravity
 
