@@ -435,7 +435,6 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
 
   // Barrier parameter μ
   double mu = 0.1;
-  double old_mu = mu;
 
   // Fraction-to-the-boundary rule scale factor τ
   double tau = tau_min;
@@ -673,10 +672,15 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
         return x;
       }
 
+      // Hₖ = ∇²ₓₓL(x, s, y, z)ₖ
+      H = hessianL.Calculate();
+
+      g = gradientF.Calculate();
+
       // If the error estimate is below the desired threshold for this barrier
       // parameter value, break out of the loop so it's decreased further
-      E_mu = ErrorEstimate(g, A_e, c_e, A_i, c_i, s, S, y, z, old_mu);
-      if (E_mu <= kappa_epsilon * old_mu) {
+      E_mu = ErrorEstimate(g, A_e, c_e, A_i, c_i, s, S, y, z, mu);
+      if (E_mu <= kappa_epsilon * mu) {
         break;
       }
 
@@ -688,9 +692,6 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
 
       // Σ = S⁻¹Z
       Eigen::SparseMatrix<double> sigma = S.cwiseInverse() * Z;
-
-      // Hₖ = ∇²ₓₓL(x, s, y, z)ₖ
-      H = hessianL.Calculate();
 
       // lhs = [H + AᵢᵀΣAᵢ  Aₑᵀ]
       //       [    Aₑ       0 ]
@@ -711,8 +712,6 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       Eigen::SparseMatrix<double> lhs{H.rows() + A_e.rows(),
                                       H.cols() + A_e.rows()};
       lhs.setFromTriplets(triplets.begin(), triplets.end());
-
-      g = gradientF.Calculate();
 
       // rhs = −[∇f − Aₑᵀy + Aᵢᵀ(S⁻¹(Zcᵢ − μe) − z)]
       //        [                cₑ                ]
@@ -962,7 +961,6 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
     //   μⱼ₊₁ = max(εₜₒₗ/10, min(κ_μ μⱼ, μⱼ^θ_μ))
     //
     // See equation (7) of [2].
-    old_mu = mu;
     mu = std::max(mu_min, std::min(kappa_mu * mu, std::pow(mu, theta_mu)));
 
     // Update the fraction-to-the-boundary rule scaling factor.
