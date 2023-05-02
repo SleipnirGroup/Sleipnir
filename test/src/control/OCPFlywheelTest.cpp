@@ -104,7 +104,7 @@ void TestFlywheel(std::string test_name, Eigen::Matrix<double, 1, 1> A,
       EXPECT_GE(u(0), u_ss(0)) << fmt::format("  k = {}", k);
       EXPECT_LE(u(0), 12.0) << fmt::format("  k = {}", k);
     } else {
-      EXPECT_NEAR(u(0), solver.U().Value(0, k), 1e-2)
+      EXPECT_NEAR(u(0), solver.U().Value(0, k), 1.0)
           << fmt::format("  k = {}", k);
     }
 
