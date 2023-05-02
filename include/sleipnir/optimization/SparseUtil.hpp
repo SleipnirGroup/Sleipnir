@@ -17,6 +17,14 @@ namespace sleipnir {
 Eigen::SparseMatrix<double> SparseDiagonal(const Eigen::VectorXd& src);
 
 /**
+ * Returns sparse identity matrix.
+ *
+ * @param rows Number of rows.
+ * @param cols Number of columns.
+ */
+Eigen::SparseMatrix<double> SparseIdentity(int rows, int cols);
+
+/**
  * Adds a sparse matrix to the list of triplets with the given row and column
  * offset.
  *
@@ -24,11 +32,9 @@ Eigen::SparseMatrix<double> SparseDiagonal(const Eigen::VectorXd& src);
  * @param[in] rowOffset The row offset for each triplet.
  * @param[in] colOffset The column offset for each triplet.
  * @param[in] mat The matrix to iterate over.
- * @param[in] transpose Whether to transpose mat.
  */
 void AssignSparseBlock(std::vector<Eigen::Triplet<double>>& triplets,
                        int rowOffset, int colOffset,
-                       const Eigen::SparseMatrix<double>& mat,
-                       bool transpose = false);
+                       const Eigen::SparseMatrix<double>& mat);
 
 }  // namespace sleipnir
