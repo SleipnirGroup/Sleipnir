@@ -146,6 +146,25 @@ VariableMatrix OptimizationProblem::DecisionVariable(int rows, int cols) {
   return vars;
 }
 
+VariableMatrix OptimizationProblem::SymmetricDecisionVariable(int rows) {
+  // An nxn symmetric matrix has (n² + n)/2 unique entries. The number of
+  // entries in the lower triangle is equal to the sum of the numbers 1 to n).
+  m_decisionVariables.reserve(m_decisionVariables.size() +
+                              (rows * rows + rows) / 2);
+
+  VariableMatrix vars{rows, rows};
+
+  for (int row = 0; row < rows; ++row) {
+    for (int col = 0; col <= row; ++col) {
+      m_decisionVariables.emplace_back(0.0);
+      vars(row, col) = m_decisionVariables.back();
+      vars(col, row) = m_decisionVariables.back();
+    }
+  }
+
+  return vars;
+}
+
 void OptimizationProblem::Minimize(const Variable& cost) {
   m_f = cost;
 }

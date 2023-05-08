@@ -225,6 +225,17 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
   [[nodiscard]] VariableMatrix DecisionVariable(int rows, int cols = 1);
 
   /**
+   * Create a symmetric matrix of decision variables in the optimization
+   * problem.
+   *
+   * Variable instances are reused across the diagonal, which helps reduce
+   * problem dimensionality.
+   *
+   * @param rows Number of matrix rows.
+   */
+  [[nodiscard]] VariableMatrix SymmetricDecisionVariable(int rows);
+
+  /**
    * Tells the solver to minimize the output of the given cost function.
    *
    * Note that this is optional. If only constraints are specified, the solver
