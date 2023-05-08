@@ -15,7 +15,15 @@ macro(sleipnir_compiler_flags target)
         ${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER_EQUAL "12")
       target_compile_options(${target} PRIVATE -Wno-array-bounds)
     endif()
-    if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" AND # Resolve an error with emscripten
+
+    # Disable warning false positive in fmt
+    if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" AND
+        ${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER_EQUAL "13")
+      target_compile_options(${target} PRIVATE -Wno-dangling-reference)
+    endif()
+
+    # Disable warning false positive from emscripten
+    if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" AND
         ${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER_EQUAL "3")
       target_compile_options(${target} PRIVATE -Wno-error=unused-but-set-variable)
     endif()
