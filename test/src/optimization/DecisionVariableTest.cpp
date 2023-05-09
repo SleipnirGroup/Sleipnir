@@ -171,3 +171,25 @@ TEST(DecisionVariableTest, DynamicMatrixInitAssign) {
     EXPECT_EQ(expectedResult, z.Value());
   }
 }
+
+TEST(DecisionVariableTest, SymmetricMatrix) {
+  sleipnir::OptimizationProblem problem;
+
+  // Matrix zero init
+  auto A = problem.SymmetricDecisionVariable(2);
+  EXPECT_DOUBLE_EQ(0.0, A.Value(0, 0));
+  EXPECT_DOUBLE_EQ(0.0, A.Value(0, 1));
+  EXPECT_DOUBLE_EQ(0.0, A.Value(1, 0));
+  EXPECT_DOUBLE_EQ(0.0, A.Value(1, 1));
+
+  // Assign to lower triangle
+  A(0, 0) = 1.0;
+  A(1, 0) = 2.0;
+  A(1, 1) = 3.0;
+
+  // Confirm whole matrix changed
+  EXPECT_DOUBLE_EQ(1.0, A.Value(0, 0));
+  EXPECT_DOUBLE_EQ(2.0, A.Value(0, 1));
+  EXPECT_DOUBLE_EQ(2.0, A.Value(1, 0));
+  EXPECT_DOUBLE_EQ(3.0, A.Value(1, 1));
+}
