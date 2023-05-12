@@ -82,7 +82,7 @@ set(CMAKE_Fortran_COMPILER "" CACHE STRING "" FORCE)
 FetchContent_Declare(
   Eigen3
   GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
-  GIT_TAG        3.4.0
+  GIT_TAG        2709f4c8fbbe71a5383de1ba27e9833f218a642d
 )
 FetchContent_MakeAvailable(Eigen3)
 
