@@ -16,10 +16,10 @@ macro(sleipnir_compiler_flags target)
       target_compile_options(${target} PRIVATE -Wno-array-bounds)
     endif()
 
-    # Disable warning false positive in fmt
+    # Disable warning false positives in fmt
     if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" AND
         ${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER_EQUAL "13")
-      target_compile_options(${target} PRIVATE -Wno-dangling-reference)
+      target_compile_options(${target} PRIVATE -Wno-dangling-reference -Wno-stringop-overflow)
     endif()
 
     # Disable warning false positive from emscripten
