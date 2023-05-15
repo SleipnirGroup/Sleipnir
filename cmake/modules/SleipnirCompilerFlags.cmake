@@ -16,16 +16,16 @@ macro(sleipnir_compiler_flags target)
       target_compile_options(${target} PRIVATE -Wno-array-bounds)
     endif()
 
+    # Disable deprecated-anon-enum-enum-conversion warning in Eigen
+    if (${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang" AND
+        ${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER_EQUAL "13")
+      target_compile_options(${target} PRIVATE -Wno-deprecated-anon-enum-enum-conversion)
+    endif()
+
     # Disable warning false positives in fmt
     if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" AND
         ${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER_EQUAL "13")
       target_compile_options(${target} PRIVATE -Wno-dangling-reference -Wno-stringop-overflow)
-    endif()
-
-    # Disable warning false positive from emscripten
-    if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" AND
-        ${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER_EQUAL "3")
-      target_compile_options(${target} PRIVATE -Wno-error=unused-but-set-variable)
     endif()
   else()
     target_compile_options(${target} PRIVATE /wd4146 /wd4244 /wd4251 /wd4267 /WX)

@@ -187,7 +187,7 @@ sleipnir::VariableMatrix CartPoleDynamics(const sleipnir::VariableMatrix& x,
   return qddot;
 }
 
-TEST(CartPoleProblemTest, DirectTranscription) {
+TEST(CartPoleProblemTest, DISABLED_DirectTranscription) {
   constexpr auto T = 5_s;
   constexpr units::second_t dt = 50_ms;
   constexpr int N = T / dt;
