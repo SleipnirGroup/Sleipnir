@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <fstream>
+#include <functional>
 #include <optional>
 #include <utility>
 #include <vector>
@@ -14,6 +16,7 @@
 #include "sleipnir/autodiff/VariableMatrix.hpp"
 #include "sleipnir/optimization/Constraints.hpp"
 #include "sleipnir/optimization/SolverConfig.hpp"
+#include "sleipnir/optimization/SolverIterationInfo.hpp"
 #include "sleipnir/optimization/SolverStatus.hpp"
 
 namespace sleipnir {
@@ -321,6 +324,13 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
    */
   SolverStatus Solve(const SolverConfig& config = kDefaultConfig);
 
+  /**
+   * Sets a callback to be called at each solver iteration.
+   *
+   * @param callback The callback.
+   */
+  void Callback(std::function<void(const SolverIterationInfo&)> callback);
+
  private:
   // GCC incorrectly applies C++14 rules for const static data members, so an
   // initializer is required here.
@@ -341,6 +351,14 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
   std::vector<Variable> m_inequalityConstraints;
 
   SolverConfig m_config;
+
+  // Sparsity pattern files written when spy flag is set in SolverConfig
+  std::ofstream m_H_spy;
+  std::ofstream m_A_e_spy;
+  std::ofstream m_A_i_spy;
+
+  std::function<void(const SolverIterationInfo&)> m_callback =
+      [](const SolverIterationInfo&) {};
 
   /**
   Find the optimal solution to the nonlinear program using an interior-point

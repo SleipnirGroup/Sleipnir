@@ -283,6 +283,12 @@ SolverStatus OptimizationProblem::Solve(const SolverConfig& config) {
     m_f = 0.0;
   }
 
+  if (config.spy) {
+    m_A_e_spy.open("A_e.spy");
+    m_A_i_spy.open("A_i.spy");
+    m_H_spy.open("H.spy");
+  }
+
   // Solve the optimization problem
   Eigen::VectorXd solution = InteriorPoint(x, &status);
 
@@ -311,6 +317,11 @@ SolverStatus OptimizationProblem::Solve(const SolverConfig& config) {
   SetAD(m_decisionVariables, solution);
 
   return status;
+}
+
+void OptimizationProblem::Callback(
+    std::function<void(const SolverIterationInfo&)> callback) {
+  m_callback = callback;
 }
 
 Eigen::VectorXd OptimizationProblem::InteriorPoint(
@@ -710,6 +721,22 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       H = hessianL.Calculate();
 
       g = gradientF.Calculate();
+
+      if (m_config.spy) {
+        // Gap between sparsity patterns
+        if (iterations > 0) {
+          m_A_e_spy << "\n";
+          m_A_i_spy << "\n";
+          m_H_spy << "\n";
+        }
+
+        Spy(m_H_spy, H);
+        Spy(m_A_e_spy, A_e);
+        Spy(m_A_i_spy, A_i);
+      }
+
+      // Call user callback
+      m_callback({iterations, g, H, A_e, A_i});
 
       // If the error estimate is below the desired threshold for this barrier
       // parameter value, break out of the loop so it's decreased further

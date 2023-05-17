@@ -18,3 +18,5 @@ compile_commands.json
 # clangd cache
 .clangd/
 .cache/
+
+*.spy
