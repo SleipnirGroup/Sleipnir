@@ -9,7 +9,6 @@
 #include <limits>
 #include <string>
 
-#include <Eigen/SparseCore>
 #include <fmt/core.h>
 
 #include "Filter.hpp"

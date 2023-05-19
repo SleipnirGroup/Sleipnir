@@ -7,6 +7,7 @@
 #include <vector>
 
 #include <Eigen/Core>
+#include <Eigen/SparseCore>
 
 #include "sleipnir/SymbolExports.hpp"
 #include "sleipnir/autodiff/Variable.hpp"
