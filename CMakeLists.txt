@@ -84,6 +84,7 @@ set(CMAKE_Fortran_COMPILER "" CACHE STRING "" FORCE)
 # Options for using a package manager (e.g., vcpkg) for certain dependencies
 option(USE_SYSTEM_EIGEN "Use system eigen" OFF)
 option(USE_SYSTEM_FMT "Use system fmt" OFF)
+option(USE_SYSTEM_PYBIND "Use system pybind" OFF)
 
 # Eigen dependency
 if (NOT USE_SYSTEM_EIGEN)
@@ -284,3 +285,66 @@ foreach(example ${EXAMPLES})
     endif()
   endif()
 endforeach()
+
+option(BUILD_PYTHON "Build Python module" OFF)
+
+if (BUILD_PYTHON)
+  find_package(Python REQUIRED COMPONENTS Interpreter Development)
+  if (DEFINED PY_BUILD_CMAKE_MODULE_NAME)
+    set(PY_DEST ${PY_BUILD_CMAKE_MODULE_NAME})
+  else()
+    set(PY_DEST lib/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR})
+  endif()
+
+  # pybind11 dependency
+  if (NOT USE_SYSTEM_PYBIND)
+    FetchContent_Declare(
+      pybind11
+      GIT_REPOSITORY https://github.com/pybind/pybind11.git
+      GIT_TAG        v2.10.4
+    )
+    FetchContent_MakeAvailable(pybind11)
+  else()
+    find_package(pybind11 CONFIG REQUIRED)
+  endif()
+
+  file(GLOB_RECURSE jormungandr_src jormungandr/cpp/*.cpp)
+
+  # Build fmt and Sleipnir dependencies directly into the wheel to avoid having
+  # to configure RPATHs
+  set(fmt_src ${fmt_SOURCE_DIR}/src/format.cc ${fmt_SOURCE_DIR}/src/os.cc)
+  pybind11_add_module(_jormungandr ${jormungandr_src} ${fmt_src} ${Sleipnir_src})
+  sleipnir_compiler_flags(_jormungandr)
+  target_include_directories(_jormungandr
+                             PRIVATE
+                             ${CMAKE_CURRENT_SOURCE_DIR}/src
+                             ${CMAKE_CURRENT_SOURCE_DIR}/include
+                             ${fmt_SOURCE_DIR}/include
+                             ${CMAKE_CURRENT_SOURCE_DIR}/jormungandr/cpp)
+  target_link_libraries(_jormungandr
+                        PUBLIC
+                        pybind11::module
+                        Eigen3::Eigen)
+
+  install(TARGETS _jormungandr
+    COMPONENT python_modules
+    LIBRARY DESTINATION ${PY_DEST})
+
+  # Generate stubs for the Python module
+  # FIXME: pybind11-stubgen fails in Windows CI with
+  #        "ImportError: No module named _jormungandr"
+  if (NOT WIN32 AND NOT CMAKE_CROSSCOMPILING)
+    # pybind11-stubgen dependency
+    FetchContent_Declare(
+      pybind11-stubgen
+      GIT_REPOSITORY https://github.com/sizmailov/pybind11-stubgen.git
+      GIT_TAG        master
+      GIT_SUBMODULES ""
+    )
+    FetchContent_MakeAvailable(pybind11-stubgen)
+
+    include(cmake/modules/Pybind11Stubgen.cmake)
+    pybind11_stubgen(_jormungandr)
+    pybind11_stubgen_install(_jormungandr ${PY_DEST})
+  endif()
+endif()

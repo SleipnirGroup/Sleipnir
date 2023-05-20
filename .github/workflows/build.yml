@@ -13,13 +13,13 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - artifact-name: Windows
+          - artifact-name: Windows - native
             cmake-config-env-vars:
             os: windows-2022
-          - artifact-name: Linux
+          - artifact-name: Linux - native
             cmake-config-env-vars:
             os: ubuntu-22.04
-          - artifact-name: macOS
+          - artifact-name: macOS - native
             cmake-config-env-vars: CFLAGS="$CFLAGS -arch x86_64 -arch arm64" CXXFLAGS="$CXXFLAGS -arch x86_64 -arch arm64"
             os: macOS-12
 
@@ -29,7 +29,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Configure
-        run: ${{ matrix.cmake-config-env-vars }} cmake -B build -S .
+        run: ${{ matrix.cmake-config-env-vars }} cmake -B build -S . -DBUILD_PYTHON=OFF
 
       - name: Build
         run: cmake --build build --config RelWithDebInfo --parallel $(nproc)
@@ -45,6 +45,44 @@ jobs:
         with:
           name: ${{ matrix.artifact-name }}
           path: pkg
+
+  build-python:
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - artifact-name: Windows - python
+            cmake-config-env-vars:
+            os: windows-2022
+          - artifact-name: Linux - python
+            cmake-config-env-vars:
+            os: ubuntu-22.04
+          - artifact-name: macOS - python
+            cmake-config-env-vars: CFLAGS="$CFLAGS -arch x86_64 -arch arm64" CXXFLAGS="$CXXFLAGS -arch x86_64 -arch arm64"
+            os: macOS-12
+
+    name: "${{ matrix.artifact-name }}"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install build and tox Python packages
+        run: pip3 install --user build tox
+
+      - name: Build
+        run: ${{ matrix.cmake-config-env-vars }} python3 -m build
+
+      - name: Test
+        run: |
+          pip3 install --user dist/sleipnirgroup_jormungandr-*.whl
+          python3 -m tox
+        shell: bash
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: dist
 
   build-cross:
     strategy:
@@ -62,7 +100,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Configure
-        run: cmake -B build -S . --toolchain ${{ matrix.toolchain }}
+        run: cmake -B build -S . --toolchain ${{ matrix.toolchain }} -DBUILD_PYTHON=OFF
 
       - name: Build
         run: cmake --build build --config RelWithDebInfo --parallel $(nproc)
@@ -85,7 +123,7 @@ jobs:
         uses: numworks/setup-emscripten@latest
 
       - name: Configure
-        run: emcmake cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DBUILD_BENCHMARKING=OFF -DBUILD_TESTING=OFF
+        run: emcmake cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DBUILD_BENCHMARKING=OFF -DBUILD_TESTING=OFF -DBUILD_PYTHON=OFF
 
       - name: Build
         run: cmake --build build --config Release --parallel $(nproc)
