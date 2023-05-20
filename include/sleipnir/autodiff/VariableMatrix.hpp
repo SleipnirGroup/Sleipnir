@@ -507,6 +507,56 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    */
   Eigen::MatrixXd Value() const;
 
+  /**
+   * Equality operator that returns an equality constraint for two
+   * VariableMatrices.
+   *
+   * @param lhs Left-hand side.
+   * @param rhs Left-hand side.
+   */
+  friend SLEIPNIR_DLLEXPORT EqualityConstraints
+  operator==(const VariableMatrix& lhs, const VariableMatrix& rhs);
+
+  /**
+   * Less-than comparison operator that returns an inequality constraint for two
+   * VariableMatrices.
+   *
+   * @param lhs Left-hand side.
+   * @param rhs Left-hand side.
+   */
+  friend SLEIPNIR_DLLEXPORT InequalityConstraints
+  operator<(const VariableMatrix& lhs, const VariableMatrix& rhs);
+
+  /**
+   * Less-than-or-equal-to comparison operator that returns an inequality
+   * constraint for two VariableMatrices.
+   *
+   * @param lhs Left-hand side.
+   * @param rhs Left-hand side.
+   */
+  friend SLEIPNIR_DLLEXPORT InequalityConstraints
+  operator<=(const VariableMatrix& lhs, const VariableMatrix& rhs);
+
+  /**
+   * Greater-than comparison operator that returns an inequality constraint for
+   * two VariableMatrices.
+   *
+   * @param lhs Left-hand side.
+   * @param rhs Left-hand side.
+   */
+  friend SLEIPNIR_DLLEXPORT InequalityConstraints
+  operator>(const VariableMatrix& lhs, const VariableMatrix& rhs);
+
+  /**
+   * Greater-than-or-equal-to comparison operator that returns an inequality
+   * constraint for two VariableMatrices.
+   *
+   * @param lhs Left-hand side.
+   * @param rhs Left-hand side.
+   */
+  friend SLEIPNIR_DLLEXPORT InequalityConstraints
+  operator>=(const VariableMatrix& lhs, const VariableMatrix& rhs);
+
  private:
   std::vector<Variable> m_storage;
   int m_rows = 0;
@@ -709,20 +759,5 @@ SLEIPNIR_DLLEXPORT VariableMatrix tan(const VariableMatrix& x);
  * @param x The argument.
  */
 SLEIPNIR_DLLEXPORT VariableMatrix tanh(const VariableMatrix& x);
-
-SLEIPNIR_DLLEXPORT EqualityConstraints operator==(const VariableMatrix& lhs,
-                                                  const VariableMatrix& rhs);
-
-SLEIPNIR_DLLEXPORT InequalityConstraints operator<(const VariableMatrix& lhs,
-                                                   const VariableMatrix& rhs);
-
-SLEIPNIR_DLLEXPORT InequalityConstraints operator<=(const VariableMatrix& lhs,
-                                                    const VariableMatrix& rhs);
-
-SLEIPNIR_DLLEXPORT InequalityConstraints operator>(const VariableMatrix& lhs,
-                                                   const VariableMatrix& rhs);
-
-SLEIPNIR_DLLEXPORT InequalityConstraints operator>=(const VariableMatrix& lhs,
-                                                    const VariableMatrix& rhs);
 
 }  // namespace sleipnir
