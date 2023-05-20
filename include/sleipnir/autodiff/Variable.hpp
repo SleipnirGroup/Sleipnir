@@ -263,7 +263,7 @@ class SLEIPNIR_DLLEXPORT Variable {
   ExpressionType Type() const;
 
   /**
-   * Update the value of this variable based on the values of its dependent
+   * Updates the value of this variable based on the values of its dependent
    * variables.
    */
   void Update();
