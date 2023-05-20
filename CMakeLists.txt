@@ -78,13 +78,21 @@ include(FetchContent)
 # Disable Eigen's Fortran compiler check, which takes a long time in Windows CI
 set(CMAKE_Fortran_COMPILER "" CACHE STRING "" FORCE)
 
+# Options for using a package manager (e.g., vcpkg) for certain dependencies
+option(USE_SYSTEM_EIGEN "Use system eigen" OFF)
+option(USE_SYSTEM_FMT "Use system fmt" OFF)
+
 # Eigen dependency
-FetchContent_Declare(
-  Eigen3
-  GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
-  GIT_TAG        2709f4c8fbbe71a5383de1ba27e9833f218a642d
-)
-FetchContent_MakeAvailable(Eigen3)
+if (NOT USE_SYSTEM_EIGEN)
+  FetchContent_Declare(
+    Eigen3
+    GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
+    GIT_TAG        2709f4c8fbbe71a5383de1ba27e9833f218a642d
+  )
+  FetchContent_MakeAvailable(Eigen3)
+else()
+  find_package(Eigen3 CONFIG REQUIRED)
+endif()
 
 target_link_libraries(Sleipnir PUBLIC Eigen3::Eigen)
 
@@ -98,12 +106,16 @@ add_custom_command(
 
 # fmt dependency
 set(FMT_INSTALL ON)
-FetchContent_Declare(
-  fmt
-  GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-  GIT_TAG        10.0.0
-)
-FetchContent_MakeAvailable(fmt)
+if (NOT USE_SYSTEM_FMT)
+  FetchContent_Declare(
+    fmt
+    GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+    GIT_TAG        10.0.0
+  )
+  FetchContent_MakeAvailable(fmt)
+else()
+  find_package(fmt CONFIG REQUIRED)
+endif()
 
 target_link_libraries(Sleipnir PRIVATE fmt::fmt)
 
@@ -182,6 +194,8 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(googletest)
 set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_SAVE})
+
+include(CMakeDependentOption)
 
 cmake_dependent_option(BUILD_TESTING "Enable creation of tests." ON "PROJECT_IS_TOP_LEVEL" OFF)
 if (BUILD_TESTING)
