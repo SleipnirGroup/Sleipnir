@@ -36,7 +36,7 @@ class SLEIPNIR_DLLEXPORT Gradient {
    * @param variable Variable of which to compute the gradient.
    * @param wrt Variables with respect to which to compute the gradient.
    */
-  Gradient(Variable variable, Eigen::Ref<VectorXvar> wrt) noexcept;
+  Gradient(Variable variable, VectorXvar wrt) noexcept;
 
   /**
    * Calculates the gradient.
