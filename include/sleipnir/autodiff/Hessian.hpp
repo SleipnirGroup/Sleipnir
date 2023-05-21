@@ -27,7 +27,7 @@ class SLEIPNIR_DLLEXPORT Hessian {
    * @param variable Variable of which to compute the gradient.
    * @param wrt Variables with respect to which to compute the gradient.
    */
-  Hessian(Variable variable, Eigen::Ref<VectorXvar> wrt) noexcept;
+  Hessian(Variable variable, VectorXvar wrt) noexcept;
 
   /**
    * Calculates the Hessian.

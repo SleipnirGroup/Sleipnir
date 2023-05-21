@@ -6,7 +6,7 @@
 
 using namespace sleipnir;
 
-Hessian::Hessian(Variable variable, Eigen::Ref<VectorXvar> wrt) noexcept
+Hessian::Hessian(Variable variable, VectorXvar wrt) noexcept
     : m_jacobian{ExpressionGraph{variable}.GenerateGradientTree(wrt), wrt} {}
 
 const Eigen::SparseMatrix<double>& Hessian::Calculate() {
