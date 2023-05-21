@@ -182,6 +182,16 @@ void OptimizationProblem::Maximize(Variable&& cost) {
   m_f = -std::move(cost);
 }
 
+void OptimizationProblem::SubjectTo(const EqualityConstraints& constraint) {
+  auto& storage = constraint.constraints;
+
+  m_equalityConstraints.reserve(m_equalityConstraints.size() + storage.size());
+
+  for (size_t i = 0; i < storage.size(); ++i) {
+    m_equalityConstraints.emplace_back(storage[i]);
+  }
+}
+
 void OptimizationProblem::SubjectTo(EqualityConstraints&& constraint) {
   auto& storage = constraint.constraints;
 
@@ -189,6 +199,17 @@ void OptimizationProblem::SubjectTo(EqualityConstraints&& constraint) {
 
   for (size_t i = 0; i < storage.size(); ++i) {
     m_equalityConstraints.emplace_back(std::move(storage[i]));
+  }
+}
+
+void OptimizationProblem::SubjectTo(const InequalityConstraints& constraint) {
+  auto& storage = constraint.constraints;
+
+  m_inequalityConstraints.reserve(m_inequalityConstraints.size() +
+                                  storage.size());
+
+  for (size_t i = 0; i < storage.size(); ++i) {
+    m_inequalityConstraints.emplace_back(storage[i]);
   }
 }
 

@@ -286,7 +286,23 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
    *
    * @param constraint The constraint to satisfy.
    */
+  void SubjectTo(const EqualityConstraints& constraint);
+
+  /**
+   * Tells the solver to solve the problem while satisfying the given equality
+   * constraint.
+   *
+   * @param constraint The constraint to satisfy.
+   */
   void SubjectTo(EqualityConstraints&& constraint);
+
+  /**
+   * Tells the solver to solve the problem while satisfying the given inequality
+   * constraint.
+   *
+   * @param constraint The constraint to satisfy.
+   */
+  void SubjectTo(const InequalityConstraints& constraint);
 
   /**
    * Tells the solver to solve the problem while satisfying the given inequality
