@@ -21,7 +21,7 @@ jobs:
           mkdir build
           doxygen docs/Doxyfile
 
-      - uses: actions/upload-artifact@v3.1.1
+      - uses: actions/upload-artifact@v3
         with:
           name: documentation
           path: build/docs

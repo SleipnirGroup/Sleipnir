@@ -28,20 +28,20 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: configure
+      - name: Configure
         run: ${{ matrix.cmake-config-env-vars }} cmake -B build -S .
 
-      - name: build
+      - name: Build
         run: cmake --build build --config RelWithDebInfo --parallel $(nproc)
 
-      - name: test
+      - name: Test
         working-directory: build
         run: ctest -C RelWithDebInfo --output-on-failure
 
-      - name: install
+      - name: Install
         run: cmake --install build --config RelWithDebInfo --prefix pkg
 
-      - uses: actions/upload-artifact@v3.1.1
+      - uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.artifact-name }}
           path: pkg
@@ -61,16 +61,16 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: configure
+      - name: Configure
         run: cmake -B build -S . --toolchain ${{ matrix.toolchain }}
 
-      - name: build
+      - name: Build
         run: cmake --build build --config RelWithDebInfo --parallel $(nproc)
 
-      - name: install
+      - name: Install
         run: cmake --install build --config RelWithDebInfo --prefix pkg
 
-      - uses: actions/upload-artifact@v3.1.1
+      - uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.artifact-name }}
           path: pkg
@@ -84,16 +84,16 @@ jobs:
       - name: Setup emscripten
         uses: numworks/setup-emscripten@latest
 
-      - name: configure
+      - name: Configure
         run: emcmake cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DBUILD_BENCHMARKING=OFF -DBUILD_TESTING=OFF
 
-      - name: build
+      - name: Build
         run: cmake --build build --config Release --parallel $(nproc)
 
-      - name: install
+      - name: Install
         run: cmake --install build --config Release --prefix pkg
 
-      - uses: actions/upload-artifact@v3.1.1
+      - uses: actions/upload-artifact@v3
         with:
           name: Wasm
           path: pkg

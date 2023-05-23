@@ -32,12 +32,12 @@ jobs:
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y clang-14
 
-      - name: configure
+      - name: Configure
         run: cmake -B build -S . -DCMAKE_C_COMPILER:FILEPATH=/usr/bin/clang-14 -DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/clang++-14 ${{ matrix.cmake-flags }}
 
-      - name: build
+      - name: Build
         run: cmake --build build --target all --config RelWithDebInfo --parallel $(nproc)
 
-      - name: test
+      - name: Test
         working-directory: build
         run: ${{ matrix.ctest-env }} ctest -C RelWithDebInfo --output-on-failure
