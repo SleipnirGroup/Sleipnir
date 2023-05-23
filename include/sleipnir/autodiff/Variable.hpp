@@ -13,9 +13,6 @@
 
 namespace sleipnir {
 
-struct SLEIPNIR_DLLEXPORT EqualityConstraints;
-struct SLEIPNIR_DLLEXPORT InequalityConstraints;
-
 /**
  * An autodiff variable pointing to an expression node.
  */
@@ -270,81 +267,6 @@ class SLEIPNIR_DLLEXPORT Variable {
    * variables.
    */
   void Update();
-
-  /**
-   * Equality operator that returns an equality constraint for two Variables.
-   *
-   * @param lhs Left-hand side.
-   * @param rhs Left-hand side.
-   */
-  friend SLEIPNIR_DLLEXPORT EqualityConstraints operator==(const Variable& lhs,
-                                                           const Variable& rhs);
-
-  /**
-   * Less-than comparison operator that returns an inequality constraint for two
-   * Variables.
-   *
-   * @param lhs Left-hand side.
-   * @param rhs Left-hand side.
-   */
-  friend SLEIPNIR_DLLEXPORT InequalityConstraints
-  operator<(const Variable& lhs, const Variable& rhs);
-
-  /**
-   * Less-than-or-equal-to comparison operator that returns an inequality
-   * constraint for two Variables.
-   *
-   * @param lhs Left-hand side.
-   * @param rhs Left-hand side.
-   */
-  friend SLEIPNIR_DLLEXPORT InequalityConstraints
-  operator<=(const Variable& lhs, const Variable& rhs);
-
-  /**
-   * Greater-than comparison operator that returns an inequality constraint for
-   * two Variables.
-   *
-   * @param lhs Left-hand side.
-   * @param rhs Left-hand side.
-   */
-  friend SLEIPNIR_DLLEXPORT InequalityConstraints
-  operator>(const Variable& lhs, const Variable& rhs);
-
-  /**
-   * Greater-than-or-equal-to comparison operator that returns an inequality
-   * constraint for two Variables.
-   *
-   * @param lhs Left-hand side.
-   * @param rhs Left-hand side.
-   */
-  friend SLEIPNIR_DLLEXPORT InequalityConstraints
-  operator>=(const Variable& lhs, const Variable& rhs);
-};
-
-/**
- * A vector of equality constraints of the form cₑ(x) = 0.
- */
-struct SLEIPNIR_DLLEXPORT EqualityConstraints {
-  /// A vector of scalar equality constraints.
-  std::vector<Variable> constraints;
-
-  /**
-   * Implicit conversion operator to bool.
-   */
-  operator bool() const;  // NOLINT
-};
-
-/**
- * A vector of inequality constraints of the form cᵢ(x) ≥ 0.
- */
-struct SLEIPNIR_DLLEXPORT InequalityConstraints {
-  /// A vector of scalar inequality constraints.
-  std::vector<Variable> constraints;
-
-  /**
-   * Implicit conversion operator to bool.
-   */
-  operator bool() const;  // NOLINT
 };
 
 using VectorXvar = Eigen::Vector<Variable, Eigen::Dynamic>;
