@@ -2,6 +2,7 @@
 
 #include <gtest/gtest.h>
 #include <sleipnir/autodiff/VariableMatrix.hpp>
+#include <sleipnir/optimization/Constraints.hpp>
 
 TEST(VariableMatrixTest, AssignmentToDefault) {
   sleipnir::VariableMatrix mat;
