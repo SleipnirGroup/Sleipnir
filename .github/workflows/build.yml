@@ -18,7 +18,7 @@ jobs:
             os: windows-2022
           - artifact-name: Linux
             cmake-config-env-vars:
-            os: macOS-11
+            os: ubuntu-22.04
           - artifact-name: macOS
             cmake-config-env-vars: CFLAGS="$CFLAGS -arch x86_64 -arch arm64" CXXFLAGS="$CXXFLAGS -arch x86_64 -arch arm64"
             os: macOS-11
