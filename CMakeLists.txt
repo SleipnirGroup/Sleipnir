@@ -9,6 +9,9 @@ endif()
 cmake_minimum_required(VERSION 3.21)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
 
+# Make `GIT_SUBMODULES ""` initialize no submodules
+cmake_policy(SET CMP0097 NEW)
+
 project(Sleipnir)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -125,6 +128,7 @@ target_include_directories(Sleipnir
                            $<INSTALL_INTERFACE:include/Sleipnir>)
 
 install(TARGETS Sleipnir
+        COMPONENT Sleipnir
         EXPORT SleipnirTargets
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
