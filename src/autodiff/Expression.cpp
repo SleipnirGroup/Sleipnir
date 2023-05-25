@@ -62,7 +62,7 @@ Expression::Expression(ExpressionType type, BinaryFuncDouble valueFunc,
       gradientFuncs{lhsGradientFunc, rhsGradientFunc},
       args{lhs, rhs} {}
 
-SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator*(
+IntrusiveSharedPtr<Expression> operator*(
     double lhs, const IntrusiveSharedPtr<Expression>& rhs) {
   if (lhs == 0.0) {
     return Zero();
@@ -73,7 +73,7 @@ SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator*(
   return ConstantExpr(lhs) * rhs;
 }
 
-SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator*(
+IntrusiveSharedPtr<Expression> operator*(
     const IntrusiveSharedPtr<Expression>& lhs, double rhs) {
   if (rhs == 0.0) {
     return Zero();
@@ -84,7 +84,7 @@ SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator*(
   return lhs * ConstantExpr(rhs);
 }
 
-SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator*(
+IntrusiveSharedPtr<Expression> operator*(
     const IntrusiveSharedPtr<Expression>& lhs,
     const IntrusiveSharedPtr<Expression>& rhs) {
   if (lhs == Zero() || rhs == Zero()) {
@@ -142,7 +142,7 @@ SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator*(
       lhs, rhs);
 }
 
-SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator/(
+IntrusiveSharedPtr<Expression> operator/(
     double lhs, const IntrusiveSharedPtr<Expression>& rhs) {
   if (lhs == 0.0) {
     return Zero();
@@ -151,12 +151,12 @@ SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator/(
   return ConstantExpr(lhs) / rhs;
 }
 
-SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator/(
+IntrusiveSharedPtr<Expression> operator/(
     const IntrusiveSharedPtr<Expression>& lhs, double rhs) {
   return lhs / ConstantExpr(rhs);
 }
 
-SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator/(
+IntrusiveSharedPtr<Expression> operator/(
     const IntrusiveSharedPtr<Expression>& lhs,
     const IntrusiveSharedPtr<Expression>& rhs) {
   if (lhs == Zero()) {
@@ -193,7 +193,7 @@ SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator/(
       lhs, rhs);
 }
 
-SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator+(
+IntrusiveSharedPtr<Expression> operator+(
     double lhs, const IntrusiveSharedPtr<Expression>& rhs) {
   if (lhs == 0.0) {
     return rhs;
@@ -202,7 +202,7 @@ SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator+(
   return ConstantExpr(lhs) + rhs;
 }
 
-SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator+(
+IntrusiveSharedPtr<Expression> operator+(
     const IntrusiveSharedPtr<Expression>& lhs, double rhs) {
   if (rhs == 0.0) {
     return lhs;
@@ -211,7 +211,7 @@ SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator+(
   return lhs + ConstantExpr(rhs);
 }
 
-SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator+(
+IntrusiveSharedPtr<Expression> operator+(
     const IntrusiveSharedPtr<Expression>& lhs,
     const IntrusiveSharedPtr<Expression>& rhs) {
   if (lhs == Zero()) {
@@ -244,8 +244,8 @@ SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator+(
       lhs, rhs);
 }
 
-SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression>& operator+=(
-    IntrusiveSharedPtr<Expression>& lhs, double rhs) {
+IntrusiveSharedPtr<Expression>& operator+=(IntrusiveSharedPtr<Expression>& lhs,
+                                           double rhs) {
   if (rhs == 0.0) {
     return lhs;
   }
@@ -253,7 +253,7 @@ SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression>& operator+=(
   return lhs += ConstantExpr(rhs);
 }
 
-SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression>& operator+=(
+IntrusiveSharedPtr<Expression>& operator+=(
     IntrusiveSharedPtr<Expression>& lhs,
     const IntrusiveSharedPtr<Expression>& rhs) {
   if (lhs == Zero()) {
@@ -267,7 +267,7 @@ SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression>& operator+=(
   return lhs;
 }
 
-SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator-(
+IntrusiveSharedPtr<Expression> operator-(
     double lhs, const IntrusiveSharedPtr<Expression>& rhs) {
   if (lhs == 0.0) {
     return -rhs;
@@ -276,7 +276,7 @@ SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator-(
   return ConstantExpr(lhs) - rhs;
 }
 
-SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator-(
+IntrusiveSharedPtr<Expression> operator-(
     const IntrusiveSharedPtr<Expression>& lhs, double rhs) {
   if (rhs == 0.0) {
     return lhs;
@@ -285,7 +285,7 @@ SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator-(
   return lhs - ConstantExpr(rhs);
 }
 
-SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator-(
+IntrusiveSharedPtr<Expression> operator-(
     const IntrusiveSharedPtr<Expression>& lhs,
     const IntrusiveSharedPtr<Expression>& rhs) {
   if (lhs == Zero()) {
@@ -322,7 +322,7 @@ SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator-(
       lhs, rhs);
 }
 
-SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator-(
+IntrusiveSharedPtr<Expression> operator-(
     const IntrusiveSharedPtr<Expression>& lhs) {
   if (lhs == Zero()) {
     return Zero();
@@ -340,7 +340,7 @@ SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator-(
       lhs);
 }
 
-SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator+(
+IntrusiveSharedPtr<Expression> operator+(
     const IntrusiveSharedPtr<Expression>& lhs) {
   if (lhs == Zero()) {
     return Zero();

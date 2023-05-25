@@ -51,16 +51,15 @@ Variable& Variable::operator=(int value) {
   return *this;
 }
 
-SLEIPNIR_DLLEXPORT Variable operator*(double lhs, const Variable& rhs) {
+Variable operator*(double lhs, const Variable& rhs) {
   return Variable{lhs * rhs.expr};
 }
 
-SLEIPNIR_DLLEXPORT Variable operator*(const Variable& lhs, double rhs) {
+Variable operator*(const Variable& lhs, double rhs) {
   return Variable{lhs.expr * rhs};
 }
 
-SLEIPNIR_DLLEXPORT Variable operator*(const Variable& lhs,
-                                      const Variable& rhs) {
+Variable operator*(const Variable& lhs, const Variable& rhs) {
   return Variable{lhs.expr * rhs.expr};
 }
 
@@ -74,16 +73,15 @@ Variable& Variable::operator*=(const Variable& rhs) {
   return *this;
 }
 
-SLEIPNIR_DLLEXPORT Variable operator/(double lhs, const Variable& rhs) {
+Variable operator/(double lhs, const Variable& rhs) {
   return Variable{lhs / rhs.expr};
 }
 
-SLEIPNIR_DLLEXPORT Variable operator/(const Variable& lhs, double rhs) {
+Variable operator/(const Variable& lhs, double rhs) {
   return Variable{lhs.expr / rhs};
 }
 
-SLEIPNIR_DLLEXPORT Variable operator/(const Variable& lhs,
-                                      const Variable& rhs) {
+Variable operator/(const Variable& lhs, const Variable& rhs) {
   return Variable{lhs.expr / rhs.expr};
 }
 
@@ -97,16 +95,15 @@ Variable& Variable::operator/=(const Variable& rhs) {
   return *this;
 }
 
-SLEIPNIR_DLLEXPORT Variable operator+(double lhs, const Variable& rhs) {
+Variable operator+(double lhs, const Variable& rhs) {
   return Variable{lhs + rhs.expr};
 }
 
-SLEIPNIR_DLLEXPORT Variable operator+(const Variable& lhs, double rhs) {
+Variable operator+(const Variable& lhs, double rhs) {
   return Variable{lhs.expr + rhs};
 }
 
-SLEIPNIR_DLLEXPORT Variable operator+(const Variable& lhs,
-                                      const Variable& rhs) {
+Variable operator+(const Variable& lhs, const Variable& rhs) {
   return Variable{lhs.expr + rhs.expr};
 }
 
@@ -120,16 +117,15 @@ Variable& Variable::operator+=(const Variable& rhs) {
   return *this;
 }
 
-SLEIPNIR_DLLEXPORT Variable operator-(double lhs, const Variable& rhs) {
+Variable operator-(double lhs, const Variable& rhs) {
   return Variable{lhs - rhs.expr};
 }
 
-SLEIPNIR_DLLEXPORT Variable operator-(const Variable& lhs, double rhs) {
+Variable operator-(const Variable& lhs, double rhs) {
   return Variable{lhs.expr - rhs};
 }
 
-SLEIPNIR_DLLEXPORT Variable operator-(const Variable& lhs,
-                                      const Variable& rhs) {
+Variable operator-(const Variable& lhs, const Variable& rhs) {
   return Variable{lhs.expr - rhs.expr};
 }
 
@@ -143,11 +139,11 @@ Variable& Variable::operator-=(const Variable& rhs) {
   return *this;
 }
 
-SLEIPNIR_DLLEXPORT Variable operator-(const Variable& lhs) {
+Variable operator-(const Variable& lhs) {
   return Variable{-lhs.expr};
 }
 
-SLEIPNIR_DLLEXPORT Variable operator+(const Variable& lhs) {
+Variable operator+(const Variable& lhs) {
   return Variable{+lhs.expr};
 }
 

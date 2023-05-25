@@ -132,8 +132,7 @@ const VariableBlock<const VariableMatrix> VariableMatrix::Col(int col) const {
   return Block(0, col, Rows(), 1);
 }
 
-SLEIPNIR_DLLEXPORT VariableMatrix operator*(const VariableMatrix& lhs,
-                                            const VariableMatrix& rhs) {
+VariableMatrix operator*(const VariableMatrix& lhs, const VariableMatrix& rhs) {
   assert(lhs.Cols() == rhs.Rows());
 
   VariableMatrix result{lhs.Rows(), rhs.Cols()};
@@ -151,8 +150,7 @@ SLEIPNIR_DLLEXPORT VariableMatrix operator*(const VariableMatrix& lhs,
   return result;
 }
 
-SLEIPNIR_DLLEXPORT VariableMatrix operator*(const VariableMatrix& lhs,
-                                            const Variable& rhs) {
+VariableMatrix operator*(const VariableMatrix& lhs, const Variable& rhs) {
   VariableMatrix result{lhs.Rows(), lhs.Cols()};
 
   for (int row = 0; row < result.Rows(); ++row) {
@@ -164,13 +162,11 @@ SLEIPNIR_DLLEXPORT VariableMatrix operator*(const VariableMatrix& lhs,
   return result;
 }
 
-SLEIPNIR_DLLEXPORT VariableMatrix operator*(const VariableMatrix& lhs,
-                                            double rhs) {
+VariableMatrix operator*(const VariableMatrix& lhs, double rhs) {
   return lhs * Constant(rhs);
 }
 
-SLEIPNIR_DLLEXPORT VariableMatrix operator*(const Variable& lhs,
-                                            const VariableMatrix& rhs) {
+VariableMatrix operator*(const Variable& lhs, const VariableMatrix& rhs) {
   VariableMatrix result{rhs.Rows(), rhs.Cols()};
 
   for (int row = 0; row < result.Rows(); ++row) {
@@ -182,8 +178,7 @@ SLEIPNIR_DLLEXPORT VariableMatrix operator*(const Variable& lhs,
   return result;
 }
 
-SLEIPNIR_DLLEXPORT VariableMatrix operator*(double lhs,
-                                            const VariableMatrix& rhs) {
+VariableMatrix operator*(double lhs, const VariableMatrix& rhs) {
   return Constant(lhs) * rhs;
 }
 
@@ -213,8 +208,7 @@ VariableMatrix& VariableMatrix::operator*=(double rhs) {
   return *this;
 }
 
-SLEIPNIR_DLLEXPORT VariableMatrix operator/(const VariableMatrix& lhs,
-                                            const VariableMatrix& rhs) {
+VariableMatrix operator/(const VariableMatrix& lhs, const VariableMatrix& rhs) {
   assert(rhs.Rows() == 1 && rhs.Cols() == 1);
 
   VariableMatrix result{lhs.Rows(), lhs.Cols()};
@@ -228,8 +222,7 @@ SLEIPNIR_DLLEXPORT VariableMatrix operator/(const VariableMatrix& lhs,
   return result;
 }
 
-SLEIPNIR_DLLEXPORT VariableMatrix operator/(const VariableMatrix& lhs,
-                                            double rhs) {
+VariableMatrix operator/(const VariableMatrix& lhs, double rhs) {
   VariableMatrix result{lhs.Rows(), lhs.Cols()};
 
   for (int row = 0; row < result.Rows(); ++row) {
@@ -261,8 +254,7 @@ VariableMatrix& VariableMatrix::operator/=(double rhs) {
   return *this;
 }
 
-SLEIPNIR_DLLEXPORT VariableMatrix operator+(const VariableMatrix& lhs,
-                                            const VariableMatrix& rhs) {
+VariableMatrix operator+(const VariableMatrix& lhs, const VariableMatrix& rhs) {
   VariableMatrix result{lhs.Rows(), lhs.Cols()};
 
   for (int row = 0; row < result.Rows(); ++row) {
@@ -284,8 +276,7 @@ VariableMatrix& VariableMatrix::operator+=(const VariableMatrix& rhs) {
   return *this;
 }
 
-SLEIPNIR_DLLEXPORT VariableMatrix operator-(const VariableMatrix& lhs,
-                                            const VariableMatrix& rhs) {
+VariableMatrix operator-(const VariableMatrix& lhs, const VariableMatrix& rhs) {
   VariableMatrix result{lhs.Rows(), lhs.Cols()};
 
   for (int row = 0; row < result.Rows(); ++row) {
@@ -307,7 +298,7 @@ VariableMatrix& VariableMatrix::operator-=(const VariableMatrix& rhs) {
   return *this;
 }
 
-SLEIPNIR_DLLEXPORT VariableMatrix operator-(const VariableMatrix& lhs) {
+VariableMatrix operator-(const VariableMatrix& lhs) {
   VariableMatrix result{lhs.Rows(), lhs.Cols()};
 
   for (int row = 0; row < result.Rows(); ++row) {
