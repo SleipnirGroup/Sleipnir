@@ -3,6 +3,7 @@
 #include "sleipnir/optimization/Constraints.hpp"
 
 #include <algorithm>
+#include <cassert>
 
 namespace sleipnir {
 
