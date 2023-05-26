@@ -683,7 +683,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
 
   RegularizedLDLT solver;
 
-  int allowedFullStepCounter = 0;
+  int stepTooSmallCounter = 0;
 
   while (E_mu > m_config.tolerance) {
     while (true) {
@@ -930,9 +930,9 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       }
       if (maxStepScaled < 10.0 * std::numeric_limits<double>::epsilon()) {
         alpha = alpha_max;
-        ++allowedFullStepCounter;
+        ++stepTooSmallCounter;
       } else {
-        allowedFullStepCounter = 0;
+        stepTooSmallCounter = 0;
       }
 
       // αₖᶻ = max(α ∈ (0, 1] : zₖ + αpₖᶻ ≥ (1−τⱼ)zₖ)
@@ -995,7 +995,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       // the barrier parameter.
       //
       // See section 3.9 of [2].
-      if (allowedFullStepCounter == 2) {
+      if (stepTooSmallCounter == 2) {
         if (mu > mu_min) {
           break;
         } else {
