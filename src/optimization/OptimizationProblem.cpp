@@ -461,30 +461,14 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
                m_inequalityConstraints.size());
   }
 
-  // Barrier parameter scale factor κ_μ for tolerance checks
-  constexpr double kappa_epsilon = 10.0;
-
-  // Barrier parameter scale factor κ_Σ for inequality constraint Lagrange
-  // multiplier safeguard
-  constexpr double kappa_sigma = 1e10;
-
-  // Fraction-to-the-boundary rule scale factor minimum
-  constexpr double tau_min = 0.99;
-
-  // Barrier parameter linear decrease power in "κ_μ μ". Range of (0, 1).
-  constexpr double kappa_mu = 0.2;
-
-  // Barrier parameter superlinear decrease power in "μ^(θ_μ)". Range of (1, 2).
-  constexpr double theta_mu = 1.5;
-
-  // Safety factor for the minimal step size
-  constexpr double alpha_min_frac = 0.05;
-
   // Barrier parameter minimum
   double mu_min = m_config.tolerance / 10.0;
 
   // Barrier parameter μ
   double mu = 0.1;
+
+  // Fraction-to-the-boundary rule scale factor minimum
+  constexpr double tau_min = 0.99;
 
   // Fraction-to-the-boundary rule scale factor τ
   double tau = tau_min;
@@ -681,329 +665,15 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
     }
   }};
 
-  RegularizedLDLT solver;
+  // This should be run once the error estimate is below a desired threshold for
+  // the current barrier parameter
+  auto UpdateBarrierParameterAndResetFilter = [&] {
+    // Barrier parameter linear decrease power in "κ_μ μ". Range of (0, 1).
+    constexpr double kappa_mu = 0.2;
 
-  int stepTooSmallCounter = 0;
-
-  while (E_mu > m_config.tolerance) {
-    while (true) {
-      auto innerIterStartTime = std::chrono::system_clock::now();
-
-      //     [s₁ 0 ⋯ 0 ]
-      // S = [0  ⋱   ⋮ ]
-      //     [⋮    ⋱ 0 ]
-      //     [0  ⋯ 0 sₘ]
-      Eigen::SparseMatrix<double> S = SparseDiagonal(s);
-
-      //         [∇ᵀcₑ₁(x)ₖ]
-      // Aₑ(x) = [∇ᵀcₑ₂(x)ₖ]
-      //         [    ⋮    ]
-      //         [∇ᵀcₑₘ(x)ₖ]
-      A_e = jacobianCe.Calculate();
-
-      //         [∇ᵀcᵢ₁(x)ₖ]
-      // Aᵢ(x) = [∇ᵀcᵢ₂(x)ₖ]
-      //         [    ⋮    ]
-      //         [∇ᵀcᵢₘ(x)ₖ]
-      A_i = jacobianCi.Calculate();
-
-      // Update cₑ and cᵢ
-      c_e = GetAD(m_equalityConstraints);
-      c_i = GetAD(m_inequalityConstraints);
-
-      // Check for local infeasibility
-      if (!IsLocallyFeasible(A_e, c_e, A_i, c_i)) {
-        status->exitCondition = SolverExitCondition::kLocallyInfeasible;
-        return x;
-      }
-
-      // Hₖ = ∇²ₓₓL(x, s, y, z)ₖ
-      H = hessianL.Calculate();
-
-      g = gradientF.Calculate();
-
-      if (m_config.spy) {
-        // Gap between sparsity patterns
-        if (iterations > 0) {
-          m_A_e_spy << "\n";
-          m_A_i_spy << "\n";
-          m_H_spy << "\n";
-        }
-
-        Spy(m_H_spy, H);
-        Spy(m_A_e_spy, A_e);
-        Spy(m_A_i_spy, A_i);
-      }
-
-      // Call user callback
-      m_callback({iterations, g, H, A_e, A_i});
-
-      // If the error estimate is below the desired threshold for this barrier
-      // parameter value, break out of the loop so it's decreased further
-      E_mu = ErrorEstimate(g, A_e, c_e, A_i, c_i, s, S, y, z, mu);
-      if (E_mu <= kappa_epsilon * mu) {
-        break;
-      }
-
-      //     [z₁ 0 ⋯ 0 ]
-      // Z = [0  ⋱   ⋮ ]
-      //     [⋮    ⋱ 0 ]
-      //     [0  ⋯ 0 zₘ]
-      Eigen::SparseMatrix<double> Z = SparseDiagonal(z);
-
-      // Σ = S⁻¹Z
-      Eigen::SparseMatrix<double> sigma = S.cwiseInverse() * Z;
-
-      // lhs = [H + AᵢᵀΣAᵢ  Aₑᵀ]
-      //       [    Aₑ       0 ]
-      triplets.clear();
-      // Assign top-left quadrant
-      AssignSparseBlock(triplets, 0, 0, H + A_i.transpose() * sigma * A_i);
-      // Assign bottom-left quadrant
-      AssignSparseBlock(triplets, H.rows(), 0, A_e);
-      // Assign top-right quadrant
-      AssignSparseBlock(triplets, 0, H.rows(), A_e.transpose());
-      Eigen::SparseMatrix<double> lhs{H.rows() + A_e.rows(),
-                                      H.cols() + A_e.rows()};
-      lhs.setFromTriplets(triplets.begin(), triplets.end());
-
-      // rhs = −[∇f − Aₑᵀy + Aᵢᵀ(S⁻¹(Zcᵢ − μe) − z)]
-      //        [                cₑ                ]
-      //
-      // The outer negative sign is applied in the solve() call.
-      Eigen::VectorXd rhs{x.rows() + y.rows()};
-      rhs.segment(0, x.rows()) =
-          g - A_e.transpose() * y +
-          A_i.transpose() * (S.cwiseInverse() * (Z * c_i - mu * e) - z);
-      rhs.segment(x.rows(), y.rows()) = c_e;
-
-      // Solve the Newton-KKT system
-      solver.Compute(lhs, m_equalityConstraints.size(), mu);
-      if (solver.Info() == Eigen::Success) {
-        step = solver.Solve(-rhs);
-      } else {
-        // The regularization procedure failed due to a rank-deficient equality
-        // constraint Jacobian with linearly dependent constraints. Set the step
-        // length to zero and let second-order corrections attempt to restore
-        // feasibility.
-        step.setZero();
-      }
-
-      // step = [ pₖˣ]
-      //        [−pₖʸ]
-      Eigen::VectorXd p_x = step.segment(0, x.rows());
-      Eigen::VectorXd p_y = -step.segment(x.rows(), y.rows());
-
-      // pₖᶻ = −Σcᵢ + μS⁻¹e − ΣAᵢpₖˣ
-      Eigen::VectorXd p_z =
-          -sigma * c_i + mu * S.cwiseInverse() * e - sigma * A_i * p_x;
-
-      // pₖˢ = μZ⁻¹e − s − Z⁻¹Spₖᶻ
-      Eigen::VectorXd p_s =
-          mu * Z.cwiseInverse() * e - s - Z.cwiseInverse() * S * p_z;
-
-      bool stepAcceptable = false;
-
-      double alpha_max = FractionToTheBoundaryRule(s, p_s, tau);
-      double alpha = alpha_max;
-
-      while (!stepAcceptable) {
-        Eigen::VectorXd trial_x = x + alpha * p_x;
-        Eigen::VectorXd trial_s = s + alpha * p_s;
-
-        double alpha_z = FractionToTheBoundaryRule(z, p_z, tau);
-        Eigen::VectorXd trial_y = y + alpha_z * p_y;
-        Eigen::VectorXd trial_z = z + alpha_z * p_z;
-
-        SetAD(xAD, trial_x);
-        SetAD(yAD, trial_y);
-        SetAD(zAD, trial_z);
-        SetAD(sAD, trial_s);
-        graphL.Update();
-
-        Eigen::VectorXd trial_c_e = GetAD(m_equalityConstraints);
-        Eigen::VectorXd trial_c_i = GetAD(m_inequalityConstraints);
-
-        FilterEntry entry{m_f.value(), mu, trial_s, trial_c_e, trial_c_i};
-        if (filter.IsAcceptable(entry)) {
-          stepAcceptable = true;
-          filter.Add(std::move(entry));
-          continue;
-        }
-
-        double prevConstraintViolation =
-            c_e.lpNorm<1>() + (c_i - s).lpNorm<1>();
-        double nextConstraintViolation =
-            trial_c_e.lpNorm<1>() + (trial_c_i - trial_s).lpNorm<1>();
-
-        // If first trial point was rejected and constraint violation stayed the
-        // same or went up, apply second-order corrections
-        if (nextConstraintViolation >= prevConstraintViolation) {
-          // Apply second-order corrections. See section 2.4 of [2].
-          Eigen::VectorXd p_x_cor = p_x;
-          Eigen::VectorXd p_y_soc = p_y;
-          Eigen::VectorXd p_z_soc = p_z;
-          Eigen::VectorXd p_s_soc = p_s;
-
-          double alpha_soc = alpha;
-          Eigen::VectorXd c_e_soc = c_e;
-
-          for (int soc_iteration = 0; soc_iteration < 5 && !stepAcceptable;
-               ++soc_iteration) {
-            // Rebuild Newton-KKT rhs with updated constraint values.
-            //
-            // rhs = −[∇f − Aₑᵀy + Aᵢᵀ(S⁻¹(Zcᵢ − μe) − z)]
-            //        [              cₑˢᵒᶜ               ]
-            //
-            // where cₑˢᵒᶜ = αc(xₖ) + c(xₖ + αp_x)
-            //
-            // The outer negative sign is applied in the solve() call.
-            c_e_soc = alpha_soc * c_e_soc + trial_c_e;
-            rhs.bottomRows(y.rows()) = c_e_soc;
-
-            // Solve the Newton-KKT system
-            step = solver.Solve(-rhs);
-
-            p_x_cor = step.segment(0, x.rows());
-            p_y_soc = -step.segment(x.rows(), y.rows());
-
-            // pₖᶻ = −Σcᵢ + μS⁻¹e − ΣAᵢpₖˣ
-            p_z_soc = -sigma * c_i + mu * S.cwiseInverse() * e -
-                      sigma * A_i * p_x_cor;
-
-            // pₖˢ = μZ⁻¹e − s − Z⁻¹Spₖᶻ
-            p_s_soc =
-                mu * Z.cwiseInverse() * e - s - Z.cwiseInverse() * S * p_z_soc;
-
-            alpha_soc = FractionToTheBoundaryRule(s, p_s_soc, tau);
-            trial_x = x + alpha_soc * p_x_cor;
-            trial_s = s + alpha_soc * p_s_soc;
-
-            // αₖᶻ = max(α ∈ (0, 1] : zₖ + αpₖᶻ ≥ (1−τⱼ)zₖ)
-            alpha_z = FractionToTheBoundaryRule(z, p_z_soc, tau);
-            trial_y = y + alpha_z * p_y_soc;
-            trial_z = z + alpha_z * p_z_soc;
-
-            SetAD(xAD, trial_x);
-            SetAD(yAD, trial_y);
-            SetAD(zAD, trial_z);
-            SetAD(sAD, trial_s);
-            graphL.Update();
-
-            trial_c_e = GetAD(m_equalityConstraints);
-            trial_c_i = GetAD(m_inequalityConstraints);
-
-            entry = FilterEntry{m_f.value(), mu, trial_s, trial_c_e, trial_c_i};
-            if (filter.IsAcceptable(entry)) {
-              p_x = p_x_cor;
-              p_y = p_y_soc;
-              p_z = p_z_soc;
-              p_s = p_s_soc;
-              alpha = alpha_soc;
-              stepAcceptable = true;
-              filter.Add(std::move(entry));
-              break;
-            }
-          }
-        }
-
-        alpha *= 0.5;
-
-        if (alpha < alpha_min_frac * 1e-5) {
-          if (mu > mu_min) {
-            break;
-          } else {
-            status->exitCondition = SolverExitCondition::kNumericalIssue;
-            return x;
-          }
-        }
-      }
-
-      // Handle very small search directions by letting αₖ = αₖᵐᵃˣ when
-      // max(|pₖˣ(i)|/(1 + |xₖ(i)|)) < 10ε_mach.
-      //
-      // See section 3.9 of [2].
-      double maxStepScaled = 0.0;
-      for (int row = 0; row < x.rows(); ++row) {
-        maxStepScaled = std::max(maxStepScaled,
-                                 std::abs(p_x(row)) / (1.0 + std::abs(x(row))));
-      }
-      if (maxStepScaled < 10.0 * std::numeric_limits<double>::epsilon()) {
-        alpha = alpha_max;
-        ++stepTooSmallCounter;
-      } else {
-        stepTooSmallCounter = 0;
-      }
-
-      // αₖᶻ = max(α ∈ (0, 1] : zₖ + αpₖᶻ ≥ (1−τⱼ)zₖ)
-      double alpha_z = FractionToTheBoundaryRule(z, p_z, tau);
-
-      // xₖ₊₁ = xₖ + αₖpₖˣ
-      // sₖ₊₁ = xₖ + αₖpₖˢ
-      // yₖ₊₁ = xₖ + αₖᶻpₖʸ
-      // zₖ₊₁ = xₖ + αₖᶻpₖᶻ
-      x += alpha * p_x;
-      s += alpha * p_s;
-      y += alpha_z * p_y;
-      z += alpha_z * p_z;
-
-      // A requirement for the convergence proof is that the "primal-dual
-      // barrier term Hessian" Σₖ does not deviate arbitrarily much from the
-      // "primal Hessian" μⱼSₖ⁻². We ensure this by resetting
-      //
-      //   zₖ₊₁⁽ⁱ⁾ = max(min(zₖ₊₁⁽ⁱ⁾, κ_Σ μⱼ/sₖ₊₁⁽ⁱ⁾), μⱼ/(κ_Σ sₖ₊₁⁽ⁱ⁾))
-      //
-      // for some fixed κ_Σ ≥ 1 after each step. See equation (16) of [2].
-      for (int row = 0; row < z.rows(); ++row) {
-        z(row) = std::max(std::min(z(row), kappa_sigma * mu / s(row)),
-                          mu / (kappa_sigma * s(row)));
-      }
-
-      SetAD(xAD, x);
-      SetAD(sAD, s);
-      SetAD(yAD, y);
-      SetAD(zAD, z);
-      graphL.Update();
-
-      auto innerIterEndTime = std::chrono::system_clock::now();
-
-      if (m_config.diagnostics) {
-        if (iterations % 20 == 0) {
-          fmt::print("{:>4}   {:>10}  {:>10}   {:>16}  {:>19}\n", "iter",
-                     "time (ms)", "error", "cost", "infeasibility");
-          fmt::print("{:=^70}\n", "");
-        }
-        fmt::print("{:>4}  {:>9}  {:>15e}  {:>16e}   {:>16e}\n", iterations,
-                   ToMilliseconds(innerIterEndTime - innerIterStartTime), E_mu,
-                   filter.LastEntry().cost,
-                   filter.LastEntry().constraintViolation);
-      }
-
-      ++iterations;
-      if (iterations >= m_config.maxIterations) {
-        status->exitCondition = SolverExitCondition::kMaxIterations;
-        return x;
-      }
-
-      if (innerIterEndTime - solveStartTime > m_config.timeout) {
-        status->exitCondition = SolverExitCondition::kTimeout;
-        return x;
-      }
-
-      // The search direction has been very small twice, so assume the problem
-      // has been solved as well as possible given finite precision and reduce
-      // the barrier parameter.
-      //
-      // See section 3.9 of [2].
-      if (stepTooSmallCounter == 2) {
-        if (mu > mu_min) {
-          break;
-        } else {
-          status->exitCondition = SolverExitCondition::kNumericalIssue;
-          return x;
-        }
-      }
-    }
+    // Barrier parameter superlinear decrease power in "μ^(θ_μ)". Range of (1,
+    // 2).
+    constexpr double theta_mu = 1.5;
 
     // Update the barrier parameter.
     //
@@ -1019,8 +689,347 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
     // See equation (8) of [2].
     tau = std::max(tau_min, 1.0 - mu);
 
-    // Reset the filter when the barrier parameter is updated.
+    // Reset the filter when the barrier parameter is updated
     filter.Reset(FilterEntry{m_f.value(), mu, s, c_e, c_i});
+  };
+
+  RegularizedLDLT solver;
+
+  int stepTooSmallCounter = 0;
+
+  while (E_mu > m_config.tolerance) {
+    auto innerIterStartTime = std::chrono::system_clock::now();
+
+    //     [s₁ 0 ⋯ 0 ]
+    // S = [0  ⋱   ⋮ ]
+    //     [⋮    ⋱ 0 ]
+    //     [0  ⋯ 0 sₘ]
+    Eigen::SparseMatrix<double> S = SparseDiagonal(s);
+
+    //         [∇ᵀcₑ₁(x)ₖ]
+    // Aₑ(x) = [∇ᵀcₑ₂(x)ₖ]
+    //         [    ⋮    ]
+    //         [∇ᵀcₑₘ(x)ₖ]
+    A_e = jacobianCe.Calculate();
+
+    //         [∇ᵀcᵢ₁(x)ₖ]
+    // Aᵢ(x) = [∇ᵀcᵢ₂(x)ₖ]
+    //         [    ⋮    ]
+    //         [∇ᵀcᵢₘ(x)ₖ]
+    A_i = jacobianCi.Calculate();
+
+    // Update cₑ and cᵢ
+    c_e = GetAD(m_equalityConstraints);
+    c_i = GetAD(m_inequalityConstraints);
+
+    // Check for local infeasibility
+    if (!IsLocallyFeasible(A_e, c_e, A_i, c_i)) {
+      status->exitCondition = SolverExitCondition::kLocallyInfeasible;
+      return x;
+    }
+
+    // Hₖ = ∇²ₓₓL(x, s, y, z)ₖ
+    H = hessianL.Calculate();
+
+    g = gradientF.Calculate();
+
+    if (m_config.spy) {
+      // Gap between sparsity patterns
+      if (iterations > 0) {
+        m_A_e_spy << "\n";
+        m_A_i_spy << "\n";
+        m_H_spy << "\n";
+      }
+
+      Spy(m_H_spy, H);
+      Spy(m_A_e_spy, A_e);
+      Spy(m_A_i_spy, A_i);
+    }
+
+    // Call user callback
+    m_callback({iterations, g, H, A_e, A_i});
+
+    // If the error estimate is below the desired threshold for this barrier
+    // parameter value, decrease it further and restart the loop
+    {
+      // Barrier parameter scale factor κ_μ for tolerance checks
+      constexpr double kappa_epsilon = 10.0;
+
+      E_mu = ErrorEstimate(g, A_e, c_e, A_i, c_i, s, S, y, z, mu);
+      if (E_mu <= kappa_epsilon * mu) {
+        UpdateBarrierParameterAndResetFilter();
+        continue;
+      }
+    }
+
+    //     [z₁ 0 ⋯ 0 ]
+    // Z = [0  ⋱   ⋮ ]
+    //     [⋮    ⋱ 0 ]
+    //     [0  ⋯ 0 zₘ]
+    Eigen::SparseMatrix<double> Z = SparseDiagonal(z);
+
+    // Σ = S⁻¹Z
+    Eigen::SparseMatrix<double> sigma = S.cwiseInverse() * Z;
+
+    // lhs = [H + AᵢᵀΣAᵢ  Aₑᵀ]
+    //       [    Aₑ       0 ]
+    triplets.clear();
+    // Assign top-left quadrant
+    AssignSparseBlock(triplets, 0, 0, H + A_i.transpose() * sigma * A_i);
+    // Assign bottom-left quadrant
+    AssignSparseBlock(triplets, H.rows(), 0, A_e);
+    // Assign top-right quadrant
+    AssignSparseBlock(triplets, 0, H.rows(), A_e.transpose());
+    Eigen::SparseMatrix<double> lhs{H.rows() + A_e.rows(),
+                                    H.cols() + A_e.rows()};
+    lhs.setFromTriplets(triplets.begin(), triplets.end());
+
+    // rhs = −[∇f − Aₑᵀy + Aᵢᵀ(S⁻¹(Zcᵢ − μe) − z)]
+    //        [                cₑ                ]
+    //
+    // The outer negative sign is applied in the solve() call.
+    Eigen::VectorXd rhs{x.rows() + y.rows()};
+    rhs.segment(0, x.rows()) =
+        g - A_e.transpose() * y +
+        A_i.transpose() * (S.cwiseInverse() * (Z * c_i - mu * e) - z);
+    rhs.segment(x.rows(), y.rows()) = c_e;
+
+    // Solve the Newton-KKT system
+    solver.Compute(lhs, m_equalityConstraints.size(), mu);
+    if (solver.Info() == Eigen::Success) {
+      step = solver.Solve(-rhs);
+    } else {
+      // The regularization procedure failed due to a rank-deficient equality
+      // constraint Jacobian with linearly dependent constraints. Set the step
+      // length to zero and let second-order corrections attempt to restore
+      // feasibility.
+      step.setZero();
+    }
+
+    // step = [ pₖˣ]
+    //        [−pₖʸ]
+    Eigen::VectorXd p_x = step.segment(0, x.rows());
+    Eigen::VectorXd p_y = -step.segment(x.rows(), y.rows());
+
+    // pₖᶻ = −Σcᵢ + μS⁻¹e − ΣAᵢpₖˣ
+    Eigen::VectorXd p_z =
+        -sigma * c_i + mu * S.cwiseInverse() * e - sigma * A_i * p_x;
+
+    // pₖˢ = μZ⁻¹e − s − Z⁻¹Spₖᶻ
+    Eigen::VectorXd p_s =
+        mu * Z.cwiseInverse() * e - s - Z.cwiseInverse() * S * p_z;
+
+    bool stepAcceptable = false;
+
+    double alpha_max = FractionToTheBoundaryRule(s, p_s, tau);
+    double alpha = alpha_max;
+
+    while (!stepAcceptable) {
+      Eigen::VectorXd trial_x = x + alpha * p_x;
+      Eigen::VectorXd trial_s = s + alpha * p_s;
+
+      double alpha_z = FractionToTheBoundaryRule(z, p_z, tau);
+      Eigen::VectorXd trial_y = y + alpha_z * p_y;
+      Eigen::VectorXd trial_z = z + alpha_z * p_z;
+
+      SetAD(xAD, trial_x);
+      SetAD(yAD, trial_y);
+      SetAD(zAD, trial_z);
+      SetAD(sAD, trial_s);
+      graphL.Update();
+
+      Eigen::VectorXd trial_c_e = GetAD(m_equalityConstraints);
+      Eigen::VectorXd trial_c_i = GetAD(m_inequalityConstraints);
+
+      FilterEntry entry{m_f.value(), mu, trial_s, trial_c_e, trial_c_i};
+      if (filter.IsAcceptable(entry)) {
+        stepAcceptable = true;
+        filter.Add(std::move(entry));
+        continue;
+      }
+
+      double prevConstraintViolation = c_e.lpNorm<1>() + (c_i - s).lpNorm<1>();
+      double nextConstraintViolation =
+          trial_c_e.lpNorm<1>() + (trial_c_i - trial_s).lpNorm<1>();
+
+      // If first trial point was rejected and constraint violation stayed the
+      // same or went up, apply second-order corrections
+      if (nextConstraintViolation >= prevConstraintViolation) {
+        // Apply second-order corrections. See section 2.4 of [2].
+        Eigen::VectorXd p_x_cor = p_x;
+        Eigen::VectorXd p_y_soc = p_y;
+        Eigen::VectorXd p_z_soc = p_z;
+        Eigen::VectorXd p_s_soc = p_s;
+
+        double alpha_soc = alpha;
+        Eigen::VectorXd c_e_soc = c_e;
+
+        for (int soc_iteration = 0; soc_iteration < 5 && !stepAcceptable;
+             ++soc_iteration) {
+          // Rebuild Newton-KKT rhs with updated constraint values.
+          //
+          // rhs = −[∇f − Aₑᵀy + Aᵢᵀ(S⁻¹(Zcᵢ − μe) − z)]
+          //        [              cₑˢᵒᶜ               ]
+          //
+          // where cₑˢᵒᶜ = αc(xₖ) + c(xₖ + αp_x)
+          //
+          // The outer negative sign is applied in the solve() call.
+          c_e_soc = alpha_soc * c_e_soc + trial_c_e;
+          rhs.bottomRows(y.rows()) = c_e_soc;
+
+          // Solve the Newton-KKT system
+          step = solver.Solve(-rhs);
+
+          p_x_cor = step.segment(0, x.rows());
+          p_y_soc = -step.segment(x.rows(), y.rows());
+
+          // pₖᶻ = −Σcᵢ + μS⁻¹e − ΣAᵢpₖˣ
+          p_z_soc =
+              -sigma * c_i + mu * S.cwiseInverse() * e - sigma * A_i * p_x_cor;
+
+          // pₖˢ = μZ⁻¹e − s − Z⁻¹Spₖᶻ
+          p_s_soc =
+              mu * Z.cwiseInverse() * e - s - Z.cwiseInverse() * S * p_z_soc;
+
+          alpha_soc = FractionToTheBoundaryRule(s, p_s_soc, tau);
+          trial_x = x + alpha_soc * p_x_cor;
+          trial_s = s + alpha_soc * p_s_soc;
+
+          // αₖᶻ = max(α ∈ (0, 1] : zₖ + αpₖᶻ ≥ (1−τⱼ)zₖ)
+          alpha_z = FractionToTheBoundaryRule(z, p_z_soc, tau);
+          trial_y = y + alpha_z * p_y_soc;
+          trial_z = z + alpha_z * p_z_soc;
+
+          SetAD(xAD, trial_x);
+          SetAD(yAD, trial_y);
+          SetAD(zAD, trial_z);
+          SetAD(sAD, trial_s);
+          graphL.Update();
+
+          trial_c_e = GetAD(m_equalityConstraints);
+          trial_c_i = GetAD(m_inequalityConstraints);
+
+          entry = FilterEntry{m_f.value(), mu, trial_s, trial_c_e, trial_c_i};
+          if (filter.IsAcceptable(entry)) {
+            p_x = p_x_cor;
+            p_y = p_y_soc;
+            p_z = p_z_soc;
+            p_s = p_s_soc;
+            alpha = alpha_soc;
+            stepAcceptable = true;
+            filter.Add(std::move(entry));
+            break;
+          }
+        }
+      }
+
+      alpha *= 0.5;
+
+      // Safety factor for the minimal step size
+      constexpr double alpha_min_frac = 0.05;
+
+      if (alpha < alpha_min_frac * 1e-5) {
+        if (mu > mu_min) {
+          UpdateBarrierParameterAndResetFilter();
+          continue;
+        } else {
+          status->exitCondition = SolverExitCondition::kNumericalIssue;
+          return x;
+        }
+      }
+    }
+
+    // Handle very small search directions by letting αₖ = αₖᵐᵃˣ when
+    // max(|pₖˣ(i)|/(1 + |xₖ(i)|)) < 10ε_mach.
+    //
+    // See section 3.9 of [2].
+    double maxStepScaled = 0.0;
+    for (int row = 0; row < x.rows(); ++row) {
+      maxStepScaled = std::max(maxStepScaled,
+                               std::abs(p_x(row)) / (1.0 + std::abs(x(row))));
+    }
+    if (maxStepScaled < 10.0 * std::numeric_limits<double>::epsilon()) {
+      alpha = alpha_max;
+      ++stepTooSmallCounter;
+    } else {
+      stepTooSmallCounter = 0;
+    }
+
+    // αₖᶻ = max(α ∈ (0, 1] : zₖ + αpₖᶻ ≥ (1−τⱼ)zₖ)
+    double alpha_z = FractionToTheBoundaryRule(z, p_z, tau);
+
+    // xₖ₊₁ = xₖ + αₖpₖˣ
+    // sₖ₊₁ = xₖ + αₖpₖˢ
+    // yₖ₊₁ = xₖ + αₖᶻpₖʸ
+    // zₖ₊₁ = xₖ + αₖᶻpₖᶻ
+    x += alpha * p_x;
+    s += alpha * p_s;
+    y += alpha_z * p_y;
+    z += alpha_z * p_z;
+
+    // A requirement for the convergence proof is that the "primal-dual barrier
+    // term Hessian" Σₖ does not deviate arbitrarily much from the "primal
+    // Hessian" μⱼSₖ⁻². We ensure this by resetting
+    //
+    //   zₖ₊₁⁽ⁱ⁾ = max(min(zₖ₊₁⁽ⁱ⁾, κ_Σ μⱼ/sₖ₊₁⁽ⁱ⁾), μⱼ/(κ_Σ sₖ₊₁⁽ⁱ⁾))
+    //
+    // for some fixed κ_Σ ≥ 1 after each step. See equation (16) of [2].
+    {
+      // Barrier parameter scale factor κ_Σ for inequality constraint Lagrange
+      // multiplier safeguard
+      constexpr double kappa_sigma = 1e10;
+
+      for (int row = 0; row < z.rows(); ++row) {
+        z(row) = std::max(std::min(z(row), kappa_sigma * mu / s(row)),
+                          mu / (kappa_sigma * s(row)));
+      }
+    }
+
+    SetAD(xAD, x);
+    SetAD(sAD, s);
+    SetAD(yAD, y);
+    SetAD(zAD, z);
+    graphL.Update();
+
+    auto innerIterEndTime = std::chrono::system_clock::now();
+
+    if (m_config.diagnostics) {
+      if (iterations % 20 == 0) {
+        fmt::print("{:>4}   {:>10}  {:>10}   {:>16}  {:>19}\n", "iter",
+                   "time (ms)", "error", "cost", "infeasibility");
+        fmt::print("{:=^70}\n", "");
+      }
+      fmt::print("{:>4}  {:>9}  {:>15e}  {:>16e}   {:>16e}\n", iterations,
+                 ToMilliseconds(innerIterEndTime - innerIterStartTime), E_mu,
+                 filter.LastEntry().cost,
+                 filter.LastEntry().constraintViolation);
+    }
+
+    ++iterations;
+    if (iterations >= m_config.maxIterations) {
+      status->exitCondition = SolverExitCondition::kMaxIterations;
+      return x;
+    }
+
+    if (innerIterEndTime - solveStartTime > m_config.timeout) {
+      status->exitCondition = SolverExitCondition::kTimeout;
+      return x;
+    }
+
+    // The search direction has been very small twice, so assume the problem has
+    // been solved as well as possible given finite precision and reduce the
+    // barrier parameter.
+    //
+    // See section 3.9 of [2].
+    if (stepTooSmallCounter == 2) {
+      if (mu > mu_min) {
+        UpdateBarrierParameterAndResetFilter();
+        continue;
+      } else {
+        status->exitCondition = SolverExitCondition::kNumericalIssue;
+        return x;
+      }
+    }
   }
 
   if (m_config.diagnostics) {
