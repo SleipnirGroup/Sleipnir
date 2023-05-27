@@ -20,7 +20,8 @@
 #include "sleipnir/autodiff/Hessian.hpp"
 #include "sleipnir/autodiff/Jacobian.hpp"
 #include "sleipnir/autodiff/Variable.hpp"
-#include "sleipnir/optimization/SparseUtil.hpp"
+#include "sleipnir/util/AutodiffUtil.hpp"
+#include "sleipnir/util/SparseUtil.hpp"
 
 using namespace sleipnir;
 
@@ -36,49 +37,6 @@ using namespace sleipnir;
 //     https://users.iems.northwestern.edu/~nocedal/PDFfiles/integrated.pdf
 
 namespace {
-
-/**
- * Assigns the contents of a double vector to an autodiff vector.
- *
- * @param dest The autodiff vector.
- * @param src The double vector.
- */
-void SetAD(std::vector<Variable>& dest,
-           const Eigen::Ref<const Eigen::VectorXd>& src) {
-  assert(dest.size() == static_cast<size_t>(src.rows()));
-
-  for (size_t row = 0; row < dest.size(); ++row) {
-    dest[row] = src(row);
-  }
-}
-
-/**
- * Assigns the contents of a double vector to an autodiff vector.
- *
- * @param dest The autodiff vector.
- * @param src The double vector.
- */
-void SetAD(Eigen::Ref<VectorXvar> dest,
-           const Eigen::Ref<const Eigen::VectorXd>& src) {
-  assert(dest.rows() == src.rows());
-
-  for (int row = 0; row < dest.rows(); ++row) {
-    dest(row) = src(row);
-  }
-}
-
-/**
- * Gets the contents of a autodiff vector as a double vector.
- *
- * @param src The autodiff vector.
- */
-Eigen::VectorXd GetAD(std::vector<Variable> src) {
-  Eigen::VectorXd dest{src.size()};
-  for (int row = 0; row < dest.size(); ++row) {
-    dest(row) = src[row].Value();
-  }
-  return dest;
-}
 
 /**
  * Applies fraction-to-the-boundary rule to a variable and its iterate, then

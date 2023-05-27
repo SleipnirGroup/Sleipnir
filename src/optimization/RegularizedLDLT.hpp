@@ -10,7 +10,7 @@
 #include <Eigen/SparseCore>
 
 #include "Inertia.hpp"
-#include "sleipnir/optimization/SparseUtil.hpp"
+#include "sleipnir/util/SparseUtil.hpp"
 
 namespace sleipnir {
 

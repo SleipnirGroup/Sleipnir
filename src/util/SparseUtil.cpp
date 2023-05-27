@@ -1,8 +1,6 @@
 // Copyright (c) Sleipnir contributors
 
-#include "sleipnir/optimization/SparseUtil.hpp"
-
-#include <functional>
+#include "sleipnir/util/SparseUtil.hpp"
 
 namespace sleipnir {
 

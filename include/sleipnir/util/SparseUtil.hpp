@@ -8,6 +8,8 @@
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
 
+#include "sleipnir/SymbolExports.hpp"
+
 namespace sleipnir {
 
 /**
@@ -15,7 +17,8 @@ namespace sleipnir {
  *
  * @param src Column vector.
  */
-Eigen::SparseMatrix<double> SparseDiagonal(const Eigen::VectorXd& src);
+SLEIPNIR_DLLEXPORT Eigen::SparseMatrix<double> SparseDiagonal(
+    const Eigen::VectorXd& src);
 
 /**
  * Returns sparse identity matrix.
@@ -23,7 +26,8 @@ Eigen::SparseMatrix<double> SparseDiagonal(const Eigen::VectorXd& src);
  * @param rows Number of rows.
  * @param cols Number of columns.
  */
-Eigen::SparseMatrix<double> SparseIdentity(int rows, int cols);
+SLEIPNIR_DLLEXPORT Eigen::SparseMatrix<double> SparseIdentity(int rows,
+                                                              int cols);
 
 /**
  * Adds a sparse matrix to the list of triplets with the given row and column
@@ -34,9 +38,9 @@ Eigen::SparseMatrix<double> SparseIdentity(int rows, int cols);
  * @param[in] colOffset The column offset for each triplet.
  * @param[in] mat The matrix to iterate over.
  */
-void AssignSparseBlock(std::vector<Eigen::Triplet<double>>& triplets,
-                       int rowOffset, int colOffset,
-                       const Eigen::SparseMatrix<double>& mat);
+SLEIPNIR_DLLEXPORT void AssignSparseBlock(
+    std::vector<Eigen::Triplet<double>>& triplets, int rowOffset, int colOffset,
+    const Eigen::SparseMatrix<double>& mat);
 
 /**
  * Write the sparsity pattern of a sparse matrix to a file.
@@ -52,7 +56,8 @@ void AssignSparseBlock(std::vector<Eigen::Triplet<double>>& triplets,
  * @param[in] filename The filename.
  * @param[in] mat The sparse matrix.
  */
-void Spy(std::string_view filename, const Eigen::SparseMatrix<double>& mat);
+SLEIPNIR_DLLEXPORT void Spy(std::string_view filename,
+                            const Eigen::SparseMatrix<double>& mat);
 
 /**
  * Write the sparsity pattern of a sparse matrix to a file.
@@ -68,6 +73,7 @@ void Spy(std::string_view filename, const Eigen::SparseMatrix<double>& mat);
  * @param[out] file A file stream.
  * @param[in] mat The sparse matrix.
  */
-void Spy(std::ostream& file, const Eigen::SparseMatrix<double>& mat);
+SLEIPNIR_DLLEXPORT void Spy(std::ostream& file,
+                            const Eigen::SparseMatrix<double>& mat);
 
 }  // namespace sleipnir
