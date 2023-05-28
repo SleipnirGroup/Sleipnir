@@ -29,6 +29,14 @@ VariableMatrix& VariableMatrix::operator=(double value) {
   return *this;
 }
 
+VariableMatrix& VariableMatrix::operator=(int value) {
+  assert(Rows() == 1 && Cols() == 1);
+
+  (*this)(0, 0) = value;
+
+  return *this;
+}
+
 VariableMatrix::VariableMatrix(const Variable& variable)
     : m_rows{1}, m_cols{1} {
   m_storage.emplace_back(variable);
