@@ -744,18 +744,16 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
 
     // rhs = −[∇f − Aₑᵀy + Aᵢᵀ(S⁻¹(Zcᵢ − μe) − z)]
     //        [                cₑ                ]
-    //
-    // The outer negative sign is applied in the solve() call.
     Eigen::VectorXd rhs{x.rows() + y.rows()};
     rhs.segment(0, x.rows()) =
-        g - A_e.transpose() * y +
-        A_i.transpose() * (S.cwiseInverse() * (Z * c_i - mu * e) - z);
-    rhs.segment(x.rows(), y.rows()) = c_e;
+        -(g - A_e.transpose() * y +
+          A_i.transpose() * (S.cwiseInverse() * (Z * c_i - mu * e) - z));
+    rhs.segment(x.rows(), y.rows()) = -c_e;
 
     // Solve the Newton-KKT system
     solver.Compute(lhs, m_equalityConstraints.size(), mu);
     if (solver.Info() == Eigen::Success) {
-      step = solver.Solve(-rhs);
+      step = solver.Solve(rhs);
     } else {
       // The regularization procedure failed due to a rank-deficient equality
       // constraint Jacobian with linearly dependent constraints. Set the step
@@ -830,13 +828,11 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
           //        [              cₑˢᵒᶜ               ]
           //
           // where cₑˢᵒᶜ = αc(xₖ) + c(xₖ + αp_x)
-          //
-          // The outer negative sign is applied in the solve() call.
           c_e_soc = alpha_soc * c_e_soc + trial_c_e;
-          rhs.bottomRows(y.rows()) = c_e_soc;
+          rhs.bottomRows(y.rows()) = -c_e_soc;
 
           // Solve the Newton-KKT system
-          step = solver.Solve(-rhs);
+          step = solver.Solve(rhs);
 
           p_x_cor = step.segment(0, x.rows());
           p_y_soc = -step.segment(x.rows(), y.rows());
