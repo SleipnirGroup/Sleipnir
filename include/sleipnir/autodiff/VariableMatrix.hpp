@@ -45,6 +45,11 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
   VariableMatrix& operator=(double value);
 
   /**
+   * Assigns a double to a scalar VariableMatrix.
+   */
+  VariableMatrix& operator=(int value);
+
+  /**
    * Constructs a VariableMatrix from an Eigen matrix.
    */
   template <typename Derived>

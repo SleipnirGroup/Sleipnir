@@ -60,6 +60,21 @@ class VariableBlock {
   }
 
   /**
+   * Copy constructs a VariableBlock to the block.
+   */
+  VariableBlock(const VariableBlock<Mat>& values) {
+    if (this == &values) {
+      return;
+    }
+
+    for (int row = 0; row < m_blockRows; ++row) {
+      for (int col = 0; col < m_blockCols; ++col) {
+        (*this)(row, col) = std::move(values(row, col));
+      }
+    }
+  }
+
+  /**
    * Assigns a VariableBlock to the block.
    */
   VariableBlock<Mat>& operator=(VariableBlock<Mat>& values) {
