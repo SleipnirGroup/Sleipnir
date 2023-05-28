@@ -122,9 +122,9 @@ class VariableBlock {
    * @param row The scalar subblock's row.
    * @param col The scalar subblock's column.
    */
-  template <typename Mat2 = Mat,
-            std::enable_if_t<!std::is_const_v<Mat2>, bool> = true>
-  Variable& operator()(int row, int col) {
+  template <typename Mat2 = Mat>
+  requires std::negation_v<std::is_const<Mat2>> Variable& operator()(int row,
+                                                                     int col) {
     assert(row >= 0 && row < Rows());
     assert(col >= 0 && col < Cols());
     return (*m_mat)(m_rowOffset + row, m_colOffset + col);
@@ -147,9 +147,8 @@ class VariableBlock {
    *
    * @param row The scalar subblock's row.
    */
-  template <typename Mat2 = Mat,
-            std::enable_if_t<!std::is_const_v<Mat2>, bool> = true>
-  Variable& operator()(int row) {
+  template <typename Mat2 = Mat>
+  requires std::negation_v<std::is_const<Mat2>> Variable& operator()(int row) {
     assert(row >= 0 && row < Rows() * Cols());
     return (*m_mat)(row);
   }
