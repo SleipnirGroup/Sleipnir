@@ -290,6 +290,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
 
   auto solveStartTime = std::chrono::system_clock::now();
 
+  // Print problem dimensionality
   if (m_config.diagnostics) {
     fmt::print("Number of decision variables: {}\n",
                m_decisionVariables.size());
@@ -299,73 +300,28 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
                m_inequalityConstraints.size());
   }
 
-  // Barrier parameter minimum
-  double mu_min = m_config.tolerance / 10.0;
-
-  // Barrier parameter μ
-  double mu = 0.1;
-
-  // Fraction-to-the-boundary rule scale factor minimum
-  constexpr double tau_min = 0.99;
-
-  // Fraction-to-the-boundary rule scale factor τ
-  double tau = tau_min;
-
-  std::vector<Eigen::Triplet<double>> triplets;
-
-  Eigen::VectorXd x = initialGuess;
+  // Map decision variables and constraints to Eigen vectors for Lagrangian
   MapVectorXvar xAD(m_decisionVariables.data(), m_decisionVariables.size());
-
-  Eigen::VectorXd s = Eigen::VectorXd::Ones(m_inequalityConstraints.size());
-  VectorXvar sAD = VectorXvar::Ones(m_inequalityConstraints.size());
-
-  // Initialization of y is deferred
-  Eigen::VectorXd y;
-  VectorXvar yAD = VectorXvar::Zero(m_equalityConstraints.size());
-
-  Eigen::VectorXd z = Eigen::VectorXd::Ones(m_inequalityConstraints.size());
-  VectorXvar zAD = VectorXvar::Ones(m_inequalityConstraints.size());
-
   MapVectorXvar c_eAD(m_equalityConstraints.data(),
                       m_equalityConstraints.size());
   MapVectorXvar c_iAD(m_inequalityConstraints.data(),
                       m_inequalityConstraints.size());
 
-  const Eigen::VectorXd e = Eigen::VectorXd::Ones(s.rows());
+  // Create autodiff variables for s, y, and z for Lagrangian
+  VectorXvar sAD = VectorXvar::Ones(m_inequalityConstraints.size());
+  VectorXvar yAD = VectorXvar::Zero(m_equalityConstraints.size());
+  VectorXvar zAD = VectorXvar::Ones(m_inequalityConstraints.size());
 
+  // Lagrangian L
+  //
   // L(x, s, y, z)ₖ = f(x)ₖ − yₖᵀcₑ(x)ₖ − zₖᵀ(cᵢ(x)ₖ − sₖ)
   Variable L =
       m_f.value() - yAD.transpose() * c_eAD - zAD.transpose() * (c_iAD - sAD);
   ExpressionGraph graphL{L};
 
-  Eigen::VectorXd step = Eigen::VectorXd::Zero(x.rows());
-
+  // Set x to initial guess and update autodiff so Jacobians and Hessian use it
+  Eigen::VectorXd x = initialGuess;
   SetAD(xAD, x);
-  graphL.Update();
-
-  Gradient gradientF{m_f.value(), xAD};
-  Hessian hessianL{L, xAD};
-  Jacobian jacobianCe{c_eAD, xAD};
-  Jacobian jacobianCi{c_iAD, xAD};
-
-  // Error estimate E_μ
-  double E_mu = std::numeric_limits<double>::infinity();
-
-  // Gradient of f ∇f
-  Eigen::SparseVector<double> g = gradientF.Calculate();
-
-  // Hessian of the Lagrangian H
-  //
-  // Hₖ = ∇²ₓₓL(x, s, y, z)ₖ
-  Eigen::SparseMatrix<double> H = hessianL.Calculate();
-
-  // Equality constraints cₑ
-  Eigen::VectorXd c_e = GetAD(m_equalityConstraints);
-
-  // Inequality constraints cᵢ
-  Eigen::VectorXd c_i = GetAD(m_inequalityConstraints);
-
-  Filter filter{FilterEntry{m_f.value(), mu, s, c_e, c_i}};
 
   // Equality constraint Jacobian Aₑ
   //
@@ -373,6 +329,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   // Aₑ(x) = [∇ᵀcₑ₂(x)ₖ]
   //         [    ⋮    ]
   //         [∇ᵀcₑₘ(x)ₖ]
+  Jacobian jacobianCe{c_eAD, xAD};
   Eigen::SparseMatrix<double> A_e = jacobianCe.Calculate();
 
   // Inequality constraint Jacobian Aᵢ
@@ -381,76 +338,27 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   // Aᵢ(x) = [∇ᵀcᵢ₂(x)ₖ]
   //         [    ⋮    ]
   //         [∇ᵀcᵢₘ(x)ₖ]
+  Jacobian jacobianCi{c_iAD, xAD};
   Eigen::SparseMatrix<double> A_i = jacobianCi.Calculate();
 
-  // Initialize y
+  // Gradient of f ∇f
+  Gradient gradientF{m_f.value(), xAD};
+  Eigen::SparseVector<double> g = gradientF.Calculate();
+
+  // Initialize y for the Hessian to use
+  Eigen::VectorXd y = InitializeY(A_e, g);
+  SetAD(yAD, y);
+
+  // Hessian of the Lagrangian H
   //
-  //   [  I     Aₑᵀ(x₀)][w] = −[∇f(x₀)]
-  //   [Aₑ(x₀)     0   ][y]    [  0   ]
-  //
-  // See equation (36) of [2].
-  {
-    triplets.clear();
-    // Assign top-left quadrant
-    AssignSparseBlock(
-        triplets, 0, 0,
-        SparseIdentity(m_decisionVariables.size(), m_decisionVariables.size()));
-    // Assign bottom-left quadrant
-    AssignSparseBlock(triplets, m_decisionVariables.size(), 0, A_e);
-    // Assign top-right quadrant
-    AssignSparseBlock(triplets, 0, m_decisionVariables.size(), A_e.transpose());
+  // Hₖ = ∇²ₓₓL(x, s, y, z)ₖ
+  Hessian hessianL{L, xAD};
+  Eigen::SparseMatrix<double> H = hessianL.Calculate();
 
-    // [  I     Aₑᵀ(x₀)]
-    // [Aₑ(x₀)     0   ]
-    Eigen::SparseMatrix<double> lhs{x.rows() + A_e.rows(),
-                                    x.rows() + A_e.rows()};
-    lhs.setFromTriplets(triplets.begin(), triplets.end());
-
-    // −[∇f(x₀)]
-    //  [  0   ]
-    Eigen::VectorXd rhs{x.rows() + A_e.rows()};
-    rhs.block(0, 0, x.rows(), 1) = -g;
-    rhs.block(x.rows(), 0, A_e.rows(), 1).setZero();
-
-    y = Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>>{lhs}
-            .solve(rhs)
-            .block(x.rows(), 0, A_e.rows(), 1);
-    if (y.lpNorm<Eigen::Infinity>() > 1e3) {
-      y.setZero();
-    } else {
-      SetAD(yAD, y);
-    }
-  }
-
-  auto iterationsStartTime = std::chrono::system_clock::now();
-
-  if (m_config.diagnostics) {
-    // Print number of nonzeros in Lagrangian Hessian and constraint Jacobians
-    std::string prints;
-
-    if (status->costFunctionType <= ExpressionType::kQuadratic &&
-        status->equalityConstraintType <= ExpressionType::kQuadratic &&
-        status->inequalityConstraintType <= ExpressionType::kQuadratic) {
-      prints += fmt::format("Number of nonzeros in Lagrangian Hessian: {}\n",
-                            H.nonZeros());
-    }
-    if (status->equalityConstraintType <= ExpressionType::kLinear) {
-      prints += fmt::format(
-          "Number of nonzeros in equality constraint Jacobian: {}\n",
-          A_e.nonZeros());
-    }
-    if (status->inequalityConstraintType <= ExpressionType::kLinear) {
-      prints += fmt::format(
-          "Number of nonzeros in inequality constraint Jacobian: {}\n",
-          A_i.nonZeros());
-    }
-
-    if (prints.length() > 0) {
-      fmt::print("{}\n", prints);
-    }
-
-    fmt::print("Error tolerance: {}\n\n", m_config.tolerance);
-  }
+  Eigen::VectorXd s = GetAD(sAD);
+  Eigen::VectorXd z = GetAD(zAD);
+  Eigen::VectorXd c_e = GetAD(m_equalityConstraints);
+  Eigen::VectorXd c_i = GetAD(m_inequalityConstraints);
 
   // Check for overconstrained problem
   if (m_equalityConstraints.size() > m_decisionVariables.size()) {
@@ -465,6 +373,14 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
     status->exitCondition = SolverExitCondition::kTooFewDOFs;
     return x;
   }
+
+  if (m_config.diagnostics) {
+    PrintNonZeros(status, H, A_e, A_i);
+
+    fmt::print("Error tolerance: {}\n\n", m_config.tolerance);
+  }
+
+  std::chrono::system_clock::time_point iterationsStartTime;
 
   int iterations = 0;
 
@@ -503,7 +419,21 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
     }
   }};
 
-  // This should be run once the error estimate is below a desired threshold for
+  // Barrier parameter minimum
+  double mu_min = m_config.tolerance / 10.0;
+
+  // Barrier parameter μ
+  double mu = 0.1;
+
+  // Fraction-to-the-boundary rule scale factor minimum
+  constexpr double tau_min = 0.99;
+
+  // Fraction-to-the-boundary rule scale factor τ
+  double tau = tau_min;
+
+  Filter filter{FilterEntry{m_f.value(), mu, s, c_e, c_i}};
+
+  // This should be run when the error estimate is below a desired threshold for
   // the current barrier parameter
   auto UpdateBarrierParameterAndResetFilter = [&] {
     // Barrier parameter linear decrease power in "κ_μ μ". Range of (0, 1).
@@ -531,9 +461,17 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
     filter.Reset(FilterEntry{m_f.value(), mu, s, c_e, c_i});
   };
 
+  // Kept outside the loop so its storage can be reused
+  std::vector<Eigen::Triplet<double>> triplets;
+
   RegularizedLDLT solver;
 
   int stepTooSmallCounter = 0;
+
+  // Error estimate E_μ
+  double E_mu = std::numeric_limits<double>::infinity();
+
+  iterationsStartTime = std::chrono::system_clock::now();
 
   while (E_mu > m_config.tolerance) {
     auto innerIterStartTime = std::chrono::system_clock::now();
@@ -622,6 +560,8 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
                                     H.cols() + A_e.rows()};
     lhs.setFromTriplets(triplets.begin(), triplets.end());
 
+    const Eigen::VectorXd e = Eigen::VectorXd::Ones(s.rows());
+
     // rhs = −[∇f − Aₑᵀy + Aᵢᵀ(S⁻¹(Zcᵢ − μe) − z)]
     //        [                cₑ                ]
     Eigen::VectorXd rhs{x.rows() + y.rows()};
@@ -632,6 +572,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
 
     // Solve the Newton-KKT system
     solver.Compute(lhs, m_equalityConstraints.size(), mu);
+    Eigen::VectorXd step{x.rows() + y.rows(), 1};
     if (solver.Info() == Eigen::Success) {
       step = solver.Solve(rhs);
     } else {
@@ -735,12 +676,16 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
           trial_z = z + alpha_z * p_z_soc;
 
           SetAD(xAD, trial_x);
-          SetAD(yAD, trial_y);
-          SetAD(zAD, trial_z);
-          SetAD(sAD, trial_s);
-          graphL.Update();
+          m_f.value().Update();
 
+          for (int row = 0; row < c_e.rows(); ++row) {
+            c_eAD(row).Update();
+          }
           trial_c_e = GetAD(m_equalityConstraints);
+
+          for (int row = 0; row < c_i.rows(); ++row) {
+            c_iAD(row).Update();
+          }
           trial_c_i = GetAD(m_inequalityConstraints);
 
           entry = FilterEntry{m_f.value(), mu, trial_s, trial_c_e, trial_c_i};
@@ -876,6 +821,74 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   }
 
   return x;
+}
+
+Eigen::VectorXd OptimizationProblem::InitializeY(
+    const Eigen::SparseMatrix<double>& A_e, const Eigen::VectorXd& g) const {
+  //   [  I     Aₑᵀ(x₀)][w] = −[∇f(x₀)]
+  //   [Aₑ(x₀)     0   ][y]    [  0   ]
+  //
+  // See equation (36) of [2].
+
+  std::vector<Eigen::Triplet<double>> triplets;
+
+  // Assign top-left quadrant
+  AssignSparseBlock(
+      triplets, 0, 0,
+      SparseIdentity(m_decisionVariables.size(), m_decisionVariables.size()));
+  // Assign bottom-left quadrant
+  AssignSparseBlock(triplets, m_decisionVariables.size(), 0, A_e);
+  // Assign top-right quadrant
+  AssignSparseBlock(triplets, 0, m_decisionVariables.size(), A_e.transpose());
+
+  // [  I     Aₑᵀ(x₀)]
+  // [Aₑ(x₀)     0   ]
+  Eigen::SparseMatrix<double> lhs(m_decisionVariables.size() + A_e.rows(),
+                                  m_decisionVariables.size() + A_e.rows());
+  lhs.setFromTriplets(triplets.begin(), triplets.end());
+
+  // −[∇f(x₀)]
+  //  [  0   ]
+  Eigen::VectorXd rhs(m_decisionVariables.size() + A_e.rows());
+  rhs.block(0, 0, m_decisionVariables.size(), 1) = -g;
+  rhs.block(m_decisionVariables.size(), 0, A_e.rows(), 1).setZero();
+
+  Eigen::VectorXd y =
+      Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>>{lhs}.solve(rhs).block(
+          m_decisionVariables.size(), 0, A_e.rows(), 1);
+  if (y.lpNorm<Eigen::Infinity>() > 1e3) {
+    return Eigen::VectorXd::Zero(A_e.rows());
+  } else {
+    return y;
+  }
+}
+
+void OptimizationProblem::PrintNonZeros(
+    SolverStatus* status, const Eigen::SparseMatrix<double>& H,
+    const Eigen::SparseMatrix<double>& A_e,
+    const Eigen::SparseMatrix<double>& A_i) {
+  std::string prints;
+
+  if (status->costFunctionType <= ExpressionType::kQuadratic &&
+      status->equalityConstraintType <= ExpressionType::kQuadratic &&
+      status->inequalityConstraintType <= ExpressionType::kQuadratic) {
+    prints += fmt::format("Number of nonzeros in Lagrangian Hessian: {}\n",
+                          H.nonZeros());
+  }
+  if (status->equalityConstraintType <= ExpressionType::kLinear) {
+    prints +=
+        fmt::format("Number of nonzeros in equality constraint Jacobian: {}\n",
+                    A_e.nonZeros());
+  }
+  if (status->inequalityConstraintType <= ExpressionType::kLinear) {
+    prints += fmt::format(
+        "Number of nonzeros in inequality constraint Jacobian: {}\n",
+        A_i.nonZeros());
+  }
+
+  if (prints.length() > 0) {
+    fmt::print("{}\n", prints);
+  }
 }
 
 bool OptimizationProblem::IsLocallyFeasible(

@@ -383,6 +383,29 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
       SolverStatus* status);
 
   /**
+   * Initialize y based on initial equality constraint Jacobian and gradient.
+   *
+   * @param A_e The initial equality constraint Jacobian.
+   * @param g The initial gradient.
+   */
+  Eigen::VectorXd InitializeY(const Eigen::SparseMatrix<double>& A_e,
+                              const Eigen::VectorXd& g) const;
+
+  /**
+   * Print number of nonzeros in Lagrangian Hessian and constraint Jacobians
+   * if they're constant.
+   *
+   * @param status The solver status.
+   * @param H The Lagrangian Hessian.
+   * @param A_e The Equality constraint Jacobian.
+   * @param A_i The Inequality constraint Jacobian.
+   */
+  static void PrintNonZeros(SolverStatus* status,
+                            const Eigen::SparseMatrix<double>& H,
+                            const Eigen::SparseMatrix<double>& A_e,
+                            const Eigen::SparseMatrix<double>& A_i);
+
+  /**
    * Returns true if the problem is locally feasible.
    *
    * @param A_e The problem's equality constraint Jacobian Aₑ(x) evaluated at
