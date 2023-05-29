@@ -21,6 +21,10 @@ VariableMatrix::VariableMatrix(double value) : m_rows{1}, m_cols{1} {
   m_storage.emplace_back(value);
 }
 
+VariableMatrix::VariableMatrix(int value) : m_rows{1}, m_cols{1} {
+  m_storage.emplace_back(value);
+}
+
 VariableMatrix& VariableMatrix::operator=(double value) {
   assert(Rows() == 1 && Cols() == 1);
 

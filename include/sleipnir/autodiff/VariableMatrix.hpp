@@ -40,6 +40,11 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
   VariableMatrix(double value);  // NOLINT
 
   /**
+   * Constructs a scalar VariableMatrix from an int.
+   */
+  VariableMatrix(int value);  // NOLINT
+
+  /**
    * Assigns a double to a scalar VariableMatrix.
    */
   VariableMatrix& operator=(double value);
