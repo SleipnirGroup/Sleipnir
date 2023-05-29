@@ -45,7 +45,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
   VariableMatrix& operator=(double value);
 
   /**
-   * Assigns a double to a scalar VariableMatrix.
+   * Assigns an int to a scalar VariableMatrix.
    */
   VariableMatrix& operator=(int value);
 
