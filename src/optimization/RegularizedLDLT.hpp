@@ -43,29 +43,45 @@ class RegularizedLDLT {
     //
     // [1] Nocedal, J. and Wright, S. "Numerical Optimization", 2nd. ed.,
     //     App. B. Springer, 2006.
+    m_numDecisionVariables = lhs.rows() - numEqualityConstraints;
+    m_numEqualityConstraints = numEqualityConstraints;
+
+    const Inertia idealInertia{m_numDecisionVariables, m_numEqualityConstraints,
+                               0};
+
     double delta = 0.0;
     double gamma = 0.0;
 
-    size_t numDecisionVariables = lhs.rows() - numEqualityConstraints;
-
-    Inertia idealInertia{lhs.rows() - numEqualityConstraints,
-                         numEqualityConstraints, 0};
-
     m_solver.compute(lhs);
-    if (m_solver.info() == Eigen::Success) {
-      Inertia inertia{m_solver};
-      if (inertia == idealInertia) {
+    Inertia inertia{m_solver};
+
+    // If the decomposition succeeded and the inertia is ideal, don't regularize
+    // the system
+    if (m_solver.info() == Eigen::Success && inertia == idealInertia) {
+      m_info = Eigen::Success;
+      return;
+    }
+
+    // If the decomposition succeeded and the inertia has some zero eigenvalues,
+    // or the decomposition failed, regularize the equality constraints and try
+    // again
+    if ((m_solver.info() == Eigen::Success && inertia.zero > 0) ||
+        m_solver.info() != Eigen::Success) {
+      gamma = 1e-8 * std::pow(mu, 0.25);
+
+      m_solver.compute(lhs + Regularization(delta, gamma));
+      inertia = Inertia{m_solver};
+
+      if (m_solver.info() == Eigen::Success && inertia == idealInertia) {
         m_info = Eigen::Success;
         return;
       }
-
-      if (inertia.zero > 0) {
-        gamma = 1e-8 * std::pow(mu, 0.25);
-      }
-    } else {
-      gamma = 1e-8 * std::pow(mu, 0.25);
     }
 
+    // Since adding gamma didn't fix the inertia, the Hessian needs to be
+    // regularized. If the Hessian wasn't regularized in a previous run of
+    // Compute(), start at a small value of delta. Otherwise, attempt a delta
+    // half as big as the previous run so delta can trend downwards over time.
     if (m_deltaOld == 0.0) {
       delta = 1e-4;
     } else {
@@ -77,18 +93,11 @@ class RegularizedLDLT {
       //
       // lhs = [H + AᵢᵀΣAᵢ + δI   Aₑᵀ]
       //       [       Aₑ        −γI ]
-      Eigen::SparseMatrix<double> regularization{lhs.rows(), lhs.cols()};
-      m_triplets.clear();
-      AssignSparseBlock(
-          m_triplets, 0, 0,
-          delta * SparseIdentity(numDecisionVariables, numDecisionVariables));
-      AssignSparseBlock(m_triplets, numDecisionVariables, numDecisionVariables,
-                        -gamma * SparseIdentity(numEqualityConstraints,
-                                                numEqualityConstraints));
-      regularization.setFromTriplets(m_triplets.begin(), m_triplets.end());
-      m_solver.compute(lhs + regularization);
-
+      m_solver.compute(lhs + Regularization(delta, gamma));
       Inertia inertia{m_solver};
+
+      // If the inertia is ideal, store that value of delta and return.
+      // Otherwise, increase delta by an order of magnitude and try again.
       if (inertia == idealInertia) {
         m_deltaOld = delta;
         m_info = Eigen::Success;
@@ -122,9 +131,39 @@ class RegularizedLDLT {
 
   Eigen::ComputationInfo m_info = Eigen::Success;
 
+  /// The number of decision variables in the system.
+  size_t m_numDecisionVariables = 0;
+
+  /// The number of equality constraints in the system.
+  size_t m_numEqualityConstraints = 0;
+
+  /// The value of delta from the previous run of Compute().
   double m_deltaOld = 0.0;
 
   std::vector<Eigen::Triplet<double>> m_triplets;
+
+  /**
+   * Returns regularization matrix.
+   *
+   * @param delta The Hessian regularization factor.
+   * @param gamma The equality constraint Jacobian regularization factor.
+   */
+  Eigen::SparseMatrix<double> Regularization(double delta, double gamma) {
+    m_triplets.clear();
+    AssignSparseBlock(
+        m_triplets, 0, 0,
+        delta * SparseIdentity(m_numDecisionVariables, m_numDecisionVariables));
+    AssignSparseBlock(m_triplets, m_numDecisionVariables,
+                      m_numDecisionVariables,
+                      -gamma * SparseIdentity(m_numEqualityConstraints,
+                                              m_numEqualityConstraints));
+
+    int rows = m_numDecisionVariables + m_numEqualityConstraints;
+    Eigen::SparseMatrix<double> regularization{rows, rows};
+    regularization.setFromTriplets(m_triplets.begin(), m_triplets.end());
+
+    return regularization;
+  }
 };
 
 }  // namespace sleipnir
