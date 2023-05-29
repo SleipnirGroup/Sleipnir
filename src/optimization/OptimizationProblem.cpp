@@ -474,6 +474,13 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   iterationsStartTime = std::chrono::system_clock::now();
 
   while (E_mu > m_config.tolerance) {
+    // Update autodiff for Jacobians and Hessian
+    SetAD(xAD, x);
+    SetAD(sAD, s);
+    SetAD(yAD, y);
+    SetAD(zAD, z);
+    graphL.Update();
+
     auto innerIterStartTime = std::chrono::system_clock::now();
 
     //     [s₁ 0 ⋯ 0 ]
@@ -610,12 +617,16 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       Eigen::VectorXd trial_z = z + alpha_z * p_z;
 
       SetAD(xAD, trial_x);
-      SetAD(yAD, trial_y);
-      SetAD(zAD, trial_z);
-      SetAD(sAD, trial_s);
-      graphL.Update();
+      m_f.value().Update();
 
+      for (int row = 0; row < c_e.rows(); ++row) {
+        c_eAD(row).Update();
+      }
       Eigen::VectorXd trial_c_e = GetAD(m_equalityConstraints);
+
+      for (int row = 0; row < c_i.rows(); ++row) {
+        c_iAD(row).Update();
+      }
       Eigen::VectorXd trial_c_i = GetAD(m_inequalityConstraints);
 
       FilterEntry entry{m_f.value(), mu, trial_s, trial_c_e, trial_c_i};
@@ -701,77 +712,71 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
         }
       }
 
-      if (stepAcceptable) {
-        continue;
-      }
+      if (!stepAcceptable) {
+        alpha *= 0.5;
 
-      alpha *= 0.5;
+        // Safety factor for the minimal step size
+        constexpr double alpha_min_frac = 0.05;
 
-      // Safety factor for the minimal step size
-      constexpr double alpha_min_frac = 0.05;
-
-      if (alpha < alpha_min_frac * 1e-5) {
-        if (mu > mu_min) {
-          UpdateBarrierParameterAndResetFilter();
-          continue;
-        } else {
-          status->exitCondition = SolverExitCondition::kNumericalIssue;
-          return x;
+        if (alpha < alpha_min_frac * 1e-5) {
+          if (mu > mu_min) {
+            UpdateBarrierParameterAndResetFilter();
+            break;
+          } else {
+            status->exitCondition = SolverExitCondition::kNumericalIssue;
+            return x;
+          }
         }
       }
     }
 
-    // Handle very small search directions by letting αₖ = αₖᵐᵃˣ when
-    // max(|pₖˣ(i)|/(1 + |xₖ(i)|)) < 10ε_mach.
-    //
-    // See section 3.9 of [2].
-    double maxStepScaled = 0.0;
-    for (int row = 0; row < x.rows(); ++row) {
-      maxStepScaled = std::max(maxStepScaled,
-                               std::abs(p_x(row)) / (1.0 + std::abs(x(row))));
-    }
-    if (maxStepScaled < 10.0 * std::numeric_limits<double>::epsilon()) {
-      alpha = alpha_max;
-      ++stepTooSmallCounter;
-    } else {
-      stepTooSmallCounter = 0;
-    }
+    if (stepAcceptable) {
+      // Handle very small search directions by letting αₖ = αₖᵐᵃˣ when
+      // max(|pₖˣ(i)|/(1 + |xₖ(i)|)) < 10ε_mach.
+      //
+      // See section 3.9 of [2].
+      double maxStepScaled = 0.0;
+      for (int row = 0; row < x.rows(); ++row) {
+        maxStepScaled = std::max(maxStepScaled,
+                                 std::abs(p_x(row)) / (1.0 + std::abs(x(row))));
+      }
+      if (maxStepScaled < 10.0 * std::numeric_limits<double>::epsilon()) {
+        alpha = alpha_max;
+        ++stepTooSmallCounter;
+      } else {
+        stepTooSmallCounter = 0;
+      }
 
-    // αₖᶻ = max(α ∈ (0, 1] : zₖ + αpₖᶻ ≥ (1−τⱼ)zₖ)
-    double alpha_z = FractionToTheBoundaryRule(z, p_z, tau);
+      // αₖᶻ = max(α ∈ (0, 1] : zₖ + αpₖᶻ ≥ (1−τⱼ)zₖ)
+      double alpha_z = FractionToTheBoundaryRule(z, p_z, tau);
 
-    // xₖ₊₁ = xₖ + αₖpₖˣ
-    // sₖ₊₁ = xₖ + αₖpₖˢ
-    // yₖ₊₁ = xₖ + αₖᶻpₖʸ
-    // zₖ₊₁ = xₖ + αₖᶻpₖᶻ
-    x += alpha * p_x;
-    s += alpha * p_s;
-    y += alpha_z * p_y;
-    z += alpha_z * p_z;
+      // xₖ₊₁ = xₖ + αₖpₖˣ
+      // sₖ₊₁ = xₖ + αₖpₖˢ
+      // yₖ₊₁ = xₖ + αₖᶻpₖʸ
+      // zₖ₊₁ = xₖ + αₖᶻpₖᶻ
+      x += alpha * p_x;
+      s += alpha * p_s;
+      y += alpha_z * p_y;
+      z += alpha_z * p_z;
 
-    // A requirement for the convergence proof is that the "primal-dual barrier
-    // term Hessian" Σₖ does not deviate arbitrarily much from the "primal
-    // Hessian" μⱼSₖ⁻². We ensure this by resetting
-    //
-    //   zₖ₊₁⁽ⁱ⁾ = max(min(zₖ₊₁⁽ⁱ⁾, κ_Σ μⱼ/sₖ₊₁⁽ⁱ⁾), μⱼ/(κ_Σ sₖ₊₁⁽ⁱ⁾))
-    //
-    // for some fixed κ_Σ ≥ 1 after each step. See equation (16) of [2].
-    {
-      // Barrier parameter scale factor κ_Σ for inequality constraint Lagrange
-      // multiplier safeguard
-      constexpr double kappa_sigma = 1e10;
+      // A requirement for the convergence proof is that the "primal-dual
+      // barrier term Hessian" Σₖ does not deviate arbitrarily much from the
+      // "primal Hessian" μⱼSₖ⁻². We ensure this by resetting
+      //
+      //   zₖ₊₁⁽ⁱ⁾ = max(min(zₖ₊₁⁽ⁱ⁾, κ_Σ μⱼ/sₖ₊₁⁽ⁱ⁾), μⱼ/(κ_Σ sₖ₊₁⁽ⁱ⁾))
+      //
+      // for some fixed κ_Σ ≥ 1 after each step. See equation (16) of [2].
+      {
+        // Barrier parameter scale factor κ_Σ for inequality constraint Lagrange
+        // multiplier safeguard
+        constexpr double kappa_sigma = 1e10;
 
-      for (int row = 0; row < z.rows(); ++row) {
-        z(row) = std::max(std::min(z(row), kappa_sigma * mu / s(row)),
-                          mu / (kappa_sigma * s(row)));
+        for (int row = 0; row < z.rows(); ++row) {
+          z(row) = std::max(std::min(z(row), kappa_sigma * mu / s(row)),
+                            mu / (kappa_sigma * s(row)));
+        }
       }
     }
-
-    SetAD(xAD, x);
-    SetAD(sAD, s);
-    SetAD(yAD, y);
-    SetAD(zAD, z);
-    graphL.Update();
 
     auto innerIterEndTime = std::chrono::system_clock::now();
 
