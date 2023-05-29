@@ -872,9 +872,12 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
             alpha = alpha_soc;
             stepAcceptable = true;
             filter.Add(std::move(entry));
-            break;
           }
         }
+      }
+
+      if (stepAcceptable) {
+        continue;
       }
 
       alpha *= 0.5;
