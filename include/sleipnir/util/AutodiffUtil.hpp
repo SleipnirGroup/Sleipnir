@@ -36,4 +36,11 @@ SLEIPNIR_DLLEXPORT void SetAD(Eigen::Ref<VectorXvar> dest,
  */
 SLEIPNIR_DLLEXPORT Eigen::VectorXd GetAD(std::vector<Variable> src);
 
+/**
+ * Returns an Eigen::Vector<Variable> as an Eigen::VectorXd.
+ *
+ * @param src The Eigen::Vector<Variable>.
+ */
+SLEIPNIR_DLLEXPORT Eigen::VectorXd GetAD(Eigen::Ref<VectorXvar> src);
+
 }  // namespace sleipnir

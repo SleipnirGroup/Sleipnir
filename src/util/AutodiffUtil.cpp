@@ -32,4 +32,12 @@ Eigen::VectorXd GetAD(std::vector<Variable> src) {
   return dest;
 }
 
+Eigen::VectorXd GetAD(Eigen::Ref<VectorXvar> src) {
+  Eigen::VectorXd dest{src.size()};
+  for (int row = 0; row < dest.size(); ++row) {
+    dest(row) = src(row).Value();
+  }
+  return dest;
+}
+
 }  // namespace sleipnir
