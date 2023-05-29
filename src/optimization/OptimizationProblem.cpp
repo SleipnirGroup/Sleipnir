@@ -259,10 +259,16 @@ SolverStatus OptimizationProblem::Solve(const SolverConfig& config) {
     } else if (status.exitCondition ==
                SolverExitCondition::kLocallyInfeasible) {
       fmt::print("problem is locally infeasible");
-    } else if (status.exitCondition == SolverExitCondition::kNumericalIssue) {
+    } else if (status.exitCondition ==
+               SolverExitCondition::kNumericalIssue_BadStep) {
       fmt::print(
           "solver failed to reach the desired tolerance due to a numerical "
-          "issue");
+          "issue (bad step)");
+    } else if (status.exitCondition ==
+               SolverExitCondition::kNumericalIssue_MaxStepTooSmall) {
+      fmt::print(
+          "solver failed to reach the desired tolerance due to a numerical "
+          "issue (max step too small)");
     } else if (status.exitCondition == SolverExitCondition::kMaxIterations) {
       fmt::print("maximum iterations exceeded");
     } else if (status.exitCondition == SolverExitCondition::kTimeout) {
@@ -723,7 +729,8 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
             UpdateBarrierParameterAndResetFilter();
             break;
           } else {
-            status->exitCondition = SolverExitCondition::kNumericalIssue;
+            status->exitCondition =
+                SolverExitCondition::kNumericalIssue_BadStep;
             return x;
           }
         }
@@ -813,7 +820,8 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
         UpdateBarrierParameterAndResetFilter();
         continue;
       } else {
-        status->exitCondition = SolverExitCondition::kNumericalIssue;
+        status->exitCondition =
+            SolverExitCondition::kNumericalIssue_MaxStepTooSmall;
         return x;
       }
     }
