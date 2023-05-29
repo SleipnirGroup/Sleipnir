@@ -35,4 +35,6 @@ macro(sleipnir_compiler_flags target)
   if (MSVC)
     target_compile_options(${target} PUBLIC /bigobj)
   endif()
+
+  set_property(TARGET ${target} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 endmacro()
