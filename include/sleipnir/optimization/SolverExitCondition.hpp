@@ -10,6 +10,8 @@ namespace sleipnir {
 enum class SolverExitCondition {
   /// The solver found an optimal solution.
   kOk,
+  /// The solver reached an acceptable tolerance, but not the desired one.
+  kReachedAcceptableTolerance,
   /// The solver determined the problem to be overconstrained and gave up.
   kTooFewDOFs,
   /// The solver determined the problem to be locally infeasible and gave up.
