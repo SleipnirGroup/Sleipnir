@@ -110,15 +110,11 @@ class Filter {
   bool IsAcceptable(const FilterEntry& entry) {
     // If current filter entry is better than all prior ones in some respect,
     // accept it
-    return std::all_of(
-               m_filter.begin(), m_filter.end(),
-               [&](const auto& elem) {
-                 return entry.cost <=
-                            elem.cost - kGammaCost * elem.constraintViolation ||
-                        entry.constraintViolation <=
-                            (1.0 - kGammaConstraint) * elem.constraintViolation;
-               }) &&
-           entry.constraintViolation < m_maxConstraintViolation;
+    return std::all_of(m_filter.begin(), m_filter.end(), [&](const auto& elem) {
+      return entry.cost <= elem.cost - kGammaCost * elem.constraintViolation ||
+             entry.constraintViolation <=
+                 (1.0 - kGammaConstraint) * elem.constraintViolation;
+    });
   }
 
  private:
