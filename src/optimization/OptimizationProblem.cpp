@@ -485,7 +485,6 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
     SetAD(sAD, s);
     SetAD(yAD, y);
     SetAD(zAD, z);
-    graphL.Update();
 
     auto innerIterStartTime = std::chrono::system_clock::now();
 
