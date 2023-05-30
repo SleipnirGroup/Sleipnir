@@ -472,6 +472,9 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
 
   RegularizedLDLT solver;
 
+  int acceptableIterCounter = 0;
+  const double acceptableTolerance = m_config.tolerance * 100;
+
   int stepTooSmallCounter = 0;
 
   // Error estimate E_μ
@@ -479,7 +482,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
 
   iterationsStartTime = std::chrono::system_clock::now();
 
-  while (E_mu > m_config.tolerance) {
+  while (E_mu > m_config.tolerance && acceptableIterCounter < 15) {
     // Update autodiff for Jacobians and Hessian
     SetAD(xAD, x);
     SetAD(sAD, s);
@@ -544,6 +547,11 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       constexpr double kappa_epsilon = 10.0;
 
       E_mu = ErrorEstimate(g, A_e, c_e, A_i, c_i, s, S, y, z, mu);
+      if (E_mu < acceptableTolerance) {
+        ++acceptableIterCounter;
+      } else {
+        acceptableIterCounter = 0;
+      }
       if (E_mu <= kappa_epsilon * mu) {
         UpdateBarrierParameterAndResetFilter();
         continue;
@@ -824,6 +832,10 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
         return x;
       }
     }
+  }
+
+  if (E_mu > m_config.tolerance && E_mu < acceptableTolerance) {
+    status->exitCondition = SolverExitCondition::kReachedAcceptableTolerance;
   }
 
   if (m_config.diagnostics) {

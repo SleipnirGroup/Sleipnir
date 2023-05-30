@@ -187,7 +187,7 @@ sleipnir::VariableMatrix CartPoleDynamics(const sleipnir::VariableMatrix& x,
   return qddot;
 }
 
-TEST(CartPoleProblemTest, DISABLED_DirectTranscription) {
+TEST(CartPoleProblemTest, DirectTranscription) {
   constexpr auto T = 5_s;
   constexpr units::second_t dt = 50_ms;
   constexpr int N = T / dt;
@@ -255,8 +255,10 @@ TEST(CartPoleProblemTest, DISABLED_DirectTranscription) {
   EXPECT_EQ(sleipnir::ExpressionType::kNonlinear,
             status.equalityConstraintType);
   EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.inequalityConstraintType);
-  EXPECT_EQ(sleipnir::SolverExitCondition::kOk, status.exitCondition);
+  // FIXME: Poor convergence
+  // EXPECT_EQ(sleipnir::SolverExitCondition::kOk, status.exitCondition);
 
+#if 0
   // Verify initial state
   EXPECT_NEAR(0.0, X.Value(0, 0), 1e-2);
   EXPECT_NEAR(0.0, X.Value(1, 0), 1e-2);
@@ -290,6 +292,7 @@ TEST(CartPoleProblemTest, DISABLED_DirectTranscription) {
   EXPECT_NEAR(std::numbers::pi, X.Value(1, N), 1e-2);
   EXPECT_NEAR(0.0, X.Value(2, N), 1e-2);
   EXPECT_NEAR(0.0, X.Value(3, N), 1e-2);
+#endif
 
   // Log states for offline viewing
   std::ofstream states{"Cart-pole states.csv"};

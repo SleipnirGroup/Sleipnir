@@ -14,7 +14,7 @@ namespace sleipnir {
  */
 struct SLEIPNIR_DLLEXPORT SolverConfig {
   /// The solver will stop once the error is below this tolerance.
-  double tolerance = 1e-6;
+  double tolerance = 1e-8;
 
   /// The maximum number of solver iterations before returning a solution.
   int maxIterations = 5000;
