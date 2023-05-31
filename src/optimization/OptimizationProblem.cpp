@@ -20,6 +20,7 @@
 #include "sleipnir/autodiff/Hessian.hpp"
 #include "sleipnir/autodiff/Jacobian.hpp"
 #include "sleipnir/autodiff/Variable.hpp"
+#include "sleipnir/optimization/SolverExitCondition.hpp"
 #include "sleipnir/util/AutodiffUtil.hpp"
 #include "sleipnir/util/SparseUtil.hpp"
 
@@ -252,27 +253,40 @@ SolverStatus OptimizationProblem::Solve(const SolverConfig& config) {
 
   if (m_config.diagnostics) {
     fmt::print("Exit condition: ");
-    if (status.exitCondition == SolverExitCondition::kOk) {
-      fmt::print("optimal solution found");
-    } else if (status.exitCondition == SolverExitCondition::kTooFewDOFs) {
-      fmt::print("problem has too few degrees of freedom");
-    } else if (status.exitCondition ==
-               SolverExitCondition::kLocallyInfeasible) {
-      fmt::print("problem is locally infeasible");
-    } else if (status.exitCondition ==
-               SolverExitCondition::kNumericalIssue_BadStep) {
-      fmt::print(
-          "solver failed to reach the desired tolerance due to a numerical "
-          "issue (bad step)");
-    } else if (status.exitCondition ==
-               SolverExitCondition::kNumericalIssue_MaxStepTooSmall) {
-      fmt::print(
-          "solver failed to reach the desired tolerance due to a numerical "
-          "issue (max step too small)");
-    } else if (status.exitCondition == SolverExitCondition::kMaxIterations) {
-      fmt::print("maximum iterations exceeded");
-    } else if (status.exitCondition == SolverExitCondition::kTimeout) {
-      fmt::print("solution returned after timeout");
+    switch (status.exitCondition) {
+      case SolverExitCondition::kSuccess:
+        fmt::print("solved to desired tolerance");
+        break;
+      case SolverExitCondition::kSolvedToAcceptableTolerance:
+        fmt::print("solved to acceptable tolerance");
+        break;
+      case SolverExitCondition::kTooFewDOFs:
+        fmt::print("problem has too few degrees of freedom");
+        break;
+      case SolverExitCondition::kLocallyInfeasible:
+        fmt::print("problem is locally infeasible");
+        break;
+      case SolverExitCondition::kBadSearchDirection:
+        fmt::print(
+            "solver failed to reach the desired tolerance due to a bad search "
+            "direction");
+        break;
+      case SolverExitCondition::kMaxSearchDirectionTooSmall:
+        fmt::print(
+            "solver failed to reach the desired tolerance due to the maximum "
+            "search direction becoming too small");
+        break;
+      case SolverExitCondition::kDivergingIterates:
+        fmt::print(
+            "solver encountered diverging primal iterates pₖˣ and/or pₖˢ and "
+            "gave up");
+        break;
+      case SolverExitCondition::kMaxIterationsExceeded:
+        fmt::print("solution returned after maximum iterations exceeded");
+        break;
+      case SolverExitCondition::kMaxWallClockTimeExceeded:
+        fmt::print("solution returned after maximum wall time exceeded");
+        break;
     }
     fmt::print("\n");
   }
@@ -736,12 +750,17 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
             UpdateBarrierParameterAndResetFilter();
             break;
           } else {
-            status->exitCondition =
-                SolverExitCondition::kNumericalIssue_BadStep;
+            status->exitCondition = SolverExitCondition::kBadSearchDirection;
             return x;
           }
         }
       }
+    }
+
+    if (p_x.lpNorm<Eigen::Infinity>() > 1e20 ||
+        p_s.lpNorm<Eigen::Infinity>() > 1e20) {
+      status->exitCondition = SolverExitCondition::kDivergingIterates;
+      return x;
     }
 
     if (stepAcceptable) {
@@ -808,12 +827,12 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
 
     ++iterations;
     if (iterations >= m_config.maxIterations) {
-      status->exitCondition = SolverExitCondition::kMaxIterations;
+      status->exitCondition = SolverExitCondition::kMaxIterationsExceeded;
       return x;
     }
 
     if (innerIterEndTime - solveStartTime > m_config.timeout) {
-      status->exitCondition = SolverExitCondition::kTimeout;
+      status->exitCondition = SolverExitCondition::kMaxWallClockTimeExceeded;
       return x;
     }
 
@@ -828,14 +847,14 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
         continue;
       } else {
         status->exitCondition =
-            SolverExitCondition::kNumericalIssue_MaxStepTooSmall;
+            SolverExitCondition::kMaxSearchDirectionTooSmall;
         return x;
       }
     }
   }
 
   if (E_mu > m_config.tolerance && E_mu < acceptableTolerance) {
-    status->exitCondition = SolverExitCondition::kReachedAcceptableTolerance;
+    status->exitCondition = SolverExitCondition::kSolvedToAcceptableTolerance;
   }
 
   if (m_config.diagnostics) {
