@@ -249,7 +249,7 @@ TEST(OCPSolverTest, DISABLED_CartPoleProblem) {
   EXPECT_EQ(sleipnir::ExpressionType::kNonlinear,
             status.equalityConstraintType);
   EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.inequalityConstraintType);
-  EXPECT_EQ(sleipnir::SolverExitCondition::kOk, status.exitCondition);
+  EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
 
   // Log states from input-replay for offline viewing
   std::ofstream inputReplayStates{

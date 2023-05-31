@@ -11,7 +11,7 @@ TEST(TrivialProblemTest, Empty) {
   EXPECT_EQ(sleipnir::ExpressionType::kNone, status.costFunctionType);
   EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
   EXPECT_EQ(sleipnir::ExpressionType::kNone, status.inequalityConstraintType);
-  EXPECT_EQ(sleipnir::SolverExitCondition::kOk, status.exitCondition);
+  EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
 }
 
 TEST(TrivialProblemTest, NoCostUnconstrained) {
@@ -25,7 +25,7 @@ TEST(TrivialProblemTest, NoCostUnconstrained) {
     EXPECT_EQ(sleipnir::ExpressionType::kNone, status.costFunctionType);
     EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
     EXPECT_EQ(sleipnir::ExpressionType::kNone, status.inequalityConstraintType);
-    EXPECT_EQ(sleipnir::SolverExitCondition::kOk, status.exitCondition);
+    EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
 
     for (int row = 0; row < X.Rows(); ++row) {
       for (int col = 0; col < X.Cols(); ++col) {
@@ -45,7 +45,7 @@ TEST(TrivialProblemTest, NoCostUnconstrained) {
     EXPECT_EQ(sleipnir::ExpressionType::kNone, status.costFunctionType);
     EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
     EXPECT_EQ(sleipnir::ExpressionType::kNone, status.inequalityConstraintType);
-    EXPECT_EQ(sleipnir::SolverExitCondition::kOk, status.exitCondition);
+    EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
 
     for (int row = 0; row < X.Rows(); ++row) {
       for (int col = 0; col < X.Cols(); ++col) {

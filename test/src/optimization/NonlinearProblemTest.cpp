@@ -32,7 +32,7 @@ TEST(NonlinearProblemTest, Quartic) {
   EXPECT_EQ(sleipnir::ExpressionType::kNonlinear, status.costFunctionType);
   EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
   EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.inequalityConstraintType);
-  EXPECT_EQ(sleipnir::SolverExitCondition::kOk, status.exitCondition);
+  EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
 
   EXPECT_NEAR(1.0, x.Value(), 1e-6);
 }
@@ -60,7 +60,7 @@ TEST(NonlinearProblemTest, RosenbrockWithCubicAndLineConstraint) {
       EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
       EXPECT_EQ(sleipnir::ExpressionType::kNonlinear,
                 status.inequalityConstraintType);
-      EXPECT_EQ(sleipnir::SolverExitCondition::kOk, status.exitCondition);
+      EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
 
       auto Near = [](double expected, double actual, double tolerance) {
         return std::abs(expected - actual) < tolerance;
@@ -100,7 +100,7 @@ TEST(NonlinearProblemTest, RosenbrockWithDiskConstraint) {
       EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
       EXPECT_EQ(sleipnir::ExpressionType::kQuadratic,
                 status.inequalityConstraintType);
-      EXPECT_EQ(sleipnir::SolverExitCondition::kOk, status.exitCondition);
+      EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
 
       EXPECT_NEAR(1.0, x.Value(), 1e-1)
           << fmt::format("  (x₀, y₀) = ({}, {})\n", x0, y0)

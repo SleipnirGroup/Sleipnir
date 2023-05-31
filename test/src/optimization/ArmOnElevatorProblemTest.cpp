@@ -98,5 +98,5 @@ TEST(ArmOnElevatorProblemTest, DirectTranscription) {
   EXPECT_EQ(sleipnir::ExpressionType::kNonlinear,
             status.inequalityConstraintType);
   // FIXME: Poor convergence
-  // EXPECT_EQ(sleipnir::SolverExitCondition::kOk, status.exitCondition);
+  // EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
 }

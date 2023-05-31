@@ -76,7 +76,7 @@ TEST(OCPSolverTest, Robot) {
   EXPECT_EQ(sleipnir::ExpressionType::kNonlinear,
             status.equalityConstraintType);
   EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.inequalityConstraintType);
-  EXPECT_EQ(sleipnir::SolverExitCondition::kOk, status.exitCondition);
+  EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
 
   // Log states for offline viewing
   std::ofstream states{"Robot states.csv"};

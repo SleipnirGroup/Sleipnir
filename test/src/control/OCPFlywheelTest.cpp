@@ -65,7 +65,7 @@ void TestFlywheel(std::string test_name, Eigen::Matrix<double, 1, 1> A,
   EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
   EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.equalityConstraintType);
   EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.inequalityConstraintType);
-  EXPECT_EQ(sleipnir::SolverExitCondition::kOk, status.exitCondition);
+  EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
 
   // Voltage for steady-state velocity:
   //

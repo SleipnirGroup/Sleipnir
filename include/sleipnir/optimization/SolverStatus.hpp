@@ -23,7 +23,7 @@ struct SLEIPNIR_DLLEXPORT SolverStatus {
   ExpressionType inequalityConstraintType = ExpressionType::kNone;
 
   /// The solver's exit condition.
-  SolverExitCondition exitCondition = SolverExitCondition::kOk;
+  SolverExitCondition exitCondition = SolverExitCondition::kSuccess;
 };
 
 }  // namespace sleipnir

@@ -256,7 +256,7 @@ TEST(CartPoleProblemTest, DirectTranscription) {
             status.equalityConstraintType);
   EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.inequalityConstraintType);
   // FIXME: Poor convergence
-  // EXPECT_EQ(sleipnir::SolverExitCondition::kOk, status.exitCondition);
+  // EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
 
 #if 0
   // Verify initial state

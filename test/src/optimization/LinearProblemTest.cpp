@@ -25,7 +25,7 @@ TEST(LinearProblemTest, Maximize) {
   EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.costFunctionType);
   EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
   EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.inequalityConstraintType);
-  EXPECT_EQ(sleipnir::SolverExitCondition::kOk, status.exitCondition);
+  EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
 
   EXPECT_NEAR(375.0, x.Value(), 1e-6);
   EXPECT_NEAR(250.0, y.Value(), 1e-6);

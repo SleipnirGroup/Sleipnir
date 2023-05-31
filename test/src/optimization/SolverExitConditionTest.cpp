@@ -70,7 +70,7 @@ TEST(SolverExitConditionTest, LocallyInfeasible) {
   }
 }
 
-TEST(SolverExitConditionTest, MaxIterations) {
+TEST(SolverExitConditionTest, MaxIterationsExceeded) {
   sleipnir::OptimizationProblem problem;
 
   auto x = problem.DecisionVariable();
@@ -82,7 +82,7 @@ TEST(SolverExitConditionTest, MaxIterations) {
   EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.costFunctionType);
   EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
   EXPECT_EQ(sleipnir::ExpressionType::kNone, status.inequalityConstraintType);
-  EXPECT_EQ(sleipnir::SolverExitCondition::kMaxIterations,
+  EXPECT_EQ(sleipnir::SolverExitCondition::kMaxIterationsExceeded,
             status.exitCondition);
 }
 
@@ -100,5 +100,6 @@ TEST(SolverExitConditionTest, Timeout) {
   EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.costFunctionType);
   EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
   EXPECT_EQ(sleipnir::ExpressionType::kNone, status.inequalityConstraintType);
-  EXPECT_EQ(sleipnir::SolverExitCondition::kTimeout, status.exitCondition);
+  EXPECT_EQ(sleipnir::SolverExitCondition::kMaxWallClockTimeExceeded,
+            status.exitCondition);
 }
