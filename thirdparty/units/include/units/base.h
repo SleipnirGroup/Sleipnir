@@ -1,9 +1,4 @@
-/*----------------------------------------------------------------------------*/
-/* Copyright (c) 2020 FIRST. All Rights Reserved.                             */
-/* Open Source Software - may be modified and shared by FRC teams. The code   */
-/* must be accompanied by the FIRST BSD license file in the root directory of */
-/* the project.                                                               */
-/*----------------------------------------------------------------------------*/
+// Copyright (c) Sleipnir contributors
 
 // Copyright (c) 2016 Nic Holthaus
 //
@@ -78,7 +73,8 @@
 	#include <iostream>
 	#include <locale>
 	#include <string>
-#else
+#endif
+#if __has_include(<fmt/format.h>) && !defined(UNIT_LIB_DISABLE_FMT)
 	#include <locale>
 	#include <string>
 	#include <fmt/format.h>
@@ -178,7 +174,7 @@ namespace units
  * @param		abbrev - abbreviated unit name, e.g. 'm'
  * @note		When UNIT_LIB_ENABLE_IOSTREAM isn't defined, the macro does not generate any code
  */
-#if !defined(UNIT_LIB_ENABLE_IOSTREAM)
+#if __has_include(<fmt/format.h>) && !defined(UNIT_LIB_DISABLE_FMT)
 	#define UNIT_ADD_IO(namespaceName, nameSingular, abbrev)\
 	}\
 	template <>\
@@ -203,7 +199,8 @@ namespace units
 			return units::detail::to_string(obj()) + std::string(" "#abbrev);\
 		}\
 	}
-#else
+#endif
+#if defined(UNIT_LIB_ENABLE_IOSTREAM)
 	#define UNIT_ADD_IO(namespaceName, nameSingular, abbrev)\
 	namespace namespaceName\
 	{\
@@ -870,7 +867,7 @@ namespace units
 	 *				- A `std::ratio` defining the conversion factor to the base unit type. (e.g. `std::ratio<1,12>` for inches to feet)
 	 *				- A base unit that the unit is derived from (or a unit category. Must be of type `unit` or `base_unit`)
 	 *				- An exponent representing factors of PI required by the conversion. (e.g. `std::ratio<-1>` for a radians to degrees conversion)
-	 *				- a ratio representing a datum translation required for the conversion (e.g. `std::ratio<32>` for a farenheit to celsius conversion)
+	 *				- a ratio representing a datum translation required for the conversion (e.g. `std::ratio<32>` for a fahrenheit to celsius conversion)
 	 *
 	 *				Typically, a specific unit, like `meters`, would be implemented as a type alias
 	 *				of `unit`, i.e. `using meters = unit<std::ratio<1>, units::category::length_unit`, or
@@ -1395,7 +1392,7 @@ namespace units
 	 *					error. This value should be chosen to be as high as possible before
 	 *					integer overflow errors occur in the compiler.
 	 * @note		USE WITH CAUTION. The is an approximate value. In general, squared<sqrt<meter>> != meter,
-	 *				i.e. the operation is not reversible, and it will result in propogated approximations.
+	 *				i.e. the operation is not reversible, and it will result in propagated approximations.
 	 *				Use only when absolutely necessary.
 	 */
 	template<class U, std::intmax_t Eps = 10000000000>
@@ -1759,7 +1756,7 @@ namespace units
 #ifdef FOR_DOXYGEN_PURPOSOES_ONLY
 		/**
 		* @ingroup		TypeTraits
-		* @brief		Trait for accessing the publically defined types of `units::unit_t`
+		* @brief		Trait for accessing the publicly defined types of `units::unit_t`
 		* @details		The units library determines certain properties of the unit_t types passed to them
 		*				and what they represent by using the members of the corresponding unit_t_traits instantiation.
 		*/
@@ -1789,7 +1786,7 @@ namespace units
 
 		/**
 		 * @ingroup		TypeTraits
-		 * @brief		Trait for accessing the publically defined types of `units::unit_t`
+		 * @brief		Trait for accessing the publicly defined types of `units::unit_t`
 		 * @details
 		 */
 		template<typename T>
@@ -2867,13 +2864,16 @@ namespace units
 	namespace dimensionless
 	{
 		typedef unit_t<scalar, UNIT_LIB_DEFAULT_TYPE, decibel_scale> dB_t;
-#if defined(UNIT_LIB_ENABLE_IOSTREAM)
-		inline std::ostream& operator<<(std::ostream& os, const dB_t& obj) { os << obj() << " dB"; return os; }
 		typedef dB_t dBi_t;
 	}
-#else
+#if defined(UNIT_LIB_ENABLE_IOSTREAM)
+	namespace dimensionless
+	{
+		inline std::ostream& operator<<(std::ostream& os, const dB_t& obj) { os << obj() << " dB"; return os; }
+	}
+#endif
 }
-}
+#if __has_include(<fmt/format.h>) && !defined(UNIT_LIB_DISABLE_FMT)
 template <>
 struct fmt::formatter<units::dimensionless::dB_t> : fmt::formatter<double>
 {
@@ -2886,13 +2886,9 @@ struct fmt::formatter<units::dimensionless::dB_t> : fmt::formatter<double>
 		return fmt::format_to(out, " dB");
 	}
 };
-
-namespace units {
-namespace dimensionless {
-		typedef dB_t dBi_t;
-	}
 #endif
 
+namespace units {
 	//------------------------------
 	//	DECIBEL ARITHMETIC
 	//------------------------------
@@ -2974,7 +2970,7 @@ namespace dimensionless {
 #ifdef FOR_DOXYGEN_PURPOSES_ONLY
 		/**
 		* @ingroup		TypeTraits
-		* @brief		Trait for accessing the publically defined types of `units::unit_value_t_traits`
+		* @brief		Trait for accessing the publicly defined types of `units::unit_value_t_traits`
 		* @details		The units library determines certain properties of the `unit_value_t` types passed to
 		*				them and what they represent by using the members of the corresponding `unit_value_t_traits`
 		*				instantiation.
@@ -3001,7 +2997,7 @@ namespace dimensionless {
 
 		/**
 		 * @ingroup		TypeTraits
-		 * @brief		Trait for accessing the publically defined types of `units::unit_value_t_traits`
+		 * @brief		Trait for accessing the publicly defined types of `units::unit_value_t_traits`
 		 * @details
 		 */
 		template<typename T>
@@ -3441,3 +3437,7 @@ namespace dimensionless {
 namespace units::literals {}
 using namespace units::literals;
 #endif  // UNIT_HAS_LITERAL_SUPPORT
+
+#if __has_include(<fmt/format.h>) && !defined(UNIT_LIB_DISABLE_FMT)
+#include "units/formatter.h"
+#endif
