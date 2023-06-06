@@ -29,12 +29,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Install doxygen
-        run: sudo apt update && sudo apt install -y doxygen
-      - name: Run doxygen
-        run: |
-          mkdir build
-          doxygen docs/Doxyfile
+      - name: Create build directory
+        run: mkdir build
+      - name: Run Doxygen
+        uses: mattnotmitt/doxygen-action@1.9.5
+        with:
+          doxyfile-path: 'docs/Doxyfile'
       - name: Setup Pages
         uses: actions/configure-pages@v2
       - name: Upload artifact
