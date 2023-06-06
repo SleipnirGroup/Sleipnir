@@ -56,8 +56,8 @@ class PoolResource {
    * @param bytes Number of bytes in the block (unused).
    * @param alignment Alignment of the block (unused).
    */
-  [[nodiscard]] void* allocate(size_t bytes,
-                               size_t alignment = alignof(std::max_align_t)) {
+  [[nodiscard]]
+  void* allocate(size_t bytes, size_t alignment = alignof(std::max_align_t)) {
     if (m_freeList.empty()) {
       AddChunk();
     }
@@ -138,7 +138,8 @@ class PoolAllocator {
    *
    * @param n Number of bytes in the block (unused).
    */
-  [[nodiscard]] T* allocate(size_t n) {
+  [[nodiscard]]
+  T* allocate(size_t n) {
     return static_cast<T*>(m_memoryResource->allocate(n));
   }
 

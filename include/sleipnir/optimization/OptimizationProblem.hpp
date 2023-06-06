@@ -219,7 +219,8 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
   /**
    * Create a decision variable in the optimization problem.
    */
-  [[nodiscard]] Variable DecisionVariable();
+  [[nodiscard]]
+  Variable DecisionVariable();
 
   /**
    * Create a matrix of decision variables in the optimization problem.
@@ -227,7 +228,8 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
    * @param rows Number of matrix rows.
    * @param cols Number of matrix columns.
    */
-  [[nodiscard]] VariableMatrix DecisionVariable(int rows, int cols = 1);
+  [[nodiscard]]
+  VariableMatrix DecisionVariable(int rows, int cols = 1);
 
   /**
    * Create a symmetric matrix of decision variables in the optimization
@@ -238,7 +240,8 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
    *
    * @param rows Number of matrix rows.
    */
-  [[nodiscard]] VariableMatrix SymmetricDecisionVariable(int rows);
+  [[nodiscard]]
+  VariableMatrix SymmetricDecisionVariable(int rows);
 
   /**
    * Tells the solver to minimize the output of the given cost function.
