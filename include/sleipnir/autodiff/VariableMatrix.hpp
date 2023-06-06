@@ -210,10 +210,9 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param lhs Operator left-hand side.
    * @param rhs Operator right-hand side.
    */
-  template <int _Rows, int _Cols, int... Args>
-  friend VariableMatrix operator*(
-      const Eigen::Matrix<double, _Rows, _Cols, Args...>& lhs,
-      const VariableMatrix& rhs) {
+  template <typename Derived>
+  friend VariableMatrix operator*(const Eigen::MatrixBase<Derived>& lhs,
+                                  const VariableMatrix& rhs) {
     assert(lhs.cols() == rhs.Rows());
 
     VariableMatrix result{static_cast<int>(lhs.rows()), rhs.Cols()};
@@ -237,10 +236,9 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param lhs Operator left-hand side.
    * @param rhs Operator right-hand side.
    */
-  template <int _Rows, int _Cols, int... Args>
-  friend VariableMatrix operator*(
-      const VariableMatrix& lhs,
-      const Eigen::Matrix<double, _Rows, _Cols, Args...>& rhs) {
+  template <typename Derived>
+  friend VariableMatrix operator*(const VariableMatrix& lhs,
+                                  const Eigen::MatrixBase<Derived>& rhs) {
     assert(lhs.Cols() == rhs.rows());
 
     VariableMatrix result{lhs.Rows(), static_cast<int>(rhs.cols())};
@@ -358,10 +356,9 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param lhs Operator left-hand side.
    * @param rhs Operator right-hand side.
    */
-  template <int _Rows, int _Cols, int... Args>
-  friend VariableMatrix operator+(
-      const Eigen::Matrix<double, _Rows, _Cols, Args...>& lhs,
-      const VariableMatrix& rhs) {
+  template <typename Derived>
+  friend VariableMatrix operator+(const Eigen::MatrixBase<Derived>& lhs,
+                                  const VariableMatrix& rhs) {
     VariableMatrix result{static_cast<int>(lhs.rows()),
                           static_cast<int>(lhs.cols())};
 
@@ -380,10 +377,9 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param lhs Operator left-hand side.
    * @param rhs Operator right-hand side.
    */
-  template <int _Rows, int _Cols, int... Args>
-  friend VariableMatrix operator+(
-      const VariableMatrix& lhs,
-      const Eigen::Matrix<double, _Rows, _Cols, Args...>& rhs) {
+  template <typename Derived>
+  friend VariableMatrix operator+(const VariableMatrix& lhs,
+                                  const Eigen::MatrixBase<Derived>& rhs) {
     VariableMatrix result{lhs.Rows(), lhs.Cols()};
 
     for (int row = 0; row < result.Rows(); ++row) {
@@ -417,10 +413,9 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param lhs Operator left-hand side.
    * @param rhs Operator right-hand side.
    */
-  template <int _Rows, int _Cols, int... Args>
-  friend VariableMatrix operator-(
-      const Eigen::Matrix<double, _Rows, _Cols, Args...>& lhs,
-      const VariableMatrix& rhs) {
+  template <typename Derived>
+  friend VariableMatrix operator-(const Eigen::MatrixBase<Derived>& lhs,
+                                  const VariableMatrix& rhs) {
     VariableMatrix result{static_cast<int>(lhs.rows()),
                           static_cast<int>(lhs.cols())};
 
@@ -448,10 +443,9 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param lhs Operator left-hand side.
    * @param rhs Operator right-hand side.
    */
-  template <int _Rows, int _Cols, int... Args>
-  friend VariableMatrix operator-(
-      const VariableMatrix& lhs,
-      const Eigen::Matrix<double, _Rows, _Cols, Args...>& rhs) {
+  template <typename Derived>
+  friend VariableMatrix operator-(const VariableMatrix& lhs,
+                                  const Eigen::MatrixBase<Derived>& rhs) {
     VariableMatrix result{lhs.Rows(), lhs.Cols()};
 
     for (int row = 0; row < result.Rows(); ++row) {
