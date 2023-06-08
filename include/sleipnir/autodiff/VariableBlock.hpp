@@ -63,15 +63,11 @@ class VariableBlock {
    * Copy constructs a VariableBlock to the block.
    */
   VariableBlock(const VariableBlock<Mat>& values) {
-    if (this == &values) {
-      return;
-    }
-
-    for (int row = 0; row < m_blockRows; ++row) {
-      for (int col = 0; col < m_blockCols; ++col) {
-        (*this)(row, col) = std::move(values(row, col));
-      }
-    }
+    m_mat = values.m_mat;
+    m_rowOffset = values.m_rowOffset;
+    m_colOffset = values.m_colOffset;
+    m_blockRows = values.m_blockRows;
+    m_blockCols = values.m_blockCols;
   }
 
   /**
@@ -82,11 +78,23 @@ class VariableBlock {
       return *this;
     }
 
-    for (int row = 0; row < m_blockRows; ++row) {
-      for (int col = 0; col < m_blockCols; ++col) {
-        (*this)(row, col) = std::move(values(row, col));
+    if (m_mat == nullptr) {
+      m_mat = values.m_mat;
+      m_rowOffset = values.m_rowOffset;
+      m_colOffset = values.m_colOffset;
+      m_blockRows = values.m_blockRows;
+      m_blockCols = values.m_blockCols;
+    } else {
+      assert(Rows() == values.Rows());
+      assert(Cols() == values.Cols());
+
+      for (int row = 0; row < Rows(); ++row) {
+        for (int col = 0; col < Cols(); ++col) {
+          (*this)(row, col) = values(row, col);
+        }
       }
     }
+
     return *this;
   }
 
@@ -98,8 +106,8 @@ class VariableBlock {
     assert(Rows() == values.rows());
     assert(Cols() == values.cols());
 
-    for (int row = 0; row < values.rows(); ++row) {
-      for (int col = 0; col < values.cols(); ++col) {
+    for (int row = 0; row < Rows(); ++row) {
+      for (int col = 0; col < Cols(); ++col) {
         (*this)(row, col) = values(row, col);
       }
     }
@@ -111,8 +119,11 @@ class VariableBlock {
    * Assigns a VariableMatrix to the block.
    */
   VariableBlock<Mat>& operator=(const Mat& values) {
-    for (int row = 0; row < m_blockRows; ++row) {
-      for (int col = 0; col < m_blockCols; ++col) {
+    assert(Rows() == values.Rows());
+    assert(Cols() == values.Cols());
+
+    for (int row = 0; row < Rows(); ++row) {
+      for (int col = 0; col < Cols(); ++col) {
         (*this)(row, col) = values(row, col);
       }
     }
@@ -123,8 +134,11 @@ class VariableBlock {
    * Assigns a VariableMatrix to the block.
    */
   VariableBlock<Mat>& operator=(Mat&& values) {
-    for (int row = 0; row < m_blockRows; ++row) {
-      for (int col = 0; col < m_blockCols; ++col) {
+    assert(Rows() == values.Rows());
+    assert(Cols() == values.Cols());
+
+    for (int row = 0; row < Rows(); ++row) {
+      for (int col = 0; col < Cols(); ++col) {
         (*this)(row, col) = std::move(values(row, col));
       }
     }
