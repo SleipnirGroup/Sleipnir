@@ -268,12 +268,12 @@ TEST(CartPoleProblemTest, DirectTranscription) {
   // Verify solution
   for (int k = 0; k < N; ++k) {
     // Cart position constraints
-    EXPECT_GE(X.Row(0).Value(k), 0.0);
-    EXPECT_LE(X.Row(0).Value(k), d_max.value());
+    EXPECT_GE(X(0, k), 0.0);
+    EXPECT_LE(X(0, k), d_max.value());
 
     // Input constraints
-    EXPECT_GE(U.Col(k).Value(0), -u_max.value());
-    EXPECT_LE(U.Col(k).Value(0), u_max.value());
+    EXPECT_GE(U(0, k), -u_max.value());
+    EXPECT_LE(U(0, k), u_max.value());
 
     // Dynamics constraints
     // FIXME: The tolerance here is too large. It should be 1e-6 based on the
