@@ -67,15 +67,8 @@ TEST(DecisionVariableTest, StaticMatrixInitAssign) {
 
   // Block assignment
   {
-    sleipnir::OptimizationProblem problem;
-
-    Eigen::Matrix<double, 3, 2> expected{{7.0, 8.0}, {9.0, 10.0}, {11.0, 12.0}};
-
     Eigen::Matrix<double, 2, 1> expectedBlock{{1.0}, {1.0}};
     z.Block(0, 0, 2, 1) = expectedBlock;
-    expected.block<2, 1>(0, 0) = expectedBlock;
-
-    EXPECT_EQ(expected, z.Value());
 
     Eigen::Matrix<double, 3, 2> expectedResult{
         {1.0, 8.0}, {1.0, 10.0}, {11.0, 12.0}};
@@ -84,15 +77,8 @@ TEST(DecisionVariableTest, StaticMatrixInitAssign) {
 
   // Segment assignment
   {
-    sleipnir::OptimizationProblem problem;
-
-    Eigen::Matrix<double, 3, 2> expected{{7.0, 8.0}, {9.0, 10.0}, {11.0, 12.0}};
-
     Eigen::Matrix<double, 2, 1> expectedBlock{{1.0}, {1.0}};
     z.Segment(0, 2) = expectedBlock;
-    expected.block<2, 1>(0, 0) = expectedBlock;
-
-    EXPECT_EQ(expected, z.Value());
 
     Eigen::Matrix<double, 3, 2> expectedResult{
         {1.0, 8.0}, {1.0, 10.0}, {11.0, 12.0}};
@@ -135,17 +121,9 @@ TEST(DecisionVariableTest, DynamicMatrixInitAssign) {
 
   // Block assignment
   {
-    sleipnir::OptimizationProblem problem;
-
-    Eigen::MatrixXd expected{3, 2};
-    expected << 7.0, 8.0, 9.0, 10.0, 11.0, 12.0;
-
     Eigen::MatrixXd expectedBlock{2, 1};
     expectedBlock << 1.0, 1.0;
     z.Block(0, 0, 2, 1) = expectedBlock;
-    expected.block<2, 1>(0, 0) = expectedBlock;
-
-    EXPECT_EQ(expected, z.Value());
 
     Eigen::MatrixXd expectedResult{3, 2};
     expectedResult << 1.0, 8.0, 1.0, 10.0, 11.0, 12.0;
@@ -154,17 +132,9 @@ TEST(DecisionVariableTest, DynamicMatrixInitAssign) {
 
   // Segment assignment
   {
-    sleipnir::OptimizationProblem problem;
-
-    Eigen::MatrixXd expected{3, 2};
-    expected << 7.0, 8.0, 9.0, 10.0, 11.0, 12.0;
-
     Eigen::MatrixXd expectedBlock{2, 1};
     expectedBlock << 1.0, 1.0;
     z.Segment(0, 2) = expectedBlock;
-    expected.block<2, 1>(0, 0) = expectedBlock;
-
-    EXPECT_EQ(expected, z.Value());
 
     Eigen::MatrixXd expectedResult{3, 2};
     expectedResult << 1.0, 8.0, 1.0, 10.0, 11.0, 12.0;
