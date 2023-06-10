@@ -108,14 +108,18 @@ add_custom_command(
 )
 
 # fmt dependency
-set(FMT_INSTALL ON)
 if (NOT USE_SYSTEM_FMT)
+  set(BUILD_SHARED_LIBS_SAVE ${BUILD_SHARED_LIBS})
+  set(BUILD_SHARED_LIBS OFF)
+  set(CMAKE_POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS_SAVE})
+  set(FMT_INSTALL ON)
   FetchContent_Declare(
     fmt
     GIT_REPOSITORY https://github.com/fmtlib/fmt.git
     GIT_TAG        10.0.0
   )
   FetchContent_MakeAvailable(fmt)
+  set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_SAVE})
 else()
   find_package(fmt CONFIG REQUIRED)
 endif()
