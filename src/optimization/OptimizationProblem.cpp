@@ -15,7 +15,6 @@
 #include "RegularizedLDLT.hpp"
 #include "ScopeExit.hpp"
 #include "sleipnir/autodiff/Expression.hpp"
-#include "sleipnir/autodiff/ExpressionGraph.hpp"
 #include "sleipnir/autodiff/Gradient.hpp"
 #include "sleipnir/autodiff/Hessian.hpp"
 #include "sleipnir/autodiff/Jacobian.hpp"
@@ -337,7 +336,6 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   // L(x, s, y, z)ₖ = f(x)ₖ − yₖᵀcₑ(x)ₖ − zₖᵀ(cᵢ(x)ₖ − sₖ)
   Variable L =
       m_f.value() - yAD.transpose() * c_eAD - zAD.transpose() * (c_iAD - sAD);
-  ExpressionGraph graphL{L};
 
   // Set x to initial guess and update autodiff so Jacobians and Hessian use it
   Eigen::VectorXd x = initialGuess;
@@ -644,7 +642,6 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       Eigen::VectorXd trial_z = z + alpha_z * p_z;
 
       SetAD(xAD, trial_x);
-      m_f.value().Update();
 
       for (int row = 0; row < c_e.rows(); ++row) {
         c_eAD(row).Update();
@@ -656,6 +653,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       }
       Eigen::VectorXd trial_c_i = GetAD(m_inequalityConstraints);
 
+      m_f.value().Update();
       FilterEntry entry{m_f.value(), mu, trial_s, trial_c_e, trial_c_i};
       if (filter.IsAcceptable(entry)) {
         stepAcceptable = true;
@@ -714,7 +712,6 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
           trial_z = z + alpha_z * p_z_soc;
 
           SetAD(xAD, trial_x);
-          m_f.value().Update();
 
           for (int row = 0; row < c_e.rows(); ++row) {
             c_eAD(row).Update();
@@ -726,6 +723,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
           }
           trial_c_i = GetAD(m_inequalityConstraints);
 
+          m_f.value().Update();
           entry = FilterEntry{m_f.value(), mu, trial_s, trial_c_e, trial_c_i};
           if (filter.IsAcceptable(entry)) {
             p_x = p_x_cor;
