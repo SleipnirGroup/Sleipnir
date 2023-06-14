@@ -630,6 +630,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
 
     bool stepAcceptable = false;
 
+    // αᵐᵃˣ = max(α ∈ (0, 1] : sₖ + αpₖˢ ≥ (1−τⱼ)sₖ)
     double alpha_max = FractionToTheBoundaryRule(s, p_s, tau);
     double alpha = alpha_max;
 
@@ -702,6 +703,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
           p_s_soc =
               mu * Z.cwiseInverse() * e - s - Z.cwiseInverse() * S * p_z_soc;
 
+          // αˢᵒᶜ = max(α ∈ (0, 1] : sₖ + αpₖˢ ≥ (1−τⱼ)sₖ)
           alpha_soc = FractionToTheBoundaryRule(s, p_s_soc, tau);
           trial_x = x + alpha_soc * p_x_cor;
           trial_s = s + alpha_soc * p_s_soc;
@@ -738,12 +740,13 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       }
 
       if (!stepAcceptable) {
-        alpha *= 0.5;
+        constexpr double alpha_red_factor = 0.5;
+        alpha *= alpha_red_factor;
 
         // Safety factor for the minimal step size
         constexpr double alpha_min_frac = 0.05;
 
-        if (alpha < alpha_min_frac * 1e-5) {
+        if (alpha < alpha_min_frac * Filter::kGammaConstraint) {
           if (mu > mu_min) {
             UpdateBarrierParameterAndResetFilter();
             break;
