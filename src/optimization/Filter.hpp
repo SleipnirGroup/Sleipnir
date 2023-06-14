@@ -43,6 +43,9 @@ struct FilterEntry {
  */
 class Filter {
  public:
+  static constexpr double kGammaCost = 1e-8;
+  static constexpr double kGammaConstraint = 1e-5;
+
   /**
    * Initialize the filter with an entry.
    *
@@ -125,9 +128,6 @@ class Filter {
   std::vector<FilterEntry> m_filter;
 
   double m_maxConstraintViolation = 1e4;
-
-  static constexpr double kGammaCost = 1e-8;
-  static constexpr double kGammaConstraint = 1e-5;
 };
 
 }  // namespace sleipnir
