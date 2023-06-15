@@ -112,7 +112,14 @@ if (NOT USE_SYSTEM_FMT)
   set(BUILD_SHARED_LIBS_SAVE ${BUILD_SHARED_LIBS})
   set(BUILD_SHARED_LIBS OFF)
   set(CMAKE_POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS_SAVE})
-  set(FMT_INSTALL ON)
+
+  # Since fmt is an internal dependency, only install it for Emscripten compiler
+  if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
+    set(FMT_INSTALL ON)
+  else()
+    set(FMT_INSTALL OFF)
+  endif()
+
   FetchContent_Declare(
     fmt
     GIT_REPOSITORY https://github.com/fmtlib/fmt.git
