@@ -141,7 +141,9 @@ install(TARGETS Sleipnir
 export(TARGETS Sleipnir
        FILE Sleipnir.cmake
        NAMESPACE Sleipnir::)
-install(DIRECTORY include/ DESTINATION "include/Sleipnir")
+install(DIRECTORY include/
+        COMPONENT Sleipnir
+        DESTINATION "include/Sleipnir")
 install(EXPORT SleipnirTargets
         FILE Sleipnir.cmake
         NAMESPACE Sleipnir::
@@ -158,9 +160,9 @@ configure_package_config_file(
   NO_CHECK_REQUIRED_COMPONENTS_MACRO)
 
 # Install the config file
-install(FILES
-  ${CMAKE_CURRENT_BINARY_DIR}/SleipnirConfig.cmake
-  DESTINATION lib/cmake/Sleipnir)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/SleipnirConfig.cmake
+        COMPONENT Sleipnir
+        DESTINATION lib/cmake/Sleipnir)
 
 option(BUILD_BENCHMARKING "Build CasADi and Sleipnir benchmarks" ON)
 
