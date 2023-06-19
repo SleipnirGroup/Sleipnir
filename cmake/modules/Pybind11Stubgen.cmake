@@ -6,7 +6,8 @@ function(pybind11_stubgen target)
         COMMAND
             ${Python3_EXECUTABLE} -m pybind11_stubgen --ignore-all-errors
             --print-invalid-expressions-as-is --exit-code
-            $<TARGET_FILE_BASE_NAME:${target}> -o $<TARGET_FILE_DIR:${target}>
+            $<TARGET_FILE_BASE_NAME:${target}> -o
+            $<TARGET_FILE_DIR:${target}>-stubs
         WORKING_DIRECTORY $<TARGET_FILE_DIR:${target}>
         USES_TERMINAL
     )
@@ -14,11 +15,10 @@ endfunction()
 
 function(pybind11_stubgen_install target destination)
     install(
-        DIRECTORY
-            $<TARGET_FILE_DIR:${target}>/$<TARGET_FILE_BASE_NAME:${target}>-stubs/
+        DIRECTORY $<TARGET_FILE_DIR:${target}>-stubs/${target}/
         COMPONENT python_modules
-        DESTINATION ${destination}/$<TARGET_FILE_BASE_NAME:${target}>
+        DESTINATION ${destination}
         FILES_MATCHING
-        REGEX "\.pyi$"
+        PATTERN "*.pyi"
     )
 endfunction()

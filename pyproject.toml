@@ -13,7 +13,7 @@ dependencies = [ "numpy", "scipy" ]
   Documentation = "https://sleipnirgroup.github.io/Sleipnir/"
 
 [build-system]
-requires = [ "py-build-cmake~=0.1.8", "pybind11", "pybind11-stubgen" ]
+requires = [ "py-build-cmake~=0.1.8", "pybind11", "pybind11-mkdoc", "clang==16.0.6", "pybind11-stubgen" ]
 build-backend = "py_build_cmake.build"
 
 [tool.py-build-cmake.module]

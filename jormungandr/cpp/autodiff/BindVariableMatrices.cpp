@@ -12,6 +12,7 @@
 #include <sleipnir/autodiff/VariableMatrix.hpp>
 #include <sleipnir/optimization/Constraints.hpp>
 
+#include "Docstrings.hpp"
 #include "sleipnir/optimization/OptimizationProblem.hpp"
 
 namespace py = pybind11;
@@ -25,9 +26,10 @@ void BindVariableBlock(
     py::class_<VariableBlock<VariableMatrix>>& variable_block);
 
 void BindVariableMatrices(py::module_& autodiff) {
-  py::class_<VariableMatrix> variable_matrix{autodiff, "VariableMatrix"};
-  py::class_<VariableBlock<VariableMatrix>> variable_block{autodiff,
-                                                           "VariableBlock"};
+  py::class_<VariableMatrix> variable_matrix{autodiff, "VariableMatrix",
+                                             DOC(sleipnir, VariableMatrix)};
+  py::class_<VariableBlock<VariableMatrix>> variable_block{
+      autodiff, "VariableBlock", DOC(sleipnir, VariableBlock)};
 
   BindVariableMatrix(autodiff, variable_matrix);
 
@@ -36,12 +38,14 @@ void BindVariableMatrices(py::module_& autodiff) {
       [](const VariableMatrix& lhs, const VariableMatrix& rhs,
          const std::function<Variable(const Variable&, const Variable&)> func) {
         return CwiseReduce(lhs, rhs, func);
-      });
+      },
+      DOC(sleipnir, CwiseReduce));
 
   autodiff.def(
       "block",
       static_cast<VariableMatrix (*)(std::vector<std::vector<VariableMatrix>>)>(
-          &Block));
+          &Block),
+      DOC(sleipnir, Block));
 
   BindVariableBlock(autodiff, variable_block);
 
@@ -51,26 +55,38 @@ void BindVariableMatrices(py::module_& autodiff) {
          const VariableBlock<VariableMatrix>& rhs,
          const std::function<Variable(const Variable&, const Variable&)> func) {
         return CwiseReduce(lhs, rhs, func);
-      });
+      },
+      DOC(sleipnir, CwiseReduce));
 }
 
 void BindVariableMatrix(py::module_& autodiff,
                         py::class_<VariableMatrix>& variable_matrix) {
-  variable_matrix.def(py::init<>());
-  variable_matrix.def(py::init<int>());
-  variable_matrix.def(py::init<int, int>());
-  variable_matrix.def(py::init<std::vector<std::vector<double>>>());
-  variable_matrix.def(py::init<std::vector<std::vector<Variable>>>());
-  variable_matrix.def(py::init<const Variable&>());
-  variable_matrix.def(py::init<const VariableBlock<VariableMatrix>&>());
-  variable_matrix.def("set",
-                      [](VariableMatrix& self, const Eigen::MatrixXd& values) {
-                        self = values;
-                      });
-  variable_matrix.def("set_value",
-                      [](VariableMatrix& self, const Eigen::MatrixXd& values) {
-                        self.SetValue(values);
-                      });
+  variable_matrix.def(py::init<>(),
+                      DOC(sleipnir, VariableMatrix, VariableMatrix));
+  variable_matrix.def(py::init<int>(),
+                      DOC(sleipnir, VariableMatrix, VariableMatrix, 2));
+  variable_matrix.def(py::init<int, int>(),
+                      DOC(sleipnir, VariableMatrix, VariableMatrix, 3));
+  variable_matrix.def(py::init<std::vector<std::vector<double>>>(),
+                      DOC(sleipnir, VariableMatrix, VariableMatrix, 5));
+  variable_matrix.def(py::init<std::vector<std::vector<Variable>>>(),
+                      DOC(sleipnir, VariableMatrix, VariableMatrix, 6));
+  variable_matrix.def(py::init<const Variable&>(),
+                      DOC(sleipnir, VariableMatrix, VariableMatrix, 9));
+  variable_matrix.def(py::init<const VariableBlock<VariableMatrix>&>(),
+                      DOC(sleipnir, VariableMatrix, VariableMatrix, 11));
+  variable_matrix.def(
+      "set",
+      [](VariableMatrix& self, const Eigen::MatrixXd& values) {
+        self = values;
+      },
+      DOC(sleipnir, VariableMatrix, operator, assign));
+  variable_matrix.def(
+      "set_value",
+      [](VariableMatrix& self, const Eigen::MatrixXd& values) {
+        self.SetValue(values);
+      },
+      DOC(sleipnir, VariableMatrix, SetValue));
   variable_matrix.def("__setitem__",
                       [](VariableMatrix& self, int row, const Variable& value) {
                         return self(row) = value;
@@ -135,16 +151,19 @@ void BindVariableMatrix(py::module_& autodiff,
           value.cast<int>();
     }
   });
-  variable_matrix.def("__getitem__",
-                      [](VariableMatrix& self, int row) -> Variable& {
-                        if (row < 0) {
-                          row = self.size() + row;
-                        }
-                        return self(row);
-                      });
+  variable_matrix.def(
+      "__getitem__",
+      [](VariableMatrix& self, int row) -> Variable& {
+        if (row < 0) {
+          row = self.size() + row;
+        }
+        return self(row);
+      },
+      DOC(sleipnir, VariableMatrix, operator, call, 3));
   // TODO: Support slice stride other than 1
   variable_matrix.def(
-      "__getitem__", [](VariableMatrix& self, py::tuple slices) -> py::object {
+      "__getitem__",
+      [](VariableMatrix& self, py::tuple slices) -> py::object {
         if (slices.size() != 2) {
           throw py::index_error(
               fmt::format("Expected 2 slices, got {}.", slices.size()));
@@ -211,9 +230,12 @@ void BindVariableMatrix(py::module_& autodiff,
         }
 
         return py::cast(self.Block(rowOffset, colOffset, blockRows, blockCols));
-      });
-  variable_matrix.def("row", py::overload_cast<int>(&VariableMatrix::Row));
-  variable_matrix.def("col", py::overload_cast<int>(&VariableMatrix::Col));
+      },
+      DOC(sleipnir, VariableMatrix, operator, call));
+  variable_matrix.def("row", py::overload_cast<int>(&VariableMatrix::Row),
+                      DOC(sleipnir, VariableMatrix, Row));
+  variable_matrix.def("col", py::overload_cast<int>(&VariableMatrix::Col),
+                      DOC(sleipnir, VariableMatrix, Col));
   variable_matrix.def(
       "__mul__",
       [](const VariableMatrix& lhs, const VariableMatrix& rhs) {
@@ -323,8 +345,10 @@ void BindVariableMatrix(py::module_& autodiff,
 
   variable_matrix.def(py::self / Variable());
   variable_matrix.def(py::self / double());
-  variable_matrix.def(py::self /= Variable());
-  variable_matrix.def(py::self /= double());
+  variable_matrix.def(py::self /= Variable(),
+                      DOC(sleipnir, VariableMatrix, operator, idiv));
+  variable_matrix.def(py::self /= double(),
+                      DOC(sleipnir, VariableMatrix, operator, idiv));
 
   variable_matrix.def(py::self + py::self);
   variable_matrix.def(
@@ -401,54 +425,64 @@ void BindVariableMatrix(py::module_& autodiff,
         return sleipnir::pow(self, power);
       },
       py::is_operator());
-  variable_matrix.def_property_readonly("T", &VariableMatrix::T);
-  variable_matrix.def("rows", &VariableMatrix::Rows);
-  variable_matrix.def("cols", &VariableMatrix::Cols);
+  variable_matrix.def_property_readonly("T", &VariableMatrix::T,
+                                        DOC(sleipnir, VariableMatrix, T));
+  variable_matrix.def("rows", &VariableMatrix::Rows,
+                      DOC(sleipnir, VariableMatrix, Rows));
+  variable_matrix.def("cols", &VariableMatrix::Cols,
+                      DOC(sleipnir, VariableMatrix, Cols));
   variable_matrix.def_property_readonly(
       "shape", [](const VariableMatrix& self) {
         return py::make_tuple(self.Rows(), self.Cols());
       });
   variable_matrix.def("value",
                       static_cast<double (VariableMatrix::*)(int, int) const>(
-                          &VariableMatrix::Value));
+                          &VariableMatrix::Value),
+                      DOC(sleipnir, VariableMatrix, Value));
   variable_matrix.def("value",
                       static_cast<double (VariableMatrix::*)(int) const>(
-                          &VariableMatrix::Value));
+                          &VariableMatrix::Value),
+                      DOC(sleipnir, VariableMatrix, Value, 2));
   variable_matrix.def("value",
                       static_cast<Eigen::MatrixXd (VariableMatrix::*)() const>(
-                          &VariableMatrix::Value));
-  variable_matrix.def("cwise_transform",
-                      [](const VariableMatrix& self,
-                         const std::function<Variable(const Variable&)>& func) {
-                        return self.CwiseTransform(func);
-                      });
-  variable_matrix.def_static("zero", &VariableMatrix::Zero);
-  variable_matrix.def_static("ones", &VariableMatrix::Ones);
-  variable_matrix.def(py::self == py::self);
-  variable_matrix.def(py::self == double());
-  variable_matrix.def(py::self == int());
-  variable_matrix.def(double() == py::self);
-  variable_matrix.def(int() == py::self);
-  variable_matrix.def(py::self < py::self);
-  variable_matrix.def(py::self < double());
-  variable_matrix.def(py::self < int());
-  variable_matrix.def(double() < py::self);
-  variable_matrix.def(int() < py::self);
-  variable_matrix.def(py::self <= py::self);
-  variable_matrix.def(py::self <= double());
-  variable_matrix.def(py::self <= int());
-  variable_matrix.def(double() <= py::self);
-  variable_matrix.def(int() <= py::self);
-  variable_matrix.def(py::self > py::self);
-  variable_matrix.def(py::self > double());
-  variable_matrix.def(py::self > int());
-  variable_matrix.def(double() > py::self);
-  variable_matrix.def(int() > py::self);
-  variable_matrix.def(py::self >= py::self);
-  variable_matrix.def(py::self >= double());
-  variable_matrix.def(py::self >= int());
-  variable_matrix.def(double() >= py::self);
-  variable_matrix.def(int() >= py::self);
+                          &VariableMatrix::Value),
+                      DOC(sleipnir, VariableMatrix, Value, 3));
+  variable_matrix.def(
+      "cwise_transform",
+      [](const VariableMatrix& self,
+         const std::function<Variable(const Variable&)>& func) {
+        return self.CwiseTransform(func);
+      },
+      DOC(sleipnir, VariableMatrix, CwiseTransform));
+  variable_matrix.def_static("zero", &VariableMatrix::Zero,
+                             DOC(sleipnir, VariableMatrix, Zero));
+  variable_matrix.def_static("ones", &VariableMatrix::Ones,
+                             DOC(sleipnir, VariableMatrix, Ones));
+  variable_matrix.def(py::self == py::self, DOC(sleipnir, operator, eq));
+  variable_matrix.def(py::self == double(), DOC(sleipnir, operator, eq));
+  variable_matrix.def(py::self == int(), DOC(sleipnir, operator, eq));
+  variable_matrix.def(double() == py::self, DOC(sleipnir, operator, eq));
+  variable_matrix.def(int() == py::self, DOC(sleipnir, operator, eq));
+  variable_matrix.def(py::self < py::self, DOC(sleipnir, operator, lt));
+  variable_matrix.def(py::self < double(), DOC(sleipnir, operator, lt));
+  variable_matrix.def(py::self < int(), DOC(sleipnir, operator, lt));
+  variable_matrix.def(double() < py::self, DOC(sleipnir, operator, lt));
+  variable_matrix.def(int() < py::self, DOC(sleipnir, operator, lt));
+  variable_matrix.def(py::self <= py::self, DOC(sleipnir, operator, le));
+  variable_matrix.def(py::self <= double(), DOC(sleipnir, operator, le));
+  variable_matrix.def(py::self <= int(), DOC(sleipnir, operator, le));
+  variable_matrix.def(double() <= py::self, DOC(sleipnir, operator, le));
+  variable_matrix.def(int() <= py::self, DOC(sleipnir, operator, le));
+  variable_matrix.def(py::self > py::self, DOC(sleipnir, operator, gt));
+  variable_matrix.def(py::self > double(), DOC(sleipnir, operator, gt));
+  variable_matrix.def(py::self > int(), DOC(sleipnir, operator, gt));
+  variable_matrix.def(double() > py::self, DOC(sleipnir, operator, gt));
+  variable_matrix.def(int() > py::self, DOC(sleipnir, operator, gt));
+  variable_matrix.def(py::self >= py::self, DOC(sleipnir, operator, ge));
+  variable_matrix.def(py::self >= double(), DOC(sleipnir, operator, ge));
+  variable_matrix.def(py::self >= int(), DOC(sleipnir, operator, ge));
+  variable_matrix.def(double() >= py::self, DOC(sleipnir, operator, ge));
+  variable_matrix.def(int() >= py::self, DOC(sleipnir, operator, ge));
   py::implicitly_convertible<VariableMatrix, Variable>();
 
   // VariableMatrix-VariableBlock overloads
@@ -487,32 +521,33 @@ void BindVariableMatrix(py::module_& autodiff,
       [](const VariableMatrix& lhs, const VariableBlock<VariableMatrix>& rhs) {
         return lhs == rhs;
       },
-      py::is_operator());
+      py::is_operator(), DOC(sleipnir, operator, eq));
   variable_matrix.def(
       "__lt__",
       [](const VariableMatrix& lhs, const VariableBlock<VariableMatrix>& rhs) {
         return lhs < rhs;
       },
-      py::is_operator());
+      py::is_operator(), DOC(sleipnir, operator, lt));
   variable_matrix.def(
       "__le__",
       [](const VariableMatrix& lhs, const VariableBlock<VariableMatrix>& rhs) {
         return lhs <= rhs;
       },
-      py::is_operator());
+      py::is_operator(), DOC(sleipnir, operator, le));
   variable_matrix.def(
       "__gt__",
       [](const VariableMatrix& lhs, const VariableBlock<VariableMatrix>& rhs) {
         return lhs > rhs;
       },
-      py::is_operator());
+      py::is_operator(), DOC(sleipnir, operator, gt));
   variable_matrix.def(
       "__ge__",
       [](const VariableMatrix& lhs, const VariableBlock<VariableMatrix>& rhs) {
         return lhs >= rhs;
       },
-      py::is_operator());
-  variable_matrix.def("__len__", &VariableMatrix::Rows);
+      py::is_operator(), DOC(sleipnir, operator, ge));
+  variable_matrix.def("__len__", &VariableMatrix::Rows,
+                      DOC(sleipnir, VariableMatrix, Rows));
 }
 
 void BindVariableBlock(
@@ -522,25 +557,38 @@ void BindVariableBlock(
   variable_block.def(py::self * VariableMatrix());
   variable_block.def(py::self + VariableMatrix());
   variable_block.def(py::self - VariableMatrix());
-  variable_block.def(py::self == VariableMatrix());
-  variable_block.def(py::self < VariableMatrix());
-  variable_block.def(py::self <= VariableMatrix());
-  variable_block.def(py::self > VariableMatrix());
-  variable_block.def(py::self >= VariableMatrix());
+  variable_block.def(py::self == VariableMatrix(), DOC(sleipnir, operator, eq));
+  variable_block.def(py::self < VariableMatrix(), DOC(sleipnir, operator, lt));
+  variable_block.def(py::self <= VariableMatrix(), DOC(sleipnir, operator, le));
+  variable_block.def(py::self > VariableMatrix(), DOC(sleipnir, operator, gt));
+  variable_block.def(py::self >= VariableMatrix(), DOC(sleipnir, operator, ge));
 
-  variable_block.def(py::init<VariableMatrix&>());
-  variable_block.def(py::init<VariableMatrix&, int, int, int, int>());
-  variable_block.def("set", [](VariableBlock<VariableMatrix>& self,
-                               double value) { self = value; });
-  variable_block.def("set_value", [](VariableBlock<VariableMatrix>& self,
-                                     double value) { self.SetValue(value); });
-  variable_block.def("set",
-                     [](VariableBlock<VariableMatrix>& self,
-                        const Eigen::MatrixXd& values) { self = values; });
-  variable_block.def("set_value", [](VariableBlock<VariableMatrix>& self,
-                                     const Eigen::MatrixXd& values) {
-    self.SetValue(values);
-  });
+  variable_block.def(py::init<VariableMatrix&>(),
+                     DOC(sleipnir, VariableBlock, VariableBlock, 3));
+  variable_block.def(py::init<VariableMatrix&, int, int, int, int>(),
+                     DOC(sleipnir, VariableBlock, VariableBlock, 4));
+  variable_block.def(
+      "set",
+      [](VariableBlock<VariableMatrix>& self, double value) { self = value; },
+      DOC(sleipnir, VariableBlock, operator, assign, 3));
+  variable_block.def(
+      "set_value",
+      [](VariableBlock<VariableMatrix>& self, double value) {
+        self.SetValue(value);
+      },
+      DOC(sleipnir, VariableBlock, SetValue));
+  variable_block.def(
+      "set",
+      [](VariableBlock<VariableMatrix>& self, const Eigen::MatrixXd& values) {
+        self = values;
+      },
+      DOC(sleipnir, VariableBlock, operator, assign, 4));
+  variable_block.def(
+      "set_value",
+      [](VariableBlock<VariableMatrix>& self, const Eigen::MatrixXd& values) {
+        self.SetValue(values);
+      },
+      DOC(sleipnir, VariableBlock, SetValue, 2));
   variable_block.def("__setitem__",
                      [](VariableBlock<VariableMatrix>& self, int row,
                         const Variable& value) { return self(row) = value; });
@@ -611,7 +659,8 @@ void BindVariableBlock(
           row = self.size() + row;
         }
         return self(row);
-      });
+      },
+      DOC(sleipnir, VariableBlock, operator, call, 3));
   // TODO: Support slice stride other than 1
   variable_block.def(
       "__getitem__",
@@ -682,11 +731,14 @@ void BindVariableBlock(
         }
 
         return py::cast(self.Block(rowOffset, colOffset, blockRows, blockCols));
-      });
+      },
+      DOC(sleipnir, VariableBlock, operator, call));
   variable_block.def(
-      "row", py::overload_cast<int>(&VariableBlock<VariableMatrix>::Row));
+      "row", py::overload_cast<int>(&VariableBlock<VariableMatrix>::Row),
+      DOC(sleipnir, VariableBlock, Row));
   variable_block.def(
-      "col", py::overload_cast<int>(&VariableBlock<VariableMatrix>::Col));
+      "col", py::overload_cast<int>(&VariableBlock<VariableMatrix>::Col),
+      DOC(sleipnir, VariableBlock, Col));
   variable_block.def(
       "__mul__",
       [](const VariableBlock<VariableMatrix>& lhs,
@@ -829,9 +881,12 @@ void BindVariableBlock(
         return sleipnir::pow(VariableMatrix{self}, power);
       },
       py::is_operator());
-  variable_block.def_property_readonly("T", &VariableBlock<VariableMatrix>::T);
-  variable_block.def("rows", &VariableBlock<VariableMatrix>::Rows);
-  variable_block.def("cols", &VariableBlock<VariableMatrix>::Cols);
+  variable_block.def_property_readonly("T", &VariableBlock<VariableMatrix>::T,
+                                       DOC(sleipnir, VariableBlock, T));
+  variable_block.def("rows", &VariableBlock<VariableMatrix>::Rows,
+                     DOC(sleipnir, VariableBlock, Rows));
+  variable_block.def("cols", &VariableBlock<VariableMatrix>::Cols,
+                     DOC(sleipnir, VariableBlock, Cols));
   variable_block.def_property_readonly(
       "shape", [](const VariableBlock<VariableMatrix>& self) {
         return py::make_tuple(self.Rows(), self.Cols());
@@ -839,46 +894,52 @@ void BindVariableBlock(
   variable_block.def(
       "value",
       static_cast<double (VariableBlock<VariableMatrix>::*)(int, int) const>(
-          &VariableBlock<VariableMatrix>::Value));
+          &VariableBlock<VariableMatrix>::Value),
+      DOC(sleipnir, VariableBlock, Value));
   variable_block.def(
       "value",
       static_cast<double (VariableBlock<VariableMatrix>::*)(int) const>(
-          &VariableBlock<VariableMatrix>::Value));
+          &VariableBlock<VariableMatrix>::Value),
+      DOC(sleipnir, VariableBlock, Value, 2));
   variable_block.def(
       "value",
       static_cast<Eigen::MatrixXd (VariableBlock<VariableMatrix>::*)() const>(
-          &VariableBlock<VariableMatrix>::Value));
-  variable_block.def("cwise_transform",
-                     [](const VariableBlock<VariableMatrix>& self,
-                        const std::function<Variable(const Variable&)>& func) {
-                       return self.CwiseTransform(func);
-                     });
-  variable_block.def(py::self == py::self);
-  variable_block.def(py::self == double());
-  variable_block.def(py::self == int());
-  variable_block.def(double() == py::self);
-  variable_block.def(int() == py::self);
-  variable_block.def(py::self < py::self);
-  variable_block.def(py::self < double());
-  variable_block.def(py::self < int());
-  variable_block.def(double() < py::self);
-  variable_block.def(int() < py::self);
-  variable_block.def(py::self <= py::self);
-  variable_block.def(py::self <= double());
-  variable_block.def(py::self <= int());
-  variable_block.def(double() <= py::self);
-  variable_block.def(int() <= py::self);
-  variable_block.def(py::self > py::self);
-  variable_block.def(py::self > double());
-  variable_block.def(py::self > int());
-  variable_block.def(double() > py::self);
-  variable_block.def(int() > py::self);
-  variable_block.def(py::self >= py::self);
-  variable_block.def(py::self >= double());
-  variable_block.def(py::self >= int());
-  variable_block.def(double() >= py::self);
-  variable_block.def(int() >= py::self);
-  variable_block.def("__len__", &VariableBlock<VariableMatrix>::Rows);
+          &VariableBlock<VariableMatrix>::Value),
+      DOC(sleipnir, VariableBlock, Value, 3));
+  variable_block.def(
+      "cwise_transform",
+      [](const VariableBlock<VariableMatrix>& self,
+         const std::function<Variable(const Variable&)>& func) {
+        return self.CwiseTransform(func);
+      },
+      DOC(sleipnir, VariableBlock, CwiseTransform));
+  variable_block.def(py::self == py::self, DOC(sleipnir, operator, eq));
+  variable_block.def(py::self == double(), DOC(sleipnir, operator, eq));
+  variable_block.def(py::self == int(), DOC(sleipnir, operator, eq));
+  variable_block.def(double() == py::self, DOC(sleipnir, operator, eq));
+  variable_block.def(int() == py::self, DOC(sleipnir, operator, eq));
+  variable_block.def(py::self < py::self, DOC(sleipnir, operator, lt));
+  variable_block.def(py::self < double(), DOC(sleipnir, operator, lt));
+  variable_block.def(py::self < int(), DOC(sleipnir, operator, lt));
+  variable_block.def(double() < py::self, DOC(sleipnir, operator, lt));
+  variable_block.def(int() < py::self, DOC(sleipnir, operator, lt));
+  variable_block.def(py::self <= py::self, DOC(sleipnir, operator, le));
+  variable_block.def(py::self <= double(), DOC(sleipnir, operator, le));
+  variable_block.def(py::self <= int(), DOC(sleipnir, operator, le));
+  variable_block.def(double() <= py::self, DOC(sleipnir, operator, le));
+  variable_block.def(int() <= py::self, DOC(sleipnir, operator, le));
+  variable_block.def(py::self > py::self, DOC(sleipnir, operator, gt));
+  variable_block.def(py::self > double(), DOC(sleipnir, operator, gt));
+  variable_block.def(py::self > int(), DOC(sleipnir, operator, gt));
+  variable_block.def(double() > py::self, DOC(sleipnir, operator, gt));
+  variable_block.def(int() > py::self, DOC(sleipnir, operator, gt));
+  variable_block.def(py::self >= py::self, DOC(sleipnir, operator, ge));
+  variable_block.def(py::self >= double(), DOC(sleipnir, operator, ge));
+  variable_block.def(py::self >= int(), DOC(sleipnir, operator, ge));
+  variable_block.def(double() >= py::self, DOC(sleipnir, operator, ge));
+  variable_block.def(int() >= py::self, DOC(sleipnir, operator, ge));
+  variable_block.def("__len__", &VariableBlock<VariableMatrix>::Rows,
+                     DOC(sleipnir, VariableBlock, Rows));
   py::implicitly_convertible<VariableBlock<VariableMatrix>, VariableMatrix>();
 }
 
