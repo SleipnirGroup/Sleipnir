@@ -175,7 +175,7 @@ Variable abs(const Variable& x) {
 }
 
 Variable acos(double x) {
-  return Variable{sleipnir::cos(ConstantExpr(x))};
+  return Variable{sleipnir::acos(ConstantExpr(x))};
 }
 
 Variable acos(const Variable& x) {
