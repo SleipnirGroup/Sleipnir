@@ -174,28 +174,34 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/SleipnirConfig.cmake
 
 option(BUILD_BENCHMARKING "Build CasADi and Sleipnir benchmarks" ON)
 
-# Add benchmark executables if CasADi exists
+# Add benchmark executables
 if (BUILD_BENCHMARKING)
-  find_package(casadi QUIET)
-  if (casadi_FOUND)
-    foreach (benchmark "CartPole" "Flywheel")
-      file(GLOB ${benchmark}ScalabilityBenchmark_src
-        benchmarks/scalability/*.cpp
-        benchmarks/scalability/${benchmark}/*.cpp)
-      add_executable(${benchmark}ScalabilityBenchmark
-                     ${${benchmark}ScalabilityBenchmark_src})
-      sleipnir_compiler_flags(${benchmark}ScalabilityBenchmark)
-      target_include_directories(${benchmark}ScalabilityBenchmark
-                                 PRIVATE
-                                 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/scalability
-                                 ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/units/include)
-      target_link_libraries(${benchmark}ScalabilityBenchmark
+  include(FetchCasADi)
+  fetch_casadi()
+
+  foreach (benchmark "CartPole" "Flywheel")
+    file(GLOB ${benchmark}ScalabilityBenchmark_src
+      benchmarks/scalability/*.cpp
+      benchmarks/scalability/${benchmark}/*.cpp)
+    add_executable(${benchmark}ScalabilityBenchmark
+                   ${${benchmark}ScalabilityBenchmark_src})
+    sleipnir_compiler_flags(${benchmark}ScalabilityBenchmark)
+    target_include_directories(${benchmark}ScalabilityBenchmark
+                               PRIVATE
+                               ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/scalability
+                               ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/units/include)
+    target_include_directories(${benchmark}ScalabilityBenchmark
+                               SYSTEM PRIVATE
+                               ${CASADI_INCLUDEDIR})
+    target_link_directories(${benchmark}ScalabilityBenchmark
                             PRIVATE
-                            Sleipnir
-                            fmt::fmt
-                            casadi)
-    endforeach()
-  endif()
+                            ${CASADI_LIBDIR})
+    target_link_libraries(${benchmark}ScalabilityBenchmark
+                          PRIVATE
+                          Sleipnir
+                          fmt::fmt
+                          casadi)
+  endforeach()
 endif()
 
 # GoogleTest dependency (static linkage)
