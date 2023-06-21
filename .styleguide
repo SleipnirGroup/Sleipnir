@@ -19,6 +19,7 @@ includeOtherLibs {
   ^Eigen/
   ^fmt/
   ^gtest/
+  ^pybind11/
   ^units/
   ^wpi/
 }

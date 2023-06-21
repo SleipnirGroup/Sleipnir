@@ -19,4 +19,13 @@ compile_commands.json
 .clangd/
 .cache/
 
+# Python
+*.egg-info/
+.eggs/
+.py-build-cmake_cache/
+.pytest_cache/
+.tox/
+__pycache__/
+dist/
+
 *.spy

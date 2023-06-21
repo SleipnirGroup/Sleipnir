@@ -90,6 +90,7 @@ See the [examples](https://github.com/SleipnirGroup/Sleipnir/tree/main/examples)
   * On macOS, install via `brew install cmake`
 * [Eigen](https://gitlab.com/libeigen/eigen)
 * [fmtlib](https://github.com/fmtlib/fmt) (internal only)
+* [pybind11](https://github.com/pybind/pybind11) (build only)
 * [googletest](https://github.com/google/googletest) (tests only)
 
 Library dependencies which aren't installed locally will be automatically downloaded and built by CMake.
@@ -100,10 +101,14 @@ If [CasADi](https://github.com/casadi/casadi) is installed locally, the benchmar
 
 On Windows, open a [Developer PowerShell](https://learn.microsoft.com/en-us/visualstudio/ide/reference/command-prompt-powershell?view=vs-2022). On Linux or macOS, open a Bash shell.
 
+Clone the repository.
 ```bash
 git clone git@github.com:SleipnirGroup/Sleipnir
 cd Sleipnir
+```
 
+Use the following instructions to build and install the C++ library.
+```
 # Configure; automatically downloads library dependencies
 cmake -B build -S .
 
@@ -117,6 +122,18 @@ cd ..
 
 # Install
 cmake --install build --prefix pkgdir
+```
+
+Use the following instructions to build and install the Python library.
+```
+# Build
+python -m build --wheel
+
+# Test
+pytest
+
+# Install
+pip install --user dist/sleipnirgroup_jormungandr-*.whl
 ```
 
 ### Supported build types
