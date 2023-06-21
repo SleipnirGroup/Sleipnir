@@ -6,6 +6,7 @@
 
 #include <array>
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include "sleipnir/IntrusiveSharedPtr.hpp"
@@ -377,11 +378,16 @@ inline void IntrusiveSharedPtrDecRefCount(Expression* expr) {
 }
 
 /**
- * Creates a constant expression.
+ * Creates an intrusive shared pointer to an expression from the global pool
+ * allocator.
  *
  * @param x The constant.
  */
-SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> ConstantExpr(double x);
+template <typename... Args>
+static IntrusiveSharedPtr<Expression> MakeExpression(Args&&... args) {
+  return AllocateIntrusiveShared<Expression>(GlobalPoolAllocator<Expression>(),
+                                             std::forward<Args>(args)...);
+}
 
 /**
  * std::abs() for Expressions.

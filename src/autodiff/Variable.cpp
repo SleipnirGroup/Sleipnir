@@ -10,21 +10,16 @@
 
 namespace sleipnir {
 
-Variable::Variable(double value)
-    : expr{AllocateIntrusiveShared<Expression>(
-          GlobalPoolAllocator<Expression>(), value)} {}
+Variable::Variable(double value) : expr{MakeExpression(value)} {}
 
-Variable::Variable(int value)
-    : expr{AllocateIntrusiveShared<Expression>(
-          GlobalPoolAllocator<Expression>(), value)} {}
+Variable::Variable(int value) : expr{MakeExpression(value)} {}
 
 Variable::Variable(IntrusiveSharedPtr<Expression> expr)
     : expr{std::move(expr)} {}
 
 Variable& Variable::operator=(double value) {
   if (expr == Zero()) {
-    expr = AllocateIntrusiveShared<Expression>(
-        GlobalPoolAllocator<Expression>(), value);
+    expr = MakeExpression(value);
   } else {
     if (expr->args[0] != Zero()) {
       fmt::print(stderr,
@@ -38,8 +33,7 @@ Variable& Variable::operator=(double value) {
 
 Variable& Variable::operator=(int value) {
   if (expr == Zero()) {
-    expr = AllocateIntrusiveShared<Expression>(
-        GlobalPoolAllocator<Expression>(), value);
+    expr = MakeExpression(value);
   } else {
     if (expr->args[0] != Zero()) {
       fmt::print(stderr,
@@ -163,8 +157,7 @@ void Variable::Update() {
 }
 
 Variable Constant(double x) {
-  return Variable{AllocateIntrusiveShared<Expression>(
-      GlobalPoolAllocator<Expression>(), x, ExpressionType::kConstant)};
+  return Variable{MakeExpression(x, ExpressionType::kConstant)};
 }
 
 Variable abs(double x) {
