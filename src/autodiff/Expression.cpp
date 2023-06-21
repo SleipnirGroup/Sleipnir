@@ -22,10 +22,7 @@ IntrusiveSharedPtr<Expression>& Zero() {
   return expr;
 }
 
-Expression::Expression(ZeroSingleton_t)
-    : adjointExpr{nullptr},
-      type{ExpressionType::kConstant},
-      args{nullptr, nullptr} {}
+Expression::Expression(ZeroSingleton_t) : type{ExpressionType::kConstant} {}
 
 Expression::Expression(double value, ExpressionType type)
     : value{value}, adjointExpr{Zero()}, type{type}, args{Zero(), Zero()} {}
