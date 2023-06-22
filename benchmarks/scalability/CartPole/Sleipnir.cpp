@@ -122,7 +122,7 @@ sleipnir::OptimizationProblem CartPoleSleipnir(units::second_t dt, int N) {
   auto X = problem.DecisionVariable(4, N + 1);
 
   // Initial guess
-  for (int k = 0; k < N; ++k) {
+  for (int k = 0; k < N + 1; ++k) {
     X(0, k) = static_cast<double>(k) / N * d.value();
     X(1, k) = static_cast<double>(k) / N * std::numbers::pi;
   }

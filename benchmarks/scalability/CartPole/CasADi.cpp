@@ -121,7 +121,7 @@ casadi::Opti CartPoleCasADi(units::second_t dt, int N) {
   auto X = opti.variable(4, N + 1);
 
   // Initial guess
-  for (int k = 0; k < N; ++k) {
+  for (int k = 0; k < N + 1; ++k) {
     opti.set_initial(X(0, k), static_cast<double>(k) / N * d.value());
     opti.set_initial(X(1, k), static_cast<double>(k) / N * std::numbers::pi);
   }
