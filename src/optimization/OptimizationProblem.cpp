@@ -50,14 +50,17 @@ namespace {
 double FractionToTheBoundaryRule(const Eigen::Ref<const Eigen::VectorXd>& x,
                                  const Eigen::Ref<const Eigen::VectorXd>& p,
                                  double tau) {
-  // αᵐᵃˣ = max(α ∈ (0, 1] : x + αp ≥ (1−τ)x)
-  //      = max(α ∈ (0, 1] : αp ≥ −τx)
+  // α = max(α ∈ (0, 1] : x + αp ≥ (1 − τ)x)
+  //
+  // x + αp = (1 − τ)x
+  // x + αp = x − τx
+  // αp = −τx
+  // α = −τ/p x
   double alpha = 1.0;
   for (int i = 0; i < x.rows(); ++i) {
-    if (p(i) != 0.0) {
-      while (alpha * p(i) < -tau * x(i)) {
-        alpha *= 0.999;
-      }
+    // Only descending parts of p can approach the boundary and affect α
+    if (p(i) < 0.0) {
+      alpha = std::min(alpha, -tau / p(i) * x(i));
     }
   }
 
