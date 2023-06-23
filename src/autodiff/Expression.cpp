@@ -4,15 +4,8 @@
 
 #include <cmath>
 #include <numbers>
-#include <type_traits>
 
 #include "sleipnir/autodiff/ExpressionGraph.hpp"
-
-// https://en.cppreference.com/w/cpp/utility/to_underlying from C++23
-template <class Enum>
-constexpr std::underlying_type_t<Enum> to_underlying(Enum e) noexcept {
-  return static_cast<std::underlying_type_t<Enum>>(e);
-}
 
 namespace sleipnir {
 
@@ -215,8 +208,7 @@ IntrusiveSharedPtr<Expression> operator+(
   }
 
   return MakeExpression(
-      ExpressionType{
-          std::max(to_underlying(lhs->type), to_underlying(rhs->type))},
+      std::max(lhs->type, rhs->type),
       [](double lhs, double rhs) { return lhs + rhs; },
       [](double lhs, double rhs, double parentAdjoint) {
         return parentAdjoint;
@@ -292,8 +284,7 @@ IntrusiveSharedPtr<Expression> operator-(
   }
 
   return MakeExpression(
-      ExpressionType{
-          std::max(to_underlying(lhs->type), to_underlying(rhs->type))},
+      std::max(lhs->type, rhs->type),
       [](double lhs, double rhs) { return lhs - rhs; },
       [](double lhs, double rhs, double parentAdjoint) {
         return parentAdjoint;
