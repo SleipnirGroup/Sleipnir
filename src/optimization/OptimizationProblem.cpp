@@ -787,9 +787,6 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
         stepTooSmallCounter = 0;
       }
 
-      // αₖᶻ = max(α ∈ (0, 1] : zₖ + αpₖᶻ ≥ (1−τⱼ)zₖ)
-      double alpha_z = FractionToTheBoundaryRule(z, p_z, tau);
-
       // xₖ₊₁ = xₖ + αₖpₖˣ
       // sₖ₊₁ = xₖ + αₖpₖˢ
       // yₖ₊₁ = xₖ + αₖᶻpₖʸ
