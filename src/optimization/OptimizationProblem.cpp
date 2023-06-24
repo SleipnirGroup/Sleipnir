@@ -637,11 +637,13 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
     double alpha_max = FractionToTheBoundaryRule(s, p_s, tau);
     double alpha = alpha_max;
 
+    // αₖᶻ = max(α ∈ (0, 1] : zₖ + αpₖᶻ ≥ (1−τⱼ)zₖ)
+    double alpha_z = FractionToTheBoundaryRule(z, p_z, tau);
+
     while (!stepAcceptable) {
       Eigen::VectorXd trial_x = x + alpha * p_x;
       Eigen::VectorXd trial_s = s + alpha * p_s;
 
-      double alpha_z = FractionToTheBoundaryRule(z, p_z, tau);
       Eigen::VectorXd trial_y = y + alpha_z * p_y;
       Eigen::VectorXd trial_z = z + alpha_z * p_z;
 
@@ -712,9 +714,9 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
           trial_s = s + alpha_soc * p_s_soc;
 
           // αₖᶻ = max(α ∈ (0, 1] : zₖ + αpₖᶻ ≥ (1−τⱼ)zₖ)
-          alpha_z = FractionToTheBoundaryRule(z, p_z_soc, tau);
-          trial_y = y + alpha_z * p_y_soc;
-          trial_z = z + alpha_z * p_z_soc;
+          double alpha_z_soc = FractionToTheBoundaryRule(z, p_z_soc, tau);
+          trial_y = y + alpha_z_soc * p_y_soc;
+          trial_z = z + alpha_z_soc * p_z_soc;
 
           SetAD(xAD, trial_x);
 
@@ -736,6 +738,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
             p_z = p_z_soc;
             p_s = p_s_soc;
             alpha = alpha_soc;
+            alpha_z = alpha_z_soc;
             stepAcceptable = true;
             filter.Add(std::move(entry));
           }
