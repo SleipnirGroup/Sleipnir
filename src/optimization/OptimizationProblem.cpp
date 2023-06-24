@@ -44,7 +44,7 @@ namespace {
  *
  * @param x The variable.
  * @param p The iterate on the variable.
- * @param tau Fraction-to-the-boundary rule scaling factor.
+ * @param tau Fraction-to-the-boundary rule scaling factor within (0, 1].
  * @return Fraction of the iterate step size within (0, 1].
  */
 double FractionToTheBoundaryRule(const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -52,15 +52,20 @@ double FractionToTheBoundaryRule(const Eigen::Ref<const Eigen::VectorXd>& x,
                                  double tau) {
   // α = max(α ∈ (0, 1] : x + αp ≥ (1 − τ)x)
   //
-  // x + αp = (1 − τ)x
-  // x + αp = x − τx
-  // αp = −τx
+  // where x and τ are positive.
+  //
+  // x + αp ≥ (1 − τ)x
+  // x + αp ≥ x − τx
+  // αp ≥ −τx
+  //
+  // If the inequality is false, p < 0 and α is too big. Find the largest value
+  // of α that makes the inequality true.
+  //
   // α = −τ/p x
   double alpha = 1.0;
   for (int i = 0; i < x.rows(); ++i) {
-    // Only descending parts of p can approach the boundary and affect α
-    if (p(i) < 0.0) {
-      alpha = std::min(alpha, -tau / p(i) * x(i));
+    if (alpha * p(i) < -tau * x(i)) {
+      alpha = -tau / p(i) * x(i);
     }
   }
 
