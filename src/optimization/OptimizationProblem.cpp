@@ -753,6 +753,44 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
         constexpr double alpha_min_frac = 0.05;
 
         if (alpha < alpha_min_frac * Filter::kGammaConstraint) {
+          // If the step using αᵐᵃˣ reduced the KKT error, accept it anyway
+
+          double currentKKTError =
+              KKTError(g, A_e, c_e, A_i, c_i, s, S, y, z, mu);
+
+          Eigen::VectorXd trial_x = x + alpha_max * p_x;
+          Eigen::VectorXd trial_s = s + alpha_max * p_s;
+
+          Eigen::VectorXd trial_y = y + alpha_z * p_y;
+          Eigen::VectorXd trial_z = z + alpha_z * p_z;
+
+          // Upate autodiff
+          SetAD(xAD, trial_x);
+          SetAD(sAD, trial_s);
+          SetAD(yAD, trial_y);
+          SetAD(zAD, trial_z);
+
+          for (int row = 0; row < c_e.rows(); ++row) {
+            c_eAD(row).Update();
+          }
+          Eigen::VectorXd trial_c_e = GetAD(m_equalityConstraints);
+
+          for (int row = 0; row < c_i.rows(); ++row) {
+            c_iAD(row).Update();
+          }
+          Eigen::VectorXd trial_c_i = GetAD(m_inequalityConstraints);
+
+          double nextKKTError =
+              KKTError(gradientF.Calculate(), jacobianCe.Calculate(), trial_c_e,
+                       jacobianCi.Calculate(), trial_c_i, trial_s,
+                       SparseDiagonal(trial_s), trial_y, trial_z, mu);
+
+          if (nextKKTError <= 0.999 * currentKKTError) {
+            alpha = alpha_max;
+            stepAcceptable = true;
+            continue;
+          }
+
           if (mu > mu_min) {
             UpdateBarrierParameterAndResetFilter();
             break;
@@ -1041,4 +1079,32 @@ double OptimizationProblem::ErrorEstimate(
   }
 
   return E_mu;
+}
+
+double OptimizationProblem::KKTError(
+    const Eigen::VectorXd& g, const Eigen::SparseMatrix<double>& A_e,
+    const Eigen::VectorXd& c_e, const Eigen::SparseMatrix<double>& A_i,
+    const Eigen::VectorXd& c_i, const Eigen::VectorXd& s,
+    const Eigen::SparseMatrix<double>& S, const Eigen::VectorXd& y,
+    const Eigen::VectorXd& z, double mu) const {
+  // Compute the KKT error as the 1-norm of the KKT conditions from equations
+  // (19.5a) through (19.5d) of [1].
+  //
+  //   ∇f − Aₑᵀy − Aᵢᵀz = 0
+  //   Sz − μe = 0
+  //   cₑ = 0
+  //   cᵢ − s = 0
+
+  const Eigen::VectorXd e = Eigen::VectorXd::Ones(s.rows());
+
+  double error = (g - A_e.transpose() * y - A_i.transpose() * z).lpNorm<1>();
+  error += (S * z - mu * e).lpNorm<1>();
+  if (m_equalityConstraints.size() > 0) {
+    error += c_e.lpNorm<1>();
+  }
+  if (m_inequalityConstraints.size() > 0) {
+    error += (c_i - s).lpNorm<1>();
+  }
+
+  return error;
 }

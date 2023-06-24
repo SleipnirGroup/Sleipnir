@@ -452,6 +452,33 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
                        const Eigen::SparseMatrix<double>& S,
                        const Eigen::VectorXd& y, const Eigen::VectorXd& z,
                        double mu) const;
+
+  /**
+   * Returns the KKT error for the interior-point method.
+   *
+   * @param g Gradient of the cost function ∇f.
+   * @param A_e The problem's equality constraint Jacobian Aₑ(x) evaluated at
+   *   the current iterate.
+   * @param c_e The problem's equality constraints cₑ(x) evaluated at the
+   *   current iterate.
+   * @param A_i The problem's inequality constraint Jacobian Aᵢ(x) evaluated at
+   *   the current iterate.
+   * @param c_i The problem's inequality constraints cᵢ(x) evaluated at the
+   *   current iterate.
+   * @param s Inequality constraint slack variables.
+   * @param S Inequality constraint slack variables as a diagonal matrix.
+   * @param y Equality constraint dual variables.
+   * @param z Inequality constraint dual variables.
+   * @param mu Barrier parameter.
+   */
+  double KKTError(const Eigen::VectorXd& g,
+                  const Eigen::SparseMatrix<double>& A_e,
+                  const Eigen::VectorXd& c_e,
+                  const Eigen::SparseMatrix<double>& A_i,
+                  const Eigen::VectorXd& c_i, const Eigen::VectorXd& s,
+                  const Eigen::SparseMatrix<double>& S,
+                  const Eigen::VectorXd& y, const Eigen::VectorXd& z,
+                  double mu) const;
 };
 
 }  // namespace sleipnir
