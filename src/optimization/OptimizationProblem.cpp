@@ -564,7 +564,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
     // If the error estimate is below the desired threshold for this barrier
     // parameter value, decrease it further and restart the loop
     {
-      // Barrier parameter scale factor κ_μ for tolerance checks
+      // Barrier parameter scale factor κ_ε for tolerance checks
       constexpr double kappa_epsilon = 10.0;
 
       E_0 = ErrorEstimate(g, A_e, c_e, A_i, c_i, s, S, y, z, 0.0);
@@ -869,7 +869,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
         fmt::print("{:=^70}\n", "");
       }
       fmt::print("{:>4}  {:>9}  {:>15e}  {:>16e}   {:>16e}\n", iterations,
-                 ToMilliseconds(innerIterEndTime - innerIterStartTime), E_mu,
+                 ToMilliseconds(innerIterEndTime - innerIterStartTime), E_0,
                  filter.LastEntry().cost,
                  filter.LastEntry().constraintViolation);
     }
@@ -904,12 +904,6 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
 
   if (E_0 > m_config.tolerance && E_0 < acceptableTolerance) {
     status->exitCondition = SolverExitCondition::kSolvedToAcceptableTolerance;
-  }
-
-  if (m_config.diagnostics) {
-    fmt::print("{:>4}  {:>9}  {:>15e}  {:>16e}   {:>16e}\n", iterations, 0.0,
-               E_0, m_f.value().Value() - mu * s.array().log().sum(),
-               c_e.lpNorm<1>() + (c_i - s).lpNorm<1>());
   }
 
   return x;
