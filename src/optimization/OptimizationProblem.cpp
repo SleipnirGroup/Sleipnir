@@ -498,11 +498,12 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   int stepTooSmallCounter = 0;
 
   // Error estimate E_μ
+  double E_0 = std::numeric_limits<double>::infinity();
   double E_mu = std::numeric_limits<double>::infinity();
 
   iterationsStartTime = std::chrono::system_clock::now();
 
-  while (E_mu > m_config.tolerance && acceptableIterCounter < 15) {
+  while (E_0 > m_config.tolerance && acceptableIterCounter < 15) {
     // Update autodiff for Jacobians and Hessian
     SetAD(xAD, x);
     SetAD(sAD, s);
@@ -566,8 +567,9 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       // Barrier parameter scale factor κ_μ for tolerance checks
       constexpr double kappa_epsilon = 10.0;
 
+      E_0 = ErrorEstimate(g, A_e, c_e, A_i, c_i, s, S, y, z, 0.0);
       E_mu = ErrorEstimate(g, A_e, c_e, A_i, c_i, s, S, y, z, mu);
-      if (E_mu < acceptableTolerance) {
+      if (E_0 < acceptableTolerance) {
         ++acceptableIterCounter;
       } else {
         acceptableIterCounter = 0;
@@ -900,13 +902,13 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
     }
   }
 
-  if (E_mu > m_config.tolerance && E_mu < acceptableTolerance) {
+  if (E_0 > m_config.tolerance && E_0 < acceptableTolerance) {
     status->exitCondition = SolverExitCondition::kSolvedToAcceptableTolerance;
   }
 
   if (m_config.diagnostics) {
     fmt::print("{:>4}  {:>9}  {:>15e}  {:>16e}   {:>16e}\n", iterations, 0.0,
-               E_mu, m_f.value().Value() - mu * s.array().log().sum(),
+               E_0, m_f.value().Value() - mu * s.array().log().sum(),
                c_e.lpNorm<1>() + (c_i - s).lpNorm<1>());
   }
 
