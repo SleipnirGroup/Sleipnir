@@ -70,6 +70,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Update version string
+        run: ./tools/update_version.py
 
       - name: Install build and tox Python packages
         run: pip3 install build tox
@@ -138,3 +143,33 @@ jobs:
         with:
           name: Wasm
           path: pkg
+
+  pypi-publish:
+    name: Upload release to PyPI
+    runs-on: ubuntu-22.04
+    needs: [build-python]
+    if: github.repository_owner == 'SleipnirGroup' && github.ref == 'refs/heads/main'
+    environment:
+      name: pypi
+      url: https://pypi.org/p/sleipnirgroup-jormungandr
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: Windows - python
+          path: dist
+      - uses: actions/download-artifact@v3
+        with:
+          name: Linux - python
+          path: dist
+      - uses: actions/download-artifact@v3
+        with:
+          name: macOS x86_64 - python
+          path: dist
+      - uses: actions/download-artifact@v3
+        with:
+          name: macOS arm64 - python
+          path: dist
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
