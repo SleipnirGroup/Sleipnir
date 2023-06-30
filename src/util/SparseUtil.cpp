@@ -30,17 +30,6 @@ Eigen::SparseMatrix<double> SparseIdentity(int rows, int cols) {
   return dest;
 }
 
-void AssignSparseBlock(std::vector<Eigen::Triplet<double>>& triplets,
-                       int rowOffset, int colOffset,
-                       const Eigen::SparseMatrix<double>& mat) {
-  for (int k = 0; k < mat.outerSize(); ++k) {
-    for (Eigen::SparseMatrix<double>::InnerIterator it{mat, k}; it; ++it) {
-      triplets.emplace_back(rowOffset + it.row(), colOffset + it.col(),
-                            it.value());
-    }
-  }
-}
-
 void Spy(std::string_view filename, const Eigen::SparseMatrix<double>& mat) {
   std::ofstream file{std::string{filename}};
   if (!file.is_open()) {

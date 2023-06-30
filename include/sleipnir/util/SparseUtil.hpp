@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <concepts>
 #include <fstream>
-#include <vector>
 
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
@@ -64,19 +63,6 @@ double SparseLpNorm(const Derived& mat) {
     return std::pow(norm, 1.0 / Power);
   }
 }
-
-/**
- * Adds a sparse matrix to the list of triplets with the given row and column
- * offset.
- *
- * @param[out] triplets The triplet storage.
- * @param[in] rowOffset The row offset for each triplet.
- * @param[in] colOffset The column offset for each triplet.
- * @param[in] mat The matrix to iterate over.
- */
-SLEIPNIR_DLLEXPORT void AssignSparseBlock(
-    std::vector<Eigen::Triplet<double>>& triplets, int rowOffset, int colOffset,
-    const Eigen::SparseMatrix<double>& mat);
 
 /**
  * Write the sparsity pattern of a sparse matrix to a file.
