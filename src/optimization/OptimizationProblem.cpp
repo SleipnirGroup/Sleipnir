@@ -21,6 +21,7 @@
 #include "sleipnir/autodiff/Variable.hpp"
 #include "sleipnir/optimization/SolverExitCondition.hpp"
 #include "sleipnir/util/AutodiffUtil.hpp"
+#include "sleipnir/util/SparseMatrixBuilder.hpp"
 #include "sleipnir/util/SparseUtil.hpp"
 
 using namespace sleipnir;
@@ -488,7 +489,8 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   };
 
   // Kept outside the loop so its storage can be reused
-  std::vector<Eigen::Triplet<double>> triplets;
+  SparseMatrixBuilder<double> lhsBuilder(H.rows() + A_e.rows(),
+                                         H.cols() + A_e.rows());
 
   RegularizedLDLT solver;
 
@@ -591,16 +593,15 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
 
     // lhs = [H + AᵢᵀΣAᵢ  Aₑᵀ]
     //       [    Aₑ       0 ]
-    triplets.clear();
+    lhsBuilder.Clear();
     // Assign top-left quadrant
-    AssignSparseBlock(triplets, 0, 0, H + A_i.transpose() * sigma * A_i);
+    lhsBuilder.Block(0, 0, H.rows(), H.cols()) =
+        H + A_i.transpose() * sigma * A_i;
     // Assign bottom-left quadrant
-    AssignSparseBlock(triplets, H.rows(), 0, A_e);
+    lhsBuilder.Block(H.rows(), 0, A_e.rows(), A_e.cols()) = A_e;
     // Assign top-right quadrant
-    AssignSparseBlock(triplets, 0, H.rows(), A_e.transpose());
-    Eigen::SparseMatrix<double> lhs{H.rows() + A_e.rows(),
-                                    H.cols() + A_e.rows()};
-    lhs.setFromTriplets(triplets.begin(), triplets.end());
+    lhsBuilder.Block(0, H.rows(), A_e.cols(), A_e.rows()) = A_e.transpose();
+    Eigen::SparseMatrix<double> lhs = lhsBuilder.Build();
 
     const Eigen::VectorXd e = Eigen::VectorXd::Ones(s.rows());
 
@@ -916,22 +917,20 @@ Eigen::VectorXd OptimizationProblem::InitializeY(
   //
   // See equation (36) of [2].
 
-  std::vector<Eigen::Triplet<double>> triplets;
-
-  // Assign top-left quadrant
-  AssignSparseBlock(
-      triplets, 0, 0,
-      SparseIdentity(m_decisionVariables.size(), m_decisionVariables.size()));
-  // Assign bottom-left quadrant
-  AssignSparseBlock(triplets, m_decisionVariables.size(), 0, A_e);
-  // Assign top-right quadrant
-  AssignSparseBlock(triplets, 0, m_decisionVariables.size(), A_e.transpose());
-
   // [  I     Aₑᵀ(x₀)]
   // [Aₑ(x₀)     0   ]
-  Eigen::SparseMatrix<double> lhs(m_decisionVariables.size() + A_e.rows(),
-                                  m_decisionVariables.size() + A_e.rows());
-  lhs.setFromTriplets(triplets.begin(), triplets.end());
+  SparseMatrixBuilder<double> lhsBuilder(
+      m_decisionVariables.size() + A_e.rows(),
+      m_decisionVariables.size() + A_e.rows());
+  // Assign top-left quadrant
+  lhsBuilder.Block(0, 0, m_decisionVariables.size(), m_decisionVariables.size())
+      .SetIdentity();
+  // Assign bottom-left quadrant
+  lhsBuilder.Block(m_decisionVariables.size(), 0, A_e.rows(), A_e.cols()) = A_e;
+  // Assign top-right quadrant
+  lhsBuilder.Block(0, m_decisionVariables.size(), A_e.cols(), A_e.rows()) =
+      A_e.transpose();
+  Eigen::SparseMatrix<double> lhs = lhsBuilder.Build();
 
   // −[∇f(x₀)]
   //  [  0   ]

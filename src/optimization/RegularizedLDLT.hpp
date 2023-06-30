@@ -4,12 +4,12 @@
 
 #include <cmath>
 #include <cstddef>
-#include <vector>
 
 #include <Eigen/SparseCholesky>
 #include <Eigen/SparseCore>
 
 #include "Inertia.hpp"
+#include "sleipnir/util/SparseMatrixBuilder.hpp"
 #include "sleipnir/util/SparseUtil.hpp"
 
 namespace sleipnir {
@@ -140,8 +140,6 @@ class RegularizedLDLT {
   /// The value of delta from the previous run of Compute().
   double m_deltaOld = 0.0;
 
-  std::vector<Eigen::Triplet<double>> m_triplets;
-
   /**
    * Returns regularization matrix.
    *
@@ -149,20 +147,16 @@ class RegularizedLDLT {
    * @param gamma The equality constraint Jacobian regularization factor.
    */
   Eigen::SparseMatrix<double> Regularization(double delta, double gamma) {
-    m_triplets.clear();
-    AssignSparseBlock(
-        m_triplets, 0, 0,
-        delta * SparseIdentity(m_numDecisionVariables, m_numDecisionVariables));
-    AssignSparseBlock(m_triplets, m_numDecisionVariables,
-                      m_numDecisionVariables,
-                      -gamma * SparseIdentity(m_numEqualityConstraints,
-                                              m_numEqualityConstraints));
-
     int rows = m_numDecisionVariables + m_numEqualityConstraints;
-    Eigen::SparseMatrix<double> regularization{rows, rows};
-    regularization.setFromTriplets(m_triplets.begin(), m_triplets.end());
 
-    return regularization;
+    SparseMatrixBuilder<double> reg{rows, rows};
+    reg.Block(0, 0, m_numDecisionVariables, m_numDecisionVariables) =
+        delta * SparseIdentity(m_numDecisionVariables, m_numDecisionVariables);
+    reg.Block(m_numDecisionVariables, m_numDecisionVariables,
+              m_numEqualityConstraints, m_numEqualityConstraints) =
+        -gamma *
+        SparseIdentity(m_numEqualityConstraints, m_numEqualityConstraints);
+    return reg.Build();
   }
 };
 
