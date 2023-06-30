@@ -203,8 +203,8 @@ class VariableBlock {
    */
   VariableBlock<Mat> Block(int rowOffset, int colOffset, int blockRows,
                            int blockCols) {
-    assert(rowOffset >= 0 && rowOffset < Rows());
-    assert(colOffset >= 0 && colOffset < Cols());
+    assert(rowOffset >= 0 && rowOffset <= Rows());
+    assert(colOffset >= 0 && colOffset <= Cols());
     assert(blockRows >= 0 && blockRows <= Rows() - rowOffset);
     assert(blockCols >= 0 && blockCols <= Cols() - colOffset);
     return VariableBlock{*m_mat, rowOffset, colOffset, blockRows, blockCols};
@@ -220,8 +220,8 @@ class VariableBlock {
    */
   const VariableBlock<const Mat> Block(int rowOffset, int colOffset,
                                        int blockRows, int blockCols) const {
-    assert(rowOffset >= 0 && rowOffset < Rows());
-    assert(colOffset >= 0 && colOffset < Cols());
+    assert(rowOffset >= 0 && rowOffset <= Rows());
+    assert(colOffset >= 0 && colOffset <= Cols());
     assert(blockRows >= 0 && blockRows <= Rows() - rowOffset);
     assert(blockCols >= 0 && blockCols <= Cols() - colOffset);
     return VariableBlock{*m_mat, rowOffset, colOffset, blockRows, blockCols};
