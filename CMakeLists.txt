@@ -137,7 +137,7 @@ target_link_libraries(Sleipnir PRIVATE fmt::fmt)
 target_include_directories(Sleipnir
                            PUBLIC
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-                           $<INSTALL_INTERFACE:include/Sleipnir>)
+                           $<INSTALL_INTERFACE:include>)
 
 install(TARGETS Sleipnir
         COMPONENT Sleipnir
@@ -151,7 +151,7 @@ export(TARGETS Sleipnir
        NAMESPACE Sleipnir::)
 install(DIRECTORY include/
         COMPONENT Sleipnir
-        DESTINATION "include/Sleipnir")
+        DESTINATION "include")
 install(EXPORT SleipnirTargets
         FILE Sleipnir.cmake
         NAMESPACE Sleipnir::
