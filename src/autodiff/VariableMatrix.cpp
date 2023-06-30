@@ -95,8 +95,8 @@ VariableBlock<VariableMatrix> VariableMatrix::Block(int rowOffset,
                                                     int colOffset,
                                                     int blockRows,
                                                     int blockCols) {
-  assert(rowOffset >= 0 && rowOffset < Rows());
-  assert(colOffset >= 0 && colOffset < Cols());
+  assert(rowOffset >= 0 && rowOffset <= Rows());
+  assert(colOffset >= 0 && colOffset <= Cols());
   assert(blockRows >= 0 && blockRows <= Rows() - rowOffset);
   assert(blockCols >= 0 && blockCols <= Cols() - colOffset);
   return VariableBlock{*this, rowOffset, colOffset, blockRows, blockCols};
@@ -104,8 +104,8 @@ VariableBlock<VariableMatrix> VariableMatrix::Block(int rowOffset,
 
 const VariableBlock<const VariableMatrix> VariableMatrix::Block(
     int rowOffset, int colOffset, int blockRows, int blockCols) const {
-  assert(rowOffset >= 0 && rowOffset < Rows());
-  assert(colOffset >= 0 && colOffset < Cols());
+  assert(rowOffset >= 0 && rowOffset <= Rows());
+  assert(colOffset >= 0 && colOffset <= Cols());
   assert(blockRows >= 0 && blockRows <= Rows() - rowOffset);
   assert(blockCols >= 0 && blockCols <= Cols() - colOffset);
   return VariableBlock{*this, rowOffset, colOffset, blockRows, blockCols};
