@@ -33,7 +33,7 @@ macro(sleipnir_compiler_flags target)
 
   target_compile_features(${target} PUBLIC cxx_std_20)
   if (MSVC)
-    target_compile_options(${target} PUBLIC /bigobj)
+    target_compile_options(${target} PUBLIC /utf-8 /bigobj)
   endif()
 
   set_property(TARGET ${target} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)

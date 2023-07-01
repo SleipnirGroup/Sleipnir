@@ -45,12 +45,12 @@ namespace {
  *
  * @param x The variable.
  * @param p The iterate on the variable.
- * @param tau Fraction-to-the-boundary rule scaling factor within (0, 1].
+ * @param τ Fraction-to-the-boundary rule scaling factor within (0, 1].
  * @return Fraction of the iterate step size within (0, 1].
  */
 double FractionToTheBoundaryRule(const Eigen::Ref<const Eigen::VectorXd>& x,
                                  const Eigen::Ref<const Eigen::VectorXd>& p,
-                                 double tau) {
+                                 double τ) {
   // α = max(α ∈ (0, 1] : x + αp ≥ (1 − τ)x)
   //
   // where x and τ are positive.
@@ -63,14 +63,14 @@ double FractionToTheBoundaryRule(const Eigen::Ref<const Eigen::VectorXd>& x,
   // of α that makes the inequality true.
   //
   // α = −τ/p x
-  double alpha = 1.0;
+  double α = 1.0;
   for (int i = 0; i < x.rows(); ++i) {
-    if (alpha * p(i) < -tau * x(i)) {
-      alpha = -tau / p(i) * x(i);
+    if (α * p(i) < -τ * x(i)) {
+      α = -τ / p(i) * x(i);
     }
   }
 
-  return alpha;
+  return α;
 }
 
 /**
@@ -447,45 +447,45 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   }};
 
   // Barrier parameter minimum
-  double mu_min = m_config.tolerance / 10.0;
+  double μ_min = m_config.tolerance / 10.0;
 
   // Barrier parameter μ
-  double mu = 0.1;
+  double μ = 0.1;
 
   // Fraction-to-the-boundary rule scale factor minimum
-  constexpr double tau_min = 0.99;
+  constexpr double τ_min = 0.99;
 
   // Fraction-to-the-boundary rule scale factor τ
-  double tau = tau_min;
+  double τ = τ_min;
 
-  Filter filter{FilterEntry{m_f.value(), mu, s, c_e, c_i}};
+  Filter filter{FilterEntry{m_f.value(), μ, s, c_e, c_i}};
 
   // This should be run when the error estimate is below a desired threshold for
   // the current barrier parameter
   auto UpdateBarrierParameterAndResetFilter = [&] {
     // Barrier parameter linear decrease power in "κ_μ μ". Range of (0, 1).
-    constexpr double kappa_mu = 0.2;
+    constexpr double κ_μ = 0.2;
 
     // Barrier parameter superlinear decrease power in "μ^(θ_μ)". Range of (1,
     // 2).
-    constexpr double theta_mu = 1.5;
+    constexpr double θ_μ = 1.5;
 
     // Update the barrier parameter.
     //
     //   μⱼ₊₁ = max(εₜₒₗ/10, min(κ_μ μⱼ, μⱼ^θ_μ))
     //
     // See equation (7) of [2].
-    mu = std::max(mu_min, std::min(kappa_mu * mu, std::pow(mu, theta_mu)));
+    μ = std::max(μ_min, std::min(κ_μ * μ, std::pow(μ, θ_μ)));
 
     // Update the fraction-to-the-boundary rule scaling factor.
     //
     //   τⱼ = max(τₘᵢₙ, 1 − μⱼ)
     //
     // See equation (8) of [2].
-    tau = std::max(tau_min, 1.0 - mu);
+    τ = std::max(τ_min, 1.0 - μ);
 
     // Reset the filter when the barrier parameter is updated
-    filter.Reset(FilterEntry{m_f.value(), mu, s, c_e, c_i});
+    filter.Reset(FilterEntry{m_f.value(), μ, s, c_e, c_i});
   };
 
   // Kept outside the loop so its storage can be reused
@@ -501,7 +501,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
 
   // Error estimate E_μ
   double E_0 = std::numeric_limits<double>::infinity();
-  double E_mu = std::numeric_limits<double>::infinity();
+  double E_μ = std::numeric_limits<double>::infinity();
 
   iterationsStartTime = std::chrono::system_clock::now();
 
@@ -566,17 +566,17 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
     // If the error estimate is below the desired threshold for this barrier
     // parameter value, decrease it further and restart the loop
     {
-      // Barrier parameter scale factor κ_ε for tolerance checks
-      constexpr double kappa_epsilon = 10.0;
+      // Barrier parameter scale factor for tolerance checks
+      constexpr double κ_ε = 10.0;
 
       E_0 = ErrorEstimate(g, A_e, c_e, A_i, c_i, s, S, y, z, 0.0);
-      E_mu = ErrorEstimate(g, A_e, c_e, A_i, c_i, s, S, y, z, mu);
+      E_μ = ErrorEstimate(g, A_e, c_e, A_i, c_i, s, S, y, z, μ);
       if (E_0 < acceptableTolerance) {
         ++acceptableIterCounter;
       } else {
         acceptableIterCounter = 0;
       }
-      if (E_mu <= kappa_epsilon * mu) {
+      if (E_μ <= κ_ε * μ) {
         UpdateBarrierParameterAndResetFilter();
         continue;
       }
@@ -589,14 +589,13 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
     Eigen::SparseMatrix<double> Z = SparseDiagonal(z);
 
     // Σ = S⁻¹Z
-    Eigen::SparseMatrix<double> sigma = S.cwiseInverse() * Z;
+    Eigen::SparseMatrix<double> Σ = S.cwiseInverse() * Z;
 
     // lhs = [H + AᵢᵀΣAᵢ  Aₑᵀ]
     //       [    Aₑ       0 ]
     lhsBuilder.Clear();
     // Assign top-left quadrant
-    lhsBuilder.Block(0, 0, H.rows(), H.cols()) =
-        H + A_i.transpose() * sigma * A_i;
+    lhsBuilder.Block(0, 0, H.rows(), H.cols()) = H + A_i.transpose() * Σ * A_i;
     // Assign bottom-left quadrant
     lhsBuilder.Block(H.rows(), 0, A_e.rows(), A_e.cols()) = A_e;
     // Assign top-right quadrant
@@ -610,11 +609,11 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
     Eigen::VectorXd rhs{x.rows() + y.rows()};
     rhs.segment(0, x.rows()) =
         -(g - A_e.transpose() * y +
-          A_i.transpose() * (S.cwiseInverse() * (Z * c_i - mu * e) - z));
+          A_i.transpose() * (S.cwiseInverse() * (Z * c_i - μ * e) - z));
     rhs.segment(x.rows(), y.rows()) = -c_e;
 
     // Solve the Newton-KKT system
-    solver.Compute(lhs, m_equalityConstraints.size(), mu);
+    solver.Compute(lhs, m_equalityConstraints.size(), μ);
     Eigen::VectorXd step{x.rows() + y.rows(), 1};
     if (solver.Info() == Eigen::Success) {
       step = solver.Solve(rhs);
@@ -632,28 +631,27 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
     Eigen::VectorXd p_y = -step.segment(x.rows(), y.rows());
 
     // pₖᶻ = −Σcᵢ + μS⁻¹e − ΣAᵢpₖˣ
-    Eigen::VectorXd p_z =
-        -sigma * c_i + mu * S.cwiseInverse() * e - sigma * A_i * p_x;
+    Eigen::VectorXd p_z = -Σ * c_i + μ * S.cwiseInverse() * e - Σ * A_i * p_x;
 
     // pₖˢ = μZ⁻¹e − s − Z⁻¹Spₖᶻ
     Eigen::VectorXd p_s =
-        mu * Z.cwiseInverse() * e - s - Z.cwiseInverse() * S * p_z;
+        μ * Z.cwiseInverse() * e - s - Z.cwiseInverse() * S * p_z;
 
     bool stepAcceptable = false;
 
     // αᵐᵃˣ = max(α ∈ (0, 1] : sₖ + αpₖˢ ≥ (1−τⱼ)sₖ)
-    double alpha_max = FractionToTheBoundaryRule(s, p_s, tau);
-    double alpha = alpha_max;
+    double α_max = FractionToTheBoundaryRule(s, p_s, τ);
+    double α = α_max;
 
     // αₖᶻ = max(α ∈ (0, 1] : zₖ + αpₖᶻ ≥ (1−τⱼ)zₖ)
-    double alpha_z = FractionToTheBoundaryRule(z, p_z, tau);
+    double α_z = FractionToTheBoundaryRule(z, p_z, τ);
 
     while (!stepAcceptable) {
-      Eigen::VectorXd trial_x = x + alpha * p_x;
-      Eigen::VectorXd trial_s = s + alpha * p_s;
+      Eigen::VectorXd trial_x = x + α * p_x;
+      Eigen::VectorXd trial_s = s + α * p_s;
 
-      Eigen::VectorXd trial_y = y + alpha_z * p_y;
-      Eigen::VectorXd trial_z = z + alpha_z * p_z;
+      Eigen::VectorXd trial_y = y + α_z * p_y;
+      Eigen::VectorXd trial_z = z + α_z * p_z;
 
       SetAD(xAD, trial_x);
 
@@ -668,7 +666,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       Eigen::VectorXd trial_c_i = GetAD(m_inequalityConstraints);
 
       m_f.value().Update();
-      FilterEntry entry{m_f.value(), mu, trial_s, trial_c_e, trial_c_i};
+      FilterEntry entry{m_f.value(), μ, trial_s, trial_c_e, trial_c_i};
       if (filter.IsAcceptable(entry)) {
         stepAcceptable = true;
         filter.Add(std::move(entry));
@@ -688,7 +686,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
         Eigen::VectorXd p_z_soc = p_z;
         Eigen::VectorXd p_s_soc = p_s;
 
-        double alpha_soc = alpha;
+        double α_soc = α;
         Eigen::VectorXd c_e_soc = c_e;
 
         for (int soc_iteration = 0; soc_iteration < 5 && !stepAcceptable;
@@ -699,7 +697,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
           //        [              cₑˢᵒᶜ               ]
           //
           // where cₑˢᵒᶜ = αc(xₖ) + c(xₖ + αp_x)
-          c_e_soc = alpha_soc * c_e_soc + trial_c_e;
+          c_e_soc = α_soc * c_e_soc + trial_c_e;
           rhs.bottomRows(y.rows()) = -c_e_soc;
 
           // Solve the Newton-KKT system
@@ -709,22 +707,21 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
           p_y_soc = -step.segment(x.rows(), y.rows());
 
           // pₖᶻ = −Σcᵢ + μS⁻¹e − ΣAᵢpₖˣ
-          p_z_soc =
-              -sigma * c_i + mu * S.cwiseInverse() * e - sigma * A_i * p_x_cor;
+          p_z_soc = -Σ * c_i + μ * S.cwiseInverse() * e - Σ * A_i * p_x_cor;
 
           // pₖˢ = μZ⁻¹e − s − Z⁻¹Spₖᶻ
           p_s_soc =
-              mu * Z.cwiseInverse() * e - s - Z.cwiseInverse() * S * p_z_soc;
+              μ * Z.cwiseInverse() * e - s - Z.cwiseInverse() * S * p_z_soc;
 
           // αˢᵒᶜ = max(α ∈ (0, 1] : sₖ + αpₖˢ ≥ (1−τⱼ)sₖ)
-          alpha_soc = FractionToTheBoundaryRule(s, p_s_soc, tau);
-          trial_x = x + alpha_soc * p_x_cor;
-          trial_s = s + alpha_soc * p_s_soc;
+          α_soc = FractionToTheBoundaryRule(s, p_s_soc, τ);
+          trial_x = x + α_soc * p_x_cor;
+          trial_s = s + α_soc * p_s_soc;
 
           // αₖᶻ = max(α ∈ (0, 1] : zₖ + αpₖᶻ ≥ (1−τⱼ)zₖ)
-          double alpha_z_soc = FractionToTheBoundaryRule(z, p_z_soc, tau);
-          trial_y = y + alpha_z_soc * p_y_soc;
-          trial_z = z + alpha_z_soc * p_z_soc;
+          double α_z_soc = FractionToTheBoundaryRule(z, p_z_soc, τ);
+          trial_y = y + α_z_soc * p_y_soc;
+          trial_z = z + α_z_soc * p_z_soc;
 
           SetAD(xAD, trial_x);
 
@@ -739,14 +736,14 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
           trial_c_i = GetAD(m_inequalityConstraints);
 
           m_f.value().Update();
-          entry = FilterEntry{m_f.value(), mu, trial_s, trial_c_e, trial_c_i};
+          entry = FilterEntry{m_f.value(), μ, trial_s, trial_c_e, trial_c_i};
           if (filter.IsAcceptable(entry)) {
             p_x = p_x_cor;
             p_y = p_y_soc;
             p_z = p_z_soc;
             p_s = p_s_soc;
-            alpha = alpha_soc;
-            alpha_z = alpha_z_soc;
+            α = α_soc;
+            α_z = α_z_soc;
             stepAcceptable = true;
             filter.Add(std::move(entry));
           }
@@ -754,23 +751,23 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       }
 
       if (!stepAcceptable) {
-        constexpr double alpha_red_factor = 0.5;
-        alpha *= alpha_red_factor;
+        constexpr double α_red_factor = 0.5;
+        α *= α_red_factor;
 
         // Safety factor for the minimal step size
-        constexpr double alpha_min_frac = 0.05;
+        constexpr double α_min_frac = 0.05;
 
-        if (alpha < alpha_min_frac * Filter::kGammaConstraint) {
+        if (α < α_min_frac * Filter::γConstraint) {
           // If the step using αᵐᵃˣ reduced the KKT error, accept it anyway
 
           double currentKKTError =
-              KKTError(g, A_e, c_e, A_i, c_i, s, S, y, z, mu);
+              KKTError(g, A_e, c_e, A_i, c_i, s, S, y, z, μ);
 
-          Eigen::VectorXd trial_x = x + alpha_max * p_x;
-          Eigen::VectorXd trial_s = s + alpha_max * p_s;
+          Eigen::VectorXd trial_x = x + α_max * p_x;
+          Eigen::VectorXd trial_s = s + α_max * p_s;
 
-          Eigen::VectorXd trial_y = y + alpha_z * p_y;
-          Eigen::VectorXd trial_z = z + alpha_z * p_z;
+          Eigen::VectorXd trial_y = y + α_z * p_y;
+          Eigen::VectorXd trial_z = z + α_z * p_z;
 
           // Upate autodiff
           SetAD(xAD, trial_x);
@@ -791,15 +788,15 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
           double nextKKTError =
               KKTError(gradientF.Calculate(), jacobianCe.Calculate(), trial_c_e,
                        jacobianCi.Calculate(), trial_c_i, trial_s,
-                       SparseDiagonal(trial_s), trial_y, trial_z, mu);
+                       SparseDiagonal(trial_s), trial_y, trial_z, μ);
 
           if (nextKKTError <= 0.999 * currentKKTError) {
-            alpha = alpha_max;
+            α = α_max;
             stepAcceptable = true;
             continue;
           }
 
-          if (mu > mu_min) {
+          if (μ > μ_min) {
             UpdateBarrierParameterAndResetFilter();
             break;
           } else {
@@ -827,7 +824,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
                                  std::abs(p_x(row)) / (1.0 + std::abs(x(row))));
       }
       if (maxStepScaled < 10.0 * std::numeric_limits<double>::epsilon()) {
-        alpha = alpha_max;
+        α = α_max;
         ++stepTooSmallCounter;
       } else {
         stepTooSmallCounter = 0;
@@ -837,26 +834,26 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       // sₖ₊₁ = xₖ + αₖpₖˢ
       // yₖ₊₁ = xₖ + αₖᶻpₖʸ
       // zₖ₊₁ = xₖ + αₖᶻpₖᶻ
-      x += alpha * p_x;
-      s += alpha * p_s;
-      y += alpha_z * p_y;
-      z += alpha_z * p_z;
+      x += α * p_x;
+      s += α * p_s;
+      y += α_z * p_y;
+      z += α_z * p_z;
 
       // A requirement for the convergence proof is that the "primal-dual
-      // barrier term Hessian" Σₖ does not deviate arbitrarily much from the
+      // barrier term Hessian" Σₖ does not deviate arbitrarily μch from the
       // "primal Hessian" μⱼSₖ⁻². We ensure this by resetting
       //
       //   zₖ₊₁⁽ⁱ⁾ = max(min(zₖ₊₁⁽ⁱ⁾, κ_Σ μⱼ/sₖ₊₁⁽ⁱ⁾), μⱼ/(κ_Σ sₖ₊₁⁽ⁱ⁾))
       //
       // for some fixed κ_Σ ≥ 1 after each step. See equation (16) of [2].
       {
-        // Barrier parameter scale factor κ_Σ for inequality constraint Lagrange
+        // Barrier parameter scale factor for inequality constraint Lagrange
         // multiplier safeguard
-        constexpr double kappa_sigma = 1e10;
+        constexpr double κ_Σ = 1e10;
 
         for (int row = 0; row < z.rows(); ++row) {
-          z(row) = std::max(std::min(z(row), kappa_sigma * mu / s(row)),
-                            mu / (kappa_sigma * s(row)));
+          z(row) =
+              std::max(std::min(z(row), κ_Σ * μ / s(row)), μ / (κ_Σ * s(row)));
         }
       }
     }
@@ -892,7 +889,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
     //
     // See section 3.9 of [2].
     if (stepTooSmallCounter == 2) {
-      if (mu > mu_min) {
+      if (μ > μ_min) {
         UpdateBarrierParameterAndResetFilter();
         continue;
       } else {
@@ -1037,7 +1034,7 @@ double OptimizationProblem::ErrorEstimate(
     const Eigen::VectorXd& c_e, const Eigen::SparseMatrix<double>& A_i,
     const Eigen::VectorXd& c_i, const Eigen::VectorXd& s,
     const Eigen::SparseMatrix<double>& S, const Eigen::VectorXd& y,
-    const Eigen::VectorXd& z, double mu) const {
+    const Eigen::VectorXd& z, double μ) const {
   // Update the error estimate using the KKT conditions from equations (19.5a)
   // through (19.5d) of [1].
   //
@@ -1067,18 +1064,18 @@ double OptimizationProblem::ErrorEstimate(
 
   const Eigen::VectorXd e = Eigen::VectorXd::Ones(s.rows());
 
-  double E_mu = std::max((g - A_e.transpose() * y - A_i.transpose() * z)
-                                 .lpNorm<Eigen::Infinity>() /
-                             s_d,
-                         (S * z - mu * e).lpNorm<Eigen::Infinity>() / s_c);
+  double E_μ = std::max((g - A_e.transpose() * y - A_i.transpose() * z)
+                                .lpNorm<Eigen::Infinity>() /
+                            s_d,
+                        (S * z - μ * e).lpNorm<Eigen::Infinity>() / s_c);
   if (m_equalityConstraints.size() > 0) {
-    E_mu = std::max(E_mu, c_e.lpNorm<Eigen::Infinity>());
+    E_μ = std::max(E_μ, c_e.lpNorm<Eigen::Infinity>());
   }
   if (m_inequalityConstraints.size() > 0) {
-    E_mu = std::max(E_mu, (c_i - s).lpNorm<Eigen::Infinity>());
+    E_μ = std::max(E_μ, (c_i - s).lpNorm<Eigen::Infinity>());
   }
 
-  return E_mu;
+  return E_μ;
 }
 
 double OptimizationProblem::KKTError(
@@ -1086,7 +1083,7 @@ double OptimizationProblem::KKTError(
     const Eigen::VectorXd& c_e, const Eigen::SparseMatrix<double>& A_i,
     const Eigen::VectorXd& c_i, const Eigen::VectorXd& s,
     const Eigen::SparseMatrix<double>& S, const Eigen::VectorXd& y,
-    const Eigen::VectorXd& z, double mu) const {
+    const Eigen::VectorXd& z, double μ) const {
   // Compute the KKT error as the 1-norm of the KKT conditions from equations
   // (19.5a) through (19.5d) of [1].
   //
@@ -1098,7 +1095,7 @@ double OptimizationProblem::KKTError(
   const Eigen::VectorXd e = Eigen::VectorXd::Ones(s.rows());
 
   double error = (g - A_e.transpose() * y - A_i.transpose() * z).lpNorm<1>();
-  error += (S * z - mu * e).lpNorm<1>();
+  error += (S * z - μ * e).lpNorm<1>();
   if (m_equalityConstraints.size() > 0) {
     error += c_e.lpNorm<1>();
   }

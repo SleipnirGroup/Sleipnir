@@ -442,7 +442,7 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
    * @param S Inequality constraint slack variables as a diagonal matrix.
    * @param y Equality constraint dual variables.
    * @param z Inequality constraint dual variables.
-   * @param mu Barrier parameter.
+   * @param μ Barrier parameter.
    */
   double ErrorEstimate(const Eigen::VectorXd& g,
                        const Eigen::SparseMatrix<double>& A_e,
@@ -451,7 +451,7 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
                        const Eigen::VectorXd& c_i, const Eigen::VectorXd& s,
                        const Eigen::SparseMatrix<double>& S,
                        const Eigen::VectorXd& y, const Eigen::VectorXd& z,
-                       double mu) const;
+                       double μ) const;
 
   /**
    * Returns the KKT error for the interior-point method.
@@ -469,7 +469,7 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
    * @param S Inequality constraint slack variables as a diagonal matrix.
    * @param y Equality constraint dual variables.
    * @param z Inequality constraint dual variables.
-   * @param mu Barrier parameter.
+   * @param μ Barrier parameter.
    */
   double KKTError(const Eigen::VectorXd& g,
                   const Eigen::SparseMatrix<double>& A_e,
@@ -478,7 +478,7 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
                   const Eigen::VectorXd& c_i, const Eigen::VectorXd& s,
                   const Eigen::SparseMatrix<double>& S,
                   const Eigen::VectorXd& y, const Eigen::VectorXd& z,
-                  double mu) const;
+                  double μ) const;
 };
 
 }  // namespace sleipnir

@@ -27,14 +27,14 @@ struct FilterEntry {
    * Constructs a FilterEntry.
    *
    * @param f The cost function.
-   * @param mu The barrier parameter.
+   * @param μ The barrier parameter.
    * @param s The inequality constraint slack variables.
    * @param c_e The equality constraint values (nonzero means violation).
    * @param c_i The inequality constraint values (negative means violation).
    */
-  FilterEntry(const Variable& f, double mu, Eigen::VectorXd& s,
+  FilterEntry(const Variable& f, double μ, Eigen::VectorXd& s,
               const Eigen::VectorXd& c_e, const Eigen::VectorXd& c_i)
-      : cost{f.Value() - mu * s.array().log().sum()},
+      : cost{f.Value() - μ * s.array().log().sum()},
         constraintViolation{c_e.lpNorm<1>() + (c_i - s).lpNorm<1>()} {}
 };
 
@@ -43,8 +43,8 @@ struct FilterEntry {
  */
 class Filter {
  public:
-  static constexpr double kGammaCost = 1e-8;
-  static constexpr double kGammaConstraint = 1e-5;
+  static constexpr double γCost = 1e-8;
+  static constexpr double γConstraint = 1e-5;
 
   /**
    * Initialize the filter with an entry.
@@ -117,9 +117,9 @@ class Filter {
                m_filter.begin(), m_filter.end(),
                [&](const auto& elem) {
                  return entry.cost <=
-                            elem.cost - kGammaCost * elem.constraintViolation ||
+                            elem.cost - γCost * elem.constraintViolation ||
                         entry.constraintViolation <=
-                            (1.0 - kGammaConstraint) * elem.constraintViolation;
+                            (1.0 - γConstraint) * elem.constraintViolation;
                }) &&
            entry.constraintViolation < m_maxConstraintViolation;
   }

@@ -49,8 +49,8 @@ class RegularizedLDLT {
     const Inertia idealInertia{m_numDecisionVariables, m_numEqualityConstraints,
                                0};
 
-    double delta = 0.0;
-    double gamma = 0.0;
+    double δ = 0.0;
+    double γ = 0.0;
 
     m_solver.compute(lhs);
     Inertia inertia{m_solver};
@@ -67,9 +67,9 @@ class RegularizedLDLT {
     // again
     if ((m_solver.info() == Eigen::Success && inertia.zero > 0) ||
         m_solver.info() != Eigen::Success) {
-      gamma = 1e-8 * std::pow(mu, 0.25);
+      γ = 1e-8 * std::pow(mu, 0.25);
 
-      m_solver.compute(lhs + Regularization(delta, gamma));
+      m_solver.compute(lhs + Regularization(δ, γ));
       inertia = Inertia{m_solver};
 
       if (m_solver.info() == Eigen::Success && inertia == idealInertia) {
@@ -78,14 +78,14 @@ class RegularizedLDLT {
       }
     }
 
-    // Since adding gamma didn't fix the inertia, the Hessian needs to be
+    // Since adding γ didn't fix the inertia, the Hessian needs to be
     // regularized. If the Hessian wasn't regularized in a previous run of
-    // Compute(), start at a small value of delta. Otherwise, attempt a delta
-    // half as big as the previous run so delta can trend downwards over time.
-    if (m_deltaOld == 0.0) {
-      delta = 1e-4;
+    // Compute(), start at a small value of δ. Otherwise, attempt a δ half as
+    // big as the previous run so δ can trend downwards over time.
+    if (m_δOld == 0.0) {
+      δ = 1e-4;
     } else {
-      delta = m_deltaOld / 2.0;
+      δ = m_δOld / 2.0;
     }
 
     while (true) {
@@ -93,22 +93,22 @@ class RegularizedLDLT {
       //
       // lhs = [H + AᵢᵀΣAᵢ + δI   Aₑᵀ]
       //       [       Aₑ        −γI ]
-      m_solver.compute(lhs + Regularization(delta, gamma));
+      m_solver.compute(lhs + Regularization(δ, γ));
       Inertia inertia{m_solver};
 
-      // If the inertia is ideal, store that value of delta and return.
-      // Otherwise, increase delta by an order of magnitude and try again.
+      // If the inertia is ideal, store that value of δ and return.
+      // Otherwise, increase δ by an order of magnitude and try again.
       if (inertia == idealInertia) {
-        m_deltaOld = delta;
+        m_δOld = δ;
         m_info = Eigen::Success;
         return;
       } else {
-        delta *= 10.0;
+        δ *= 10.0;
 
         // If the Hessian perturbation is too high, report failure. This can
         // happen due to a rank-deficient equality constraint Jacobian with
         // linearly dependent constraints.
-        if (delta > 1e20) {
+        if (δ > 1e20) {
           m_info = Eigen::NumericalIssue;
           return;
         }
@@ -137,25 +137,24 @@ class RegularizedLDLT {
   /// The number of equality constraints in the system.
   size_t m_numEqualityConstraints = 0;
 
-  /// The value of delta from the previous run of Compute().
-  double m_deltaOld = 0.0;
+  /// The value of δ from the previous run of Compute().
+  double m_δOld = 0.0;
 
   /**
    * Returns regularization matrix.
    *
-   * @param delta The Hessian regularization factor.
-   * @param gamma The equality constraint Jacobian regularization factor.
+   * @param δ The Hessian regularization factor.
+   * @param γ The equality constraint Jacobian regularization factor.
    */
-  Eigen::SparseMatrix<double> Regularization(double delta, double gamma) {
+  Eigen::SparseMatrix<double> Regularization(double δ, double γ) {
     int rows = m_numDecisionVariables + m_numEqualityConstraints;
 
     SparseMatrixBuilder<double> reg{rows, rows};
     reg.Block(0, 0, m_numDecisionVariables, m_numDecisionVariables) =
-        delta * SparseIdentity(m_numDecisionVariables, m_numDecisionVariables);
+        δ * SparseIdentity(m_numDecisionVariables, m_numDecisionVariables);
     reg.Block(m_numDecisionVariables, m_numDecisionVariables,
               m_numEqualityConstraints, m_numEqualityConstraints) =
-        -gamma *
-        SparseIdentity(m_numEqualityConstraints, m_numEqualityConstraints);
+        -γ * SparseIdentity(m_numEqualityConstraints, m_numEqualityConstraints);
     return reg.Build();
   }
 };
