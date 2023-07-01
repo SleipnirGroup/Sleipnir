@@ -35,10 +35,10 @@ class RegularizedLDLT {
    * @param lhs Left-hand side of the system.
    * @param numEqualityConstraints The number of equality constraints in the
    *   system.
-   * @param mu The barrier parameter for the current interior-point iteration.
+   * @param μ The barrier parameter for the current interior-point iteration.
    */
   void Compute(const Eigen::SparseMatrix<double>& lhs,
-               size_t numEqualityConstraints, double mu) {
+               size_t numEqualityConstraints, double μ) {
     // The regularization procedure is based on algorithm B.1 of [1].
     //
     // [1] Nocedal, J. and Wright, S. "Numerical Optimization", 2nd. ed.,
@@ -67,7 +67,7 @@ class RegularizedLDLT {
     // again
     if ((m_solver.info() == Eigen::Success && inertia.zero > 0) ||
         m_solver.info() != Eigen::Success) {
-      γ = 1e-8 * std::pow(mu, 0.25);
+      γ = 1e-8 * std::pow(μ, 0.25);
 
       m_solver.compute(lhs + Regularization(δ, γ));
       inertia = Inertia{m_solver};
