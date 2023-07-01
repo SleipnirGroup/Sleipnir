@@ -1064,18 +1064,12 @@ double OptimizationProblem::ErrorEstimate(
 
   const Eigen::VectorXd e = Eigen::VectorXd::Ones(s.rows());
 
-  double E_μ = std::max((g - A_e.transpose() * y - A_i.transpose() * z)
-                                .lpNorm<Eigen::Infinity>() /
-                            s_d,
-                        (S * z - μ * e).lpNorm<Eigen::Infinity>() / s_c);
-  if (m_equalityConstraints.size() > 0) {
-    E_μ = std::max(E_μ, c_e.lpNorm<Eigen::Infinity>());
-  }
-  if (m_inequalityConstraints.size() > 0) {
-    E_μ = std::max(E_μ, (c_i - s).lpNorm<Eigen::Infinity>());
-  }
-
-  return E_μ;
+  return std::max({(g - A_e.transpose() * y - A_i.transpose() * z)
+                           .lpNorm<Eigen::Infinity>() /
+                       s_d,
+                   (S * z - μ * e).lpNorm<Eigen::Infinity>() / s_c,
+                   c_e.lpNorm<Eigen::Infinity>(),
+                   (c_i - s).lpNorm<Eigen::Infinity>()});
 }
 
 double OptimizationProblem::KKTError(
@@ -1094,14 +1088,6 @@ double OptimizationProblem::KKTError(
 
   const Eigen::VectorXd e = Eigen::VectorXd::Ones(s.rows());
 
-  double error = (g - A_e.transpose() * y - A_i.transpose() * z).lpNorm<1>();
-  error += (S * z - μ * e).lpNorm<1>();
-  if (m_equalityConstraints.size() > 0) {
-    error += c_e.lpNorm<1>();
-  }
-  if (m_inequalityConstraints.size() > 0) {
-    error += (c_i - s).lpNorm<1>();
-  }
-
-  return error;
+  return (g - A_e.transpose() * y - A_i.transpose() * z).lpNorm<1>() +
+         (S * z - μ * e).lpNorm<1>() + c_e.lpNorm<1>() + (c_i - s).lpNorm<1>();
 }
