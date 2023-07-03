@@ -840,7 +840,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       z += α_z * p_z;
 
       // A requirement for the convergence proof is that the "primal-dual
-      // barrier term Hessian" Σₖ does not deviate arbitrarily μch from the
+      // barrier term Hessian" Σₖ does not deviate arbitrarily much from the
       // "primal Hessian" μⱼSₖ⁻². We ensure this by resetting
       //
       //   zₖ₊₁⁽ⁱ⁾ = max(min(zₖ₊₁⁽ⁱ⁾, κ_Σ μⱼ/sₖ₊₁⁽ⁱ⁾), μⱼ/(κ_Σ sₖ₊₁⁽ⁱ⁾))
