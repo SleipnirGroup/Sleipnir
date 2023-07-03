@@ -140,12 +140,12 @@ void OptimizationProblem::Minimize(Variable&& cost) {
 }
 
 void OptimizationProblem::Maximize(const Variable& cost) {
-  // Maximizing an cost function is the same as minimizing its negative
+  // Maximizing a cost function is the same as minimizing its negative
   m_f = -cost;
 }
 
 void OptimizationProblem::Maximize(Variable&& cost) {
-  // Maximizing an cost function is the same as minimizing its negative
+  // Maximizing a cost function is the same as minimizing its negative
   m_f = -std::move(cost);
 }
 
