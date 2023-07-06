@@ -247,7 +247,7 @@ SolverStatus OptimizationProblem::Solve(const SolverConfig& config) {
 
   // If there's no cost function, make it zero and continue
   if (!m_f.has_value()) {
-    m_f = 0.0;
+    m_f = Variable();
   }
 
   if (config.spy) {
