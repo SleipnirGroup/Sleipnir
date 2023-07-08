@@ -458,7 +458,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   // Fraction-to-the-boundary rule scale factor τ
   double τ = τ_min;
 
-  Filter filter{FilterEntry{m_f.value(), μ, s, c_e, c_i}};
+  Filter filter;
 
   // This should be run when the error estimate is below a desired threshold for
   // the current barrier parameter
@@ -485,7 +485,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
     τ = std::max(τ_min, 1.0 - μ);
 
     // Reset the filter when the barrier parameter is updated
-    filter.Reset(FilterEntry{m_f.value(), μ, s, c_e, c_i});
+    filter.Reset();
   };
 
   // Kept outside the loop so its storage can be reused
@@ -497,6 +497,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   int acceptableIterCounter = 0;
   const double acceptableTolerance = m_config.tolerance * 100;
 
+  int fullStepRejectedCounter = 0;
   int stepTooSmallCounter = 0;
 
   // Error estimate E_μ
@@ -750,7 +751,26 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
         }
       }
 
+      // Count number of times full step is rejected in a row
+      if (α == 1.0) {
+        if (!stepAcceptable) {
+          ++fullStepRejectedCounter;
+        } else {
+          fullStepRejectedCounter = 0;
+        }
+      }
+
       if (!stepAcceptable) {
+        // Reset filter if it's repeatedly impeding progress
+        //
+        // See section 3.2 case I of [2].
+        if (fullStepRejectedCounter == 4 &&
+            filter.maxConstraintViolation > entry.constraintViolation / 10.0) {
+          filter.maxConstraintViolation *= 0.1;
+          filter.Reset();
+          continue;
+        }
+
         constexpr double α_red_factor = 0.5;
         α *= α_red_factor;
 
@@ -796,13 +816,9 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
             continue;
           }
 
-          if (μ > μ_min) {
-            UpdateBarrierParameterAndResetFilter();
-            break;
-          } else {
-            status->exitCondition = SolverExitCondition::kBadSearchDirection;
-            return x;
-          }
+          // TODO: Feasibility restoration phase
+          status->exitCondition = SolverExitCondition::kBadSearchDirection;
+          return x;
         }
       }
     }
