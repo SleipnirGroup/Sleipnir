@@ -71,14 +71,30 @@ class Filter {
    *
    * @param entry The entry to add to the filter.
    */
-  void Add(const FilterEntry& entry) { m_filter.push_back(entry); }
+  void Add(const FilterEntry& entry) {
+    // Remove dominated entries
+    std::erase_if(m_filter, [&](const auto& elem) {
+      return entry.cost <= elem.cost &&
+             entry.constraintViolation <= elem.constraintViolation;
+    });
+
+    m_filter.push_back(entry);
+  }
 
   /**
    * Add a new entry to the filter.
    *
    * @param entry The entry to add to the filter.
    */
-  void Add(FilterEntry&& entry) { m_filter.push_back(entry); }
+  void Add(FilterEntry&& entry) {
+    // Remove dominated entries
+    std::erase_if(m_filter, [&](const auto& elem) {
+      return entry.cost <= elem.cost &&
+             entry.constraintViolation <= elem.constraintViolation;
+    });
+
+    m_filter.push_back(entry);
+  }
 
   /**
    * Returns the last entry in the filter.
