@@ -30,7 +30,7 @@ struct FilterEntry {
    * @param cost The cost function's value.
    * @param constraintViolation The constraint violation.
    */
-  FilterEntry(double cost, double constraintViolation)
+  constexpr FilterEntry(double cost, double constraintViolation)
       : cost{cost}, constraintViolation{constraintViolation} {}
 
   /**
@@ -61,7 +61,7 @@ class Filter {
   /**
    * Construct an empty filter.
    */
-  Filter() {
+  constexpr Filter() {
     // Initial filter entry rejects constraint violations above max
     m_filter.emplace_back(std::numeric_limits<double>::infinity(),
                           maxConstraintViolation);
@@ -72,7 +72,7 @@ class Filter {
    *
    * @param entry The entry to add to the filter.
    */
-  void Add(const FilterEntry& entry) {
+  constexpr void Add(const FilterEntry& entry) {
     // Remove dominated entries
     std::erase_if(m_filter, [&](const auto& elem) {
       return entry.cost <= elem.cost &&
@@ -87,7 +87,7 @@ class Filter {
    *
    * @param entry The entry to add to the filter.
    */
-  void Add(FilterEntry&& entry) {
+  constexpr void Add(FilterEntry&& entry) {
     // Remove dominated entries
     std::erase_if(m_filter, [&](const auto& elem) {
       return entry.cost <= elem.cost &&
@@ -100,7 +100,7 @@ class Filter {
   /**
    * Reset the filter.
    */
-  void Reset() {
+  constexpr void Reset() {
     m_filter.clear();
 
     // Initial filter entry rejects constraint violations above max
@@ -113,7 +113,7 @@ class Filter {
    *
    * @param entry The entry to check.
    */
-  bool IsAcceptable(const FilterEntry& entry) {
+  constexpr bool IsAcceptable(const FilterEntry& entry) {
     // If current filter entry is better than all prior ones in some respect,
     // accept it
     return std::all_of(m_filter.begin(), m_filter.end(), [&](const auto& elem) {
