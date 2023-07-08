@@ -16,6 +16,7 @@
 #include "sleipnir/autodiff/VariableMatrix.hpp"
 #include "sleipnir/optimization/Constraints.hpp"
 #include "sleipnir/optimization/SolverConfig.hpp"
+#include "sleipnir/optimization/SolverExitCondition.hpp"
 #include "sleipnir/optimization/SolverIterationInfo.hpp"
 #include "sleipnir/optimization/SolverStatus.hpp"
 
@@ -393,6 +394,13 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
    */
   Eigen::VectorXd InitializeY(const Eigen::SparseMatrix<double>& A_e,
                               const Eigen::VectorXd& g) const;
+
+  /**
+   * Prints exit condition as a user-readable message.
+   *
+   * @param exitCondition The solver exit condition.
+   */
+  static void PrintExitCondition(const SolverExitCondition& exitCondition);
 
   /**
    * Print number of nonzeros in Lagrangian Hessian and constraint Jacobians
