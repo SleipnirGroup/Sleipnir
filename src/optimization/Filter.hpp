@@ -3,6 +3,7 @@
 #pragma once
 
 #include <algorithm>
+#include <limits>
 #include <vector>
 
 #include <Eigen/Core>
@@ -22,6 +23,15 @@ struct FilterEntry {
   double constraintViolation = 0.0;
 
   constexpr FilterEntry() = default;
+
+  /**
+   * Constructs a FilterEntry.
+   *
+   * @param cost The cost function's value.
+   * @param constraintViolation The constraint violation.
+   */
+  FilterEntry(double cost, double constraintViolation)
+      : cost{cost}, constraintViolation{constraintViolation} {}
 
   /**
    * Constructs a FilterEntry.
@@ -46,24 +56,15 @@ class Filter {
   static constexpr double γCost = 1e-8;
   static constexpr double γConstraint = 1e-5;
 
-  /**
-   * Initialize the filter with an entry.
-   *
-   * @param entry The initial filter entry.
-   */
-  explicit Filter(const FilterEntry& entry) {
-    m_filter.push_back(entry);
-    m_maxConstraintViolation = 1e4 * std::max(1.0, entry.constraintViolation);
-  }
+  double maxConstraintViolation = 1e4;
 
   /**
-   * Initialize the filter with an entry.
-   *
-   * @param entry The initial filter entry.
+   * Construct an empty filter.
    */
-  explicit Filter(FilterEntry&& entry) {
-    m_filter.push_back(entry);
-    m_maxConstraintViolation = 1e4 * std::max(1.0, entry.constraintViolation);
+  Filter() {
+    // Initial filter entry rejects constraint violations above max
+    m_filter.emplace_back(std::numeric_limits<double>::infinity(),
+                          maxConstraintViolation);
   }
 
   /**
@@ -102,23 +103,14 @@ class Filter {
   const FilterEntry& LastEntry() const { return m_filter.back(); }
 
   /**
-   * Reset the filter with an entry.
-   *
-   * @param entry The initial filter entry.
+   * Reset the filter.
    */
-  void Reset(const FilterEntry& entry) {
+  void Reset() {
     m_filter.clear();
-    m_filter.push_back(entry);
-  }
 
-  /**
-   * Reset the filter with an entry.
-   *
-   * @param entry The initial filter entry.
-   */
-  void Reset(FilterEntry&& entry) {
-    m_filter.clear();
-    m_filter.push_back(entry);
+    // Initial filter entry rejects constraint violations above max
+    m_filter.emplace_back(std::numeric_limits<double>::infinity(),
+                          maxConstraintViolation);
   }
 
   /**
@@ -129,21 +121,15 @@ class Filter {
   bool IsAcceptable(const FilterEntry& entry) {
     // If current filter entry is better than all prior ones in some respect,
     // accept it
-    return std::all_of(
-               m_filter.begin(), m_filter.end(),
-               [&](const auto& elem) {
-                 return entry.cost <=
-                            elem.cost - γCost * elem.constraintViolation ||
-                        entry.constraintViolation <=
-                            (1.0 - γConstraint) * elem.constraintViolation;
-               }) &&
-           entry.constraintViolation < m_maxConstraintViolation;
+    return std::all_of(m_filter.begin(), m_filter.end(), [&](const auto& elem) {
+      return entry.cost <= elem.cost - γCost * elem.constraintViolation ||
+             entry.constraintViolation <=
+                 (1.0 - γConstraint) * elem.constraintViolation;
+    });
   }
 
  private:
   std::vector<FilterEntry> m_filter;
-
-  double m_maxConstraintViolation = 1e4;
 };
 
 }  // namespace sleipnir
