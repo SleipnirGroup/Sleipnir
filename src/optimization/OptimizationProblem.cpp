@@ -19,7 +19,6 @@
 #include "sleipnir/autodiff/Hessian.hpp"
 #include "sleipnir/autodiff/Jacobian.hpp"
 #include "sleipnir/autodiff/Variable.hpp"
-#include "sleipnir/optimization/SolverExitCondition.hpp"
 #include "sleipnir/util/AutodiffUtil.hpp"
 #include "sleipnir/util/SparseMatrixBuilder.hpp"
 #include "sleipnir/util/SparseUtil.hpp"
@@ -195,16 +194,20 @@ SolverStatus OptimizationProblem::Solve(const SolverConfig& config) {
   m_config = config;
 
   // Create the initial value column vector
-  Eigen::VectorXd x{m_decisionVariables.size(), 1};
+  Eigen::VectorXd x{m_decisionVariables.size()};
   for (size_t i = 0; i < m_decisionVariables.size(); ++i) {
     x(i) = m_decisionVariables[i].Value();
   }
 
   SolverStatus status;
 
-  // Get f's expression type
   if (m_f.has_value()) {
+    // If there's a cost function, get its expression type. The default is
+    // "none".
     status.costFunctionType = m_f.value().Type();
+  } else {
+    // If there's no cost function, make it zero and continue
+    m_f = Variable();
   }
 
   // Get the highest order equality constraint expression type
@@ -227,6 +230,7 @@ SolverStatus OptimizationProblem::Solve(const SolverConfig& config) {
     constexpr std::array<const char*, 5> kExprTypeToName = {
         "empty", "constant", "linear", "quadratic", "nonlinear"};
 
+    // Print cost function and constraint expression types
     fmt::print("The cost function is {}.\n",
                kExprTypeToName[static_cast<int>(status.costFunctionType)]);
     fmt::print(
@@ -236,6 +240,14 @@ SolverStatus OptimizationProblem::Solve(const SolverConfig& config) {
         "The inequality constraints are {}.\n",
         kExprTypeToName[static_cast<int>(status.inequalityConstraintType)]);
     fmt::print("\n");
+
+    // Print problem dimensionality
+    fmt::print("Number of decision variables: {}\n",
+               m_decisionVariables.size());
+    fmt::print("Number of equality constraints: {}\n",
+               m_equalityConstraints.size());
+    fmt::print("Number of inequality constraints: {}\n\n",
+               m_inequalityConstraints.size());
   }
 
   // If the problem is empty or constant, there's nothing to do
@@ -243,11 +255,6 @@ SolverStatus OptimizationProblem::Solve(const SolverConfig& config) {
       status.equalityConstraintType <= ExpressionType::kConstant &&
       status.inequalityConstraintType <= ExpressionType::kConstant) {
     return status;
-  }
-
-  // If there's no cost function, make it zero and continue
-  if (!m_f.has_value()) {
-    m_f = Variable();
   }
 
   if (config.spy) {
@@ -260,43 +267,7 @@ SolverStatus OptimizationProblem::Solve(const SolverConfig& config) {
   Eigen::VectorXd solution = InteriorPoint(x, &status);
 
   if (m_config.diagnostics) {
-    fmt::print("Exit condition: ");
-    switch (status.exitCondition) {
-      case SolverExitCondition::kSuccess:
-        fmt::print("solved to desired tolerance");
-        break;
-      case SolverExitCondition::kSolvedToAcceptableTolerance:
-        fmt::print("solved to acceptable tolerance");
-        break;
-      case SolverExitCondition::kTooFewDOFs:
-        fmt::print("problem has too few degrees of freedom");
-        break;
-      case SolverExitCondition::kLocallyInfeasible:
-        fmt::print("problem is locally infeasible");
-        break;
-      case SolverExitCondition::kBadSearchDirection:
-        fmt::print(
-            "solver failed to reach the desired tolerance due to a bad search "
-            "direction");
-        break;
-      case SolverExitCondition::kMaxSearchDirectionTooSmall:
-        fmt::print(
-            "solver failed to reach the desired tolerance due to the maximum "
-            "search direction becoming too small");
-        break;
-      case SolverExitCondition::kDivergingIterates:
-        fmt::print(
-            "solver encountered diverging primal iterates pₖˣ and/or pₖˢ and "
-            "gave up");
-        break;
-      case SolverExitCondition::kMaxIterationsExceeded:
-        fmt::print("solution returned after maximum iterations exceeded");
-        break;
-      case SolverExitCondition::kMaxWallClockTimeExceeded:
-        fmt::print("solution returned after maximum wall time exceeded");
-        break;
-    }
-    fmt::print("\n");
+    PrintExitCondition(status.exitCondition);
   }
 
   // Assign the solution to the original Variable instances
@@ -317,16 +288,6 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   // interior-point method formulation being used.
 
   auto solveStartTime = std::chrono::system_clock::now();
-
-  // Print problem dimensionality
-  if (m_config.diagnostics) {
-    fmt::print("Number of decision variables: {}\n",
-               m_decisionVariables.size());
-    fmt::print("Number of equality constraints: {}\n",
-               m_equalityConstraints.size());
-    fmt::print("Number of inequality constraints: {}\n\n",
-               m_inequalityConstraints.size());
-  }
 
   // Map decision variables and constraints to Eigen vectors for Lagrangian
   MapVectorXvar xAD(m_decisionVariables.data(), m_decisionVariables.size());
@@ -959,6 +920,47 @@ Eigen::VectorXd OptimizationProblem::InitializeY(
   } else {
     return y;
   }
+}
+
+void OptimizationProblem::PrintExitCondition(
+    const SolverExitCondition& exitCondition) {
+  fmt::print("Exit condition: ");
+  switch (exitCondition) {
+    case SolverExitCondition::kSuccess:
+      fmt::print("solved to desired tolerance");
+      break;
+    case SolverExitCondition::kSolvedToAcceptableTolerance:
+      fmt::print("solved to acceptable tolerance");
+      break;
+    case SolverExitCondition::kTooFewDOFs:
+      fmt::print("problem has too few degrees of freedom");
+      break;
+    case SolverExitCondition::kLocallyInfeasible:
+      fmt::print("problem is locally infeasible");
+      break;
+    case SolverExitCondition::kBadSearchDirection:
+      fmt::print(
+          "solver failed to reach the desired tolerance due to a bad search "
+          "direction");
+      break;
+    case SolverExitCondition::kMaxSearchDirectionTooSmall:
+      fmt::print(
+          "solver failed to reach the desired tolerance due to the maximum "
+          "search direction becoming too small");
+      break;
+    case SolverExitCondition::kDivergingIterates:
+      fmt::print(
+          "solver encountered diverging primal iterates pₖˣ and/or pₖˢ and "
+          "gave up");
+      break;
+    case SolverExitCondition::kMaxIterationsExceeded:
+      fmt::print("solution returned after maximum iterations exceeded");
+      break;
+    case SolverExitCondition::kMaxWallClockTimeExceeded:
+      fmt::print("solution returned after maximum wall time exceeded");
+      break;
+  }
+  fmt::print("\n");
 }
 
 void OptimizationProblem::PrintNonZeros(
