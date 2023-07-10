@@ -465,12 +465,6 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
          acceptableIterCounter < maxAcceptableIterations) {
     auto innerIterStartTime = std::chrono::system_clock::now();
 
-    //     [s₁ 0 ⋯ 0 ]
-    // S = [0  ⋱   ⋮ ]
-    //     [⋮    ⋱ 0 ]
-    //     [0  ⋯ 0 sₘ]
-    Eigen::SparseMatrix<double> S = SparseDiagonal(s);
-
     // Check for local infeasibility
     if (!IsLocallyFeasible(A_e, c_e, A_i, c_i)) {
       status->exitCondition = SolverExitCondition::kLocallyInfeasible;
@@ -492,6 +486,12 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
 
     // Call user callback
     m_callback({iterations, g, H, A_e, A_i});
+
+    //     [s₁ 0 ⋯ 0 ]
+    // S = [0  ⋱   ⋮ ]
+    //     [⋮    ⋱ 0 ]
+    //     [0  ⋯ 0 sₘ]
+    Eigen::SparseMatrix<double> S = SparseDiagonal(s);
 
     //     [z₁ 0 ⋯ 0 ]
     // Z = [0  ⋱   ⋮ ]
