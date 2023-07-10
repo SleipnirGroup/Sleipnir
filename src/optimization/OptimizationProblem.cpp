@@ -291,6 +291,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
 
   // Map decision variables and constraints to Eigen vectors for Lagrangian
   MapVectorXvar xAD(m_decisionVariables.data(), m_decisionVariables.size());
+  SetAD(xAD, initialGuess);
   MapVectorXvar c_eAD(m_equalityConstraints.data(),
                       m_equalityConstraints.size());
   MapVectorXvar c_iAD(m_inequalityConstraints.data(),
@@ -307,10 +308,6 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   Variable L =
       m_f.value() - yAD.transpose() * c_eAD - zAD.transpose() * (c_iAD - sAD);
 
-  // Set x to initial guess and update autodiff so Jacobians and Hessian use it
-  Eigen::VectorXd x = initialGuess;
-  SetAD(xAD, x);
-
   // Equality constraint Jacobian Aₑ
   //
   //         [∇ᵀcₑ₁(x)ₖ]
@@ -318,7 +315,6 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   //         [    ⋮    ]
   //         [∇ᵀcₑₘ(x)ₖ]
   Jacobian jacobianCe{c_eAD, xAD};
-  Eigen::SparseMatrix<double> A_e = jacobianCe.Calculate();
 
   // Inequality constraint Jacobian Aᵢ
   //
@@ -327,23 +323,18 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   //         [    ⋮    ]
   //         [∇ᵀcᵢₘ(x)ₖ]
   Jacobian jacobianCi{c_iAD, xAD};
-  Eigen::SparseMatrix<double> A_i = jacobianCi.Calculate();
 
   // Gradient of f ∇f
   Gradient gradientF{m_f.value(), xAD};
-  Eigen::SparseVector<double> g = gradientF.Calculate();
-
-  // Initialize y for the Hessian to use
-  Eigen::VectorXd y = InitializeY(A_e, g);
-  SetAD(yAD, y);
 
   // Hessian of the Lagrangian H
   //
   // Hₖ = ∇²ₓₓL(x, s, y, z)ₖ
   Hessian hessianL{L, xAD};
-  Eigen::SparseMatrix<double> H = hessianL.Calculate();
 
+  Eigen::VectorXd x = initialGuess;
   Eigen::VectorXd s = GetAD(sAD);
+  Eigen::VectorXd y = GetAD(yAD);
   Eigen::VectorXd z = GetAD(zAD);
   Eigen::VectorXd c_e = GetAD(m_equalityConstraints);
   Eigen::VectorXd c_i = GetAD(m_inequalityConstraints);
@@ -363,8 +354,6 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   }
 
   if (m_config.diagnostics) {
-    PrintNonZeros(status, H, A_e, A_i);
-
     fmt::print("Error tolerance: {}\n\n", m_config.tolerance);
   }
 
@@ -450,8 +439,9 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   };
 
   // Kept outside the loop so its storage can be reused
-  SparseMatrixBuilder<double> lhsBuilder(H.rows() + A_e.rows(),
-                                         H.cols() + A_e.rows());
+  SparseMatrixBuilder<double> lhsBuilder(
+      m_decisionVariables.size() + m_equalityConstraints.size(),
+      m_decisionVariables.size() + m_equalityConstraints.size());
 
   RegularizedLDLT solver;
 
@@ -486,13 +476,13 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
     // Aₑ(x) = [∇ᵀcₑ₂(x)ₖ]
     //         [    ⋮    ]
     //         [∇ᵀcₑₘ(x)ₖ]
-    A_e = jacobianCe.Calculate();
+    Eigen::SparseMatrix<double> A_e = jacobianCe.Calculate();
 
     //         [∇ᵀcᵢ₁(x)ₖ]
     // Aᵢ(x) = [∇ᵀcᵢ₂(x)ₖ]
     //         [    ⋮    ]
     //         [∇ᵀcᵢₘ(x)ₖ]
-    A_i = jacobianCi.Calculate();
+    Eigen::SparseMatrix<double> A_i = jacobianCi.Calculate();
 
     // Update cₑ and cᵢ
     c_e = GetAD(m_equalityConstraints);
@@ -505,9 +495,9 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
     }
 
     // Hₖ = ∇²ₓₓL(x, s, y, z)ₖ
-    H = hessianL.Calculate();
+    Eigen::SparseMatrix<double> H = hessianL.Calculate();
 
-    g = gradientF.Calculate();
+    Eigen::SparseVector<double> g = gradientF.Calculate();
 
     if (m_config.spy) {
       // Gap between sparsity patterns
@@ -539,8 +529,10 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
         acceptableIterCounter = 0;
       }
       if (E_μ <= κ_ε * μ) {
-        UpdateBarrierParameterAndResetFilter();
-        continue;
+        do {
+          UpdateBarrierParameterAndResetFilter();
+          E_μ = ErrorEstimate(g, A_e, c_e, A_i, c_i, s, S, y, z, μ);
+        } while (E_0 > m_config.tolerance && E_μ <= κ_ε * μ);
       }
     }
 
@@ -884,44 +876,6 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   return x;
 }
 
-Eigen::VectorXd OptimizationProblem::InitializeY(
-    const Eigen::SparseMatrix<double>& A_e, const Eigen::VectorXd& g) const {
-  //   [  I     Aₑᵀ(x₀)][w] = −[∇f(x₀)]
-  //   [Aₑ(x₀)     0   ][y]    [  0   ]
-  //
-  // See equation (36) of [2].
-
-  // [  I     Aₑᵀ(x₀)]
-  // [Aₑ(x₀)     0   ]
-  SparseMatrixBuilder<double> lhsBuilder(
-      m_decisionVariables.size() + A_e.rows(),
-      m_decisionVariables.size() + A_e.rows());
-  // Assign top-left quadrant
-  lhsBuilder.Block(0, 0, m_decisionVariables.size(), m_decisionVariables.size())
-      .SetIdentity();
-  // Assign bottom-left quadrant
-  lhsBuilder.Block(m_decisionVariables.size(), 0, A_e.rows(), A_e.cols()) = A_e;
-  // Assign top-right quadrant
-  lhsBuilder.Block(0, m_decisionVariables.size(), A_e.cols(), A_e.rows()) =
-      A_e.transpose();
-  Eigen::SparseMatrix<double> lhs = lhsBuilder.Build();
-
-  // −[∇f(x₀)]
-  //  [  0   ]
-  Eigen::VectorXd rhs(m_decisionVariables.size() + A_e.rows());
-  rhs.block(0, 0, m_decisionVariables.size(), 1) = -g;
-  rhs.block(m_decisionVariables.size(), 0, A_e.rows(), 1).setZero();
-
-  Eigen::VectorXd y =
-      Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>>{lhs}.solve(rhs).block(
-          m_decisionVariables.size(), 0, A_e.rows(), 1);
-  if (y.lpNorm<Eigen::Infinity>() > 1e3) {
-    return Eigen::VectorXd::Zero(A_e.rows());
-  } else {
-    return y;
-  }
-}
-
 void OptimizationProblem::PrintExitCondition(
     const SolverExitCondition& exitCondition) {
   fmt::print("Exit condition: ");
@@ -961,34 +915,6 @@ void OptimizationProblem::PrintExitCondition(
       break;
   }
   fmt::print("\n");
-}
-
-void OptimizationProblem::PrintNonZeros(
-    SolverStatus* status, const Eigen::SparseMatrix<double>& H,
-    const Eigen::SparseMatrix<double>& A_e,
-    const Eigen::SparseMatrix<double>& A_i) {
-  std::string prints;
-
-  if (status->costFunctionType <= ExpressionType::kQuadratic &&
-      status->equalityConstraintType <= ExpressionType::kQuadratic &&
-      status->inequalityConstraintType <= ExpressionType::kQuadratic) {
-    prints += fmt::format("Number of nonzeros in Lagrangian Hessian: {}\n",
-                          H.nonZeros());
-  }
-  if (status->equalityConstraintType <= ExpressionType::kLinear) {
-    prints +=
-        fmt::format("Number of nonzeros in equality constraint Jacobian: {}\n",
-                    A_e.nonZeros());
-  }
-  if (status->inequalityConstraintType <= ExpressionType::kLinear) {
-    prints += fmt::format(
-        "Number of nonzeros in inequality constraint Jacobian: {}\n",
-        A_i.nonZeros());
-  }
-
-  if (prints.length() > 0) {
-    fmt::print("{}\n", prints);
-  }
 }
 
 bool OptimizationProblem::IsLocallyFeasible(
