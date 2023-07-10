@@ -315,6 +315,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   //         [    ⋮    ]
   //         [∇ᵀcₑₘ(x)ₖ]
   Jacobian jacobianCe{c_eAD, xAD};
+  Eigen::SparseMatrix<double> A_e = jacobianCe.Calculate();
 
   // Inequality constraint Jacobian Aᵢ
   //
@@ -323,14 +324,17 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   //         [    ⋮    ]
   //         [∇ᵀcᵢₘ(x)ₖ]
   Jacobian jacobianCi{c_iAD, xAD};
+  Eigen::SparseMatrix<double> A_i = jacobianCi.Calculate();
 
   // Gradient of f ∇f
   Gradient gradientF{m_f.value(), xAD};
+  Eigen::SparseVector<double> g = gradientF.Calculate();
 
   // Hessian of the Lagrangian H
   //
   // Hₖ = ∇²ₓₓL(x, s, y, z)ₖ
   Hessian hessianL{L, xAD};
+  Eigen::SparseMatrix<double> H = hessianL.Calculate();
 
   Eigen::VectorXd x = initialGuess;
   Eigen::VectorXd s = GetAD(sAD);
@@ -446,24 +450,19 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
   RegularizedLDLT solver;
 
   int acceptableIterCounter = 0;
+  constexpr int maxAcceptableIterations = 15;
   const double acceptableTolerance = m_config.tolerance * 100;
 
   int fullStepRejectedCounter = 0;
   int stepTooSmallCounter = 0;
 
-  // Error estimate E_μ
+  // Error estimate
   double E_0 = std::numeric_limits<double>::infinity();
-  double E_μ = std::numeric_limits<double>::infinity();
 
   iterationsStartTime = std::chrono::system_clock::now();
 
-  while (E_0 > m_config.tolerance && acceptableIterCounter < 15) {
-    // Update autodiff for Jacobians and Hessian
-    SetAD(xAD, x);
-    SetAD(sAD, s);
-    SetAD(yAD, y);
-    SetAD(zAD, z);
-
+  while (E_0 > m_config.tolerance &&
+         acceptableIterCounter < maxAcceptableIterations) {
     auto innerIterStartTime = std::chrono::system_clock::now();
 
     //     [s₁ 0 ⋯ 0 ]
@@ -472,32 +471,11 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
     //     [0  ⋯ 0 sₘ]
     Eigen::SparseMatrix<double> S = SparseDiagonal(s);
 
-    //         [∇ᵀcₑ₁(x)ₖ]
-    // Aₑ(x) = [∇ᵀcₑ₂(x)ₖ]
-    //         [    ⋮    ]
-    //         [∇ᵀcₑₘ(x)ₖ]
-    Eigen::SparseMatrix<double> A_e = jacobianCe.Calculate();
-
-    //         [∇ᵀcᵢ₁(x)ₖ]
-    // Aᵢ(x) = [∇ᵀcᵢ₂(x)ₖ]
-    //         [    ⋮    ]
-    //         [∇ᵀcᵢₘ(x)ₖ]
-    Eigen::SparseMatrix<double> A_i = jacobianCi.Calculate();
-
-    // Update cₑ and cᵢ
-    c_e = GetAD(m_equalityConstraints);
-    c_i = GetAD(m_inequalityConstraints);
-
     // Check for local infeasibility
     if (!IsLocallyFeasible(A_e, c_e, A_i, c_i)) {
       status->exitCondition = SolverExitCondition::kLocallyInfeasible;
       return x;
     }
-
-    // Hₖ = ∇²ₓₓL(x, s, y, z)ₖ
-    Eigen::SparseMatrix<double> H = hessianL.Calculate();
-
-    Eigen::SparseVector<double> g = gradientF.Calculate();
 
     if (m_config.spy) {
       // Gap between sparsity patterns
@@ -514,27 +492,6 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
 
     // Call user callback
     m_callback({iterations, g, H, A_e, A_i});
-
-    // If the error estimate is below the desired threshold for this barrier
-    // parameter value, decrease it further and restart the loop
-    {
-      // Barrier parameter scale factor for tolerance checks
-      constexpr double κ_ε = 10.0;
-
-      E_0 = ErrorEstimate(g, A_e, c_e, A_i, c_i, s, S, y, z, 0.0);
-      E_μ = ErrorEstimate(g, A_e, c_e, A_i, c_i, s, S, y, z, μ);
-      if (E_0 < acceptableTolerance) {
-        ++acceptableIterCounter;
-      } else {
-        acceptableIterCounter = 0;
-      }
-      if (E_μ <= κ_ε * μ) {
-        do {
-          UpdateBarrierParameterAndResetFilter();
-          E_μ = ErrorEstimate(g, A_e, c_e, A_i, c_i, s, S, y, z, μ);
-        } while (E_0 > m_config.tolerance && E_μ <= κ_ε * μ);
-      }
-    }
 
     //     [z₁ 0 ⋯ 0 ]
     // Z = [0  ⋱   ⋮ ]
@@ -733,8 +690,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
         if (α < α_min_frac * Filter::γConstraint) {
           // If the step using αᵐᵃˣ reduced the KKT error, accept it anyway
 
-          double currentKKTError =
-              KKTError(g, A_e, c_e, A_i, c_i, s, S, y, z, μ);
+          double currentKKTError = KKTError(g, A_e, c_e, A_i, c_i, s, y, z, μ);
 
           Eigen::VectorXd trial_x = x + α_max * p_x;
           Eigen::VectorXd trial_s = s + α_max * p_s;
@@ -758,10 +714,9 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
           }
           Eigen::VectorXd trial_c_i = GetAD(m_inequalityConstraints);
 
-          double nextKKTError =
-              KKTError(gradientF.Calculate(), jacobianCe.Calculate(), trial_c_e,
-                       jacobianCi.Calculate(), trial_c_i, trial_s,
-                       SparseDiagonal(trial_s), trial_y, trial_z, μ);
+          double nextKKTError = KKTError(
+              gradientF.Calculate(), jacobianCe.Calculate(), trial_c_e,
+              jacobianCi.Calculate(), trial_c_i, trial_s, trial_y, trial_z, μ);
 
           if (nextKKTError <= 0.999 * currentKKTError) {
             α = α_max;
@@ -827,6 +782,51 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
       }
     }
 
+    // Update autodiff for Jacobians and Hessian
+    SetAD(xAD, x);
+    SetAD(sAD, s);
+    SetAD(yAD, y);
+    SetAD(zAD, z);
+
+    A_e = jacobianCe.Calculate();
+    A_i = jacobianCi.Calculate();
+    g = gradientF.Calculate();
+    H = hessianL.Calculate();
+
+    // Update cₑ
+    for (int row = 0; row < c_e.rows(); ++row) {
+      c_eAD(row).Update();
+    }
+    c_e = GetAD(m_equalityConstraints);
+
+    // Update cᵢ
+    for (int row = 0; row < c_i.rows(); ++row) {
+      c_iAD(row).Update();
+    }
+    c_i = GetAD(m_inequalityConstraints);
+
+    // Update the error estimate
+    E_0 = ErrorEstimate(g, A_e, c_e, A_i, c_i, s, y, z, 0.0);
+    if (E_0 < acceptableTolerance) {
+      ++acceptableIterCounter;
+    } else {
+      acceptableIterCounter = 0;
+    }
+
+    // Update the barrier parameter if necessary
+    if (E_0 > m_config.tolerance) {
+      // Barrier parameter scale factor for tolerance checks
+      constexpr double κ_ε = 10.0;
+
+      // While the error estimate is below the desired threshold for this
+      // barrier parameter value, decrease the barrier parameter further
+      double E_μ = ErrorEstimate(g, A_e, c_e, A_i, c_i, s, y, z, μ);
+      while (μ > μ_min && E_μ <= κ_ε * μ) {
+        UpdateBarrierParameterAndResetFilter();
+        E_μ = ErrorEstimate(g, A_e, c_e, A_i, c_i, s, y, z, μ);
+      }
+    }
+
     auto innerIterEndTime = std::chrono::system_clock::now();
 
     if (m_config.diagnostics) {
@@ -835,10 +835,11 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
                    "time (ms)", "error", "cost", "infeasibility");
         fmt::print("{:=^70}\n", "");
       }
+
+      FilterEntry entry{m_f.value(), μ, s, c_e, c_i};
       fmt::print("{:>4}  {:>9}  {:>15e}  {:>16e}   {:>16e}\n", iterations,
                  ToMilliseconds(innerIterEndTime - innerIterStartTime), E_0,
-                 filter.LastEntry().cost,
-                 filter.LastEntry().constraintViolation);
+                 entry.cost, entry.constraintViolation);
     }
 
     ++iterations;
@@ -849,6 +850,12 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
 
     if (innerIterEndTime - solveStartTime > m_config.timeout) {
       status->exitCondition = SolverExitCondition::kMaxWallClockTimeExceeded;
+      return x;
+    }
+
+    if (E_0 > m_config.tolerance &&
+        acceptableIterCounter == maxAcceptableIterations) {
+      status->exitCondition = SolverExitCondition::kSolvedToAcceptableTolerance;
       return x;
     }
 
@@ -867,10 +874,6 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
         return x;
       }
     }
-  }
-
-  if (E_0 > m_config.tolerance && E_0 < acceptableTolerance) {
-    status->exitCondition = SolverExitCondition::kSolvedToAcceptableTolerance;
   }
 
   return x;
@@ -977,8 +980,7 @@ double OptimizationProblem::ErrorEstimate(
     const Eigen::VectorXd& g, const Eigen::SparseMatrix<double>& A_e,
     const Eigen::VectorXd& c_e, const Eigen::SparseMatrix<double>& A_i,
     const Eigen::VectorXd& c_i, const Eigen::VectorXd& s,
-    const Eigen::SparseMatrix<double>& S, const Eigen::VectorXd& y,
-    const Eigen::VectorXd& z, double μ) const {
+    const Eigen::VectorXd& y, const Eigen::VectorXd& z, double μ) const {
   // Update the error estimate using the KKT conditions from equations (19.5a)
   // through (19.5d) of [1].
   //
@@ -1006,6 +1008,7 @@ double OptimizationProblem::ErrorEstimate(
   double s_c =
       std::max(s_max, z.lpNorm<1>() / m_inequalityConstraints.size()) / s_max;
 
+  const Eigen::SparseMatrix<double> S = SparseDiagonal(s);
   const Eigen::VectorXd e = Eigen::VectorXd::Ones(s.rows());
 
   return std::max({(g - A_e.transpose() * y - A_i.transpose() * z)
@@ -1020,8 +1023,7 @@ double OptimizationProblem::KKTError(
     const Eigen::VectorXd& g, const Eigen::SparseMatrix<double>& A_e,
     const Eigen::VectorXd& c_e, const Eigen::SparseMatrix<double>& A_i,
     const Eigen::VectorXd& c_i, const Eigen::VectorXd& s,
-    const Eigen::SparseMatrix<double>& S, const Eigen::VectorXd& y,
-    const Eigen::VectorXd& z, double μ) const {
+    const Eigen::VectorXd& y, const Eigen::VectorXd& z, double μ) const {
   // Compute the KKT error as the 1-norm of the KKT conditions from equations
   // (19.5a) through (19.5d) of [1].
   //
@@ -1030,6 +1032,7 @@ double OptimizationProblem::KKTError(
   //   cₑ = 0
   //   cᵢ − s = 0
 
+  const Eigen::SparseMatrix<double> S = SparseDiagonal(s);
   const Eigen::VectorXd e = Eigen::VectorXd::Ones(s.rows());
 
   return (g - A_e.transpose() * y - A_i.transpose() * z).lpNorm<1>() +

@@ -98,11 +98,6 @@ class Filter {
   }
 
   /**
-   * Returns the last entry in the filter.
-   */
-  const FilterEntry& LastEntry() const { return m_filter.back(); }
-
-  /**
    * Reset the filter.
    */
   void Reset() {

@@ -424,7 +424,6 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
    * @param c_i The problem's inequality constraints cᵢ(x) evaluated at the
    *   current iterate.
    * @param s Inequality constraint slack variables.
-   * @param S Inequality constraint slack variables as a diagonal matrix.
    * @param y Equality constraint dual variables.
    * @param z Inequality constraint dual variables.
    * @param μ Barrier parameter.
@@ -434,7 +433,6 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
                        const Eigen::VectorXd& c_e,
                        const Eigen::SparseMatrix<double>& A_i,
                        const Eigen::VectorXd& c_i, const Eigen::VectorXd& s,
-                       const Eigen::SparseMatrix<double>& S,
                        const Eigen::VectorXd& y, const Eigen::VectorXd& z,
                        double μ) const;
 
@@ -451,7 +449,6 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
    * @param c_i The problem's inequality constraints cᵢ(x) evaluated at the
    *   current iterate.
    * @param s Inequality constraint slack variables.
-   * @param S Inequality constraint slack variables as a diagonal matrix.
    * @param y Equality constraint dual variables.
    * @param z Inequality constraint dual variables.
    * @param μ Barrier parameter.
@@ -461,7 +458,6 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
                   const Eigen::VectorXd& c_e,
                   const Eigen::SparseMatrix<double>& A_i,
                   const Eigen::VectorXd& c_i, const Eigen::VectorXd& s,
-                  const Eigen::SparseMatrix<double>& S,
                   const Eigen::VectorXd& y, const Eigen::VectorXd& z,
                   double μ) const;
 };
