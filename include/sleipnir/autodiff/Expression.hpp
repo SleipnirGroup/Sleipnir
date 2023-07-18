@@ -381,7 +381,7 @@ inline void IntrusiveSharedPtrDecRefCount(Expression* expr) {
  * Creates an intrusive shared pointer to an expression from the global pool
  * allocator.
  *
- * @param x The constant.
+ * @param args Constructor arguments for Expression.
  */
 template <typename... Args>
 static IntrusiveSharedPtr<Expression> MakeExpression(Args&&... args) {
