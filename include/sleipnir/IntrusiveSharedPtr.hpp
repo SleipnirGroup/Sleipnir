@@ -182,11 +182,30 @@ class IntrusiveSharedPtr {
   T* m_ptr = nullptr;
 };
 
+/**
+ * Constructs an object of type T and wraps it in an intrusive shared pointer
+ * using args as the parameter list for the constructor of T.
+ *
+ * @tparam T Type of object for intrusive shared pointer.
+ * @tparam Args Types of constructor arguments.
+ * @param args Constructor arguments for T.
+ */
 template <typename T, typename... Args>
 IntrusiveSharedPtr<T> MakeIntrusiveShared(Args&&... args) {
   return IntrusiveSharedPtr<T>{new T(std::forward<Args>(args)...)};
 }
 
+/**
+ * Constructs an object of type T and wraps it in an intrusive shared pointer
+ * using alloc as the storage allocator of T and args as the parameter list for
+ * the constructor of T.
+ *
+ * @tparam T Type of object for intrusive shared pointer.
+ * @tparam Alloc Type of allocator for T.
+ * @tparam Args Types of constructor arguments.
+ * @param alloc The allocator for T.
+ * @param args Constructor arguments for T.
+ */
 template <typename T, typename Alloc, typename... Args>
 IntrusiveSharedPtr<T> AllocateIntrusiveShared(Alloc alloc, Args&&... args) {
   auto ptr = std::allocator_traits<Alloc>::allocate(alloc, sizeof(T));
