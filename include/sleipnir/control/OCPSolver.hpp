@@ -3,6 +3,7 @@
 #pragma once
 
 #include <chrono>
+#include <functional>
 
 #include <Eigen/Core>
 
