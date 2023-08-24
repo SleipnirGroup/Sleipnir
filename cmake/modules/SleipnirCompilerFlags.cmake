@@ -2,6 +2,12 @@ macro(sleipnir_compiler_flags target)
   if (NOT MSVC)
     target_compile_options(${target} PRIVATE -Wall -pedantic -Wextra -Werror -Wno-unused-parameter)
 
+    # clang 18 warns on `operator"" _a` in dependencies
+    if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" AND
+        ${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER_EQUAL "18")
+      target_compile_options(${target} PRIVATE -Wno-deprecated-literal-operator)
+    endif()
+
     # Disable warning false positives in Eigen
     if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" AND
         ${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER_EQUAL "8")
