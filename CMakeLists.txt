@@ -336,7 +336,7 @@ if (BUILD_PYTHON)
     FetchContent_Declare(
       pybind11-stubgen
       GIT_REPOSITORY https://github.com/sizmailov/pybind11-stubgen.git
-      GIT_TAG        master
+      GIT_TAG        v1.0.dev1
       GIT_SUBMODULES ""
     )
     FetchContent_MakeAvailable(pybind11-stubgen)
