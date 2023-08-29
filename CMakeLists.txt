@@ -122,7 +122,7 @@ if (NOT USE_SYSTEM_FMT)
   FetchContent_Declare(
     fmt
     GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-    GIT_TAG        10.1.0
+    GIT_TAG        10.1.1
   )
   FetchContent_MakeAvailable(fmt)
   set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_SAVE})
