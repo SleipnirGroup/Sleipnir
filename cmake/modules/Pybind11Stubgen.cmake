@@ -3,8 +3,6 @@ function(pybind11_stubgen target)
   add_custom_command(TARGET ${target} POST_BUILD
     COMMAND ${Python3_EXECUTABLE} -m pybind11_stubgen
             $<TARGET_FILE_BASE_NAME:${target}>
-            --bare-numpy-ndarray
-            --no-setup-py
             -o $<TARGET_FILE_DIR:${target}>
     WORKING_DIRECTORY $<TARGET_FILE_DIR:${target}>
     USES_TERMINAL)
