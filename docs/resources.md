@@ -14,7 +14,7 @@ Visually Explained's _Convex Optimization_ video series provides geometric intui
 
 Sleipnir's authors learned numerical optimization from the following book and relied heavily upon it to implement Sleipnir.
 
-> Nocedal, J. and Wright, S. _Numerical Optimization_, 2nd. ed., Springer, 2006. https://www.csie.ntu.edu.tw/~r97002/temp/num_optimization.pdf
+> Nocedal, J. and Wright, S. _Numerical Optimization_, 2nd. ed., Springer, 2006. https://www.math.uci.edu/~qnie/Publications/NumericalOptimization.pdf
 
 Sleipnir's internals occasionally reference the following papers.
 
