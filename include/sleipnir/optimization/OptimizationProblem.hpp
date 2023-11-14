@@ -331,9 +331,10 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
   /**
    * Sets a callback to be called at each solver iteration.
    *
-   * @param callback The callback.
+   * @param callback The callback. Returning true from the callback causes the
+   *   solver to exit early with the solution it has so far.
    */
-  void Callback(std::function<void(const SolverIterationInfo&)> callback);
+  void Callback(std::function<bool(const SolverIterationInfo&)> callback);
 
  private:
   // GCC incorrectly applies C++14 rules for const static data members, so an
@@ -361,8 +362,8 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
   std::ofstream m_A_e_spy;
   std::ofstream m_A_i_spy;
 
-  std::function<void(const SolverIterationInfo&)> m_callback =
-      [](const SolverIterationInfo&) {};
+  std::function<bool(const SolverIterationInfo&)> m_callback =
+      [](const SolverIterationInfo&) { return false; };
 
   /**
   Find the optimal solution to the nonlinear program using an interior-point

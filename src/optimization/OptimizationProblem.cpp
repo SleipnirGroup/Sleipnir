@@ -19,6 +19,7 @@
 #include "sleipnir/autodiff/Hessian.hpp"
 #include "sleipnir/autodiff/Jacobian.hpp"
 #include "sleipnir/autodiff/Variable.hpp"
+#include "sleipnir/optimization/SolverExitCondition.hpp"
 #include "sleipnir/util/AutodiffUtil.hpp"
 #include "sleipnir/util/SparseMatrixBuilder.hpp"
 #include "sleipnir/util/SparseUtil.hpp"
@@ -277,7 +278,7 @@ SolverStatus OptimizationProblem::Solve(const SolverConfig& config) {
 }
 
 void OptimizationProblem::Callback(
-    std::function<void(const SolverIterationInfo&)> callback) {
+    std::function<bool(const SolverIterationInfo&)> callback) {
   m_callback = callback;
 }
 
@@ -485,7 +486,10 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
     }
 
     // Call user callback
-    m_callback({iterations, g, H, A_e, A_i});
+    if (m_callback({iterations, g, H, A_e, A_i})) {
+      status->exitCondition = SolverExitCondition::kCallbackRequestedStop;
+      return x;
+    }
 
     //     [s₁ 0 ⋯ 0 ]
     // S = [0  ⋱   ⋮ ]
@@ -888,6 +892,9 @@ void OptimizationProblem::PrintExitCondition(
       break;
     case SolverExitCondition::kSolvedToAcceptableTolerance:
       fmt::print("solved to acceptable tolerance");
+      break;
+    case SolverExitCondition::kCallbackRequestedStop:
+      fmt::print("callback requested stop");
       break;
     case SolverExitCondition::kTooFewDOFs:
       fmt::print("problem has too few degrees of freedom");

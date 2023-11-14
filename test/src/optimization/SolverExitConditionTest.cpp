@@ -5,6 +5,24 @@
 
 // These tests ensure coverage of the off-nominal solver exit conditions
 
+TEST(SolverExitConditionTest, CallbackRequestedStop) {
+  sleipnir::OptimizationProblem problem;
+
+  auto x = problem.DecisionVariable();
+  x = 0.0;
+  problem.Minimize(x);
+
+  problem.Callback([](const sleipnir::SolverIterationInfo&) { return true; });
+
+  auto status = problem.Solve({.diagnostics = true});
+
+  EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.costFunctionType);
+  EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
+  EXPECT_EQ(sleipnir::ExpressionType::kNone, status.inequalityConstraintType);
+  EXPECT_EQ(sleipnir::SolverExitCondition::kCallbackRequestedStop,
+            status.exitCondition);
+}
+
 TEST(SolverExitConditionTest, TooFewDOFs) {
   sleipnir::OptimizationProblem problem;
 
