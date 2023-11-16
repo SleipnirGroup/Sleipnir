@@ -1,12 +1,15 @@
 // Copyright (c) Sleipnir contributors
 
+#include <string_view>
 #include <vector>
 
 #include "CasADi.hpp"
 #include "Sleipnir.hpp"
 #include "Util.hpp"
 
-int main() {
+int main(int argc, char* argv[]) {
+  std::vector<std::string_view> args{argv + 1, argv + argc};
+
   constexpr bool diagnostics = false;
 
   constexpr auto T = 5_s;
@@ -19,7 +22,16 @@ int main() {
 
   fmt::print("Solving cart-pole problem from N = {} to N = {}.\n",
              sampleSizesToTest.front(), sampleSizesToTest.back());
-  return RunBenchmarksAndLog("cart-pole-scalability-results.csv", diagnostics,
-                             T, sampleSizesToTest, &CartPoleCasADi,
-                             &CartPoleSleipnir);
+  if (args.size() == 0 ||
+      std::find(args.begin(), args.end(), "--casadi") != args.end()) {
+    RunBenchmarksAndLog<casadi::Opti>(
+        "cart-pole-scalability-results-casadi.csv", diagnostics, T,
+        sampleSizesToTest, &CartPoleCasADi);
+  }
+  if (args.size() == 0 ||
+      std::find(args.begin(), args.end(), "--sleipnir") != args.end()) {
+    RunBenchmarksAndLog<sleipnir::OptimizationProblem>(
+        "cart-pole-scalability-results-sleipnir.csv", diagnostics, T,
+        sampleSizesToTest, &CartPoleSleipnir);
+  }
 }

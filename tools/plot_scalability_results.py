@@ -82,16 +82,26 @@ def main():
         description="Runs all formatting tasks on the code base. This should be invoked from a directory within the project."
     )
     parser.add_argument(
-        "--filename",
-        dest="filename",
+        "--filenames",
+        dest="filenames",
         type=str,
+        nargs="+",
         required=True,
-        help="filename of CSV to plot",
+        help="filenames of CSVs to plot",
+    )
+    parser.add_argument(
+        "--labels",
+        dest="labels",
+        type=str,
+        nargs="+",
+        required=True,
+        help="plot labels for each filename's data",
     )
     parser.add_argument(
         "--title",
         dest="title",
         type=str,
+        required=True,
         help="plot title",
     )
     parser.add_argument(
@@ -102,36 +112,34 @@ def main():
     )
     args = parser.parse_args()
 
-    (
-        samples,
-        casadi_setup_time,
-        casadi_solve_time,
-        problem_setup_time,
-        problem_solve_time,
-    ) = np.genfromtxt(
-        args.filename,
-        delimiter=",",
-        skip_header=1,
-        unpack=True,
-        invalid_raise=False,
-        ndmin=2,
-    )
+    samples = []
+    setup_times = []
+    solve_times = []
 
-    if (
-        math.isnan(casadi_setup_time[-1])
-        or math.isnan(casadi_solve_time[-1])
-        or math.isnan(problem_setup_time[-1])
-        or math.isnan(problem_solve_time[-1])
-    ):
-        samples = samples[:-1]
-        casadi_setup_time = casadi_setup_time[:-1]
-        casadi_solve_time = casadi_solve_time[:-1]
-        problem_setup_time = problem_setup_time[:-1]
-        problem_solve_time = problem_solve_time[:-1]
+    for filename in args.filenames:
+        (
+            sample,
+            setup_time,
+            solve_time,
+        ) = np.genfromtxt(
+            filename,
+            delimiter=",",
+            skip_header=1,
+            unpack=True,
+            invalid_raise=False,
+            ndmin=2,
+        )
+        if math.isnan(setup_time[-1]) or math.isnan(solve_time[-1]):
+            sample = sample[:-1]
+            setup_time = setup_time[:-1]
+            solve_time = solve_time[:-1]
+        if len(sample) == 0:
+            print("No data to plot.")
+            sys.exit(1)
 
-    if len(samples) == 0:
-        print("No data to plot.")
-        sys.exit(1)
+        samples.append(sample)
+        setup_times.append(setup_time)
+        solve_times.append(solve_time)
 
     fig = plt.figure()
 
@@ -140,11 +148,11 @@ def main():
     ax1.set_ylabel("Setup time (ms)")
     ax1.grid(visible=True)
 
-    ax1.plot(samples, casadi_setup_time, label="CasADi + ipopt")
-    plot_poly2_fit(ax1, samples, casadi_setup_time, color="blue")
+    colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
 
-    ax1.plot(samples, problem_setup_time, label="Sleipnir")
-    plot_poly2_fit(ax1, samples, problem_setup_time, color="orange")
+    for i in range(len(samples)):
+        ax1.plot(samples[i], setup_times[i], label=args.labels[i])
+        plot_poly2_fit(ax1, samples[i], setup_times[i], color=colors[i])
 
     ax1.legend()
 
@@ -153,18 +161,16 @@ def main():
     ax2.set_ylabel("Solve time (ms)")
     ax2.grid(visible=True)
 
-    ax2.plot(samples, casadi_solve_time, label="CasADi + ipopt")
-    plot_exp2_fit(ax2, samples, casadi_solve_time, color="blue", force_intercept=True)
-
-    ax2.plot(samples, problem_solve_time, label="Sleipnir")
-    plot_exp2_fit(
-        ax2, samples, problem_solve_time, color="orange", force_intercept=True
-    )
+    for i in range(len(samples)):
+        ax2.plot(samples[i], solve_times[i], label=args.labels[i])
+        plot_exp2_fit(
+            ax2, samples[i], solve_times[i], color=colors[i], force_intercept=True
+        )
 
     ax2.legend()
 
     if args.noninteractive:
-        plt.savefig(args.filename.replace(".csv", ".png"))
+        plt.savefig(f"{args.title.lower()}-scalability-results.png")
     else:
         plt.show()
 

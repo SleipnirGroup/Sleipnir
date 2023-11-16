@@ -1,12 +1,16 @@
 // Copyright (c) Sleipnir contributors
 
+#include <algorithm>
+#include <string_view>
 #include <vector>
 
 #include "CasADi.hpp"
 #include "Sleipnir.hpp"
 #include "Util.hpp"
 
-int main() {
+int main(int argc, char* argv[]) {
+  std::vector<std::string_view> args{argv + 1, argv + argc};
+
   constexpr bool diagnostics = false;
 
   constexpr auto T = 5_s;
@@ -22,7 +26,16 @@ int main() {
 
   fmt::print("Solving flywheel problem from N = {} to N = {}.\n",
              sampleSizesToTest.front(), sampleSizesToTest.back());
-  return RunBenchmarksAndLog("flywheel-scalability-results.csv", diagnostics, T,
-                             sampleSizesToTest, &FlywheelCasADi,
-                             &FlywheelSleipnir);
+  if (args.size() == 0 ||
+      std::find(args.begin(), args.end(), "--casadi") != args.end()) {
+    RunBenchmarksAndLog<casadi::Opti>("flywheel-scalability-results-casadi.csv",
+                                      diagnostics, T, sampleSizesToTest,
+                                      &FlywheelCasADi);
+  }
+  if (args.size() == 0 ||
+      std::find(args.begin(), args.end(), "--sleipnir") != args.end()) {
+    RunBenchmarksAndLog<sleipnir::OptimizationProblem>(
+        "flywheel-scalability-results-sleipnir.csv", diagnostics, T,
+        sampleSizesToTest, &FlywheelSleipnir);
+  }
 }
