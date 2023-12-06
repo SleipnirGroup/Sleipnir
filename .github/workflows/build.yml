@@ -26,7 +26,7 @@ jobs:
     name: "${{ matrix.artifact-name }}"
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Configure
         run: ${{ matrix.cmake-config-env-vars }} cmake -B build -S . -DBUILD_PYTHON=OFF
@@ -65,7 +65,7 @@ jobs:
     name: "${{ matrix.artifact-name }}"
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install build and tox Python packages
         run: pip3 install --user build tox
@@ -97,7 +97,7 @@ jobs:
     runs-on: ubuntu-22.04
     container: ${{ matrix.container }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Configure
         run: cmake -B build -S . --toolchain ${{ matrix.toolchain }} -DBUILD_PYTHON=OFF
@@ -117,7 +117,7 @@ jobs:
     name: "Wasm"
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup emscripten
         uses: numworks/setup-emscripten@latest
