@@ -123,17 +123,6 @@ add_custom_command(
 
 # fmt dependency
 if(NOT USE_SYSTEM_FMT)
-    set(BUILD_SHARED_LIBS_SAVE ${BUILD_SHARED_LIBS})
-    set(BUILD_SHARED_LIBS OFF)
-    set(CMAKE_POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS_SAVE})
-
-    # Since fmt is an internal dependency, only install it for Emscripten compiler
-    if(${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
-        set(FMT_INSTALL ON)
-    else()
-        set(FMT_INSTALL OFF)
-    endif()
-
     fetchcontent_declare(
         fmt
         GIT_REPOSITORY https://github.com/fmtlib/fmt.git
@@ -145,7 +134,7 @@ else()
     find_package(fmt CONFIG REQUIRED)
 endif()
 
-target_link_libraries(Sleipnir PRIVATE fmt::fmt)
+target_link_libraries(Sleipnir PUBLIC fmt::fmt)
 
 target_include_directories(
     Sleipnir
@@ -218,7 +207,7 @@ if(BUILD_BENCHMARKING)
             )
             target_link_libraries(
                 ${benchmark}ScalabilityBenchmark
-                PRIVATE Sleipnir fmt::fmt casadi
+                PRIVATE Sleipnir casadi
             )
         endforeach()
     endif()
@@ -268,7 +257,7 @@ if(BUILD_TESTING)
     )
     target_link_libraries(
         SleipnirTest
-        PRIVATE Sleipnir fmt::fmt GTest::gtest GTest::gtest_main
+        PRIVATE Sleipnir GTest::gtest GTest::gtest_main
     )
     if(NOT CMAKE_TOOLCHAIN_FILE)
         gtest_discover_tests(SleipnirTest)
@@ -289,7 +278,7 @@ foreach(example ${EXAMPLES})
             ${CMAKE_CURRENT_SOURCE_DIR}/examples/${example}/include
             ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/units/include
     )
-    target_link_libraries(${example} PRIVATE Sleipnir fmt::fmt)
+    target_link_libraries(${example} PRIVATE Sleipnir)
 
     # Build example test if files exist for it
     if(
@@ -315,7 +304,7 @@ foreach(example ${EXAMPLES})
         )
         target_link_libraries(
             ${example}Test
-            PRIVATE Sleipnir fmt::fmt GTest::gtest GTest::gtest_main
+            PRIVATE Sleipnir GTest::gtest GTest::gtest_main
         )
         if(NOT CMAKE_TOOLCHAIN_FILE)
             gtest_discover_tests(${example}Test)
