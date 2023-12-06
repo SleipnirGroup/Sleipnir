@@ -13,6 +13,9 @@ struct SolverIterationInfo {
   /// The solver iteration.
   int iteration;
 
+  /// The decision variables.
+  const Eigen::VectorXd& x;
+
   /// The gradient of the cost function.
   const Eigen::SparseVector<double>& g;
 

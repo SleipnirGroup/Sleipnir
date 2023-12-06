@@ -486,7 +486,7 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
     }
 
     // Call user callback
-    if (m_callback({iterations, g, H, A_e, A_i})) {
+    if (m_callback({iterations, x, g, H, A_e, A_i})) {
       status->exitCondition = SolverExitCondition::kCallbackRequestedStop;
       return x;
     }
