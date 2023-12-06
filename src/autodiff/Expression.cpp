@@ -5,8 +5,6 @@
 #include <cmath>
 #include <numbers>
 
-#include "sleipnir/autodiff/ExpressionGraph.hpp"
-
 namespace sleipnir {
 
 IntrusiveSharedPtr<Expression>& Zero() {
