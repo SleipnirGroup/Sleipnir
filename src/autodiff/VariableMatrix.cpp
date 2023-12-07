@@ -370,6 +370,49 @@ Eigen::MatrixXd VariableMatrix::Value() const {
   return result;
 }
 
+VariableMatrix Block(
+    std::initializer_list<std::initializer_list<VariableMatrix>> list) {
+  // Get row and column counts for destination matrix
+  int rows = 0;
+  int cols = -1;
+  for (const auto& row : list) {
+    if (row.size() > 0) {
+      rows += row.begin()->Rows();
+    }
+
+    // Get number of columns in this row
+    int latestCols = 0;
+    for (const auto& elem : row) {
+      // Assert the first and latest row have the same height
+      assert(row.begin()->Rows() == elem.Rows());
+
+      latestCols += elem.Cols();
+    }
+
+    // If this is the first row, record the column count. Otherwise, assert the
+    // first and latest column counts are the same.
+    if (cols == -1) {
+      cols = latestCols;
+    } else {
+      assert(cols == latestCols);
+    }
+  }
+
+  VariableMatrix result{static_cast<int>(rows), static_cast<int>(cols)};
+
+  int rowOffset = 0;
+  for (const auto& row : list) {
+    int colOffset = 0;
+    for (const VariableMatrix& elem : row) {
+      result.Block(rowOffset, colOffset, elem.Rows(), elem.Cols()) = elem;
+      colOffset += elem.Cols();
+    }
+    rowOffset += row.begin()->Rows();
+  }
+
+  return result;
+}
+
 VariableMatrix abs(const VariableMatrix& x) {
   VariableMatrix result{x.Rows(), x.Cols()};
 

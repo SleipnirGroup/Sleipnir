@@ -16,19 +16,21 @@ namespace py = pybind11;
 
 namespace sleipnir {
 
-using Block = VariableBlock<VariableMatrix>;
-
 void BindVariableMatrix(py::module_& autodiff,
                         py::class_<VariableMatrix>& variable_matrix);
-void BindVariableBlock(py::module_& autodiff,
-                       py::class_<Block>& variable_block);
+void BindVariableBlock(
+    py::module_& autodiff,
+    py::class_<VariableBlock<VariableMatrix>>& variable_block);
 
 void BindVariableMatrices(py::module_& autodiff) {
   py::class_<VariableMatrix> variable_matrix{autodiff, "VariableMatrix"};
-  py::class_<Block> variable_block{autodiff, "VariableBlock"};
+  py::class_<VariableBlock<VariableMatrix>> variable_block{autodiff,
+                                                           "VariableBlock"};
 
   BindVariableMatrix(autodiff, variable_matrix);
   BindVariableBlock(autodiff, variable_block);
+
+  // TODO: Wrap sleipnir::Block()
 
   autodiff.def("abs",
                static_cast<VariableMatrix (*)(const VariableMatrix&)>(&abs));
@@ -78,7 +80,7 @@ void BindVariableMatrix(py::module_& autodiff,
   variable_matrix.def(py::init<int, int>());
   variable_matrix.def(py::init<double>());
   variable_matrix.def(py::init<const Variable&>());
-  variable_matrix.def(py::init<const Block&>());
+  variable_matrix.def(py::init<const VariableBlock<VariableMatrix>&>());
   variable_matrix.def("set",
                       [](VariableMatrix& self, double value) { self = value; });
   variable_matrix.def("set",
@@ -138,9 +140,9 @@ void BindVariableMatrix(py::module_& autodiff,
     if (py::isinstance<VariableMatrix>(value)) {
       self.Block(rowOffset, colOffset, blockRows, blockCols) =
           value.cast<VariableMatrix>();
-    } else if (py::isinstance<Block>(value)) {
+    } else if (py::isinstance<VariableBlock<VariableMatrix>>(value)) {
       self.Block(rowOffset, colOffset, blockRows, blockCols) =
-          value.cast<Block>();
+          value.cast<VariableBlock<VariableMatrix>>();
     } else if (py::isinstance<double>(value)) {
       self.Block(rowOffset, colOffset, blockRows, blockCols) =
           value.cast<double>();
@@ -154,7 +156,9 @@ void BindVariableMatrix(py::module_& autodiff,
       [](VariableMatrix& self, int row) -> Variable& { return self(row); });
   // TODO: Support slice stride other than 1
   variable_matrix.def(
-      "__getitem__", [](VariableMatrix& self, py::tuple slices) -> Block {
+      "__getitem__",
+      [](VariableMatrix& self,
+         py::tuple slices) -> VariableBlock<VariableMatrix> {
         if (slices.size() != 2) {
           throw py::index_error(
               fmt::format("Expected 2 slices, got {}.", slices.size()));
@@ -429,48 +433,69 @@ void BindVariableMatrix(py::module_& autodiff,
   // VariableMatrix-VariableBlock overloads
   variable_matrix.def(
       "__mul__",
-      [](const VariableMatrix& lhs, const Block& rhs) { return lhs * rhs; },
+      [](const VariableMatrix& lhs, const VariableBlock<VariableMatrix>& rhs) {
+        return lhs * rhs;
+      },
       py::is_operator());
   variable_matrix.def(
       "__rmul__",
-      [](const VariableMatrix& rhs, const Block& lhs) { return lhs * rhs; },
+      [](const VariableMatrix& rhs, const VariableBlock<VariableMatrix>& lhs) {
+        return lhs * rhs;
+      },
       py::is_operator());
   variable_matrix.def(
       "__matmul__",
-      [](const VariableMatrix& lhs, const Block& rhs) { return lhs * rhs; },
+      [](const VariableMatrix& lhs, const VariableBlock<VariableMatrix>& rhs) {
+        return lhs * rhs;
+      },
       py::is_operator());
   variable_matrix.def(
       "__add__",
-      [](const VariableMatrix& lhs, const Block& rhs) { return lhs + rhs; },
+      [](const VariableMatrix& lhs, const VariableBlock<VariableMatrix>& rhs) {
+        return lhs + rhs;
+      },
       py::is_operator());
   variable_matrix.def(
       "__sub__",
-      [](const VariableMatrix& lhs, const Block& rhs) { return lhs - rhs; },
+      [](const VariableMatrix& lhs, const VariableBlock<VariableMatrix>& rhs) {
+        return lhs - rhs;
+      },
       py::is_operator());
   variable_matrix.def(
       "__eq__",
-      [](const VariableMatrix& lhs, const Block& rhs) { return lhs == rhs; },
+      [](const VariableMatrix& lhs, const VariableBlock<VariableMatrix>& rhs) {
+        return lhs == rhs;
+      },
       py::is_operator());
   variable_matrix.def(
       "__lt__",
-      [](const VariableMatrix& lhs, const Block& rhs) { return lhs < rhs; },
+      [](const VariableMatrix& lhs, const VariableBlock<VariableMatrix>& rhs) {
+        return lhs < rhs;
+      },
       py::is_operator());
   variable_matrix.def(
       "__le__",
-      [](const VariableMatrix& lhs, const Block& rhs) { return lhs <= rhs; },
+      [](const VariableMatrix& lhs, const VariableBlock<VariableMatrix>& rhs) {
+        return lhs <= rhs;
+      },
       py::is_operator());
   variable_matrix.def(
       "__gt__",
-      [](const VariableMatrix& lhs, const Block& rhs) { return lhs > rhs; },
+      [](const VariableMatrix& lhs, const VariableBlock<VariableMatrix>& rhs) {
+        return lhs > rhs;
+      },
       py::is_operator());
   variable_matrix.def(
       "__ge__",
-      [](const VariableMatrix& lhs, const Block& rhs) { return lhs >= rhs; },
+      [](const VariableMatrix& lhs, const VariableBlock<VariableMatrix>& rhs) {
+        return lhs >= rhs;
+      },
       py::is_operator());
 }
 
-void BindVariableBlock(py::module_& autodiff,
-                       py::class_<Block>& variable_block) {
+void BindVariableBlock(
+    py::module_& autodiff,
+    py::class_<VariableBlock<VariableMatrix>>& variable_block) {
   // VariableBlock-VariableMatrix overloads
   variable_block.def(py::self * VariableMatrix());
   variable_block.def(py::self + VariableMatrix());
@@ -483,16 +508,17 @@ void BindVariableBlock(py::module_& autodiff,
 
   variable_block.def(py::init<VariableMatrix&>());
   variable_block.def(py::init<VariableMatrix&, int, int, int, int>());
-  variable_block.def("set", [](Block& self, double value) { self = value; });
-  variable_block.def(
-      "set", [](Block& self, const Eigen::MatrixXd& values) { self = values; });
+  variable_block.def("set", [](VariableBlock<VariableMatrix>& self,
+                               double value) { self = value; });
+  variable_block.def("set",
+                     [](VariableBlock<VariableMatrix>& self,
+                        const Eigen::MatrixXd& values) { self = values; });
   variable_block.def("__setitem__",
-                     [](Block& self, int row, const Variable& value) {
-                       return self(row) = value;
-                     });
+                     [](VariableBlock<VariableMatrix>& self, int row,
+                        const Variable& value) { return self(row) = value; });
   // TODO: Support slice stride other than 1
-  variable_block.def("__setitem__", [](Block& self, py::tuple slices,
-                                       py::object value) {
+  variable_block.def("__setitem__", [](VariableBlock<VariableMatrix>& self,
+                                       py::tuple slices, py::object value) {
     if (slices.size() != 2) {
       throw py::index_error(
           fmt::format("Expected 2 slices, got {}.", slices.size()));
@@ -539,9 +565,9 @@ void BindVariableBlock(py::module_& autodiff,
     if (py::isinstance<VariableMatrix>(value)) {
       self.Block(rowOffset, colOffset, blockRows, blockCols) =
           value.cast<VariableMatrix>();
-    } else if (py::isinstance<Block>(value)) {
+    } else if (py::isinstance<VariableBlock<VariableMatrix>>(value)) {
       self.Block(rowOffset, colOffset, blockRows, blockCols) =
-          value.cast<Block>();
+          value.cast<VariableBlock<VariableMatrix>>();
     } else if (py::isinstance<double>(value)) {
       self.Block(rowOffset, colOffset, blockRows, blockCols) =
           value.cast<double>();
@@ -550,74 +576,86 @@ void BindVariableBlock(py::module_& autodiff,
           value.cast<int>();
     }
   });
-  variable_block.def("__getitem__", [](Block& self, int row) -> Variable& {
-    return self(row);
-  });
+  variable_block.def("__getitem__",
+                     [](VariableBlock<VariableMatrix>& self,
+                        int row) -> Variable& { return self(row); });
   // TODO: Support slice stride other than 1
-  variable_block.def("__getitem__", [](Block& self, py::tuple slices) -> Block {
-    if (slices.size() != 2) {
-      throw py::index_error(
-          fmt::format("Expected 2 slices, got {}.", slices.size()));
-    }
-
-    int rowOffset = 0;
-    int colOffset = 0;
-    int blockRows = self.Rows();
-    int blockCols = self.Cols();
-
-    size_t start;
-    size_t stop;
-    size_t step;
-    size_t sliceLength;
-
-    // Row slice
-    const auto& rowElem = slices[0];
-    if (py::isinstance<py::slice>(rowElem)) {
-      const auto& rowSlice = rowElem.cast<py::slice>();
-      if (!rowSlice.compute(self.Rows(), &start, &stop, &step, &sliceLength)) {
-        throw py::error_already_set();
-      }
-      rowOffset = start;
-      blockRows = stop - start;
-    } else {
-      rowOffset = rowElem.cast<int>();
-      blockRows = 1;
-    }
-
-    // Column slice
-    const auto& colElem = slices[1];
-    if (py::isinstance<py::slice>(colElem)) {
-      const auto& colSlice = colElem.cast<py::slice>();
-      if (!colSlice.compute(self.Cols(), &start, &stop, &step, &sliceLength)) {
-        throw py::error_already_set();
-      }
-      colOffset = start;
-      blockCols = stop - start;
-    } else {
-      colOffset = colElem.cast<int>();
-      blockCols = 1;
-    }
-
-    return self.Block(rowOffset, colOffset, blockRows, blockCols);
-  });
-  variable_block.def("row", py::overload_cast<int>(&Block::Row));
-  variable_block.def("col", py::overload_cast<int>(&Block::Col));
   variable_block.def(
-      "__mul__", [](const Block& lhs, const Block& rhs) { return lhs * rhs; },
+      "__getitem__",
+      [](VariableBlock<VariableMatrix>& self,
+         py::tuple slices) -> VariableBlock<VariableMatrix> {
+        if (slices.size() != 2) {
+          throw py::index_error(
+              fmt::format("Expected 2 slices, got {}.", slices.size()));
+        }
+
+        int rowOffset = 0;
+        int colOffset = 0;
+        int blockRows = self.Rows();
+        int blockCols = self.Cols();
+
+        size_t start;
+        size_t stop;
+        size_t step;
+        size_t sliceLength;
+
+        // Row slice
+        const auto& rowElem = slices[0];
+        if (py::isinstance<py::slice>(rowElem)) {
+          const auto& rowSlice = rowElem.cast<py::slice>();
+          if (!rowSlice.compute(self.Rows(), &start, &stop, &step,
+                                &sliceLength)) {
+            throw py::error_already_set();
+          }
+          rowOffset = start;
+          blockRows = stop - start;
+        } else {
+          rowOffset = rowElem.cast<int>();
+          blockRows = 1;
+        }
+
+        // Column slice
+        const auto& colElem = slices[1];
+        if (py::isinstance<py::slice>(colElem)) {
+          const auto& colSlice = colElem.cast<py::slice>();
+          if (!colSlice.compute(self.Cols(), &start, &stop, &step,
+                                &sliceLength)) {
+            throw py::error_already_set();
+          }
+          colOffset = start;
+          blockCols = stop - start;
+        } else {
+          colOffset = colElem.cast<int>();
+          blockCols = 1;
+        }
+
+        return self.Block(rowOffset, colOffset, blockRows, blockCols);
+      });
+  variable_block.def(
+      "row", py::overload_cast<int>(&VariableBlock<VariableMatrix>::Row));
+  variable_block.def(
+      "col", py::overload_cast<int>(&VariableBlock<VariableMatrix>::Col));
+  variable_block.def(
+      "__mul__",
+      [](const VariableBlock<VariableMatrix>& lhs,
+         const VariableBlock<VariableMatrix>& rhs) { return lhs * rhs; },
       py::is_operator());
   variable_block.def(
-      "__rmul__", [](const Block& rhs, const Block& lhs) { return lhs * rhs; },
+      "__rmul__",
+      [](const VariableBlock<VariableMatrix>& rhs,
+         const VariableBlock<VariableMatrix>& lhs) { return lhs * rhs; },
       py::is_operator());
   variable_block.def(
       "__matmul__",
-      [](const Block& lhs, const Block& rhs) { return lhs * rhs; },
+      [](const VariableBlock<VariableMatrix>& lhs,
+         const VariableBlock<VariableMatrix>& rhs) { return lhs * rhs; },
       py::is_operator());
 
   // https://numpy.org/doc/stable/user/basics.dispatch.html
   variable_block.def(
       "__array_ufunc__",
-      [](Block& self, py::object ufunc, py::str method, py::args inputs,
-         const py::kwargs& kwargs) -> py::object {
+      [](VariableBlock<VariableMatrix>& self, py::object ufunc, py::str method,
+         py::args inputs, const py::kwargs& kwargs) -> py::object {
         std::string method_name = method;
         std::string ufunc_name = ufunc.attr("__repr__")().cast<py::str>();
 
@@ -707,41 +745,57 @@ void BindVariableBlock(py::module_& autodiff,
   variable_block.def(double() + py::self);
   variable_block.def(
       "__add__",
-      [](const Block& lhs, const Eigen::Ref<const Eigen::MatrixXd>& rhs)
-          -> VariableMatrix { return lhs + rhs; },
+      [](const VariableBlock<VariableMatrix>& lhs,
+         const Eigen::Ref<const Eigen::MatrixXd>& rhs) -> VariableMatrix {
+        return lhs + rhs;
+      },
       py::is_operator());
   variable_block.def(
       "__add__",
       [](const Eigen::Ref<const Eigen::MatrixXd>& lhs,
-         const Block& rhs) -> VariableMatrix { return lhs + rhs; },
+         const VariableBlock<VariableMatrix>& rhs) -> VariableMatrix {
+        return lhs + rhs;
+      },
       py::is_operator());
   variable_block.def(py::self - py::self);
   variable_block.def(
       "__sub__",
-      [](const Block& lhs, const Eigen::Ref<const Eigen::MatrixXd>& rhs)
-          -> VariableMatrix { return lhs - rhs; },
+      [](const VariableBlock<VariableMatrix>& lhs,
+         const Eigen::Ref<const Eigen::MatrixXd>& rhs) -> VariableMatrix {
+        return lhs - rhs;
+      },
       py::is_operator());
   variable_block.def(double() - py::self);
   variable_block.def(
       "__sub__",
       [](const Eigen::Ref<const Eigen::MatrixXd>& lhs,
-         const Block& rhs) -> VariableMatrix { return lhs - rhs; },
+         const VariableBlock<VariableMatrix>& rhs) -> VariableMatrix {
+        return lhs - rhs;
+      },
       py::is_operator());
   variable_block.def(double() - py::self);
   variable_block.def(-py::self);
   variable_block.def(
       "__pow__",
-      [](const Block& self, int power) { return sleipnir::pow(self, power); },
+      [](const VariableBlock<VariableMatrix>& self, int power) {
+        return sleipnir::pow(self, power);
+      },
       py::is_operator());
-  variable_block.def_property_readonly("T", &Block::T);
-  variable_block.def("rows", &Block::Rows);
-  variable_block.def("cols", &Block::Cols);
+  variable_block.def_property_readonly("T", &VariableBlock<VariableMatrix>::T);
+  variable_block.def("rows", &VariableBlock<VariableMatrix>::Rows);
+  variable_block.def("cols", &VariableBlock<VariableMatrix>::Cols);
   variable_block.def(
-      "value", static_cast<double (Block::*)(int, int) const>(&Block::Value));
-  variable_block.def("value",
-                     static_cast<double (Block::*)(int) const>(&Block::Value));
+      "value",
+      static_cast<double (VariableBlock<VariableMatrix>::*)(int, int) const>(
+          &VariableBlock<VariableMatrix>::Value));
   variable_block.def(
-      "value", static_cast<Eigen::MatrixXd (Block::*)() const>(&Block::Value));
+      "value",
+      static_cast<double (VariableBlock<VariableMatrix>::*)(int) const>(
+          &VariableBlock<VariableMatrix>::Value));
+  variable_block.def(
+      "value",
+      static_cast<Eigen::MatrixXd (VariableBlock<VariableMatrix>::*)() const>(
+          &VariableBlock<VariableMatrix>::Value));
   variable_block.def(py::self == py::self);
   variable_block.def(py::self == double());
   variable_block.def(py::self == int());
@@ -767,7 +821,7 @@ void BindVariableBlock(py::module_& autodiff,
   variable_block.def(py::self >= int());
   variable_block.def(double() >= py::self);
   variable_block.def(int() >= py::self);
-  py::implicitly_convertible<Block, VariableMatrix>();
+  py::implicitly_convertible<VariableBlock<VariableMatrix>, VariableMatrix>();
 }
 
 }  // namespace sleipnir
