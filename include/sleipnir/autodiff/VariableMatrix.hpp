@@ -3,6 +3,7 @@
 #pragma once
 
 #include <cassert>
+#include <initializer_list>
 #include <utility>
 #include <vector>
 
@@ -516,6 +517,19 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
   int m_rows = 0;
   int m_cols = 0;
 };
+
+/**
+ * Assemble a VariableMatrix from a nested list of blocks.
+ *
+ * Each row's blocks must have the same height, and the assembled block rows
+ * must have the same width. For example, for the block matrix [[A, B], [C]] to
+ * be constructible, the number of rows in A and B must match, and the number of
+ * columns in [A, B] and [C] must match.
+ *
+ * @param list The nested list of blocks.
+ */
+SLEIPNIR_DLLEXPORT VariableMatrix
+Block(std::initializer_list<std::initializer_list<VariableMatrix>> list);
 
 /**
  * std::abs() for VariableMatrices.
