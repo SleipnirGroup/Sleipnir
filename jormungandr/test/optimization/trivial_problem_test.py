@@ -35,7 +35,7 @@ def test_no_cost_unconstrained_2():
     problem = OptimizationProblem()
 
     X = problem.decision_variable(2, 3)
-    X.set_values([[1.0, 1.0, 1.0], [1.0, 1.0, 1.0]])
+    X.set_value([[1.0, 1.0, 1.0], [1.0, 1.0, 1.0]])
 
     status = problem.solve(diagnostics=True)
 

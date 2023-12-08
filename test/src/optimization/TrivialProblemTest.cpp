@@ -38,7 +38,7 @@ TEST(TrivialProblemTest, NoCostUnconstrained) {
     sleipnir::OptimizationProblem problem;
 
     auto X = problem.DecisionVariable(2, 3);
-    X.SetValues(Eigen::Matrix<double, 2, 3>{{1.0, 1.0, 1.0}, {1.0, 1.0, 1.0}});
+    X.SetValue(Eigen::Matrix<double, 2, 3>{{1.0, 1.0, 1.0}, {1.0, 1.0, 1.0}});
 
     auto status = problem.Solve({.diagnostics = true});
 

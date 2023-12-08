@@ -50,7 +50,7 @@ TEST(DecisionVariableTest, StaticMatrixInitAssign) {
   EXPECT_DOUBLE_EQ(0.0, z.Value(2, 1));
 
   // Matrix assignment; element comparison
-  z.SetValues(Eigen::Matrix<double, 3, 2>{{1.0, 2.0}, {3.0, 4.0}, {5.0, 6.0}});
+  z.SetValue(Eigen::Matrix<double, 3, 2>{{1.0, 2.0}, {3.0, 4.0}, {5.0, 6.0}});
   EXPECT_DOUBLE_EQ(1.0, z.Value(0, 0));
   EXPECT_DOUBLE_EQ(2.0, z.Value(0, 1));
   EXPECT_DOUBLE_EQ(3.0, z.Value(1, 0));
@@ -61,14 +61,14 @@ TEST(DecisionVariableTest, StaticMatrixInitAssign) {
   // Matrix assignment; matrix comparison
   {
     Eigen::Matrix<double, 3, 2> expected{{7.0, 8.0}, {9.0, 10.0}, {11.0, 12.0}};
-    z.SetValues(expected);
+    z.SetValue(expected);
     EXPECT_EQ(expected, z.Value());
   }
 
   // Block assignment
   {
     Eigen::Matrix<double, 2, 1> expectedBlock{{1.0}, {1.0}};
-    z.Block(0, 0, 2, 1).SetValues(expectedBlock);
+    z.Block(0, 0, 2, 1).SetValue(expectedBlock);
 
     Eigen::Matrix<double, 3, 2> expectedResult{
         {1.0, 8.0}, {1.0, 10.0}, {11.0, 12.0}};
@@ -78,7 +78,7 @@ TEST(DecisionVariableTest, StaticMatrixInitAssign) {
   // Segment assignment
   {
     Eigen::Matrix<double, 2, 1> expectedBlock{{1.0}, {1.0}};
-    z.Segment(0, 2).SetValues(expectedBlock);
+    z.Segment(0, 2).SetValue(expectedBlock);
 
     Eigen::Matrix<double, 3, 2> expectedResult{
         {1.0, 8.0}, {1.0, 10.0}, {11.0, 12.0}};
@@ -102,7 +102,7 @@ TEST(DecisionVariableTest, DynamicMatrixInitAssign) {
   {
     Eigen::MatrixXd expected{3, 2};
     expected << 1.0, 2.0, 3.0, 4.0, 5.0, 6.0;
-    z.SetValues(expected);
+    z.SetValue(expected);
     EXPECT_DOUBLE_EQ(1.0, z.Value(0, 0));
     EXPECT_DOUBLE_EQ(2.0, z.Value(0, 1));
     EXPECT_DOUBLE_EQ(3.0, z.Value(1, 0));
@@ -115,7 +115,7 @@ TEST(DecisionVariableTest, DynamicMatrixInitAssign) {
   {
     Eigen::MatrixXd expected{3, 2};
     expected << 7.0, 8.0, 9.0, 10.0, 11.0, 12.0;
-    z.SetValues(expected);
+    z.SetValue(expected);
     EXPECT_EQ(expected, z.Value());
   }
 
@@ -123,7 +123,7 @@ TEST(DecisionVariableTest, DynamicMatrixInitAssign) {
   {
     Eigen::MatrixXd expectedBlock{2, 1};
     expectedBlock << 1.0, 1.0;
-    z.Block(0, 0, 2, 1).SetValues(expectedBlock);
+    z.Block(0, 0, 2, 1).SetValue(expectedBlock);
 
     Eigen::MatrixXd expectedResult{3, 2};
     expectedResult << 1.0, 8.0, 1.0, 10.0, 11.0, 12.0;
@@ -134,7 +134,7 @@ TEST(DecisionVariableTest, DynamicMatrixInitAssign) {
   {
     Eigen::MatrixXd expectedBlock{2, 1};
     expectedBlock << 1.0, 1.0;
-    z.Segment(0, 2).SetValues(expectedBlock);
+    z.Segment(0, 2).SetValue(expectedBlock);
 
     Eigen::MatrixXd expectedResult{3, 2};
     expectedResult << 1.0, 8.0, 1.0, 10.0, 11.0, 12.0;

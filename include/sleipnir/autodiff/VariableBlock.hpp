@@ -139,7 +139,7 @@ class VariableBlock {
    */
   template <typename Derived>
     requires std::same_as<typename Derived::Scalar, double>
-  VariableBlock<Mat>& SetValues(const Eigen::MatrixBase<Derived>& values) {
+  VariableBlock<Mat>& SetValue(const Eigen::MatrixBase<Derived>& values) {
     assert(Rows() == values.rows());
     assert(Cols() == values.cols());
 

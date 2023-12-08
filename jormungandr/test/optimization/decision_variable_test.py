@@ -49,7 +49,7 @@ def test_matrix_init_assign():
     assert z.value(2, 1) == 0.0
 
     # Matrix assignment; element comparison
-    z.set_values(np.array([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]]))
+    z.set_value(np.array([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]]))
     assert z.value(0, 0) == 1.0
     assert z.value(0, 1) == 2.0
     assert z.value(1, 0) == 3.0
@@ -58,11 +58,11 @@ def test_matrix_init_assign():
     assert z.value(2, 1) == 6.0
 
     # Matrix assignment; matrix comparison
-    z.set_values(np.array([[7.0, 8.0], [9.0, 10.0], [11.0, 12.0]]))
+    z.set_value(np.array([[7.0, 8.0], [9.0, 10.0], [11.0, 12.0]]))
     assert (z.value() == np.array([[7.0, 8.0], [9.0, 10.0], [11.0, 12.0]])).all()
 
     # Block assignment
-    z[:2, :1].set_values(np.array([[1.0], [1.0]]))
+    z[:2, :1].set_value(np.array([[1.0], [1.0]]))
     assert (z.value() == np.array([[1.0, 8.0], [1.0, 10.0], [11.0, 12.0]])).all()
 
 
