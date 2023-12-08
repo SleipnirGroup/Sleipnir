@@ -566,6 +566,29 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
 };
 
 /**
+ * Applies a coefficient-wise reduce operation to two matrices.
+ *
+ * @param lhs The left-hand side of the binary operator.
+ * @param rhs The right-hand side of the binary operator.
+ * @param binaryOp The binary operator to use for the reduce operation.
+ */
+template <typename BinaryOp>
+VariableMatrix CwiseReduce(const VariableMatrix& lhs, const VariableMatrix& rhs,
+                           BinaryOp binaryOp) {
+  assert(lhs.Rows() == rhs.Rows());
+  assert(lhs.Rows() == rhs.Rows());
+
+  VariableMatrix result{lhs.Rows(), lhs.Cols()};
+  for (int row = 0; row < lhs.Rows(); ++row) {
+    for (int col = 0; col < lhs.Cols(); ++col) {
+      result(row, col) = binaryOp(lhs(row, col), rhs(row, col));
+    }
+  }
+
+  return result;
+}
+
+/**
  * Assemble a VariableMatrix from a nested list of blocks.
  *
  * Each row's blocks must have the same height, and the assembled block rows
