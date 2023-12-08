@@ -454,6 +454,16 @@ SLEIPNIR_DLLEXPORT Variable hypot(const Variable& x, double y);
 SLEIPNIR_DLLEXPORT Variable hypot(const Variable& x, const Variable& y);
 
 /**
+ * std::hypot() for Variables.
+ *
+ * @param x The x argument.
+ * @param y The y argument.
+ * @param z The z argument.
+ */
+SLEIPNIR_DLLEXPORT Variable hypot(const Variable& x, const Variable& y,
+                                  const Variable& z);
+
+/**
  * std::log() for Variables.
  *
  * @param x The argument.
