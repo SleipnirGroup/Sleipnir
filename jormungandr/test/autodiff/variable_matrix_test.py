@@ -16,10 +16,10 @@ def test_assignment_to_default():
     assert mat[1, 0] == 0.0
     assert mat[1, 1] == 0.0
 
-    mat[0, 0].set(1.0)
-    mat[0, 1].set(2.0)
-    mat[1, 0].set(3.0)
-    mat[1, 1].set(4.0)
+    mat[0, 0].set_value(1.0)
+    mat[0, 1].set_value(2.0)
+    mat[1, 0].set_value(3.0)
+    mat[1, 1].set_value(4.0)
 
     assert mat[0, 0] == 1.0
     assert mat[0, 1] == 2.0

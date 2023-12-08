@@ -9,35 +9,35 @@ OCPSolver::OCPSolver(int numStates, int numInputs,
                      const DynamicsFunction& dynamics,
                      DynamicsType dynamicsType, TimestepMethod timestepMethod,
                      TranscriptionMethod method)
-    : m_numStates(numStates),
-      m_numInputs(numInputs),
-      m_dt(dt),
-      m_numSteps(numSteps),
-      m_transcriptionMethod(method),
-      m_dynamicsType(dynamicsType),
-      m_dynamicsFunction(dynamics),
-      m_timestepMethod(timestepMethod) {
+    : m_numStates{numStates},
+      m_numInputs{numInputs},
+      m_dt{dt},
+      m_numSteps{numSteps},
+      m_transcriptionMethod{method},
+      m_dynamicsType{dynamicsType},
+      m_dynamicsFunction{dynamics},
+      m_timestepMethod{timestepMethod} {
   // u is numSteps + 1 so that the final constraintFunction evaluation works
   m_U = DecisionVariable(m_numInputs, m_numSteps + 1);
 
   if (m_timestepMethod == TimestepMethod::kFixed) {
-    m_DT = VariableMatrix(1, m_numSteps + 1);
+    m_DT = VariableMatrix{1, m_numSteps + 1};
     for (int i = 0; i < numSteps + 1; ++i) {
-      m_DT(0, i) = Constant(m_dt.count());
+      m_DT(0, i) = m_dt.count();
     }
   } else if (m_timestepMethod == TimestepMethod::kVariableSingle) {
-    Variable DT = DecisionVariable(1, 1)(0, 0);
-    // Initial guess
-    DT = m_dt.count();
-    m_DT = VariableMatrix(1, m_numSteps + 1);
+    Variable DT = DecisionVariable();
+    DT.SetValue(m_dt.count());
+
     // Set the member variable matrix to track the decision variable
+    m_DT = VariableMatrix{1, m_numSteps + 1};
     for (int i = 0; i < numSteps + 1; ++i) {
       m_DT(0, i) = DT;
     }
   } else if (m_timestepMethod == TimestepMethod::kVariable) {
     m_DT = DecisionVariable(1, m_numSteps + 1);
     for (int i = 0; i < numSteps + 1; ++i) {
-      m_DT(0, i) = m_dt.count();
+      m_DT(0, i).SetValue(m_dt.count());
     }
   }
 
@@ -50,7 +50,7 @@ OCPSolver::OCPSolver(int numStates, int numInputs,
   } else if (m_transcriptionMethod == TranscriptionMethod::kSingleShooting) {
     // In single-shooting the states aren't decision variables, but instead
     // depend on the input and previous states
-    m_X = VariableMatrix(m_numStates, m_numSteps + 1);
+    m_X = VariableMatrix{m_numStates, m_numSteps + 1};
     ConstrainSingleShooting();
   }
 }
@@ -59,7 +59,9 @@ void OCPSolver::ConstrainDirectCollocation() {
   if (m_dynamicsType != DynamicsType::kExplicitODE) {
     throw std::runtime_error("Direct Collocation requires an explicit ODE");
   }
-  Variable time{0.0};
+
+  Variable time = 0.0;
+
   for (int i = 0; i < m_numSteps; ++i) {
     auto x_begin = X().Col(i);
     auto x_end = X().Col(i + 1);
@@ -68,6 +70,7 @@ void OCPSolver::ConstrainDirectCollocation() {
     auto t_begin = time;
     auto t_end = time + dt;
     auto t_c = t_begin + dt / 2.0;
+
     time += dt;
 
     // Use u_begin on the end point as well because we are approaching a
@@ -83,7 +86,8 @@ void OCPSolver::ConstrainDirectCollocation() {
 }
 
 void OCPSolver::ConstrainDirectTranscription() {
-  Variable time{0.0};
+  Variable time = 0.0;
+
   for (int i = 0; i < m_numSteps; ++i) {
     auto x_begin = X().Col(i);
     auto x_end = X().Col(i + 1);
@@ -97,12 +101,14 @@ void OCPSolver::ConstrainDirectTranscription() {
     } else if (m_dynamicsType == DynamicsType::kDiscrete) {
       SubjectTo(x_end == m_dynamicsFunction(time, x_begin, u, dt));
     }
+
     time += dt;
   }
 }
 
 void OCPSolver::ConstrainSingleShooting() {
-  Variable time{0.0};
+  Variable time = 0.0;
+
   for (int i = 0; i < m_numSteps; ++i) {
     auto x_begin = X().Col(i);
     auto x_end = X().Col(i + 1);
@@ -115,18 +121,21 @@ void OCPSolver::ConstrainSingleShooting() {
     } else if (m_dynamicsType == DynamicsType::kDiscrete) {
       x_end = m_dynamicsFunction(time, x_begin, u, dt);
     }
+
     time += dt;
   }
 }
 
 void OCPSolver::ConstrainAlways(
     const OCPConstraintCallback& constraintFunction) {
-  Variable time{0.0};
+  Variable time = 0.0;
+
   for (int i = 0; i < m_numSteps + 1; ++i) {
     auto x = X().Col(i);
     auto u = U().Col(i);
     auto dt = DT()(0, i);
     constraintFunction(time, x, u, dt);
+
     time += dt;
   }
 }

@@ -222,8 +222,8 @@ TEST(OCPSolverTest, DISABLED_CartPoleProblem) {
 
   // Initial guess
   for (int k = 0; k < N; ++k) {
-    X(0, k) = static_cast<double>(k) / N * d.value();
-    X(1, k) = static_cast<double>(k) / N * std::numbers::pi;
+    X(0, k).SetValue(static_cast<double>(k) / N * d.value());
+    X(1, k).SetValue(static_cast<double>(k) / N * std::numbers::pi);
   }
 
   // Cart position constraints

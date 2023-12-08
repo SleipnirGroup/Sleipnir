@@ -9,7 +9,7 @@ TEST(SolverExitConditionTest, CallbackRequestedStop) {
   sleipnir::OptimizationProblem problem;
 
   auto x = problem.DecisionVariable();
-  x = 0.0;
+  x.SetValue(0.0);
   problem.Minimize(x);
 
   problem.Callback([](const sleipnir::SolverIterationInfo&) { return true; });
@@ -92,7 +92,7 @@ TEST(SolverExitConditionTest, MaxIterationsExceeded) {
   sleipnir::OptimizationProblem problem;
 
   auto x = problem.DecisionVariable();
-  x = 0.0;
+  x.SetValue(0.0);
   problem.Minimize(x);
 
   auto status = problem.Solve({.maxIterations = 0, .diagnostics = true});
@@ -110,7 +110,7 @@ TEST(SolverExitConditionTest, Timeout) {
   sleipnir::OptimizationProblem problem;
 
   auto x = problem.DecisionVariable();
-  x = 0.0;
+  x.SetValue(0.0);
   problem.Minimize(x);
 
   auto status = problem.Solve({.timeout = 0s, .diagnostics = true});

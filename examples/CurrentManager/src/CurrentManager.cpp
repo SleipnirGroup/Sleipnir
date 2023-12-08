@@ -45,7 +45,7 @@ std::vector<units::ampere_t> CurrentManager::Calculate(
   }
 
   for (size_t i = 0; i < desiredCurrents.size(); ++i) {
-    m_desiredCurrents(i) = desiredCurrents[i].value();
+    m_desiredCurrents(i).SetValue(desiredCurrents[i].value());
   }
 
   m_problem.Solve();

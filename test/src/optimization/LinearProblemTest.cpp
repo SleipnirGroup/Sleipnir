@@ -7,10 +7,10 @@ TEST(LinearProblemTest, Maximize) {
   sleipnir::OptimizationProblem problem;
 
   auto x = problem.DecisionVariable();
-  x = 1.0;
+  x.SetValue(1.0);
 
   auto y = problem.DecisionVariable();
-  y = 1.0;
+  y.SetValue(1.0);
 
   problem.Maximize(50 * x + 40 * y);
 

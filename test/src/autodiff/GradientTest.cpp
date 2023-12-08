@@ -6,8 +6,10 @@
 #include <sleipnir/autodiff/Gradient.hpp>
 
 TEST(GradientTest, TrivialCase) {
-  sleipnir::Variable a = 10;
-  sleipnir::Variable b = 20;
+  sleipnir::Variable a;
+  a.SetValue(10);
+  sleipnir::Variable b;
+  b.SetValue(20);
   sleipnir::Variable c = a;
 
   EXPECT_DOUBLE_EQ(1, sleipnir::Gradient(a, a).Calculate().coeff(0));
@@ -17,7 +19,8 @@ TEST(GradientTest, TrivialCase) {
 }
 
 TEST(GradientTest, PositiveOperator) {
-  sleipnir::Variable a = 10;
+  sleipnir::Variable a;
+  a.SetValue(10);
   sleipnir::Variable c = +a;
 
   EXPECT_DOUBLE_EQ(a.Value(), c.Value());
@@ -25,7 +28,8 @@ TEST(GradientTest, PositiveOperator) {
 }
 
 TEST(GradientTest, NegativeOperator) {
-  sleipnir::Variable a = 10;
+  sleipnir::Variable a;
+  a.SetValue(10);
   sleipnir::Variable c = -a;
 
   EXPECT_DOUBLE_EQ(-a.Value(), c.Value());
@@ -33,7 +37,8 @@ TEST(GradientTest, NegativeOperator) {
 }
 
 TEST(GradientTest, IdenticalVariables) {
-  sleipnir::Variable a = 10;
+  sleipnir::Variable a;
+  a.SetValue(10);
   sleipnir::Variable x = a;
   sleipnir::Variable c = a * a + x;
 
@@ -47,9 +52,12 @@ TEST(GradientTest, IdenticalVariables) {
 }
 
 TEST(GradientTest, Elementary) {
-  sleipnir::Variable a = 1.0;
-  sleipnir::Variable b = 2.0;
-  sleipnir::Variable c = 3.0;
+  sleipnir::Variable a;
+  a.SetValue(1.0);
+  sleipnir::Variable b;
+  b.SetValue(2.0);
+  sleipnir::Variable c;
+  c.SetValue(3.0);
 
   c = -2 * a;
   EXPECT_DOUBLE_EQ(-2, sleipnir::Gradient(c, a).Calculate().coeff(0));
@@ -57,8 +65,8 @@ TEST(GradientTest, Elementary) {
   c = a / 3.0;
   EXPECT_DOUBLE_EQ(1.0 / 3.0, sleipnir::Gradient(c, a).Calculate().coeff(0));
 
-  a = 100.0;
-  b = 200.0;
+  a.SetValue(100.0);
+  b.SetValue(200.0);
 
   c = a + b;
   EXPECT_DOUBLE_EQ(1.0, sleipnir::Gradient(c, a).Calculate().coeff(0));
@@ -77,9 +85,12 @@ TEST(GradientTest, Elementary) {
 }
 
 TEST(GradientTest, Comparison) {
-  sleipnir::Variable x = 10.0;
-  sleipnir::Variable a = 10.0;
-  sleipnir::Variable b = 200.0;
+  sleipnir::Variable x;
+  x.SetValue(10.0);
+  sleipnir::Variable a;
+  a.SetValue(10.0);
+  sleipnir::Variable b;
+  b.SetValue(200.0);
 
   EXPECT_DOUBLE_EQ(a.Value(), a.Value());
   EXPECT_DOUBLE_EQ(a.Value(), x.Value());
@@ -135,7 +146,8 @@ TEST(GradientTest, Comparison) {
 }
 
 TEST(GradientTest, Trigonometry) {
-  sleipnir::Variable x = 0.5;
+  sleipnir::Variable x;
+  x.SetValue(0.5);
   EXPECT_DOUBLE_EQ(std::sin(x.Value()), sleipnir::sin(x).Value());
   EXPECT_DOUBLE_EQ(
       std::cos(x.Value()),
@@ -168,7 +180,8 @@ TEST(GradientTest, Trigonometry) {
 }
 
 TEST(GradientTest, Hyperbolic) {
-  sleipnir::Variable x = 1.0;
+  sleipnir::Variable x;
+  x.SetValue(1.0);
   EXPECT_DOUBLE_EQ(std::sinh(x.Value()), sleipnir::sinh(x).Value());
   EXPECT_DOUBLE_EQ(
       std::cosh(x.Value()),
@@ -186,7 +199,8 @@ TEST(GradientTest, Hyperbolic) {
 }
 
 TEST(GradientTest, Exponential) {
-  sleipnir::Variable x = 1.0;
+  sleipnir::Variable x;
+  x.SetValue(1.0);
   EXPECT_DOUBLE_EQ(std::log(x.Value()), sleipnir::log(x).Value());
   EXPECT_DOUBLE_EQ(
       1.0 / x.Value(),
@@ -204,8 +218,10 @@ TEST(GradientTest, Exponential) {
 }
 
 TEST(GradientTest, Power) {
-  sleipnir::Variable x = 1.0;
-  sleipnir::Variable a = 2.0;
+  sleipnir::Variable x;
+  x.SetValue(1.0);
+  sleipnir::Variable a;
+  a.SetValue(2.0);
   sleipnir::Variable y = 2 * a;
   EXPECT_DOUBLE_EQ(std::sqrt(x.Value()), sleipnir::sqrt(x).Value());
   EXPECT_DOUBLE_EQ(
@@ -246,15 +262,16 @@ TEST(GradientTest, Power) {
 }
 
 TEST(GradientTest, Abs) {
-  sleipnir::Variable x = 1.0;
+  sleipnir::Variable x;
+  x.SetValue(1.0);
   EXPECT_DOUBLE_EQ(std::abs(x.Value()), sleipnir::abs(x).Value());
   EXPECT_DOUBLE_EQ(
       1.0, sleipnir::Gradient(sleipnir::abs(x), x).Calculate().coeff(0));
-  x = -1.0;
+  x.SetValue(-1.0);
   EXPECT_DOUBLE_EQ(std::abs(x.Value()), sleipnir::abs(x).Value());
   EXPECT_DOUBLE_EQ(
       -1.0, sleipnir::Gradient(sleipnir::abs(x), x).Calculate().coeff(0));
-  x = 0.0;
+  x.SetValue(0.0);
   EXPECT_DOUBLE_EQ(std::abs(x.Value()), sleipnir::abs(x).Value());
   EXPECT_DOUBLE_EQ(
       0.0, sleipnir::Gradient(sleipnir::abs(x), x).Calculate().coeff(0));
@@ -262,22 +279,24 @@ TEST(GradientTest, Abs) {
 
 TEST(GradientTest, Atan2) {
   // Testing atan2 function on (double, var)
-  sleipnir::Variable x = 1.0;
-  sleipnir::Variable y = 0.9;
+  sleipnir::Variable x;
+  x.SetValue(1.0);
+  sleipnir::Variable y;
+  y.SetValue(0.9);
   EXPECT_DOUBLE_EQ(sleipnir::atan2(2.0, x).Value(), std::atan2(2.0, x.Value()));
   EXPECT_DOUBLE_EQ(
       sleipnir::Gradient(sleipnir::atan2(2.0, x), x).Calculate().coeff(0),
       (-2.0 / (2 * 2 + x * x)).Value());
 
   // Testing atan2 function on (var, double)
-  x = 1.0;
+  x.SetValue(1.0);
   EXPECT_DOUBLE_EQ(sleipnir::atan2(x, 2.0).Value(), std::atan2(x.Value(), 2.0));
   EXPECT_DOUBLE_EQ(
       sleipnir::Gradient(sleipnir::atan2(x, 2.0), x).Calculate().coeff(0),
       (2.0 / (2 * 2 + x * x)).Value());
 
   // Testing atan2 function on (var, var)
-  x = 1.1;
+  x.SetValue(1.1);
   EXPECT_DOUBLE_EQ(sleipnir::atan2(y, x).Value(),
                    std::atan2(y.Value(), x.Value()));
   EXPECT_DOUBLE_EQ(
@@ -308,8 +327,10 @@ TEST(GradientTest, Atan2) {
 
 TEST(GradientTest, Hypot) {
   // Testing hypot function on (var, double)
-  sleipnir::Variable x = 1.8;
-  sleipnir::Variable y = 1.5;
+  sleipnir::Variable x;
+  x.SetValue(1.8);
+  sleipnir::Variable y;
+  y.SetValue(1.5);
   EXPECT_DOUBLE_EQ(std::hypot(x.Value(), 2.0), sleipnir::hypot(x, 2.0).Value());
   EXPECT_DOUBLE_EQ(
       (x / std::hypot(x.Value(), 2.0)).Value(),
@@ -322,8 +343,8 @@ TEST(GradientTest, Hypot) {
       sleipnir::Gradient(sleipnir::hypot(2.0, y), y).Calculate().coeff(0));
 
   // Testing hypot function on (var, var)
-  x = 1.3;
-  y = 2.3;
+  x.SetValue(1.3);
+  y.SetValue(2.3);
   EXPECT_DOUBLE_EQ(std::hypot(x.Value(), y.Value()),
                    sleipnir::hypot(x, y).Value());
   EXPECT_DOUBLE_EQ(
@@ -334,8 +355,8 @@ TEST(GradientTest, Hypot) {
       sleipnir::Gradient(sleipnir::hypot(x, y), y).Calculate().coeff(0));
 
   // Testing hypot function on (expr, expr)
-  x = 1.3;
-  y = 2.3;
+  x.SetValue(1.3);
+  y.SetValue(2.3);
   EXPECT_DOUBLE_EQ(std::hypot(2.0 * x.Value(), 3.0 * y.Value()),
                    sleipnir::hypot(2.0 * x, 3.0 * y).Value());
   EXPECT_DOUBLE_EQ(
@@ -351,13 +372,14 @@ TEST(GradientTest, Hypot) {
 }
 
 TEST(GradientTest, Miscellaneous) {
-  sleipnir::Variable x = 3.0;
+  sleipnir::Variable x;
+  x.SetValue(3.0);
   sleipnir::Variable y = x;
 
   EXPECT_DOUBLE_EQ(std::abs(x.Value()), sleipnir::abs(x).Value());
   EXPECT_DOUBLE_EQ(1.0, sleipnir::Gradient(x, x).Calculate().coeff(0));
 
-  x = 0.5;
+  x.SetValue(0.5);
   EXPECT_DOUBLE_EQ(std::erf(x.Value()), sleipnir::erf(x).Value());
   EXPECT_DOUBLE_EQ(
       2 / std::sqrt(std::numbers::pi) * std::exp(-x.Value() * x.Value()),
@@ -365,8 +387,10 @@ TEST(GradientTest, Miscellaneous) {
 }
 
 TEST(GradientTest, Reuse) {
-  sleipnir::Variable a = 10;
-  sleipnir::Variable b = 20;
+  sleipnir::Variable a;
+  a.SetValue(10);
+  sleipnir::Variable b;
+  b.SetValue(20);
   sleipnir::Variable x = a * b;
 
   sleipnir::Gradient gradient{x, a};
@@ -374,7 +398,7 @@ TEST(GradientTest, Reuse) {
   Eigen::VectorXd g = gradient.Calculate();
   EXPECT_DOUBLE_EQ(20.0, g(0));
 
-  b = 10;
+  b.SetValue(10);
   g = gradient.Calculate();
   EXPECT_DOUBLE_EQ(10.0, g(0));
 }
@@ -390,15 +414,16 @@ TEST(GradientTest, Sign) {
     }
   };
 
-  sleipnir::Variable x = 1.0;
+  sleipnir::Variable x;
+  x.SetValue(1.0);
   EXPECT_DOUBLE_EQ(sign(x.Value()), sleipnir::sign(x).Value());
   EXPECT_DOUBLE_EQ(
       0.0, sleipnir::Gradient(sleipnir::sign(x), x).Calculate().coeff(0));
-  x = -1.0;
+  x.SetValue(-1.0);
   EXPECT_DOUBLE_EQ(sign(x.Value()), sleipnir::sign(x).Value());
   EXPECT_DOUBLE_EQ(
       0.0, sleipnir::Gradient(sleipnir::sign(x), x).Calculate().coeff(0));
-  x = 0.0;
+  x.SetValue(0.0);
   EXPECT_DOUBLE_EQ(sign(x.Value()), sleipnir::sign(x).Value());
   EXPECT_DOUBLE_EQ(
       0.0, sleipnir::Gradient(sleipnir::sign(x), x).Calculate().coeff(0));

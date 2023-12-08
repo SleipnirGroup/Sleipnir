@@ -205,8 +205,8 @@ TEST(CartPoleProblemTest, DISABLED_DirectTranscription) {
 
   // Initial guess
   for (int k = 0; k < N + 1; ++k) {
-    X(0, k) = static_cast<double>(k) / N * d.value();
-    X(1, k) = static_cast<double>(k) / N * std::numbers::pi;
+    X(0, k).SetValue(static_cast<double>(k) / N * d.value());
+    X(1, k).SetValue(static_cast<double>(k) / N * std::numbers::pi);
   }
 
   // u = f_x

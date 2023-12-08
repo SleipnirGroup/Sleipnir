@@ -7,7 +7,7 @@ TEST(QuadraticProblemTest, Unconstrained1d) {
   sleipnir::OptimizationProblem problem;
 
   auto x = problem.DecisionVariable();
-  x = 2.0;
+  x.SetValue(2.0);
 
   problem.Minimize(x * x - 6.0 * x);
 
@@ -26,9 +26,9 @@ TEST(QuadraticProblemTest, Unconstrained2d) {
     sleipnir::OptimizationProblem problem;
 
     auto x = problem.DecisionVariable();
-    x = 1.0;
+    x.SetValue(1.0);
     auto y = problem.DecisionVariable();
-    y = 2.0;
+    y.SetValue(2.0);
 
     problem.Minimize(x * x + y * y);
 
@@ -47,8 +47,8 @@ TEST(QuadraticProblemTest, Unconstrained2d) {
     sleipnir::OptimizationProblem problem;
 
     auto x = problem.DecisionVariable(2);
-    x(0) = 1.0;
-    x(1) = 2.0;
+    x(0).SetValue(1.0);
+    x(1).SetValue(2.0);
 
     problem.Minimize(x.T() * x);
 
@@ -128,8 +128,8 @@ TEST(QuadraticProblemTest, EqualityConstrained) {
     sleipnir::OptimizationProblem problem;
 
     auto x = problem.DecisionVariable(2);
-    x(0) = 1.0;
-    x(1) = 2.0;
+    x(0).SetValue(1.0);
+    x(1).SetValue(2.0);
 
     problem.Minimize(x.T() * x);
 

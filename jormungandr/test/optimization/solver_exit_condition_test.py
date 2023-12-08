@@ -66,7 +66,7 @@ def test_max_iterations_exceeded():
     problem = OptimizationProblem()
 
     x = problem.decision_variable()
-    x.set(0.0)
+    x.set_value(0.0)
     problem.minimize(x)
 
     status = problem.solve(max_iterations=0, diagnostics=True)
@@ -81,7 +81,7 @@ def test_timeout():
     problem = OptimizationProblem()
 
     x = problem.decision_variable()
-    x.set(0.0)
+    x.set_value(0.0)
     problem.minimize(x)
 
     status = problem.solve(timeout=0.0, diagnostics=True)

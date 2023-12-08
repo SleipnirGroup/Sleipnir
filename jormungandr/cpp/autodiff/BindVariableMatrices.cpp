@@ -83,9 +83,16 @@ void BindVariableMatrix(py::module_& autodiff,
   variable_matrix.def(py::init<const VariableBlock<VariableMatrix>&>());
   variable_matrix.def("set",
                       [](VariableMatrix& self, double value) { self = value; });
+  variable_matrix.def("set_value", [](VariableMatrix& self, double value) {
+    self.SetValue(value);
+  });
   variable_matrix.def("set",
                       [](VariableMatrix& self, const Eigen::MatrixXd& values) {
                         self = values;
+                      });
+  variable_matrix.def("set_values",
+                      [](VariableMatrix& self, const Eigen::MatrixXd& values) {
+                        self.SetValues(values);
                       });
   variable_matrix.def("__setitem__",
                       [](VariableMatrix& self, int row, const Variable& value) {
@@ -510,9 +517,15 @@ void BindVariableBlock(
   variable_block.def(py::init<VariableMatrix&, int, int, int, int>());
   variable_block.def("set", [](VariableBlock<VariableMatrix>& self,
                                double value) { self = value; });
+  variable_block.def("set_value", [](VariableBlock<VariableMatrix>& self,
+                                     double value) { self.SetValue(value); });
   variable_block.def("set",
                      [](VariableBlock<VariableMatrix>& self,
                         const Eigen::MatrixXd& values) { self = values; });
+  variable_block.def("set_values", [](VariableBlock<VariableMatrix>& self,
+                                      const Eigen::MatrixXd& values) {
+    self.SetValues(values);
+  });
   variable_block.def("__setitem__",
                      [](VariableBlock<VariableMatrix>& self, int row,
                         const Variable& value) { return self(row) = value; });

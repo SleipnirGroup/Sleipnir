@@ -22,7 +22,7 @@ bool Near(double expected, double actual, double tolerance) {
 }
 }  // namespace
 
-void TestFlywheel(std::string test_name, Eigen::Matrix<double, 1, 1> A,
+void TestFlywheel(std::string testName, Eigen::Matrix<double, 1, 1> A,
                   Eigen::Matrix<double, 1, 1> B,
                   const sleipnir::DynamicsFunction& F,
                   sleipnir::DynamicsType dynamicsType,
@@ -63,7 +63,14 @@ void TestFlywheel(std::string test_name, Eigen::Matrix<double, 1, 1> A,
   auto status = solver.Solve({.diagnostics = true});
 
   EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
-  EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.equalityConstraintType);
+  if (method == sleipnir::TranscriptionMethod::kSingleShooting) {
+    // The initial state isn't dependent on any decision variables, so
+    // constraining it to a constant makes the constraint itself constant
+    EXPECT_EQ(sleipnir::ExpressionType::kConstant,
+              status.equalityConstraintType);
+  } else {
+    EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.equalityConstraintType);
+  }
   EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.inequalityConstraintType);
   EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
 
@@ -116,7 +123,7 @@ void TestFlywheel(std::string test_name, Eigen::Matrix<double, 1, 1> A,
   EXPECT_NEAR(r(0), solver.X().Value(0, N - 1), 1e-2);
 
   // Log states for offline viewing
-  std::ofstream states{fmt::format("{} Flywheel states.csv", test_name)};
+  std::ofstream states{fmt::format("{} Flywheel states.csv", testName)};
   if (states.is_open()) {
     states << "Time (s),Velocity (rad/s)\n";
 
@@ -127,7 +134,7 @@ void TestFlywheel(std::string test_name, Eigen::Matrix<double, 1, 1> A,
   }
 
   // Log inputs for offline viewing
-  std::ofstream inputs{fmt::format("{} Flywheel inputs.csv", test_name)};
+  std::ofstream inputs{fmt::format("{} Flywheel inputs.csv", testName)};
   if (inputs.is_open()) {
     inputs << "Time (s),Voltage (V)\n";
 

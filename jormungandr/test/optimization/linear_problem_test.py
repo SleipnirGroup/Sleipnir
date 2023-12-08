@@ -10,10 +10,10 @@ def test_maximize():
     problem = OptimizationProblem()
 
     x = problem.decision_variable()
-    x.set(1.0)
+    x.set_value(1.0)
 
     y = problem.decision_variable()
-    y.set(1.0)
+    y.set_value(1.0)
 
     problem.maximize(50 * x + 40 * y)
 
