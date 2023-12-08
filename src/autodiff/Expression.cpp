@@ -8,11 +8,9 @@
 namespace sleipnir {
 
 IntrusiveSharedPtr<Expression>& Zero() {
-  static auto expr = MakeExpression(Expression::ZeroSingleton);
+  static auto expr = MakeExpression();
   return expr;
 }
-
-Expression::Expression(ZeroSingleton_t) : type{ExpressionType::kConstant} {}
 
 Expression::Expression(double value, ExpressionType type)
     : value{value}, adjointExpr{Zero()}, type{type}, args{Zero(), Zero()} {}

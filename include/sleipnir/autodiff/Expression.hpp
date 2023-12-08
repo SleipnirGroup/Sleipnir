@@ -62,7 +62,7 @@ struct SLEIPNIR_DLLEXPORT Expression {
   IntrusiveSharedPtr<Expression> adjointExpr;
 
   /// Expression argument type.
-  ExpressionType type = ExpressionType::kLinear;
+  ExpressionType type = ExpressionType::kConstant;
 
   /// Either nullary operator with no arguments, unary operator with one
   /// argument, or binary operator with two arguments. This operator is
@@ -104,20 +104,9 @@ struct SLEIPNIR_DLLEXPORT Expression {
   uint32_t refCount = 0;
 
   /**
-   * Type tag used for constructing the "zero" expression.
+   * Default constructor.
    */
-  struct ZeroSingleton_t {};
-
-  /**
-   * Type tag used for constructing the "zero" expression.
-   */
-  static inline ZeroSingleton_t ZeroSingleton;
-
-  /**
-   * Constructs an instance of "zero", which has special meaning in expression
-   * operations. This should only be constructed once via Zero().
-   */
-  explicit Expression(ZeroSingleton_t);
+  Expression() = default;
 
   /**
    * Copy constructor.
