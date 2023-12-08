@@ -1,6 +1,7 @@
 // Copyright (c) Sleipnir contributors
 
 #include <functional>
+#include <iterator>
 
 #include <Eigen/Core>
 #include <gtest/gtest.h>
@@ -31,6 +32,48 @@ TEST(VariableMatrixTest, AssignmentToDefault) {
   EXPECT_EQ(2.0, mat(0, 1));
   EXPECT_EQ(3.0, mat(1, 0));
   EXPECT_EQ(4.0, mat(1, 1));
+}
+
+TEST(VariableMatrixTest, Iterators) {
+  sleipnir::VariableMatrix A{{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}, {7.0, 8.0, 9.0}};
+
+  // VariableMatrix iterator
+  EXPECT_EQ(9, std::distance(A.begin(), A.end()));
+
+  int i = 1;
+  for (auto& elem : A) {
+    EXPECT_EQ(i, elem.Value());
+    ++i;
+  }
+
+  // VariableMatrix const_iterator
+  EXPECT_EQ(9, std::distance(A.cbegin(), A.cend()));
+
+  i = 1;
+  for (const auto& elem : A) {
+    EXPECT_EQ(i, elem.Value());
+    ++i;
+  }
+
+  auto Asub = A.Block(2, 1, 1, 2);
+
+  // VariableBlock iterator
+  EXPECT_EQ(2, std::distance(Asub.begin(), Asub.end()));
+
+  i = 8;
+  for (auto& elem : Asub) {
+    EXPECT_EQ(i, elem.Value());
+    ++i;
+  }
+
+  // VariableBlock const_iterator
+  EXPECT_EQ(2, std::distance(Asub.begin(), Asub.end()));
+
+  i = 8;
+  for (const auto& elem : Asub) {
+    EXPECT_EQ(i, elem.Value());
+    ++i;
+  }
 }
 
 TEST(VariableMatrixTest, CwiseReduce) {
