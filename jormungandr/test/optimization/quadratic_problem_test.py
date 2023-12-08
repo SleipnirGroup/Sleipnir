@@ -11,7 +11,7 @@ def test_unconstrained1d():
     problem = OptimizationProblem()
 
     x = problem.decision_variable()
-    x.set(2.0)
+    x.set_value(2.0)
 
     problem.minimize(x * x - 6.0 * x)
 
@@ -29,9 +29,9 @@ def test_unconstrained2d_1():
     problem = OptimizationProblem()
 
     x = problem.decision_variable()
-    x.set(1.0)
+    x.set_value(1.0)
     y = problem.decision_variable()
-    y.set(2.0)
+    y.set_value(2.0)
 
     problem.minimize(x * x + y * y)
 
@@ -50,8 +50,8 @@ def test_unconstrained2d_2():
     problem = OptimizationProblem()
 
     x = problem.decision_variable(2)
-    x[0].set(1.0)
-    x[1].set(2.0)
+    x[0].set_value(1.0)
+    x[1].set_value(2.0)
 
     problem.minimize(x.T @ x)
 
@@ -129,8 +129,8 @@ def test_equality_constrained_2():
     problem = OptimizationProblem()
 
     x = problem.decision_variable(2)
-    x[0].set(1.0)
-    x[1].set(2.0)
+    x[0].set_value(1.0)
+    x[1].set_value(2.0)
 
     problem.minimize(x.T @ x)
 

@@ -2,8 +2,6 @@
 
 #include "sleipnir/autodiff/VariableMatrix.hpp"
 
-#include <cassert>
-
 #include "sleipnir/autodiff/Expression.hpp"
 
 namespace sleipnir {
@@ -18,17 +16,17 @@ VariableMatrix::VariableMatrix(int rows, int cols)
 }
 
 VariableMatrix::VariableMatrix(double value) : m_rows{1}, m_cols{1} {
-  m_storage.emplace_back(value);
+  m_storage.emplace_back(MakeExpression(value, ExpressionType::kConstant));
 }
 
 VariableMatrix::VariableMatrix(int value) : m_rows{1}, m_cols{1} {
-  m_storage.emplace_back(value);
+  m_storage.emplace_back(MakeExpression(value, ExpressionType::kConstant));
 }
 
 VariableMatrix& VariableMatrix::operator=(double value) {
   assert(Rows() == 1 && Cols() == 1);
 
-  (*this)(0, 0) = value;
+  (*this)(0, 0) = Constant(value);
 
   return *this;
 }
@@ -36,9 +34,47 @@ VariableMatrix& VariableMatrix::operator=(double value) {
 VariableMatrix& VariableMatrix::operator=(int value) {
   assert(Rows() == 1 && Cols() == 1);
 
-  (*this)(0, 0) = value;
+  (*this)(0, 0) = Constant(value);
 
   return *this;
+}
+
+VariableMatrix& VariableMatrix::SetValue(double value) {
+  assert(Rows() == 1 && Cols() == 1);
+
+  (*this)(0, 0).SetValue(value);
+
+  return *this;
+}
+
+VariableMatrix& VariableMatrix::SetValue(int value) {
+  assert(Rows() == 1 && Cols() == 1);
+
+  (*this)(0, 0).SetValue(value);
+
+  return *this;
+}
+
+VariableMatrix::VariableMatrix(
+    std::initializer_list<std::initializer_list<double>> list) {
+  // Get row and column counts for destination matrix
+  m_rows = list.size();
+  m_cols = 0;
+  if (list.size() > 0) {
+    m_cols = list.begin()->size();
+  }
+
+  // Assert the first and latest column counts are the same
+  for ([[maybe_unused]] const auto& row : list) {
+    assert(list.begin()->size() == row.size());
+  }
+
+  m_storage.reserve(Rows() * Cols());
+  for (const auto& row : list) {
+    for (const auto& elem : row) {
+      m_storage.emplace_back(MakeExpression(elem, ExpressionType::kConstant));
+    }
+  }
 }
 
 VariableMatrix::VariableMatrix(const Variable& variable)
@@ -398,12 +434,12 @@ VariableMatrix Block(
     }
   }
 
-  VariableMatrix result{static_cast<int>(rows), static_cast<int>(cols)};
+  VariableMatrix result{rows, cols};
 
   int rowOffset = 0;
   for (const auto& row : list) {
     int colOffset = 0;
-    for (const VariableMatrix& elem : row) {
+    for (const auto& elem : row) {
       result.Block(rowOffset, colOffset, elem.Rows(), elem.Cols()) = elem;
       colOffset += elem.Cols();
     }

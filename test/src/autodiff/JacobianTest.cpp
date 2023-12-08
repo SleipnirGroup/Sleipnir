@@ -6,9 +6,9 @@
 TEST(JacobianTest, YvsX) {
   sleipnir::VectorXvar y{3};
   sleipnir::VectorXvar x{3};
-  x(0) = 1;
-  x(1) = 2;
-  x(2) = 3;
+  x(0).SetValue(1);
+  x(1).SetValue(2);
+  x(2).SetValue(3);
 
   // y = x
   //
@@ -32,9 +32,9 @@ TEST(JacobianTest, YvsX) {
 TEST(JacobianTest, Yvs3X) {
   sleipnir::VectorXvar y{3};
   sleipnir::VectorXvar x{3};
-  x(0) = 1;
-  x(1) = 2;
-  x(2) = 3;
+  x(0).SetValue(1);
+  x(1).SetValue(2);
+  x(2).SetValue(3);
 
   // y = 3x
   //
@@ -58,9 +58,9 @@ TEST(JacobianTest, Yvs3X) {
 TEST(JacobianTest, Products) {
   sleipnir::VectorXvar y{3};
   sleipnir::VectorXvar x{3};
-  x(0) = 1;
-  x(1) = 2;
-  x(2) = 3;
+  x(0).SetValue(1);
+  x(1).SetValue(2);
+  x(2).SetValue(3);
 
   //     [x₁x₂]
   // y = [x₂x₃]
@@ -91,7 +91,7 @@ TEST(JacobianTest, Products) {
 
 TEST(JacobianTest, DISABLED_NestedProducts) {
   sleipnir::VectorXvar z{1};
-  z(0) = 1;
+  z(0).SetValue(1);
   sleipnir::VectorXvar x{3};
   x(0) = 1 * z(0);
   x(1) = 2 * z(0);
@@ -133,9 +133,9 @@ TEST(JacobianTest, DISABLED_NestedProducts) {
 TEST(JacobianTest, NonSquare) {
   sleipnir::VectorXvar y{1};
   sleipnir::VectorXvar x{3};
-  x(0) = 1;
-  x(1) = 2;
-  x(2) = 3;
+  x(0).SetValue(1);
+  x(1).SetValue(2);
+  x(2).SetValue(3);
 
   // y = [x₁ + 3x₂ − 5x₃]
   //
@@ -155,8 +155,8 @@ TEST(JacobianTest, Reuse) {
   sleipnir::VectorXvar x{2};
 
   // y = [x₁x₂]
-  x(0) = 1;
-  x(1) = 2;
+  x(0).SetValue(1);
+  x(1).SetValue(2);
   y(0) = x(0) * x(1);
 
   sleipnir::Jacobian jacobian{y, x};
@@ -170,8 +170,8 @@ TEST(JacobianTest, Reuse) {
   EXPECT_DOUBLE_EQ(2.0, J(0, 0));
   EXPECT_DOUBLE_EQ(1.0, J(0, 1));
 
-  x(0) = 2;
-  x(1) = 1;
+  x(0).SetValue(2);
+  x(1).SetValue(1);
   // dy/dx = [x₂  x₁]
   // dy/dx = [1  2]
   J = jacobian.Calculate();

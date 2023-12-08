@@ -3,6 +3,7 @@
 #pragma once
 
 #include <cassert>
+#include <concepts>
 #include <initializer_list>
 #include <utility>
 #include <vector>
@@ -56,6 +57,24 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
   VariableMatrix& operator=(int value);
 
   /**
+   * Assigns a double to a scalar VariableMatrix.
+   */
+  VariableMatrix& SetValue(double value);
+
+  /**
+   * Assigns an int to a scalar VariableMatrix.
+   */
+  VariableMatrix& SetValue(int value);
+
+  /**
+   * Constructs a scalar VariableMatrix from a nested list of constants.
+   *
+   * @param list The nested list of constants.
+   */
+  VariableMatrix(
+      std::initializer_list<std::initializer_list<double>> list);  // NOLINT
+
+  /**
    * Constructs a VariableMatrix from an Eigen matrix.
    */
   template <typename Derived>
@@ -65,13 +84,18 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
     m_storage.reserve(values.rows() * values.cols());
     for (int row = 0; row < values.rows(); ++row) {
       for (int col = 0; col < values.cols(); ++col) {
-        m_storage.emplace_back(values(row, col));
+        if constexpr (std::same_as<typename Derived::Scalar, double>) {
+          m_storage.emplace_back(
+              MakeExpression(values(row, col), ExpressionType::kConstant));
+        } else {
+          m_storage.emplace_back(values(row, col));
+        }
       }
     }
   }
 
   /**
-   * Constructs a VariableMatrix from an Eigen matrix.
+   * Assigns an Eigen matrix to a VariableMatrix.
    */
   template <typename Derived>
   VariableMatrix& operator=(const Eigen::MatrixBase<Derived>& values) {
@@ -80,7 +104,30 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
 
     for (int row = 0; row < values.rows(); ++row) {
       for (int col = 0; col < values.cols(); ++col) {
-        (*this)(row, col) = values(row, col);
+        if constexpr (std::same_as<typename Derived::Scalar, double>) {
+          (*this)(row, col) = Variable{
+              MakeExpression(values(row, col), ExpressionType::kConstant)};
+        } else {
+          (*this)(row, col) = values(row, col);
+        }
+      }
+    }
+
+    return *this;
+  }
+
+  /**
+   * Sets the VariableMatrix's internal values.
+   */
+  template <typename Derived>
+    requires std::same_as<typename Derived::Scalar, double>
+  VariableMatrix& SetValues(const Eigen::MatrixBase<Derived>& values) {
+    assert(Rows() == values.rows());
+    assert(Cols() == values.cols());
+
+    for (int row = 0; row < values.rows(); ++row) {
+      for (int col = 0; col < values.cols(); ++col) {
+        (*this)(row, col).SetValue(values(row, col));
       }
     }
 

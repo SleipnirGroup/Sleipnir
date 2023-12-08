@@ -82,6 +82,20 @@ class SLEIPNIR_DLLEXPORT Variable {
   Variable& operator=(int value);
 
   /**
+   * Sets Variable's internal value.
+   *
+   * @param value The value of the Variable.
+   */
+  Variable& SetValue(double value);
+
+  /**
+   * Sets Variable's internal value.
+   *
+   * @param value The value of the Variable.
+   */
+  Variable& SetValue(int value);
+
+  /**
    * double-Variable multiplication operator.
    *
    * @param lhs Operator left-hand side.

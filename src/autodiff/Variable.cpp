@@ -10,14 +10,28 @@
 
 namespace sleipnir {
 
-Variable::Variable(double value) : expr{MakeExpression(value)} {}
+Variable::Variable(double value)
+    : expr{MakeExpression(value, ExpressionType::kConstant)} {}
 
-Variable::Variable(int value) : expr{MakeExpression(value)} {}
+Variable::Variable(int value)
+    : expr{MakeExpression(value, ExpressionType::kConstant)} {}
 
 Variable::Variable(IntrusiveSharedPtr<Expression> expr)
     : expr{std::move(expr)} {}
 
 Variable& Variable::operator=(double value) {
+  expr = MakeExpression(value, ExpressionType::kConstant);
+
+  return *this;
+}
+
+Variable& Variable::operator=(int value) {
+  expr = MakeExpression(value, ExpressionType::kConstant);
+
+  return *this;
+}
+
+Variable& Variable::SetValue(double value) {
   if (expr == Zero()) {
     expr = MakeExpression(value);
   } else {
@@ -31,7 +45,7 @@ Variable& Variable::operator=(double value) {
   return *this;
 }
 
-Variable& Variable::operator=(int value) {
+Variable& Variable::SetValue(int value) {
   if (expr == Zero()) {
     expr = MakeExpression(value);
   } else {

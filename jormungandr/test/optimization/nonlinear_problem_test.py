@@ -12,7 +12,7 @@ def test_quartic():
     problem = OptimizationProblem()
 
     x = problem.decision_variable()
-    x.set(20.0)
+    x.set_value(20.0)
 
     problem.minimize(autodiff.pow(x, 4))
 
@@ -35,9 +35,9 @@ def test_rosenbrock_with_cubic_and_line_constraint():
             problem = OptimizationProblem()
 
             x = problem.decision_variable()
-            x.set(x0)
+            x.set_value(x0)
             y = problem.decision_variable()
-            y.set(y0)
+            y.set_value(y0)
 
             problem.minimize(
                 autodiff.pow(1 - x, 2) + 100 * autodiff.pow(y - autodiff.pow(x, 2), 2)
@@ -66,9 +66,9 @@ def test_rosenbrock_with_disk_constraint():
             problem = OptimizationProblem()
 
             x = problem.decision_variable()
-            x.set(x0)
+            x.set_value(x0)
             y = problem.decision_variable()
-            y.set(y0)
+            y.set_value(y0)
 
             problem.minimize(
                 autodiff.pow(1 - x, 2) + 100 * autodiff.pow(y - autodiff.pow(x, 2), 2)

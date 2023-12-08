@@ -50,6 +50,8 @@ void BindVariable(py::module_& autodiff, py::module_& optimization) {
   variable.def(py::init<int>());
   variable.def("set", py::overload_cast<double>(&Variable::operator=));
   variable.def("set", py::overload_cast<int>(&Variable::operator=));
+  variable.def("set_value", py::overload_cast<double>(&Variable::SetValue));
+  variable.def("set_value", py::overload_cast<int>(&Variable::SetValue));
   variable.def(double() * py::self);
   variable.def(py::self * double());
   variable.def(py::self * py::self);
@@ -96,7 +98,6 @@ void BindVariable(py::module_& autodiff, py::module_& optimization) {
   variable.def(double() > py::self);
   variable.def(double() >= py::self);
 
-  autodiff.def("constant", &Constant);
   autodiff.def("abs", static_cast<Variable (*)(double)>(&abs));
   autodiff.def("abs", static_cast<Variable (*)(const Variable&)>(&abs));
   autodiff.def("acos", static_cast<Variable (*)(double)>(&acos));

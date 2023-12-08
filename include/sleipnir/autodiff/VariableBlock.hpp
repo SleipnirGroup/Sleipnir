@@ -3,6 +3,7 @@
 #pragma once
 
 #include <cassert>
+#include <concepts>
 #include <type_traits>
 #include <utility>
 
@@ -54,7 +55,20 @@ class VariableBlock {
   VariableBlock<Mat>& operator=(double value) {
     assert(Rows() == 1 && Cols() == 1);
 
-    (*this)(0, 0) = value;
+    (*this)(0, 0) = Constant(value);
+
+    return *this;
+  }
+
+  /**
+   * Assigns a double to the block.
+   *
+   * This only works for blocks with one row and one column.
+   */
+  VariableBlock<Mat>& SetValue(double value) {
+    assert(Rows() == 1 && Cols() == 1);
+
+    (*this)(0, 0).SetValue(value);
 
     return *this;
   }
@@ -108,7 +122,30 @@ class VariableBlock {
 
     for (int row = 0; row < Rows(); ++row) {
       for (int col = 0; col < Cols(); ++col) {
-        (*this)(row, col) = values(row, col);
+        if constexpr (std::same_as<typename Derived::Scalar, double>) {
+          (*this)(row, col) = Variable{
+              MakeExpression(values(row, col), ExpressionType::kConstant)};
+        } else {
+          (*this)(row, col) = values(row, col);
+        }
+      }
+    }
+
+    return *this;
+  }
+
+  /**
+   * Sets block's internal values.
+   */
+  template <typename Derived>
+    requires std::same_as<typename Derived::Scalar, double>
+  VariableBlock<Mat>& SetValues(const Eigen::MatrixBase<Derived>& values) {
+    assert(Rows() == values.rows());
+    assert(Cols() == values.cols());
+
+    for (int row = 0; row < Rows(); ++row) {
+      for (int col = 0; col < Cols(); ++col) {
+        (*this)(row, col).SetValue(values(row, col));
       }
     }
 

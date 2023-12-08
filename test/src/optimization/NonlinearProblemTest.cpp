@@ -21,7 +21,7 @@ TEST(NonlinearProblemTest, Quartic) {
   sleipnir::OptimizationProblem problem;
 
   auto x = problem.DecisionVariable();
-  x = 20.0;
+  x.SetValue(20.0);
 
   problem.Minimize(sleipnir::pow(x, 4));
 
@@ -44,9 +44,9 @@ TEST(NonlinearProblemTest, RosenbrockWithCubicAndLineConstraint) {
       sleipnir::OptimizationProblem problem;
 
       auto x = problem.DecisionVariable();
-      x = x0;
+      x.SetValue(x0);
       auto y = problem.DecisionVariable();
-      y = y0;
+      y.SetValue(y0);
 
       problem.Minimize(sleipnir::pow(1 - x, 2) +
                        100 * sleipnir::pow(y - sleipnir::pow(x, 2), 2));
@@ -85,9 +85,9 @@ TEST(NonlinearProblemTest, RosenbrockWithDiskConstraint) {
       sleipnir::OptimizationProblem problem;
 
       auto x = problem.DecisionVariable();
-      x = x0;
+      x.SetValue(x0);
       auto y = problem.DecisionVariable();
-      y = y0;
+      y.SetValue(y0);
 
       problem.Minimize(sleipnir::pow(1 - x, 2) +
                        100 * sleipnir::pow(y - sleipnir::pow(x, 2), 2));

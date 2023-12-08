@@ -7,7 +7,7 @@
 TEST(HessianTest, Linear) {
   // y = x
   sleipnir::VectorXvar x{1};
-  x(0) = 3;
+  x(0).SetValue(3);
   sleipnir::Variable y = x(0);
 
   // dy/dx = 1
@@ -25,7 +25,7 @@ TEST(HessianTest, Quadratic) {
   // y = x²
   // y = x * x
   sleipnir::VectorXvar x{1};
-  x(0) = 3;
+  x(0).SetValue(3);
   sleipnir::Variable y = x(0) * x(0);
 
   // dy/dx = x (rhs) + x (lhs)
@@ -46,11 +46,11 @@ TEST(HessianTest, Sum) {
   Eigen::VectorXd g;
   Eigen::MatrixXd H;
   sleipnir::VectorXvar x{5};
-  x(0) = 1;
-  x(1) = 2;
-  x(2) = 3;
-  x(3) = 4;
-  x(4) = 5;
+  x(0).SetValue(1);
+  x(1).SetValue(2);
+  x(2).SetValue(3);
+  x(3).SetValue(4);
+  x(4).SetValue(5);
 
   // y = sum(x)
   y = x.sum();
@@ -74,13 +74,13 @@ TEST(HessianTest, SumOfProducts) {
   Eigen::VectorXd g;
   Eigen::MatrixXd H;
   sleipnir::VectorXvar x{5};
-  x(0) = 1;
-  x(1) = 2;
-  x(2) = 3;
-  x(3) = 4;
-  x(4) = 5;
+  x(0).SetValue(1);
+  x(1).SetValue(2);
+  x(2).SetValue(3);
+  x(3).SetValue(4);
+  x(4).SetValue(5);
 
-  // y = ||x||^2
+  // y = ||x||²
   y = x.cwiseProduct(x).sum();
   g = sleipnir::Gradient{y, x}.Calculate();
 
@@ -106,11 +106,11 @@ TEST(HessianTest, ProductOfSines) {
   Eigen::VectorXd g;
   Eigen::MatrixXd H;
   sleipnir::VectorXvar x{5};
-  x(0) = 1;
-  x(1) = 2;
-  x(2) = 3;
-  x(3) = 4;
-  x(4) = 5;
+  x(0).SetValue(1);
+  x(1).SetValue(2);
+  x(2).SetValue(3);
+  x(3).SetValue(4);
+  x(4).SetValue(5);
 
   // y = prod(sin(x))
   y = x.array().sin().prod();
@@ -144,11 +144,11 @@ TEST(HessianTest, SumOfSquaredResiduals) {
   Eigen::VectorXd g;
   Eigen::MatrixXd H;
   sleipnir::VectorXvar x{5};
-  x(0) = 1;
-  x(1) = 1;
-  x(2) = 1;
-  x(3) = 1;
-  x(4) = 1;
+  x(0).SetValue(1);
+  x(1).SetValue(1);
+  x(2).SetValue(1);
+  x(3).SetValue(1);
+  x(4).SetValue(1);
 
   // y = sum(diff(x).^2)
   y = (x.head(4) - x.tail(4)).array().square().sum();
@@ -190,8 +190,16 @@ TEST(HessianTest, SumOfSquaredResiduals) {
 }
 
 TEST(HessianTest, SumOfSquares) {
-  sleipnir::VectorXvar r{{25.0, 10.0, 5.0, 0.0}};
-  sleipnir::VectorXvar x{{0.0, 0.0, 0.0, 0.0}};
+  sleipnir::VectorXvar r{4};
+  r(0).SetValue(25.0);
+  r(1).SetValue(10.0);
+  r(2).SetValue(5.0);
+  r(3).SetValue(0.0);
+  sleipnir::VectorXvar x{4};
+  x(0).SetValue(0.0);
+  x(1).SetValue(0.0);
+  x(2).SetValue(0.0);
+  x(3).SetValue(0.0);
 
   sleipnir::Variable J = 0.0;
   for (int i = 0; i < 4; ++i) {
@@ -215,7 +223,7 @@ TEST(HessianTest, Reuse) {
   sleipnir::VectorXvar x{1};
 
   // y = x³
-  x(0) = 1;
+  x(0).SetValue(1);
   y = x(0) * x(0) * x(0);
 
   sleipnir::Hessian hessian{y, x};
@@ -228,7 +236,7 @@ TEST(HessianTest, Reuse) {
   EXPECT_EQ(1, H.cols());
   EXPECT_DOUBLE_EQ(6.0, H(0, 0));
 
-  x(0) = 2;
+  x(0).SetValue(2);
   // d²y/dx² = 6x
   // H = 12
   H = hessian.Calculate();

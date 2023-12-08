@@ -11,7 +11,7 @@ void SetAD(std::vector<Variable>& dest,
   assert(dest.size() == static_cast<size_t>(src.rows()));
 
   for (size_t row = 0; row < dest.size(); ++row) {
-    dest[row] = src(row);
+    dest[row].SetValue(src(row));
   }
 }
 
@@ -20,7 +20,7 @@ void SetAD(Eigen::Ref<VectorXvar> dest,
   assert(dest.rows() == src.rows());
 
   for (int row = 0; row < dest.rows(); ++row) {
-    dest(row) = src(row);
+    dest(row).SetValue(src(row));
   }
 }
 
