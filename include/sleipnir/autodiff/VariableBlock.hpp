@@ -469,6 +469,102 @@ class VariableBlock {
     return result;
   }
 
+  class iterator {
+   public:
+    using iterator_category = std::forward_iterator_tag;
+    using value_type = Variable;
+    using difference_type = std::ptrdiff_t;
+    using pointer = Variable*;
+    using reference = Variable&;
+
+    iterator(VariableBlock<Mat>* mat, int row, int col)
+        : m_mat{mat}, m_row{row}, m_col{col} {}
+
+    iterator& operator++() {
+      ++m_col;
+      if (m_col == m_mat->Cols()) {
+        m_col = 0;
+        ++m_row;
+      }
+      return *this;
+    }
+    iterator operator++(int) {
+      iterator retval = *this;
+      ++(*this);
+      return retval;
+    }
+    bool operator==(const iterator&) const = default;
+    reference operator*() { return (*m_mat)(m_row, m_col); }
+
+   private:
+    VariableBlock<Mat>* m_mat;
+    int m_row;
+    int m_col;
+  };
+
+  class const_iterator {
+   public:
+    using iterator_category = std::forward_iterator_tag;
+    using value_type = Variable;
+    using difference_type = std::ptrdiff_t;
+    using pointer = Variable*;
+    using const_reference = const Variable&;
+
+    const_iterator(const VariableBlock<Mat>* mat, int row, int col)
+        : m_mat{mat}, m_row{row}, m_col{col} {}
+
+    const_iterator& operator++() {
+      ++m_col;
+      if (m_col == m_mat->Cols()) {
+        m_col = 0;
+        ++m_row;
+      }
+      return *this;
+    }
+    const_iterator operator++(int) {
+      const_iterator retval = *this;
+      ++(*this);
+      return retval;
+    }
+    bool operator==(const const_iterator&) const = default;
+    const_reference operator*() const { return (*m_mat)(m_row, m_col); }
+
+   private:
+    const VariableBlock<Mat>* m_mat;
+    int m_row;
+    int m_col;
+  };
+
+  /**
+   * Returns begin iterator.
+   */
+  iterator begin() { return iterator(this, 0, 0); }
+
+  /**
+   * Returns end iterator.
+   */
+  iterator end() { return iterator(this, Rows(), 0); }
+
+  /**
+   * Returns begin iterator.
+   */
+  const_iterator begin() const { return const_iterator(this, 0, 0); }
+
+  /**
+   * Returns end iterator.
+   */
+  const_iterator end() const { return const_iterator(this, Rows(), 0); }
+
+  /**
+   * Returns begin iterator.
+   */
+  const_iterator cbegin() const { return const_iterator(this, 0, 0); }
+
+  /**
+   * Returns end iterator.
+   */
+  const_iterator cend() const { return const_iterator(this, Rows(), 0); }
+
  private:
   Mat* m_mat = nullptr;
   int m_rowOffset = 0;
