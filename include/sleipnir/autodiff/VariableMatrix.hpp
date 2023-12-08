@@ -67,12 +67,12 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
   VariableMatrix& SetValue(int value);
 
   /**
-   * Constructs a scalar VariableMatrix from a nested list of constants.
+   * Constructs a scalar VariableMatrix from a nested list of Variables.
    *
-   * @param list The nested list of constants.
+   * @param list The nested list of Variables.
    */
   VariableMatrix(
-      std::initializer_list<std::initializer_list<double>> list);  // NOLINT
+      std::initializer_list<std::initializer_list<Variable>> list);  // NOLINT
 
   /**
    * Constructs a VariableMatrix from an Eigen matrix.

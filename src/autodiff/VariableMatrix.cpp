@@ -56,7 +56,7 @@ VariableMatrix& VariableMatrix::SetValue(int value) {
 }
 
 VariableMatrix::VariableMatrix(
-    std::initializer_list<std::initializer_list<double>> list) {
+    std::initializer_list<std::initializer_list<Variable>> list) {
   // Get row and column counts for destination matrix
   m_rows = list.size();
   m_cols = 0;
@@ -72,7 +72,7 @@ VariableMatrix::VariableMatrix(
   m_storage.reserve(Rows() * Cols());
   for (const auto& row : list) {
     for (const auto& elem : row) {
-      m_storage.emplace_back(MakeExpression(elem, ExpressionType::kConstant));
+      m_storage.emplace_back(elem);
     }
   }
 }
