@@ -54,6 +54,11 @@ void BindVariableMatrices(py::module_& autodiff) {
   autodiff.def("hypot",
                static_cast<VariableMatrix (*)(const VariableMatrix&,
                                               const VariableMatrix&)>(&hypot));
+  autodiff.def(
+      "hypot",
+      static_cast<VariableMatrix (*)(
+          const VariableMatrix&, const VariableMatrix&, const VariableMatrix&)>(
+          &hypot));
   autodiff.def("log",
                static_cast<VariableMatrix (*)(const VariableMatrix&)>(&log));
   autodiff.def("log10",

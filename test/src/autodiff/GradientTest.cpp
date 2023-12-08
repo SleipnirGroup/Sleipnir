@@ -369,6 +369,23 @@ TEST(GradientTest, Hypot) {
       sleipnir::Gradient(sleipnir::hypot(2.0 * x, 3.0 * y), y)
           .Calculate()
           .coeff(0));
+
+  // Testing hypot function on (var, var, var)
+  x.SetValue(1.3);
+  y.SetValue(2.3);
+  sleipnir::Variable z;
+  z.SetValue(3.3);
+  EXPECT_DOUBLE_EQ(std::hypot(x.Value(), y.Value(), z.Value()),
+                   sleipnir::hypot(x, y, z).Value());
+  EXPECT_DOUBLE_EQ(
+      (x / std::hypot(x.Value(), y.Value(), z.Value())).Value(),
+      sleipnir::Gradient(sleipnir::hypot(x, y, z), x).Calculate().coeff(0));
+  EXPECT_DOUBLE_EQ(
+      (y / std::hypot(x.Value(), y.Value(), z.Value())).Value(),
+      sleipnir::Gradient(sleipnir::hypot(x, y, z), y).Calculate().coeff(0));
+  EXPECT_DOUBLE_EQ(
+      (z / std::hypot(x.Value(), y.Value(), z.Value())).Value(),
+      sleipnir::Gradient(sleipnir::hypot(x, y, z), z).Calculate().coeff(0));
 }
 
 TEST(GradientTest, Miscellaneous) {

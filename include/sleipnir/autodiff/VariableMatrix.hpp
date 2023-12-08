@@ -696,6 +696,19 @@ SLEIPNIR_DLLEXPORT VariableMatrix hypot(const VariableMatrix& x,
                                         const VariableMatrix& y);
 
 /**
+ * std::hypot() for VariableMatrices.
+ *
+ * The function is applied element-wise to the arguments.
+ *
+ * @param x The x argument.
+ * @param y The y argument.
+ * @param z The z argument.
+ */
+SLEIPNIR_DLLEXPORT VariableMatrix hypot(const VariableMatrix& x,
+                                        const VariableMatrix& y,
+                                        const VariableMatrix& z);
+
+/**
  * std::log() for VariableMatrices.
  *
  * The function is applied element-wise to the argument.

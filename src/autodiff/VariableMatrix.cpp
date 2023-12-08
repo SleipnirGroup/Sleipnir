@@ -569,6 +569,19 @@ VariableMatrix hypot(const VariableMatrix& x, const VariableMatrix& y) {
   return result;
 }
 
+VariableMatrix hypot(const VariableMatrix& x, const VariableMatrix& y,
+                     const VariableMatrix& z) {
+  VariableMatrix result{x.Rows(), x.Cols()};
+
+  for (int row = 0; row < result.Rows(); ++row) {
+    for (int col = 0; col < result.Cols(); ++col) {
+      result(row, col) = sleipnir::hypot(x(row, col), y(row, col), z(row, col));
+    }
+  }
+
+  return result;
+}
+
 VariableMatrix log(const VariableMatrix& x) {
   VariableMatrix result{x.Rows(), x.Cols()};
 

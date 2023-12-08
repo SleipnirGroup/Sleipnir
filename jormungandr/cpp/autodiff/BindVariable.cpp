@@ -128,6 +128,9 @@ void BindVariable(py::module_& autodiff, py::module_& optimization) {
   autodiff.def(
       "hypot",
       static_cast<Variable (*)(const Variable&, const Variable&)>(&hypot));
+  autodiff.def("hypot",
+               static_cast<Variable (*)(const Variable&, const Variable&,
+                                        const Variable&)>(&hypot));
   autodiff.def("log", static_cast<Variable (*)(double)>(&log));
   autodiff.def("log", static_cast<Variable (*)(const Variable&)>(&log));
   autodiff.def("log10", static_cast<Variable (*)(double)>(&log10));

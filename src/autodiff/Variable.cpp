@@ -262,6 +262,11 @@ Variable hypot(const Variable& x, const Variable& y) {
   return Variable{sleipnir::hypot(x.expr, y.expr)};
 }
 
+Variable hypot(const Variable& x, const Variable& y, const Variable& z) {
+  return Variable{sleipnir::sqrt(sleipnir::pow(x, 2) + sleipnir::pow(y, 2) +
+                                 sleipnir::pow(z, 2))};
+}
+
 Variable log(double x) {
   return sleipnir::log(Constant(x));
 }
