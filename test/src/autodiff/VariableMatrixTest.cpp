@@ -1,5 +1,7 @@
 // Copyright (c) Sleipnir contributors
 
+#include <functional>
+
 #include <Eigen/Core>
 #include <gtest/gtest.h>
 #include <sleipnir/autodiff/VariableMatrix.hpp>
@@ -29,6 +31,16 @@ TEST(VariableMatrixTest, AssignmentToDefault) {
   EXPECT_EQ(2.0, mat(0, 1));
   EXPECT_EQ(3.0, mat(1, 0));
   EXPECT_EQ(4.0, mat(1, 1));
+}
+
+TEST(VariableMatrixTest, CwiseReduce) {
+  sleipnir::VariableMatrix A{{2.0, 3.0, 4.0}, {5.0, 6.0, 7.0}};
+  sleipnir::VariableMatrix B{{8.0, 9.0, 10.0}, {11.0, 12.0, 13.0}};
+  sleipnir::VariableMatrix result =
+      sleipnir::CwiseReduce(A, B, std::multiplies<>{});
+
+  Eigen::Matrix<double, 2, 3> expected{{16.0, 27.0, 40.0}, {55.0, 72.0, 91.0}};
+  EXPECT_EQ(expected, result.Value());
 }
 
 TEST(VariableMatrixTest, BlockFreeFunction) {
