@@ -31,7 +31,7 @@ TEST(VariableMatrixTest, AssignmentToDefault) {
   EXPECT_EQ(4.0, mat(1, 1));
 }
 
-TEST(VariableMatrixTest, BlockMatrix) {
+TEST(VariableMatrixTest, BlockFreeFunction) {
   sleipnir::VariableMatrix A =
       Eigen::Matrix<double, 2, 3>{{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}};
   sleipnir::VariableMatrix B = Eigen::Matrix<double, 2, 1>{{7.0}, {8.0}};
