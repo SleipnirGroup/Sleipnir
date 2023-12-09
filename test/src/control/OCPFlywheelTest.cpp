@@ -40,12 +40,13 @@ void TestFlywheel(std::string testName, Eigen::Matrix<double, 1, 1> A,
   Eigen::Matrix<double, 1, 1> B_discrete{(1.0 - A_discrete(0)) * B(0)};
   Eigen::Matrix<double, 1, 1> r{10.0};
 
-  sleipnir::OCPSolver solver(1, 1, std::chrono::duration<double>(dt.value()), N,
+  sleipnir::OCPSolver solver(1, 1, std::chrono::duration<double>{dt.value()}, N,
                              F, dynamicsType, sleipnir::TimestepMethod::kFixed,
                              method);
   solver.ConstrainInitialState(0.0);
   solver.SetUpperInputBound(12);
   solver.SetLowerInputBound(-12);
+
   // Set up objective
   Eigen::Matrix<double, 1, N + 1> r_mat =
       r * Eigen::Matrix<double, 1, N + 1>::Ones();
@@ -152,9 +153,11 @@ void TestFlywheel(std::string testName, Eigen::Matrix<double, 1, 1> A,
 TEST(OCPSolverTest, FlywheelExplicit) {
   Eigen::Matrix<double, 1, 1> A{-1.0};
   Eigen::Matrix<double, 1, 1> B{1.0};
+
   auto f_ode = [=](sleipnir::Variable t, sleipnir::VariableMatrix x,
                    sleipnir::VariableMatrix u,
                    sleipnir::Variable dt) { return A * x + B * u; };
+
   TestFlywheel("Explicit Collocation", A, B, f_ode,
                sleipnir::DynamicsType::kExplicitODE,
                sleipnir::TranscriptionMethod::kDirectCollocation);
@@ -169,13 +172,16 @@ TEST(OCPSolverTest, FlywheelExplicit) {
 TEST(OCPSolverTest, FlywheelDiscrete) {
   Eigen::Matrix<double, 1, 1> A{-1.0};
   Eigen::Matrix<double, 1, 1> B{1.0};
-  units::second_t dt = 5_ms;
+  constexpr units::second_t dt = 5_ms;
+
   Eigen::Matrix<double, 1, 1> A_discrete{std::exp(A(0) * dt.value())};
   Eigen::Matrix<double, 1, 1> B_discrete{(1.0 - A_discrete(0)) * B(0)};
+
   auto f_discrete = [=](sleipnir::Variable t, sleipnir::VariableMatrix x,
                         sleipnir::VariableMatrix u, sleipnir::Variable dt) {
     return A_discrete * x + B_discrete * u;
   };
+
   TestFlywheel("Discrete Transcription", A, B, f_discrete,
                sleipnir::DynamicsType::kDiscrete,
                sleipnir::TranscriptionMethod::kDirectTranscription);

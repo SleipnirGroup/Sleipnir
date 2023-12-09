@@ -206,7 +206,7 @@ TEST(OCPSolverTest, DISABLED_CartPoleProblem) {
   };
 
   sleipnir::OCPSolver problem(
-      4, 1, std::chrono::duration<double>(dt.value()), N, dynamicsFunction,
+      4, 1, std::chrono::duration<double>{dt.value()}, N, dynamicsFunction,
       sleipnir::DynamicsType::kExplicitODE,
       sleipnir::TimestepMethod::kVariableSingle,
       sleipnir::TranscriptionMethod::kDirectCollocation);
@@ -217,6 +217,7 @@ TEST(OCPSolverTest, DISABLED_CartPoleProblem) {
       Eigen::Matrix<double, 4, 1>{1.0, std::numbers::pi, 0.0, 0.0});
   problem.SetLowerInputBound(-u_max.value());
   problem.SetUpperInputBound(u_max.value());
+
   // x = [q, q̇]ᵀ = [x, θ, ẋ, θ̇]ᵀ
   auto X = problem.X();
 

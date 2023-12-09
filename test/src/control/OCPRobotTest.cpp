@@ -37,7 +37,7 @@ TEST(OCPSolverTest, Robot) {
   constexpr Eigen::Matrix<double, 2, 1> inputMin{{0.0, 0.0}};
 
   sleipnir::OCPSolver solverMinTime(
-      3, 2, std::chrono::duration<double>(minTimestep.value()), N,
+      3, 2, std::chrono::duration<double>{minTimestep.value()}, N,
       dynamicsFunction, sleipnir::DynamicsType::kExplicitODE,
       sleipnir::TimestepMethod::kVariableSingle,
       sleipnir::TranscriptionMethod::kDirectTranscription);
@@ -57,8 +57,8 @@ TEST(OCPSolverTest, Robot) {
   // TODO: Solver is unhappy when more than one minimum timestep is constrained.
   // Detect this in either OptimizationProblem or OCPSolver.
   solverMinTime.SetMinTimestep(
-      std::chrono::duration<double>(minTimestep.value()));
-  solverMinTime.SetMaxTimestep(std::chrono::duration<double>(3.0));
+      std::chrono::duration<double>{minTimestep.value()});
+  solverMinTime.SetMaxTimestep(std::chrono::duration<double>{3.0});
 
   // Set up objective
   solverMinTime.Minimize(solverMinTime.DT() *
