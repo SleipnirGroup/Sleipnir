@@ -373,7 +373,7 @@ inline void IntrusiveSharedPtrDecRefCount(Expression* expr) {
  * @param args Constructor arguments for Expression.
  */
 template <typename... Args>
-static IntrusiveSharedPtr<Expression> MakeExpression(Args&&... args) {
+static IntrusiveSharedPtr<Expression> MakeExpressionPtr(Args&&... args) {
   return AllocateIntrusiveShared<Expression>(GlobalPoolAllocator<Expression>(),
                                              std::forward<Args>(args)...);
 }

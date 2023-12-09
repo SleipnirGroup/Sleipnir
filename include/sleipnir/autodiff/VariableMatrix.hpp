@@ -87,7 +87,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
       for (int col = 0; col < values.cols(); ++col) {
         if constexpr (std::same_as<typename Derived::Scalar, double>) {
           m_storage.emplace_back(
-              MakeExpression(values(row, col), ExpressionType::kConstant));
+              MakeExpressionPtr(values(row, col), ExpressionType::kConstant));
         } else {
           m_storage.emplace_back(values(row, col));
         }
@@ -107,7 +107,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
       for (int col = 0; col < values.cols(); ++col) {
         if constexpr (std::same_as<typename Derived::Scalar, double>) {
           (*this)(row, col) = Variable{
-              MakeExpression(values(row, col), ExpressionType::kConstant)};
+              MakeExpressionPtr(values(row, col), ExpressionType::kConstant)};
         } else {
           (*this)(row, col) = values(row, col);
         }
