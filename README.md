@@ -163,7 +163,22 @@ The following build types can be specified via `-DCMAKE_BUILD_TYPE` during CMake
 
 Some test problems generate CSV files containing their solutions. These can be plotted with [tools/plot_test_problem_solutions.py](https://github.com/SleipnirGroup/Sleipnir/blob/main/tools/plot_test_problem_solutions.py).
 
-## Logo
+## Branding
 
-Logo: [SVG](https://github.com/SleipnirGroup/Sleipnir/tree/main/logo/sleipnir.svg), [PNG (1000px)](https://github.com/SleipnirGroup/Sleipnir/tree/main/logo/sleipnir_THcolors_1000px.png)<br>
+### Logo
+
+[SVG](https://github.com/SleipnirGroup/Sleipnir/tree/main/logo/sleipnir.svg), [PNG (1000px)](https://github.com/SleipnirGroup/Sleipnir/tree/main/logo/sleipnir_THcolors_1000px.png)<br>
 Font: [Centaur](https://en.wikipedia.org/wiki/Centaur_(typeface))
+
+### Color palette
+
+<table>
+  <tr>
+    <th>Purple</th>
+    <th>Yellow</th>
+  </tr>
+  <tr>
+    <td style="background-color: #6d3d94; color: white;">6D3D94</td>
+    <td style="background-color: #fdb813; color: white;">FDB813</td>
+  </tr>
+</table>
