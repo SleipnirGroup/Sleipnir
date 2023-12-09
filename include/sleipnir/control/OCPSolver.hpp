@@ -58,34 +58,53 @@ State RK4(F&& f, State x, Input u, Time t0, Time dt) {
  * Enum describing an OCP transcription method.
  */
 enum class TranscriptionMethod {
+  /// Each state is a decision variable constrained to the integrated dynamics
+  /// of the previous state.
   kDirectTranscription,
+  /// The trajectory is modeled as a series of cubic polynomials where the
+  /// centerpoint slope is constrained.
   kDirectCollocation,
+  /// States depend explicitly as a function of all previous states and all
+  /// previous inputs.
   kSingleShooting
 };
 
 /**
  * Enum describing a type of system dynamics constraints.
  */
-enum class DynamicsType { kExplicitODE, kDiscrete };
+enum class DynamicsType {
+  /// The dynamics are a function in the form dx/dt = f(t, x, u).
+  kExplicitODE,
+  /// The dynamics are a function in the form xₖ₊₁ = f(t, xₖ, uₖ).
+  kDiscrete
+};
 
 /**
  * Enum describing the type of system timestep.
  */
-enum class TimestepMethod { kFixed, kVariable, kVariableSingle };
+enum class TimestepMethod {
+  /// The timestep is a fixed constant.
+  kFixed,
+  /// The timesteps are allowed to vary as independent decision variables.
+  kVariable,
+  /// The timesteps are equal length but allowed to vary as a single decision
+  /// variable.
+  kVariableSingle
+};
 
 /**
  * This class allows the user to pose and solve a constrained optimal control
  * problem (OCP) in a variety of ways.
  *
- * The system is transcripted by one of three methods (direct collocation,
- * direct transcription, or single-shooting) and additional constraints can be
+ * The system is transcripted by one of three methods (direct transcription,
+ * direct collocation, or single-shooting) and additional constraints can be
  * added.
  *
- * In single-shooting, states depend explicitly as a function of all previous
- * states and all previous inputs. In direct transcription, each state is a
- * decision variable constrained to the integrated dynamics of the previous
- * state. In direct collocation, the trajectory is modeled as a series of cubic
- * polynomials where the centerpoint slope is constrained.
+ * In direct transcription, each state is a decision variable constrained to the
+ * integrated dynamics of the previous state. In direct collocation, the
+ * trajectory is modeled as a series of cubic polynomials where the centerpoint
+ * slope is constrained. In single-shooting, states depend explicitly as a
+ * function of all previous states and all previous inputs.
  *
  * Explicit ODEs are integrated using RK4.
  *
