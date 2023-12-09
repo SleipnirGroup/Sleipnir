@@ -76,6 +76,22 @@ TEST(VariableMatrixTest, Iterators) {
   }
 }
 
+TEST(VariableMatrixTest, ZeroStaticFunction) {
+  auto A = sleipnir::VariableMatrix::Zero(2, 3);
+
+  for (const auto& elem : A) {
+    EXPECT_EQ(0.0, elem.Value());
+  }
+}
+
+TEST(VariableMatrixTest, OnesStaticFunction) {
+  auto A = sleipnir::VariableMatrix::Ones(2, 3);
+
+  for (const auto& elem : A) {
+    EXPECT_EQ(1.0, elem.Value());
+  }
+}
+
 TEST(VariableMatrixTest, CwiseReduce) {
   sleipnir::VariableMatrix A{{2.0, 3.0, 4.0}, {5.0, 6.0, 7.0}};
   sleipnir::VariableMatrix B{{8.0, 9.0, 10.0}, {11.0, 12.0, 13.0}};

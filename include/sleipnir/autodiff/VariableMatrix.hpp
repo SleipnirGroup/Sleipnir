@@ -668,6 +668,22 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    */
   const_iterator cend() const { return const_iterator(this, Rows(), 0); }
 
+  /**
+   * Returns a variable matrix filled with zeroes.
+   *
+   * @param rows The number of matrix rows.
+   * @param cols The number of matrix columns.
+   */
+  static VariableMatrix Zero(int rows, int cols);
+
+  /**
+   * Returns a variable matrix filled with ones.
+   *
+   * @param rows The number of matrix rows.
+   * @param cols The number of matrix columns.
+   */
+  static VariableMatrix Ones(int rows, int cols);
+
  private:
   std::vector<Variable> m_storage;
   int m_rows = 0;
