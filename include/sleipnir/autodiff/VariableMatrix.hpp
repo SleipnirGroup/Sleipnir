@@ -408,6 +408,9 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
   template <typename Derived>
   friend VariableMatrix operator+(const Eigen::MatrixBase<Derived>& lhs,
                                   const VariableMatrix& rhs) {
+    assert(lhs.rows() == rhs.Rows());
+    assert(lhs.cols() == rhs.Cols());
+
     VariableMatrix result{static_cast<int>(lhs.rows()),
                           static_cast<int>(lhs.cols())};
 
@@ -429,6 +432,9 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
   template <typename Derived>
   friend VariableMatrix operator+(const VariableMatrix& lhs,
                                   const Eigen::MatrixBase<Derived>& rhs) {
+    assert(lhs.Rows() == rhs.rows());
+    assert(lhs.Cols() == rhs.cols());
+
     VariableMatrix result{lhs.Rows(), lhs.Cols()};
 
     for (int row = 0; row < result.Rows(); ++row) {
@@ -465,6 +471,9 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
   template <typename Derived>
   friend VariableMatrix operator-(const Eigen::MatrixBase<Derived>& lhs,
                                   const VariableMatrix& rhs) {
+    assert(lhs.rows() == rhs.Rows());
+    assert(lhs.cols() == rhs.Cols());
+
     VariableMatrix result{static_cast<int>(lhs.rows()),
                           static_cast<int>(lhs.cols())};
 
@@ -495,6 +504,9 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
   template <typename Derived>
   friend VariableMatrix operator-(const VariableMatrix& lhs,
                                   const Eigen::MatrixBase<Derived>& rhs) {
+    assert(lhs.Rows() == rhs.rows());
+    assert(lhs.Cols() == rhs.cols());
+
     VariableMatrix result{lhs.Rows(), lhs.Cols()};
 
     for (int row = 0; row < result.Rows(); ++row) {
