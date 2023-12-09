@@ -406,6 +406,26 @@ Eigen::MatrixXd VariableMatrix::Value() const {
   return result;
 }
 
+VariableMatrix VariableMatrix::Zero(int rows, int cols) {
+  VariableMatrix result{rows, cols};
+
+  for (auto& elem : result) {
+    elem = 0.0;
+  }
+
+  return result;
+}
+
+VariableMatrix VariableMatrix::Ones(int rows, int cols) {
+  VariableMatrix result{rows, cols};
+
+  for (auto& elem : result) {
+    elem = 1.0;
+  }
+
+  return result;
+}
+
 VariableMatrix Block(
     std::initializer_list<std::initializer_list<VariableMatrix>> list) {
   // Get row and column counts for destination matrix
