@@ -99,7 +99,7 @@ VectorXvar ExpressionGraph::GenerateGradientTree(Eigen::Ref<VectorXvar> wrt) {
   // Zero adjoints. The root node's adjoint is 1.0 as df/df is always 1.
   if (m_adjointList.size() > 0) {
     m_adjointList[0]->adjointExpr =
-        MakeExpression(1.0, ExpressionType::kConstant);
+        MakeExpressionPtr(1.0, ExpressionType::kConstant);
     for (auto it = m_adjointList.begin() + 1; it != m_adjointList.end(); ++it) {
       auto& node = *it;
       node->adjointExpr = Zero();
