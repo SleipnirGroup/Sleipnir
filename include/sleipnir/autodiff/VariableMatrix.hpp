@@ -859,26 +859,6 @@ SLEIPNIR_DLLEXPORT VariableMatrix log10(const VariableMatrix& x);
  * @param base The base.
  * @param power The power.
  */
-SLEIPNIR_DLLEXPORT VariableMatrix pow(double base, const VariableMatrix& power);
-
-/**
- * std::pow() for VariableMatrices.
- *
- * The function is applied element-wise to the arguments.
- *
- * @param base The base.
- * @param power The power.
- */
-SLEIPNIR_DLLEXPORT VariableMatrix pow(const VariableMatrix& base, double power);
-
-/**
- * std::pow() for VariableMatrices.
- *
- * The function is applied element-wise to the arguments.
- *
- * @param base The base.
- * @param power The power.
- */
 SLEIPNIR_DLLEXPORT VariableMatrix pow(const VariableMatrix& base,
                                       const VariableMatrix& power);
 
