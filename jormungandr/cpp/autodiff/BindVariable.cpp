@@ -98,58 +98,66 @@ void BindVariable(py::module_& autodiff, py::module_& optimization) {
   variable.def(double() > py::self);
   variable.def(double() >= py::self);
 
-  autodiff.def("abs", static_cast<Variable (*)(double)>(&abs));
+  autodiff.def("abs", [](double x) { return sleipnir::abs(Variable{x}); });
   autodiff.def("abs", static_cast<Variable (*)(const Variable&)>(&abs));
-  autodiff.def("acos", static_cast<Variable (*)(double)>(&acos));
+  autodiff.def("acos", [](double x) { return sleipnir::acos(Variable{x}); });
   autodiff.def("acos", static_cast<Variable (*)(const Variable&)>(&acos));
-  autodiff.def("asin", static_cast<Variable (*)(double)>(&asin));
+  autodiff.def("asin", [](double x) { return sleipnir::asin(Variable{x}); });
   autodiff.def("asin", static_cast<Variable (*)(const Variable&)>(&asin));
-  autodiff.def("atan", static_cast<Variable (*)(double)>(&atan));
+  autodiff.def("atan", [](double x) { return sleipnir::atan(Variable{x}); });
   autodiff.def("atan", static_cast<Variable (*)(const Variable&)>(&atan));
-  autodiff.def("atan2",
-               static_cast<Variable (*)(double, const Variable&)>(&atan2));
-  autodiff.def("atan2",
-               static_cast<Variable (*)(const Variable&, double)>(&atan2));
-  autodiff.def(
-      "atan2",
-      static_cast<Variable (*)(const Variable&, const Variable&)>(&atan2));
-  autodiff.def("cos", static_cast<Variable (*)(double)>(&cos));
+  autodiff.def("atan2", [](double y, const Variable& x) {
+    return sleipnir::atan2(y, x);
+  });
+  autodiff.def("atan2", [](const Variable& y, double x) {
+    return sleipnir::atan2(y, x);
+  });
+  autodiff.def("atan2", [](const Variable& y, const Variable& x) {
+    return sleipnir::atan2(y, x);
+  });
+  autodiff.def("cos", [](double x) { return sleipnir::cos(Variable{x}); });
   autodiff.def("cos", static_cast<Variable (*)(const Variable&)>(&cos));
-  autodiff.def("cosh", static_cast<Variable (*)(double)>(&cosh));
+  autodiff.def("cosh", [](double x) { return sleipnir::cosh(Variable{x}); });
   autodiff.def("cosh", static_cast<Variable (*)(const Variable&)>(&cosh));
-  autodiff.def("erf", static_cast<Variable (*)(double)>(&erf));
+  autodiff.def("erf", [](double x) { return sleipnir::erf(Variable{x}); });
   autodiff.def("erf", static_cast<Variable (*)(const Variable&)>(&erf));
-  autodiff.def("exp", static_cast<Variable (*)(double)>(&exp));
+  autodiff.def("exp", [](double x) { return sleipnir::exp(Variable{x}); });
   autodiff.def("exp", static_cast<Variable (*)(const Variable&)>(&exp));
-  autodiff.def("hypot",
-               static_cast<Variable (*)(double, const Variable&)>(&hypot));
-  autodiff.def("hypot",
-               static_cast<Variable (*)(const Variable&, double)>(&hypot));
+  autodiff.def("hypot", [](double x, const Variable& y) {
+    return sleipnir::hypot(x, y);
+  });
+  autodiff.def("hypot", [](const Variable& x, double y) {
+    return sleipnir::hypot(x, y);
+  });
   autodiff.def(
       "hypot",
       static_cast<Variable (*)(const Variable&, const Variable&)>(&hypot));
   autodiff.def("hypot",
                static_cast<Variable (*)(const Variable&, const Variable&,
                                         const Variable&)>(&hypot));
-  autodiff.def("log", static_cast<Variable (*)(double)>(&log));
+  autodiff.def("log", [](double x) { return sleipnir::log(Variable{x}); });
   autodiff.def("log", static_cast<Variable (*)(const Variable&)>(&log));
-  autodiff.def("log10", static_cast<Variable (*)(double)>(&log10));
+  autodiff.def("log10", [](double x) { return sleipnir::log10(Variable{x}); });
   autodiff.def("log10", static_cast<Variable (*)(const Variable&)>(&log10));
-  autodiff.def("pow", static_cast<Variable (*)(double, const Variable&)>(&pow));
-  autodiff.def("pow", static_cast<Variable (*)(const Variable&, double)>(&pow));
+  autodiff.def("pow", [](double base, const Variable& power) {
+    return sleipnir::pow(base, power);
+  });
+  autodiff.def("pow", [](const Variable& base, double power) {
+    return sleipnir::pow(base, power);
+  });
   autodiff.def(
       "pow", static_cast<Variable (*)(const Variable&, const Variable&)>(&pow));
-  autodiff.def("sign", static_cast<Variable (*)(double)>(&sign));
+  autodiff.def("sign", [](double x) { return sleipnir::sign(Variable{x}); });
   autodiff.def("sign", static_cast<Variable (*)(const Variable&)>(&sign));
-  autodiff.def("sin", static_cast<Variable (*)(double)>(&sin));
+  autodiff.def("sin", [](double x) { return sleipnir::sin(Variable{x}); });
   autodiff.def("sin", static_cast<Variable (*)(const Variable&)>(&sin));
-  autodiff.def("sinh", static_cast<Variable (*)(double)>(&sinh));
+  autodiff.def("sinh", [](double x) { return sleipnir::sinh(Variable{x}); });
   autodiff.def("sinh", static_cast<Variable (*)(const Variable&)>(&sinh));
-  autodiff.def("sqrt", static_cast<Variable (*)(double)>(&sqrt));
+  autodiff.def("sqrt", [](double x) { return sleipnir::sqrt(Variable{x}); });
   autodiff.def("sqrt", static_cast<Variable (*)(const Variable&)>(&sqrt));
-  autodiff.def("tan", static_cast<Variable (*)(double)>(&tan));
+  autodiff.def("tan", [](double x) { return sleipnir::tan(Variable{x}); });
   autodiff.def("tan", static_cast<Variable (*)(const Variable&)>(&tan));
-  autodiff.def("tanh", static_cast<Variable (*)(double)>(&tanh));
+  autodiff.def("tanh", [](double x) { return sleipnir::tanh(Variable{x}); });
   autodiff.def("tanh", static_cast<Variable (*)(const Variable&)>(&tanh));
 
   // FIXME: Eigen::SparseVector<double> isn't wrapped correctly by pybind11

@@ -291,21 +291,7 @@ using MapVectorXvar = Eigen::Map<VectorXvar>;
  *
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT Variable abs(double x);
-
-/**
- * std::abs() for Variables.
- *
- * @param x The argument.
- */
 SLEIPNIR_DLLEXPORT Variable abs(const Variable& x);
-
-/**
- * std::acos() for Variables.
- *
- * @param x The argument.
- */
-SLEIPNIR_DLLEXPORT Variable acos(double x);
 
 /**
  * std::acos() for Variables.
@@ -319,21 +305,7 @@ SLEIPNIR_DLLEXPORT Variable acos(const Variable& x);
  *
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT Variable asin(double x);
-
-/**
- * std::asin() for Variables.
- *
- * @param x The argument.
- */
 SLEIPNIR_DLLEXPORT Variable asin(const Variable& x);
-
-/**
- * std::atan() for Variables.
- *
- * @param x The argument.
- */
-SLEIPNIR_DLLEXPORT Variable atan(double x);
 
 /**
  * std::atan() for Variables.
@@ -348,30 +320,7 @@ SLEIPNIR_DLLEXPORT Variable atan(const Variable& x);
  * @param y The y argument.
  * @param x The x argument.
  */
-SLEIPNIR_DLLEXPORT Variable atan2(double y, const Variable& x);
-
-/**
- * std::atan2() for Variables.
- *
- * @param y The y argument.
- * @param x The x argument.
- */
-SLEIPNIR_DLLEXPORT Variable atan2(const Variable& y, double x);
-
-/**
- * std::atan2() for Variables.
- *
- * @param y The y argument.
- * @param x The x argument.
- */
 SLEIPNIR_DLLEXPORT Variable atan2(const Variable& y, const Variable& x);
-
-/**
- * std::cos() for Variables.
- *
- * @param x The argument.
- */
-SLEIPNIR_DLLEXPORT Variable cos(double x);
 
 /**
  * std::cos() for Variables.
@@ -385,21 +334,7 @@ SLEIPNIR_DLLEXPORT Variable cos(const Variable& x);
  *
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT Variable cosh(double x);
-
-/**
- * std::cosh() for Variables.
- *
- * @param x The argument.
- */
 SLEIPNIR_DLLEXPORT Variable cosh(const Variable& x);
-
-/**
- * std::erf() for Variables.
- *
- * @param x The argument.
- */
-SLEIPNIR_DLLEXPORT Variable erf(double x);
 
 /**
  * std::erf() for Variables.
@@ -413,30 +348,7 @@ SLEIPNIR_DLLEXPORT Variable erf(const Variable& x);
  *
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT Variable exp(double x);
-
-/**
- * std::exp() for Variables.
- *
- * @param x The argument.
- */
 SLEIPNIR_DLLEXPORT Variable exp(const Variable& x);
-
-/**
- * std::hypot() for Variables.
- *
- * @param x The x argument.
- * @param y The y argument.
- */
-SLEIPNIR_DLLEXPORT Variable hypot(double x, const Variable& y);
-
-/**
- * std::hypot() for Variables.
- *
- * @param x The x argument.
- * @param y The y argument.
- */
-SLEIPNIR_DLLEXPORT Variable hypot(const Variable& x, double y);
 
 /**
  * std::hypot() for Variables.
@@ -461,21 +373,7 @@ SLEIPNIR_DLLEXPORT Variable hypot(const Variable& x, const Variable& y,
  *
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT Variable log(double x);
-
-/**
- * std::log() for Variables.
- *
- * @param x The argument.
- */
 SLEIPNIR_DLLEXPORT Variable log(const Variable& x);
-
-/**
- * std::log10() for Variables.
- *
- * @param x The argument.
- */
-SLEIPNIR_DLLEXPORT Variable log10(double x);
 
 /**
  * std::log10() for Variables.
@@ -490,30 +388,7 @@ SLEIPNIR_DLLEXPORT Variable log10(const Variable& x);
  * @param base The base.
  * @param power The power.
  */
-SLEIPNIR_DLLEXPORT Variable pow(double base, const Variable& power);
-
-/**
- * std::pow() for Variables.
- *
- * @param base The base.
- * @param power The power.
- */
-SLEIPNIR_DLLEXPORT Variable pow(const Variable& base, double power);
-
-/**
- * std::pow() for Variables.
- *
- * @param base The base.
- * @param power The power.
- */
 SLEIPNIR_DLLEXPORT Variable pow(const Variable& base, const Variable& power);
-
-/**
- * sign() for Variables.
- *
- * @param x The argument.
- */
-SLEIPNIR_DLLEXPORT Variable sign(double x);
 
 /**
  * sign() for Variables.
@@ -527,21 +402,7 @@ SLEIPNIR_DLLEXPORT Variable sign(const Variable& x);
  *
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT Variable sin(double x);
-
-/**
- * std::sin() for Variables.
- *
- * @param x The argument.
- */
 SLEIPNIR_DLLEXPORT Variable sin(const Variable& x);
-
-/**
- * std::sinh() for Variables.
- *
- * @param x The argument.
- */
-SLEIPNIR_DLLEXPORT Variable sinh(double x);
 
 /**
  * std::sinh() for Variables.
@@ -555,13 +416,6 @@ SLEIPNIR_DLLEXPORT Variable sinh(const Variable& x);
  *
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT Variable sqrt(double x);
-
-/**
- * std::sqrt() for Variables.
- *
- * @param x The argument.
- */
 SLEIPNIR_DLLEXPORT Variable sqrt(const Variable& x);
 
 /**
@@ -569,21 +423,7 @@ SLEIPNIR_DLLEXPORT Variable sqrt(const Variable& x);
  *
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT Variable tan(double x);
-
-/**
- * std::tan() for Variables.
- *
- * @param x The argument.
- */
 SLEIPNIR_DLLEXPORT Variable tan(const Variable& x);
-
-/**
- * std::tanh() for Variables.
- *
- * @param x The argument.
- */
-SLEIPNIR_DLLEXPORT Variable tanh(double x);
 
 /**
  * std::tanh() for Variables.

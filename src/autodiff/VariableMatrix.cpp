@@ -626,30 +626,6 @@ VariableMatrix log10(const VariableMatrix& x) {
   return result;
 }
 
-VariableMatrix pow(double base, const VariableMatrix& power) {
-  VariableMatrix result{power.Rows(), power.Cols()};
-
-  for (int row = 0; row < result.Rows(); ++row) {
-    for (int col = 0; col < result.Cols(); ++col) {
-      result(row, col) = sleipnir::pow(base, power(row, col));
-    }
-  }
-
-  return result;
-}
-
-VariableMatrix pow(const VariableMatrix& base, double power) {
-  VariableMatrix result{base.Rows(), base.Cols()};
-
-  for (int row = 0; row < result.Rows(); ++row) {
-    for (int col = 0; col < result.Cols(); ++col) {
-      result(row, col) = sleipnir::pow(base(row, col), power);
-    }
-  }
-
-  return result;
-}
-
 VariableMatrix pow(const VariableMatrix& base, const VariableMatrix& power) {
   VariableMatrix result{base.Rows(), base.Cols()};
 
