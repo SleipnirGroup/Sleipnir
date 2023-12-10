@@ -26,7 +26,7 @@ VariableMatrix::VariableMatrix(int value) : m_rows{1}, m_cols{1} {
 VariableMatrix& VariableMatrix::operator=(double value) {
   assert(Rows() == 1 && Cols() == 1);
 
-  (*this)(0, 0) = Constant(value);
+  (*this)(0, 0) = value;
 
   return *this;
 }
@@ -34,7 +34,7 @@ VariableMatrix& VariableMatrix::operator=(double value) {
 VariableMatrix& VariableMatrix::operator=(int value) {
   assert(Rows() == 1 && Cols() == 1);
 
-  (*this)(0, 0) = Constant(value);
+  (*this)(0, 0) = value;
 
   return *this;
 }
@@ -211,7 +211,7 @@ VariableMatrix operator*(const VariableMatrix& lhs, const Variable& rhs) {
 }
 
 VariableMatrix operator*(const VariableMatrix& lhs, double rhs) {
-  return lhs * Constant(rhs);
+  return lhs * Variable{rhs};
 }
 
 VariableMatrix operator*(const Variable& lhs, const VariableMatrix& rhs) {
@@ -227,7 +227,7 @@ VariableMatrix operator*(const Variable& lhs, const VariableMatrix& rhs) {
 }
 
 VariableMatrix operator*(double lhs, const VariableMatrix& rhs) {
-  return Constant(lhs) * rhs;
+  return Variable{lhs} * rhs;
 }
 
 VariableMatrix& VariableMatrix::operator*=(const VariableMatrix& rhs) {
@@ -249,7 +249,7 @@ VariableMatrix& VariableMatrix::operator*=(const VariableMatrix& rhs) {
 VariableMatrix& VariableMatrix::operator*=(double rhs) {
   for (int row = 0; row < Rows(); ++row) {
     for (int col = 0; col < Cols(); ++col) {
-      (*this)(row, col) *= Constant(rhs);
+      (*this)(row, col) *= rhs;
     }
   }
 
@@ -275,7 +275,7 @@ VariableMatrix operator/(const VariableMatrix& lhs, double rhs) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result(row, col) = lhs(row, col) / Constant(rhs);
+      result(row, col) = lhs(row, col) / rhs;
     }
   }
 
@@ -295,7 +295,7 @@ VariableMatrix& VariableMatrix::operator/=(const VariableMatrix& rhs) {
 VariableMatrix& VariableMatrix::operator/=(double rhs) {
   for (int row = 0; row < Rows(); ++row) {
     for (int col = 0; col < Cols(); ++col) {
-      (*this)(row, col) /= Constant(rhs);
+      (*this)(row, col) /= rhs;
     }
   }
 
@@ -631,7 +631,7 @@ VariableMatrix pow(double base, const VariableMatrix& power) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result(row, col) = sleipnir::pow(Constant(base), power(row, col));
+      result(row, col) = sleipnir::pow(base, power(row, col));
     }
   }
 
@@ -643,7 +643,7 @@ VariableMatrix pow(const VariableMatrix& base, double power) {
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result(row, col) = sleipnir::pow(base(row, col), Constant(power));
+      result(row, col) = sleipnir::pow(base(row, col), power);
     }
   }
 

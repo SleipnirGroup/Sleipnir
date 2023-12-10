@@ -287,13 +287,6 @@ using VectorXvar = Eigen::Vector<Variable, Eigen::Dynamic>;
 using MapVectorXvar = Eigen::Map<VectorXvar>;
 
 /**
- * Returns a Variable representing a constant.
- *
- * @param x The constant.
- */
-SLEIPNIR_DLLEXPORT Variable Constant(double x);
-
-/**
  * std::abs() for Variables.
  *
  * @param x The argument.

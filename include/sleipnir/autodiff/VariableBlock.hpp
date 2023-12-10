@@ -55,7 +55,7 @@ class VariableBlock {
   VariableBlock<Mat>& operator=(double value) {
     assert(Rows() == 1 && Cols() == 1);
 
-    (*this)(0, 0) = Constant(value);
+    (*this)(0, 0) = value;
 
     return *this;
   }
@@ -334,7 +334,7 @@ class VariableBlock {
   VariableBlock& operator*=(double rhs) {
     for (int row = 0; row < Rows(); ++row) {
       for (int col = 0; col < Cols(); ++col) {
-        (*this)(row, col) *= Constant(rhs);
+        (*this)(row, col) *= rhs;
       }
     }
 
@@ -368,7 +368,7 @@ class VariableBlock {
   VariableBlock<Mat>& operator/=(double rhs) {
     for (int row = 0; row < Rows(); ++row) {
       for (int col = 0; col < Cols(); ++col) {
-        (*this)(row, col) /= Constant(rhs);
+        (*this)(row, col) /= rhs;
       }
     }
 

@@ -170,12 +170,8 @@ void Variable::Update() {
   }
 }
 
-Variable Constant(double x) {
-  return Variable{MakeExpressionPtr(x, ExpressionType::kConstant)};
-}
-
 Variable abs(double x) {
-  return sleipnir::abs(Constant(x));
+  return sleipnir::abs(Variable{x});
 }
 
 Variable abs(const Variable& x) {
@@ -183,7 +179,7 @@ Variable abs(const Variable& x) {
 }
 
 Variable acos(double x) {
-  return sleipnir::acos(Constant(x));
+  return sleipnir::acos(Variable{x});
 }
 
 Variable acos(const Variable& x) {
@@ -191,7 +187,7 @@ Variable acos(const Variable& x) {
 }
 
 Variable asin(double x) {
-  return sleipnir::asin(Constant(x));
+  return sleipnir::asin(Variable{x});
 }
 
 Variable asin(const Variable& x) {
@@ -199,7 +195,7 @@ Variable asin(const Variable& x) {
 }
 
 Variable atan(double x) {
-  return sleipnir::atan(Constant(x));
+  return sleipnir::atan(Variable{x});
 }
 
 Variable atan(const Variable& x) {
@@ -207,11 +203,11 @@ Variable atan(const Variable& x) {
 }
 
 Variable atan2(double y, const Variable& x) {
-  return sleipnir::atan2(Constant(y), x);
+  return sleipnir::atan2(Variable{y}, x);
 }
 
 Variable atan2(const Variable& y, double x) {
-  return sleipnir::atan2(y, Constant(x));
+  return sleipnir::atan2(y, Variable{x});
 }
 
 Variable atan2(const Variable& y, const Variable& x) {
@@ -219,7 +215,7 @@ Variable atan2(const Variable& y, const Variable& x) {
 }
 
 Variable cos(double x) {
-  return sleipnir::cos(Constant(x));
+  return sleipnir::cos(Variable{x});
 }
 
 Variable cos(const Variable& x) {
@@ -227,7 +223,7 @@ Variable cos(const Variable& x) {
 }
 
 Variable cosh(double x) {
-  return sleipnir::cosh(Constant(x));
+  return sleipnir::cosh(Variable{x});
 }
 
 Variable cosh(const Variable& x) {
@@ -235,7 +231,7 @@ Variable cosh(const Variable& x) {
 }
 
 Variable erf(double x) {
-  return sleipnir::erf(Constant(x));
+  return sleipnir::erf(Variable{x});
 }
 
 Variable erf(const Variable& x) {
@@ -243,7 +239,7 @@ Variable erf(const Variable& x) {
 }
 
 Variable exp(double x) {
-  return sleipnir::exp(Constant(x));
+  return sleipnir::exp(Variable{x});
 }
 
 Variable exp(const Variable& x) {
@@ -251,11 +247,11 @@ Variable exp(const Variable& x) {
 }
 
 Variable hypot(double x, const Variable& y) {
-  return sleipnir::hypot(Constant(x), y);
+  return sleipnir::hypot(Variable{x}, y);
 }
 
 Variable hypot(const Variable& x, double y) {
-  return sleipnir::hypot(x, Constant(y));
+  return sleipnir::hypot(x, Variable{y});
 }
 
 Variable hypot(const Variable& x, const Variable& y) {
@@ -268,7 +264,7 @@ Variable hypot(const Variable& x, const Variable& y, const Variable& z) {
 }
 
 Variable log(double x) {
-  return sleipnir::log(Constant(x));
+  return sleipnir::log(Variable{x});
 }
 
 Variable log(const Variable& x) {
@@ -276,7 +272,7 @@ Variable log(const Variable& x) {
 }
 
 Variable log10(double x) {
-  return sleipnir::log10(Constant(x));
+  return sleipnir::log10(Variable{x});
 }
 
 Variable log10(const Variable& x) {
@@ -284,11 +280,11 @@ Variable log10(const Variable& x) {
 }
 
 Variable pow(double base, const Variable& power) {
-  return sleipnir::pow(Constant(base), power);
+  return sleipnir::pow(Variable{base}, power);
 }
 
 Variable pow(const Variable& base, double power) {
-  return sleipnir::pow(base, Constant(power));
+  return sleipnir::pow(base, Variable{power});
 }
 
 Variable pow(const Variable& base, const Variable& power) {
@@ -296,7 +292,7 @@ Variable pow(const Variable& base, const Variable& power) {
 }
 
 Variable sign(double x) {
-  return sleipnir::sign(Constant(x));
+  return sleipnir::sign(Variable{x});
 }
 
 Variable sign(const Variable& x) {
@@ -304,7 +300,7 @@ Variable sign(const Variable& x) {
 }
 
 Variable sin(double x) {
-  return sleipnir::sin(Constant(x));
+  return sleipnir::sin(Variable{x});
 }
 
 Variable sin(const Variable& x) {
@@ -312,7 +308,7 @@ Variable sin(const Variable& x) {
 }
 
 Variable sinh(double x) {
-  return sleipnir::sinh(Constant(x));
+  return sleipnir::sinh(Variable{x});
 }
 
 Variable sinh(const Variable& x) {
@@ -320,7 +316,7 @@ Variable sinh(const Variable& x) {
 }
 
 Variable sqrt(double x) {
-  return sleipnir::sqrt(Constant(x));
+  return sleipnir::sqrt(Variable{x});
 }
 
 Variable sqrt(const Variable& x) {
@@ -328,7 +324,7 @@ Variable sqrt(const Variable& x) {
 }
 
 Variable tan(double x) {
-  return sleipnir::tan(Constant(x));
+  return sleipnir::tan(Variable{x});
 }
 
 Variable tan(const Variable& x) {
@@ -336,7 +332,7 @@ Variable tan(const Variable& x) {
 }
 
 Variable tanh(double x) {
-  return sleipnir::tanh(Constant(x));
+  return sleipnir::tanh(Variable{x});
 }
 
 Variable tanh(const Variable& x) {
