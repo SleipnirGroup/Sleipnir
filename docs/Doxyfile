@@ -1048,7 +1048,6 @@ RECURSIVE              = YES
 EXCLUDE                = benchmarks \
                          build \
                          examples \
-                         include/sleipnir/util/EigenFormatter.hpp \
                          thirdparty \
                          test \
                          tools
