@@ -776,6 +776,29 @@ Mat hypot(const VariableBlock<Mat>& x, const VariableBlock<Mat>& y) {
 }
 
 /**
+ * std::hypot() for VariableMatrices.
+ *
+ * The function is applied element-wise to the arguments.
+ *
+ * @param x The x argument.
+ * @param y The y argument.
+ * @param z The z argument.
+ */
+template <typename Mat>
+Mat hypot(const VariableBlock<Mat>& x, const VariableBlock<Mat>& y,
+          const VariableBlock<Mat>& z) {
+  std::remove_cv_t<Mat> result{x.Rows(), x.Cols()};
+
+  for (int row = 0; row < result.Rows(); ++row) {
+    for (int col = 0; col < result.Cols(); ++col) {
+      result(row, col) = sleipnir::hypot(x(row, col), y(row, col), z(row, col));
+    }
+  }
+
+  return result;
+}
+
+/**
  * std::log() for VariableMatrices.
  *
  * The function is applied element-wise to the argument.
