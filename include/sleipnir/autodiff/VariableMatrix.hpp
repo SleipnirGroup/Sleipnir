@@ -85,12 +85,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
     m_storage.reserve(values.rows() * values.cols());
     for (int row = 0; row < values.rows(); ++row) {
       for (int col = 0; col < values.cols(); ++col) {
-        if constexpr (std::same_as<typename Derived::Scalar, double>) {
-          m_storage.emplace_back(
-              MakeExpressionPtr(values(row, col), ExpressionType::kConstant));
-        } else {
-          m_storage.emplace_back(values(row, col));
-        }
+        m_storage.emplace_back(values(row, col));
       }
     }
   }
@@ -105,12 +100,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
 
     for (int row = 0; row < values.rows(); ++row) {
       for (int col = 0; col < values.cols(); ++col) {
-        if constexpr (std::same_as<typename Derived::Scalar, double>) {
-          (*this)(row, col) = Variable{
-              MakeExpressionPtr(values(row, col), ExpressionType::kConstant)};
-        } else {
-          (*this)(row, col) = values(row, col);
-        }
+        (*this)(row, col) = values(row, col);
       }
     }
 
@@ -542,6 +532,7 @@ VariableMatrix CwiseReduce(const VariableMatrix& lhs, const VariableMatrix& rhs,
   assert(lhs.Rows() == rhs.Rows());
 
   VariableMatrix result{lhs.Rows(), lhs.Cols()};
+
   for (int row = 0; row < lhs.Rows(); ++row) {
     for (int col = 0; col < lhs.Cols(); ++col) {
       result(row, col) = binaryOp(lhs(row, col), rhs(row, col));

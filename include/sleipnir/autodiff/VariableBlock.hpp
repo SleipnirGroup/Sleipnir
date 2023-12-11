@@ -122,12 +122,7 @@ class VariableBlock {
 
     for (int row = 0; row < Rows(); ++row) {
       for (int col = 0; col < Cols(); ++col) {
-        if constexpr (std::same_as<typename Derived::Scalar, double>) {
-          (*this)(row, col) = Variable{
-              MakeExpressionPtr(values(row, col), ExpressionType::kConstant)};
-        } else {
-          (*this)(row, col) = values(row, col);
-        }
+        (*this)(row, col) = values(row, col);
       }
     }
 
