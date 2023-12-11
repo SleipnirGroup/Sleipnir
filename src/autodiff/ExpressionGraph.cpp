@@ -2,7 +2,7 @@
 
 #include "sleipnir/autodiff/ExpressionGraph.hpp"
 
-using namespace sleipnir;
+using namespace sleipnir::detail;
 
 ExpressionGraph::ExpressionGraph(Variable& root) {
   // If the root type is a constant, Update() is a no-op, so there's no work to
@@ -85,7 +85,8 @@ void ExpressionGraph::Update() {
   }
 }
 
-VectorXvar ExpressionGraph::GenerateGradientTree(Eigen::Ref<VectorXvar> wrt) {
+sleipnir::VectorXvar ExpressionGraph::GenerateGradientTree(
+    Eigen::Ref<VectorXvar> wrt) {
   // Read docs/algorithms.md#Reverse_accumulation_automatic_differentiation for
   // background on reverse accumulation automatic differentiation.
 

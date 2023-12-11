@@ -74,7 +74,7 @@ def test_direct_transcription():
 
     # Height limit
     problem.subject_to(
-        elevator[:1, :] + ARM_LENGTH * autodiff.sin(arm[:1, :])
+        elevator[:1, :] + ARM_LENGTH * arm[:1, :].cwise_transform(autodiff.sin)
         <= END_EFFECTOR_MAX_HEIGHT
     )
 

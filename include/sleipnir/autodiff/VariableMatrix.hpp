@@ -400,6 +400,24 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    */
   Eigen::MatrixXd Value() const;
 
+  /**
+   * Transforms the matrix coefficient-wise with an unary operator.
+   *
+   * @param unaryOp The unary operator to use for the transform operation.
+   */
+  template <std::invocable<const Variable&> UnaryOp>
+  VariableMatrix CwiseTransform(UnaryOp unaryOp) const {
+    VariableMatrix result{Rows(), Cols()};
+
+    for (int row = 0; row < Rows(); ++row) {
+      for (int col = 0; col < Cols(); ++col) {
+        result(row, col) = unaryOp((*this)(row, col));
+      }
+    }
+
+    return result;
+  }
+
   class iterator {
    public:
     using iterator_category = std::forward_iterator_tag;
@@ -525,7 +543,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
  * @param rhs The right-hand side of the binary operator.
  * @param binaryOp The binary operator to use for the reduce operation.
  */
-template <typename BinaryOp>
+template <std::invocable<const Variable&, const Variable&> BinaryOp>
 VariableMatrix CwiseReduce(const VariableMatrix& lhs, const VariableMatrix& rhs,
                            BinaryOp binaryOp) {
   assert(lhs.Rows() == rhs.Rows());
@@ -554,195 +572,5 @@ VariableMatrix CwiseReduce(const VariableMatrix& lhs, const VariableMatrix& rhs,
  */
 SLEIPNIR_DLLEXPORT VariableMatrix
 Block(std::initializer_list<std::initializer_list<VariableMatrix>> list);
-
-/**
- * std::abs() for VariableMatrices.
- *
- * The function is applied element-wise to the argument.
- *
- * @param x The argument.
- */
-SLEIPNIR_DLLEXPORT VariableMatrix abs(const VariableMatrix& x);
-
-/**
- * std::acos() for VariableMatrices.
- *
- * The function is applied element-wise to the argument.
- *
- * @param x The argument.
- */
-SLEIPNIR_DLLEXPORT VariableMatrix acos(const VariableMatrix& x);
-
-/**
- * std::asin() for VariableMatrices.
- *
- * The function is applied element-wise to the argument.
- *
- * @param x The argument.
- */
-SLEIPNIR_DLLEXPORT VariableMatrix asin(const VariableMatrix& x);
-
-/**
- * std::atan() for VariableMatrices.
- *
- * The function is applied element-wise to the argument.
- *
- * @param x The argument.
- */
-SLEIPNIR_DLLEXPORT VariableMatrix atan(const VariableMatrix& x);
-
-/**
- * std::atan2() for VariableMatrices.
- *
- * The function is applied element-wise to the arguments.
- *
- * @param y The y argument.
- * @param x The x argument.
- */
-SLEIPNIR_DLLEXPORT VariableMatrix atan2(const VariableMatrix& y,
-                                        const VariableMatrix& x);
-
-/**
- * std::cos() for VariableMatrices.
- *
- * The function is applied element-wise to the argument.
- *
- * @param x The argument.
- */
-SLEIPNIR_DLLEXPORT VariableMatrix cos(const VariableMatrix& x);
-
-/**
- * std::cosh() for VariableMatrices.
- *
- * The function is applied element-wise to the argument.
- *
- * @param x The argument.
- */
-SLEIPNIR_DLLEXPORT VariableMatrix cosh(const VariableMatrix& x);
-
-/**
- * std::erf() for VariableMatrices.
- *
- * The function is applied element-wise to the argument.
- *
- * @param x The argument.
- */
-SLEIPNIR_DLLEXPORT VariableMatrix erf(const VariableMatrix& x);
-
-/**
- * std::exp() for VariableMatrices.
- *
- * The function is applied element-wise to the argument.
- *
- * @param x The argument.
- */
-SLEIPNIR_DLLEXPORT VariableMatrix exp(const VariableMatrix& x);
-
-/**
- * std::hypot() for VariableMatrices.
- *
- * The function is applied element-wise to the arguments.
- *
- * @param x The x argument.
- * @param y The y argument.
- */
-SLEIPNIR_DLLEXPORT VariableMatrix hypot(const VariableMatrix& x,
-                                        const VariableMatrix& y);
-
-/**
- * std::hypot() for VariableMatrices.
- *
- * The function is applied element-wise to the arguments.
- *
- * @param x The x argument.
- * @param y The y argument.
- * @param z The z argument.
- */
-SLEIPNIR_DLLEXPORT VariableMatrix hypot(const VariableMatrix& x,
-                                        const VariableMatrix& y,
-                                        const VariableMatrix& z);
-
-/**
- * std::log() for VariableMatrices.
- *
- * The function is applied element-wise to the argument.
- *
- * @param x The argument.
- */
-SLEIPNIR_DLLEXPORT VariableMatrix log(const VariableMatrix& x);
-
-/**
- * std::log10() for VariableMatrices.
- *
- * The function is applied element-wise to the argument.
- *
- * @param x The argument.
- */
-SLEIPNIR_DLLEXPORT VariableMatrix log10(const VariableMatrix& x);
-
-/**
- * std::pow() for VariableMatrices.
- *
- * The function is applied element-wise to the arguments.
- *
- * @param base The base.
- * @param power The power.
- */
-SLEIPNIR_DLLEXPORT VariableMatrix pow(const VariableMatrix& base,
-                                      const VariableMatrix& power);
-
-/**
- * sign() for VariableMatrices.
- *
- * The function is applied element-wise to the argument.
- *
- * @param x The argument.
- */
-SLEIPNIR_DLLEXPORT VariableMatrix sign(const VariableMatrix& x);
-
-/**
- * std::sin() for VariableMatrices.
- *
- * The function is applied element-wise to the argument.
- *
- * @param x The argument.
- */
-SLEIPNIR_DLLEXPORT VariableMatrix sin(const VariableMatrix& x);
-
-/**
- * std::sinh() for VariableMatrices.
- *
- * The function is applied element-wise to the argument.
- *
- * @param x The argument.
- */
-SLEIPNIR_DLLEXPORT VariableMatrix sinh(const VariableMatrix& x);
-
-/**
- * std::sqrt() for VariableMatrices.
- *
- * The function is applied element-wise to the argument.
- *
- * @param x The argument.
- */
-SLEIPNIR_DLLEXPORT VariableMatrix sqrt(const VariableMatrix& x);
-
-/**
- * std::tan() for VariableMatrices.
- *
- * The function is applied element-wise to the argument.
- *
- * @param x The argument.
- */
-SLEIPNIR_DLLEXPORT VariableMatrix tan(const VariableMatrix& x);
-
-/**
- * std::tanh() for VariableMatrices.
- *
- * The function is applied element-wise to the argument.
- *
- * @param x The argument.
- */
-SLEIPNIR_DLLEXPORT VariableMatrix tanh(const VariableMatrix& x);
 
 }  // namespace sleipnir
