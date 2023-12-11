@@ -80,7 +80,8 @@ TEST(ArmOnElevatorProblemTest, DirectTranscription) {
 
   // Height limit
   problem.SubjectTo(elevator.Row(0) +
-                        kArmLength.value() * sleipnir::sin(arm.Row(0)) <=
+                        kArmLength.value() *
+                            arm.Row(0).CwiseTransform(sleipnir::sin) <=
                     kEndEffectorMaxHeight.value());
 
   // Cost function

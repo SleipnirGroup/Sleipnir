@@ -33,6 +33,8 @@ enum class ExpressionType {
   kNonlinear
 };
 
+namespace detail {
+
 struct SLEIPNIR_DLLEXPORT Expression;
 
 /**
@@ -474,5 +476,7 @@ SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> tan(  // NOLINT
  */
 SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> tanh(
     const IntrusiveSharedPtr<Expression>& x);
+
+}  // namespace detail
 
 }  // namespace sleipnir

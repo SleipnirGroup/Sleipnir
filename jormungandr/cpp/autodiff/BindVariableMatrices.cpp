@@ -4,6 +4,7 @@
 
 #include <fmt/format.h>
 #include <pybind11/eigen.h>
+#include <pybind11/functional.h>
 #include <pybind11/operators.h>
 #include <sleipnir/autodiff/Variable.hpp>
 #include <sleipnir/autodiff/VariableBlock.hpp>
@@ -31,52 +32,6 @@ void BindVariableMatrices(py::module_& autodiff) {
   BindVariableBlock(autodiff, variable_block);
 
   // TODO: Wrap sleipnir::Block()
-
-  autodiff.def("abs",
-               static_cast<VariableMatrix (*)(const VariableMatrix&)>(&abs));
-  autodiff.def("acos",
-               static_cast<VariableMatrix (*)(const VariableMatrix&)>(&acos));
-  autodiff.def("asin",
-               static_cast<VariableMatrix (*)(const VariableMatrix&)>(&asin));
-  autodiff.def("atan",
-               static_cast<VariableMatrix (*)(const VariableMatrix&)>(&atan));
-  autodiff.def("atan2",
-               static_cast<VariableMatrix (*)(const VariableMatrix&,
-                                              const VariableMatrix&)>(&atan2));
-  autodiff.def("cos",
-               static_cast<VariableMatrix (*)(const VariableMatrix&)>(&cos));
-  autodiff.def("cosh",
-               static_cast<VariableMatrix (*)(const VariableMatrix&)>(&cosh));
-  autodiff.def("erf",
-               static_cast<VariableMatrix (*)(const VariableMatrix&)>(&erf));
-  autodiff.def("exp",
-               static_cast<VariableMatrix (*)(const VariableMatrix&)>(&exp));
-  autodiff.def("hypot",
-               static_cast<VariableMatrix (*)(const VariableMatrix&,
-                                              const VariableMatrix&)>(&hypot));
-  autodiff.def(
-      "hypot",
-      static_cast<VariableMatrix (*)(
-          const VariableMatrix&, const VariableMatrix&, const VariableMatrix&)>(
-          &hypot));
-  autodiff.def("log",
-               static_cast<VariableMatrix (*)(const VariableMatrix&)>(&log));
-  autodiff.def("log10",
-               static_cast<VariableMatrix (*)(const VariableMatrix&)>(&log10));
-  autodiff.def("pow", static_cast<VariableMatrix (*)(
-                          const VariableMatrix&, const VariableMatrix&)>(&pow));
-  autodiff.def("sign",
-               static_cast<VariableMatrix (*)(const VariableMatrix&)>(&sign));
-  autodiff.def("sin",
-               static_cast<VariableMatrix (*)(const VariableMatrix&)>(&sin));
-  autodiff.def("sinh",
-               static_cast<VariableMatrix (*)(const VariableMatrix&)>(&sinh));
-  autodiff.def("sqrt",
-               static_cast<VariableMatrix (*)(const VariableMatrix&)>(&sqrt));
-  autodiff.def("tan",
-               static_cast<VariableMatrix (*)(const VariableMatrix&)>(&tan));
-  autodiff.def("tanh",
-               static_cast<VariableMatrix (*)(const VariableMatrix&)>(&tanh));
 }
 
 void BindVariableMatrix(py::module_& autodiff,
@@ -415,6 +370,11 @@ void BindVariableMatrix(py::module_& autodiff,
   variable_matrix.def("value",
                       static_cast<Eigen::MatrixXd (VariableMatrix::*)() const>(
                           &VariableMatrix::Value));
+  variable_matrix.def("cwise_transform",
+                      [](const VariableMatrix& self,
+                         const std::function<Variable(const Variable&)>& func) {
+                        return self.CwiseTransform(func);
+                      });
   variable_matrix.def(py::self == py::self);
   variable_matrix.def(py::self == double());
   variable_matrix.def(py::self == int());
@@ -503,6 +463,13 @@ void BindVariableMatrix(py::module_& autodiff,
         return lhs >= rhs;
       },
       py::is_operator());
+
+  autodiff.def(
+      "cwise_reduce",
+      [](const VariableMatrix& lhs, const VariableMatrix& rhs,
+         const std::function<Variable(const Variable&, const Variable&)> func) {
+        return CwiseReduce(lhs, rhs, func);
+      });
 }
 
 void BindVariableBlock(
@@ -796,7 +763,7 @@ void BindVariableBlock(
   variable_block.def(
       "__pow__",
       [](const VariableBlock<VariableMatrix>& self, int power) {
-        return sleipnir::pow(self, power);
+        return sleipnir::pow(VariableMatrix{self}, power);
       },
       py::is_operator());
   variable_block.def_property_readonly("T", &VariableBlock<VariableMatrix>::T);
@@ -814,6 +781,11 @@ void BindVariableBlock(
       "value",
       static_cast<Eigen::MatrixXd (VariableBlock<VariableMatrix>::*)() const>(
           &VariableBlock<VariableMatrix>::Value));
+  variable_block.def("cwise_transform",
+                     [](const VariableMatrix& self,
+                        const std::function<Variable(const Variable&)>& func) {
+                       return self.CwiseTransform(func);
+                     });
   variable_block.def(py::self == py::self);
   variable_block.def(py::self == double());
   variable_block.def(py::self == int());
@@ -840,6 +812,14 @@ void BindVariableBlock(
   variable_block.def(double() >= py::self);
   variable_block.def(int() >= py::self);
   py::implicitly_convertible<VariableBlock<VariableMatrix>, VariableMatrix>();
+
+  autodiff.def(
+      "cwise_reduce",
+      [](const VariableBlock<VariableMatrix>& lhs,
+         const VariableBlock<VariableMatrix>& rhs,
+         const std::function<Variable(const Variable&, const Variable&)> func) {
+        return CwiseReduce(lhs, rhs, func);
+      });
 }
 
 }  // namespace sleipnir

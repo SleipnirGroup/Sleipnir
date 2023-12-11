@@ -8,7 +8,7 @@
 #include "sleipnir/autodiff/Expression.hpp"
 #include "sleipnir/autodiff/Variable.hpp"
 
-namespace sleipnir {
+namespace sleipnir::detail {
 
 /**
  * This class is an adaptor type that performs value updates of an expression's
@@ -34,7 +34,7 @@ class SLEIPNIR_DLLEXPORT ExpressionGraph {
    *
    * @param wrt Variables with respect to which to compute the gradient.
    */
-  VectorXvar GenerateGradientTree(Eigen::Ref<VectorXvar> wrt);
+  sleipnir::VectorXvar GenerateGradientTree(Eigen::Ref<VectorXvar> wrt);
 
   /**
    * Updates the adjoints in the expression graph, effectively computing the
@@ -85,4 +85,4 @@ class SLEIPNIR_DLLEXPORT ExpressionGraph {
   std::vector<Expression*> m_valueList;
 };
 
-}  // namespace sleipnir
+}  // namespace sleipnir::detail

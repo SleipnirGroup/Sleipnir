@@ -76,6 +76,31 @@ TEST(VariableMatrixTest, Iterators) {
   }
 }
 
+TEST(VariableMatrixTest, CwiseTransform) {
+  // VariableMatrix CwiseTransform
+  sleipnir::VariableMatrix A{{-2.0, -3.0, -4.0}, {-5.0, -6.0, -7.0}};
+
+  sleipnir::VariableMatrix result1 = A.CwiseTransform(sleipnir::abs);
+  Eigen::Matrix<double, 2, 3> expected1{{2.0, 3.0, 4.0}, {5.0, 6.0, 7.0}};
+
+  // Don't modify original matrix
+  EXPECT_EQ(-expected1, A.Value());
+
+  EXPECT_EQ(expected1, result1.Value());
+
+  // VariableBlock CwiseTransform
+  auto Asub = A.Block(0, 0, 2, 2);
+
+  sleipnir::VariableMatrix result2 = Asub.CwiseTransform(sleipnir::abs);
+  Eigen::Matrix<double, 2, 2> expected2{{2.0, 3.0}, {5.0, 6.0}};
+
+  // Don't modify original matrix
+  EXPECT_EQ(-expected1, A.Value());
+  EXPECT_EQ(-expected2, Asub.Value());
+
+  EXPECT_EQ(expected2, result2.Value());
+}
+
 TEST(VariableMatrixTest, ZeroStaticFunction) {
   auto A = sleipnir::VariableMatrix::Zero(2, 3);
 

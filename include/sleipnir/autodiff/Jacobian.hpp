@@ -50,7 +50,7 @@ class SLEIPNIR_DLLEXPORT Jacobian {
   VectorXvar m_variables;
   VectorXvar m_wrt;
 
-  std::vector<ExpressionGraph> m_graphs;
+  std::vector<detail::ExpressionGraph> m_graphs;
 
   Eigen::SparseMatrix<double> m_J{m_variables.rows(), m_wrt.rows()};
 

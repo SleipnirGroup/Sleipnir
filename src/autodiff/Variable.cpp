@@ -11,31 +11,31 @@
 namespace sleipnir {
 
 Variable::Variable(double value)
-    : expr{MakeExpressionPtr(value, ExpressionType::kConstant)} {}
+    : expr{detail::MakeExpressionPtr(value, ExpressionType::kConstant)} {}
 
 Variable::Variable(int value)
-    : expr{MakeExpressionPtr(value, ExpressionType::kConstant)} {}
+    : expr{detail::MakeExpressionPtr(value, ExpressionType::kConstant)} {}
 
-Variable::Variable(IntrusiveSharedPtr<Expression> expr)
+Variable::Variable(IntrusiveSharedPtr<detail::Expression> expr)
     : expr{std::move(expr)} {}
 
 Variable& Variable::operator=(double value) {
-  expr = MakeExpressionPtr(value, ExpressionType::kConstant);
+  expr = detail::MakeExpressionPtr(value, ExpressionType::kConstant);
 
   return *this;
 }
 
 Variable& Variable::operator=(int value) {
-  expr = MakeExpressionPtr(value, ExpressionType::kConstant);
+  expr = detail::MakeExpressionPtr(value, ExpressionType::kConstant);
 
   return *this;
 }
 
 Variable& Variable::SetValue(double value) {
-  if (expr == Zero()) {
-    expr = MakeExpressionPtr(value);
+  if (expr == detail::Zero()) {
+    expr = detail::MakeExpressionPtr(value);
   } else {
-    if (expr->args[0] != Zero()) {
+    if (expr->args[0] != detail::Zero()) {
       fmt::print(stderr,
                  "WARNING: {}:{}: Modified the value of a dependent variable\n",
                  __FILE__, __LINE__);
@@ -46,10 +46,10 @@ Variable& Variable::SetValue(double value) {
 }
 
 Variable& Variable::SetValue(int value) {
-  if (expr == Zero()) {
-    expr = MakeExpressionPtr(value);
+  if (expr == detail::Zero()) {
+    expr = detail::MakeExpressionPtr(value);
   } else {
-    if (expr->args[0] != Zero()) {
+    if (expr->args[0] != detail::Zero()) {
       fmt::print(stderr,
                  "WARNING: {}:{}: Modified the value of a dependent variable\n",
                  __FILE__, __LINE__);
@@ -112,50 +112,50 @@ ExpressionType Variable::Type() const {
 }
 
 void Variable::Update() {
-  if (expr != Zero()) {
-    ExpressionGraph graph{*this};
+  if (expr != detail::Zero()) {
+    detail::ExpressionGraph graph{*this};
     graph.Update();
   }
 }
 
 Variable abs(const Variable& x) {
-  return Variable{abs(x.expr)};
+  return Variable{detail::abs(x.expr)};
 }
 
 Variable acos(const Variable& x) {
-  return Variable{acos(x.expr)};
+  return Variable{detail::acos(x.expr)};
 }
 
 Variable asin(const Variable& x) {
-  return Variable{asin(x.expr)};
+  return Variable{detail::asin(x.expr)};
 }
 
 Variable atan(const Variable& x) {
-  return Variable{atan(x.expr)};
+  return Variable{detail::atan(x.expr)};
 }
 
 Variable atan2(const Variable& y, const Variable& x) {
-  return Variable{atan2(y.expr, x.expr)};
+  return Variable{detail::atan2(y.expr, x.expr)};
 }
 
 Variable cos(const Variable& x) {
-  return Variable{cos(x.expr)};
+  return Variable{detail::cos(x.expr)};
 }
 
 Variable cosh(const Variable& x) {
-  return Variable{cosh(x.expr)};
+  return Variable{detail::cosh(x.expr)};
 }
 
 Variable erf(const Variable& x) {
-  return Variable{erf(x.expr)};
+  return Variable{detail::erf(x.expr)};
 }
 
 Variable exp(const Variable& x) {
-  return Variable{exp(x.expr)};
+  return Variable{detail::exp(x.expr)};
 }
 
 Variable hypot(const Variable& x, const Variable& y) {
-  return Variable{sleipnir::hypot(x.expr, y.expr)};
+  return Variable{detail::hypot(x.expr, y.expr)};
 }
 
 Variable hypot(const Variable& x, const Variable& y, const Variable& z) {
@@ -164,39 +164,39 @@ Variable hypot(const Variable& x, const Variable& y, const Variable& z) {
 }
 
 Variable log(const Variable& x) {
-  return Variable{log(x.expr)};
+  return Variable{detail::log(x.expr)};
 }
 
 Variable log10(const Variable& x) {
-  return Variable{log10(x.expr)};
+  return Variable{detail::log10(x.expr)};
 }
 
 Variable pow(const Variable& base, const Variable& power) {
-  return Variable{pow(base.expr, power.expr)};
+  return Variable{detail::pow(base.expr, power.expr)};
 }
 
 Variable sign(const Variable& x) {
-  return Variable{sign(x.expr)};
+  return Variable{detail::sign(x.expr)};
 }
 
 Variable sin(const Variable& x) {
-  return Variable{sin(x.expr)};
+  return Variable{detail::sin(x.expr)};
 }
 
 Variable sinh(const Variable& x) {
-  return Variable{sinh(x.expr)};
+  return Variable{detail::sinh(x.expr)};
 }
 
 Variable sqrt(const Variable& x) {
-  return Variable{sqrt(x.expr)};
+  return Variable{detail::sqrt(x.expr)};
 }
 
 Variable tan(const Variable& x) {
-  return Variable{tan(x.expr)};
+  return Variable{detail::tan(x.expr)};
 }
 
 Variable tanh(const Variable& x) {
-  return Variable{tanh(x.expr)};
+  return Variable{detail::tanh(x.expr)};
 }
 
 }  // namespace sleipnir

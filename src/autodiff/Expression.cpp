@@ -5,7 +5,7 @@
 #include <cmath>
 #include <numbers>
 
-namespace sleipnir {
+namespace sleipnir::detail {
 
 IntrusiveSharedPtr<Expression>& Zero() {
   static auto expr = MakeExpressionPtr();
@@ -316,7 +316,7 @@ IntrusiveSharedPtr<Expression> acos(  // NOLINT
          const IntrusiveSharedPtr<Expression>&,
          const IntrusiveSharedPtr<Expression>& parentAdjoint) {
         return -parentAdjoint /
-               sleipnir::sqrt(
+               sleipnir::detail::sqrt(
                    MakeExpressionPtr(1.0, ExpressionType::kConstant) - x * x);
       },
       x);
@@ -345,7 +345,7 @@ IntrusiveSharedPtr<Expression> asin(  // NOLINT
          const IntrusiveSharedPtr<Expression>&,
          const IntrusiveSharedPtr<Expression>& parentAdjoint) {
         return parentAdjoint /
-               sleipnir::sqrt(
+               sleipnir::detail::sqrt(
                    MakeExpressionPtr(1.0, ExpressionType::kConstant) - x * x);
       },
       x);
@@ -440,7 +440,7 @@ IntrusiveSharedPtr<Expression> cos(  // NOLINT
       [](const IntrusiveSharedPtr<Expression>& x,
          const IntrusiveSharedPtr<Expression>&,
          const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-        return parentAdjoint * -sleipnir::sin(x);
+        return parentAdjoint * -sleipnir::detail::sin(x);
       },
       x);
 }
@@ -467,7 +467,7 @@ IntrusiveSharedPtr<Expression> cosh(  // NOLINT
       [](const IntrusiveSharedPtr<Expression>& x,
          const IntrusiveSharedPtr<Expression>&,
          const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-        return parentAdjoint * sleipnir::sinh(x);
+        return parentAdjoint * sleipnir::detail::sinh(x);
       },
       x);
 }
@@ -499,7 +499,7 @@ IntrusiveSharedPtr<Expression> erf(  // NOLINT
          const IntrusiveSharedPtr<Expression>& parentAdjoint) {
         return parentAdjoint *
                MakeExpressionPtr(2.0 / sqrt_pi, ExpressionType::kConstant) *
-               sleipnir::exp(-x * x);
+               sleipnir::detail::exp(-x * x);
       },
       x);
 }
@@ -526,7 +526,7 @@ IntrusiveSharedPtr<Expression> exp(  // NOLINT
       [](const IntrusiveSharedPtr<Expression>& x,
          const IntrusiveSharedPtr<Expression>&,
          const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-        return parentAdjoint * sleipnir::exp(x);
+        return parentAdjoint * sleipnir::detail::exp(x);
       },
       x);
 }
@@ -558,12 +558,12 @@ IntrusiveSharedPtr<Expression> hypot(  // NOLINT
         [](const IntrusiveSharedPtr<Expression>& x,
            const IntrusiveSharedPtr<Expression>& y,
            const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-          return parentAdjoint * x / sleipnir::hypot(x, y);
+          return parentAdjoint * x / sleipnir::detail::hypot(x, y);
         },
         [](const IntrusiveSharedPtr<Expression>& x,
            const IntrusiveSharedPtr<Expression>& y,
            const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-          return parentAdjoint * y / sleipnir::hypot(x, y);
+          return parentAdjoint * y / sleipnir::detail::hypot(x, y);
         },
         MakeExpressionPtr(0.0, ExpressionType::kConstant), y);
   } else if (x != Zero() && y == Zero()) {
@@ -586,12 +586,12 @@ IntrusiveSharedPtr<Expression> hypot(  // NOLINT
         [](const IntrusiveSharedPtr<Expression>& x,
            const IntrusiveSharedPtr<Expression>& y,
            const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-          return parentAdjoint * x / sleipnir::hypot(x, y);
+          return parentAdjoint * x / sleipnir::detail::hypot(x, y);
         },
         [](const IntrusiveSharedPtr<Expression>& x,
            const IntrusiveSharedPtr<Expression>& y,
            const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-          return parentAdjoint * y / sleipnir::hypot(x, y);
+          return parentAdjoint * y / sleipnir::detail::hypot(x, y);
         },
         x, MakeExpressionPtr(0.0, ExpressionType::kConstant));
   } else {
@@ -615,12 +615,12 @@ IntrusiveSharedPtr<Expression> hypot(  // NOLINT
         [](const IntrusiveSharedPtr<Expression>& x,
            const IntrusiveSharedPtr<Expression>& y,
            const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-          return parentAdjoint * x / sleipnir::hypot(x, y);
+          return parentAdjoint * x / sleipnir::detail::hypot(x, y);
         },
         [](const IntrusiveSharedPtr<Expression>& x,
            const IntrusiveSharedPtr<Expression>& y,
            const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-          return parentAdjoint * y / sleipnir::hypot(x, y);
+          return parentAdjoint * y / sleipnir::detail::hypot(x, y);
         },
         x, y);
   }
@@ -729,8 +729,9 @@ IntrusiveSharedPtr<Expression> pow(  // NOLINT
          const IntrusiveSharedPtr<Expression>& power,
          const IntrusiveSharedPtr<Expression>& parentAdjoint) {
         return parentAdjoint *
-               sleipnir::pow(base, power - MakeExpressionPtr(
-                                               1, ExpressionType::kConstant)) *
+               sleipnir::detail::pow(
+                   base,
+                   power - MakeExpressionPtr(1, ExpressionType::kConstant)) *
                power;
       },
       [](const IntrusiveSharedPtr<Expression>& base,
@@ -741,10 +742,10 @@ IntrusiveSharedPtr<Expression> pow(  // NOLINT
           return Zero();
         } else {
           return parentAdjoint *
-                 sleipnir::pow(
+                 sleipnir::detail::pow(
                      base,
                      power - MakeExpressionPtr(1, ExpressionType::kConstant)) *
-                 base * sleipnir::log(base);
+                 base * sleipnir::detail::log(base);
         }
       },
       base, power);
@@ -805,7 +806,7 @@ IntrusiveSharedPtr<Expression> sin(  // NOLINT
       [](const IntrusiveSharedPtr<Expression>& x,
          const IntrusiveSharedPtr<Expression>&,
          const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-        return parentAdjoint * sleipnir::cos(x);
+        return parentAdjoint * sleipnir::detail::cos(x);
       },
       x);
 }
@@ -831,7 +832,7 @@ IntrusiveSharedPtr<Expression> sinh(const IntrusiveSharedPtr<Expression>& x) {
       [](const IntrusiveSharedPtr<Expression>& x,
          const IntrusiveSharedPtr<Expression>&,
          const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-        return parentAdjoint * sleipnir::cosh(x);
+        return parentAdjoint * sleipnir::detail::cosh(x);
       },
       x);
 }
@@ -860,7 +861,7 @@ IntrusiveSharedPtr<Expression> sqrt(  // NOLINT
          const IntrusiveSharedPtr<Expression>& parentAdjoint) {
         return parentAdjoint /
                (MakeExpressionPtr(2.0, ExpressionType::kConstant) *
-                sleipnir::sqrt(x));
+                sleipnir::detail::sqrt(x));
       },
       x);
 }
@@ -887,7 +888,8 @@ IntrusiveSharedPtr<Expression> tan(  // NOLINT
       [](const IntrusiveSharedPtr<Expression>& x,
          const IntrusiveSharedPtr<Expression>&,
          const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-        return parentAdjoint / (sleipnir::cos(x) * sleipnir::cos(x));
+        return parentAdjoint /
+               (sleipnir::detail::cos(x) * sleipnir::detail::cos(x));
       },
       x);
 }
@@ -913,9 +915,10 @@ IntrusiveSharedPtr<Expression> tanh(const IntrusiveSharedPtr<Expression>& x) {
       [](const IntrusiveSharedPtr<Expression>& x,
          const IntrusiveSharedPtr<Expression>&,
          const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-        return parentAdjoint / (sleipnir::cosh(x) * sleipnir::cosh(x));
+        return parentAdjoint /
+               (sleipnir::detail::cosh(x) * sleipnir::detail::cosh(x));
       },
       x);
 }
 
-}  // namespace sleipnir
+}  // namespace sleipnir::detail
