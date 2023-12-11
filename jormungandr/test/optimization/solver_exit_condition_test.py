@@ -4,6 +4,22 @@ from jormungandr.autodiff import ExpressionType
 from jormungandr.optimization import OptimizationProblem, SolverExitCondition
 
 
+def test_callback_requested_stop():
+    problem = OptimizationProblem()
+
+    x = problem.decision_variable()
+    problem.minimize(x)
+
+    problem.callback(lambda info: True)
+
+    status = problem.solve(diagnostics=True)
+
+    assert status.cost_function_type == ExpressionType.LINEAR
+    assert status.equality_constraint_type == ExpressionType.NONE
+    assert status.inequality_constraint_type == ExpressionType.NONE
+    assert status.exit_condition == SolverExitCondition.CALLBACK_REQUESTED_STOP
+
+
 def test_too_few_dofs():
     problem = OptimizationProblem()
 

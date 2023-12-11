@@ -13,6 +13,8 @@ void BindSolverExitCondition(py::module_& optimization) {
   e.value("SUCCESS", SolverExitCondition::kSuccess);
   e.value("SOLVED_TO_ACCEPTABLE_TOLERANCE",
           SolverExitCondition::kSolvedToAcceptableTolerance);
+  e.value("CALLBACK_REQUESTED_STOP",
+          SolverExitCondition::kCallbackRequestedStop);
   e.value("TOO_FEW_DOFS", SolverExitCondition::kTooFewDOFs);
   e.value("LOCALLY_INFEASIBLE", SolverExitCondition::kLocallyInfeasible);
   e.value("BAD_SEARCH_DIRECTION", SolverExitCondition::kBadSearchDirection);

@@ -9,7 +9,6 @@ TEST(SolverExitConditionTest, CallbackRequestedStop) {
   sleipnir::OptimizationProblem problem;
 
   auto x = problem.DecisionVariable();
-  x.SetValue(0.0);
   problem.Minimize(x);
 
   problem.Callback([](const sleipnir::SolverIterationInfo&) { return true; });

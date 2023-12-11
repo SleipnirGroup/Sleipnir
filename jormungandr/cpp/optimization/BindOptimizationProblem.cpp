@@ -3,6 +3,7 @@
 #include "optimization/BindOptimizationProblem.hpp"
 
 #include <fmt/core.h>
+#include <pybind11/functional.h>
 #include <pybind11/pytypes.h>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 
@@ -65,6 +66,7 @@ void BindOptimizationProblem(py::module_& optimization) {
 
     return self.Solve(config);
   });
+  cls.def("callback", &OptimizationProblem::Callback);
 }
 
 }  // namespace sleipnir

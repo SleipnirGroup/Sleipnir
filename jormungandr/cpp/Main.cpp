@@ -7,6 +7,7 @@
 #include "autodiff/BindVariableMatrices.hpp"
 #include "optimization/BindOptimizationProblem.hpp"
 #include "optimization/BindSolverExitCondition.hpp"
+#include "optimization/BindSolverIterationInfo.hpp"
 #include "optimization/BindSolverStatus.hpp"
 
 namespace py = pybind11;
@@ -28,6 +29,7 @@ PYBIND11_MODULE(_jormungandr, m) {
   BindVariableMatrices(autodiff);
 
   BindSolverExitCondition(optimization);
+  BindSolverIterationInfo(optimization);
   BindSolverStatus(optimization);
   BindOptimizationProblem(optimization);
 }
