@@ -96,22 +96,6 @@ class SLEIPNIR_DLLEXPORT Variable {
   Variable& SetValue(int value);
 
   /**
-   * double-Variable multiplication operator.
-   *
-   * @param lhs Operator left-hand side.
-   * @param rhs Operator right-hand side.
-   */
-  friend SLEIPNIR_DLLEXPORT Variable operator*(double lhs, const Variable& rhs);
-
-  /**
-   * Variable-double multiplication operator.
-   *
-   * @param lhs Operator left-hand side.
-   * @param rhs Operator right-hand side.
-   */
-  friend SLEIPNIR_DLLEXPORT Variable operator*(const Variable& lhs, double rhs);
-
-  /**
    * Variable-Variable multiplication operator.
    *
    * @param lhs Operator left-hand side.
@@ -121,34 +105,11 @@ class SLEIPNIR_DLLEXPORT Variable {
                                                const Variable& rhs);
 
   /**
-   * Variable-double compound multiplication operator.
-   *
-   * @param rhs Operator right-hand side.
-   */
-  Variable& operator*=(double rhs);
-
-  /**
    * Variable-Variable compound multiplication operator.
    *
    * @param rhs Operator right-hand side.
    */
   Variable& operator*=(const Variable& rhs);
-
-  /**
-   * double-Variable division operator.
-   *
-   * @param lhs Operator left-hand side.
-   * @param rhs Operator right-hand side.
-   */
-  friend SLEIPNIR_DLLEXPORT Variable operator/(double lhs, const Variable& rhs);
-
-  /**
-   * Variable-double division operator.
-   *
-   * @param lhs Operator left-hand side.
-   * @param rhs Operator right-hand side.
-   */
-  friend SLEIPNIR_DLLEXPORT Variable operator/(const Variable& lhs, double rhs);
 
   /**
    * Variable-Variable division operator.
@@ -160,34 +121,11 @@ class SLEIPNIR_DLLEXPORT Variable {
                                                const Variable& rhs);
 
   /**
-   * Variable-double compound division operator.
-   *
-   * @param rhs Operator right-hand side.
-   */
-  Variable& operator/=(double rhs);
-
-  /**
    * Variable-Variable compound division operator.
    *
    * @param rhs Operator right-hand side.
    */
   Variable& operator/=(const Variable& rhs);
-
-  /**
-   * double-Variable addition operator.
-   *
-   * @param lhs Operator left-hand side.
-   * @param rhs Operator right-hand side.
-   */
-  friend SLEIPNIR_DLLEXPORT Variable operator+(double lhs, const Variable& rhs);
-
-  /**
-   * Variable-double addition operator.
-   *
-   * @param lhs Operator left-hand side.
-   * @param rhs Operator right-hand side.
-   */
-  friend SLEIPNIR_DLLEXPORT Variable operator+(const Variable& lhs, double rhs);
 
   /**
    * Variable-Variable addition operator.
@@ -199,34 +137,11 @@ class SLEIPNIR_DLLEXPORT Variable {
                                                const Variable& rhs);
 
   /**
-   * Variable-double compound addition operator.
-   *
-   * @param rhs Operator right-hand side.
-   */
-  Variable& operator+=(double rhs);
-
-  /**
    * Variable-Variable compound addition operator.
    *
    * @param rhs Operator right-hand side.
    */
   Variable& operator+=(const Variable& rhs);
-
-  /**
-   * double-Variable subtraction operator.
-   *
-   * @param lhs Operator left-hand side.
-   * @param rhs Operator right-hand side.
-   */
-  friend SLEIPNIR_DLLEXPORT Variable operator-(double lhs, const Variable& rhs);
-
-  /**
-   * Variable-double subtraction operator.
-   *
-   * @param lhs Operator left-hand side.
-   * @param rhs Operator right-hand side.
-   */
-  friend SLEIPNIR_DLLEXPORT Variable operator-(const Variable& lhs, double rhs);
 
   /**
    * Variable-Variable subtraction operator.
@@ -236,13 +151,6 @@ class SLEIPNIR_DLLEXPORT Variable {
    */
   friend SLEIPNIR_DLLEXPORT Variable operator-(const Variable& lhs,
                                                const Variable& rhs);
-
-  /**
-   * Variable-double compound subtraction operator.
-   *
-   * @param rhs Operator right-hand side.
-   */
-  Variable& operator-=(double rhs);
 
   /**
    * Variable-Variable compound subtraction operator.

@@ -259,58 +259,6 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param lhs Operator left-hand side.
    * @param rhs Operator right-hand side.
    */
-  template <typename Derived>
-  friend VariableMatrix operator*(const Eigen::MatrixBase<Derived>& lhs,
-                                  const VariableMatrix& rhs) {
-    assert(lhs.cols() == rhs.Rows());
-
-    VariableMatrix result{static_cast<int>(lhs.rows()), rhs.Cols()};
-
-    for (int i = 0; i < lhs.rows(); ++i) {
-      for (int j = 0; j < rhs.Cols(); ++j) {
-        Variable sum = 0.0;
-        for (int k = 0; k < lhs.cols(); ++k) {
-          sum += lhs(i, k) * rhs(k, j);
-        }
-        result(i, j) = sum;
-      }
-    }
-
-    return result;
-  }
-
-  /**
-   * Matrix multiplication operator.
-   *
-   * @param lhs Operator left-hand side.
-   * @param rhs Operator right-hand side.
-   */
-  template <typename Derived>
-  friend VariableMatrix operator*(const VariableMatrix& lhs,
-                                  const Eigen::MatrixBase<Derived>& rhs) {
-    assert(lhs.Cols() == rhs.rows());
-
-    VariableMatrix result{lhs.Rows(), static_cast<int>(rhs.cols())};
-
-    for (int i = 0; i < lhs.Rows(); ++i) {
-      for (int j = 0; j < rhs.cols(); ++j) {
-        Variable sum = 0.0;
-        for (int k = 0; k < lhs.Cols(); ++k) {
-          sum += lhs(i, k) * rhs(k, j);
-        }
-        result(i, j) = sum;
-      }
-    }
-
-    return result;
-  }
-
-  /**
-   * Matrix multiplication operator.
-   *
-   * @param lhs Operator left-hand side.
-   * @param rhs Operator right-hand side.
-   */
   friend SLEIPNIR_DLLEXPORT VariableMatrix operator*(const VariableMatrix& lhs,
                                                      const VariableMatrix& rhs);
 
@@ -358,14 +306,6 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
   VariableMatrix& operator*=(const VariableMatrix& rhs);
 
   /**
-   * Compound matrix multiplication-assignment operator (only enabled when lhs
-   * is a scalar).
-   *
-   * @param rhs Variable to multiply.
-   */
-  VariableMatrix& operator*=(double rhs);
-
-  /**
    * Binary division operator (only enabled when rhs is a scalar).
    *
    * @param lhs Operator left-hand side.
@@ -392,61 +332,6 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
   VariableMatrix& operator/=(const VariableMatrix& rhs);
 
   /**
-   * Compound matrix division-assignment operator (only enabled when rhs
-   * is a scalar).
-   *
-   * @param rhs Variable to divide.
-   */
-  VariableMatrix& operator/=(double rhs);
-
-  /**
-   * Binary addition operator.
-   *
-   * @param lhs Operator left-hand side.
-   * @param rhs Operator right-hand side.
-   */
-  template <typename Derived>
-  friend VariableMatrix operator+(const Eigen::MatrixBase<Derived>& lhs,
-                                  const VariableMatrix& rhs) {
-    assert(lhs.rows() == rhs.Rows());
-    assert(lhs.cols() == rhs.Cols());
-
-    VariableMatrix result{static_cast<int>(lhs.rows()),
-                          static_cast<int>(lhs.cols())};
-
-    for (int row = 0; row < result.Rows(); ++row) {
-      for (int col = 0; col < result.Cols(); ++col) {
-        result(row, col) = lhs(row, col) + rhs(row, col);
-      }
-    }
-
-    return result;
-  }
-
-  /**
-   * Binary addition operator.
-   *
-   * @param lhs Operator left-hand side.
-   * @param rhs Operator right-hand side.
-   */
-  template <typename Derived>
-  friend VariableMatrix operator+(const VariableMatrix& lhs,
-                                  const Eigen::MatrixBase<Derived>& rhs) {
-    assert(lhs.Rows() == rhs.rows());
-    assert(lhs.Cols() == rhs.cols());
-
-    VariableMatrix result{lhs.Rows(), lhs.Cols()};
-
-    for (int row = 0; row < result.Rows(); ++row) {
-      for (int col = 0; col < result.Cols(); ++col) {
-        result(row, col) = lhs(row, col) + rhs(row, col);
-      }
-    }
-
-    return result;
-  }
-
-  /**
    * Binary addition operator.
    *
    * @param lhs Operator left-hand side.
@@ -468,55 +353,8 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param lhs Operator left-hand side.
    * @param rhs Operator right-hand side.
    */
-  template <typename Derived>
-  friend VariableMatrix operator-(const Eigen::MatrixBase<Derived>& lhs,
-                                  const VariableMatrix& rhs) {
-    assert(lhs.rows() == rhs.Rows());
-    assert(lhs.cols() == rhs.Cols());
-
-    VariableMatrix result{static_cast<int>(lhs.rows()),
-                          static_cast<int>(lhs.cols())};
-
-    for (int row = 0; row < result.Rows(); ++row) {
-      for (int col = 0; col < result.Cols(); ++col) {
-        result(row, col) = lhs(row, col) - rhs(row, col);
-      }
-    }
-
-    return result;
-  }
-
-  /**
-   * Binary subtraction operator.
-   *
-   * @param lhs Operator left-hand side.
-   * @param rhs Operator right-hand side.
-   */
   friend SLEIPNIR_DLLEXPORT VariableMatrix operator-(const VariableMatrix& lhs,
                                                      const VariableMatrix& rhs);
-
-  /**
-   * Binary subtraction operator.
-   *
-   * @param lhs Operator left-hand side.
-   * @param rhs Operator right-hand side.
-   */
-  template <typename Derived>
-  friend VariableMatrix operator-(const VariableMatrix& lhs,
-                                  const Eigen::MatrixBase<Derived>& rhs) {
-    assert(lhs.Rows() == rhs.rows());
-    assert(lhs.Cols() == rhs.cols());
-
-    VariableMatrix result{lhs.Rows(), lhs.Cols()};
-
-    for (int row = 0; row < result.Rows(); ++row) {
-      for (int col = 0; col < result.Cols(); ++col) {
-        result(row, col) = lhs(row, col) - rhs(row, col);
-      }
-    }
-
-    return result;
-  }
 
   /**
    * Compound subtraction-assignment operator.

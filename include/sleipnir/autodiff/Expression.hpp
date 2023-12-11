@@ -192,24 +192,6 @@ struct SLEIPNIR_DLLEXPORT Expression {
              IntrusiveSharedPtr<Expression> rhs);
 
   /**
-   * Double-expression multiplication operator.
-   *
-   * @param lhs Operator left-hand side.
-   * @param rhs Operator right-hand side.
-   */
-  friend SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator*(
-      double lhs, const IntrusiveSharedPtr<Expression>& rhs);
-
-  /**
-   * Expression-double multiplication operator.
-   *
-   * @param lhs Operator left-hand side.
-   * @param rhs Operator right-hand side.
-   */
-  friend SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator*(
-      const IntrusiveSharedPtr<Expression>& lhs, double rhs);
-
-  /**
    * Expression-Expression multiplication operator.
    *
    * @param lhs Operator left-hand side.
@@ -218,24 +200,6 @@ struct SLEIPNIR_DLLEXPORT Expression {
   friend SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator*(
       const IntrusiveSharedPtr<Expression>& lhs,
       const IntrusiveSharedPtr<Expression>& rhs);
-
-  /**
-   * double-Expression division operator.
-   *
-   * @param lhs Operator left-hand side.
-   * @param rhs Operator right-hand side.
-   */
-  friend SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator/(
-      double lhs, const IntrusiveSharedPtr<Expression>& rhs);
-
-  /**
-   * Expression-double division operator.
-   *
-   * @param lhs Operator left-hand side.
-   * @param rhs Operator right-hand side.
-   */
-  friend SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator/(
-      const IntrusiveSharedPtr<Expression>& lhs, double rhs);
 
   /**
    * Expression-Expression division operator.
@@ -248,24 +212,6 @@ struct SLEIPNIR_DLLEXPORT Expression {
       const IntrusiveSharedPtr<Expression>& rhs);
 
   /**
-   * double-Expression addition operator.
-   *
-   * @param lhs Operator left-hand side.
-   * @param rhs Operator right-hand side.
-   */
-  friend SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator+(
-      double lhs, const IntrusiveSharedPtr<Expression>& rhs);
-
-  /**
-   * Expression-double addition operator.
-   *
-   * @param lhs Operator left-hand side.
-   * @param rhs Operator right-hand side.
-   */
-  friend SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator+(
-      const IntrusiveSharedPtr<Expression>& lhs, double rhs);
-
-  /**
    * Expression-Expression addition operator.
    *
    * @param lhs Operator left-hand side.
@@ -276,15 +222,6 @@ struct SLEIPNIR_DLLEXPORT Expression {
       const IntrusiveSharedPtr<Expression>& rhs);
 
   /**
-   * Expression-double compound addition operator.
-   *
-   * @param lhs Operator left-hand side.
-   * @param rhs Operator right-hand side.
-   */
-  friend SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression>& operator+=(
-      IntrusiveSharedPtr<Expression>& lhs, double rhs);
-
-  /**
    * Expression-Expression compound addition operator.
    *
    * @param lhs Operator left-hand side.
@@ -293,24 +230,6 @@ struct SLEIPNIR_DLLEXPORT Expression {
   friend SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression>& operator+=(
       IntrusiveSharedPtr<Expression>& lhs,
       const IntrusiveSharedPtr<Expression>& rhs);
-
-  /**
-   * double-Expression subtraction operator.
-   *
-   * @param lhs Operator left-hand side.
-   * @param rhs Operator right-hand side.
-   */
-  friend SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator-(
-      double lhs, const IntrusiveSharedPtr<Expression>& rhs);
-
-  /**
-   * Expression-double subtraction operator.
-   *
-   * @param lhs Operator left-hand side.
-   * @param rhs Operator right-hand side.
-   */
-  friend SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator-(
-      const IntrusiveSharedPtr<Expression>& lhs, double rhs);
 
   /**
    * Expression-Expression subtraction operator.

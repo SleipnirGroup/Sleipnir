@@ -59,21 +59,8 @@ Variable& Variable::SetValue(int value) {
   return *this;
 }
 
-Variable operator*(double lhs, const Variable& rhs) {
-  return Variable{lhs * rhs.expr};
-}
-
-Variable operator*(const Variable& lhs, double rhs) {
-  return Variable{lhs.expr * rhs};
-}
-
 Variable operator*(const Variable& lhs, const Variable& rhs) {
   return Variable{lhs.expr * rhs.expr};
-}
-
-Variable& Variable::operator*=(double rhs) {
-  *this = *this * rhs;
-  return *this;
 }
 
 Variable& Variable::operator*=(const Variable& rhs) {
@@ -81,21 +68,8 @@ Variable& Variable::operator*=(const Variable& rhs) {
   return *this;
 }
 
-Variable operator/(double lhs, const Variable& rhs) {
-  return Variable{lhs / rhs.expr};
-}
-
-Variable operator/(const Variable& lhs, double rhs) {
-  return Variable{lhs.expr / rhs};
-}
-
 Variable operator/(const Variable& lhs, const Variable& rhs) {
   return Variable{lhs.expr / rhs.expr};
-}
-
-Variable& Variable::operator/=(double rhs) {
-  *this = *this / rhs;
-  return *this;
 }
 
 Variable& Variable::operator/=(const Variable& rhs) {
@@ -103,21 +77,8 @@ Variable& Variable::operator/=(const Variable& rhs) {
   return *this;
 }
 
-Variable operator+(double lhs, const Variable& rhs) {
-  return Variable{lhs + rhs.expr};
-}
-
-Variable operator+(const Variable& lhs, double rhs) {
-  return Variable{lhs.expr + rhs};
-}
-
 Variable operator+(const Variable& lhs, const Variable& rhs) {
   return Variable{lhs.expr + rhs.expr};
-}
-
-Variable& Variable::operator+=(double rhs) {
-  *this = *this + rhs;
-  return *this;
 }
 
 Variable& Variable::operator+=(const Variable& rhs) {
@@ -125,21 +86,8 @@ Variable& Variable::operator+=(const Variable& rhs) {
   return *this;
 }
 
-Variable operator-(double lhs, const Variable& rhs) {
-  return Variable{lhs - rhs.expr};
-}
-
-Variable operator-(const Variable& lhs, double rhs) {
-  return Variable{lhs.expr - rhs};
-}
-
 Variable operator-(const Variable& lhs, const Variable& rhs) {
   return Variable{lhs.expr - rhs.expr};
-}
-
-Variable& Variable::operator-=(double rhs) {
-  *this = *this - rhs;
-  return *this;
 }
 
 Variable& Variable::operator-=(const Variable& rhs) {
