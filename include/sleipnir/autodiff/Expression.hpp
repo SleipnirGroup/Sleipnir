@@ -224,16 +224,6 @@ struct SLEIPNIR_DLLEXPORT Expression {
       const IntrusiveSharedPtr<Expression>& rhs);
 
   /**
-   * Expression-Expression compound addition operator.
-   *
-   * @param lhs Operator left-hand side.
-   * @param rhs Operator right-hand side.
-   */
-  friend SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression>& operator+=(
-      IntrusiveSharedPtr<Expression>& lhs,
-      const IntrusiveSharedPtr<Expression>& rhs);
-
-  /**
    * Expression-Expression subtraction operator.
    *
    * @param lhs Operator left-hand side.
@@ -318,6 +308,11 @@ static IntrusiveSharedPtr<Expression> MakeExpressionPtr(Args&&... args) {
   return AllocateIntrusiveShared<Expression>(GlobalPoolAllocator<Expression>(),
                                              std::forward<Args>(args)...);
 }
+
+/**
+ * Returns true if this expression is the constant zero.
+ */
+SLEIPNIR_DLLEXPORT bool IsZero(const IntrusiveSharedPtr<Expression>& ptr);
 
 /**
  * std::abs() for Expressions.
@@ -478,5 +473,18 @@ SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> tanh(
     const IntrusiveSharedPtr<Expression>& x);
 
 }  // namespace detail
+
+// FIXME: Doxygen is confused:
+//
+//   Found ';' while parsing initializer list! (doxygen could be confused by a
+//   macro call without semicolon)
+
+//! @cond Doxygen_Suppress
+
+// Instantiate Expression pool in Expression.cpp instead to avoid ODR violation
+extern template EXPORT_TEMPLATE_DECLARE(SLEIPNIR_DLLEXPORT)
+    PoolAllocator<detail::Expression> GlobalPoolAllocator<detail::Expression>();
+
+//! @endcond
 
 }  // namespace sleipnir

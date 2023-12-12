@@ -5,11 +5,24 @@
 #include <cmath>
 #include <numbers>
 
+namespace sleipnir {
+
+// Instantiate Expression pool in Expression.cpp instead to avoid ODR violation
+template EXPORT_TEMPLATE_DEFINE(SLEIPNIR_DLLEXPORT)
+    PoolAllocator<detail::Expression> GlobalPoolAllocator<detail::Expression>();
+
+}  // namespace sleipnir
+
 namespace sleipnir::detail {
 
+namespace {
+// Instantiate static outside Zero() to avoid atomic initialization check on
+// every call to Zero()
+static auto kZero = MakeExpressionPtr();
+}  // namespace
+
 IntrusiveSharedPtr<Expression>& Zero() {
-  static auto expr = MakeExpressionPtr();
-  return expr;
+  return kZero;
 }
 
 Expression::Expression(double value, ExpressionType type)
@@ -50,7 +63,7 @@ Expression::Expression(ExpressionType type, BinaryFuncDouble valueFunc,
 IntrusiveSharedPtr<Expression> operator*(
     const IntrusiveSharedPtr<Expression>& lhs,
     const IntrusiveSharedPtr<Expression>& rhs) {
-  if (lhs == Zero() || rhs == Zero()) {
+  if (IsZero(lhs) || IsZero(rhs)) {
     return Zero();
   }
 
@@ -107,7 +120,7 @@ IntrusiveSharedPtr<Expression> operator*(
 IntrusiveSharedPtr<Expression> operator/(
     const IntrusiveSharedPtr<Expression>& lhs,
     const IntrusiveSharedPtr<Expression>& rhs) {
-  if (lhs == Zero()) {
+  if (IsZero(lhs)) {
     return Zero();
   }
 
@@ -143,9 +156,9 @@ IntrusiveSharedPtr<Expression> operator/(
 IntrusiveSharedPtr<Expression> operator+(
     const IntrusiveSharedPtr<Expression>& lhs,
     const IntrusiveSharedPtr<Expression>& rhs) {
-  if (lhs == Zero()) {
+  if (IsZero(lhs)) {
     return rhs;
-  } else if (rhs == Zero()) {
+  } else if (IsZero(rhs)) {
     return lhs;
   }
 
@@ -171,30 +184,16 @@ IntrusiveSharedPtr<Expression> operator+(
       lhs, rhs);
 }
 
-IntrusiveSharedPtr<Expression>& operator+=(
-    IntrusiveSharedPtr<Expression>& lhs,
-    const IntrusiveSharedPtr<Expression>& rhs) {
-  if (lhs == Zero()) {
-    lhs = rhs;
-  } else if (rhs == Zero()) {
-    return lhs;
-  } else {
-    lhs = lhs + rhs;
-  }
-
-  return lhs;
-}
-
 IntrusiveSharedPtr<Expression> operator-(
     const IntrusiveSharedPtr<Expression>& lhs,
     const IntrusiveSharedPtr<Expression>& rhs) {
-  if (lhs == Zero()) {
-    if (rhs != Zero()) {
+  if (IsZero(lhs)) {
+    if (!IsZero(rhs)) {
       return -rhs;
     } else {
       return Zero();
     }
-  } else if (rhs == Zero()) {
+  } else if (IsZero(rhs)) {
     return lhs;
   }
 
@@ -222,7 +221,7 @@ IntrusiveSharedPtr<Expression> operator-(
 
 IntrusiveSharedPtr<Expression> operator-(
     const IntrusiveSharedPtr<Expression>& lhs) {
-  if (lhs == Zero()) {
+  if (IsZero(lhs)) {
     return Zero();
   }
 
@@ -239,7 +238,7 @@ IntrusiveSharedPtr<Expression> operator-(
 
 IntrusiveSharedPtr<Expression> operator+(
     const IntrusiveSharedPtr<Expression>& lhs) {
-  if (lhs == Zero()) {
+  if (IsZero(lhs)) {
     return Zero();
   }
 
@@ -254,9 +253,13 @@ IntrusiveSharedPtr<Expression> operator+(
       lhs);
 }
 
+bool IsZero(const IntrusiveSharedPtr<Expression>& ptr) {
+  return ptr == Zero();
+}
+
 IntrusiveSharedPtr<Expression> abs(  // NOLINT
     const IntrusiveSharedPtr<Expression>& x) {
-  if (x == Zero()) {
+  if (IsZero(x)) {
     return Zero();
   }
 
@@ -295,7 +298,7 @@ IntrusiveSharedPtr<Expression> abs(  // NOLINT
 
 IntrusiveSharedPtr<Expression> acos(  // NOLINT
     const IntrusiveSharedPtr<Expression>& x) {
-  if (x == Zero()) {
+  if (IsZero(x)) {
     return MakeExpressionPtr(std::numbers::pi / 2.0, ExpressionType::kConstant);
   }
 
@@ -324,7 +327,7 @@ IntrusiveSharedPtr<Expression> acos(  // NOLINT
 
 IntrusiveSharedPtr<Expression> asin(  // NOLINT
     const IntrusiveSharedPtr<Expression>& x) {
-  if (x == Zero()) {
+  if (IsZero(x)) {
     return Zero();
   }
 
@@ -353,7 +356,7 @@ IntrusiveSharedPtr<Expression> asin(  // NOLINT
 
 IntrusiveSharedPtr<Expression> atan(  // NOLINT
     const IntrusiveSharedPtr<Expression>& x) {
-  if (x == Zero()) {
+  if (IsZero(x)) {
     return Zero();
   }
 
@@ -382,9 +385,9 @@ IntrusiveSharedPtr<Expression> atan(  // NOLINT
 IntrusiveSharedPtr<Expression> atan2(  // NOLINT
     const IntrusiveSharedPtr<Expression>& y,
     const IntrusiveSharedPtr<Expression>& x) {
-  if (y == Zero()) {
+  if (IsZero(y)) {
     return Zero();
-  } else if (x == Zero()) {
+  } else if (IsZero(x)) {
     return MakeExpressionPtr(std::numbers::pi / 2.0, ExpressionType::kConstant);
   }
 
@@ -420,7 +423,7 @@ IntrusiveSharedPtr<Expression> atan2(  // NOLINT
 
 IntrusiveSharedPtr<Expression> cos(  // NOLINT
     const IntrusiveSharedPtr<Expression>& x) {
-  if (x == Zero()) {
+  if (IsZero(x)) {
     return MakeExpressionPtr(1.0, ExpressionType::kConstant);
   }
 
@@ -447,7 +450,7 @@ IntrusiveSharedPtr<Expression> cos(  // NOLINT
 
 IntrusiveSharedPtr<Expression> cosh(  // NOLINT
     const IntrusiveSharedPtr<Expression>& x) {
-  if (x == Zero()) {
+  if (IsZero(x)) {
     return MakeExpressionPtr(1.0, ExpressionType::kConstant);
   }
 
@@ -474,7 +477,7 @@ IntrusiveSharedPtr<Expression> cosh(  // NOLINT
 
 IntrusiveSharedPtr<Expression> erf(  // NOLINT
     const IntrusiveSharedPtr<Expression>& x) {
-  if (x == Zero()) {
+  if (IsZero(x)) {
     return Zero();
   }
 
@@ -505,7 +508,7 @@ IntrusiveSharedPtr<Expression> erf(  // NOLINT
 
 IntrusiveSharedPtr<Expression> exp(  // NOLINT
     const IntrusiveSharedPtr<Expression>& x) {
-  if (x == Zero()) {
+  if (IsZero(x)) {
     return MakeExpressionPtr(1.0, ExpressionType::kConstant);
   }
 
@@ -533,11 +536,11 @@ IntrusiveSharedPtr<Expression> exp(  // NOLINT
 IntrusiveSharedPtr<Expression> hypot(  // NOLINT
     const IntrusiveSharedPtr<Expression>& x,
     const IntrusiveSharedPtr<Expression>& y) {
-  if (x == Zero() && y == Zero()) {
+  if (IsZero(x) && IsZero(y)) {
     return Zero();
   }
 
-  if (x == Zero() && y != Zero()) {
+  if (IsZero(x) && !IsZero(y)) {
     // Evaluate the expression's type
     ExpressionType type;
     if (y->type == ExpressionType::kConstant) {
@@ -565,7 +568,7 @@ IntrusiveSharedPtr<Expression> hypot(  // NOLINT
           return parentAdjoint * y / sleipnir::detail::hypot(x, y);
         },
         MakeExpressionPtr(0.0, ExpressionType::kConstant), y);
-  } else if (x != Zero() && y == Zero()) {
+  } else if (!IsZero(x) && IsZero(y)) {
     // Evaluate the expression's type
     ExpressionType type;
     if (x->type == ExpressionType::kConstant) {
@@ -627,7 +630,7 @@ IntrusiveSharedPtr<Expression> hypot(  // NOLINT
 
 IntrusiveSharedPtr<Expression> log(  // NOLINT
     const IntrusiveSharedPtr<Expression>& x) {
-  if (x == Zero()) {
+  if (IsZero(x)) {
     return Zero();
   }
 
@@ -652,7 +655,7 @@ IntrusiveSharedPtr<Expression> log(  // NOLINT
 
 IntrusiveSharedPtr<Expression> log10(  // NOLINT
     const IntrusiveSharedPtr<Expression>& x) {
-  if (x == Zero()) {
+  if (IsZero(x)) {
     return Zero();
   }
 
@@ -682,10 +685,10 @@ IntrusiveSharedPtr<Expression> log10(  // NOLINT
 IntrusiveSharedPtr<Expression> pow(  // NOLINT
     const IntrusiveSharedPtr<Expression>& base,
     const IntrusiveSharedPtr<Expression>& power) {
-  if (base == Zero()) {
+  if (IsZero(base)) {
     return Zero();
   }
-  if (power == Zero()) {
+  if (IsZero(power)) {
     return MakeExpressionPtr(1.0, ExpressionType::kConstant);
   }
 
@@ -750,7 +753,7 @@ IntrusiveSharedPtr<Expression> pow(  // NOLINT
 }
 
 IntrusiveSharedPtr<Expression> sign(const IntrusiveSharedPtr<Expression>& x) {
-  if (x == Zero()) {
+  if (IsZero(x)) {
     return Zero();
   }
 
@@ -784,7 +787,7 @@ IntrusiveSharedPtr<Expression> sign(const IntrusiveSharedPtr<Expression>& x) {
 
 IntrusiveSharedPtr<Expression> sin(  // NOLINT
     const IntrusiveSharedPtr<Expression>& x) {
-  if (x == Zero()) {
+  if (IsZero(x)) {
     return Zero();
   }
 
@@ -810,7 +813,7 @@ IntrusiveSharedPtr<Expression> sin(  // NOLINT
 }
 
 IntrusiveSharedPtr<Expression> sinh(const IntrusiveSharedPtr<Expression>& x) {
-  if (x == Zero()) {
+  if (IsZero(x)) {
     return Zero();
   }
 
@@ -837,7 +840,7 @@ IntrusiveSharedPtr<Expression> sinh(const IntrusiveSharedPtr<Expression>& x) {
 
 IntrusiveSharedPtr<Expression> sqrt(  // NOLINT
     const IntrusiveSharedPtr<Expression>& x) {
-  if (x == Zero()) {
+  if (IsZero(x)) {
     return Zero();
   }
 
@@ -866,7 +869,7 @@ IntrusiveSharedPtr<Expression> sqrt(  // NOLINT
 
 IntrusiveSharedPtr<Expression> tan(  // NOLINT
     const IntrusiveSharedPtr<Expression>& x) {
-  if (x == Zero()) {
+  if (IsZero(x)) {
     return Zero();
   }
 
@@ -893,7 +896,7 @@ IntrusiveSharedPtr<Expression> tan(  // NOLINT
 }
 
 IntrusiveSharedPtr<Expression> tanh(const IntrusiveSharedPtr<Expression>& x) {
-  if (x == Zero()) {
+  if (IsZero(x)) {
     return Zero();
   }
 

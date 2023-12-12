@@ -115,8 +115,10 @@ sleipnir::VectorXvar ExpressionGraph::GenerateGradientTree(
     auto& lhs = node->args[0];
     auto& rhs = node->args[1];
 
-    lhs->adjointExpr += node->gradientFuncs[0](lhs, rhs, node->adjointExpr);
-    rhs->adjointExpr += node->gradientFuncs[1](lhs, rhs, node->adjointExpr);
+    lhs->adjointExpr =
+        lhs->adjointExpr + node->gradientFuncs[0](lhs, rhs, node->adjointExpr);
+    rhs->adjointExpr =
+        rhs->adjointExpr + node->gradientFuncs[1](lhs, rhs, node->adjointExpr);
 
     // If variable is a leaf node, assign its adjoint to the gradient.
     if (node->row != -1) {
