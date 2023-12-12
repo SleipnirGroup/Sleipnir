@@ -81,7 +81,7 @@ struct SLEIPNIR_DLLEXPORT Expression {
 
   /// The adjoint of the expression node used during gradient expression tree
   /// generation.
-  IntrusiveSharedPtr<Expression> adjointExpr;
+  IntrusiveSharedPtr<Expression> adjointExpr{Zero()};
 
   /// Expression argument type.
   ExpressionType type = ExpressionType::kConstant;
@@ -120,7 +120,7 @@ struct SLEIPNIR_DLLEXPORT Expression {
          const IntrusiveSharedPtr<Expression>&) { return Zero(); }};
 
   /// Expression arguments.
-  std::array<IntrusiveSharedPtr<Expression>, 2> args;
+  std::array<IntrusiveSharedPtr<Expression>, 2> args{Zero(), Zero()};
 
   /// Reference count for intrusive shared pointer.
   uint32_t refCount = 0;
