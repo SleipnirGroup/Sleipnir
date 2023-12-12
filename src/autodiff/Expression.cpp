@@ -26,14 +26,13 @@ IntrusiveSharedPtr<Expression>& Zero() {
 }
 
 Expression::Expression(double value, ExpressionType type)
-    : value{value}, adjointExpr{Zero()}, type{type}, args{Zero(), Zero()} {}
+    : value{value}, type{type} {}
 
 Expression::Expression(ExpressionType type, BinaryFuncDouble valueFunc,
                        TrinaryFuncDouble lhsGradientValueFunc,
                        TrinaryFuncExpr lhsGradientFunc,
                        IntrusiveSharedPtr<Expression> lhs)
     : value{valueFunc(lhs->value, 0.0)},
-      adjointExpr{Zero()},
       type{type},
       valueFunc{valueFunc},
       gradientValueFuncs{lhsGradientValueFunc,
@@ -53,7 +52,6 @@ Expression::Expression(ExpressionType type, BinaryFuncDouble valueFunc,
                        IntrusiveSharedPtr<Expression> lhs,
                        IntrusiveSharedPtr<Expression> rhs)
     : value{valueFunc(lhs->value, rhs->value)},
-      adjointExpr{Zero()},
       type{type},
       valueFunc{valueFunc},
       gradientValueFuncs{lhsGradientValueFunc, rhsGradientValueFunc},
