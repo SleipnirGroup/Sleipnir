@@ -474,9 +474,6 @@ IntrusiveSharedPtr<Expression> cosh(  // NOLINT
 
 IntrusiveSharedPtr<Expression> erf(  // NOLINT
     const IntrusiveSharedPtr<Expression>& x) {
-  static constexpr double sqrt_pi =
-      1.7724538509055160272981674833411451872554456638435L;
-
   if (x == Zero()) {
     return Zero();
   }
@@ -492,13 +489,15 @@ IntrusiveSharedPtr<Expression> erf(  // NOLINT
   return MakeExpressionPtr(
       type, [](double x, double) { return std::erf(x); },
       [](double x, double, double parentAdjoint) {
-        return parentAdjoint * 2.0 / sqrt_pi * std::exp(-x * x);
+        return parentAdjoint * 2.0 * std::numbers::inv_sqrtpi *
+               std::exp(-x * x);
       },
       [](const IntrusiveSharedPtr<Expression>& x,
          const IntrusiveSharedPtr<Expression>&,
          const IntrusiveSharedPtr<Expression>& parentAdjoint) {
         return parentAdjoint *
-               MakeExpressionPtr(2.0 / sqrt_pi, ExpressionType::kConstant) *
+               MakeExpressionPtr(2.0 * std::numbers::inv_sqrtpi,
+                                 ExpressionType::kConstant) *
                sleipnir::detail::exp(-x * x);
       },
       x);
@@ -653,8 +652,6 @@ IntrusiveSharedPtr<Expression> log(  // NOLINT
 
 IntrusiveSharedPtr<Expression> log10(  // NOLINT
     const IntrusiveSharedPtr<Expression>& x) {
-  static constexpr double ln10 = 2.3025850929940456840179914546843L;
-
   if (x == Zero()) {
     return Zero();
   }
@@ -670,13 +667,14 @@ IntrusiveSharedPtr<Expression> log10(  // NOLINT
   return MakeExpressionPtr(
       type, [](double x, double) { return std::log10(x); },
       [](double x, double, double parentAdjoint) {
-        return parentAdjoint / (ln10 * x);
+        return parentAdjoint / (std::numbers::ln10 * x);
       },
       [](const IntrusiveSharedPtr<Expression>& x,
          const IntrusiveSharedPtr<Expression>&,
          const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-        return parentAdjoint /
-               (MakeExpressionPtr(ln10, ExpressionType::kConstant) * x);
+        return parentAdjoint / (MakeExpressionPtr(std::numbers::ln10,
+                                                  ExpressionType::kConstant) *
+                                x);
       },
       x);
 }
