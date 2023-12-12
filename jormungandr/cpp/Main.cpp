@@ -2,6 +2,7 @@
 
 #include <pybind11/pybind11.h>
 
+#include "autodiff/BindConstraints.hpp"
 #include "autodiff/BindExpressionType.hpp"
 #include "autodiff/BindVariable.hpp"
 #include "autodiff/BindVariableMatrices.hpp"
@@ -25,7 +26,8 @@ PYBIND11_MODULE(_jormungandr, m) {
   py::module_ optimization = m.def_submodule("optimization");
 
   BindExpressionType(autodiff);
-  BindVariable(autodiff, optimization);
+  BindConstraints(optimization);
+  BindVariable(autodiff);
   BindVariableMatrices(autodiff);
 
   BindSolverExitCondition(optimization);

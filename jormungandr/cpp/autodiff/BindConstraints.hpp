@@ -8,6 +8,6 @@ namespace py = pybind11;
 
 namespace sleipnir {
 
-void BindVariable(py::module_& autodiff);
+void BindConstraints(py::module_& optimization);
 
 }  // namespace sleipnir

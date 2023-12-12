@@ -30,20 +30,7 @@ class type_caster<sleipnir::VectorXvar, void>
 
 namespace sleipnir {
 
-void BindVariable(py::module_& autodiff, py::module_& optimization) {
-  py::class_<EqualityConstraints> equalityConstraints{optimization,
-                                                      "EqualityConstraints"};
-  equalityConstraints.def(
-      "__bool__", [](const EqualityConstraints& self) -> bool { return self; },
-      py::is_operator());
-
-  py::class_<InequalityConstraints> inequalityConstraints{
-      optimization, "InequalityConstraints"};
-  inequalityConstraints.def(
-      "__bool__",
-      [](const InequalityConstraints& self) -> bool { return self; },
-      py::is_operator());
-
+void BindVariable(py::module_& autodiff) {
   py::class_<Variable> variable{autodiff, "Variable"};
   variable.def(py::init<>());
   variable.def(py::init<double>());
