@@ -76,6 +76,24 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
       std::initializer_list<std::initializer_list<Variable>> list);  // NOLINT
 
   /**
+   * Constructs a scalar VariableMatrix from a nested list of doubles.
+   *
+   * This overload is for Python bindings only.
+   *
+   * @param list The nested list of Variables.
+   */
+  VariableMatrix(std::vector<std::vector<double>> list);  // NOLINT
+
+  /**
+   * Constructs a scalar VariableMatrix from a nested list of Variables.
+   *
+   * This overload is for Python bindings only.
+   *
+   * @param list The nested list of Variables.
+   */
+  VariableMatrix(std::vector<std::vector<Variable>> list);  // NOLINT
+
+  /**
    * Constructs a VariableMatrix from an Eigen matrix.
    */
   template <typename Derived>
@@ -572,5 +590,20 @@ VariableMatrix CwiseReduce(const VariableMatrix& lhs, const VariableMatrix& rhs,
  */
 SLEIPNIR_DLLEXPORT VariableMatrix
 Block(std::initializer_list<std::initializer_list<VariableMatrix>> list);
+
+/**
+ * Assemble a VariableMatrix from a nested list of blocks.
+ *
+ * Each row's blocks must have the same height, and the assembled block rows
+ * must have the same width. For example, for the block matrix [[A, B], [C]] to
+ * be constructible, the number of rows in A and B must match, and the number of
+ * columns in [A, B] and [C] must match.
+ *
+ * This overload is for Python bindings only.
+ *
+ * @param list The nested list of blocks.
+ */
+SLEIPNIR_DLLEXPORT VariableMatrix
+Block(std::vector<std::vector<VariableMatrix>> list);
 
 }  // namespace sleipnir

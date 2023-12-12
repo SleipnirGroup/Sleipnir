@@ -128,9 +128,8 @@ TEST(VariableMatrixTest, CwiseReduce) {
 }
 
 TEST(VariableMatrixTest, BlockFreeFunction) {
-  sleipnir::VariableMatrix A =
-      Eigen::Matrix<double, 2, 3>{{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}};
-  sleipnir::VariableMatrix B = Eigen::Matrix<double, 2, 1>{{7.0}, {8.0}};
+  sleipnir::VariableMatrix A{{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}};
+  sleipnir::VariableMatrix B{{7.0}, {8.0}};
 
   sleipnir::VariableMatrix mat1 = sleipnir::Block({{A, B}});
   Eigen::Matrix<double, 2, 4> expected1{{1.0, 2.0, 3.0, 7.0},
@@ -139,8 +138,7 @@ TEST(VariableMatrixTest, BlockFreeFunction) {
   EXPECT_EQ(4, mat1.Cols());
   EXPECT_EQ(expected1, mat1.Value());
 
-  sleipnir::VariableMatrix C =
-      Eigen::Matrix<double, 1, 4>{{9.0, 10.0, 11.0, 12.0}};
+  sleipnir::VariableMatrix C{{9.0, 10.0, 11.0, 12.0}};
 
   sleipnir::VariableMatrix mat2 = sleipnir::Block({{A, B}, {C}});
   Eigen::Matrix<double, 3, 4> expected2{

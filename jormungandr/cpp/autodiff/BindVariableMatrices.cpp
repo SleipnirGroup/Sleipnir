@@ -6,6 +6,7 @@
 #include <pybind11/eigen.h>
 #include <pybind11/functional.h>
 #include <pybind11/operators.h>
+#include <pybind11/stl.h>
 #include <sleipnir/autodiff/Variable.hpp>
 #include <sleipnir/autodiff/VariableBlock.hpp>
 #include <sleipnir/autodiff/VariableMatrix.hpp>
@@ -29,9 +30,28 @@ void BindVariableMatrices(py::module_& autodiff) {
                                                            "VariableBlock"};
 
   BindVariableMatrix(autodiff, variable_matrix);
+
+  autodiff.def(
+      "cwise_reduce",
+      [](const VariableMatrix& lhs, const VariableMatrix& rhs,
+         const std::function<Variable(const Variable&, const Variable&)> func) {
+        return CwiseReduce(lhs, rhs, func);
+      });
+
+  autodiff.def(
+      "block",
+      static_cast<VariableMatrix (*)(std::vector<std::vector<VariableMatrix>>)>(
+          &Block));
+
   BindVariableBlock(autodiff, variable_block);
 
-  // TODO: Wrap sleipnir::Block()
+  autodiff.def(
+      "cwise_reduce",
+      [](const VariableBlock<VariableMatrix>& lhs,
+         const VariableBlock<VariableMatrix>& rhs,
+         const std::function<Variable(const Variable&, const Variable&)> func) {
+        return CwiseReduce(lhs, rhs, func);
+      });
 }
 
 void BindVariableMatrix(py::module_& autodiff,
@@ -39,6 +59,8 @@ void BindVariableMatrix(py::module_& autodiff,
   variable_matrix.def(py::init<>());
   variable_matrix.def(py::init<int, int>());
   variable_matrix.def(py::init<double>());
+  variable_matrix.def(py::init<std::vector<std::vector<double>>>());
+  variable_matrix.def(py::init<std::vector<std::vector<Variable>>>());
   variable_matrix.def(py::init<const Variable&>());
   variable_matrix.def(py::init<const VariableBlock<VariableMatrix>&>());
   variable_matrix.def("set",
@@ -361,6 +383,10 @@ void BindVariableMatrix(py::module_& autodiff,
   variable_matrix.def_property_readonly("T", &VariableMatrix::T);
   variable_matrix.def("rows", &VariableMatrix::Rows);
   variable_matrix.def("cols", &VariableMatrix::Cols);
+  variable_matrix.def_property_readonly(
+      "shape", [](const VariableMatrix& self) {
+        return py::make_tuple(self.Rows(), self.Cols());
+      });
   variable_matrix.def("value",
                       static_cast<double (VariableMatrix::*)(int, int) const>(
                           &VariableMatrix::Value));
@@ -375,6 +401,8 @@ void BindVariableMatrix(py::module_& autodiff,
                          const std::function<Variable(const Variable&)>& func) {
                         return self.CwiseTransform(func);
                       });
+  variable_matrix.def_static("zero", &VariableMatrix::Zero);
+  variable_matrix.def_static("ones", &VariableMatrix::Ones);
   variable_matrix.def(py::self == py::self);
   variable_matrix.def(py::self == double());
   variable_matrix.def(py::self == int());
@@ -463,13 +491,6 @@ void BindVariableMatrix(py::module_& autodiff,
         return lhs >= rhs;
       },
       py::is_operator());
-
-  autodiff.def(
-      "cwise_reduce",
-      [](const VariableMatrix& lhs, const VariableMatrix& rhs,
-         const std::function<Variable(const Variable&, const Variable&)> func) {
-        return CwiseReduce(lhs, rhs, func);
-      });
 }
 
 void BindVariableBlock(
@@ -769,6 +790,10 @@ void BindVariableBlock(
   variable_block.def_property_readonly("T", &VariableBlock<VariableMatrix>::T);
   variable_block.def("rows", &VariableBlock<VariableMatrix>::Rows);
   variable_block.def("cols", &VariableBlock<VariableMatrix>::Cols);
+  variable_block.def_property_readonly(
+      "shape", [](const VariableBlock<VariableMatrix>& self) {
+        return py::make_tuple(self.Rows(), self.Cols());
+      });
   variable_block.def(
       "value",
       static_cast<double (VariableBlock<VariableMatrix>::*)(int, int) const>(
@@ -782,7 +807,7 @@ void BindVariableBlock(
       static_cast<Eigen::MatrixXd (VariableBlock<VariableMatrix>::*)() const>(
           &VariableBlock<VariableMatrix>::Value));
   variable_block.def("cwise_transform",
-                     [](const VariableMatrix& self,
+                     [](const VariableBlock<VariableMatrix>& self,
                         const std::function<Variable(const Variable&)>& func) {
                        return self.CwiseTransform(func);
                      });
@@ -812,14 +837,6 @@ void BindVariableBlock(
   variable_block.def(double() >= py::self);
   variable_block.def(int() >= py::self);
   py::implicitly_convertible<VariableBlock<VariableMatrix>, VariableMatrix>();
-
-  autodiff.def(
-      "cwise_reduce",
-      [](const VariableBlock<VariableMatrix>& lhs,
-         const VariableBlock<VariableMatrix>& rhs,
-         const std::function<Variable(const Variable&, const Variable&)> func) {
-        return CwiseReduce(lhs, rhs, func);
-      });
 }
 
 }  // namespace sleipnir

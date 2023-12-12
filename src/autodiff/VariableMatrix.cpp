@@ -79,6 +79,48 @@ VariableMatrix::VariableMatrix(
   }
 }
 
+VariableMatrix::VariableMatrix(std::vector<std::vector<double>> list) {
+  // Get row and column counts for destination matrix
+  m_rows = list.size();
+  m_cols = 0;
+  if (list.size() > 0) {
+    m_cols = list.begin()->size();
+  }
+
+  // Assert the first and latest column counts are the same
+  for ([[maybe_unused]] const auto& row : list) {
+    assert(list.begin()->size() == row.size());
+  }
+
+  m_storage.reserve(Rows() * Cols());
+  for (const auto& row : list) {
+    for (const auto& elem : row) {
+      m_storage.emplace_back(elem);
+    }
+  }
+}
+
+VariableMatrix::VariableMatrix(std::vector<std::vector<Variable>> list) {
+  // Get row and column counts for destination matrix
+  m_rows = list.size();
+  m_cols = 0;
+  if (list.size() > 0) {
+    m_cols = list.begin()->size();
+  }
+
+  // Assert the first and latest column counts are the same
+  for ([[maybe_unused]] const auto& row : list) {
+    assert(list.begin()->size() == row.size());
+  }
+
+  m_storage.reserve(Rows() * Cols());
+  for (const auto& row : list) {
+    for (const auto& elem : row) {
+      m_storage.emplace_back(elem);
+    }
+  }
+}
+
 VariableMatrix::VariableMatrix(const Variable& variable)
     : m_rows{1}, m_cols{1} {
   m_storage.emplace_back(variable);
@@ -410,6 +452,48 @@ VariableMatrix VariableMatrix::Ones(int rows, int cols) {
 
 VariableMatrix Block(
     std::initializer_list<std::initializer_list<VariableMatrix>> list) {
+  // Get row and column counts for destination matrix
+  int rows = 0;
+  int cols = -1;
+  for (const auto& row : list) {
+    if (row.size() > 0) {
+      rows += row.begin()->Rows();
+    }
+
+    // Get number of columns in this row
+    int latestCols = 0;
+    for (const auto& elem : row) {
+      // Assert the first and latest row have the same height
+      assert(row.begin()->Rows() == elem.Rows());
+
+      latestCols += elem.Cols();
+    }
+
+    // If this is the first row, record the column count. Otherwise, assert the
+    // first and latest column counts are the same.
+    if (cols == -1) {
+      cols = latestCols;
+    } else {
+      assert(cols == latestCols);
+    }
+  }
+
+  VariableMatrix result{rows, cols};
+
+  int rowOffset = 0;
+  for (const auto& row : list) {
+    int colOffset = 0;
+    for (const auto& elem : row) {
+      result.Block(rowOffset, colOffset, elem.Rows(), elem.Cols()) = elem;
+      colOffset += elem.Cols();
+    }
+    rowOffset += row.begin()->Rows();
+  }
+
+  return result;
+}
+
+VariableMatrix Block(std::vector<std::vector<VariableMatrix>> list) {
   // Get row and column counts for destination matrix
   int rows = 0;
   int cols = -1;
