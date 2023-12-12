@@ -32,10 +32,10 @@ Variable& Variable::operator=(int value) {
 }
 
 Variable& Variable::SetValue(double value) {
-  if (expr == detail::Zero()) {
+  if (detail::IsZero(expr)) {
     expr = detail::MakeExpressionPtr(value);
   } else {
-    if (expr->args[0] != detail::Zero()) {
+    if (!detail::IsZero(expr->args[0])) {
       fmt::print(stderr,
                  "WARNING: {}:{}: Modified the value of a dependent variable\n",
                  __FILE__, __LINE__);
@@ -46,10 +46,10 @@ Variable& Variable::SetValue(double value) {
 }
 
 Variable& Variable::SetValue(int value) {
-  if (expr == detail::Zero()) {
+  if (detail::IsZero(expr)) {
     expr = detail::MakeExpressionPtr(value);
   } else {
-    if (expr->args[0] != detail::Zero()) {
+    if (!detail::IsZero(expr->args[0])) {
       fmt::print(stderr,
                  "WARNING: {}:{}: Modified the value of a dependent variable\n",
                  __FILE__, __LINE__);
@@ -112,7 +112,7 @@ ExpressionType Variable::Type() const {
 }
 
 void Variable::Update() {
-  if (expr != detail::Zero()) {
+  if (!detail::IsZero(expr)) {
     detail::ExpressionGraph graph{*this};
     graph.Update();
   }
