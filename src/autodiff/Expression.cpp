@@ -21,7 +21,7 @@ namespace {
 static auto kZero = MakeExpressionPtr();
 }  // namespace
 
-IntrusiveSharedPtr<Expression>& Zero() {
+const IntrusiveSharedPtr<Expression>& Zero() {
   return kZero;
 }
 
