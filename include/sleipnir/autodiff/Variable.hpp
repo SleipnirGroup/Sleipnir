@@ -7,7 +7,6 @@
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
 
-#include "sleipnir/IntrusiveSharedPtr.hpp"
 #include "sleipnir/SymbolExports.hpp"
 #include "sleipnir/autodiff/Expression.hpp"
 
@@ -19,7 +18,7 @@ namespace sleipnir {
 class SLEIPNIR_DLLEXPORT Variable {
  public:
   /// The expression node.
-  IntrusiveSharedPtr<detail::Expression> expr = detail::Zero();
+  detail::ExpressionPtr expr = detail::Zero();
 
   /**
    * Constructs an uninitialized Variable.
@@ -65,7 +64,7 @@ class SLEIPNIR_DLLEXPORT Variable {
    *
    * @param expr The autodiff variable.
    */
-  explicit Variable(IntrusiveSharedPtr<detail::Expression> expr);
+  explicit Variable(detail::ExpressionPtr expr);
 
   /**
    * Assignment operator for double.
