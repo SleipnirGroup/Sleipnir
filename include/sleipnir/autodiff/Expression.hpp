@@ -41,7 +41,7 @@ struct SLEIPNIR_DLLEXPORT Expression;
  * Returns an instance of "zero", which has special meaning in expression
  * operations.
  */
-SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression>& Zero();
+SLEIPNIR_DLLEXPORT const IntrusiveSharedPtr<Expression>& Zero();
 
 /**
  * An autodiff expression node.
