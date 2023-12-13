@@ -21,7 +21,7 @@ namespace {
 static auto kZero = MakeExpressionPtr();
 }  // namespace
 
-const IntrusiveSharedPtr<Expression>& Zero() {
+const ExpressionPtr& Zero() {
   return kZero;
 }
 
@@ -30,27 +30,23 @@ Expression::Expression(double value, ExpressionType type)
 
 Expression::Expression(ExpressionType type, BinaryFuncDouble valueFunc,
                        TrinaryFuncDouble lhsGradientValueFunc,
-                       TrinaryFuncExpr lhsGradientFunc,
-                       IntrusiveSharedPtr<Expression> lhs)
+                       TrinaryFuncExpr lhsGradientFunc, ExpressionPtr lhs)
     : value{valueFunc(lhs->value, 0.0)},
       type{type},
       valueFunc{valueFunc},
       gradientValueFuncs{lhsGradientValueFunc,
                          [](double, double, double) { return 0.0; }},
-      gradientFuncs{
-          lhsGradientFunc,
-          [](const IntrusiveSharedPtr<Expression>&,
-             const IntrusiveSharedPtr<Expression>&,
-             const IntrusiveSharedPtr<Expression>&) { return Zero(); }},
+      gradientFuncs{lhsGradientFunc,
+                    [](const ExpressionPtr&, const ExpressionPtr&,
+                       const ExpressionPtr&) { return Zero(); }},
       args{lhs, Zero()} {}
 
 Expression::Expression(ExpressionType type, BinaryFuncDouble valueFunc,
                        TrinaryFuncDouble lhsGradientValueFunc,
                        TrinaryFuncDouble rhsGradientValueFunc,
                        TrinaryFuncExpr lhsGradientFunc,
-                       TrinaryFuncExpr rhsGradientFunc,
-                       IntrusiveSharedPtr<Expression> lhs,
-                       IntrusiveSharedPtr<Expression> rhs)
+                       TrinaryFuncExpr rhsGradientFunc, ExpressionPtr lhs,
+                       ExpressionPtr rhs)
     : value{valueFunc(lhs->value, rhs->value)},
       type{type},
       valueFunc{valueFunc},
@@ -58,9 +54,7 @@ Expression::Expression(ExpressionType type, BinaryFuncDouble valueFunc,
       gradientFuncs{lhsGradientFunc, rhsGradientFunc},
       args{lhs, rhs} {}
 
-IntrusiveSharedPtr<Expression> operator*(
-    const IntrusiveSharedPtr<Expression>& lhs,
-    const IntrusiveSharedPtr<Expression>& rhs) {
+ExpressionPtr operator*(const ExpressionPtr& lhs, const ExpressionPtr& rhs) {
   if (IsZero(lhs) || IsZero(rhs)) {
     return Zero();
   }
@@ -102,22 +96,14 @@ IntrusiveSharedPtr<Expression> operator*(
       [](double lhs, double rhs, double parentAdjoint) {
         return parentAdjoint * lhs;
       },
-      [](const IntrusiveSharedPtr<Expression>& lhs,
-         const IntrusiveSharedPtr<Expression>& rhs,
-         const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-        return parentAdjoint * rhs;
-      },
-      [](const IntrusiveSharedPtr<Expression>& lhs,
-         const IntrusiveSharedPtr<Expression>& rhs,
-         const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-        return parentAdjoint * lhs;
-      },
+      [](const ExpressionPtr& lhs, const ExpressionPtr& rhs,
+         const ExpressionPtr& parentAdjoint) { return parentAdjoint * rhs; },
+      [](const ExpressionPtr& lhs, const ExpressionPtr& rhs,
+         const ExpressionPtr& parentAdjoint) { return parentAdjoint * lhs; },
       lhs, rhs);
 }
 
-IntrusiveSharedPtr<Expression> operator/(
-    const IntrusiveSharedPtr<Expression>& lhs,
-    const IntrusiveSharedPtr<Expression>& rhs) {
+ExpressionPtr operator/(const ExpressionPtr& lhs, const ExpressionPtr& rhs) {
   if (IsZero(lhs)) {
     return Zero();
   }
@@ -138,22 +124,16 @@ IntrusiveSharedPtr<Expression> operator/(
       [](double lhs, double rhs, double parentAdjoint) {
         return parentAdjoint * -lhs / (rhs * rhs);
       },
-      [](const IntrusiveSharedPtr<Expression>& lhs,
-         const IntrusiveSharedPtr<Expression>& rhs,
-         const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-        return parentAdjoint / rhs;
-      },
-      [](const IntrusiveSharedPtr<Expression>& lhs,
-         const IntrusiveSharedPtr<Expression>& rhs,
-         const IntrusiveSharedPtr<Expression>& parentAdjoint) {
+      [](const ExpressionPtr& lhs, const ExpressionPtr& rhs,
+         const ExpressionPtr& parentAdjoint) { return parentAdjoint / rhs; },
+      [](const ExpressionPtr& lhs, const ExpressionPtr& rhs,
+         const ExpressionPtr& parentAdjoint) {
         return parentAdjoint * -lhs / (rhs * rhs);
       },
       lhs, rhs);
 }
 
-IntrusiveSharedPtr<Expression> operator+(
-    const IntrusiveSharedPtr<Expression>& lhs,
-    const IntrusiveSharedPtr<Expression>& rhs) {
+ExpressionPtr operator+(const ExpressionPtr& lhs, const ExpressionPtr& rhs) {
   if (IsZero(lhs)) {
     return rhs;
   } else if (IsZero(rhs)) {
@@ -169,22 +149,14 @@ IntrusiveSharedPtr<Expression> operator+(
       [](double lhs, double rhs, double parentAdjoint) {
         return parentAdjoint;
       },
-      [](const IntrusiveSharedPtr<Expression>& lhs,
-         const IntrusiveSharedPtr<Expression>& rhs,
-         const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-        return parentAdjoint;
-      },
-      [](const IntrusiveSharedPtr<Expression>& lhs,
-         const IntrusiveSharedPtr<Expression>& rhs,
-         const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-        return parentAdjoint;
-      },
+      [](const ExpressionPtr& lhs, const ExpressionPtr& rhs,
+         const ExpressionPtr& parentAdjoint) { return parentAdjoint; },
+      [](const ExpressionPtr& lhs, const ExpressionPtr& rhs,
+         const ExpressionPtr& parentAdjoint) { return parentAdjoint; },
       lhs, rhs);
 }
 
-IntrusiveSharedPtr<Expression> operator-(
-    const IntrusiveSharedPtr<Expression>& lhs,
-    const IntrusiveSharedPtr<Expression>& rhs) {
+ExpressionPtr operator-(const ExpressionPtr& lhs, const ExpressionPtr& rhs) {
   if (IsZero(lhs)) {
     if (!IsZero(rhs)) {
       return -rhs;
@@ -204,21 +176,14 @@ IntrusiveSharedPtr<Expression> operator-(
       [](double lhs, double rhs, double parentAdjoint) {
         return -parentAdjoint;
       },
-      [](const IntrusiveSharedPtr<Expression>& lhs,
-         const IntrusiveSharedPtr<Expression>& rhs,
-         const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-        return parentAdjoint;
-      },
-      [](const IntrusiveSharedPtr<Expression>& lhs,
-         const IntrusiveSharedPtr<Expression>& rhs,
-         const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-        return -parentAdjoint;
-      },
+      [](const ExpressionPtr& lhs, const ExpressionPtr& rhs,
+         const ExpressionPtr& parentAdjoint) { return parentAdjoint; },
+      [](const ExpressionPtr& lhs, const ExpressionPtr& rhs,
+         const ExpressionPtr& parentAdjoint) { return -parentAdjoint; },
       lhs, rhs);
 }
 
-IntrusiveSharedPtr<Expression> operator-(
-    const IntrusiveSharedPtr<Expression>& lhs) {
+ExpressionPtr operator-(const ExpressionPtr& lhs) {
   if (IsZero(lhs)) {
     return Zero();
   }
@@ -226,16 +191,12 @@ IntrusiveSharedPtr<Expression> operator-(
   return MakeExpressionPtr(
       lhs->type, [](double lhs, double) { return -lhs; },
       [](double lhs, double, double parentAdjoint) { return -parentAdjoint; },
-      [](const IntrusiveSharedPtr<Expression>& lhs,
-         const IntrusiveSharedPtr<Expression>& rhs,
-         const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-        return -parentAdjoint;
-      },
+      [](const ExpressionPtr& lhs, const ExpressionPtr& rhs,
+         const ExpressionPtr& parentAdjoint) { return -parentAdjoint; },
       lhs);
 }
 
-IntrusiveSharedPtr<Expression> operator+(
-    const IntrusiveSharedPtr<Expression>& lhs) {
+ExpressionPtr operator+(const ExpressionPtr& lhs) {
   if (IsZero(lhs)) {
     return Zero();
   }
@@ -243,20 +204,17 @@ IntrusiveSharedPtr<Expression> operator+(
   return MakeExpressionPtr(
       lhs->type, [](double lhs, double) { return lhs; },
       [](double lhs, double, double parentAdjoint) { return parentAdjoint; },
-      [](const IntrusiveSharedPtr<Expression>& lhs,
-         const IntrusiveSharedPtr<Expression>& rhs,
-         const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-        return parentAdjoint;
-      },
+      [](const ExpressionPtr& lhs, const ExpressionPtr& rhs,
+         const ExpressionPtr& parentAdjoint) { return parentAdjoint; },
       lhs);
 }
 
-bool IsZero(const IntrusiveSharedPtr<Expression>& ptr) {
+bool IsZero(const ExpressionPtr& ptr) {
   return ptr == Zero();
 }
 
-IntrusiveSharedPtr<Expression> abs(  // NOLINT
-    const IntrusiveSharedPtr<Expression>& x) {
+ExpressionPtr abs(  // NOLINT
+    const ExpressionPtr& x) {
   if (IsZero(x)) {
     return Zero();
   }
@@ -280,9 +238,8 @@ IntrusiveSharedPtr<Expression> abs(  // NOLINT
           return 0.0;
         }
       },
-      [](const IntrusiveSharedPtr<Expression>& x,
-         const IntrusiveSharedPtr<Expression>&,
-         const IntrusiveSharedPtr<Expression>& parentAdjoint) {
+      [](const ExpressionPtr& x, const ExpressionPtr&,
+         const ExpressionPtr& parentAdjoint) {
         if (x->value < 0.0) {
           return -parentAdjoint;
         } else if (x->value > 0.0) {
@@ -294,8 +251,8 @@ IntrusiveSharedPtr<Expression> abs(  // NOLINT
       x);
 }
 
-IntrusiveSharedPtr<Expression> acos(  // NOLINT
-    const IntrusiveSharedPtr<Expression>& x) {
+ExpressionPtr acos(  // NOLINT
+    const ExpressionPtr& x) {
   if (IsZero(x)) {
     return MakeExpressionPtr(std::numbers::pi / 2.0, ExpressionType::kConstant);
   }
@@ -313,9 +270,8 @@ IntrusiveSharedPtr<Expression> acos(  // NOLINT
       [](double x, double, double parentAdjoint) {
         return -parentAdjoint / std::sqrt(1.0 - x * x);
       },
-      [](const IntrusiveSharedPtr<Expression>& x,
-         const IntrusiveSharedPtr<Expression>&,
-         const IntrusiveSharedPtr<Expression>& parentAdjoint) {
+      [](const ExpressionPtr& x, const ExpressionPtr&,
+         const ExpressionPtr& parentAdjoint) {
         return -parentAdjoint /
                sleipnir::detail::sqrt(
                    MakeExpressionPtr(1.0, ExpressionType::kConstant) - x * x);
@@ -323,8 +279,8 @@ IntrusiveSharedPtr<Expression> acos(  // NOLINT
       x);
 }
 
-IntrusiveSharedPtr<Expression> asin(  // NOLINT
-    const IntrusiveSharedPtr<Expression>& x) {
+ExpressionPtr asin(  // NOLINT
+    const ExpressionPtr& x) {
   if (IsZero(x)) {
     return Zero();
   }
@@ -342,9 +298,8 @@ IntrusiveSharedPtr<Expression> asin(  // NOLINT
       [](double x, double, double parentAdjoint) {
         return parentAdjoint / std::sqrt(1.0 - x * x);
       },
-      [](const IntrusiveSharedPtr<Expression>& x,
-         const IntrusiveSharedPtr<Expression>&,
-         const IntrusiveSharedPtr<Expression>& parentAdjoint) {
+      [](const ExpressionPtr& x, const ExpressionPtr&,
+         const ExpressionPtr& parentAdjoint) {
         return parentAdjoint /
                sleipnir::detail::sqrt(
                    MakeExpressionPtr(1.0, ExpressionType::kConstant) - x * x);
@@ -352,8 +307,8 @@ IntrusiveSharedPtr<Expression> asin(  // NOLINT
       x);
 }
 
-IntrusiveSharedPtr<Expression> atan(  // NOLINT
-    const IntrusiveSharedPtr<Expression>& x) {
+ExpressionPtr atan(  // NOLINT
+    const ExpressionPtr& x) {
   if (IsZero(x)) {
     return Zero();
   }
@@ -371,18 +326,16 @@ IntrusiveSharedPtr<Expression> atan(  // NOLINT
       [](double x, double, double parentAdjoint) {
         return parentAdjoint / (1.0 + x * x);
       },
-      [](const IntrusiveSharedPtr<Expression>& x,
-         const IntrusiveSharedPtr<Expression>&,
-         const IntrusiveSharedPtr<Expression>& parentAdjoint) {
+      [](const ExpressionPtr& x, const ExpressionPtr&,
+         const ExpressionPtr& parentAdjoint) {
         return parentAdjoint /
                (MakeExpressionPtr(1.0, ExpressionType::kConstant) + x * x);
       },
       x);
 }
 
-IntrusiveSharedPtr<Expression> atan2(  // NOLINT
-    const IntrusiveSharedPtr<Expression>& y,
-    const IntrusiveSharedPtr<Expression>& x) {
+ExpressionPtr atan2(  // NOLINT
+    const ExpressionPtr& y, const ExpressionPtr& x) {
   if (IsZero(y)) {
     return Zero();
   } else if (IsZero(x)) {
@@ -406,21 +359,19 @@ IntrusiveSharedPtr<Expression> atan2(  // NOLINT
       [](double y, double x, double parentAdjoint) {
         return parentAdjoint * -y / (y * y + x * x);
       },
-      [](const IntrusiveSharedPtr<Expression>& y,
-         const IntrusiveSharedPtr<Expression>& x,
-         const IntrusiveSharedPtr<Expression>& parentAdjoint) {
+      [](const ExpressionPtr& y, const ExpressionPtr& x,
+         const ExpressionPtr& parentAdjoint) {
         return parentAdjoint * x / (y * y + x * x);
       },
-      [](const IntrusiveSharedPtr<Expression>& y,
-         const IntrusiveSharedPtr<Expression>& x,
-         const IntrusiveSharedPtr<Expression>& parentAdjoint) {
+      [](const ExpressionPtr& y, const ExpressionPtr& x,
+         const ExpressionPtr& parentAdjoint) {
         return parentAdjoint * -y / (y * y + x * x);
       },
       y, x);
 }
 
-IntrusiveSharedPtr<Expression> cos(  // NOLINT
-    const IntrusiveSharedPtr<Expression>& x) {
+ExpressionPtr cos(  // NOLINT
+    const ExpressionPtr& x) {
   if (IsZero(x)) {
     return MakeExpressionPtr(1.0, ExpressionType::kConstant);
   }
@@ -438,16 +389,15 @@ IntrusiveSharedPtr<Expression> cos(  // NOLINT
       [](double x, double, double parentAdjoint) {
         return -parentAdjoint * std::sin(x);
       },
-      [](const IntrusiveSharedPtr<Expression>& x,
-         const IntrusiveSharedPtr<Expression>&,
-         const IntrusiveSharedPtr<Expression>& parentAdjoint) {
+      [](const ExpressionPtr& x, const ExpressionPtr&,
+         const ExpressionPtr& parentAdjoint) {
         return parentAdjoint * -sleipnir::detail::sin(x);
       },
       x);
 }
 
-IntrusiveSharedPtr<Expression> cosh(  // NOLINT
-    const IntrusiveSharedPtr<Expression>& x) {
+ExpressionPtr cosh(  // NOLINT
+    const ExpressionPtr& x) {
   if (IsZero(x)) {
     return MakeExpressionPtr(1.0, ExpressionType::kConstant);
   }
@@ -465,16 +415,15 @@ IntrusiveSharedPtr<Expression> cosh(  // NOLINT
       [](double x, double, double parentAdjoint) {
         return parentAdjoint * std::sinh(x);
       },
-      [](const IntrusiveSharedPtr<Expression>& x,
-         const IntrusiveSharedPtr<Expression>&,
-         const IntrusiveSharedPtr<Expression>& parentAdjoint) {
+      [](const ExpressionPtr& x, const ExpressionPtr&,
+         const ExpressionPtr& parentAdjoint) {
         return parentAdjoint * sleipnir::detail::sinh(x);
       },
       x);
 }
 
-IntrusiveSharedPtr<Expression> erf(  // NOLINT
-    const IntrusiveSharedPtr<Expression>& x) {
+ExpressionPtr erf(  // NOLINT
+    const ExpressionPtr& x) {
   if (IsZero(x)) {
     return Zero();
   }
@@ -493,9 +442,8 @@ IntrusiveSharedPtr<Expression> erf(  // NOLINT
         return parentAdjoint * 2.0 * std::numbers::inv_sqrtpi *
                std::exp(-x * x);
       },
-      [](const IntrusiveSharedPtr<Expression>& x,
-         const IntrusiveSharedPtr<Expression>&,
-         const IntrusiveSharedPtr<Expression>& parentAdjoint) {
+      [](const ExpressionPtr& x, const ExpressionPtr&,
+         const ExpressionPtr& parentAdjoint) {
         return parentAdjoint *
                MakeExpressionPtr(2.0 * std::numbers::inv_sqrtpi,
                                  ExpressionType::kConstant) *
@@ -504,8 +452,8 @@ IntrusiveSharedPtr<Expression> erf(  // NOLINT
       x);
 }
 
-IntrusiveSharedPtr<Expression> exp(  // NOLINT
-    const IntrusiveSharedPtr<Expression>& x) {
+ExpressionPtr exp(  // NOLINT
+    const ExpressionPtr& x) {
   if (IsZero(x)) {
     return MakeExpressionPtr(1.0, ExpressionType::kConstant);
   }
@@ -523,17 +471,15 @@ IntrusiveSharedPtr<Expression> exp(  // NOLINT
       [](double x, double, double parentAdjoint) {
         return parentAdjoint * std::exp(x);
       },
-      [](const IntrusiveSharedPtr<Expression>& x,
-         const IntrusiveSharedPtr<Expression>&,
-         const IntrusiveSharedPtr<Expression>& parentAdjoint) {
+      [](const ExpressionPtr& x, const ExpressionPtr&,
+         const ExpressionPtr& parentAdjoint) {
         return parentAdjoint * sleipnir::detail::exp(x);
       },
       x);
 }
 
-IntrusiveSharedPtr<Expression> hypot(  // NOLINT
-    const IntrusiveSharedPtr<Expression>& x,
-    const IntrusiveSharedPtr<Expression>& y) {
+ExpressionPtr hypot(  // NOLINT
+    const ExpressionPtr& x, const ExpressionPtr& y) {
   if (IsZero(x) && IsZero(y)) {
     return Zero();
   }
@@ -555,14 +501,12 @@ IntrusiveSharedPtr<Expression> hypot(  // NOLINT
         [](double x, double y, double parentAdjoint) {
           return parentAdjoint * y / std::hypot(x, y);
         },
-        [](const IntrusiveSharedPtr<Expression>& x,
-           const IntrusiveSharedPtr<Expression>& y,
-           const IntrusiveSharedPtr<Expression>& parentAdjoint) {
+        [](const ExpressionPtr& x, const ExpressionPtr& y,
+           const ExpressionPtr& parentAdjoint) {
           return parentAdjoint * x / sleipnir::detail::hypot(x, y);
         },
-        [](const IntrusiveSharedPtr<Expression>& x,
-           const IntrusiveSharedPtr<Expression>& y,
-           const IntrusiveSharedPtr<Expression>& parentAdjoint) {
+        [](const ExpressionPtr& x, const ExpressionPtr& y,
+           const ExpressionPtr& parentAdjoint) {
           return parentAdjoint * y / sleipnir::detail::hypot(x, y);
         },
         MakeExpressionPtr(0.0, ExpressionType::kConstant), y);
@@ -583,14 +527,12 @@ IntrusiveSharedPtr<Expression> hypot(  // NOLINT
         [](double x, double y, double parentAdjoint) {
           return parentAdjoint * y / std::hypot(x, y);
         },
-        [](const IntrusiveSharedPtr<Expression>& x,
-           const IntrusiveSharedPtr<Expression>& y,
-           const IntrusiveSharedPtr<Expression>& parentAdjoint) {
+        [](const ExpressionPtr& x, const ExpressionPtr& y,
+           const ExpressionPtr& parentAdjoint) {
           return parentAdjoint * x / sleipnir::detail::hypot(x, y);
         },
-        [](const IntrusiveSharedPtr<Expression>& x,
-           const IntrusiveSharedPtr<Expression>& y,
-           const IntrusiveSharedPtr<Expression>& parentAdjoint) {
+        [](const ExpressionPtr& x, const ExpressionPtr& y,
+           const ExpressionPtr& parentAdjoint) {
           return parentAdjoint * y / sleipnir::detail::hypot(x, y);
         },
         x, MakeExpressionPtr(0.0, ExpressionType::kConstant));
@@ -612,22 +554,20 @@ IntrusiveSharedPtr<Expression> hypot(  // NOLINT
         [](double x, double y, double parentAdjoint) {
           return parentAdjoint * y / std::hypot(x, y);
         },
-        [](const IntrusiveSharedPtr<Expression>& x,
-           const IntrusiveSharedPtr<Expression>& y,
-           const IntrusiveSharedPtr<Expression>& parentAdjoint) {
+        [](const ExpressionPtr& x, const ExpressionPtr& y,
+           const ExpressionPtr& parentAdjoint) {
           return parentAdjoint * x / sleipnir::detail::hypot(x, y);
         },
-        [](const IntrusiveSharedPtr<Expression>& x,
-           const IntrusiveSharedPtr<Expression>& y,
-           const IntrusiveSharedPtr<Expression>& parentAdjoint) {
+        [](const ExpressionPtr& x, const ExpressionPtr& y,
+           const ExpressionPtr& parentAdjoint) {
           return parentAdjoint * y / sleipnir::detail::hypot(x, y);
         },
         x, y);
   }
 }
 
-IntrusiveSharedPtr<Expression> log(  // NOLINT
-    const IntrusiveSharedPtr<Expression>& x) {
+ExpressionPtr log(  // NOLINT
+    const ExpressionPtr& x) {
   if (IsZero(x)) {
     return Zero();
   }
@@ -643,16 +583,13 @@ IntrusiveSharedPtr<Expression> log(  // NOLINT
   return MakeExpressionPtr(
       type, [](double x, double) { return std::log(x); },
       [](double x, double, double parentAdjoint) { return parentAdjoint / x; },
-      [](const IntrusiveSharedPtr<Expression>& x,
-         const IntrusiveSharedPtr<Expression>&,
-         const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-        return parentAdjoint / x;
-      },
+      [](const ExpressionPtr& x, const ExpressionPtr&,
+         const ExpressionPtr& parentAdjoint) { return parentAdjoint / x; },
       x);
 }
 
-IntrusiveSharedPtr<Expression> log10(  // NOLINT
-    const IntrusiveSharedPtr<Expression>& x) {
+ExpressionPtr log10(  // NOLINT
+    const ExpressionPtr& x) {
   if (IsZero(x)) {
     return Zero();
   }
@@ -670,9 +607,8 @@ IntrusiveSharedPtr<Expression> log10(  // NOLINT
       [](double x, double, double parentAdjoint) {
         return parentAdjoint / (std::numbers::ln10 * x);
       },
-      [](const IntrusiveSharedPtr<Expression>& x,
-         const IntrusiveSharedPtr<Expression>&,
-         const IntrusiveSharedPtr<Expression>& parentAdjoint) {
+      [](const ExpressionPtr& x, const ExpressionPtr&,
+         const ExpressionPtr& parentAdjoint) {
         return parentAdjoint / (MakeExpressionPtr(std::numbers::ln10,
                                                   ExpressionType::kConstant) *
                                 x);
@@ -680,9 +616,8 @@ IntrusiveSharedPtr<Expression> log10(  // NOLINT
       x);
 }
 
-IntrusiveSharedPtr<Expression> pow(  // NOLINT
-    const IntrusiveSharedPtr<Expression>& base,
-    const IntrusiveSharedPtr<Expression>& power) {
+ExpressionPtr pow(  // NOLINT
+    const ExpressionPtr& base, const ExpressionPtr& power) {
   if (IsZero(base)) {
     return Zero();
   }
@@ -724,18 +659,16 @@ IntrusiveSharedPtr<Expression> pow(  // NOLINT
                  std::log(base);
         }
       },
-      [](const IntrusiveSharedPtr<Expression>& base,
-         const IntrusiveSharedPtr<Expression>& power,
-         const IntrusiveSharedPtr<Expression>& parentAdjoint) {
+      [](const ExpressionPtr& base, const ExpressionPtr& power,
+         const ExpressionPtr& parentAdjoint) {
         return parentAdjoint *
                sleipnir::detail::pow(
                    base,
                    power - MakeExpressionPtr(1, ExpressionType::kConstant)) *
                power;
       },
-      [](const IntrusiveSharedPtr<Expression>& base,
-         const IntrusiveSharedPtr<Expression>& power,
-         const IntrusiveSharedPtr<Expression>& parentAdjoint) {
+      [](const ExpressionPtr& base, const ExpressionPtr& power,
+         const ExpressionPtr& parentAdjoint) {
         // Since x * std::log(x) -> 0 as x -> 0
         if (base->value == 0.0) {
           return Zero();
@@ -750,7 +683,7 @@ IntrusiveSharedPtr<Expression> pow(  // NOLINT
       base, power);
 }
 
-IntrusiveSharedPtr<Expression> sign(const IntrusiveSharedPtr<Expression>& x) {
+ExpressionPtr sign(const ExpressionPtr& x) {
   if (IsZero(x)) {
     return Zero();
   }
@@ -775,16 +708,13 @@ IntrusiveSharedPtr<Expression> sign(const IntrusiveSharedPtr<Expression>& x) {
         }
       },
       [](double x, double, double parentAdjoint) { return 0.0; },
-      [](const IntrusiveSharedPtr<Expression>& x,
-         const IntrusiveSharedPtr<Expression>&,
-         const IntrusiveSharedPtr<Expression>& parentAdjoint) {
-        return Zero();
-      },
+      [](const ExpressionPtr& x, const ExpressionPtr&,
+         const ExpressionPtr& parentAdjoint) { return Zero(); },
       x);
 }
 
-IntrusiveSharedPtr<Expression> sin(  // NOLINT
-    const IntrusiveSharedPtr<Expression>& x) {
+ExpressionPtr sin(  // NOLINT
+    const ExpressionPtr& x) {
   if (IsZero(x)) {
     return Zero();
   }
@@ -802,15 +732,14 @@ IntrusiveSharedPtr<Expression> sin(  // NOLINT
       [](double x, double, double parentAdjoint) {
         return parentAdjoint * std::cos(x);
       },
-      [](const IntrusiveSharedPtr<Expression>& x,
-         const IntrusiveSharedPtr<Expression>&,
-         const IntrusiveSharedPtr<Expression>& parentAdjoint) {
+      [](const ExpressionPtr& x, const ExpressionPtr&,
+         const ExpressionPtr& parentAdjoint) {
         return parentAdjoint * sleipnir::detail::cos(x);
       },
       x);
 }
 
-IntrusiveSharedPtr<Expression> sinh(const IntrusiveSharedPtr<Expression>& x) {
+ExpressionPtr sinh(const ExpressionPtr& x) {
   if (IsZero(x)) {
     return Zero();
   }
@@ -828,16 +757,15 @@ IntrusiveSharedPtr<Expression> sinh(const IntrusiveSharedPtr<Expression>& x) {
       [](double x, double, double parentAdjoint) {
         return parentAdjoint * std::cosh(x);
       },
-      [](const IntrusiveSharedPtr<Expression>& x,
-         const IntrusiveSharedPtr<Expression>&,
-         const IntrusiveSharedPtr<Expression>& parentAdjoint) {
+      [](const ExpressionPtr& x, const ExpressionPtr&,
+         const ExpressionPtr& parentAdjoint) {
         return parentAdjoint * sleipnir::detail::cosh(x);
       },
       x);
 }
 
-IntrusiveSharedPtr<Expression> sqrt(  // NOLINT
-    const IntrusiveSharedPtr<Expression>& x) {
+ExpressionPtr sqrt(  // NOLINT
+    const ExpressionPtr& x) {
   if (IsZero(x)) {
     return Zero();
   }
@@ -855,9 +783,8 @@ IntrusiveSharedPtr<Expression> sqrt(  // NOLINT
       [](double x, double, double parentAdjoint) {
         return parentAdjoint / (2.0 * std::sqrt(x));
       },
-      [](const IntrusiveSharedPtr<Expression>& x,
-         const IntrusiveSharedPtr<Expression>&,
-         const IntrusiveSharedPtr<Expression>& parentAdjoint) {
+      [](const ExpressionPtr& x, const ExpressionPtr&,
+         const ExpressionPtr& parentAdjoint) {
         return parentAdjoint /
                (MakeExpressionPtr(2.0, ExpressionType::kConstant) *
                 sleipnir::detail::sqrt(x));
@@ -865,8 +792,8 @@ IntrusiveSharedPtr<Expression> sqrt(  // NOLINT
       x);
 }
 
-IntrusiveSharedPtr<Expression> tan(  // NOLINT
-    const IntrusiveSharedPtr<Expression>& x) {
+ExpressionPtr tan(  // NOLINT
+    const ExpressionPtr& x) {
   if (IsZero(x)) {
     return Zero();
   }
@@ -884,16 +811,15 @@ IntrusiveSharedPtr<Expression> tan(  // NOLINT
       [](double x, double, double parentAdjoint) {
         return parentAdjoint / (std::cos(x) * std::cos(x));
       },
-      [](const IntrusiveSharedPtr<Expression>& x,
-         const IntrusiveSharedPtr<Expression>&,
-         const IntrusiveSharedPtr<Expression>& parentAdjoint) {
+      [](const ExpressionPtr& x, const ExpressionPtr&,
+         const ExpressionPtr& parentAdjoint) {
         return parentAdjoint /
                (sleipnir::detail::cos(x) * sleipnir::detail::cos(x));
       },
       x);
 }
 
-IntrusiveSharedPtr<Expression> tanh(const IntrusiveSharedPtr<Expression>& x) {
+ExpressionPtr tanh(const ExpressionPtr& x) {
   if (IsZero(x)) {
     return Zero();
   }
@@ -911,9 +837,8 @@ IntrusiveSharedPtr<Expression> tanh(const IntrusiveSharedPtr<Expression>& x) {
       [](double x, double, double parentAdjoint) {
         return parentAdjoint / (std::cosh(x) * std::cosh(x));
       },
-      [](const IntrusiveSharedPtr<Expression>& x,
-         const IntrusiveSharedPtr<Expression>&,
-         const IntrusiveSharedPtr<Expression>& parentAdjoint) {
+      [](const ExpressionPtr& x, const ExpressionPtr&,
+         const ExpressionPtr& parentAdjoint) {
         return parentAdjoint /
                (sleipnir::detail::cosh(x) * sleipnir::detail::cosh(x));
       },

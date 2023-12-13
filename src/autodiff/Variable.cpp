@@ -16,8 +16,7 @@ Variable::Variable(double value)
 Variable::Variable(int value)
     : expr{detail::MakeExpressionPtr(value, ExpressionType::kConstant)} {}
 
-Variable::Variable(IntrusiveSharedPtr<detail::Expression> expr)
-    : expr{std::move(expr)} {}
+Variable::Variable(detail::ExpressionPtr expr) : expr{std::move(expr)} {}
 
 Variable& Variable::operator=(double value) {
   expr = detail::MakeExpressionPtr(value, ExpressionType::kConstant);

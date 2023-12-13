@@ -38,10 +38,15 @@ namespace detail {
 struct SLEIPNIR_DLLEXPORT Expression;
 
 /**
+ * Typedef for intrusive shared pointer to Expression.
+ */
+using ExpressionPtr = IntrusiveSharedPtr<Expression>;
+
+/**
  * Returns an instance of "zero", which has special meaning in expression
  * operations.
  */
-SLEIPNIR_DLLEXPORT const IntrusiveSharedPtr<Expression>& Zero();
+SLEIPNIR_DLLEXPORT const ExpressionPtr& Zero();
 
 /**
  * An autodiff expression node.
@@ -60,10 +65,9 @@ struct SLEIPNIR_DLLEXPORT Expression {
   /**
    * Trinary function taking three expressions and returning an expression.
    */
-  using TrinaryFuncExpr =
-      IntrusiveSharedPtr<Expression> (*)(const IntrusiveSharedPtr<Expression>&,
-                                         const IntrusiveSharedPtr<Expression>&,
-                                         const IntrusiveSharedPtr<Expression>&);
+  using TrinaryFuncExpr = ExpressionPtr (*)(const ExpressionPtr&,
+                                            const ExpressionPtr&,
+                                            const ExpressionPtr&);
 
   /// The value of the expression node.
   double value = 0.0;
@@ -81,7 +85,7 @@ struct SLEIPNIR_DLLEXPORT Expression {
 
   /// The adjoint of the expression node used during gradient expression tree
   /// generation.
-  IntrusiveSharedPtr<Expression> adjointExpr{Zero()};
+  ExpressionPtr adjointExpr{Zero()};
 
   /// Expression argument type.
   ExpressionType type = ExpressionType::kConstant;
@@ -112,15 +116,15 @@ struct SLEIPNIR_DLLEXPORT Expression {
   ///   <li>parentAdjoint: Adjoint of parent expression.</li>
   /// </ul>
   std::array<TrinaryFuncExpr, 2> gradientFuncs{
-      [](const IntrusiveSharedPtr<Expression>&,
-         const IntrusiveSharedPtr<Expression>&,
-         const IntrusiveSharedPtr<Expression>&) { return Zero(); },
-      [](const IntrusiveSharedPtr<Expression>&,
-         const IntrusiveSharedPtr<Expression>&,
-         const IntrusiveSharedPtr<Expression>&) { return Zero(); }};
+      [](const ExpressionPtr&, const ExpressionPtr&, const ExpressionPtr&) {
+        return Zero();
+      },
+      [](const ExpressionPtr&, const ExpressionPtr&, const ExpressionPtr&) {
+        return Zero();
+      }};
 
   /// Expression arguments.
-  std::array<IntrusiveSharedPtr<Expression>, 2> args{Zero(), Zero()};
+  std::array<ExpressionPtr, 2> args{Zero(), Zero()};
 
   /// Reference count for intrusive shared pointer.
   uint32_t refCount = 0;
@@ -171,8 +175,7 @@ struct SLEIPNIR_DLLEXPORT Expression {
    */
   Expression(ExpressionType type, BinaryFuncDouble valueFunc,
              TrinaryFuncDouble lhsGradientValueFunc,
-             TrinaryFuncExpr lhsGradientFunc,
-             IntrusiveSharedPtr<Expression> lhs);
+             TrinaryFuncExpr lhsGradientFunc, ExpressionPtr lhs);
 
   /**
    * Constructs a binary expression (an operator with two arguments).
@@ -190,8 +193,7 @@ struct SLEIPNIR_DLLEXPORT Expression {
              TrinaryFuncDouble lhsGradientValueFunc,
              TrinaryFuncDouble rhsGradientValueFunc,
              TrinaryFuncExpr lhsGradientFunc, TrinaryFuncExpr rhsGradientFunc,
-             IntrusiveSharedPtr<Expression> lhs,
-             IntrusiveSharedPtr<Expression> rhs);
+             ExpressionPtr lhs, ExpressionPtr rhs);
 
   /**
    * Expression-Expression multiplication operator.
@@ -199,9 +201,8 @@ struct SLEIPNIR_DLLEXPORT Expression {
    * @param lhs Operator left-hand side.
    * @param rhs Operator right-hand side.
    */
-  friend SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator*(
-      const IntrusiveSharedPtr<Expression>& lhs,
-      const IntrusiveSharedPtr<Expression>& rhs);
+  friend SLEIPNIR_DLLEXPORT ExpressionPtr operator*(const ExpressionPtr& lhs,
+                                                    const ExpressionPtr& rhs);
 
   /**
    * Expression-Expression division operator.
@@ -209,9 +210,8 @@ struct SLEIPNIR_DLLEXPORT Expression {
    * @param lhs Operator left-hand side.
    * @param rhs Operator right-hand side.
    */
-  friend SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator/(
-      const IntrusiveSharedPtr<Expression>& lhs,
-      const IntrusiveSharedPtr<Expression>& rhs);
+  friend SLEIPNIR_DLLEXPORT ExpressionPtr operator/(const ExpressionPtr& lhs,
+                                                    const ExpressionPtr& rhs);
 
   /**
    * Expression-Expression addition operator.
@@ -219,9 +219,8 @@ struct SLEIPNIR_DLLEXPORT Expression {
    * @param lhs Operator left-hand side.
    * @param rhs Operator right-hand side.
    */
-  friend SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator+(
-      const IntrusiveSharedPtr<Expression>& lhs,
-      const IntrusiveSharedPtr<Expression>& rhs);
+  friend SLEIPNIR_DLLEXPORT ExpressionPtr operator+(const ExpressionPtr& lhs,
+                                                    const ExpressionPtr& rhs);
 
   /**
    * Expression-Expression subtraction operator.
@@ -229,25 +228,22 @@ struct SLEIPNIR_DLLEXPORT Expression {
    * @param lhs Operator left-hand side.
    * @param rhs Operator right-hand side.
    */
-  friend SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator-(
-      const IntrusiveSharedPtr<Expression>& lhs,
-      const IntrusiveSharedPtr<Expression>& rhs);
+  friend SLEIPNIR_DLLEXPORT ExpressionPtr operator-(const ExpressionPtr& lhs,
+                                                    const ExpressionPtr& rhs);
 
   /**
    * Unary minus operator.
    *
    * @param lhs Operand of unary minus.
    */
-  friend SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator-(
-      const IntrusiveSharedPtr<Expression>& lhs);
+  friend SLEIPNIR_DLLEXPORT ExpressionPtr operator-(const ExpressionPtr& lhs);
 
   /**
    * Unary plus operator.
    *
    * @param lhs Operand of unary plus.
    */
-  friend SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> operator+(
-      const IntrusiveSharedPtr<Expression>& lhs);
+  friend SLEIPNIR_DLLEXPORT ExpressionPtr operator+(const ExpressionPtr& lhs);
 };
 
 /**
@@ -304,7 +300,7 @@ inline void IntrusiveSharedPtrDecRefCount(Expression* expr) {
  * @param args Constructor arguments for Expression.
  */
 template <typename... Args>
-static IntrusiveSharedPtr<Expression> MakeExpressionPtr(Args&&... args) {
+static ExpressionPtr MakeExpressionPtr(Args&&... args) {
   return AllocateIntrusiveShared<Expression>(GlobalPoolAllocator<Expression>(),
                                              std::forward<Args>(args)...);
 }
@@ -312,39 +308,39 @@ static IntrusiveSharedPtr<Expression> MakeExpressionPtr(Args&&... args) {
 /**
  * Returns true if this expression is the constant zero.
  */
-SLEIPNIR_DLLEXPORT bool IsZero(const IntrusiveSharedPtr<Expression>& ptr);
+SLEIPNIR_DLLEXPORT bool IsZero(const ExpressionPtr& ptr);
 
 /**
  * std::abs() for Expressions.
  *
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> abs(  // NOLINT
-    const IntrusiveSharedPtr<Expression>& x);
+SLEIPNIR_DLLEXPORT ExpressionPtr abs(  // NOLINT
+    const ExpressionPtr& x);
 
 /**
  * std::acos() for Expressions.
  *
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> acos(  // NOLINT
-    const IntrusiveSharedPtr<Expression>& x);
+SLEIPNIR_DLLEXPORT ExpressionPtr acos(  // NOLINT
+    const ExpressionPtr& x);
 
 /**
  * std::asin() for Expressions.
  *
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> asin(  // NOLINT
-    const IntrusiveSharedPtr<Expression>& x);
+SLEIPNIR_DLLEXPORT ExpressionPtr asin(  // NOLINT
+    const ExpressionPtr& x);
 
 /**
  * std::atan() for Expressions.
  *
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> atan(  // NOLINT
-    const IntrusiveSharedPtr<Expression>& x);
+SLEIPNIR_DLLEXPORT ExpressionPtr atan(  // NOLINT
+    const ExpressionPtr& x);
 
 /**
  * std::atan2() for Expressions.
@@ -352,41 +348,40 @@ SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> atan(  // NOLINT
  * @param y The y argument.
  * @param x The x argument.
  */
-SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> atan2(  // NOLINT
-    const IntrusiveSharedPtr<Expression>& y,
-    const IntrusiveSharedPtr<Expression>& x);
+SLEIPNIR_DLLEXPORT ExpressionPtr atan2(  // NOLINT
+    const ExpressionPtr& y, const ExpressionPtr& x);
 
 /**
  * std::cos() for Expressions.
  *
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> cos(  // NOLINT
-    const IntrusiveSharedPtr<Expression>& x);
+SLEIPNIR_DLLEXPORT ExpressionPtr cos(  // NOLINT
+    const ExpressionPtr& x);
 
 /**
  * std::cosh() for Expressions.
  *
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> cosh(  // NOLINT
-    const IntrusiveSharedPtr<Expression>& x);
+SLEIPNIR_DLLEXPORT ExpressionPtr cosh(  // NOLINT
+    const ExpressionPtr& x);
 
 /**
  * std::erf() for Expressions.
  *
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> erf(  // NOLINT
-    const IntrusiveSharedPtr<Expression>& x);
+SLEIPNIR_DLLEXPORT ExpressionPtr erf(  // NOLINT
+    const ExpressionPtr& x);
 
 /**
  * std::exp() for Expressions.
  *
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> exp(  // NOLINT
-    const IntrusiveSharedPtr<Expression>& x);
+SLEIPNIR_DLLEXPORT ExpressionPtr exp(  // NOLINT
+    const ExpressionPtr& x);
 
 /**
  * std::hypot() for Expressions.
@@ -394,25 +389,24 @@ SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> exp(  // NOLINT
  * @param x The x argument.
  * @param y The y argument.
  */
-SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> hypot(  // NOLINT
-    const IntrusiveSharedPtr<Expression>& x,
-    const IntrusiveSharedPtr<Expression>& y);
+SLEIPNIR_DLLEXPORT ExpressionPtr hypot(  // NOLINT
+    const ExpressionPtr& x, const ExpressionPtr& y);
 
 /**
  * std::log() for Expressions.
  *
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> log(  // NOLINT
-    const IntrusiveSharedPtr<Expression>& x);
+SLEIPNIR_DLLEXPORT ExpressionPtr log(  // NOLINT
+    const ExpressionPtr& x);
 
 /**
  * std::log10() for Expressions.
  *
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> log10(  // NOLINT
-    const IntrusiveSharedPtr<Expression>& x);
+SLEIPNIR_DLLEXPORT ExpressionPtr log10(  // NOLINT
+    const ExpressionPtr& x);
 
 /**
  * std::pow() for Expressions.
@@ -420,57 +414,53 @@ SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> log10(  // NOLINT
  * @param base The base.
  * @param power The power.
  */
-SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> pow(  // NOLINT
-    const IntrusiveSharedPtr<Expression>& base,
-    const IntrusiveSharedPtr<Expression>& power);
+SLEIPNIR_DLLEXPORT ExpressionPtr pow(  // NOLINT
+    const ExpressionPtr& base, const ExpressionPtr& power);
 
 /**
  * sign() for Expressions.
  *
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> sign(
-    const IntrusiveSharedPtr<Expression>& x);
+SLEIPNIR_DLLEXPORT ExpressionPtr sign(const ExpressionPtr& x);
 
 /**
  * std::sin() for Expressions.
  *
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> sin(  // NOLINT
-    const IntrusiveSharedPtr<Expression>& x);
+SLEIPNIR_DLLEXPORT ExpressionPtr sin(  // NOLINT
+    const ExpressionPtr& x);
 
 /**
  * std::sinh() for Expressions.
  *
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> sinh(
-    const IntrusiveSharedPtr<Expression>& x);
+SLEIPNIR_DLLEXPORT ExpressionPtr sinh(const ExpressionPtr& x);
 
 /**
  * std::sqrt() for Expressions.
  *
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> sqrt(  // NOLINT
-    const IntrusiveSharedPtr<Expression>& x);
+SLEIPNIR_DLLEXPORT ExpressionPtr sqrt(  // NOLINT
+    const ExpressionPtr& x);
 
 /**
  * std::tan() for Expressions.
  *
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> tan(  // NOLINT
-    const IntrusiveSharedPtr<Expression>& x);
+SLEIPNIR_DLLEXPORT ExpressionPtr tan(  // NOLINT
+    const ExpressionPtr& x);
 
 /**
  * std::tanh() for Expressions.
  *
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT IntrusiveSharedPtr<Expression> tanh(
-    const IntrusiveSharedPtr<Expression>& x);
+SLEIPNIR_DLLEXPORT ExpressionPtr tanh(const ExpressionPtr& x);
 
 }  // namespace detail
 
