@@ -3,6 +3,8 @@
 #include <gtest/gtest.h>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 
+#include "CmdlineArguments.hpp"
+
 TEST(QuadraticProblemTest, Unconstrained1d) {
   sleipnir::OptimizationProblem problem;
 
@@ -11,7 +13,8 @@ TEST(QuadraticProblemTest, Unconstrained1d) {
 
   problem.Minimize(x * x - 6.0 * x);
 
-  auto status = problem.Solve({.diagnostics = true});
+  auto status =
+      problem.Solve({.diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
 
   EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
   EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
@@ -32,7 +35,8 @@ TEST(QuadraticProblemTest, Unconstrained2d) {
 
     problem.Minimize(x * x + y * y);
 
-    auto status = problem.Solve({.diagnostics = true});
+    auto status =
+        problem.Solve({.diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
 
     EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
     EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
@@ -52,7 +56,8 @@ TEST(QuadraticProblemTest, Unconstrained2d) {
 
     problem.Minimize(x.T() * x);
 
-    auto status = problem.Solve({.diagnostics = true});
+    auto status =
+        problem.Solve({.diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
 
     EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
     EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
@@ -113,7 +118,8 @@ TEST(QuadraticProblemTest, EqualityConstrained) {
 
     problem.SubjectTo(x + 3 * y == 36);
 
-    auto status = problem.Solve({.diagnostics = true});
+    auto status =
+        problem.Solve({.diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
 
     EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
     EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.equalityConstraintType);
@@ -135,7 +141,8 @@ TEST(QuadraticProblemTest, EqualityConstrained) {
 
     problem.SubjectTo(x == Eigen::Matrix<double, 2, 1>{{3.0, 3.0}});
 
-    auto status = problem.Solve({.diagnostics = true});
+    auto status =
+        problem.Solve({.diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
 
     EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
     EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.equalityConstraintType);

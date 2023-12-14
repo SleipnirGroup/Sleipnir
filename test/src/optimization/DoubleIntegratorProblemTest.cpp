@@ -10,6 +10,8 @@
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 #include <units/time.h>
 
+#include "CmdlineArguments.hpp"
+
 TEST(DoubleIntegratorProblemTest, MinimumTime) {
   auto start = std::chrono::system_clock::now();
 
@@ -62,13 +64,16 @@ TEST(DoubleIntegratorProblemTest, MinimumTime) {
   }
   problem.Minimize(J);
 
-  auto end1 = std::chrono::system_clock::now();
-  using std::chrono::duration_cast;
-  using std::chrono::microseconds;
-  fmt::print("Setup time: {} ms\n\n",
-             duration_cast<microseconds>(end1 - start).count() / 1000.0);
+  [[maybe_unused]] auto end1 = std::chrono::system_clock::now();
+  if (CmdlineArgPresent(kEnableDiagnostics)) {
+    using std::chrono::duration_cast;
+    using std::chrono::microseconds;
+    fmt::print("Setup time: {} ms\n\n",
+               duration_cast<microseconds>(end1 - start).count() / 1000.0);
+  }
 
-  auto status = problem.Solve({.diagnostics = true});
+  auto status =
+      problem.Solve({.diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
 
   EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
   EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.equalityConstraintType);

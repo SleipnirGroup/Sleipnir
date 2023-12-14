@@ -159,7 +159,9 @@ The following build types can be specified via `-DCMAKE_BUILD_TYPE` during CMake
 * Perf
   * RelWithDebInfo build type, but with frame pointer so perf utility can use it
 
-## Test problem solutions
+## Test diagnostics
+
+Passing the `--enable-diagnostics` flag to the test executable enables solver diagnostic prints.
 
 Some test problems generate CSV files containing their solutions. These can be plotted with [tools/plot_test_problem_solutions.py](https://github.com/SleipnirGroup/Sleipnir/blob/main/tools/plot_test_problem_solutions.py).
 

@@ -255,10 +255,7 @@ if(BUILD_TESTING)
             ${CMAKE_CURRENT_SOURCE_DIR}/test/include
             ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/units/include
     )
-    target_link_libraries(
-        SleipnirTest
-        PRIVATE Sleipnir GTest::gtest GTest::gtest_main
-    )
+    target_link_libraries(SleipnirTest PRIVATE Sleipnir GTest::gtest)
     if(NOT CMAKE_TOOLCHAIN_FILE)
         gtest_discover_tests(SleipnirTest)
     endif()

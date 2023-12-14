@@ -3,6 +3,8 @@
 #include <gtest/gtest.h>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 
+#include "CmdlineArguments.hpp"
+
 // These tests ensure coverage of the off-nominal solver exit conditions
 
 TEST(SolverExitConditionTest, CallbackRequestedStop) {
@@ -13,7 +15,8 @@ TEST(SolverExitConditionTest, CallbackRequestedStop) {
 
   problem.Callback([](const sleipnir::SolverIterationInfo&) { return true; });
 
-  auto status = problem.Solve({.diagnostics = true});
+  auto status =
+      problem.Solve({.diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
 
   EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.costFunctionType);
   EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
@@ -34,7 +37,8 @@ TEST(SolverExitConditionTest, TooFewDOFs) {
   problem.SubjectTo(y == 1);
   problem.SubjectTo(z == 1);
 
-  auto status = problem.Solve({.diagnostics = true});
+  auto status =
+      problem.Solve({.diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
 
   EXPECT_EQ(sleipnir::ExpressionType::kNone, status.costFunctionType);
   EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.equalityConstraintType);
@@ -55,7 +59,8 @@ TEST(SolverExitConditionTest, LocallyInfeasible) {
     problem.SubjectTo(y == z + 1);
     problem.SubjectTo(z == x + 1);
 
-    auto status = problem.Solve({.diagnostics = true});
+    auto status =
+        problem.Solve({.diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
 
     EXPECT_EQ(sleipnir::ExpressionType::kNone, status.costFunctionType);
     EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.equalityConstraintType);
@@ -76,7 +81,8 @@ TEST(SolverExitConditionTest, LocallyInfeasible) {
     problem.SubjectTo(y >= z + 1);
     problem.SubjectTo(z >= x + 1);
 
-    auto status = problem.Solve({.diagnostics = true});
+    auto status =
+        problem.Solve({.diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
 
     EXPECT_EQ(sleipnir::ExpressionType::kNone, status.costFunctionType);
     EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
@@ -94,7 +100,9 @@ TEST(SolverExitConditionTest, MaxIterationsExceeded) {
   x.SetValue(0.0);
   problem.Minimize(x);
 
-  auto status = problem.Solve({.maxIterations = 0, .diagnostics = true});
+  auto status =
+      problem.Solve({.maxIterations = 0,
+                     .diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
 
   EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.costFunctionType);
   EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
@@ -112,7 +120,8 @@ TEST(SolverExitConditionTest, Timeout) {
   x.SetValue(0.0);
   problem.Minimize(x);
 
-  auto status = problem.Solve({.timeout = 0s, .diagnostics = true});
+  auto status = problem.Solve(
+      {.timeout = 0s, .diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
 
   EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.costFunctionType);
   EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);

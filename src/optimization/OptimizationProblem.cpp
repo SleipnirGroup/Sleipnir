@@ -349,11 +349,13 @@ Eigen::VectorXd OptimizationProblem::InteriorPoint(
 
   // Check for overconstrained problem
   if (m_equalityConstraints.size() > m_decisionVariables.size()) {
-    fmt::print("The problem has too few degrees of freedom.\n");
-    fmt::print("Violated constraints (cₑ(x) = 0) in order of declaration:\n");
-    for (int row = 0; row < c_e.rows(); ++row) {
-      if (c_e(row) < 0.0) {
-        fmt::print("  {}/{}: {} = 0\n", row + 1, c_e.rows(), c_e(row));
+    if (m_config.diagnostics) {
+      fmt::print("The problem has too few degrees of freedom.\n");
+      fmt::print("Violated constraints (cₑ(x) = 0) in order of declaration:\n");
+      for (int row = 0; row < c_e.rows(); ++row) {
+        if (c_e(row) < 0.0) {
+          fmt::print("  {}/{}: {} = 0\n", row + 1, c_e.rows(), c_e(row));
+        }
       }
     }
 

@@ -3,10 +3,13 @@
 #include <gtest/gtest.h>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 
+#include "CmdlineArguments.hpp"
+
 TEST(TrivialProblemTest, Empty) {
   sleipnir::OptimizationProblem problem;
 
-  auto status = problem.Solve({.diagnostics = true});
+  auto status =
+      problem.Solve({.diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
 
   EXPECT_EQ(sleipnir::ExpressionType::kNone, status.costFunctionType);
   EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
@@ -20,7 +23,8 @@ TEST(TrivialProblemTest, NoCostUnconstrained) {
 
     auto X = problem.DecisionVariable(2, 3);
 
-    auto status = problem.Solve({.diagnostics = true});
+    auto status =
+        problem.Solve({.diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
 
     EXPECT_EQ(sleipnir::ExpressionType::kNone, status.costFunctionType);
     EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
@@ -40,7 +44,8 @@ TEST(TrivialProblemTest, NoCostUnconstrained) {
     auto X = problem.DecisionVariable(2, 3);
     X.SetValue(Eigen::Matrix<double, 2, 3>{{1.0, 1.0, 1.0}, {1.0, 1.0, 1.0}});
 
-    auto status = problem.Solve({.diagnostics = true});
+    auto status =
+        problem.Solve({.diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
 
     EXPECT_EQ(sleipnir::ExpressionType::kNone, status.costFunctionType);
     EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
