@@ -10,6 +10,8 @@
 #include <sleipnir/control/OCPSolver.hpp>
 #include <units/time.h>
 
+#include "CmdlineArguments.hpp"
+
 TEST(OCPSolverTest, Robot) {
   auto start = std::chrono::system_clock::now();
 
@@ -64,14 +66,17 @@ TEST(OCPSolverTest, Robot) {
   solverMinTime.Minimize(solverMinTime.DT() *
                          Eigen::Matrix<double, N + 1, 1>::Ones());
 
-  auto end1 = std::chrono::system_clock::now();
-  using std::chrono::duration_cast;
-  using std::chrono::microseconds;
-  fmt::print("Setup time: {} ms\n\n",
-             duration_cast<microseconds>(end1 - start).count() / 1000.0);
+  [[maybe_unused]] auto end1 = std::chrono::system_clock::now();
+  if (CmdlineArgPresent(kEnableDiagnostics)) {
+    using std::chrono::duration_cast;
+    using std::chrono::microseconds;
+    fmt::print("Setup time: {} ms\n\n",
+               duration_cast<microseconds>(end1 - start).count() / 1000.0);
+  }
 
-  auto status =
-      solverMinTime.Solve({.maxIterations = 1000, .diagnostics = true});
+  auto status = solverMinTime.Solve(
+      {.maxIterations = 1000,
+       .diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
 
   EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.costFunctionType);
   EXPECT_EQ(sleipnir::ExpressionType::kNonlinear,

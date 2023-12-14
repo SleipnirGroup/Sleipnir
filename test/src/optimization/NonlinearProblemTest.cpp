@@ -6,6 +6,8 @@
 #include <gtest/gtest.h>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 
+#include "CmdlineArguments.hpp"
+
 std::vector<double> Range(double start, double end, double step) {
   std::vector<double> ret;
 
@@ -27,7 +29,8 @@ TEST(NonlinearProblemTest, Quartic) {
 
   problem.SubjectTo(x >= 1);
 
-  auto status = problem.Solve({.diagnostics = true});
+  auto status =
+      problem.Solve({.diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
 
   EXPECT_EQ(sleipnir::ExpressionType::kNonlinear, status.costFunctionType);
   EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
@@ -54,7 +57,8 @@ TEST(NonlinearProblemTest, RosenbrockWithCubicAndLineConstraint) {
       problem.SubjectTo(sleipnir::pow(x - 1, 3) - y + 1 <= 0);
       problem.SubjectTo(x + y - 2 <= 0);
 
-      auto status = problem.Solve();
+      auto status =
+          problem.Solve({.diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
 
       EXPECT_EQ(sleipnir::ExpressionType::kNonlinear, status.costFunctionType);
       EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
@@ -94,7 +98,8 @@ TEST(NonlinearProblemTest, RosenbrockWithDiskConstraint) {
 
       problem.SubjectTo(sleipnir::pow(x, 2) + sleipnir::pow(y, 2) <= 2);
 
-      auto status = problem.Solve();
+      auto status =
+          problem.Solve({.diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
 
       EXPECT_EQ(sleipnir::ExpressionType::kNonlinear, status.costFunctionType);
       EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);

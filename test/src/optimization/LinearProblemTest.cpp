@@ -3,6 +3,8 @@
 #include <gtest/gtest.h>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 
+#include "CmdlineArguments.hpp"
+
 TEST(LinearProblemTest, Maximize) {
   sleipnir::OptimizationProblem problem;
 
@@ -20,7 +22,8 @@ TEST(LinearProblemTest, Maximize) {
   problem.SubjectTo(x >= 0);
   problem.SubjectTo(y >= 0);
 
-  auto status = problem.Solve({.diagnostics = true});
+  auto status =
+      problem.Solve({.diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
 
   EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.costFunctionType);
   EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);

@@ -10,6 +10,8 @@
 #include <units/time.h>
 #include <units/velocity.h>
 
+#include "CmdlineArguments.hpp"
+
 // This problem tests the case where regularization fails
 TEST(ArmOnElevatorProblemTest, DirectTranscription) {
   constexpr int N = 800;
@@ -92,7 +94,8 @@ TEST(ArmOnElevatorProblemTest, DirectTranscription) {
   }
   problem.Minimize(J);
 
-  auto status = problem.Solve({.diagnostics = true});
+  auto status =
+      problem.Solve({.diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
 
   EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
   EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.equalityConstraintType);

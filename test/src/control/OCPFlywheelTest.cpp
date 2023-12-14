@@ -16,6 +16,8 @@
 #include <units/time.h>
 #include <units/voltage.h>
 
+#include "CmdlineArguments.hpp"
+
 namespace {
 bool Near(double expected, double actual, double tolerance) {
   return std::abs(expected - actual) < tolerance;
@@ -55,13 +57,16 @@ void TestFlywheel(std::string testName, Eigen::Matrix<double, 1, 1> A,
       (r_mat_vmat - solver.X()) * (r_mat_vmat - solver.X()).T();
   solver.Minimize(objective);
 
-  auto end1 = std::chrono::system_clock::now();
-  using std::chrono::duration_cast;
-  using std::chrono::microseconds;
-  fmt::print("Setup time: {} ms\n\n",
-             duration_cast<microseconds>(end1 - start).count() / 1000.0);
+  [[maybe_unused]] auto end1 = std::chrono::system_clock::now();
+  if (CmdlineArgPresent(kEnableDiagnostics)) {
+    using std::chrono::duration_cast;
+    using std::chrono::microseconds;
+    fmt::print("Setup time: {} ms\n\n",
+               duration_cast<microseconds>(end1 - start).count() / 1000.0);
+  }
 
-  auto status = solver.Solve({.diagnostics = true});
+  auto status =
+      solver.Solve({.diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
 
   EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
   if (method == sleipnir::TranscriptionMethod::kSingleShooting) {
