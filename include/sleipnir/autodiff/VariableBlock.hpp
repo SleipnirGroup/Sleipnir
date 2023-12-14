@@ -23,6 +23,48 @@ template <typename Mat>
 class VariableBlock {
  public:
   /**
+   * Copy constructs a VariableBlock to the block.
+   */
+  VariableBlock(const VariableBlock<Mat>& values) {
+    m_mat = values.m_mat;
+    m_rowOffset = values.m_rowOffset;
+    m_colOffset = values.m_colOffset;
+    m_blockRows = values.m_blockRows;
+    m_blockCols = values.m_blockCols;
+  }
+
+  /**
+   * Assigns a VariableBlock to the block.
+   */
+  VariableBlock<Mat>& operator=(VariableBlock<Mat>& values) {
+    if (this == &values) {
+      return *this;
+    }
+
+    if (m_mat == nullptr) {
+      m_mat = values.m_mat;
+      m_rowOffset = values.m_rowOffset;
+      m_colOffset = values.m_colOffset;
+      m_blockRows = values.m_blockRows;
+      m_blockCols = values.m_blockCols;
+    } else {
+      assert(Rows() == values.Rows());
+      assert(Cols() == values.Cols());
+
+      for (int row = 0; row < Rows(); ++row) {
+        for (int col = 0; col < Cols(); ++col) {
+          (*this)(row, col) = values(row, col);
+        }
+      }
+    }
+
+    return *this;
+  }
+
+  VariableBlock(VariableBlock<Mat>&&) = default;
+  VariableBlock<Mat>& operator=(VariableBlock<Mat>&&) = default;
+
+  /**
    * Constructs a Variable block pointing to all of the given matrix.
    *
    * @param mat The matrix to which to point.
@@ -69,45 +111,6 @@ class VariableBlock {
     assert(Rows() == 1 && Cols() == 1);
 
     (*this)(0, 0).SetValue(value);
-
-    return *this;
-  }
-
-  /**
-   * Copy constructs a VariableBlock to the block.
-   */
-  VariableBlock(const VariableBlock<Mat>& values) {
-    m_mat = values.m_mat;
-    m_rowOffset = values.m_rowOffset;
-    m_colOffset = values.m_colOffset;
-    m_blockRows = values.m_blockRows;
-    m_blockCols = values.m_blockCols;
-  }
-
-  /**
-   * Assigns a VariableBlock to the block.
-   */
-  VariableBlock<Mat>& operator=(VariableBlock<Mat>& values) {
-    if (this == &values) {
-      return *this;
-    }
-
-    if (m_mat == nullptr) {
-      m_mat = values.m_mat;
-      m_rowOffset = values.m_rowOffset;
-      m_colOffset = values.m_colOffset;
-      m_blockRows = values.m_blockRows;
-      m_blockCols = values.m_blockCols;
-    } else {
-      assert(Rows() == values.Rows());
-      assert(Cols() == values.Cols());
-
-      for (int row = 0; row < Rows(); ++row) {
-        for (int col = 0; col < Cols(); ++col) {
-          (*this)(row, col) = values(row, col);
-        }
-      }
-    }
 
     return *this;
   }

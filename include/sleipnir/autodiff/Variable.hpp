@@ -21,29 +21,9 @@ class SLEIPNIR_DLLEXPORT Variable {
   detail::ExpressionPtr expr = detail::Zero();
 
   /**
-   * Constructs an uninitialized Variable.
+   * Constructs a Variable initialized to zero.
    */
-  constexpr Variable() = default;
-
-  /**
-   * Copy constructor.
-   */
-  Variable(const Variable&) = default;
-
-  /**
-   * Copy assignment operator.
-   */
-  Variable& operator=(const Variable&) = default;
-
-  /**
-   * Move constructor.
-   */
-  Variable(Variable&&) = default;
-
-  /**
-   * Move assignment operator.
-   */
-  Variable& operator=(Variable&&) = default;
+  Variable() = default;
 
   /**
    * Constructs a Variable from a double.

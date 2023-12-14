@@ -30,24 +30,9 @@ class PoolResource {
    */
   PoolResource() { AddChunk(); }
 
-  /**
-   * Copy constructor.
-   */
   PoolResource(const PoolResource&) = delete;
-
-  /**
-   * Copy-assignment operator.
-   */
   PoolResource& operator=(const PoolResource&) = delete;
-
-  /**
-   * Move constructor.
-   */
   PoolResource(PoolResource&&) = default;
-
-  /**
-   * Move-assignment operator.
-   */
   PoolResource& operator=(PoolResource&&) = default;
 
   /**
