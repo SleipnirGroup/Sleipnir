@@ -2,9 +2,11 @@
 
 #pragma once
 
+#include <concepts>
 #include <fstream>
 #include <functional>
 #include <optional>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -331,10 +333,37 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
   /**
    * Sets a callback to be called at each solver iteration.
    *
+   * The callback for this overload should return void.
+   *
+   * @param callback The callback.
+   */
+  template <typename F>
+    requires std::invocable<F, const SolverIterationInfo&> &&
+             std::same_as<std::invoke_result_t<F, const SolverIterationInfo&>,
+                          void>
+  void Callback(F&& callback) {
+    m_callback = [=, callback = std::forward<F>(callback)](
+                     const SolverIterationInfo& info) {
+      callback(info);
+      return false;
+    };
+  }
+
+  /**
+   * Sets a callback to be called at each solver iteration.
+   *
+   * The callback for this overload should return bool.
+   *
    * @param callback The callback. Returning true from the callback causes the
    *   solver to exit early with the solution it has so far.
    */
-  void Callback(std::function<bool(const SolverIterationInfo&)> callback);
+  template <typename F>
+    requires std::invocable<F, const SolverIterationInfo&> &&
+             std::same_as<std::invoke_result_t<F, const SolverIterationInfo&>,
+                          bool>
+  void Callback(F&& callback) {
+    m_callback = std::forward<F>(callback);
+  }
 
  private:
   // GCC incorrectly applies C++14 rules for const static data members, so an

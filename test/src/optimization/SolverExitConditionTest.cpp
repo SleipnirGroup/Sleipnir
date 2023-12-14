@@ -11,14 +11,31 @@ TEST(SolverExitConditionTest, CallbackRequestedStop) {
   sleipnir::OptimizationProblem problem;
 
   auto x = problem.DecisionVariable();
-  problem.Minimize(x);
+  problem.Minimize(x * x);
 
-  problem.Callback([](const sleipnir::SolverIterationInfo&) { return true; });
-
+  problem.Callback([](const sleipnir::SolverIterationInfo&) {});
   auto status =
       problem.Solve({.diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
 
-  EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.costFunctionType);
+  EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
+  EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
+  EXPECT_EQ(sleipnir::ExpressionType::kNone, status.inequalityConstraintType);
+  EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
+
+  problem.Callback([](const sleipnir::SolverIterationInfo&) { return false; });
+  status =
+      problem.Solve({.diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
+
+  EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
+  EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
+  EXPECT_EQ(sleipnir::ExpressionType::kNone, status.inequalityConstraintType);
+  EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
+
+  problem.Callback([](const sleipnir::SolverIterationInfo&) { return true; });
+  status =
+      problem.Solve({.diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
+
+  EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
   EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
   EXPECT_EQ(sleipnir::ExpressionType::kNone, status.inequalityConstraintType);
   EXPECT_EQ(sleipnir::SolverExitCondition::kCallbackRequestedStop,
@@ -93,18 +110,33 @@ TEST(SolverExitConditionTest, LocallyInfeasible) {
   }
 }
 
+TEST(SolverExitConditionTest, DivergingIterates) {
+  sleipnir::OptimizationProblem problem;
+
+  auto x = problem.DecisionVariable();
+  problem.Minimize(x);
+
+  auto status =
+      problem.Solve({.diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
+
+  EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.costFunctionType);
+  EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
+  EXPECT_EQ(sleipnir::ExpressionType::kNone, status.inequalityConstraintType);
+  EXPECT_EQ(sleipnir::SolverExitCondition::kDivergingIterates,
+            status.exitCondition);
+}
+
 TEST(SolverExitConditionTest, MaxIterationsExceeded) {
   sleipnir::OptimizationProblem problem;
 
   auto x = problem.DecisionVariable();
-  x.SetValue(0.0);
-  problem.Minimize(x);
+  problem.Minimize(x * x);
 
   auto status =
       problem.Solve({.maxIterations = 0,
                      .diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
 
-  EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.costFunctionType);
+  EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
   EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
   EXPECT_EQ(sleipnir::ExpressionType::kNone, status.inequalityConstraintType);
   EXPECT_EQ(sleipnir::SolverExitCondition::kMaxIterationsExceeded,
@@ -117,13 +149,12 @@ TEST(SolverExitConditionTest, Timeout) {
   sleipnir::OptimizationProblem problem;
 
   auto x = problem.DecisionVariable();
-  x.SetValue(0.0);
-  problem.Minimize(x);
+  problem.Minimize(x * x);
 
   auto status = problem.Solve(
       {.timeout = 0s, .diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
 
-  EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.costFunctionType);
+  EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
   EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
   EXPECT_EQ(sleipnir::ExpressionType::kNone, status.inequalityConstraintType);
   EXPECT_EQ(sleipnir::SolverExitCondition::kMaxWallClockTimeExceeded,
