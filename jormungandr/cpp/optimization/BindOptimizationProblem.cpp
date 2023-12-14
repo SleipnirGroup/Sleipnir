@@ -66,7 +66,11 @@ void BindOptimizationProblem(py::module_& optimization) {
 
     return self.Solve(config);
   });
-  cls.def("callback", &OptimizationProblem::Callback);
+  cls.def("callback",
+          [](OptimizationProblem& self,
+             std::function<bool(const SolverIterationInfo&)> callback) {
+            self.Callback(std::move(callback));
+          });
 }
 
 }  // namespace sleipnir

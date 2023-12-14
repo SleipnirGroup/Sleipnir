@@ -280,11 +280,6 @@ SolverStatus OptimizationProblem::Solve(const SolverConfig& config) {
   return status;
 }
 
-void OptimizationProblem::Callback(
-    std::function<bool(const SolverIterationInfo&)> callback) {
-  m_callback = callback;
-}
-
 Eigen::VectorXd OptimizationProblem::InteriorPoint(
     const Eigen::Ref<const Eigen::VectorXd>& initialGuess,
     SolverStatus* status) {
