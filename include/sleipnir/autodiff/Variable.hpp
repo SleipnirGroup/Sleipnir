@@ -12,14 +12,17 @@
 
 namespace sleipnir {
 
+// Forward declarations for friend declarations in Variable
+class SLEIPNIR_DLLEXPORT Jacobian;
+namespace detail {
+class SLEIPNIR_DLLEXPORT ExpressionGraph;
+}  // namespace detail
+
 /**
  * An autodiff variable pointing to an expression node.
  */
 class SLEIPNIR_DLLEXPORT Variable {
  public:
-  /// The expression node.
-  detail::ExpressionPtr expr = detail::Zero();
-
   /**
    * Constructs a Variable initialized to zero.
    */
@@ -168,6 +171,46 @@ class SLEIPNIR_DLLEXPORT Variable {
    * variables.
    */
   void Update();
+
+ private:
+  /// The expression node.
+  detail::ExpressionPtr expr = detail::Zero();
+
+  friend SLEIPNIR_DLLEXPORT Variable abs(const Variable& x);
+  friend SLEIPNIR_DLLEXPORT Variable acos(const Variable& x);
+  friend SLEIPNIR_DLLEXPORT Variable asin(const Variable& x);
+  friend SLEIPNIR_DLLEXPORT Variable atan(const Variable& x);
+  friend SLEIPNIR_DLLEXPORT Variable atan2(const Variable& y,
+                                           const Variable& x);
+  friend SLEIPNIR_DLLEXPORT Variable cos(const Variable& x);
+  friend SLEIPNIR_DLLEXPORT Variable cosh(const Variable& x);
+  friend SLEIPNIR_DLLEXPORT Variable erf(const Variable& x);
+  friend SLEIPNIR_DLLEXPORT Variable exp(const Variable& x);
+  friend SLEIPNIR_DLLEXPORT Variable hypot(const Variable& x,
+                                           const Variable& y);
+  friend SLEIPNIR_DLLEXPORT Variable hypot(const Variable& x, const Variable& y,
+                                           const Variable& z);
+  friend SLEIPNIR_DLLEXPORT Variable log(const Variable& x);
+  friend SLEIPNIR_DLLEXPORT Variable log10(const Variable& x);
+  friend SLEIPNIR_DLLEXPORT Variable pow(const Variable& base,
+                                         const Variable& power);
+  friend SLEIPNIR_DLLEXPORT Variable sign(const Variable& x);
+  friend SLEIPNIR_DLLEXPORT Variable sin(const Variable& x);
+  friend SLEIPNIR_DLLEXPORT Variable sinh(const Variable& x);
+  friend SLEIPNIR_DLLEXPORT Variable sqrt(const Variable& x);
+  friend SLEIPNIR_DLLEXPORT Variable tan(const Variable& x);
+  friend SLEIPNIR_DLLEXPORT Variable tanh(const Variable& x);
+
+  friend class SLEIPNIR_DLLEXPORT Jacobian;
+
+  // FIXME: Doxygen is confused:
+  //
+  //   member 'SLEIPNIR_DLLEXPORT detail::ExpressionGraph' of class 'Variable'
+  //   cannot be found
+
+  //! @cond Doxygen_Suppress
+  friend class SLEIPNIR_DLLEXPORT detail::ExpressionGraph;
+  //! @endcond
 };
 
 using VectorXvar = Eigen::Vector<Variable, Eigen::Dynamic>;

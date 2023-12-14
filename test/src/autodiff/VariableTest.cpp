@@ -7,5 +7,5 @@ TEST(VariableTest, DefaultConstructor) {
   sleipnir::Variable a;
 
   EXPECT_EQ(0.0, a.Value());
-  EXPECT_EQ(sleipnir::ExpressionType::kConstant, a.expr->type);
+  EXPECT_EQ(sleipnir::ExpressionType::kConstant, a.Type());
 }

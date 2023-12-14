@@ -20,14 +20,14 @@ Jacobian::Jacobian(VectorXvar variables, VectorXvar wrt) noexcept
   m_cachedTriplets.reserve(m_variables.rows() * m_wrt.rows() * 0.01);
 
   for (int row = 0; row < m_variables.rows(); ++row) {
-    if (m_variables(row).expr->type == ExpressionType::kLinear) {
+    if (m_variables(row).Type() == ExpressionType::kLinear) {
       // If the row is linear, compute its gradient once here and cache its
       // triplets. Constant rows are ignored because their gradients have no
       // nonzero triplets.
       m_graphs[row].ComputeAdjoints([&](int col, double adjoint) {
         m_cachedTriplets.emplace_back(row, col, adjoint);
       });
-    } else if (m_variables(row).expr->type > ExpressionType::kLinear) {
+    } else if (m_variables(row).Type() > ExpressionType::kLinear) {
       // If the row is quadratic or nonlinear, add it to the list of nonlinear
       // rows to be recomputed in Calculate().
       m_nonlinearRows.emplace_back(row);
