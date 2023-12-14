@@ -130,29 +130,9 @@ struct SLEIPNIR_DLLEXPORT Expression {
   uint32_t refCount = 0;
 
   /**
-   * Default constructor.
+   * Constructs a constant expression with a value of zero.
    */
   Expression() = default;
-
-  /**
-   * Copy constructor.
-   */
-  Expression(const Expression&) = default;
-
-  /**
-   * Copy-assignment operator.
-   */
-  Expression& operator=(const Expression&) = default;
-
-  /**
-   * Move constructor.
-   */
-  Expression(Expression&&) = default;
-
-  /**
-   * Move-assignment operator.
-   */
-  Expression& operator=(Expression&&) = default;
 
   /**
    * Constructs a nullary expression (an operator with no arguments).
