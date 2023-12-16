@@ -2,6 +2,10 @@
 
 #pragma once
 
+#include <iosfwd>
+
+#include "sleipnir/SymbolExports.hpp"
+
 namespace sleipnir {
 
 /**
@@ -34,5 +38,14 @@ enum class SolverExitCondition {
   /// elapsed wall clock time.
   kMaxWallClockTimeExceeded = -7
 };
+
+/**
+ * GoogleTest value formatter for SolverExitCondition.
+ *
+ * @param cond SolverExitCondition to print.
+ * @param os Output stream to which to print.
+ */
+SLEIPNIR_DLLEXPORT void PrintTo(const SolverExitCondition& cond,
+                                std::ostream* os);
 
 }  // namespace sleipnir

@@ -5,14 +5,6 @@
 #include <cmath>
 #include <numbers>
 
-namespace sleipnir {
-
-// Instantiate Expression pool in Expression.cpp instead to avoid ODR violation
-template EXPORT_TEMPLATE_DEFINE(SLEIPNIR_DLLEXPORT)
-    PoolAllocator<detail::Expression> GlobalPoolAllocator<detail::Expression>();
-
-}  // namespace sleipnir
-
 namespace sleipnir::detail {
 
 namespace {
@@ -846,3 +838,11 @@ ExpressionPtr tanh(const ExpressionPtr& x) {
 }
 
 }  // namespace sleipnir::detail
+
+namespace sleipnir {
+
+// Instantiate Expression pool in Expression.cpp instead to avoid ODR violation
+template EXPORT_TEMPLATE_DEFINE(SLEIPNIR_DLLEXPORT)
+    PoolAllocator<detail::Expression> GlobalPoolAllocator<detail::Expression>();
+
+}  // namespace sleipnir
