@@ -12,28 +12,9 @@
 #include "sleipnir/IntrusiveSharedPtr.hpp"
 #include "sleipnir/Pool.hpp"
 #include "sleipnir/SymbolExports.hpp"
+#include "sleipnir/autodiff/ExpressionType.hpp"
 
-namespace sleipnir {
-
-/**
- * Expression type.
- *
- * Used for autodiff caching.
- */
-enum class ExpressionType {
-  /// There is no expression.
-  kNone,
-  /// The expression is a constant.
-  kConstant,
-  /// The expression is composed of linear and lower-order operators.
-  kLinear,
-  /// The expression is composed of quadratic and lower-order operators.
-  kQuadratic,
-  /// The expression is composed of nonlinear and lower-order operators.
-  kNonlinear
-};
-
-namespace detail {
+namespace sleipnir::detail {
 
 struct SLEIPNIR_DLLEXPORT Expression;
 
@@ -442,7 +423,9 @@ SLEIPNIR_DLLEXPORT ExpressionPtr tan(  // NOLINT
  */
 SLEIPNIR_DLLEXPORT ExpressionPtr tanh(const ExpressionPtr& x);
 
-}  // namespace detail
+}  // namespace sleipnir::detail
+
+namespace sleipnir {
 
 // FIXME: Doxygen is confused:
 //
