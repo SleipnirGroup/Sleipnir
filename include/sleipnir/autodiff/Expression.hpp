@@ -9,10 +9,10 @@
 #include <utility>
 #include <vector>
 
-#include "sleipnir/IntrusiveSharedPtr.hpp"
-#include "sleipnir/Pool.hpp"
-#include "sleipnir/SymbolExports.hpp"
 #include "sleipnir/autodiff/ExpressionType.hpp"
+#include "sleipnir/util/IntrusiveSharedPtr.hpp"
+#include "sleipnir/util/Pool.hpp"
+#include "sleipnir/util/SymbolExports.hpp"
 
 namespace sleipnir::detail {
 

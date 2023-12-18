@@ -2,9 +2,9 @@
 
 #pragma once
 
-#include "sleipnir/SymbolExports.hpp"
 #include "sleipnir/autodiff/Expression.hpp"
 #include "sleipnir/optimization/SolverExitCondition.hpp"
+#include "sleipnir/util/SymbolExports.hpp"
 
 namespace sleipnir {
 

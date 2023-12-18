@@ -5,7 +5,6 @@
 #include <span>
 #include <vector>
 
-#include <sleipnir/SymbolExports.hpp>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 #include <units/current.h>
 
@@ -15,7 +14,7 @@
  * which subsystem gets less current if the current budget is exceeded.
  * Subsystems with a smaller tolerance are given higher priority.
  */
-class SLEIPNIR_DLLEXPORT CurrentManager {
+class CurrentManager {
  public:
   /**
    * Constructs a CurrentManager.

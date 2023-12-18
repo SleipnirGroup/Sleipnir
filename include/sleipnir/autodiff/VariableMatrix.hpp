@@ -11,9 +11,9 @@
 
 #include <Eigen/Core>
 
-#include "sleipnir/SymbolExports.hpp"
 #include "sleipnir/autodiff/Variable.hpp"
 #include "sleipnir/autodiff/VariableBlock.hpp"
+#include "sleipnir/util/SymbolExports.hpp"
 
 namespace sleipnir {
 

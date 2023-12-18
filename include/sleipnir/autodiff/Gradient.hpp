@@ -6,10 +6,10 @@
 
 #include <Eigen/SparseCore>
 
-#include "sleipnir/SymbolExports.hpp"
 #include "sleipnir/autodiff/Jacobian.hpp"
 #include "sleipnir/autodiff/Profiler.hpp"
 #include "sleipnir/autodiff/Variable.hpp"
+#include "sleipnir/util/SymbolExports.hpp"
 
 namespace sleipnir {
 

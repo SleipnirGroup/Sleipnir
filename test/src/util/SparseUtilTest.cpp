@@ -4,7 +4,8 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include <sleipnir/util/SparseUtil.hpp>
+
+#include "util/SparseUtil.hpp"
 
 TEST(SparseUtilTest, SparseDiagonal) {
   Eigen::Vector<double, 5> vec{-2.0, -1.0, 0.0, 1.0, 2.0};

@@ -7,8 +7,8 @@
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
 
-#include "sleipnir/SymbolExports.hpp"
 #include "sleipnir/autodiff/Expression.hpp"
+#include "sleipnir/util/SymbolExports.hpp"
 
 namespace sleipnir {
 

@@ -7,9 +7,9 @@
 
 #include <Eigen/Core>
 
-#include "sleipnir/SymbolExports.hpp"
 #include "sleipnir/autodiff/VariableMatrix.hpp"
 #include "sleipnir/optimization/OptimizationProblem.hpp"
+#include "sleipnir/util/SymbolExports.hpp"
 
 namespace sleipnir {
 

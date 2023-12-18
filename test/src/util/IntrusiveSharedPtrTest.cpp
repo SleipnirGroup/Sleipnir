@@ -6,7 +6,7 @@
 #include <utility>
 
 #include <gtest/gtest.h>
-#include <sleipnir/IntrusiveSharedPtr.hpp>
+#include <sleipnir/util/IntrusiveSharedPtr.hpp>
 
 // NOLINTBEGIN (clang-analyzer-cplusplus.NewDeleteLeaks)
 

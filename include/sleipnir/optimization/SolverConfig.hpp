@@ -5,7 +5,7 @@
 #include <chrono>
 #include <limits>
 
-#include "sleipnir/SymbolExports.hpp"
+#include "sleipnir/util/SymbolExports.hpp"
 
 namespace sleipnir {
 

@@ -6,7 +6,6 @@
 
 #include <Eigen/Core>
 
-#include "sleipnir/SymbolExports.hpp"
 #include "sleipnir/autodiff/Variable.hpp"
 
 namespace sleipnir {
@@ -17,8 +16,8 @@ namespace sleipnir {
  * @param[out] dest The std::vector<Variable>.
  * @param[in] src The Eigen::VectorXd.
  */
-SLEIPNIR_DLLEXPORT void SetAD(std::vector<Variable>& dest,
-                              const Eigen::Ref<const Eigen::VectorXd>& src);
+void SetAD(std::vector<Variable>& dest,
+           const Eigen::Ref<const Eigen::VectorXd>& src);
 
 /**
  * Assigns an Eigen::VectorXd to an Eigen::Vector<Variable>.
@@ -26,21 +25,21 @@ SLEIPNIR_DLLEXPORT void SetAD(std::vector<Variable>& dest,
  * @param[out] dest The Eigen::Vector<Variable>.
  * @param[in] src The Eigen::VectorXd.
  */
-SLEIPNIR_DLLEXPORT void SetAD(Eigen::Ref<VectorXvar> dest,
-                              const Eigen::Ref<const Eigen::VectorXd>& src);
+void SetAD(Eigen::Ref<VectorXvar> dest,
+           const Eigen::Ref<const Eigen::VectorXd>& src);
 
 /**
  * Returns a std::vector<Variable> as an Eigen::VectorXd.
  *
  * @param src The std::vector<Variable>.
  */
-SLEIPNIR_DLLEXPORT Eigen::VectorXd GetAD(std::vector<Variable> src);
+Eigen::VectorXd GetAD(std::vector<Variable> src);
 
 /**
  * Returns an Eigen::Vector<Variable> as an Eigen::VectorXd.
  *
  * @param src The Eigen::Vector<Variable>.
  */
-SLEIPNIR_DLLEXPORT Eigen::VectorXd GetAD(Eigen::Ref<VectorXvar> src);
+Eigen::VectorXd GetAD(Eigen::Ref<VectorXvar> src);
 
 }  // namespace sleipnir
