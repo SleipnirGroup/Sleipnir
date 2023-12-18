@@ -3,7 +3,6 @@
 #pragma once
 
 #include <concepts>
-#include <fstream>
 #include <functional>
 #include <optional>
 #include <type_traits>
@@ -11,7 +10,6 @@
 #include <vector>
 
 #include <Eigen/Core>
-#include <Eigen/SparseCore>
 
 #include "sleipnir/autodiff/Variable.hpp"
 #include "sleipnir/autodiff/VariableMatrix.hpp"
@@ -372,49 +370,22 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
   // https://stackoverflow.com/a/50639754
   static constexpr SolverConfig kDefaultConfig{};
 
-  // Decision variables, which are the root of the problem's expression tree
+  // The list of decision variables, which are the root of the problem's
+  // expression tree
   std::vector<Variable> m_decisionVariables;
 
-  // Cost function: f(x)
+  // The cost function: f(x)
   std::optional<Variable> m_f;
 
-  // Equality constraints: cₑ(x) = 0
+  // The list of equality constraints: cₑ(x) = 0
   std::vector<Variable> m_equalityConstraints;
 
-  // Inequality constraints: cᵢ(x) ≥ 0
+  // The list of inequality constraints: cᵢ(x) ≥ 0
   std::vector<Variable> m_inequalityConstraints;
 
-  SolverConfig m_config;
-
-  // Sparsity pattern files written when spy flag is set in SolverConfig
-  std::ofstream m_H_spy;
-  std::ofstream m_A_e_spy;
-  std::ofstream m_A_i_spy;
-
+  // The user callback
   std::function<bool(const SolverIterationInfo&)> m_callback =
       [](const SolverIterationInfo&) { return false; };
-
-  /**
-  Find the optimal solution to the nonlinear program using an interior-point
-  solver.
-
-  A nonlinear program has the form:
-
-  @verbatim
-       min_x f(x)
-  subject to cₑ(x) = 0
-             cᵢ(x) ≥ 0
-  @endverbatim
-
-  where f(x) is the cost function, cₑ(x) are the equality constraints, and cᵢ(x)
-  are the inequality constraints.
-
-  @param[in] initialGuess The initial guess.
-  @param[out] status The solver status.
-  */
-  Eigen::VectorXd InteriorPoint(
-      const Eigen::Ref<const Eigen::VectorXd>& initialGuess,
-      SolverStatus* status);
 
   /**
    * Prints exit condition as a user-readable message.
@@ -422,74 +393,6 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
    * @param exitCondition The solver exit condition.
    */
   static void PrintExitCondition(const SolverExitCondition& exitCondition);
-
-  /**
-   * Returns true if the problem is locally feasible.
-   *
-   * @param A_e The problem's equality constraint Jacobian Aₑ(x) evaluated at
-   *   the current iterate.
-   * @param c_e The problem's equality constraints cₑ(x) evaluated at the
-   *   current iterate.
-   * @param A_i The problem's inequality constraint Jacobian Aᵢ(x) evaluated at
-   *   the current iterate.
-   * @param c_i The problem's inequality constraints cᵢ(x) evaluated at the
-   *   current iterate.
-   */
-  bool IsLocallyFeasible(const Eigen::SparseMatrix<double>& A_e,
-                         const Eigen::VectorXd& c_e,
-                         const Eigen::SparseMatrix<double>& A_i,
-                         const Eigen::VectorXd& c_i) const;
-
-  /**
-   * Returns the error estimate using the KKT conditions for the interior-point
-   * method.
-   *
-   * @param g Gradient of the cost function ∇f.
-   * @param A_e The problem's equality constraint Jacobian Aₑ(x) evaluated at
-   *   the current iterate.
-   * @param c_e The problem's equality constraints cₑ(x) evaluated at the
-   *   current iterate.
-   * @param A_i The problem's inequality constraint Jacobian Aᵢ(x) evaluated at
-   *   the current iterate.
-   * @param c_i The problem's inequality constraints cᵢ(x) evaluated at the
-   *   current iterate.
-   * @param s Inequality constraint slack variables.
-   * @param y Equality constraint dual variables.
-   * @param z Inequality constraint dual variables.
-   * @param μ Barrier parameter.
-   */
-  double ErrorEstimate(const Eigen::VectorXd& g,
-                       const Eigen::SparseMatrix<double>& A_e,
-                       const Eigen::VectorXd& c_e,
-                       const Eigen::SparseMatrix<double>& A_i,
-                       const Eigen::VectorXd& c_i, const Eigen::VectorXd& s,
-                       const Eigen::VectorXd& y, const Eigen::VectorXd& z,
-                       double μ) const;
-
-  /**
-   * Returns the KKT error for the interior-point method.
-   *
-   * @param g Gradient of the cost function ∇f.
-   * @param A_e The problem's equality constraint Jacobian Aₑ(x) evaluated at
-   *   the current iterate.
-   * @param c_e The problem's equality constraints cₑ(x) evaluated at the
-   *   current iterate.
-   * @param A_i The problem's inequality constraint Jacobian Aᵢ(x) evaluated at
-   *   the current iterate.
-   * @param c_i The problem's inequality constraints cᵢ(x) evaluated at the
-   *   current iterate.
-   * @param s Inequality constraint slack variables.
-   * @param y Equality constraint dual variables.
-   * @param z Inequality constraint dual variables.
-   * @param μ Barrier parameter.
-   */
-  double KKTError(const Eigen::VectorXd& g,
-                  const Eigen::SparseMatrix<double>& A_e,
-                  const Eigen::VectorXd& c_e,
-                  const Eigen::SparseMatrix<double>& A_i,
-                  const Eigen::VectorXd& c_i, const Eigen::VectorXd& s,
-                  const Eigen::VectorXd& y, const Eigen::VectorXd& z,
-                  double μ) const;
 };
 
 }  // namespace sleipnir
