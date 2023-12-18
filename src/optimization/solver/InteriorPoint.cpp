@@ -38,27 +38,39 @@ namespace sleipnir {
 namespace {
 
 /**
- * Returns true if the problem is locally feasible.
+ * Returns true if the problem's equality constraints are locally infeasible.
  *
  * @param A_e The problem's equality constraint Jacobian Aₑ(x) evaluated at the
  *   current iterate.
  * @param c_e The problem's equality constraints cₑ(x) evaluated at the current
  *   iterate.
+ */
+bool IsEqualityLocallyInfeasible(const Eigen::SparseMatrix<double>& A_e,
+                                 const Eigen::VectorXd& c_e) {
+  // The equality constraints are locally infeasible if
+  //
+  //   Aₑᵀcₑ → 0
+  //   ‖cₑ‖ > ε
+  //
+  // See "Infeasibility detection" in section 6 of [3].
+  return A_e.rows() > 0 && (A_e.transpose() * c_e).norm() < 1e-6 &&
+         c_e.norm() > 1e-2;
+}
+
+/**
+ * Returns true if the problem's inequality constraints are locally infeasible.
+ *
  * @param A_i The problem's inequality constraint Jacobian Aᵢ(x) evaluated at
  *   the current iterate.
  * @param c_i The problem's inequality constraints cᵢ(x) evaluated at the
  *   current iterate.
- * @param diagnostics Whether to enable diagnostics.
  */
-bool IsLocallyFeasible(const Eigen::SparseMatrix<double>& A_e,
-                       const Eigen::VectorXd& c_e,
-                       const Eigen::SparseMatrix<double>& A_i,
-                       const Eigen::VectorXd& c_i, bool diagnostics) {
-  // Check for problem local infeasibility. The problem is locally infeasible if
+bool IsInequalityLocallyInfeasible(const Eigen::SparseMatrix<double>& A_i,
+                                   const Eigen::VectorXd& c_i) {
+  // The inequality constraints are locally infeasible if
   //
-  //   Aₑᵀcₑ → 0
   //   Aᵢᵀcᵢ⁺ → 0
-  //   ‖(cₑ, cᵢ⁺)‖ > ε
+  //   ‖cᵢ⁺‖ > ε
   //
   // where cᵢ⁺ = min(cᵢ, 0).
   //
@@ -66,45 +78,14 @@ bool IsLocallyFeasible(const Eigen::SparseMatrix<double>& A_e,
   //
   // cᵢ⁺ is used instead of cᵢ⁻ from the paper to follow the convention that
   // feasible inequality constraints are ≥ 0.
-
-  if (A_e.rows() > 0 && (A_e.transpose() * c_e).norm() < 1e-6 &&
-      c_e.norm() > 1e-2) {
-    if (diagnostics) {
-      fmt::print(
-          "The problem is locally infeasible due to violated equality "
-          "constraints.\n");
-      fmt::print("Violated constraints (cₑ(x) = 0) in order of declaration:\n");
-      for (int row = 0; row < c_e.rows(); ++row) {
-        if (c_e(row) < 0.0) {
-          fmt::print("  {}/{}: {} = 0\n", row + 1, c_e.rows(), c_e(row));
-        }
-      }
-    }
-
-    return false;
-  }
-
   if (A_i.rows() > 0) {
     Eigen::VectorXd c_i_plus = c_i.cwiseMin(0.0);
     if ((A_i.transpose() * c_i_plus).norm() < 1e-6 && c_i_plus.norm() > 1e-6) {
-      if (diagnostics) {
-        fmt::print(
-            "The problem is infeasible due to violated inequality "
-            "constraints.\n");
-        fmt::print(
-            "Violated constraints (cᵢ(x) ≥ 0) in order of declaration:\n");
-        for (int row = 0; row < c_i.rows(); ++row) {
-          if (c_i(row) < 0.0) {
-            fmt::print("  {}/{}: {} ≥ 0\n", row + 1, c_i.rows(), c_i(row));
-          }
-        }
-      }
-
-      return false;
+      return true;
     }
   }
 
-  return true;
+  return false;
 }
 
 /**
@@ -459,7 +440,37 @@ Eigen::VectorXd InteriorPoint(
     auto innerIterStartTime = std::chrono::system_clock::now();
 
     // Check for local infeasibility
-    if (!IsLocallyFeasible(A_e, c_e, A_i, c_i, config.diagnostics)) {
+    if (IsEqualityLocallyInfeasible(A_e, c_e)) {
+      if (config.diagnostics) {
+        fmt::print(
+            "The problem is locally infeasible due to violated equality "
+            "constraints.\n");
+        fmt::print(
+            "Violated constraints (cₑ(x) = 0) in order of declaration:\n");
+        for (int row = 0; row < c_e.rows(); ++row) {
+          if (c_e(row) < 0.0) {
+            fmt::print("  {}/{}: {} = 0\n", row + 1, c_e.rows(), c_e(row));
+          }
+        }
+      }
+
+      status->exitCondition = SolverExitCondition::kLocallyInfeasible;
+      return x;
+    }
+    if (IsInequalityLocallyInfeasible(A_i, c_i)) {
+      if (config.diagnostics) {
+        fmt::print(
+            "The problem is infeasible due to violated inequality "
+            "constraints.\n");
+        fmt::print(
+            "Violated constraints (cᵢ(x) ≥ 0) in order of declaration:\n");
+        for (int row = 0; row < c_i.rows(); ++row) {
+          if (c_i(row) < 0.0) {
+            fmt::print("  {}/{}: {} ≥ 0\n", row + 1, c_i.rows(), c_i(row));
+          }
+        }
+      }
+
       status->exitCondition = SolverExitCondition::kLocallyInfeasible;
       return x;
     }
