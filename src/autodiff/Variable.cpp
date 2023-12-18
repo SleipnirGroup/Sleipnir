@@ -34,6 +34,8 @@ Variable& Variable::SetValue(double value) {
   if (detail::IsZero(expr)) {
     expr = detail::MakeExpressionPtr(value);
   } else {
+    // We only need to check the first argument since unary and binary operators
+    // both use it
     if (!detail::IsZero(expr->args[0])) {
       fmt::print(stderr,
                  "WARNING: {}:{}: Modified the value of a dependent variable\n",
@@ -48,6 +50,8 @@ Variable& Variable::SetValue(int value) {
   if (detail::IsZero(expr)) {
     expr = detail::MakeExpressionPtr(value);
   } else {
+    // We only need to check the first argument since unary and binary operators
+    // both use it
     if (!detail::IsZero(expr->args[0])) {
       fmt::print(stderr,
                  "WARNING: {}:{}: Modified the value of a dependent variable\n",
