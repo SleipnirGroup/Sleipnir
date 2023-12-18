@@ -201,42 +201,44 @@ SolverStatus OptimizationProblem::Solve(const SolverConfig& config) {
 
 void OptimizationProblem::PrintExitCondition(
     const SolverExitCondition& exitCondition) {
+  using enum SolverExitCondition;
+
   fmt::print("Exit condition: ");
   switch (exitCondition) {
-    case SolverExitCondition::kSuccess:
+    case kSuccess:
       fmt::print("solved to desired tolerance");
       break;
-    case SolverExitCondition::kSolvedToAcceptableTolerance:
+    case kSolvedToAcceptableTolerance:
       fmt::print("solved to acceptable tolerance");
       break;
-    case SolverExitCondition::kCallbackRequestedStop:
+    case kCallbackRequestedStop:
       fmt::print("callback requested stop");
       break;
-    case SolverExitCondition::kTooFewDOFs:
+    case kTooFewDOFs:
       fmt::print("problem has too few degrees of freedom");
       break;
-    case SolverExitCondition::kLocallyInfeasible:
+    case kLocallyInfeasible:
       fmt::print("problem is locally infeasible");
       break;
-    case SolverExitCondition::kBadSearchDirection:
+    case kBadSearchDirection:
       fmt::print(
           "solver failed to reach the desired tolerance due to a bad search "
           "direction");
       break;
-    case SolverExitCondition::kMaxSearchDirectionTooSmall:
+    case kMaxSearchDirectionTooSmall:
       fmt::print(
           "solver failed to reach the desired tolerance due to the maximum "
           "search direction becoming too small");
       break;
-    case SolverExitCondition::kDivergingIterates:
+    case kDivergingIterates:
       fmt::print(
           "solver encountered diverging primal iterates pₖˣ and/or pₖˢ and "
           "gave up");
       break;
-    case SolverExitCondition::kMaxIterationsExceeded:
+    case kMaxIterationsExceeded:
       fmt::print("solution returned after maximum iterations exceeded");
       break;
-    case SolverExitCondition::kMaxWallClockTimeExceeded:
+    case kMaxWallClockTimeExceeded:
       fmt::print("solution returned after maximum wall time exceeded");
       break;
   }
