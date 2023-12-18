@@ -2,7 +2,7 @@
 
 #include <gtest/gtest.h>
 
-#include "ScopeExit.hpp"
+#include "util/ScopeExit.hpp"
 
 TEST(ScopeExitTest, ScopeExit) {
   int exitCount = 0;

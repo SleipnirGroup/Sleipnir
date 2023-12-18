@@ -1,6 +1,6 @@
 // Copyright (c) Sleipnir contributors
 
-#include "sleipnir/util/AutodiffUtil.hpp"
+#include "util/AutodiffUtil.hpp"
 
 #include <cassert>
 

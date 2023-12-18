@@ -4,7 +4,7 @@
 
 #include <iosfwd>
 
-#include "sleipnir/SymbolExports.hpp"
+#include "sleipnir/util/SymbolExports.hpp"
 
 namespace sleipnir {
 

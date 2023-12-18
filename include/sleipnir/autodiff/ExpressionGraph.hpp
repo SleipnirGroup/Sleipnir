@@ -4,9 +4,9 @@
 
 #include <vector>
 
-#include "sleipnir/SymbolExports.hpp"
 #include "sleipnir/autodiff/Expression.hpp"
 #include "sleipnir/autodiff/Variable.hpp"
+#include "sleipnir/util/SymbolExports.hpp"
 
 namespace sleipnir::detail {
 

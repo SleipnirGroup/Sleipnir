@@ -4,7 +4,6 @@
 
 #include <fmt/core.h>
 
-#include "sleipnir/SymbolExports.hpp"
 #include "sleipnir/autodiff/Expression.hpp"
 #include "sleipnir/autodiff/ExpressionGraph.hpp"
 

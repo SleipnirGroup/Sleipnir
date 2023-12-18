@@ -4,7 +4,7 @@
 
 #include <chrono>
 
-#include "sleipnir/SymbolExports.hpp"
+#include "sleipnir/util/SymbolExports.hpp"
 
 namespace sleipnir {
 

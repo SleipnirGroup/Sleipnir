@@ -8,9 +8,9 @@
 #include <Eigen/SparseCholesky>
 #include <Eigen/SparseCore>
 
-#include "Inertia.hpp"
-#include "sleipnir/util/SparseMatrixBuilder.hpp"
-#include "sleipnir/util/SparseUtil.hpp"
+#include "optimization/Inertia.hpp"
+#include "util/SparseMatrixBuilder.hpp"
+#include "util/SparseUtil.hpp"
 
 namespace sleipnir {
 

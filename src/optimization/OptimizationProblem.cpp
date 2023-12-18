@@ -11,18 +11,19 @@
 
 #include <fmt/core.h>
 
-#include "Filter.hpp"
-#include "RegularizedLDLT.hpp"
-#include "ScopeExit.hpp"
+#include "optimization/Filter.hpp"
+#include "optimization/RegularizedLDLT.hpp"
 #include "sleipnir/autodiff/Expression.hpp"
 #include "sleipnir/autodiff/Gradient.hpp"
 #include "sleipnir/autodiff/Hessian.hpp"
 #include "sleipnir/autodiff/Jacobian.hpp"
 #include "sleipnir/autodiff/Variable.hpp"
 #include "sleipnir/optimization/SolverExitCondition.hpp"
-#include "sleipnir/util/AutodiffUtil.hpp"
-#include "sleipnir/util/SparseMatrixBuilder.hpp"
-#include "sleipnir/util/SparseUtil.hpp"
+#include "sleipnir/util/Spy.hpp"
+#include "util/AutodiffUtil.hpp"
+#include "util/ScopeExit.hpp"
+#include "util/SparseMatrixBuilder.hpp"
+#include "util/SparseUtil.hpp"
 
 using namespace sleipnir;
 
