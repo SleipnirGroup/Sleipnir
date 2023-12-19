@@ -15,10 +15,10 @@ int main(int argc, char* argv[]) {
   constexpr auto T = 5_s;
 
   std::vector<int> sampleSizesToTest;
-  for (int N = 100; N < 500; N += 100) {
+  for (int N = 100; N < 300; N += 100) {
     sampleSizesToTest.emplace_back(N);
   }
-  sampleSizesToTest.emplace_back(500);
+  sampleSizesToTest.emplace_back(300);
 
   fmt::print("Solving cart-pole problem from N = {} to N = {}.\n",
              sampleSizesToTest.front(), sampleSizesToTest.back());

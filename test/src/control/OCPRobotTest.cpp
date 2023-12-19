@@ -82,7 +82,7 @@ TEST(OCPSolverTest, Robot) {
   EXPECT_EQ(sleipnir::ExpressionType::kNonlinear,
             status.equalityConstraintType);
   EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.inequalityConstraintType);
-  // FIXME: Poor convergence
+  // FIXME: Fails with "bad search direction"
   // EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
 
   // Log states for offline viewing
