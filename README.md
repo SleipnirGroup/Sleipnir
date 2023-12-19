@@ -69,16 +69,15 @@ We could mitigate the solver's high last-level-cache miss rate (~42% on the mach
 
 ### Running the benchmarks
 
-Benchmark projects are in the [benchmarks folder](https://github.com/SleipnirGroup/Sleipnir/tree/main/benchmarks). To compile and run the flywheel scalability benchmark, run the following in the repository root:
+Benchmark projects are in the [benchmarks folder](https://github.com/SleipnirGroup/Sleipnir/tree/main/benchmarks). To compile and run them, run the following in the repository root:
 ```bash
-# Install CasADi first
+# Install CasADi and [matplotlib, numpy, scipy] pip packages first
 cmake -B build -S .
 cmake --build build
-./build/FlywheelScalabilityBenchmark
-
-# Install matplotlib, numpy, and scipy pip packages first
-./tools/plot_scalability_results.py --filename flywheel-scalability-results.csv --title Flywheel
+./tools/generate-scalability-results.sh
 ```
+
+See the contents of `./tools/generate-scalability-results.sh` for how to run specific benchmarks.
 
 ## Examples
 
