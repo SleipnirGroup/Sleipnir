@@ -129,7 +129,7 @@ void TestFlywheel(std::string testName, Eigen::Matrix<double, 1, 1> A,
   EXPECT_NEAR(r(0), solver.X().Value(0, N - 1), 1e-2);
 
   // Log states for offline viewing
-  std::ofstream states{fmt::format("{} Flywheel states.csv", testName)};
+  std::ofstream states{fmt::format("{} states.csv", testName)};
   if (states.is_open()) {
     states << "Time (s),Velocity (rad/s)\n";
 
@@ -140,7 +140,7 @@ void TestFlywheel(std::string testName, Eigen::Matrix<double, 1, 1> A,
   }
 
   // Log inputs for offline viewing
-  std::ofstream inputs{fmt::format("{} Flywheel inputs.csv", testName)};
+  std::ofstream inputs{fmt::format("{} inputs.csv", testName)};
   if (inputs.is_open()) {
     inputs << "Time (s),Voltage (V)\n";
 
@@ -163,13 +163,13 @@ TEST(OCPSolverTest, FlywheelExplicit) {
                    sleipnir::VariableMatrix u,
                    sleipnir::Variable dt) { return A * x + B * u; };
 
-  TestFlywheel("Explicit Collocation", A, B, f_ode,
+  TestFlywheel("OCPSolver Flywheel Explicit Collocation", A, B, f_ode,
                sleipnir::DynamicsType::kExplicitODE,
                sleipnir::TranscriptionMethod::kDirectCollocation);
-  TestFlywheel("Explicit Transcription", A, B, f_ode,
+  TestFlywheel("OCPSolver Flywheel Explicit Transcription", A, B, f_ode,
                sleipnir::DynamicsType::kExplicitODE,
                sleipnir::TranscriptionMethod::kDirectTranscription);
-  TestFlywheel("Explicit Single-Shooting", A, B, f_ode,
+  TestFlywheel("OCPSolver Flywheel Explicit Single-Shooting", A, B, f_ode,
                sleipnir::DynamicsType::kExplicitODE,
                sleipnir::TranscriptionMethod::kSingleShooting);
 }
@@ -187,10 +187,10 @@ TEST(OCPSolverTest, FlywheelDiscrete) {
     return A_discrete * x + B_discrete * u;
   };
 
-  TestFlywheel("Discrete Transcription", A, B, f_discrete,
+  TestFlywheel("OCPSolver Flywheel Discrete Transcription", A, B, f_discrete,
                sleipnir::DynamicsType::kDiscrete,
                sleipnir::TranscriptionMethod::kDirectTranscription);
-  TestFlywheel("Discrete Single-Shooting", A, B, f_discrete,
+  TestFlywheel("OCPSolver Flywheel Discrete Single-Shooting", A, B, f_discrete,
                sleipnir::DynamicsType::kDiscrete,
                sleipnir::TranscriptionMethod::kSingleShooting);
 }

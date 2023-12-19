@@ -13,7 +13,7 @@
 #include "CmdlineArguments.hpp"
 
 // This problem tests the case where regularization fails
-TEST(ArmOnElevatorProblemTest, DirectTranscription) {
+TEST(OptimizationProblemTest, ArmOnElevator) {
   constexpr int N = 800;
 
   constexpr auto kElevatorStartHeight = 1_m;

@@ -12,7 +12,7 @@
 
 #include "CmdlineArguments.hpp"
 
-TEST(DoubleIntegratorProblemTest, MinimumTime) {
+TEST(OptimizationProblemTest, DoubleIntegrator) {
   auto start = std::chrono::system_clock::now();
 
   constexpr auto T = 3.5_s;
@@ -126,7 +126,7 @@ TEST(DoubleIntegratorProblemTest, MinimumTime) {
   EXPECT_NEAR(0.0, X.Value(1, N), 1e-2);
 
   // Log states for offline viewing
-  std::ofstream states{"Double integrator states.csv"};
+  std::ofstream states{"OptimizationProblem Double Integrator states.csv"};
   if (states.is_open()) {
     states << "Time (s),Position (m),Velocity (m/s)\n";
 
@@ -137,7 +137,7 @@ TEST(DoubleIntegratorProblemTest, MinimumTime) {
   }
 
   // Log inputs for offline viewing
-  std::ofstream inputs{"Double integrator inputs.csv"};
+  std::ofstream inputs{"OptimizationProblem Double Integrator inputs.csv"};
   if (inputs.is_open()) {
     inputs << "Time (s),Acceleration (m/s²)\n";
 
