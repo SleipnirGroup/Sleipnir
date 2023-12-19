@@ -19,7 +19,7 @@
 
 TEST(OCPSolverTest, CartPole) {
   constexpr auto T = 5_s;
-  constexpr units::second_t dt = 20_ms;
+  constexpr units::second_t dt = 50_ms;
   constexpr int N = T / dt;
 
   constexpr auto u_max = 20_N;
@@ -40,25 +40,30 @@ TEST(OCPSolverTest, CartPole) {
       sleipnir::TimestepMethod::kVariableSingle,
       sleipnir::TranscriptionMethod::kDirectCollocation);
 
-  problem.ConstrainInitialState(
-      Eigen::Matrix<double, 4, 1>{0.0, 0.0, 0.0, 0.0});
-  problem.ConstrainFinalState(
-      Eigen::Matrix<double, 4, 1>{1.0, std::numbers::pi, 0.0, 0.0});
-  problem.SetLowerInputBound(-u_max.value());
-  problem.SetUpperInputBound(u_max.value());
-
   // x = [q, q̇]ᵀ = [x, θ, ẋ, θ̇]ᵀ
   auto X = problem.X();
 
   // Initial guess
-  for (int k = 0; k < N; ++k) {
+  for (int k = 0; k < N + 1; ++k) {
     X(0, k).SetValue(static_cast<double>(k) / N * d.value());
     X(1, k).SetValue(static_cast<double>(k) / N * std::numbers::pi);
   }
 
+  // Initial conditions
+  problem.ConstrainInitialState(
+      Eigen::Matrix<double, 4, 1>{0.0, 0.0, 0.0, 0.0});
+
+  // Final conditions
+  problem.ConstrainFinalState(
+      Eigen::Matrix<double, 4, 1>{1.0, std::numbers::pi, 0.0, 0.0});
+
   // Cart position constraints
   problem.SubjectTo(X.Row(0) >= 0.0);
   problem.SubjectTo(X.Row(0) <= d_max.value());
+
+  // Input constraints
+  problem.SetLowerInputBound(-u_max.value());
+  problem.SetUpperInputBound(u_max.value());
 
   // Minimize sum squared inputs
   sleipnir::VariableMatrix J = 0.0;
