@@ -12,7 +12,7 @@
 
 #include "CmdlineArguments.hpp"
 
-TEST(OCPSolverTest, Robot) {
+TEST(OCPSolverTest, Unicycle) {
   auto start = std::chrono::system_clock::now();
 
   constexpr int N = 50;
@@ -86,7 +86,7 @@ TEST(OCPSolverTest, Robot) {
   // EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
 
   // Log states for offline viewing
-  std::ofstream states{"Robot states.csv"};
+  std::ofstream states{"OCPSolver Unicycle states.csv"};
   double time = 0.0;
   if (states.is_open()) {
     states << "Time (s),X estimate (m),Y estimate (m),Theta (rad),X reference "
@@ -103,7 +103,7 @@ TEST(OCPSolverTest, Robot) {
 
   time = 0.0;
   // Log inputs for offline viewing
-  std::ofstream inputs{"Robot inputs.csv"};
+  std::ofstream inputs{"OCPSolver Unicycle inputs.csv"};
   if (inputs.is_open()) {
     inputs << "Time (s),Velocity Right (m/s),Velocity Left (m/s)\n";
 

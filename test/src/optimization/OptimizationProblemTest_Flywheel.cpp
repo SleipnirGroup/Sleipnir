@@ -23,7 +23,7 @@ bool Near(double expected, double actual, double tolerance) {
 }
 }  // namespace
 
-TEST(FlywheelProblemTest, DirectTranscription) {
+TEST(OptimizationProblemTest, Flywheel) {
   auto start = std::chrono::system_clock::now();
 
   constexpr auto T = 5_s;
@@ -119,7 +119,7 @@ TEST(FlywheelProblemTest, DirectTranscription) {
   EXPECT_NEAR(r(0), X.Value(0, N), 1e-2);
 
   // Log states for offline viewing
-  std::ofstream states{"Flywheel states.csv"};
+  std::ofstream states{"OptimizationProblem Flywheel states.csv"};
   if (states.is_open()) {
     states << "Time (s),Velocity (rad/s)\n";
 
@@ -130,7 +130,7 @@ TEST(FlywheelProblemTest, DirectTranscription) {
   }
 
   // Log inputs for offline viewing
-  std::ofstream inputs{"Flywheel inputs.csv"};
+  std::ofstream inputs{"OptimizationProblem Flywheel inputs.csv"};
   if (inputs.is_open()) {
     inputs << "Time (s),Voltage (V)\n";
 
