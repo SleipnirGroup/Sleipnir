@@ -19,6 +19,9 @@ namespace sleipnir {
  */
 class RegularizedLDLT {
  public:
+  using Solver = Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>,
+                                       Eigen::Lower, Eigen::AMDOrdering<int>>;
+
   /**
    * Constructs a RegularizedLDLT instance.
    */
@@ -127,7 +130,7 @@ class RegularizedLDLT {
   }
 
  private:
-  Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>> m_solver;
+  Solver m_solver;
 
   Eigen::ComputationInfo m_info = Eigen::Success;
 
