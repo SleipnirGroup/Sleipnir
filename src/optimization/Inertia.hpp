@@ -4,9 +4,6 @@
 
 #include <cstddef>
 
-#include <Eigen/SparseCholesky>
-#include <Eigen/SparseCore>
-
 namespace sleipnir {
 
 /**
@@ -35,11 +32,12 @@ class Inertia {
   /**
    * Constructs the Inertia type with the inertia of the given matrix.
    *
+   * @tparam Solver Eigen sparse linear system solver.
    * @param matrix Matrix of which to compute the inertia.
    */
-  template <typename MatrixType>
+  template <typename Solver, typename MatrixType>
   explicit Inertia(const MatrixType& matrix) {
-    Eigen::SimplicialLDLT<MatrixType> solver{matrix};
+    Solver solver{matrix};
 
     auto D = solver.vectorD();
     for (int row = 0; row < D.rows(); ++row) {
@@ -57,10 +55,11 @@ class Inertia {
    * Constructs the Inertia type with the inertia of the given LDLT
    * decomposition.
    *
+   * @tparam Solver Eigen sparse linear system solver.
    * @param solver The LDLT decomposition of which to compute the inertia.
    */
-  explicit Inertia(
-      const Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>>& solver) {
+  template <typename Solver>
+  explicit Inertia(const Solver& solver) {
     auto D = solver.vectorD();
     for (int row = 0; row < D.rows(); ++row) {
       if (D(row) > 0.0) {
