@@ -135,8 +135,8 @@ def cart_pole_dynamics(x, u):
     # M(q) = [m_p l cosθ    m_p l²  ]
     M = VariableMatrix(2, 2)
     M[0, 0] = m_c + m_p
-    M[0, 1] = m_p * l * autodiff.cos(theta)
-    M[1, 0] = m_p * l * autodiff.cos(theta)
+    M[0, 1] = m_p * l * theta.cwise_transform(autodiff.cos)
+    M[1, 0] = m_p * l * theta.cwise_transform(autodiff.cos)
     M[1, 1] = m_p * l**2
 
     Minv = VariableMatrix(2, 2)
@@ -150,16 +150,16 @@ def cart_pole_dynamics(x, u):
     #           [0  −m_p lθ̇ sinθ]
     # C(q, q̇) = [0       0      ]
     C = VariableMatrix(2, 2)
-    C[0, 0] = autodiff.constant(0.0)
-    C[0, 1] = -m_p * l * thetadot * autodiff.sin(theta)
-    C[1, 0] = autodiff.constant(0.0)
-    C[1, 1] = autodiff.constant(0.0)
+    C[0, 0] = 0.0
+    C[0, 1] = -m_p * l * thetadot * theta.cwise_transform(autodiff.sin)
+    C[1, 0] = 0.0
+    C[1, 1] = 0.0
 
     #          [     0      ]
     # τ_g(q) = [-m_p gl sinθ]
     tau_g = VariableMatrix(2, 1)
-    tau_g[0, 0] = autodiff.constant(0.0)
-    tau_g[1, 0] = -m_p * g * l * autodiff.sin(theta)
+    tau_g[0, 0] = 0.0
+    tau_g[1, 0] = -m_p * g * l * theta.cwise_transform(autodiff.sin)
 
     #     [1]
     # B = [0]
@@ -172,7 +172,7 @@ def cart_pole_dynamics(x, u):
     return qddot
 
 
-@pytest.mark.skip(reason="Poor convergence")
+@pytest.mark.skip(reason='Fails with "bad search direction"')
 def test_direct_transcription():
     T = 5.0  # s
     dt = 0.005  # s
@@ -227,8 +227,7 @@ def test_direct_transcription():
     assert status.cost_function_type == ExpressionType.QUADRATIC
     assert status.equality_constraint_type == ExpressionType.NONLINEAR
     assert status.inequality_constraint_type == ExpressionType.LINEAR
-    # FIXME: Poor convergence
-    # assert status.exit_condition == SolverExitCondition.SUCCESS
+    assert status.exit_condition == SolverExitCondition.SUCCESS
 
     # Verify initial state
     assert near(0.0, X.value(0, 0), 1e-2)
@@ -256,7 +255,7 @@ def test_direct_transcription():
             dt,
         )
         actual_x_k1 = X[:, k + 1 : k + 2].value()
-        for row in range(actual_x_k1.rows()):
+        for row in range(actual_x_k1.shape[0]):
             assert near(expected_x_k1[row, 0], actual_x_k1[row, 0], 2e-1)
 
     # Verify final state

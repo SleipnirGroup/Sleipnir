@@ -89,10 +89,8 @@ TEST(CartPoleProblemTest, DirectTranscription) {
   EXPECT_EQ(sleipnir::ExpressionType::kNonlinear,
             status.equalityConstraintType);
   EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.inequalityConstraintType);
-  // FIXME: Poor convergence
-  // EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
+  EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
 
-#if 0
   // Verify initial state
   EXPECT_NEAR(0.0, X.Value(0, 0), 1e-2);
   EXPECT_NEAR(0.0, X.Value(1, 0), 1e-2);
@@ -126,7 +124,6 @@ TEST(CartPoleProblemTest, DirectTranscription) {
   EXPECT_NEAR(std::numbers::pi, X.Value(1, N), 1e-2);
   EXPECT_NEAR(0.0, X.Value(2, N), 1e-2);
   EXPECT_NEAR(0.0, X.Value(3, N), 1e-2);
-#endif
 
   // Log states for offline viewing
   std::ofstream states{"Cart-pole states.csv"};

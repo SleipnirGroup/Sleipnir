@@ -91,5 +91,5 @@ def test_direct_transcription():
     assert status.cost_function_type == ExpressionType.QUADRATIC
     assert status.equality_constraint_type == ExpressionType.LINEAR
     assert status.inequality_constraint_type == ExpressionType.NONLINEAR
-    # FIXME: Poor convergence
+    # FIXME: Fails with "bad search direction"
     # assert status.exit_condition == SolverExitCondition.SUCCESS
