@@ -6,7 +6,7 @@
     flywheel-scalability-results-casadi.csv \
     flywheel-scalability-results-sleipnir.csv \
   --labels \
-    "CasADi + ipopt" \
+    "CasADi + Ipopt + MUMPS" \
     "Sleipnir" \
   --title Flywheel \
   --noninteractive
@@ -18,7 +18,7 @@
     cart-pole-scalability-results-casadi.csv \
     cart-pole-scalability-results-sleipnir.csv \
   --labels \
-    "CasADi + ipopt" \
+    "CasADi + Ipopt + MUMPS" \
     "Sleipnir" \
   --title Cart-pole \
   --noninteractive
