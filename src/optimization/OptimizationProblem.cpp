@@ -18,8 +18,7 @@ OptimizationProblem::OptimizationProblem() noexcept {
 }
 
 Variable OptimizationProblem::DecisionVariable() {
-  m_decisionVariables.emplace_back(
-      detail::MakeExpressionPtr(0.0, ExpressionType::kLinear));
+  m_decisionVariables.emplace_back();
   return m_decisionVariables.back();
 }
 
@@ -30,8 +29,7 @@ VariableMatrix OptimizationProblem::DecisionVariable(int rows, int cols) {
 
   for (int row = 0; row < rows; ++row) {
     for (int col = 0; col < cols; ++col) {
-      m_decisionVariables.emplace_back(
-          detail::MakeExpressionPtr(0.0, ExpressionType::kLinear));
+      m_decisionVariables.emplace_back();
       vars(row, col) = m_decisionVariables.back();
     }
   }
@@ -49,8 +47,7 @@ VariableMatrix OptimizationProblem::SymmetricDecisionVariable(int rows) {
 
   for (int row = 0; row < rows; ++row) {
     for (int col = 0; col <= row; ++col) {
-      m_decisionVariables.emplace_back(
-          detail::MakeExpressionPtr(0.0, ExpressionType::kLinear));
+      m_decisionVariables.emplace_back();
       vars(row, col) = m_decisionVariables.back();
       vars(col, row) = m_decisionVariables.back();
     }

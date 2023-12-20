@@ -2,8 +2,6 @@
 
 #include "sleipnir/autodiff/VariableMatrix.hpp"
 
-#include "sleipnir/autodiff/Expression.hpp"
-
 namespace sleipnir {
 
 VariableMatrix::VariableMatrix(int rows, int cols)
@@ -16,11 +14,11 @@ VariableMatrix::VariableMatrix(int rows, int cols)
 }
 
 VariableMatrix::VariableMatrix(double value) : m_rows{1}, m_cols{1} {
-  m_storage.emplace_back(detail::MakeExpressionPtr(value));
+  m_storage.emplace_back(value);
 }
 
 VariableMatrix::VariableMatrix(int value) : m_rows{1}, m_cols{1} {
-  m_storage.emplace_back(detail::MakeExpressionPtr(value));
+  m_storage.emplace_back(value);
 }
 
 VariableMatrix& VariableMatrix::operator=(double value) {
