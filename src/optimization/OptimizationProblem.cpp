@@ -38,8 +38,12 @@ VariableMatrix OptimizationProblem::DecisionVariable(int rows, int cols) {
 }
 
 VariableMatrix OptimizationProblem::SymmetricDecisionVariable(int rows) {
-  // An nxn symmetric matrix has (n² + n)/2 unique entries. The number of
-  // entries in the lower triangle is equal to the sum of the numbers 1 to n).
+  // We only need to store the lower triangle of an n x n symmetric matrix; the
+  // other elements are duplicates. The lower triangle has (n² + n)/2 elements.
+  //
+  //   n
+  //   Σ k = (n² + n)/2
+  //  k=1
   m_decisionVariables.reserve(m_decisionVariables.size() +
                               (rows * rows + rows) / 2);
 
