@@ -119,11 +119,11 @@ struct SLEIPNIR_DLLEXPORT Expression {
    * Constructs a nullary expression (an operator with no arguments).
    *
    * @param value The expression value.
-   * @param type The expression type. It should be either linear (the default)
-   *             or constant.
+   * @param type The expression type. It should be either constant (the default)
+   *             or linear.
    */
   explicit Expression(double value,
-                      ExpressionType type = ExpressionType::kLinear);
+                      ExpressionType type = ExpressionType::kConstant);
 
   /**
    * Constructs an unary expression (an operator with one argument).

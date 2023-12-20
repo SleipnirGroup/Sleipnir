@@ -24,7 +24,7 @@ class SLEIPNIR_DLLEXPORT ExpressionGraph;
 class SLEIPNIR_DLLEXPORT Variable {
  public:
   /**
-   * Constructs a Variable initialized to zero.
+   * Constructs a linear Variable with a value of zero.
    */
   Variable() = default;
 
@@ -47,7 +47,14 @@ class SLEIPNIR_DLLEXPORT Variable {
    *
    * @param expr The autodiff variable.
    */
-  explicit Variable(detail::ExpressionPtr expr);
+  explicit Variable(const detail::ExpressionPtr& expr);
+
+  /**
+   * Constructs a Variable pointing to the specified expression.
+   *
+   * @param expr The autodiff variable.
+   */
+  explicit Variable(detail::ExpressionPtr&& expr);
 
   /**
    * Assignment operator for double.
@@ -174,7 +181,8 @@ class SLEIPNIR_DLLEXPORT Variable {
 
  private:
   /// The expression node.
-  detail::ExpressionPtr expr = detail::Zero();
+  detail::ExpressionPtr expr =
+      detail::MakeExpressionPtr(0.0, ExpressionType::kLinear);
 
   friend SLEIPNIR_DLLEXPORT Variable abs(const Variable& x);
   friend SLEIPNIR_DLLEXPORT Variable acos(const Variable& x);

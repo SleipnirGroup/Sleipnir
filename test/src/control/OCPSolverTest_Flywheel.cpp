@@ -69,14 +69,7 @@ void TestFlywheel(std::string testName, Eigen::Matrix<double, 1, 1> A,
       solver.Solve({.diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
 
   EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
-  if (method == sleipnir::TranscriptionMethod::kSingleShooting) {
-    // The initial state isn't dependent on any decision variables, so
-    // constraining it to a constant makes the constraint itself constant
-    EXPECT_EQ(sleipnir::ExpressionType::kConstant,
-              status.equalityConstraintType);
-  } else {
-    EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.equalityConstraintType);
-  }
+  EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.equalityConstraintType);
   EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.inequalityConstraintType);
   EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
 

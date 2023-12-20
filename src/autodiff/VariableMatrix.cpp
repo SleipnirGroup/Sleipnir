@@ -16,13 +16,11 @@ VariableMatrix::VariableMatrix(int rows, int cols)
 }
 
 VariableMatrix::VariableMatrix(double value) : m_rows{1}, m_cols{1} {
-  m_storage.emplace_back(
-      detail::MakeExpressionPtr(value, ExpressionType::kConstant));
+  m_storage.emplace_back(detail::MakeExpressionPtr(value));
 }
 
 VariableMatrix::VariableMatrix(int value) : m_rows{1}, m_cols{1} {
-  m_storage.emplace_back(
-      detail::MakeExpressionPtr(value, ExpressionType::kConstant));
+  m_storage.emplace_back(detail::MakeExpressionPtr(value));
 }
 
 VariableMatrix& VariableMatrix::operator=(double value) {
