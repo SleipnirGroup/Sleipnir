@@ -191,7 +191,9 @@ SolverStatus OptimizationProblem::Solve(const SolverConfig& config) {
   }
 
   // Assign the solution to the original Variable instances
-  SetAD(m_decisionVariables, solution);
+  for (size_t row = 0; row < m_decisionVariables.size(); ++row) {
+    m_decisionVariables[row].SetValue(solution[row]);
+  }
 
   return status;
 }

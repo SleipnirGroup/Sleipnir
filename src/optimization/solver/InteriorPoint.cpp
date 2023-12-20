@@ -311,8 +311,8 @@ Eigen::VectorXd InteriorPoint(
   Eigen::VectorXd s = GetAD(sAD);
   Eigen::VectorXd y = GetAD(yAD);
   Eigen::VectorXd z = GetAD(zAD);
-  Eigen::VectorXd c_e = GetAD(equalityConstraints);
-  Eigen::VectorXd c_i = GetAD(inequalityConstraints);
+  Eigen::VectorXd c_e = GetAD(c_eAD);
+  Eigen::VectorXd c_i = GetAD(c_iAD);
 
   // Check for overconstrained problem
   if (equalityConstraints.size() > decisionVariables.size()) {
@@ -585,12 +585,12 @@ Eigen::VectorXd InteriorPoint(
       for (int row = 0; row < c_e.rows(); ++row) {
         c_eAD(row).Update();
       }
-      Eigen::VectorXd trial_c_e = GetAD(equalityConstraints);
+      Eigen::VectorXd trial_c_e = GetAD(c_eAD);
 
       for (int row = 0; row < c_i.rows(); ++row) {
         c_iAD(row).Update();
       }
-      Eigen::VectorXd trial_c_i = GetAD(inequalityConstraints);
+      Eigen::VectorXd trial_c_i = GetAD(c_iAD);
 
       f.value().Update();
       FilterEntry entry{f.value(), μ, trial_s, trial_c_e, trial_c_i};
@@ -655,12 +655,12 @@ Eigen::VectorXd InteriorPoint(
           for (int row = 0; row < c_e.rows(); ++row) {
             c_eAD(row).Update();
           }
-          trial_c_e = GetAD(equalityConstraints);
+          trial_c_e = GetAD(c_eAD);
 
           for (int row = 0; row < c_i.rows(); ++row) {
             c_iAD(row).Update();
           }
-          trial_c_i = GetAD(inequalityConstraints);
+          trial_c_i = GetAD(c_iAD);
 
           f.value().Update();
           entry = FilterEntry{f.value(), μ, trial_s, trial_c_e, trial_c_i};
@@ -723,12 +723,12 @@ Eigen::VectorXd InteriorPoint(
           for (int row = 0; row < c_e.rows(); ++row) {
             c_eAD(row).Update();
           }
-          Eigen::VectorXd trial_c_e = GetAD(equalityConstraints);
+          Eigen::VectorXd trial_c_e = GetAD(c_eAD);
 
           for (int row = 0; row < c_i.rows(); ++row) {
             c_iAD(row).Update();
           }
-          Eigen::VectorXd trial_c_i = GetAD(inequalityConstraints);
+          Eigen::VectorXd trial_c_i = GetAD(c_iAD);
 
           double nextKKTError = KKTError(
               gradientF.Calculate(), jacobianCe.Calculate(), trial_c_e,
@@ -813,13 +813,13 @@ Eigen::VectorXd InteriorPoint(
     for (int row = 0; row < c_e.rows(); ++row) {
       c_eAD(row).Update();
     }
-    c_e = GetAD(equalityConstraints);
+    c_e = GetAD(c_eAD);
 
     // Update cᵢ
     for (int row = 0; row < c_i.rows(); ++row) {
       c_iAD(row).Update();
     }
-    c_i = GetAD(inequalityConstraints);
+    c_i = GetAD(c_iAD);
 
     // Update the error estimate
     E_0 = ErrorEstimate(g, A_e, c_e, A_i, c_i, s, y, z, 0.0);
