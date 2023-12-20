@@ -2,22 +2,11 @@
 
 #pragma once
 
-#include <vector>
-
 #include <Eigen/Core>
 
 #include "sleipnir/autodiff/Variable.hpp"
 
 namespace sleipnir {
-
-/**
- * Assigns an Eigen::VectorXd to a std::vector<Variable>.
- *
- * @param[out] dest The std::vector<Variable>.
- * @param[in] src The Eigen::VectorXd.
- */
-void SetAD(std::vector<Variable>& dest,
-           const Eigen::Ref<const Eigen::VectorXd>& src);
 
 /**
  * Assigns an Eigen::VectorXd to an Eigen::Vector<Variable>.
@@ -27,13 +16,6 @@ void SetAD(std::vector<Variable>& dest,
  */
 void SetAD(Eigen::Ref<VectorXvar> dest,
            const Eigen::Ref<const Eigen::VectorXd>& src);
-
-/**
- * Returns a std::vector<Variable> as an Eigen::VectorXd.
- *
- * @param src The std::vector<Variable>.
- */
-Eigen::VectorXd GetAD(std::vector<Variable> src);
 
 /**
  * Returns an Eigen::Vector<Variable> as an Eigen::VectorXd.
