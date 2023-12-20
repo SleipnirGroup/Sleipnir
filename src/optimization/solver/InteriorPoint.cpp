@@ -262,15 +262,15 @@ Eigen::VectorXd InteriorPoint(
   // Create autodiff variables for s, y, and z for Lagrangian
   VectorXvar sAD{inequalityConstraints.size()};
   for (auto& s : sAD) {
-    s = Variable{detail::MakeExpressionPtr(1.0, ExpressionType::kLinear)};
+    s.SetValue(1.0);
   }
   VectorXvar yAD{equalityConstraints.size()};
   for (auto& y : yAD) {
-    y = Variable{detail::MakeExpressionPtr(0.0, ExpressionType::kLinear)};
+    y.SetValue(0.0);
   }
   VectorXvar zAD{inequalityConstraints.size()};
   for (auto& z : zAD) {
-    z = Variable{detail::MakeExpressionPtr(1.0, ExpressionType::kLinear)};
+    z.SetValue(1.0);
   }
 
   // Lagrangian L
