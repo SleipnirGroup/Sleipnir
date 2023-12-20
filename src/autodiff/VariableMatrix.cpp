@@ -4,6 +4,12 @@
 
 namespace sleipnir {
 
+VariableMatrix::VariableMatrix(int rows) : m_rows{rows}, m_cols{1} {
+  for (int row = 0; row < rows; ++row) {
+    m_storage.emplace_back();
+  }
+}
+
 VariableMatrix::VariableMatrix(int rows, int cols)
     : m_rows{rows}, m_cols{cols} {
   for (int row = 0; row < rows; ++row) {
@@ -11,46 +17,6 @@ VariableMatrix::VariableMatrix(int rows, int cols)
       m_storage.emplace_back();
     }
   }
-}
-
-VariableMatrix::VariableMatrix(double value) : m_rows{1}, m_cols{1} {
-  m_storage.emplace_back(value);
-}
-
-VariableMatrix::VariableMatrix(int value) : m_rows{1}, m_cols{1} {
-  m_storage.emplace_back(value);
-}
-
-VariableMatrix& VariableMatrix::operator=(double value) {
-  assert(Rows() == 1 && Cols() == 1);
-
-  (*this)(0, 0) = value;
-
-  return *this;
-}
-
-VariableMatrix& VariableMatrix::operator=(int value) {
-  assert(Rows() == 1 && Cols() == 1);
-
-  (*this)(0, 0) = value;
-
-  return *this;
-}
-
-VariableMatrix& VariableMatrix::SetValue(double value) {
-  assert(Rows() == 1 && Cols() == 1);
-
-  (*this)(0, 0).SetValue(value);
-
-  return *this;
-}
-
-VariableMatrix& VariableMatrix::SetValue(int value) {
-  assert(Rows() == 1 && Cols() == 1);
-
-  (*this)(0, 0).SetValue(value);
-
-  return *this;
 }
 
 VariableMatrix::VariableMatrix(
@@ -141,6 +107,25 @@ VariableMatrix::VariableMatrix(
   for (int row = 0; row < Rows(); ++row) {
     for (int col = 0; col < Cols(); ++col) {
       m_storage.emplace_back(values(row, col));
+    }
+  }
+}
+
+VariableMatrix::VariableMatrix(std::span<Variable> values)
+    : m_rows{static_cast<int>(values.size())}, m_cols{1} {
+  for (int row = 0; row < Rows(); ++row) {
+    for (int col = 0; col < Cols(); ++col) {
+      m_storage.emplace_back(values[row * Cols() + col]);
+    }
+  }
+}
+
+VariableMatrix::VariableMatrix(std::span<Variable> values, int rows, int cols)
+    : m_rows{rows}, m_cols{cols} {
+  assert(static_cast<int>(values.size()) == Rows() * Cols());
+  for (int row = 0; row < Rows(); ++row) {
+    for (int col = 0; col < Cols(); ++col) {
+      m_storage.emplace_back(values[row * Cols() + col]);
     }
   }
 }

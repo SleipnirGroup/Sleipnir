@@ -10,6 +10,7 @@
 #include "sleipnir/autodiff/ExpressionGraph.hpp"
 #include "sleipnir/autodiff/Profiler.hpp"
 #include "sleipnir/autodiff/Variable.hpp"
+#include "sleipnir/autodiff/VariableMatrix.hpp"
 #include "sleipnir/util/SymbolExports.hpp"
 
 namespace sleipnir {
@@ -30,7 +31,7 @@ class SLEIPNIR_DLLEXPORT Jacobian {
    * @param wrt Vector of variables with respect to which to compute the
    *   Jacobian.
    */
-  Jacobian(VectorXvar variables, VectorXvar wrt) noexcept;
+  Jacobian(const VariableMatrix& variables, const VariableMatrix& wrt) noexcept;
 
   /**
    * Calculates the Jacobian.
@@ -48,12 +49,12 @@ class SLEIPNIR_DLLEXPORT Jacobian {
   Profiler& GetProfiler();
 
  private:
-  VectorXvar m_variables;
-  VectorXvar m_wrt;
+  VariableMatrix m_variables;
+  VariableMatrix m_wrt;
 
   std::vector<detail::ExpressionGraph> m_graphs;
 
-  Eigen::SparseMatrix<double> m_J{m_variables.rows(), m_wrt.rows()};
+  Eigen::SparseMatrix<double> m_J{m_variables.Rows(), m_wrt.Rows()};
 
   // Cached triplets for gradients of linear rows
   std::vector<Eigen::Triplet<double>> m_cachedTriplets;
