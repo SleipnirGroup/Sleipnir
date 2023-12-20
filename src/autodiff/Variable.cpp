@@ -9,22 +9,22 @@
 
 namespace sleipnir {
 
-Variable::Variable(double value)
-    : expr{detail::MakeExpressionPtr(value, ExpressionType::kConstant)} {}
+Variable::Variable(double value) : expr{detail::MakeExpressionPtr(value)} {}
 
-Variable::Variable(int value)
-    : expr{detail::MakeExpressionPtr(value, ExpressionType::kConstant)} {}
+Variable::Variable(int value) : expr{detail::MakeExpressionPtr(value)} {}
 
-Variable::Variable(detail::ExpressionPtr expr) : expr{std::move(expr)} {}
+Variable::Variable(const detail::ExpressionPtr& expr) : expr{expr} {}
+
+Variable::Variable(detail::ExpressionPtr&& expr) : expr{std::move(expr)} {}
 
 Variable& Variable::operator=(double value) {
-  expr = detail::MakeExpressionPtr(value, ExpressionType::kConstant);
+  expr = detail::MakeExpressionPtr(value);
 
   return *this;
 }
 
 Variable& Variable::operator=(int value) {
-  expr = detail::MakeExpressionPtr(value, ExpressionType::kConstant);
+  expr = detail::MakeExpressionPtr(value);
 
   return *this;
 }

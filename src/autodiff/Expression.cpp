@@ -246,7 +246,7 @@ ExpressionPtr abs(  // NOLINT
 ExpressionPtr acos(  // NOLINT
     const ExpressionPtr& x) {
   if (IsZero(x)) {
-    return MakeExpressionPtr(std::numbers::pi / 2.0, ExpressionType::kConstant);
+    return MakeExpressionPtr(std::numbers::pi / 2.0);
   }
 
   // Evaluate the expression's type
@@ -265,8 +265,7 @@ ExpressionPtr acos(  // NOLINT
       [](const ExpressionPtr& x, const ExpressionPtr&,
          const ExpressionPtr& parentAdjoint) {
         return -parentAdjoint /
-               sleipnir::detail::sqrt(
-                   MakeExpressionPtr(1.0, ExpressionType::kConstant) - x * x);
+               sleipnir::detail::sqrt(MakeExpressionPtr(1.0) - x * x);
       },
       x);
 }
@@ -293,8 +292,7 @@ ExpressionPtr asin(  // NOLINT
       [](const ExpressionPtr& x, const ExpressionPtr&,
          const ExpressionPtr& parentAdjoint) {
         return parentAdjoint /
-               sleipnir::detail::sqrt(
-                   MakeExpressionPtr(1.0, ExpressionType::kConstant) - x * x);
+               sleipnir::detail::sqrt(MakeExpressionPtr(1.0) - x * x);
       },
       x);
 }
@@ -320,8 +318,7 @@ ExpressionPtr atan(  // NOLINT
       },
       [](const ExpressionPtr& x, const ExpressionPtr&,
          const ExpressionPtr& parentAdjoint) {
-        return parentAdjoint /
-               (MakeExpressionPtr(1.0, ExpressionType::kConstant) + x * x);
+        return parentAdjoint / (MakeExpressionPtr(1.0) + x * x);
       },
       x);
 }
@@ -331,7 +328,7 @@ ExpressionPtr atan2(  // NOLINT
   if (IsZero(y)) {
     return Zero();
   } else if (IsZero(x)) {
-    return MakeExpressionPtr(std::numbers::pi / 2.0, ExpressionType::kConstant);
+    return MakeExpressionPtr(std::numbers::pi / 2.0);
   }
 
   // Evaluate the expression's type
@@ -365,7 +362,7 @@ ExpressionPtr atan2(  // NOLINT
 ExpressionPtr cos(  // NOLINT
     const ExpressionPtr& x) {
   if (IsZero(x)) {
-    return MakeExpressionPtr(1.0, ExpressionType::kConstant);
+    return MakeExpressionPtr(1.0);
   }
 
   // Evaluate the expression's type
@@ -391,7 +388,7 @@ ExpressionPtr cos(  // NOLINT
 ExpressionPtr cosh(  // NOLINT
     const ExpressionPtr& x) {
   if (IsZero(x)) {
-    return MakeExpressionPtr(1.0, ExpressionType::kConstant);
+    return MakeExpressionPtr(1.0);
   }
 
   // Evaluate the expression's type
@@ -437,8 +434,7 @@ ExpressionPtr erf(  // NOLINT
       [](const ExpressionPtr& x, const ExpressionPtr&,
          const ExpressionPtr& parentAdjoint) {
         return parentAdjoint *
-               MakeExpressionPtr(2.0 * std::numbers::inv_sqrtpi,
-                                 ExpressionType::kConstant) *
+               MakeExpressionPtr(2.0 * std::numbers::inv_sqrtpi) *
                sleipnir::detail::exp(-x * x);
       },
       x);
@@ -447,7 +443,7 @@ ExpressionPtr erf(  // NOLINT
 ExpressionPtr exp(  // NOLINT
     const ExpressionPtr& x) {
   if (IsZero(x)) {
-    return MakeExpressionPtr(1.0, ExpressionType::kConstant);
+    return MakeExpressionPtr(1.0);
   }
 
   // Evaluate the expression's type
@@ -501,7 +497,7 @@ ExpressionPtr hypot(  // NOLINT
            const ExpressionPtr& parentAdjoint) {
           return parentAdjoint * y / sleipnir::detail::hypot(x, y);
         },
-        MakeExpressionPtr(0.0, ExpressionType::kConstant), y);
+        MakeExpressionPtr(0.0), y);
   } else if (!IsZero(x) && IsZero(y)) {
     // Evaluate the expression's type
     ExpressionType type;
@@ -527,7 +523,7 @@ ExpressionPtr hypot(  // NOLINT
            const ExpressionPtr& parentAdjoint) {
           return parentAdjoint * y / sleipnir::detail::hypot(x, y);
         },
-        x, MakeExpressionPtr(0.0, ExpressionType::kConstant));
+        x, MakeExpressionPtr(0.0));
   } else {
     // Evaluate the expression's type
     ExpressionType type;
@@ -601,9 +597,7 @@ ExpressionPtr log10(  // NOLINT
       },
       [](const ExpressionPtr& x, const ExpressionPtr&,
          const ExpressionPtr& parentAdjoint) {
-        return parentAdjoint / (MakeExpressionPtr(std::numbers::ln10,
-                                                  ExpressionType::kConstant) *
-                                x);
+        return parentAdjoint / (MakeExpressionPtr(std::numbers::ln10) * x);
       },
       x);
 }
@@ -614,7 +608,7 @@ ExpressionPtr pow(  // NOLINT
     return Zero();
   }
   if (IsZero(power)) {
-    return MakeExpressionPtr(1.0, ExpressionType::kConstant);
+    return MakeExpressionPtr(1.0);
   }
 
   // Evaluate the expression's type
@@ -654,9 +648,7 @@ ExpressionPtr pow(  // NOLINT
       [](const ExpressionPtr& base, const ExpressionPtr& power,
          const ExpressionPtr& parentAdjoint) {
         return parentAdjoint *
-               sleipnir::detail::pow(
-                   base,
-                   power - MakeExpressionPtr(1, ExpressionType::kConstant)) *
+               sleipnir::detail::pow(base, power - MakeExpressionPtr(1)) *
                power;
       },
       [](const ExpressionPtr& base, const ExpressionPtr& power,
@@ -666,9 +658,7 @@ ExpressionPtr pow(  // NOLINT
           return Zero();
         } else {
           return parentAdjoint *
-                 sleipnir::detail::pow(
-                     base,
-                     power - MakeExpressionPtr(1, ExpressionType::kConstant)) *
+                 sleipnir::detail::pow(base, power - MakeExpressionPtr(1)) *
                  base * sleipnir::detail::log(base);
         }
       },
@@ -778,8 +768,7 @@ ExpressionPtr sqrt(  // NOLINT
       [](const ExpressionPtr& x, const ExpressionPtr&,
          const ExpressionPtr& parentAdjoint) {
         return parentAdjoint /
-               (MakeExpressionPtr(2.0, ExpressionType::kConstant) *
-                sleipnir::detail::sqrt(x));
+               (MakeExpressionPtr(2.0) * sleipnir::detail::sqrt(x));
       },
       x);
 }
