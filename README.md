@@ -131,6 +131,9 @@ cmake --install build --prefix pkgdir
 
 Use the following instructions to build and install the Python library.
 ```
+# Setup
+pip install --user build
+
 # Build
 python -m build --wheel
 
