@@ -145,15 +145,14 @@ void BindVariableMatrix(py::module_& autodiff,
       [](VariableMatrix& self, int row) -> Variable& { return self(row); });
   // TODO: Support slice stride other than 1
   variable_matrix.def(
-      "__getitem__",
-      [](VariableMatrix& self,
-         py::tuple slices) -> py::object {
+      "__getitem__", [](VariableMatrix& self, py::tuple slices) -> py::object {
         if (slices.size() != 2) {
           throw py::index_error(
               fmt::format("Expected 2 slices, got {}.", slices.size()));
         }
 
-        // If both indices are integers instead of slices, return Variable instead of VariableBlock
+        // If both indices are integers instead of slices, return Variable
+        // instead of VariableBlock
         if (py::isinstance<py::int_>(slices[0]) &&
             py::isinstance<py::int_>(slices[1])) {
           int row = slices[0].cast<int>();
