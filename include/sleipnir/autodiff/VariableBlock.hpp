@@ -406,8 +406,8 @@ class VariableBlock {
   /**
    * Returns the transpose of the variable matrix.
    */
-  Mat T() const {
-    Mat result{Cols(), Rows()};
+  std::remove_cv_t<Mat> T() const {
+    std::remove_cv_t<Mat> result{Cols(), Rows()};
 
     for (int row = 0; row < Rows(); ++row) {
       for (int col = 0; col < Cols(); ++col) {

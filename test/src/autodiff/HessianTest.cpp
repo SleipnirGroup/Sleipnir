@@ -155,11 +155,11 @@ TEST(HessianTest, SumOfSquaredResiduals) {
   g = sleipnir::Gradient{y, x}.Calculate();
 
   EXPECT_DOUBLE_EQ(0.0, y.Value());
-  EXPECT_DOUBLE_EQ((2 * x[0] - 2 * x[1]).Value(), g(0));
-  EXPECT_DOUBLE_EQ((-2 * x[0] + 4 * x[1] - 2 * x[2]).Value(), g(1));
-  EXPECT_DOUBLE_EQ((-2 * x[1] + 4 * x[2] - 2 * x[3]).Value(), g(2));
-  EXPECT_DOUBLE_EQ((-2 * x[2] + 4 * x[3] - 2 * x[4]).Value(), g(3));
-  EXPECT_DOUBLE_EQ((-2 * x[3] + 2 * x[4]).Value(), g(4));
+  EXPECT_DOUBLE_EQ((2 * x(0) - 2 * x(1)).Value(), g(0));
+  EXPECT_DOUBLE_EQ((-2 * x(0) + 4 * x(1) - 2 * x(2)).Value(), g(1));
+  EXPECT_DOUBLE_EQ((-2 * x(1) + 4 * x(2) - 2 * x(3)).Value(), g(2));
+  EXPECT_DOUBLE_EQ((-2 * x(2) + 4 * x(3) - 2 * x(4)).Value(), g(3));
+  EXPECT_DOUBLE_EQ((-2 * x(3) + 2 * x(4)).Value(), g(4));
 
   H = sleipnir::Hessian{y, x}.Calculate();
   EXPECT_DOUBLE_EQ(2.0, H(0, 0));

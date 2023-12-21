@@ -34,6 +34,27 @@ TEST(VariableMatrixTest, AssignmentToDefault) {
   EXPECT_EQ(4.0, mat(1, 1));
 }
 
+TEST(VariableMatrixTest, AssignmentAliasing) {
+  sleipnir::VariableMatrix A{{1.0, 2.0}, {3.0, 4.0}};
+  sleipnir::VariableMatrix B{{5.0, 6.0}, {7.0, 8.0}};
+
+  Eigen::MatrixXd expectedA{{1.0, 2.0}, {3.0, 4.0}};
+  Eigen::MatrixXd expectedB{{5.0, 6.0}, {7.0, 8.0}};
+  EXPECT_EQ(expectedA, A);
+  EXPECT_EQ(expectedB, B);
+
+  A = B;
+
+  EXPECT_EQ(expectedB, A);
+  EXPECT_EQ(expectedB, B);
+
+  B(0, 0).SetValue(2.0);
+  expectedB(0, 0) = 2.0;
+
+  EXPECT_EQ(expectedB, A);
+  EXPECT_EQ(expectedB, B);
+}
+
 TEST(VariableMatrixTest, Iterators) {
   sleipnir::VariableMatrix A{{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}, {7.0, 8.0, 9.0}};
 

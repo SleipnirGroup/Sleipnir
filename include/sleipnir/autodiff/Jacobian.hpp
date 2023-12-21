@@ -26,8 +26,9 @@ class SLEIPNIR_DLLEXPORT Jacobian {
   /**
    * Constructs a Jacobian object.
    *
-   * @param variables Variables of which to compute the Jacobian.
-   * @param wrt Variables with respect to which to compute the Jacobian.
+   * @param variables Vector of variables of which to compute the Jacobian.
+   * @param wrt Vector of variables with respect to which to compute the
+   *   Jacobian.
    */
   Jacobian(VectorXvar variables, VectorXvar wrt) noexcept;
 

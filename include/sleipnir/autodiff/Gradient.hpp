@@ -34,7 +34,8 @@ class SLEIPNIR_DLLEXPORT Gradient {
    * Constructs a Gradient object.
    *
    * @param variable Variable of which to compute the gradient.
-   * @param wrt Variables with respect to which to compute the gradient.
+   * @param wrt Vector of variables with respect to which to compute the
+   *   gradient.
    */
   Gradient(Variable variable, VectorXvar wrt) noexcept;
 
