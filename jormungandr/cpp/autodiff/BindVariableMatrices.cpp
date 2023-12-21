@@ -208,14 +208,6 @@ void BindVariableMatrix(py::module_& autodiff,
         return py::cast(self.Block(rowOffset, colOffset, blockRows, blockCols));
       });
 
-  variable_matrix.def("get_element",
-                      [](VariableMatrix& self, int row, int col) -> Variable& {
-                        if (row >= self.Rows() || col >= self.Cols()) {
-                          throw std::out_of_range("Index out of bounds");
-                        }
-                        return self(row, col);
-                      });
-
   variable_matrix.def("row", py::overload_cast<int>(&VariableMatrix::Row));
   variable_matrix.def("col", py::overload_cast<int>(&VariableMatrix::Col));
   variable_matrix.def(
