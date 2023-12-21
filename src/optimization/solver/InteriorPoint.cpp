@@ -142,8 +142,7 @@ double ErrorEstimate(const Eigen::VectorXd& g,
   double s_c =
       std::max(s_max, z.lpNorm<1>() / numInequalityConstraints) / s_max;
 
-  Eigen::SparseMatrix<double> S;
-  S = s.asDiagonal();
+  const auto S = s.asDiagonal();
   const Eigen::VectorXd e = Eigen::VectorXd::Ones(s.rows());
 
   return std::max({(g - A_e.transpose() * y - A_i.transpose() * z)
@@ -185,8 +184,7 @@ double KKTError(const Eigen::VectorXd& g,
   //   cₑ = 0
   //   cᵢ − s = 0
 
-  Eigen::SparseMatrix<double> S;
-  S = s.asDiagonal();
+  const auto S = s.asDiagonal();
   const Eigen::VectorXd e = Eigen::VectorXd::Ones(s.rows());
 
   return (g - A_e.transpose() * y - A_i.transpose() * z).lpNorm<1>() +
@@ -508,28 +506,32 @@ Eigen::VectorXd InteriorPoint(
     // S = [0  ⋱   ⋮ ]
     //     [⋮    ⋱ 0 ]
     //     [0  ⋯ 0 sₘ]
-    Eigen::SparseMatrix<double> S;
-    S = s.asDiagonal();
+    const auto S = s.asDiagonal();
+    Eigen::SparseMatrix<double> Sinv;
+    Sinv = s.cwiseInverse().asDiagonal();
 
     //     [z₁ 0 ⋯ 0 ]
     // Z = [0  ⋱   ⋮ ]
     //     [⋮    ⋱ 0 ]
     //     [0  ⋯ 0 zₘ]
-    Eigen::SparseMatrix<double> Z;
-    Z = z.asDiagonal();
+    const auto Z = z.asDiagonal();
+    Eigen::SparseMatrix<double> Zinv;
+    Zinv = z.cwiseInverse().asDiagonal();
 
     // Σ = S⁻¹Z
-    Eigen::SparseMatrix<double> Σ = S.cwiseInverse() * Z;
+    const Eigen::SparseMatrix<double> Σ = Sinv * Z;
 
     // lhs = [H + AᵢᵀΣAᵢ  Aₑᵀ]
     //       [    Aₑ       0 ]
+    //
+    // Don't assign upper triangle because solver only uses lower triangle.
     lhsBuilder.Clear();
     // Assign top-left quadrant
-    lhsBuilder.Block(0, 0, H.rows(), H.cols()) = H + A_i.transpose() * Σ * A_i;
+    lhsBuilder.Block(0, 0, H.rows(), H.cols()) =
+        H.triangularView<Eigen::Lower>() +
+        (A_i.transpose() * Σ * A_i).triangularView<Eigen::Lower>();
     // Assign bottom-left quadrant
     lhsBuilder.Block(H.rows(), 0, A_e.rows(), A_e.cols()) = A_e;
-    // Assign top-right quadrant
-    lhsBuilder.Block(0, H.rows(), A_e.cols(), A_e.rows()) = A_e.transpose();
     Eigen::SparseMatrix<double> lhs = lhsBuilder.Build();
 
     const Eigen::VectorXd e = Eigen::VectorXd::Ones(s.rows());
@@ -539,7 +541,7 @@ Eigen::VectorXd InteriorPoint(
     Eigen::VectorXd rhs{x.rows() + y.rows()};
     rhs.segment(0, x.rows()) =
         -(g - A_e.transpose() * y +
-          A_i.transpose() * (S.cwiseInverse() * (Z * c_i - μ * e) - z));
+          A_i.transpose() * (Sinv * (Z * c_i - μ * e) - z));
     rhs.segment(x.rows(), y.rows()) = -c_e;
 
     // Solve the Newton-KKT system
@@ -561,11 +563,10 @@ Eigen::VectorXd InteriorPoint(
     Eigen::VectorXd p_y = -step.segment(x.rows(), y.rows());
 
     // pₖᶻ = −Σcᵢ + μS⁻¹e − ΣAᵢpₖˣ
-    Eigen::VectorXd p_z = -Σ * c_i + μ * S.cwiseInverse() * e - Σ * A_i * p_x;
+    Eigen::VectorXd p_z = -Σ * c_i + μ * Sinv * e - Σ * A_i * p_x;
 
     // pₖˢ = μZ⁻¹e − s − Z⁻¹Spₖᶻ
-    Eigen::VectorXd p_s =
-        μ * Z.cwiseInverse() * e - s - Z.cwiseInverse() * S * p_z;
+    Eigen::VectorXd p_s = μ * Zinv * e - s - Zinv * S * p_z;
 
     bool stepAcceptable = false;
 
@@ -637,11 +638,10 @@ Eigen::VectorXd InteriorPoint(
           p_y_soc = -step.segment(x.rows(), y.rows());
 
           // pₖᶻ = −Σcᵢ + μS⁻¹e − ΣAᵢpₖˣ
-          p_z_soc = -Σ * c_i + μ * S.cwiseInverse() * e - Σ * A_i * p_x_cor;
+          p_z_soc = -Σ * c_i + μ * Sinv * e - Σ * A_i * p_x_cor;
 
           // pₖˢ = μZ⁻¹e − s − Z⁻¹Spₖᶻ
-          p_s_soc =
-              μ * Z.cwiseInverse() * e - s - Z.cwiseInverse() * S * p_z_soc;
+          p_s_soc = μ * Zinv * e - s - Zinv * S * p_z_soc;
 
           // αˢᵒᶜ = max(α ∈ (0, 1] : sₖ + αpₖˢ ≥ (1−τⱼ)sₖ)
           α_soc = FractionToTheBoundaryRule(s, p_s_soc, τ);
