@@ -24,8 +24,9 @@ class SLEIPNIR_DLLEXPORT Hessian {
   /**
    * Constructs a Hessian object.
    *
-   * @param variable Variable of which to compute the gradient.
-   * @param wrt Variables with respect to which to compute the gradient.
+   * @param variable Variable of which to compute the Hessian.
+   * @param wrt Vector of variables with respect to which to compute the
+   *   Hessian.
    */
   Hessian(Variable variable, VectorXvar wrt) noexcept;
 

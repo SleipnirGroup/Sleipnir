@@ -66,7 +66,7 @@ TEST(OCPSolverTest, CartPole) {
   problem.SetUpperInputBound(u_max.value());
 
   // Minimize sum squared inputs
-  sleipnir::VariableMatrix J = 0.0;
+  sleipnir::Variable J = 0.0;
   for (int k = 0; k < N; ++k) {
     J += problem.U().Col(k).T() * problem.U().Col(k);
   }

@@ -275,7 +275,7 @@ Eigen::VectorXd InteriorPoint(
   // Lagrangian L
   //
   // L(x, s, y, z)ₖ = f(x)ₖ − yₖᵀcₑ(x)ₖ − zₖᵀ(cᵢ(x)ₖ − sₖ)
-  Variable L =
+  auto L =
       f.value() - yAD.transpose() * c_eAD - zAD.transpose() * (c_iAD - sAD);
 
   // Equality constraint Jacobian Aₑ
