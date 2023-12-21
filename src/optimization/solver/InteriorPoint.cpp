@@ -19,7 +19,6 @@
 #include "sleipnir/util/Spy.hpp"
 #include "util/AutodiffUtil.hpp"
 #include "util/ScopeExit.hpp"
-#include "util/SparseMatrixBuilder.hpp"
 
 namespace sleipnir {
 
@@ -425,9 +424,7 @@ Eigen::VectorXd InteriorPoint(
   };
 
   // Kept outside the loop so its storage can be reused
-  SparseMatrixBuilder<double> lhsBuilder(
-      decisionVariables.size() + equalityConstraints.size(),
-      decisionVariables.size() + equalityConstraints.size());
+  std::vector<Eigen::Triplet<double>> triplets;
 
   RegularizedLDLT solver;
 
@@ -525,14 +522,27 @@ Eigen::VectorXd InteriorPoint(
     //       [    Aₑ       0 ]
     //
     // Don't assign upper triangle because solver only uses lower triangle.
-    lhsBuilder.Clear();
-    // Assign top-left quadrant
-    lhsBuilder.Block(0, 0, H.rows(), H.cols()) =
+    Eigen::SparseMatrix<double> topLeft =
         H.triangularView<Eigen::Lower>() +
         (A_i.transpose() * Σ * A_i).triangularView<Eigen::Lower>();
-    // Assign bottom-left quadrant
-    lhsBuilder.Block(H.rows(), 0, A_e.rows(), A_e.cols()) = A_e;
-    Eigen::SparseMatrix<double> lhs = lhsBuilder.Build();
+    triplets.clear();
+    triplets.reserve(topLeft.nonZeros() + A_e.nonZeros());
+    for (int col = 0; col < H.cols(); ++col) {
+      // Append column of H + AᵢᵀΣAᵢ lower triangle in top-left quadrant
+      for (Eigen::SparseMatrix<double>::InnerIterator it{topLeft, col}; it;
+           ++it) {
+        triplets.emplace_back(it.row(), it.col(), it.value());
+      }
+      // Append column of Aₑ in bottom-left quadrant
+      for (Eigen::SparseMatrix<double>::InnerIterator it{A_e, col}; it; ++it) {
+        triplets.emplace_back(H.rows() + it.row(), it.col(), it.value());
+      }
+    }
+    Eigen::SparseMatrix<double> lhs(
+        decisionVariables.size() + equalityConstraints.size(),
+        decisionVariables.size() + equalityConstraints.size());
+    lhs.setFromSortedTriplets(triplets.begin(), triplets.end(),
+                              [](const auto& a, const auto& b) { return b; });
 
     const Eigen::VectorXd e = Eigen::VectorXd::Ones(s.rows());
 
