@@ -147,7 +147,7 @@ void BindVariableMatrix(py::module_& autodiff,
   variable_matrix.def(
       "__getitem__",
       [](VariableMatrix& self,
-         py::tuple slices) -> py::object {  // Change return type to py::object
+         py::tuple slices) -> py::object {
         if (slices.size() != 2) {
           throw py::index_error(
               fmt::format("Expected 2 slices, got {}.", slices.size()));
