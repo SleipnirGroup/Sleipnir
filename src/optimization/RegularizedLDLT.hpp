@@ -5,11 +5,11 @@
 #include <cmath>
 #include <cstddef>
 
+#include <Eigen/Core>
 #include <Eigen/SparseCholesky>
 #include <Eigen/SparseCore>
 
 #include "optimization/Inertia.hpp"
-#include "util/SparseMatrixBuilder.hpp"
 #include "util/SparseUtil.hpp"
 
 namespace sleipnir {
@@ -150,15 +150,18 @@ class RegularizedLDLT {
    * @param γ The equality constraint Jacobian regularization factor.
    */
   Eigen::SparseMatrix<double> Regularization(double δ, double γ) {
-    int rows = m_numDecisionVariables + m_numEqualityConstraints;
+    Eigen::VectorXd vec{m_numDecisionVariables + m_numEqualityConstraints};
+    size_t row = 0;
+    while (row < m_numDecisionVariables) {
+      vec(row) = δ;
+      ++row;
+    }
+    while (row < m_numDecisionVariables + m_numEqualityConstraints) {
+      vec(row) = -γ;
+      ++row;
+    }
 
-    SparseMatrixBuilder<double> reg{rows, rows};
-    reg.Block(0, 0, m_numDecisionVariables, m_numDecisionVariables) =
-        δ * SparseIdentity(m_numDecisionVariables, m_numDecisionVariables);
-    reg.Block(m_numDecisionVariables, m_numDecisionVariables,
-              m_numEqualityConstraints, m_numEqualityConstraints) =
-        -γ * SparseIdentity(m_numEqualityConstraints, m_numEqualityConstraints);
-    return reg.Build();
+    return Eigen::SparseMatrix<double>{vec.asDiagonal()};
   }
 };
 
