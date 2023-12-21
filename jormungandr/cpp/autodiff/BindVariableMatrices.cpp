@@ -152,6 +152,7 @@ void BindVariableMatrix(py::module_& autodiff,
           throw py::index_error(
               fmt::format("Expected 2 slices, got {}.", slices.size()));
         }
+
         // If both indices are integers instead of slices, return Variable instead of VariableBlock
         if (py::isinstance<py::int_>(slices[0]) &&
             py::isinstance<py::int_>(slices[1])) {
