@@ -20,7 +20,6 @@
 #include "util/AutodiffUtil.hpp"
 #include "util/ScopeExit.hpp"
 #include "util/SparseMatrixBuilder.hpp"
-#include "util/SparseUtil.hpp"
 
 namespace sleipnir {
 
@@ -143,7 +142,8 @@ double ErrorEstimate(const Eigen::VectorXd& g,
   double s_c =
       std::max(s_max, z.lpNorm<1>() / numInequalityConstraints) / s_max;
 
-  const Eigen::SparseMatrix<double> S = SparseDiagonal(s);
+  Eigen::SparseMatrix<double> S;
+  S = s.asDiagonal();
   const Eigen::VectorXd e = Eigen::VectorXd::Ones(s.rows());
 
   return std::max({(g - A_e.transpose() * y - A_i.transpose() * z)
@@ -185,7 +185,8 @@ double KKTError(const Eigen::VectorXd& g,
   //   cₑ = 0
   //   cᵢ − s = 0
 
-  const Eigen::SparseMatrix<double> S = SparseDiagonal(s);
+  Eigen::SparseMatrix<double> S;
+  S = s.asDiagonal();
   const Eigen::VectorXd e = Eigen::VectorXd::Ones(s.rows());
 
   return (g - A_e.transpose() * y - A_i.transpose() * z).lpNorm<1>() +
@@ -507,13 +508,15 @@ Eigen::VectorXd InteriorPoint(
     // S = [0  ⋱   ⋮ ]
     //     [⋮    ⋱ 0 ]
     //     [0  ⋯ 0 sₘ]
-    Eigen::SparseMatrix<double> S = SparseDiagonal(s);
+    Eigen::SparseMatrix<double> S;
+    S = s.asDiagonal();
 
     //     [z₁ 0 ⋯ 0 ]
     // Z = [0  ⋱   ⋮ ]
     //     [⋮    ⋱ 0 ]
     //     [0  ⋯ 0 zₘ]
-    Eigen::SparseMatrix<double> Z = SparseDiagonal(z);
+    Eigen::SparseMatrix<double> Z;
+    Z = z.asDiagonal();
 
     // Σ = S⁻¹Z
     Eigen::SparseMatrix<double> Σ = S.cwiseInverse() * Z;
