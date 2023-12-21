@@ -152,16 +152,16 @@ void BindVariableMatrix(py::module_& autodiff,
           throw py::index_error(
               fmt::format("Expected 2 slices, got {}.", slices.size()));
         }
-        // Check if both indices are integers (not slices)
+        // If both indices are integers instead of slices, return Variable instead of VariableBlock
         if (py::isinstance<py::int_>(slices[0]) &&
             py::isinstance<py::int_>(slices[1])) {
           int row = slices[0].cast<int>();
           int col = slices[1].cast<int>();
-          // Bounds checking
+
           if (row >= self.Rows() || col >= self.Cols()) {
             throw std::out_of_range("Index out of bounds");
           }
-          // Return single Variable
+
           return py::cast(self(row, col));
         }
 
