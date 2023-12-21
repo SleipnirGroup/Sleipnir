@@ -54,7 +54,11 @@ class RegularizedLDLT {
     double δ = 0.0;
     double γ = 0.0;
 
-    m_solver.compute(lhs);
+    if (!m_analyzedPattern) {
+      m_solver.analyzePattern(lhs);
+      m_analyzedPattern = true;
+    }
+    m_solver.factorize(lhs);
     Inertia inertia{m_solver};
 
     // If the decomposition succeeded and the inertia is ideal, don't regularize
@@ -71,7 +75,7 @@ class RegularizedLDLT {
         m_solver.info() != Eigen::Success) {
       γ = 1e-8 * std::pow(μ, 0.25);
 
-      m_solver.compute(lhs + Regularization(δ, γ));
+      m_solver.factorize(lhs + Regularization(δ, γ));
       inertia = Inertia{m_solver};
 
       if (m_solver.info() == Eigen::Success && inertia == idealInertia) {
@@ -95,7 +99,7 @@ class RegularizedLDLT {
       //
       // lhs = [H + AᵢᵀΣAᵢ + δI   Aₑᵀ]
       //       [       Aₑ        −γI ]
-      m_solver.compute(lhs + Regularization(δ, γ));
+      m_solver.factorize(lhs + Regularization(δ, γ));
       Inertia inertia{m_solver};
 
       // If the inertia is ideal, store that value of δ and return.
@@ -130,6 +134,7 @@ class RegularizedLDLT {
 
  private:
   Solver m_solver;
+  bool m_analyzedPattern = false;
 
   Eigen::ComputationInfo m_info = Eigen::Success;
 
