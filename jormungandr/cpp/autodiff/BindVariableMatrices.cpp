@@ -147,10 +147,22 @@ void BindVariableMatrix(py::module_& autodiff,
   variable_matrix.def(
       "__getitem__",
       [](VariableMatrix& self,
-         py::tuple slices) -> VariableBlock<VariableMatrix> {
+         py::tuple slices) -> py::object {  // Change return type to py::object
         if (slices.size() != 2) {
           throw py::index_error(
               fmt::format("Expected 2 slices, got {}.", slices.size()));
+        }
+        // Check if both indices are integers (not slices)
+        if (py::isinstance<py::int_>(slices[0]) &&
+            py::isinstance<py::int_>(slices[1])) {
+          int row = slices[0].cast<int>();
+          int col = slices[1].cast<int>();
+          // Bounds checking
+          if (row >= self.Rows() || col >= self.Cols()) {
+            throw std::out_of_range("Index out of bounds");
+          }
+          // Return single Variable
+          return py::cast(self(row, col));
         }
 
         int rowOffset = 0;
@@ -193,8 +205,17 @@ void BindVariableMatrix(py::module_& autodiff,
           blockCols = 1;
         }
 
-        return self.Block(rowOffset, colOffset, blockRows, blockCols);
+        return py::cast(self.Block(rowOffset, colOffset, blockRows, blockCols));
       });
+
+  variable_matrix.def("get_element",
+                      [](VariableMatrix& self, int row, int col) -> Variable& {
+                        if (row >= self.Rows() || col >= self.Cols()) {
+                          throw std::out_of_range("Index out of bounds");
+                        }
+                        return self(row, col);
+                      });
+
   variable_matrix.def("row", py::overload_cast<int>(&VariableMatrix::Row));
   variable_matrix.def("col", py::overload_cast<int>(&VariableMatrix::Col));
   variable_matrix.def(
