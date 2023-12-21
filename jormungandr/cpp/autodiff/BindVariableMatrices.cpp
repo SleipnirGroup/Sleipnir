@@ -145,12 +145,24 @@ void BindVariableMatrix(py::module_& autodiff,
       [](VariableMatrix& self, int row) -> Variable& { return self(row); });
   // TODO: Support slice stride other than 1
   variable_matrix.def(
-      "__getitem__",
-      [](VariableMatrix& self,
-         py::tuple slices) -> VariableBlock<VariableMatrix> {
+      "__getitem__", [](VariableMatrix& self, py::tuple slices) -> py::object {
         if (slices.size() != 2) {
           throw py::index_error(
               fmt::format("Expected 2 slices, got {}.", slices.size()));
+        }
+
+        // If both indices are integers instead of slices, return Variable
+        // instead of VariableBlock
+        if (py::isinstance<py::int_>(slices[0]) &&
+            py::isinstance<py::int_>(slices[1])) {
+          int row = slices[0].cast<int>();
+          int col = slices[1].cast<int>();
+
+          if (row >= self.Rows() || col >= self.Cols()) {
+            throw std::out_of_range("Index out of bounds");
+          }
+
+          return py::cast(self(row, col));
         }
 
         int rowOffset = 0;
@@ -193,7 +205,7 @@ void BindVariableMatrix(py::module_& autodiff,
           blockCols = 1;
         }
 
-        return self.Block(rowOffset, colOffset, blockRows, blockCols);
+        return py::cast(self.Block(rowOffset, colOffset, blockRows, blockCols));
       });
   variable_matrix.def("row", py::overload_cast<int>(&VariableMatrix::Row));
   variable_matrix.def("col", py::overload_cast<int>(&VariableMatrix::Col));
