@@ -4,6 +4,8 @@
 #include <sleipnir/autodiff/Gradient.hpp>
 #include <sleipnir/autodiff/Hessian.hpp>
 
+#include "Range.hpp"
+
 TEST(HessianTest, Linear) {
   // y = x
   sleipnir::VectorXvar x{1};
@@ -214,6 +216,27 @@ TEST(HessianTest, SumOfSquares) {
       } else {
         EXPECT_DOUBLE_EQ(0.0, H(row, col));
       }
+    }
+  }
+}
+
+TEST(HessianTest, Rosenbrock) {
+  sleipnir::VectorXvar input{2};
+  auto& x = input(0);
+  auto& y = input(1);
+
+  for (auto x0 : Range(-2.5, 2.5, 0.1)) {
+    for (auto y0 : Range(-2.5, 2.5, 0.1)) {
+      x.SetValue(x0);
+      y.SetValue(y0);
+      auto z = sleipnir::pow(1 - x, 2) +
+               100 * sleipnir::pow(y - sleipnir::pow(x, 2), 2);
+
+      Eigen::MatrixXd H = sleipnir::Hessian{z, input}.Calculate();
+      EXPECT_DOUBLE_EQ(-400 * (y0 - x0 * x0) + 800 * x0 * x0 + 2, H(0, 0));
+      EXPECT_DOUBLE_EQ(-400 * x0, H(0, 1));
+      EXPECT_DOUBLE_EQ(-400 * x0, H(1, 0));
+      EXPECT_DOUBLE_EQ(200, H(1, 1));
     }
   }
 }
