@@ -173,9 +173,9 @@ def cart_pole_dynamics(x, u):
 
 
 @pytest.mark.skip(reason='Fails with "bad search direction"')
-def test_direct_transcription():
+def test_optimization_problem_cart_pole():
     T = 5.0  # s
-    dt = 0.005  # s
+    dt = 0.05  # s
     N = int(T / dt)
 
     u_max = 20.0  # N
