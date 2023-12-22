@@ -4,7 +4,7 @@ description = "A linearity-exploiting sparse nonlinear constrained optimization 
 version = "0.0.1"
 readme = "README.md"
 requires-python = ">=3.7"
-dependencies = [ "numpy" ]
+dependencies = [ "numpy", "scipy" ]
 
   [project.license]
   file = "LICENSE.txt"
