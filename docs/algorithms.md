@@ -161,9 +161,9 @@ The iterates are applied like so
 
 ```
   xₖ₊₁ = xₖ + αₖᵐᵃˣpₖˣ
-  sₖ₊₁ = xₖ + αₖᵐᵃˣpₖˢ
-  yₖ₊₁ = xₖ + αₖᶻpₖʸ
-  zₖ₊₁ = xₖ + αₖᶻpₖᶻ
+  sₖ₊₁ = sₖ + αₖᵐᵃˣpₖˢ
+  yₖ₊₁ = yₖ + αₖᶻpₖʸ
+  zₖ₊₁ = zₖ + αₖᶻpₖᶻ
 ```
 
 where αₖᵐᵃˣ and αₖᶻ are computed via the fraction-to-the-boundary rule shown in equations (15a) and (15b) of [2].
