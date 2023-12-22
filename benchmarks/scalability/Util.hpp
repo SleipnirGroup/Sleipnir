@@ -113,7 +113,11 @@ int RunBenchmarksAndLog(std::string_view filename, bool diagnostics,
             }
             problem.solve();
           } else {
-            problem.Solve({.diagnostics = diagnostics});
+            auto status = problem.Solve({.diagnostics = diagnostics});
+            if (status.exitCondition !=
+                sleipnir::SolverExitCondition::kSuccess) {
+              fmt::print(stderr, " FAIL ");
+            }
           }
         });
     fmt::print(stderr, " done.\n");
