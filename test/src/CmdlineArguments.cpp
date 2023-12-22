@@ -2,20 +2,10 @@
 
 #include "CmdlineArguments.hpp"
 
-#include <algorithm>
-
 namespace {
-static std::span<char*> args;
+static CmdlineArgs args;
 }  // namespace
 
-void SetCmdlineArgs(char* argv[], int argc) {
-  args = std::span(argv, argc);
-}
-
-std::span<char*> GetCmdlineArgs() {
+CmdlineArgs& Argv() {
   return args;
-}
-
-bool CmdlineArgPresent(std::string_view arg) {
-  return std::find(args.begin(), args.end(), arg) != args.end();
 }

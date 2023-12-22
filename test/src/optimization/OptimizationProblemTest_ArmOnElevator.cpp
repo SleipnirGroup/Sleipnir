@@ -95,7 +95,7 @@ TEST(OptimizationProblemTest, ArmOnElevator) {
   problem.Minimize(J);
 
   auto status =
-      problem.Solve({.diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
+      problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
 
   EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
   EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.equalityConstraintType);

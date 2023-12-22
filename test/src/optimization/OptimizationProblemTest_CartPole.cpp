@@ -75,7 +75,7 @@ TEST(OptimizationProblemTest, CartPole) {
   problem.Minimize(J);
 
   [[maybe_unused]] auto end1 = std::chrono::system_clock::now();
-  if (CmdlineArgPresent(kEnableDiagnostics)) {
+  if (Argv().Contains("--enable-diagnostics")) {
     using std::chrono::duration_cast;
     using std::chrono::microseconds;
     fmt::print("Setup time: {} ms\n\n",
@@ -83,7 +83,7 @@ TEST(OptimizationProblemTest, CartPole) {
   }
 
   auto status =
-      problem.Solve({.diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
+      problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
 
   EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
   EXPECT_EQ(sleipnir::ExpressionType::kNonlinear,

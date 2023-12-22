@@ -23,7 +23,7 @@ TEST(LinearProblemTest, Maximize) {
   problem.SubjectTo(y >= 0);
 
   auto status =
-      problem.Solve({.diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
+      problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
 
   EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.costFunctionType);
   EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);

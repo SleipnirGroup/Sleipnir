@@ -67,7 +67,7 @@ TEST(OCPSolverTest, Unicycle) {
                          Eigen::Matrix<double, N + 1, 1>::Ones());
 
   [[maybe_unused]] auto end1 = std::chrono::system_clock::now();
-  if (CmdlineArgPresent(kEnableDiagnostics)) {
+  if (Argv().Contains("--enable-diagnostics")) {
     using std::chrono::duration_cast;
     using std::chrono::microseconds;
     fmt::print("Setup time: {} ms\n\n",
@@ -76,7 +76,7 @@ TEST(OCPSolverTest, Unicycle) {
 
   auto status = solverMinTime.Solve(
       {.maxIterations = 1000,
-       .diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
+       .diagnostics = Argv().Contains("--enable-diagnostics")});
 
   EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.costFunctionType);
   EXPECT_EQ(sleipnir::ExpressionType::kNonlinear,
