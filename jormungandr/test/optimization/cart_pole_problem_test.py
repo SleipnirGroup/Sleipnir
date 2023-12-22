@@ -174,7 +174,7 @@ def cart_pole_dynamics(x, u):
 
 def test_direct_transcription():
     T = 5.0  # s
-    dt = 0.005  # s
+    dt = 0.05  # s
     N = int(T / dt)
 
     u_max = 20.0  # N

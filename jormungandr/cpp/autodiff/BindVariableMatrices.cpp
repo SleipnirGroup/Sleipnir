@@ -316,23 +316,10 @@ void BindVariableMatrix(py::module_& autodiff,
   variable_matrix.def(Variable() * py::self);
   variable_matrix.def(double() * py::self);
 
-  variable_matrix.def(py::self / py::self);
   variable_matrix.def(py::self / Variable());
-  variable_matrix.def(py::self /= Variable());
   variable_matrix.def(py::self / double());
+  variable_matrix.def(py::self /= Variable());
   variable_matrix.def(py::self /= double());
-
-  variable_matrix.def(
-      "__div__",
-      [](const VariableMatrix& lhs, const Variable& rhs) {
-        return lhs / VariableMatrix{rhs};
-      },
-      py::is_operator());
-
-  variable_matrix.def(
-      "__idiv__",
-      [](const Variable& rhs) { return py::self /= VariableMatrix{rhs}; },
-      py::is_operator());
 
   variable_matrix.def(py::self + py::self);
   variable_matrix.def(

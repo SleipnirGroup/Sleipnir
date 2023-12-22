@@ -298,29 +298,7 @@ VariableMatrix operator/(const VariableMatrix& lhs, const Variable& rhs) {
   return result;
 }
 
-VariableMatrix operator/(const VariableMatrix& lhs, double rhs) {
-  VariableMatrix result{lhs.Rows(), lhs.Cols()};
-
-  for (int row = 0; row < result.Rows(); ++row) {
-    for (int col = 0; col < result.Cols(); ++col) {
-      result(row, col) = lhs(row, col) / Variable{rhs};
-    }
-  }
-
-  return result;
-}
-
 VariableMatrix& VariableMatrix::operator/=(const Variable& rhs) {
-  for (int row = 0; row < Rows(); ++row) {
-    for (int col = 0; col < Cols(); ++col) {
-      (*this)(row, col) /= rhs;
-    }
-  }
-
-  return *this;
-}
-
-VariableMatrix& VariableMatrix::operator/=(double rhs) {
   for (int row = 0; row < Rows(); ++row) {
     for (int col = 0; col < Cols(); ++col) {
       (*this)(row, col) /= rhs;
