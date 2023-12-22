@@ -85,17 +85,16 @@ void ExpressionGraph::Update() {
   }
 }
 
-sleipnir::VectorXvar ExpressionGraph::GenerateGradientTree(
-    Eigen::Ref<VectorXvar> wrt) {
+sleipnir::VariableMatrix ExpressionGraph::GenerateGradientTree(
+    const VariableMatrix& wrt) {
   // Read docs/algorithms.md#Reverse_accumulation_automatic_differentiation for
   // background on reverse accumulation automatic differentiation.
 
-  for (int row = 0; row < wrt.rows(); ++row) {
+  for (int row = 0; row < wrt.Rows(); ++row) {
     wrt(row).expr->row = row;
   }
 
-  VectorXvar grad{wrt.rows()};
-  grad.fill(Variable{});
+  VariableMatrix grad{wrt.Rows()};
 
   // Zero adjoints. The root node's adjoint is 1.0 as df/df is always 1.
   if (m_adjointList.size() > 0) {
@@ -125,7 +124,7 @@ sleipnir::VectorXvar ExpressionGraph::GenerateGradientTree(
     }
   }
 
-  for (int row = 0; row < wrt.rows(); ++row) {
+  for (int row = 0; row < wrt.Rows(); ++row) {
     wrt(row).expr->row = -1;
   }
 

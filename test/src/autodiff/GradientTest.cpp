@@ -2,6 +2,7 @@
 
 #include <numbers>
 
+#include <Eigen/Core>
 #include <gtest/gtest.h>
 #include <sleipnir/autodiff/Gradient.hpp>
 

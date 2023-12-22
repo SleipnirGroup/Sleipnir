@@ -139,11 +139,3 @@ void OCPSolver::ConstrainAlways(
     time += dt;
   }
 }
-
-void OCPSolver::ConstrainInitialState(const VariableMatrix& initialState) {
-  SubjectTo(InitialState() == initialState);
-}
-
-void OCPSolver::ConstrainFinalState(const VariableMatrix& finalState) {
-  SubjectTo(FinalState() == finalState);
-}

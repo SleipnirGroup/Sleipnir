@@ -1,14 +1,20 @@
 // Copyright (c) Sleipnir contributors
 
+#include <algorithm>
+#include <functional>
+#include <numeric>
+
+#include <Eigen/Core>
 #include <gtest/gtest.h>
 #include <sleipnir/autodiff/Gradient.hpp>
 #include <sleipnir/autodiff/Hessian.hpp>
+#include <sleipnir/autodiff/Variable.hpp>
 
 #include "Range.hpp"
 
 TEST(HessianTest, Linear) {
   // y = x
-  sleipnir::VectorXvar x{1};
+  sleipnir::VariableMatrix x{1};
   x(0).SetValue(3);
   sleipnir::Variable y = x(0);
 
@@ -26,7 +32,7 @@ TEST(HessianTest, Linear) {
 TEST(HessianTest, Quadratic) {
   // y = x²
   // y = x * x
-  sleipnir::VectorXvar x{1};
+  sleipnir::VariableMatrix x{1};
   x(0).SetValue(3);
   sleipnir::Variable y = x(0) * x(0);
 
@@ -47,7 +53,7 @@ TEST(HessianTest, Sum) {
   sleipnir::Variable y;
   Eigen::VectorXd g;
   Eigen::MatrixXd H;
-  sleipnir::VectorXvar x{5};
+  sleipnir::VariableMatrix x{5};
   x(0).SetValue(1);
   x(1).SetValue(2);
   x(2).SetValue(3);
@@ -55,17 +61,17 @@ TEST(HessianTest, Sum) {
   x(4).SetValue(5);
 
   // y = sum(x)
-  y = x.sum();
+  y = std::accumulate(x.begin(), x.end(), sleipnir::Variable{0.0});
   g = sleipnir::Gradient{y, x}.Calculate();
 
   EXPECT_DOUBLE_EQ(15.0, y.Value());
-  for (int i = 0; i < x.rows(); ++i) {
+  for (int i = 0; i < x.Rows(); ++i) {
     EXPECT_DOUBLE_EQ(1.0, g(i));
   }
 
   H = sleipnir::Hessian{y, x}.Calculate();
-  for (int i = 0; i < x.rows(); ++i) {
-    for (int j = 0; j < x.rows(); ++j) {
+  for (int i = 0; i < x.Rows(); ++i) {
+    for (int j = 0; j < x.Rows(); ++j) {
       EXPECT_DOUBLE_EQ(0.0, H(i, j));
     }
   }
@@ -75,7 +81,7 @@ TEST(HessianTest, SumOfProducts) {
   sleipnir::Variable y;
   Eigen::VectorXd g;
   Eigen::MatrixXd H;
-  sleipnir::VectorXvar x{5};
+  sleipnir::VariableMatrix x{5};
   x(0).SetValue(1);
   x(1).SetValue(2);
   x(2).SetValue(3);
@@ -83,17 +89,17 @@ TEST(HessianTest, SumOfProducts) {
   x(4).SetValue(5);
 
   // y = ||x||²
-  y = x.cwiseProduct(x).sum();
+  y = x.T() * x;
   g = sleipnir::Gradient{y, x}.Calculate();
 
   EXPECT_DOUBLE_EQ(1 + 2 * 2 + 3 * 3 + 4 * 4 + 5 * 5, y.Value());
-  for (int i = 0; i < x.rows(); ++i) {
+  for (int i = 0; i < x.Rows(); ++i) {
     EXPECT_DOUBLE_EQ((2 * x(i)).Value(), g(i));
   }
 
   H = sleipnir::Hessian{y, x}.Calculate();
-  for (int i = 0; i < x.rows(); ++i) {
-    for (int j = 0; j < x.size(); ++j) {
+  for (int i = 0; i < x.Rows(); ++i) {
+    for (int j = 0; j < x.Rows(); ++j) {
       if (i == j) {
         EXPECT_DOUBLE_EQ(2.0, H(i, j));
       } else {
@@ -107,7 +113,7 @@ TEST(HessianTest, ProductOfSines) {
   sleipnir::Variable y;
   Eigen::VectorXd g;
   Eigen::MatrixXd H;
-  sleipnir::VectorXvar x{5};
+  sleipnir::VariableMatrix x{5};
   x(0).SetValue(1);
   x(1).SetValue(2);
   x(2).SetValue(3);
@@ -115,19 +121,21 @@ TEST(HessianTest, ProductOfSines) {
   x(4).SetValue(5);
 
   // y = prod(sin(x))
-  y = x.array().sin().prod();
+  auto temp = x.CwiseTransform(sleipnir::sin);
+  y = std::accumulate(temp.begin(), temp.end(), sleipnir::Variable{1.0},
+                      std::multiplies{});
   g = sleipnir::Gradient{y, x}.Calculate();
 
   EXPECT_DOUBLE_EQ(
       std::sin(1) * std::sin(2) * std::sin(3) * std::sin(4) * std::sin(5),
       y.Value());
-  for (int i = 0; i < x.rows(); ++i) {
+  for (int i = 0; i < x.Rows(); ++i) {
     EXPECT_DOUBLE_EQ((y / sleipnir::tan(x(i))).Value(), g(i));
   }
 
   H = sleipnir::Hessian{y, x}.Calculate();
-  for (int i = 0; i < x.rows(); ++i) {
-    for (int j = 0; j < x.rows(); ++j) {
+  for (int i = 0; i < x.Rows(); ++i) {
+    for (int j = 0; j < x.Rows(); ++j) {
       if (i == j) {
         EXPECT_NEAR(
             (g(i) / tan(x(i))).Value() *
@@ -145,7 +153,7 @@ TEST(HessianTest, SumOfSquaredResiduals) {
   sleipnir::Variable y;
   Eigen::VectorXd g;
   Eigen::MatrixXd H;
-  sleipnir::VectorXvar x{5};
+  sleipnir::VariableMatrix x{5};
   x(0).SetValue(1);
   x(1).SetValue(1);
   x(2).SetValue(1);
@@ -153,7 +161,11 @@ TEST(HessianTest, SumOfSquaredResiduals) {
   x(4).SetValue(1);
 
   // y = sum(diff(x).^2)
-  y = (x.head(4) - x.tail(4)).array().square().sum();
+  auto temp = (x.Block(0, 0, 4, 1) - x.Block(1, 0, 4, 1))
+                  .CwiseTransform([](const sleipnir::Variable& x) {
+                    return sleipnir::pow(x, 2);
+                  });
+  y = std::accumulate(temp.begin(), temp.end(), sleipnir::Variable{0.0});
   g = sleipnir::Gradient{y, x}.Calculate();
 
   EXPECT_DOUBLE_EQ(0.0, y.Value());
@@ -192,12 +204,12 @@ TEST(HessianTest, SumOfSquaredResiduals) {
 }
 
 TEST(HessianTest, SumOfSquares) {
-  sleipnir::VectorXvar r{4};
+  sleipnir::VariableMatrix r{4};
   r(0).SetValue(25.0);
   r(1).SetValue(10.0);
   r(2).SetValue(5.0);
   r(3).SetValue(0.0);
-  sleipnir::VectorXvar x{4};
+  sleipnir::VariableMatrix x{4};
   x(0).SetValue(0.0);
   x(1).SetValue(0.0);
   x(2).SetValue(0.0);
@@ -221,7 +233,7 @@ TEST(HessianTest, SumOfSquares) {
 }
 
 TEST(HessianTest, Rosenbrock) {
-  sleipnir::VectorXvar input{2};
+  sleipnir::VariableMatrix input{2};
   auto& x = input(0);
   auto& y = input(1);
 
@@ -243,7 +255,7 @@ TEST(HessianTest, Rosenbrock) {
 
 TEST(HessianTest, Reuse) {
   sleipnir::Variable y;
-  sleipnir::VectorXvar x{1};
+  sleipnir::VariableMatrix x{1};
 
   // y = x³
   x(0).SetValue(1);

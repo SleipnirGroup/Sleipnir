@@ -6,6 +6,7 @@
 #include <concepts>
 #include <initializer_list>
 #include <iterator>
+#include <span>
 #include <utility>
 #include <vector>
 
@@ -28,44 +29,19 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
   VariableMatrix() = default;
 
   /**
-   * Constructs a VariableMatrix with the given dimensions.
+   * Constructs a VariableMatrix column vector with the given rows.
    *
-   * The internal storage is uninitialized until it's assigned.
+   * @param rows The number of matrix rows.
+   */
+  explicit VariableMatrix(int rows);
+
+  /**
+   * Constructs a VariableMatrix with the given dimensions.
    *
    * @param rows The number of matrix rows.
    * @param cols The number of matrix columns.
    */
   VariableMatrix(int rows, int cols);
-
-  /**
-   * Constructs a scalar VariableMatrix from a double.
-   */
-  VariableMatrix(double value);  // NOLINT
-
-  /**
-   * Constructs a scalar VariableMatrix from an int.
-   */
-  VariableMatrix(int value);  // NOLINT
-
-  /**
-   * Assigns a double to a scalar VariableMatrix.
-   */
-  VariableMatrix& operator=(double value);
-
-  /**
-   * Assigns an int to a scalar VariableMatrix.
-   */
-  VariableMatrix& operator=(int value);
-
-  /**
-   * Assigns a double to a scalar VariableMatrix.
-   */
-  VariableMatrix& SetValue(double value);
-
-  /**
-   * Assigns an int to a scalar VariableMatrix.
-   */
-  VariableMatrix& SetValue(int value);
 
   /**
    * Constructs a scalar VariableMatrix from a nested list of Variables.
@@ -162,6 +138,22 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * Constructs a VariableMatrix from a VariableBlock.
    */
   VariableMatrix(const VariableBlock<const VariableMatrix>& values);  // NOLINT
+
+  /**
+   * Constructs a column vector wrapper around a Variable array.
+   *
+   * @param values Variable array to wrap.
+   */
+  explicit VariableMatrix(std::span<Variable> values);
+
+  /**
+   * Constructs a matrix wrapper around a Variable array.
+   *
+   * @param values Variable array to wrap.
+   * @param rows The number of matrix rows.
+   * @param cols The number of matrix columns.
+   */
+  VariableMatrix(std::span<Variable> values, int rows, int cols);
 
   /**
    * Returns a block pointing to the given row and column.

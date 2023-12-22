@@ -8,6 +8,7 @@
 #include <sleipnir/autodiff/Hessian.hpp>
 #include <sleipnir/autodiff/Jacobian.hpp>
 #include <sleipnir/autodiff/Variable.hpp>
+#include <sleipnir/autodiff/VariableMatrix.hpp>
 #include <sleipnir/optimization/Constraints.hpp>
 
 namespace py = pybind11;
@@ -21,12 +22,6 @@ PYBIND11_WARNING_DISABLE_CLANG("-Wself-assign-overloaded")
 PYBIND11_WARNING_DISABLE_CLANG("-Wself-assign-overloaded")
 #endif
 #endif
-
-namespace pybind11::detail {
-template <>
-class type_caster<sleipnir::VectorXvar, void>
-    : public type_caster_base<sleipnir::VectorXvar> {};
-}  // namespace pybind11::detail
 
 namespace sleipnir {
 
@@ -151,7 +146,7 @@ void BindVariable(py::module_& autodiff) {
   {
     py::class_<Gradient> cls{autodiff, "Gradient"};
     cls.def(py::init<Variable, Variable>())
-        .def(py::init<Variable, VectorXvar>())
+        .def(py::init<Variable, VariableMatrix>())
         .def("calculate",
              [](Gradient& self) {
                return Eigen::SparseMatrix<double>{self.Calculate()};
@@ -162,7 +157,7 @@ void BindVariable(py::module_& autodiff) {
   // Jacobian.hpp
   {
     py::class_<Jacobian> cls{autodiff, "Jacobian"};
-    cls.def(py::init<VectorXvar, VectorXvar>())
+    cls.def(py::init<VariableMatrix, VariableMatrix>())
         .def("calculate", &Jacobian::Calculate)
         .def("update", &Jacobian::Update);
   }
@@ -170,7 +165,7 @@ void BindVariable(py::module_& autodiff) {
   // Hessian.hpp
   {
     py::class_<Hessian> cls{autodiff, "Hessian"};
-    cls.def(py::init<Variable, VectorXvar>())
+    cls.def(py::init<Variable, VariableMatrix>())
         .def("calculate", &Hessian::Calculate)
         .def("update", &Hessian::Update);
   }
