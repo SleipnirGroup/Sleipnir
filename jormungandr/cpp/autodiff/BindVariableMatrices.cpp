@@ -778,7 +778,7 @@ void BindVariableBlock(
   variable_block.def(py::self * double());
   variable_block.def(Variable() * py::self);
   variable_block.def(double() * py::self);
-  variable_block.def(py::self / py::self);
+  variable_block.def(py::self / Variable());
   variable_block.def(py::self / double());
   variable_block.def(py::self + py::self);
   variable_block.def(py::self + double());
