@@ -147,15 +147,15 @@ void BindVariable(py::module_& autodiff) {
   autodiff.def("tanh", [](double x) { return sleipnir::tanh(Variable{x}); });
   autodiff.def("tanh", static_cast<Variable (*)(const Variable&)>(&tanh));
 
-  // FIXME: Eigen::SparseVector<double> isn't wrapped correctly by pybind11
-  // https://github.com/pybind/pybind11/issues/2301
-#if 0
   // Gradient.hpp
   {
     py::class_<Gradient> cls{autodiff, "Gradient"};
     cls.def(py::init<Variable, Variable>())
         .def(py::init<Variable, VectorXvar>())
-        .def("calculate", &Gradient::Calculate)
+        .def("calculate",
+             [](Gradient& self) {
+               return Eigen::SparseMatrix<double>{self.Calculate()};
+             })
         .def("update", &Gradient::Update);
   }
 
@@ -174,7 +174,6 @@ void BindVariable(py::module_& autodiff) {
         .def("calculate", &Hessian::Calculate)
         .def("update", &Hessian::Update);
   }
-#endif
 }
 
 }  // namespace sleipnir
