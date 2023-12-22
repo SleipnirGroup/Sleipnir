@@ -4,9 +4,6 @@
 
 #include <vector>
 
-#include <Eigen/Core>
-#include <Eigen/SparseCore>
-
 #include "sleipnir/autodiff/Expression.hpp"
 #include "sleipnir/util/SymbolExports.hpp"
 
@@ -220,9 +217,6 @@ class SLEIPNIR_DLLEXPORT Variable {
   friend class SLEIPNIR_DLLEXPORT detail::ExpressionGraph;
   //! @endcond
 };
-
-using VectorXvar = Eigen::Vector<Variable, Eigen::Dynamic>;
-using MapVectorXvar = Eigen::Map<VectorXvar>;
 
 /**
  * std::abs() for Variables.

@@ -57,17 +57,12 @@ void BindVariableMatrices(py::module_& autodiff) {
 void BindVariableMatrix(py::module_& autodiff,
                         py::class_<VariableMatrix>& variable_matrix) {
   variable_matrix.def(py::init<>());
+  variable_matrix.def(py::init<int>());
   variable_matrix.def(py::init<int, int>());
-  variable_matrix.def(py::init<double>());
   variable_matrix.def(py::init<std::vector<std::vector<double>>>());
   variable_matrix.def(py::init<std::vector<std::vector<Variable>>>());
   variable_matrix.def(py::init<const Variable&>());
   variable_matrix.def(py::init<const VariableBlock<VariableMatrix>&>());
-  variable_matrix.def("set",
-                      [](VariableMatrix& self, double value) { self = value; });
-  variable_matrix.def("set_value", [](VariableMatrix& self, double value) {
-    self.SetValue(value);
-  });
   variable_matrix.def("set",
                       [](VariableMatrix& self, const Eigen::MatrixXd& values) {
                         self = values;
@@ -328,14 +323,24 @@ void BindVariableMatrix(py::module_& autodiff,
         return lhs + VariableMatrix{rhs};
       },
       py::is_operator());
-  variable_matrix.def(py::self + double());
   variable_matrix.def(
       "__radd__",
       [](const VariableMatrix& rhs, const Variable& lhs) {
         return VariableMatrix{lhs} + rhs;
       },
       py::is_operator());
-  variable_matrix.def(double() + py::self);
+  variable_matrix.def(
+      "__add__",
+      [](double lhs, const VariableMatrix& rhs) {
+        return VariableMatrix{Variable{lhs}} + rhs;
+      },
+      py::is_operator());
+  variable_matrix.def(
+      "__radd__",
+      [](const VariableMatrix& rhs, double lhs) {
+        return VariableMatrix{Variable{lhs}} + rhs;
+      },
+      py::is_operator());
   variable_matrix.def(
       "__add__",
       [](const VariableMatrix& lhs,
@@ -358,14 +363,12 @@ void BindVariableMatrix(py::module_& autodiff,
         return lhs - VariableMatrix{rhs};
       },
       py::is_operator());
-  variable_matrix.def(py::self - double());
   variable_matrix.def(
       "__rsub__",
       [](const VariableMatrix& rhs, const Variable& lhs) {
         return VariableMatrix{lhs} - rhs;
       },
       py::is_operator());
-  variable_matrix.def(double() - py::self);
   variable_matrix.def(
       "__sub__",
       [](const VariableMatrix& lhs,
@@ -768,8 +771,6 @@ void BindVariableBlock(
   variable_block.def(py::self / Variable());
   variable_block.def(py::self / double());
   variable_block.def(py::self + py::self);
-  variable_block.def(py::self + double());
-  variable_block.def(double() + py::self);
   variable_block.def(
       "__add__",
       [](const VariableBlock<VariableMatrix>& lhs,
@@ -792,7 +793,6 @@ void BindVariableBlock(
         return lhs - rhs;
       },
       py::is_operator());
-  variable_block.def(double() - py::self);
   variable_block.def(
       "__sub__",
       [](const Eigen::Ref<const Eigen::MatrixXd>& lhs,
@@ -800,7 +800,6 @@ void BindVariableBlock(
         return lhs - rhs;
       },
       py::is_operator());
-  variable_block.def(py::self - double());
   variable_block.def(-py::self);
   variable_block.def(
       "__pow__",

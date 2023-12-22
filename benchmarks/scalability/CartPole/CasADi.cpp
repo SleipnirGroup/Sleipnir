@@ -5,7 +5,6 @@
 #include <cmath>
 #include <numbers>
 
-#include <Eigen/Core>
 #include <units/angle.h>
 #include <units/angular_acceleration.h>
 #include <units/angular_velocity.h>

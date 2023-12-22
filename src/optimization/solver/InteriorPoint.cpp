@@ -17,7 +17,6 @@
 #include "sleipnir/autodiff/Jacobian.hpp"
 #include "sleipnir/optimization/SolverExitCondition.hpp"
 #include "sleipnir/util/Spy.hpp"
-#include "util/AutodiffUtil.hpp"
 #include "util/ScopeExit.hpp"
 
 namespace sleipnir {
@@ -250,23 +249,22 @@ Eigen::VectorXd InteriorPoint(
 
   auto solveStartTime = std::chrono::system_clock::now();
 
-  // Map decision variables and constraints to Eigen vectors for Lagrangian
-  MapVectorXvar xAD(decisionVariables.data(), decisionVariables.size());
-  SetAD(xAD, initialGuess);
-  MapVectorXvar c_eAD(equalityConstraints.data(), equalityConstraints.size());
-  MapVectorXvar c_iAD(inequalityConstraints.data(),
-                      inequalityConstraints.size());
+  // Map decision variables and constraints to VariableMatrices for Lagrangian
+  VariableMatrix xAD{decisionVariables};
+  xAD.SetValue(initialGuess);
+  VariableMatrix c_eAD{equalityConstraints};
+  VariableMatrix c_iAD{inequalityConstraints};
 
   // Create autodiff variables for s, y, and z for Lagrangian
-  VectorXvar sAD{inequalityConstraints.size()};
+  VariableMatrix sAD(inequalityConstraints.size(), 1);
   for (auto& s : sAD) {
     s.SetValue(1.0);
   }
-  VectorXvar yAD{equalityConstraints.size()};
+  VariableMatrix yAD(equalityConstraints.size(), 1);
   for (auto& y : yAD) {
     y.SetValue(0.0);
   }
-  VectorXvar zAD{inequalityConstraints.size()};
+  VariableMatrix zAD(inequalityConstraints.size(), 1);
   for (auto& z : zAD) {
     z.SetValue(1.0);
   }
@@ -274,8 +272,7 @@ Eigen::VectorXd InteriorPoint(
   // Lagrangian L
   //
   // L(x, s, y, z)ₖ = f(x)ₖ − yₖᵀcₑ(x)ₖ − zₖᵀ(cᵢ(x)ₖ − sₖ)
-  auto L =
-      f.value() - yAD.transpose() * c_eAD - zAD.transpose() * (c_iAD - sAD);
+  auto L = f.value() - (yAD.T() * c_eAD)(0) - (zAD.T() * (c_iAD - sAD))(0);
 
   // Equality constraint Jacobian Aₑ
   //
@@ -306,11 +303,11 @@ Eigen::VectorXd InteriorPoint(
   Eigen::SparseMatrix<double> H = hessianL.Calculate();
 
   Eigen::VectorXd x = initialGuess;
-  Eigen::VectorXd s = GetAD(sAD);
-  Eigen::VectorXd y = GetAD(yAD);
-  Eigen::VectorXd z = GetAD(zAD);
-  Eigen::VectorXd c_e = GetAD(c_eAD);
-  Eigen::VectorXd c_i = GetAD(c_iAD);
+  Eigen::VectorXd s = sAD.Value();
+  Eigen::VectorXd y = yAD.Value();
+  Eigen::VectorXd z = zAD.Value();
+  Eigen::VectorXd c_e = c_eAD.Value();
+  Eigen::VectorXd c_i = c_iAD.Value();
 
   // Check for overconstrained problem
   if (equalityConstraints.size() > decisionVariables.size()) {
@@ -594,17 +591,17 @@ Eigen::VectorXd InteriorPoint(
       Eigen::VectorXd trial_y = y + α_z * p_y;
       Eigen::VectorXd trial_z = z + α_z * p_z;
 
-      SetAD(xAD, trial_x);
+      xAD.SetValue(trial_x);
 
       for (int row = 0; row < c_e.rows(); ++row) {
         c_eAD(row).Update();
       }
-      Eigen::VectorXd trial_c_e = GetAD(c_eAD);
+      Eigen::VectorXd trial_c_e = c_eAD.Value();
 
       for (int row = 0; row < c_i.rows(); ++row) {
         c_iAD(row).Update();
       }
-      Eigen::VectorXd trial_c_i = GetAD(c_iAD);
+      Eigen::VectorXd trial_c_i = c_iAD.Value();
 
       f.value().Update();
       FilterEntry entry{f.value(), μ, trial_s, trial_c_e, trial_c_i};
@@ -663,17 +660,17 @@ Eigen::VectorXd InteriorPoint(
           trial_y = y + α_z_soc * p_y_soc;
           trial_z = z + α_z_soc * p_z_soc;
 
-          SetAD(xAD, trial_x);
+          xAD.SetValue(trial_x);
 
           for (int row = 0; row < c_e.rows(); ++row) {
             c_eAD(row).Update();
           }
-          trial_c_e = GetAD(c_eAD);
+          trial_c_e = c_eAD.Value();
 
           for (int row = 0; row < c_i.rows(); ++row) {
             c_iAD(row).Update();
           }
-          trial_c_i = GetAD(c_iAD);
+          trial_c_i = c_iAD.Value();
 
           f.value().Update();
           entry = FilterEntry{f.value(), μ, trial_s, trial_c_e, trial_c_i};
@@ -728,20 +725,20 @@ Eigen::VectorXd InteriorPoint(
           Eigen::VectorXd trial_z = z + α_z * p_z;
 
           // Upate autodiff
-          SetAD(xAD, trial_x);
-          SetAD(sAD, trial_s);
-          SetAD(yAD, trial_y);
-          SetAD(zAD, trial_z);
+          xAD.SetValue(trial_x);
+          sAD.SetValue(trial_s);
+          yAD.SetValue(trial_y);
+          zAD.SetValue(trial_z);
 
           for (int row = 0; row < c_e.rows(); ++row) {
             c_eAD(row).Update();
           }
-          Eigen::VectorXd trial_c_e = GetAD(c_eAD);
+          Eigen::VectorXd trial_c_e = c_eAD.Value();
 
           for (int row = 0; row < c_i.rows(); ++row) {
             c_iAD(row).Update();
           }
-          Eigen::VectorXd trial_c_i = GetAD(c_iAD);
+          Eigen::VectorXd trial_c_i = c_iAD.Value();
 
           double nextKKTError = KKTError(
               gradientF.Calculate(), jacobianCe.Calculate(), trial_c_e,
@@ -812,10 +809,10 @@ Eigen::VectorXd InteriorPoint(
     }
 
     // Update autodiff for Jacobians and Hessian
-    SetAD(xAD, x);
-    SetAD(sAD, s);
-    SetAD(yAD, y);
-    SetAD(zAD, z);
+    xAD.SetValue(x);
+    sAD.SetValue(s);
+    yAD.SetValue(y);
+    zAD.SetValue(z);
 
     A_e = jacobianCe.Calculate();
     A_i = jacobianCi.Calculate();
@@ -826,13 +823,13 @@ Eigen::VectorXd InteriorPoint(
     for (int row = 0; row < c_e.rows(); ++row) {
       c_eAD(row).Update();
     }
-    c_e = GetAD(c_eAD);
+    c_e = c_eAD.Value();
 
     // Update cᵢ
     for (int row = 0; row < c_i.rows(); ++row) {
       c_iAD(row).Update();
     }
-    c_i = GetAD(c_iAD);
+    c_i = c_iAD.Value();
 
     // Update the error estimate
     E_0 = ErrorEstimate(g, A_e, c_e, A_i, c_i, s, y, z, 0.0);

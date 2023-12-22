@@ -7,7 +7,6 @@
 #include <fmt/core.h>
 
 #include "optimization/solver/InteriorPoint.hpp"
-#include "util/AutodiffUtil.hpp"
 
 using namespace sleipnir;
 
@@ -195,9 +194,7 @@ SolverStatus OptimizationProblem::Solve(const SolverConfig& config) {
   }
 
   // Assign the solution to the original Variable instances
-  for (size_t row = 0; row < m_decisionVariables.size(); ++row) {
-    m_decisionVariables[row].SetValue(solution[row]);
-  }
+  VariableMatrix{m_decisionVariables}.SetValue(solution);
 
   return status;
 }

@@ -6,6 +6,7 @@
 
 #include "sleipnir/autodiff/Expression.hpp"
 #include "sleipnir/autodiff/Variable.hpp"
+#include "sleipnir/autodiff/VariableMatrix.hpp"
 #include "sleipnir/util/SymbolExports.hpp"
 
 namespace sleipnir::detail {
@@ -34,7 +35,7 @@ class SLEIPNIR_DLLEXPORT ExpressionGraph {
    *
    * @param wrt Variables with respect to which to compute the gradient.
    */
-  sleipnir::VectorXvar GenerateGradientTree(Eigen::Ref<VectorXvar> wrt);
+  VariableMatrix GenerateGradientTree(const VariableMatrix& wrt);
 
   /**
    * Updates the adjoints in the expression graph, effectively computing the

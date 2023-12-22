@@ -3,12 +3,12 @@
 #pragma once
 
 #include <chrono>
+#include <concepts>
 #include <functional>
-
-#include <Eigen/Core>
 
 #include "sleipnir/autodiff/VariableMatrix.hpp"
 #include "sleipnir/optimization/OptimizationProblem.hpp"
+#include "sleipnir/util/Concepts.hpp"
 #include "sleipnir/util/SymbolExports.hpp"
 
 namespace sleipnir {
@@ -146,15 +146,22 @@ class SLEIPNIR_DLLEXPORT OCPSolver : public OptimizationProblem {
    *
    * @param initialState the initial state to constrain to.
    */
-  void ConstrainInitialState(const VariableMatrix& initialState);
+  template <typename T>
+    requires ScalarLike<T> || MatrixLike<T>
+  void ConstrainInitialState(const T& initialState) {
+    SubjectTo(InitialState() == initialState);
+  }
 
   /**
    * Utility function to constrain the final state.
    *
    * @param finalState the final state to constrain to.
    */
-
-  void ConstrainFinalState(const VariableMatrix& finalState);
+  template <typename T>
+    requires ScalarLike<T> || MatrixLike<T>
+  void ConstrainFinalState(const T& finalState) {
+    SubjectTo(FinalState() == finalState);
+  }
 
   /**
    * Set the constraint evaluation function. This function is called
@@ -171,7 +178,9 @@ class SLEIPNIR_DLLEXPORT OCPSolver : public OptimizationProblem {
    * @param lowerBound The lower bound that inputs must always be above. Must be
    * shaped (numInputs)x1.
    */
-  void SetLowerInputBound(const VariableMatrix& lowerBound) {
+  template <typename T>
+    requires ScalarLike<T> || MatrixLike<T>
+  void SetLowerInputBound(const T& lowerBound) {
     for (int i = 0; i < m_numSteps + 1; ++i) {
       SubjectTo(U().Col(i) >= lowerBound);
     }
@@ -183,7 +192,9 @@ class SLEIPNIR_DLLEXPORT OCPSolver : public OptimizationProblem {
    * @param upperBound The upper bound that inputs must always be below. Must be
    * shaped (numInputs)x1.
    */
-  void SetUpperInputBound(const VariableMatrix& upperBound) {
+  template <typename T>
+    requires ScalarLike<T> || MatrixLike<T>
+  void SetUpperInputBound(const T& upperBound) {
     for (int i = 0; i < m_numSteps + 1; ++i) {
       SubjectTo(U().Col(i) <= upperBound);
     }

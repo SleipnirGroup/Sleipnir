@@ -28,7 +28,7 @@ class SLEIPNIR_DLLEXPORT Hessian {
    * @param wrt Vector of variables with respect to which to compute the
    *   Hessian.
    */
-  Hessian(Variable variable, VectorXvar wrt) noexcept;
+  Hessian(Variable variable, const VariableMatrix& wrt) noexcept;
 
   /**
    * Calculates the Hessian.

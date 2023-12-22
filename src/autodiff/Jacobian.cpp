@@ -4,11 +4,12 @@
 
 using namespace sleipnir;
 
-Jacobian::Jacobian(VectorXvar variables, VectorXvar wrt) noexcept
+Jacobian::Jacobian(const VariableMatrix& variables,
+                   const VariableMatrix& wrt) noexcept
     : m_variables{std::move(variables)}, m_wrt{std::move(wrt)} {
   m_profiler.StartSetup();
 
-  for (int row = 0; row < m_wrt.rows(); ++row) {
+  for (int row = 0; row < m_wrt.Rows(); ++row) {
     m_wrt(row).expr->row = row;
   }
 
@@ -17,9 +18,9 @@ Jacobian::Jacobian(VectorXvar variables, VectorXvar wrt) noexcept
   }
 
   // Reserve triplet space for 99% sparsity
-  m_cachedTriplets.reserve(m_variables.rows() * m_wrt.rows() * 0.01);
+  m_cachedTriplets.reserve(m_variables.Rows() * m_wrt.Rows() * 0.01);
 
-  for (int row = 0; row < m_variables.rows(); ++row) {
+  for (int row = 0; row < m_variables.Rows(); ++row) {
     if (m_variables(row).Type() == ExpressionType::kLinear) {
       // If the row is linear, compute its gradient once here and cache its
       // triplets. Constant rows are ignored because their gradients have no
@@ -34,7 +35,7 @@ Jacobian::Jacobian(VectorXvar variables, VectorXvar wrt) noexcept
     }
   }
 
-  for (int row = 0; row < m_wrt.rows(); ++row) {
+  for (int row = 0; row < m_wrt.Rows(); ++row) {
     m_wrt(row).expr->row = -1;
   }
 

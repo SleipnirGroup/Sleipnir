@@ -5,10 +5,10 @@
 using namespace sleipnir;
 
 Gradient::Gradient(Variable variable, Variable wrt) noexcept
-    : Gradient{std::move(variable), MapVectorXvar{&wrt, 1}} {}
+    : Gradient{std::move(variable), VariableMatrix{wrt}} {}
 
-Gradient::Gradient(Variable variable, VectorXvar wrt) noexcept
-    : m_jacobian{MapVectorXvar(&variable, 1), std::move(wrt)} {}
+Gradient::Gradient(Variable variable, const VariableMatrix& wrt) noexcept
+    : m_jacobian{variable, wrt} {}
 
 const Eigen::SparseVector<double>& Gradient::Calculate() {
   m_g = m_jacobian.Calculate();

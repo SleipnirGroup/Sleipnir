@@ -4,8 +4,8 @@
 #include <sleipnir/autodiff/Jacobian.hpp>
 
 TEST(JacobianTest, YvsX) {
-  sleipnir::VectorXvar y{3};
-  sleipnir::VectorXvar x{3};
+  sleipnir::VariableMatrix y{3};
+  sleipnir::VariableMatrix x{3};
   x(0).SetValue(1);
   x(1).SetValue(2);
   x(2).SetValue(3);
@@ -30,8 +30,8 @@ TEST(JacobianTest, YvsX) {
 }
 
 TEST(JacobianTest, Yvs3X) {
-  sleipnir::VectorXvar y{3};
-  sleipnir::VectorXvar x{3};
+  sleipnir::VariableMatrix y{3};
+  sleipnir::VariableMatrix x{3};
   x(0).SetValue(1);
   x(1).SetValue(2);
   x(2).SetValue(3);
@@ -56,8 +56,8 @@ TEST(JacobianTest, Yvs3X) {
 }
 
 TEST(JacobianTest, Products) {
-  sleipnir::VectorXvar y{3};
-  sleipnir::VectorXvar x{3};
+  sleipnir::VariableMatrix y{3};
+  sleipnir::VariableMatrix x{3};
   x(0).SetValue(1);
   x(1).SetValue(2);
   x(2).SetValue(3);
@@ -90,9 +90,9 @@ TEST(JacobianTest, Products) {
 }
 
 TEST(JacobianTest, DISABLED_NestedProducts) {
-  sleipnir::VectorXvar z{1};
+  sleipnir::VariableMatrix z{1};
   z(0).SetValue(1);
-  sleipnir::VectorXvar x{3};
+  sleipnir::VariableMatrix x{3};
   x(0) = 1 * z(0);
   x(1) = 2 * z(0);
   x(2) = 3 * z(0);
@@ -113,7 +113,7 @@ TEST(JacobianTest, DISABLED_NestedProducts) {
   //         [2  1  0]
   // dy/dx = [0  3  2]
   //         [3  0  1]
-  sleipnir::VectorXvar y{3};
+  sleipnir::VariableMatrix y{3};
   y(0) = x(0) * x(1);
   y(1) = x(1) * x(2);
   y(2) = x(0) * x(2);
@@ -131,8 +131,8 @@ TEST(JacobianTest, DISABLED_NestedProducts) {
 }
 
 TEST(JacobianTest, NonSquare) {
-  sleipnir::VectorXvar y{1};
-  sleipnir::VectorXvar x{3};
+  sleipnir::VariableMatrix y{1};
+  sleipnir::VariableMatrix x{3};
   x(0).SetValue(1);
   x(1).SetValue(2);
   x(2).SetValue(3);
@@ -151,8 +151,8 @@ TEST(JacobianTest, NonSquare) {
 }
 
 TEST(JacobianTest, Reuse) {
-  sleipnir::VectorXvar y{1};
-  sleipnir::VectorXvar x{2};
+  sleipnir::VariableMatrix y{1};
+  sleipnir::VariableMatrix x{2};
 
   // y = [x₁x₂]
   x(0).SetValue(1);
