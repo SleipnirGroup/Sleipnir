@@ -34,8 +34,3 @@ class CmdlineArgs {
  private:
   std::span<char*> args;
 };
-
-/**
- * Returns the global commandline arguments.
- */
-CmdlineArgs& Argv();

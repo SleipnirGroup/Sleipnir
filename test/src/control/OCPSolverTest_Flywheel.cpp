@@ -58,7 +58,7 @@ void TestFlywheel(std::string testName, Eigen::Matrix<double, 1, 1> A,
   solver.Minimize(objective);
 
   [[maybe_unused]] auto end1 = std::chrono::system_clock::now();
-  if (CmdlineArgPresent(kEnableDiagnostics)) {
+  if (Argv().Contains("--enable-diagnostics")) {
     using std::chrono::duration_cast;
     using std::chrono::microseconds;
     fmt::print("Setup time: {} ms\n\n",
@@ -66,7 +66,7 @@ void TestFlywheel(std::string testName, Eigen::Matrix<double, 1, 1> A,
   }
 
   auto status =
-      solver.Solve({.diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
+      solver.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
 
   EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
   EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.equalityConstraintType);

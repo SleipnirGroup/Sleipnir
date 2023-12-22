@@ -15,7 +15,7 @@ TEST(SolverExitConditionTest, CallbackRequestedStop) {
 
   problem.Callback([](const sleipnir::SolverIterationInfo&) {});
   auto status =
-      problem.Solve({.diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
+      problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
 
   EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
   EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
@@ -24,7 +24,7 @@ TEST(SolverExitConditionTest, CallbackRequestedStop) {
 
   problem.Callback([](const sleipnir::SolverIterationInfo&) { return false; });
   status =
-      problem.Solve({.diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
+      problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
 
   EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
   EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
@@ -33,7 +33,7 @@ TEST(SolverExitConditionTest, CallbackRequestedStop) {
 
   problem.Callback([](const sleipnir::SolverIterationInfo&) { return true; });
   status =
-      problem.Solve({.diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
+      problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
 
   EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
   EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
@@ -55,7 +55,7 @@ TEST(SolverExitConditionTest, TooFewDOFs) {
   problem.SubjectTo(z == 1);
 
   auto status =
-      problem.Solve({.diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
+      problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
 
   EXPECT_EQ(sleipnir::ExpressionType::kNone, status.costFunctionType);
   EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.equalityConstraintType);
@@ -77,7 +77,7 @@ TEST(SolverExitConditionTest, LocallyInfeasible) {
     problem.SubjectTo(z == x + 1);
 
     auto status =
-        problem.Solve({.diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
+        problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
 
     EXPECT_EQ(sleipnir::ExpressionType::kNone, status.costFunctionType);
     EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.equalityConstraintType);
@@ -99,7 +99,7 @@ TEST(SolverExitConditionTest, LocallyInfeasible) {
     problem.SubjectTo(z >= x + 1);
 
     auto status =
-        problem.Solve({.diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
+        problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
 
     EXPECT_EQ(sleipnir::ExpressionType::kNone, status.costFunctionType);
     EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
@@ -117,7 +117,7 @@ TEST(SolverExitConditionTest, DivergingIterates) {
   problem.Minimize(x);
 
   auto status =
-      problem.Solve({.diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
+      problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
 
   EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.costFunctionType);
   EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
@@ -134,7 +134,7 @@ TEST(SolverExitConditionTest, MaxIterationsExceeded) {
 
   auto status =
       problem.Solve({.maxIterations = 0,
-                     .diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
+                     .diagnostics = Argv().Contains("--enable-diagnostics")});
 
   EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
   EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
@@ -152,7 +152,7 @@ TEST(SolverExitConditionTest, Timeout) {
   problem.Minimize(x * x);
 
   auto status = problem.Solve(
-      {.timeout = 0s, .diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
+      {.timeout = 0s, .diagnostics = Argv().Contains("--enable-diagnostics")});
 
   EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
   EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);

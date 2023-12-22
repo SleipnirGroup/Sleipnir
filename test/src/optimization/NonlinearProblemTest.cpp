@@ -30,7 +30,7 @@ TEST(NonlinearProblemTest, Quartic) {
   problem.SubjectTo(x >= 1);
 
   auto status =
-      problem.Solve({.diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
+      problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
 
   EXPECT_EQ(sleipnir::ExpressionType::kNonlinear, status.costFunctionType);
   EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
@@ -57,8 +57,8 @@ TEST(NonlinearProblemTest, RosenbrockWithCubicAndLineConstraint) {
       problem.SubjectTo(sleipnir::pow(x - 1, 3) - y + 1 <= 0);
       problem.SubjectTo(x + y - 2 <= 0);
 
-      auto status =
-          problem.Solve({.diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
+      auto status = problem.Solve(
+          {.diagnostics = Argv().Contains("--enable-diagnostics")});
 
       EXPECT_EQ(sleipnir::ExpressionType::kNonlinear, status.costFunctionType);
       EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
@@ -98,8 +98,8 @@ TEST(NonlinearProblemTest, RosenbrockWithDiskConstraint) {
 
       problem.SubjectTo(sleipnir::pow(x, 2) + sleipnir::pow(y, 2) <= 2);
 
-      auto status =
-          problem.Solve({.diagnostics = CmdlineArgPresent(kEnableDiagnostics)});
+      auto status = problem.Solve(
+          {.diagnostics = Argv().Contains("--enable-diagnostics")});
 
       EXPECT_EQ(sleipnir::ExpressionType::kNonlinear, status.costFunctionType);
       EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
