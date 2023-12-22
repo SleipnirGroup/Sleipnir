@@ -791,7 +791,7 @@ void BindVariableBlock(
         return lhs - rhs;
       },
       py::is_operator());
-  variable_block.def(double() - py::self);
+  variable_block.def(py::self - double());
   variable_block.def(-py::self);
   variable_block.def(
       "__pow__",
