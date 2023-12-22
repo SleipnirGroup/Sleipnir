@@ -8,7 +8,7 @@ from jormungandr.optimization import OptimizationProblem, SolverExitCondition
 import numpy as np
 
 
-def test_direct_transcription():
+def test_optimization_problem_arm_on_elevator():
     N = 800
 
     ELEVATOR_START_HEIGHT = 1.0  # m

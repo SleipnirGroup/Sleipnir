@@ -9,7 +9,7 @@ def near(expected, actual, tolerance):
     return abs(expected - actual) < tolerance
 
 
-def test_flywheel_problem():
+def test_optimization_problem_flywheel():
     T = 5.0
     dt = 0.005
     N = int(T / dt)

@@ -7,7 +7,7 @@ def near(expected, actual, tolerance):
     return abs(expected - actual) < tolerance
 
 
-def test_minimum_time():
+def test_optimization_problem_double_integrator():
     T = 3.5
     dt = 0.005
     N = int(T / dt)

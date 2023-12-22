@@ -1,5 +1,6 @@
 // Copyright (c) Sleipnir contributors
 
+#include <pybind11/eigen.h>
 #include <sleipnir/optimization/SolverIterationInfo.hpp>
 
 #include "optimization/BindSolverStatus.hpp"
@@ -13,8 +14,9 @@ void BindSolverIterationInfo(py::module_& optimization) {
   cls.def_readonly("iteration", &SolverIterationInfo::iteration);
   cls.def_property_readonly(
       "x", [](const SolverIterationInfo& self) { return self.x; });
-  cls.def_property_readonly(
-      "g", [](const SolverIterationInfo& self) { return self.g; });
+  cls.def_property_readonly("g", [](const SolverIterationInfo& self) {
+    return Eigen::SparseMatrix<double>{self.g};
+  });
   cls.def_property_readonly(
       "H", [](const SolverIterationInfo& self) { return self.H; });
   cls.def_property_readonly(
