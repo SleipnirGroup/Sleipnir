@@ -88,37 +88,39 @@ TEST(OCPSolverTest, CartPole) {
             status.equalityConstraintType);
   EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.inequalityConstraintType);
   // FIXME: Fails with "bad search direction"
-  // EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
+  EXPECT_TRUE(status.exitCondition == sleipnir::SolverExitCondition::kSuccess ||
+              status.exitCondition ==
+                  sleipnir::SolverExitCondition::kBadSearchDirection);
 
-#if 0
-  // Verify initial state
-  EXPECT_NEAR(0.0, X.Value(0, 0), 1e-2);
-  EXPECT_NEAR(0.0, X.Value(1, 0), 1e-2);
-  EXPECT_NEAR(0.0, X.Value(2, 0), 1e-2);
-  EXPECT_NEAR(0.0, X.Value(3, 0), 1e-2);
+  if (status.exitCondition == sleipnir::SolverExitCondition::kSuccess) {
+    // Verify initial state
+    EXPECT_NEAR(0.0, X.Value(0, 0), 1e-2);
+    EXPECT_NEAR(0.0, X.Value(1, 0), 1e-2);
+    EXPECT_NEAR(0.0, X.Value(2, 0), 1e-2);
+    EXPECT_NEAR(0.0, X.Value(3, 0), 1e-2);
 
-  // Verify solution
-  Eigen::Matrix<double, 4, 1> x{0.0, 0.0, 0.0, 0.0};
-  Eigen::Matrix<double, 1, 1> u{0.0};
-  for (int k = 0; k < N; ++k) {
-    u = problem.U().Col(k).Value();
+    // Verify solution
+    Eigen::Matrix<double, 4, 1> x{0.0, 0.0, 0.0, 0.0};
+    Eigen::Matrix<double, 1, 1> u{0.0};
+    for (int k = 0; k < N; ++k) {
+      u = problem.U().Col(k).Value();
 
-    // Verify state
-    EXPECT_NEAR(x(0), X.Value(0, k), 1e-2) << fmt::format("  k = {}", k);
-    EXPECT_NEAR(x(1), X.Value(1, k), 1e-2) << fmt::format("  k = {}", k);
-    EXPECT_NEAR(x(2), X.Value(2, k), 1e-2) << fmt::format("  k = {}", k);
-    EXPECT_NEAR(x(3), X.Value(3, k), 1e-2) << fmt::format("  k = {}", k);
+      // Verify state
+      EXPECT_NEAR(x(0), X.Value(0, k), 1e-2) << fmt::format("  k = {}", k);
+      EXPECT_NEAR(x(1), X.Value(1, k), 1e-2) << fmt::format("  k = {}", k);
+      EXPECT_NEAR(x(2), X.Value(2, k), 1e-2) << fmt::format("  k = {}", k);
+      EXPECT_NEAR(x(3), X.Value(3, k), 1e-2) << fmt::format("  k = {}", k);
 
-    // Project state forward
-    x = RK4(CartPoleDynamicsDouble, x, u, dt);
+      // Project state forward
+      x = RK4(CartPoleDynamicsDouble, x, u, dt);
+    }
+
+    // Verify final state
+    EXPECT_NEAR(1.0, X.Value(0, N - 1), 1e-2);
+    EXPECT_NEAR(std::numbers::pi, X.Value(1, N - 1), 1e-2);
+    EXPECT_NEAR(0.0, X.Value(2, N - 1), 1e-2);
+    EXPECT_NEAR(0.0, X.Value(3, N - 1), 1e-2);
   }
-
-  // Verify final state
-  EXPECT_NEAR(1.0, X.Value(0, N - 1), 1e-2);
-  EXPECT_NEAR(std::numbers::pi, X.Value(1, N - 1), 1e-2);
-  EXPECT_NEAR(0.0, X.Value(2, N - 1), 1e-2);
-  EXPECT_NEAR(0.0, X.Value(3, N - 1), 1e-2);
-#endif
 
   // Log states for offline viewing
   std::ofstream states{"OCPSolver Cart-pole states.csv"};
