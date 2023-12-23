@@ -69,16 +69,11 @@ set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS FALSE)
 
 include(SleipnirCompilerFlags)
 
-file(GLOB_RECURSE Sleipnir_src src/*.cpp thirdparty/llvm/src/*.cpp)
+file(GLOB_RECURSE Sleipnir_src src/*.cpp)
 add_library(Sleipnir ${Sleipnir_src})
 add_library(Sleipnir::Sleipnir ALIAS Sleipnir)
 sleipnir_compiler_flags(Sleipnir)
-target_include_directories(
-    Sleipnir
-    PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/src
-        ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/llvm/include
-)
+target_include_directories(Sleipnir PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 
