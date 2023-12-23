@@ -57,7 +57,7 @@ where
 
 and where m is the number of inequality constraints.
 
-Let f(x) = f(x)ₖ, H = H(x)ₖ, Aₑ = Aₑ(x)ₖ, and Aᵢ = Aᵢ(x)ₖ for clarity. We want to solve the following Newton-KKT system shown in equation (19.12) of [1].
+Let f(x) = f(x)ₖ, H = H(x)ₖ, Aₑ = Aₑ(x)ₖ, and Aᵢ = Aᵢ(x)ₖ for clarity. We want to solve the following Newton-KKT system shown in equation (19.12) of [^1].
 
 ```
   [H    0  Aₑᵀ  Aᵢᵀ][ pₖˣ]    [∇f(x) − Aₑᵀy − Aᵢᵀz]
@@ -166,7 +166,7 @@ The iterates are applied like so
   zₖ₊₁ = zₖ + αₖᶻpₖᶻ
 ```
 
-where αₖᵐᵃˣ and αₖᶻ are computed via the fraction-to-the-boundary rule shown in equations (15a) and (15b) of [2].
+where αₖᵐᵃˣ and αₖᶻ are computed via the fraction-to-the-boundary rule shown in equations (15a) and (15b) of [^2].
 
 ```
   αₖᵐᵃˣ = max(α ∈ (0, 1] : sₖ + αpₖˢ ≥ (1−τⱼ)sₖ)
@@ -175,8 +175,12 @@ where αₖᵐᵃˣ and αₖᶻ are computed via the fraction-to-the-boundary r
       = max(α ∈ (0, 1] : αpₖᶻ ≥ −τⱼzₖ)
 ```
 
-Works cited:
+Section 6 of [^3] describes how to check for local infeasibility.
 
-[1] Nocedal, J. and Wright, S. "Numerical Optimization", 2nd. ed., Ch. 19. Springer, 2006.<br>
-[2] Wächter, A. and Biegler, L. "On the implementation of an interior-point filter line-search algorithm for large-scale nonlinear programming", 2005. http://cepac.cheme.cmu.edu/pasilectures/biegler/ipopt.pdf<br>
-[3] Byrd, R. and Nocedal J. and Waltz R. "KNITRO: An Integrated Package for Nonlinear Optimization", 2005. https://users.iems.northwestern.edu/~nocedal/PDFfiles/integrated.pdf
+## Works cited
+
+[^1]: Nocedal, J. and Wright, S. "Numerical Optimization", 2nd. ed., Ch. 19. Springer, 2006.
+
+[^2]: Wächter, A. and Biegler, L. "On the implementation of an interior-point filter line-search algorithm for large-scale nonlinear programming", 2005. [http://cepac.cheme.cmu.edu/pasilectures/biegler/ipopt.pdf](http://cepac.cheme.cmu.edu/pasilectures/biegler/ipopt.pdf)
+
+[^3]: Byrd, R. and Nocedal J. and Waltz R. "KNITRO: An Integrated Package for Nonlinear Optimization", 2005. [https://users.iems.northwestern.edu/~nocedal/PDFfiles/integrated.pdf](https://users.iems.northwestern.edu/~nocedal/PDFfiles/integrated.pdf)
