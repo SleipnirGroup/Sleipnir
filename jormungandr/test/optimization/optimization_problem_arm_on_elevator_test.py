@@ -92,4 +92,7 @@ def test_optimization_problem_arm_on_elevator():
     assert status.equality_constraint_type == ExpressionType.LINEAR
     assert status.inequality_constraint_type == ExpressionType.NONLINEAR
     # FIXME: Fails with "bad search direction"
-    # assert status.exit_condition == SolverExitCondition.SUCCESS
+    assert (
+        status.exit_condition == SolverExitCondition.SUCCESS
+        or status.exit_condition == SolverExitCondition.BAD_SEARCH_DIRECTION
+    )

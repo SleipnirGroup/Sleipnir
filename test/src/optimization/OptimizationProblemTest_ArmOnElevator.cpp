@@ -102,5 +102,7 @@ TEST(OptimizationProblemTest, ArmOnElevator) {
   EXPECT_EQ(sleipnir::ExpressionType::kNonlinear,
             status.inequalityConstraintType);
   // FIXME: Fails with "bad search direction"
-  // EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
+  EXPECT_TRUE(status.exitCondition == sleipnir::SolverExitCondition::kSuccess ||
+              status.exitCondition ==
+                  sleipnir::SolverExitCondition::kBadSearchDirection);
 }

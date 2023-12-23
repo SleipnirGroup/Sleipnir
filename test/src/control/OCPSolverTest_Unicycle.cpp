@@ -83,7 +83,9 @@ TEST(OCPSolverTest, Unicycle) {
             status.equalityConstraintType);
   EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.inequalityConstraintType);
   // FIXME: Fails with "bad search direction"
-  // EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
+  EXPECT_TRUE(status.exitCondition == sleipnir::SolverExitCondition::kSuccess ||
+              status.exitCondition ==
+                  sleipnir::SolverExitCondition::kBadSearchDirection);
 
   // Log states for offline viewing
   std::ofstream states{"OCPSolver Unicycle states.csv"};
