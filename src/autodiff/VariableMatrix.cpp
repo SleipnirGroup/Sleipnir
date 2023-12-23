@@ -271,36 +271,22 @@ VariableMatrix& VariableMatrix::operator*=(const VariableMatrix& rhs) {
   return *this;
 }
 
-VariableMatrix operator/(const VariableMatrix& lhs, const VariableMatrix& rhs) {
-  assert(rhs.Rows() == 1 && rhs.Cols() == 1);
-
+VariableMatrix operator/(const VariableMatrix& lhs, const Variable& rhs) {
   VariableMatrix result{lhs.Rows(), lhs.Cols()};
 
   for (int row = 0; row < result.Rows(); ++row) {
     for (int col = 0; col < result.Cols(); ++col) {
-      result(row, col) = lhs(row, col) / rhs(0, 0);
+      result(row, col) = lhs(row, col) / rhs;
     }
   }
 
   return result;
 }
 
-VariableMatrix operator/(const VariableMatrix& lhs, double rhs) {
-  VariableMatrix result{lhs.Rows(), lhs.Cols()};
-
-  for (int row = 0; row < result.Rows(); ++row) {
-    for (int col = 0; col < result.Cols(); ++col) {
-      result(row, col) = lhs(row, col) / Variable{rhs};
-    }
-  }
-
-  return result;
-}
-
-VariableMatrix& VariableMatrix::operator/=(const VariableMatrix& rhs) {
+VariableMatrix& VariableMatrix::operator/=(const Variable& rhs) {
   for (int row = 0; row < Rows(); ++row) {
     for (int col = 0; col < Cols(); ++col) {
-      (*this)(row, col) /= rhs(0, 0);
+      (*this)(row, col) /= rhs;
     }
   }
 

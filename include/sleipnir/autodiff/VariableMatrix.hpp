@@ -312,16 +312,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param rhs Operator right-hand side.
    */
   friend SLEIPNIR_DLLEXPORT VariableMatrix operator/(const VariableMatrix& lhs,
-                                                     const VariableMatrix& rhs);
-
-  /**
-   * Binary division operator.
-   *
-   * @param lhs Operator left-hand side.
-   * @param rhs Operator right-hand side.
-   */
-  friend SLEIPNIR_DLLEXPORT VariableMatrix operator/(const VariableMatrix& lhs,
-                                                     double rhs);
+                                                     const Variable& rhs);
 
   /**
    * Compound matrix division-assignment operator (only enabled when rhs
@@ -329,7 +320,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    *
    * @param rhs Variable to divide.
    */
-  VariableMatrix& operator/=(const VariableMatrix& rhs);
+  VariableMatrix& operator/=(const Variable& rhs);
 
   /**
    * Binary addition operator.

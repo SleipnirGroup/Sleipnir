@@ -311,14 +311,10 @@ void BindVariableMatrix(py::module_& autodiff,
   variable_matrix.def(Variable() * py::self);
   variable_matrix.def(double() * py::self);
 
-  variable_matrix.def(py::self / py::self);
-  variable_matrix.def(
-      "__div__",
-      [](const VariableMatrix& lhs, const Variable& rhs) {
-        return lhs / VariableMatrix{rhs};
-      },
-      py::is_operator());
+  variable_matrix.def(py::self / Variable());
   variable_matrix.def(py::self / double());
+  variable_matrix.def(py::self /= Variable());
+  variable_matrix.def(py::self /= double());
 
   variable_matrix.def(py::self + py::self);
   variable_matrix.def(
@@ -603,11 +599,24 @@ void BindVariableBlock(
   // TODO: Support slice stride other than 1
   variable_block.def(
       "__getitem__",
-      [](VariableBlock<VariableMatrix>& self,
-         py::tuple slices) -> VariableBlock<VariableMatrix> {
+      [](VariableBlock<VariableMatrix>& self, py::tuple slices) -> py::object {
         if (slices.size() != 2) {
           throw py::index_error(
               fmt::format("Expected 2 slices, got {}.", slices.size()));
+        }
+
+        // If both indices are integers instead of slices, return Variable
+        // instead of VariableBlock
+        if (py::isinstance<py::int_>(slices[0]) &&
+            py::isinstance<py::int_>(slices[1])) {
+          int row = slices[0].cast<int>();
+          int col = slices[1].cast<int>();
+
+          if (row >= self.Rows() || col >= self.Cols()) {
+            throw std::out_of_range("Index out of bounds");
+          }
+
+          return py::cast(self(row, col));
         }
 
         int rowOffset = 0;
@@ -650,7 +659,7 @@ void BindVariableBlock(
           blockCols = 1;
         }
 
-        return self.Block(rowOffset, colOffset, blockRows, blockCols);
+        return py::cast(self.Block(rowOffset, colOffset, blockRows, blockCols));
       });
   variable_block.def(
       "row", py::overload_cast<int>(&VariableBlock<VariableMatrix>::Row));
@@ -759,7 +768,7 @@ void BindVariableBlock(
   variable_block.def(py::self * double());
   variable_block.def(Variable() * py::self);
   variable_block.def(double() * py::self);
-  variable_block.def(py::self / py::self);
+  variable_block.def(py::self / Variable());
   variable_block.def(py::self / double());
   variable_block.def(py::self + py::self);
   variable_block.def(
