@@ -12,6 +12,10 @@
 
 #include "optimization/Filter.hpp"
 #include "optimization/RegularizedLDLT.hpp"
+#include "optimization/solver/util/ErrorEstimate.hpp"
+#include "optimization/solver/util/FractionToTheBoundaryRule.hpp"
+#include "optimization/solver/util/IsLocallyInfeasible.hpp"
+#include "optimization/solver/util/KKTError.hpp"
 #include "sleipnir/autodiff/Gradient.hpp"
 #include "sleipnir/autodiff/Hessian.hpp"
 #include "sleipnir/autodiff/Jacobian.hpp"
@@ -19,209 +23,14 @@
 #include "sleipnir/util/Spy.hpp"
 #include "util/ScopeExit.hpp"
 
+// See docs/algorithms.md#Works_cited for citation definitions.
+//
+// See docs/algorithms.md#Interior-point_method for a derivation of the
+// interior-point method formulation being used.
+
 namespace sleipnir {
 
-// Works cited:
-//
-// [1] Nocedal, J. and Wright, S. "Numerical Optimization", 2nd. ed., Ch. 19.
-//     Springer, 2006.
-// [2] Wächter, A. and Biegler, L. "On the implementation of an interior-point
-//     filter line-search algorithm for large-scale nonlinear programming",
-//     2005. http://cepac.cheme.cmu.edu/pasilectures/biegler/ipopt.pdf
-// [3] Byrd, R. and Nocedal J. and Waltz R. "KNITRO: An Integrated Package for
-//     Nonlinear Optimization", 2005.
-//     https://users.iems.northwestern.edu/~nocedal/PDFfiles/integrated.pdf
-
 namespace {
-
-/**
- * Returns true if the problem's equality constraints are locally infeasible.
- *
- * @param A_e The problem's equality constraint Jacobian Aₑ(x) evaluated at the
- *   current iterate.
- * @param c_e The problem's equality constraints cₑ(x) evaluated at the current
- *   iterate.
- */
-bool IsEqualityLocallyInfeasible(const Eigen::SparseMatrix<double>& A_e,
-                                 const Eigen::VectorXd& c_e) {
-  // The equality constraints are locally infeasible if
-  //
-  //   Aₑᵀcₑ → 0
-  //   ‖cₑ‖ > ε
-  //
-  // See "Infeasibility detection" in section 6 of [3].
-  return A_e.rows() > 0 && (A_e.transpose() * c_e).norm() < 1e-6 &&
-         c_e.norm() > 1e-2;
-}
-
-/**
- * Returns true if the problem's inequality constraints are locally infeasible.
- *
- * @param A_i The problem's inequality constraint Jacobian Aᵢ(x) evaluated at
- *   the current iterate.
- * @param c_i The problem's inequality constraints cᵢ(x) evaluated at the
- *   current iterate.
- */
-bool IsInequalityLocallyInfeasible(const Eigen::SparseMatrix<double>& A_i,
-                                   const Eigen::VectorXd& c_i) {
-  // The inequality constraints are locally infeasible if
-  //
-  //   Aᵢᵀcᵢ⁺ → 0
-  //   ‖cᵢ⁺‖ > ε
-  //
-  // where cᵢ⁺ = min(cᵢ, 0).
-  //
-  // See "Infeasibility detection" in section 6 of [3].
-  //
-  // cᵢ⁺ is used instead of cᵢ⁻ from the paper to follow the convention that
-  // feasible inequality constraints are ≥ 0.
-  if (A_i.rows() > 0) {
-    Eigen::VectorXd c_i_plus = c_i.cwiseMin(0.0);
-    if ((A_i.transpose() * c_i_plus).norm() < 1e-6 && c_i_plus.norm() > 1e-6) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-/**
- * Returns the error estimate using the KKT conditions for the interior-point
- * method.
- *
- * @param g Gradient of the cost function ∇f.
- * @param A_e The problem's equality constraint Jacobian Aₑ(x) evaluated at the
- *   current iterate.
- * @param c_e The problem's equality constraints cₑ(x) evaluated at the current
- *   iterate.
- * @param A_i The problem's inequality constraint Jacobian Aᵢ(x) evaluated at
- *   the current iterate.
- * @param c_i The problem's inequality constraints cᵢ(x) evaluated at the
- *   current iterate.
- * @param s Inequality constraint slack variables.
- * @param y Equality constraint dual variables.
- * @param z Inequality constraint dual variables.
- * @param μ Barrier parameter.
- */
-double ErrorEstimate(const Eigen::VectorXd& g,
-                     const Eigen::SparseMatrix<double>& A_e,
-                     const Eigen::VectorXd& c_e,
-                     const Eigen::SparseMatrix<double>& A_i,
-                     const Eigen::VectorXd& c_i, const Eigen::VectorXd& s,
-                     const Eigen::VectorXd& y, const Eigen::VectorXd& z,
-                     double μ) {
-  int numEqualityConstraints = A_e.rows();
-  int numInequalityConstraints = A_i.rows();
-
-  // Update the error estimate using the KKT conditions from equations (19.5a)
-  // through (19.5d) of [1].
-  //
-  //   ∇f − Aₑᵀy − Aᵢᵀz = 0
-  //   Sz − μe = 0
-  //   cₑ = 0
-  //   cᵢ − s = 0
-  //
-  // The error tolerance is the max of the following infinity norms scaled by
-  // s_d and s_c (see equation (5) of [2]).
-  //
-  //   ‖∇f − Aₑᵀy − Aᵢᵀz‖_∞ / s_d
-  //   ‖Sz − μe‖_∞ / s_c
-  //   ‖cₑ‖_∞
-  //   ‖cᵢ − s‖_∞
-
-  // s_d = max(sₘₐₓ, (‖y‖₁ + ‖z‖₁) / (m + n)) / sₘₐₓ
-  constexpr double s_max = 100.0;
-  double s_d =
-      std::max(s_max, (y.lpNorm<1>() + z.lpNorm<1>()) /
-                          (numEqualityConstraints + numInequalityConstraints)) /
-      s_max;
-
-  // s_c = max(sₘₐₓ, ‖z‖₁ / n) / sₘₐₓ
-  double s_c =
-      std::max(s_max, z.lpNorm<1>() / numInequalityConstraints) / s_max;
-
-  const auto S = s.asDiagonal();
-  const Eigen::VectorXd e = Eigen::VectorXd::Ones(s.rows());
-
-  return std::max({(g - A_e.transpose() * y - A_i.transpose() * z)
-                           .lpNorm<Eigen::Infinity>() /
-                       s_d,
-                   (S * z - μ * e).lpNorm<Eigen::Infinity>() / s_c,
-                   c_e.lpNorm<Eigen::Infinity>(),
-                   (c_i - s).lpNorm<Eigen::Infinity>()});
-}
-
-/**
- * Returns the KKT error for the interior-point method.
- *
- * @param g Gradient of the cost function ∇f.
- * @param A_e The problem's equality constraint Jacobian Aₑ(x) evaluated at the
- *   current iterate.
- * @param c_e The problem's equality constraints cₑ(x) evaluated at the current
- *   iterate.
- * @param A_i The problem's inequality constraint Jacobian Aᵢ(x) evaluated at
- *   the current iterate.
- * @param c_i The problem's inequality constraints cᵢ(x) evaluated at the
- *   current iterate.
- * @param s Inequality constraint slack variables.
- * @param y Equality constraint dual variables.
- * @param z Inequality constraint dual variables.
- * @param μ Barrier parameter.
- */
-double KKTError(const Eigen::VectorXd& g,
-                const Eigen::SparseMatrix<double>& A_e,
-                const Eigen::VectorXd& c_e,
-                const Eigen::SparseMatrix<double>& A_i,
-                const Eigen::VectorXd& c_i, const Eigen::VectorXd& s,
-                const Eigen::VectorXd& y, const Eigen::VectorXd& z, double μ) {
-  // Compute the KKT error as the 1-norm of the KKT conditions from equations
-  // (19.5a) through (19.5d) of [1].
-  //
-  //   ∇f − Aₑᵀy − Aᵢᵀz = 0
-  //   Sz − μe = 0
-  //   cₑ = 0
-  //   cᵢ − s = 0
-
-  const auto S = s.asDiagonal();
-  const Eigen::VectorXd e = Eigen::VectorXd::Ones(s.rows());
-
-  return (g - A_e.transpose() * y - A_i.transpose() * z).lpNorm<1>() +
-         (S * z - μ * e).lpNorm<1>() + c_e.lpNorm<1>() + (c_i - s).lpNorm<1>();
-}
-
-/**
- * Applies fraction-to-the-boundary rule to a variable and its iterate, then
- * returns a fraction of the iterate step size within (0, 1].
- *
- * @param x The variable.
- * @param p The iterate on the variable.
- * @param τ Fraction-to-the-boundary rule scaling factor within (0, 1].
- * @return Fraction of the iterate step size within (0, 1].
- */
-double FractionToTheBoundaryRule(const Eigen::Ref<const Eigen::VectorXd>& x,
-                                 const Eigen::Ref<const Eigen::VectorXd>& p,
-                                 double τ) {
-  // α = max(α ∈ (0, 1] : x + αp ≥ (1 − τ)x)
-  //
-  // where x and τ are positive.
-  //
-  // x + αp ≥ (1 − τ)x
-  // x + αp ≥ x − τx
-  // αp ≥ −τx
-  //
-  // If the inequality is false, p < 0 and α is too big. Find the largest value
-  // of α that makes the inequality true.
-  //
-  // α = −τ/p x
-  double α = 1.0;
-  for (int i = 0; i < x.rows(); ++i) {
-    if (α * p(i) < -τ * x(i)) {
-      α = -τ / p(i) * x(i);
-    }
-  }
-
-  return α;
-}
 
 /**
  * Converts std::chrono::duration to a number of milliseconds rounded to three
@@ -244,9 +53,6 @@ Eigen::VectorXd InteriorPoint(
     const SolverConfig& config,
     const Eigen::Ref<const Eigen::VectorXd>& initialGuess,
     SolverStatus* status) {
-  // Read docs/algorithms.md#Interior-point_method for a derivation of the
-  // interior-point method formulation being used.
-
   auto solveStartTime = std::chrono::system_clock::now();
 
   // Map decision variables and constraints to VariableMatrices for Lagrangian

@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+title: Sleipnir
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - name: Sleipnir contributors
+repository-code: 'https://github.com/SleipnirGroup/Sleipnir'
+url: 'https://github.com/SleipnirGroup/Sleipnir'
+abstract: >-
+  A linearity-exploiting sparse nonlinear constrained
+  optimization problem solver that uses the interior-point
+  method.
+keywords:
+  - optimization
+  - solver
+license: BSD-3-Clause
