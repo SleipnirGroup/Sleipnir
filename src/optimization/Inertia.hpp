@@ -4,6 +4,8 @@
 
 #include <cstddef>
 
+#include "sleipnir/util/Concepts.hpp"
+
 namespace sleipnir {
 
 /**
@@ -30,37 +32,15 @@ class Inertia {
       : positive{positive}, negative{negative}, zero{zero} {}
 
   /**
-   * Constructs the Inertia type with the inertia of the given matrix.
-   *
-   * @tparam Solver Eigen sparse linear system solver.
-   * @param matrix Matrix of which to compute the inertia.
-   */
-  template <typename Solver, typename MatrixType>
-  explicit Inertia(const MatrixType& matrix) {
-    Solver solver{matrix};
-
-    auto D = solver.vectorD();
-    for (int row = 0; row < D.rows(); ++row) {
-      if (D(row) > 0.0) {
-        ++positive;
-      } else if (D(row) < 0.0) {
-        ++negative;
-      } else {
-        ++zero;
-      }
-    }
-  }
-
-  /**
    * Constructs the Inertia type with the inertia of the given LDLT
    * decomposition.
    *
    * @tparam Solver Eigen sparse linear system solver.
    * @param solver The LDLT decomposition of which to compute the inertia.
    */
-  template <typename Solver>
+  template <EigenSolver Solver>
   explicit Inertia(const Solver& solver) {
-    auto D = solver.vectorD();
+    const auto& D = solver.vectorD();
     for (int row = 0; row < D.rows(); ++row) {
       if (D(row) > 0.0) {
         ++positive;
