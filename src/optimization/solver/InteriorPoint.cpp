@@ -22,6 +22,7 @@
 #include "sleipnir/optimization/SolverExitCondition.hpp"
 #include "sleipnir/util/Spy.hpp"
 #include "util/ScopeExit.hpp"
+#include "util/ToMilliseconds.hpp"
 
 // See docs/algorithms.md#Works_cited for citation definitions.
 //
@@ -29,21 +30,6 @@
 // interior-point method formulation being used.
 
 namespace sleipnir {
-
-namespace {
-
-/**
- * Converts std::chrono::duration to a number of milliseconds rounded to three
- * decimals.
- */
-template <typename Rep, typename Period = std::ratio<1>>
-double ToMilliseconds(const std::chrono::duration<Rep, Period>& duration) {
-  using std::chrono::duration_cast;
-  using std::chrono::microseconds;
-  return duration_cast<microseconds>(duration).count() / 1000.0;
-}
-
-}  // namespace
 
 Eigen::VectorXd InteriorPoint(
     std::vector<Variable>& decisionVariables, std::optional<Variable>& f,
@@ -149,6 +135,7 @@ Eigen::VectorXd InteriorPoint(
 
   int iterations = 0;
 
+  // Prints final diagnostics when the solver exits
   scope_exit exit{[&] {
     if (config.diagnostics) {
       auto solveEndTime = std::chrono::system_clock::now();
@@ -231,6 +218,7 @@ Eigen::VectorXd InteriorPoint(
 
   RegularizedLDLT solver;
 
+  // Variables for determining when a step is acceptable
   int acceptableIterCounter = 0;
   constexpr int maxAcceptableIterations = 15;
   const double acceptableTolerance = config.tolerance * 100;
@@ -247,7 +235,7 @@ Eigen::VectorXd InteriorPoint(
          acceptableIterCounter < maxAcceptableIterations) {
     auto innerIterStartTime = std::chrono::system_clock::now();
 
-    // Check for local infeasibility
+    // Check for local equality constraint infeasibility
     if (IsEqualityLocallyInfeasible(A_e, c_e)) {
       if (config.diagnostics) {
         fmt::print(
@@ -265,6 +253,8 @@ Eigen::VectorXd InteriorPoint(
       status->exitCondition = SolverExitCondition::kLocallyInfeasible;
       return x;
     }
+
+    // Check for local inequality constraint infeasibility
     if (IsInequalityLocallyInfeasible(A_i, c_i)) {
       if (config.diagnostics) {
         fmt::print(
@@ -283,6 +273,7 @@ Eigen::VectorXd InteriorPoint(
       return x;
     }
 
+    // Write out spy file contents if that's enabled
     if (config.spy) {
       // Gap between sparsity patterns
       if (iterations > 0) {
@@ -410,6 +401,8 @@ Eigen::VectorXd InteriorPoint(
       Eigen::VectorXd trial_c_i = c_iAD.Value();
 
       f.value().Update();
+
+      // Check whether filter accepts trial iterate
       FilterEntry entry{f.value(), μ, trial_s, trial_c_e, trial_c_i};
       if (filter.IsAcceptable(entry)) {
         stepAcceptable = true;
@@ -421,6 +414,8 @@ Eigen::VectorXd InteriorPoint(
       double nextConstraintViolation =
           trial_c_e.lpNorm<1>() + (trial_c_i - trial_s).lpNorm<1>();
 
+      // Second-order corrections
+      //
       // If first trial point was rejected and constraint violation stayed the
       // same or went up, apply second-order corrections
       if (nextConstraintViolation >= prevConstraintViolation) {
@@ -479,6 +474,8 @@ Eigen::VectorXd InteriorPoint(
           trial_c_i = c_iAD.Value();
 
           f.value().Update();
+
+          // Check whether filter accepts trial iterate
           entry = FilterEntry{f.value(), μ, trial_s, trial_c_e, trial_c_i};
           if (filter.IsAcceptable(entry)) {
             p_x = p_x_cor;
@@ -513,15 +510,16 @@ Eigen::VectorXd InteriorPoint(
           continue;
         }
 
+        // Reduce step size
         constexpr double α_red_factor = 0.5;
         α *= α_red_factor;
 
         // Safety factor for the minimal step size
         constexpr double α_min_frac = 0.05;
 
+        // If step size hit a minimum, check if the KKT error was reduced. If it
+        // wasn't, invoke feasibility restoration.
         if (α < α_min_frac * Filter::γConstraint) {
-          // If the step using αᵐᵃˣ reduced the KKT error, accept it anyway
-
           double currentKKTError = KKTError(g, A_e, c_e, A_i, c_i, s, y, z, μ);
 
           Eigen::VectorXd trial_x = x + α_max * p_x;
@@ -550,6 +548,7 @@ Eigen::VectorXd InteriorPoint(
               gradientF.Calculate(), jacobianCe.Calculate(), trial_c_e,
               jacobianCi.Calculate(), trial_c_i, trial_s, trial_y, trial_z, μ);
 
+          // If the step using αᵐᵃˣ reduced the KKT error, accept it anyway
           if (nextKKTError <= 0.999 * currentKKTError) {
             α = α_max;
             stepAcceptable = true;
@@ -563,6 +562,7 @@ Eigen::VectorXd InteriorPoint(
       }
     }
 
+    // Check for diverging iterates
     if (p_x.lpNorm<Eigen::Infinity>() > 1e20 ||
         p_s.lpNorm<Eigen::Infinity>() > 1e20) {
       status->exitCondition = SolverExitCondition::kDivergingIterates;
@@ -619,7 +619,6 @@ Eigen::VectorXd InteriorPoint(
     sAD.SetValue(s);
     yAD.SetValue(y);
     zAD.SetValue(z);
-
     A_e = jacobianCe.Calculate();
     A_i = jacobianCi.Calculate();
     g = gradientF.Calculate();
@@ -661,6 +660,7 @@ Eigen::VectorXd InteriorPoint(
 
     auto innerIterEndTime = std::chrono::system_clock::now();
 
+    // Diagnostics for current iteration
     if (config.diagnostics) {
       if (iterations % 20 == 0) {
         fmt::print("{:>4}   {:>10}  {:>10}   {:>16}  {:>19}\n", "iter",
@@ -675,16 +675,20 @@ Eigen::VectorXd InteriorPoint(
     }
 
     ++iterations;
+
+    // Check for max iterations
     if (iterations >= config.maxIterations) {
       status->exitCondition = SolverExitCondition::kMaxIterationsExceeded;
       return x;
     }
 
+    // Check for max wall clock time
     if (innerIterEndTime - solveStartTime > config.timeout) {
       status->exitCondition = SolverExitCondition::kMaxWallClockTimeExceeded;
       return x;
     }
 
+    // Check for solve to acceptable tolerance
     if (E_0 > config.tolerance &&
         acceptableIterCounter == maxAcceptableIterations) {
       status->exitCondition = SolverExitCondition::kSolvedToAcceptableTolerance;
