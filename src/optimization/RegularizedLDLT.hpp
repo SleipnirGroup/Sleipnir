@@ -11,6 +11,8 @@
 
 #include "optimization/Inertia.hpp"
 
+// See docs/algorithms.md#Works_cited for citation definitions
+
 namespace sleipnir {
 
 /**
@@ -41,10 +43,7 @@ class RegularizedLDLT {
    */
   void Compute(const Eigen::SparseMatrix<double>& lhs,
                size_t numEqualityConstraints, double μ) {
-    // The regularization procedure is based on algorithm B.1 of [1].
-    //
-    // [1] Nocedal, J. and Wright, S. "Numerical Optimization", 2nd. ed.,
-    //     App. B. Springer, 2006.
+    // The regularization procedure is based on algorithm B.1 of [1]
     m_numDecisionVariables = lhs.rows() - numEqualityConstraints;
     m_numEqualityConstraints = numEqualityConstraints;
 
@@ -69,25 +68,16 @@ class RegularizedLDLT {
     }
 
     // If the decomposition succeeded and the inertia has some zero eigenvalues,
-    // or the decomposition failed, regularize the equality constraints and try
-    // again
+    // or the decomposition failed, regularize the equality constraints
     if ((m_solver.info() == Eigen::Success && inertia.zero > 0) ||
         m_solver.info() != Eigen::Success) {
       γ = 1e-8 * std::pow(μ, 0.25);
-
-      m_solver.factorize(lhs + Regularization(δ, γ));
-      inertia = Inertia{m_solver};
-
-      if (m_solver.info() == Eigen::Success && inertia == idealInertia) {
-        m_info = Eigen::Success;
-        return;
-      }
     }
 
-    // Since adding γ didn't fix the inertia, the Hessian needs to be
-    // regularized. If the Hessian wasn't regularized in a previous run of
-    // Compute(), start at a small value of δ. Otherwise, attempt a δ half as
-    // big as the previous run so δ can trend downwards over time.
+    // Also regularize the Hessian. If the Hessian wasn't regularized in a
+    // previous run of Compute(), start at a small value of δ. Otherwise,
+    // attempt a δ half as big as the previous run so δ can trend downwards over
+    // time.
     if (m_δOld == 0.0) {
       δ = 1e-4;
     } else {
@@ -100,7 +90,7 @@ class RegularizedLDLT {
       // lhs = [H + AᵢᵀΣAᵢ + δI   Aₑᵀ]
       //       [       Aₑ        −γI ]
       m_solver.factorize(lhs + Regularization(δ, γ));
-      Inertia inertia{m_solver};
+      inertia = Inertia{m_solver};
 
       // If the inertia is ideal, store that value of δ and return.
       // Otherwise, increase δ by an order of magnitude and try again.

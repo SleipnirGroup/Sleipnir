@@ -20,6 +20,9 @@ concept EigenMatrixLike =
     std::derived_from<Derived, Eigen::MatrixBase<Derived>>;
 
 template <typename T>
+concept EigenSolver = requires(T t) { t.solve(Eigen::VectorXd{}); };
+
+template <typename T>
 concept MatrixLike =
     std::same_as<T, VariableMatrix> ||
     std::same_as<T, VariableBlock<VariableMatrix>> || EigenMatrixLike<T>;
