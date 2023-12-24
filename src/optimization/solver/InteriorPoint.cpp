@@ -39,7 +39,7 @@ Eigen::VectorXd InteriorPoint(
     const SolverConfig& config,
     const Eigen::Ref<const Eigen::VectorXd>& initialGuess,
     SolverStatus* status) {
-  auto solveStartTime = std::chrono::system_clock::now();
+  const auto solveStartTime = std::chrono::system_clock::now();
 
   // Map decision variables and constraints to VariableMatrices for Lagrangian
   VariableMatrix xAD{decisionVariables};
@@ -172,7 +172,7 @@ Eigen::VectorXd InteriorPoint(
   }};
 
   // Barrier parameter minimum
-  double μ_min = config.tolerance / 10.0;
+  const double μ_min = config.tolerance / 10.0;
 
   // Barrier parameter μ
   double μ = 0.1;
@@ -316,7 +316,7 @@ Eigen::VectorXd InteriorPoint(
     //       [    Aₑ       0 ]
     //
     // Don't assign upper triangle because solver only uses lower triangle.
-    Eigen::SparseMatrix<double> topLeft =
+    const Eigen::SparseMatrix<double> topLeft =
         H.triangularView<Eigen::Lower>() +
         (A_i.transpose() * Σ * A_i).triangularView<Eigen::Lower>();
     triplets.clear();
@@ -350,7 +350,7 @@ Eigen::VectorXd InteriorPoint(
 
     // Solve the Newton-KKT system
     solver.Compute(lhs, equalityConstraints.size(), μ);
-    Eigen::VectorXd step{x.rows() + y.rows(), 1};
+    Eigen::VectorXd step{x.rows() + y.rows()};
     if (solver.Info() == Eigen::Success) {
       step = solver.Solve(rhs);
     } else {
@@ -375,7 +375,7 @@ Eigen::VectorXd InteriorPoint(
     bool stepAcceptable = false;
 
     // αᵐᵃˣ = max(α ∈ (0, 1] : sₖ + αpₖˢ ≥ (1−τⱼ)sₖ)
-    double α_max = FractionToTheBoundaryRule(s, p_s, τ);
+    const double α_max = FractionToTheBoundaryRule(s, p_s, τ);
     double α = α_max;
 
     // αₖᶻ = max(α ∈ (0, 1] : zₖ + αpₖᶻ ≥ (1−τⱼ)zₖ)
@@ -658,7 +658,7 @@ Eigen::VectorXd InteriorPoint(
       }
     }
 
-    auto innerIterEndTime = std::chrono::system_clock::now();
+    const auto innerIterEndTime = std::chrono::system_clock::now();
 
     // Diagnostics for current iteration
     if (config.diagnostics) {
