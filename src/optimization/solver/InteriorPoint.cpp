@@ -188,19 +188,16 @@ Eigen::VectorXd InteriorPoint(
   // This should be run when the error estimate is below a desired threshold for
   // the current barrier parameter
   auto UpdateBarrierParameterAndResetFilter = [&] {
-    // Barrier parameter linear decrease power in "κ_μ μ". Range of (0, 1).
-    constexpr double κ_μ = 0.2;
-
-    // Barrier parameter superlinear decrease power in "μ^(θ_μ)". Range of (1,
-    // 2).
-    constexpr double θ_μ = 1.5;
-
-    // Update the barrier parameter.
+    // Adaptively update μ based on complementarity.
     //
-    //   μⱼ₊₁ = max(εₜₒₗ/10, min(κ_μ μⱼ, μⱼ^θ_μ))
+    //   ξₖ = min(sₖ .* zₖ)/((sₖᵀzₖ)/m)
+    //   ρₖ = 0.1 min(0.05 (1 − ξₖ)/ξₖ, 2)³
+    //   μₖ₊₁ = sₖᵀzₖ/m
     //
-    // See equation (7) of [2].
-    μ = std::max(μ_min, std::min(κ_μ * μ, std::pow(μ, θ_μ)));
+    // See equations (19.19) and (19.20) of [1].
+    double ε = s.cwiseProduct(z).minCoeff() / (s.dot(z) / s.rows());
+    double ρ = 0.1 * std::pow(std::min(0.05 * (1 - ε) / ε, 2.0), 3);
+    μ = ρ * s.dot(z) / s.rows();
 
     // Update the fraction-to-the-boundary rule scaling factor.
     //
