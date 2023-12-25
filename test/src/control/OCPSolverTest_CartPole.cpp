@@ -16,6 +16,7 @@
 
 #include "CartPoleUtil.hpp"
 #include "CmdlineArguments.hpp"
+#include "RK4.hpp"
 
 TEST(OCPSolverTest, CartPole) {
   constexpr auto T = 5_s;
