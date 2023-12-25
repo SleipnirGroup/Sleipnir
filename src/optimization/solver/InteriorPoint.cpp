@@ -372,8 +372,6 @@ Eigen::VectorXd InteriorPoint(
     // pₖˢ = μZ⁻¹e − s − Z⁻¹Spₖᶻ
     Eigen::VectorXd p_s = μ * Zinv * e - s - Zinv * S * p_z;
 
-    bool stepAcceptable = false;
-
     // αᵐᵃˣ = max(α ∈ (0, 1] : sₖ + αpₖˢ ≥ (1−τⱼ)sₖ)
     const double α_max = FractionToTheBoundaryRule(s, p_s, τ);
     double α = α_max;
@@ -381,6 +379,7 @@ Eigen::VectorXd InteriorPoint(
     // αₖᶻ = max(α ∈ (0, 1] : zₖ + αpₖᶻ ≥ (1−τⱼ)zₖ)
     double α_z = FractionToTheBoundaryRule(z, p_z, τ);
 
+    bool stepAcceptable = false;
     while (!stepAcceptable) {
       Eigen::VectorXd trial_x = x + α * p_x;
       Eigen::VectorXd trial_s = s + α * p_s;
@@ -569,48 +568,46 @@ Eigen::VectorXd InteriorPoint(
       return x;
     }
 
-    if (stepAcceptable) {
-      // Handle very small search directions by letting αₖ = αₖᵐᵃˣ when
-      // max(|pₖˣ(i)|/(1 + |xₖ(i)|)) < 10ε_mach.
-      //
-      // See section 3.9 of [2].
-      double maxStepScaled = 0.0;
-      for (int row = 0; row < x.rows(); ++row) {
-        maxStepScaled = std::max(maxStepScaled,
-                                 std::abs(p_x(row)) / (1.0 + std::abs(x(row))));
-      }
-      if (maxStepScaled < 10.0 * std::numeric_limits<double>::epsilon()) {
-        α = α_max;
-        ++stepTooSmallCounter;
-      } else {
-        stepTooSmallCounter = 0;
-      }
+    // Handle very small search directions by letting αₖ = αₖᵐᵃˣ when
+    // max(|pₖˣ(i)|/(1 + |xₖ(i)|)) < 10ε_mach.
+    //
+    // See section 3.9 of [2].
+    double maxStepScaled = 0.0;
+    for (int row = 0; row < x.rows(); ++row) {
+      maxStepScaled = std::max(maxStepScaled,
+                               std::abs(p_x(row)) / (1.0 + std::abs(x(row))));
+    }
+    if (maxStepScaled < 10.0 * std::numeric_limits<double>::epsilon()) {
+      α = α_max;
+      ++stepTooSmallCounter;
+    } else {
+      stepTooSmallCounter = 0;
+    }
 
-      // xₖ₊₁ = xₖ + αₖpₖˣ
-      // sₖ₊₁ = xₖ + αₖpₖˢ
-      // yₖ₊₁ = xₖ + αₖᶻpₖʸ
-      // zₖ₊₁ = xₖ + αₖᶻpₖᶻ
-      x += α * p_x;
-      s += α * p_s;
-      y += α_z * p_y;
-      z += α_z * p_z;
+    // xₖ₊₁ = xₖ + αₖpₖˣ
+    // sₖ₊₁ = xₖ + αₖpₖˢ
+    // yₖ₊₁ = xₖ + αₖᶻpₖʸ
+    // zₖ₊₁ = xₖ + αₖᶻpₖᶻ
+    x += α * p_x;
+    s += α * p_s;
+    y += α_z * p_y;
+    z += α_z * p_z;
 
-      // A requirement for the convergence proof is that the "primal-dual
-      // barrier term Hessian" Σₖ does not deviate arbitrarily much from the
-      // "primal Hessian" μⱼSₖ⁻². We ensure this by resetting
-      //
-      //   zₖ₊₁⁽ⁱ⁾ = max(min(zₖ₊₁⁽ⁱ⁾, κ_Σ μⱼ/sₖ₊₁⁽ⁱ⁾), μⱼ/(κ_Σ sₖ₊₁⁽ⁱ⁾))
-      //
-      // for some fixed κ_Σ ≥ 1 after each step. See equation (16) of [2].
-      {
-        // Barrier parameter scale factor for inequality constraint Lagrange
-        // multiplier safeguard
-        constexpr double κ_Σ = 1e10;
+    // A requirement for the convergence proof is that the "primal-dual barrier
+    // term Hessian" Σₖ does not deviate arbitrarily much from the "primal
+    // Hessian" μⱼSₖ⁻². We ensure this by resetting
+    //
+    //   zₖ₊₁⁽ⁱ⁾ = max(min(zₖ₊₁⁽ⁱ⁾, κ_Σ μⱼ/sₖ₊₁⁽ⁱ⁾), μⱼ/(κ_Σ sₖ₊₁⁽ⁱ⁾))
+    //
+    // for some fixed κ_Σ ≥ 1 after each step. See equation (16) of [2].
+    {
+      // Barrier parameter scale factor for inequality constraint Lagrange
+      // multiplier safeguard
+      constexpr double κ_Σ = 1e10;
 
-        for (int row = 0; row < z.rows(); ++row) {
-          z(row) =
-              std::max(std::min(z(row), κ_Σ * μ / s(row)), μ / (κ_Σ * s(row)));
-        }
+      for (int row = 0; row < z.rows(); ++row) {
+        z(row) =
+            std::max(std::min(z(row), κ_Σ * μ / s(row)), μ / (κ_Σ * s(row)));
       }
     }
 
