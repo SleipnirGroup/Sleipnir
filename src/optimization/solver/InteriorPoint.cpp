@@ -10,9 +10,9 @@
 
 #include <fmt/core.h>
 
-#include "optimization/Filter.hpp"
 #include "optimization/RegularizedLDLT.hpp"
 #include "optimization/solver/util/ErrorEstimate.hpp"
+#include "optimization/solver/util/Filter.hpp"
 #include "optimization/solver/util/FractionToTheBoundaryRule.hpp"
 #include "optimization/solver/util/IsLocallyInfeasible.hpp"
 #include "optimization/solver/util/KKTError.hpp"
