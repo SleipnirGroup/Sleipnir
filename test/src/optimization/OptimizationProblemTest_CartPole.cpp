@@ -25,8 +25,10 @@ TEST(OptimizationProblemTest, CartPole) {
   constexpr int N = T / dt;
 
   constexpr auto u_max = 20_N;
-  constexpr auto d = 1_m;
   constexpr auto d_max = 2_m;
+
+  constexpr Eigen::Vector<double, 4> x_initial{{0.0, 0.0, 0.0, 0.0}};
+  constexpr Eigen::Vector<double, 4> x_final{{1.0, std::numbers::pi, 0.0, 0.0}};
 
   auto start = std::chrono::system_clock::now();
 
@@ -37,20 +39,20 @@ TEST(OptimizationProblemTest, CartPole) {
 
   // Initial guess
   for (int k = 0; k < N + 1; ++k) {
-    X(0, k).SetValue(static_cast<double>(k) / N * d.value());
-    X(1, k).SetValue(static_cast<double>(k) / N * std::numbers::pi);
+    X(0, k).SetValue(
+        std::lerp(x_initial(0), x_final(0), static_cast<double>(k) / N));
+    X(1, k).SetValue(
+        std::lerp(x_initial(1), x_final(1), static_cast<double>(k) / N));
   }
 
   // u = f_x
   auto U = problem.DecisionVariable(1, N);
 
   // Initial conditions
-  problem.SubjectTo(X.Col(0) ==
-                    Eigen::Matrix<double, 4, 1>{0.0, 0.0, 0.0, 0.0});
+  problem.SubjectTo(X.Col(0) == x_initial);
 
   // Final conditions
-  problem.SubjectTo(X.Col(N) == Eigen::Matrix<double, 4, 1>{
-                                    d.value(), std::numbers::pi, 0.0, 0.0});
+  problem.SubjectTo(X.Col(N) == x_final);
 
   // Cart position constraints
   problem.SubjectTo(X.Row(0) >= 0.0);
@@ -93,10 +95,10 @@ TEST(OptimizationProblemTest, CartPole) {
   EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
 
   // Verify initial state
-  EXPECT_NEAR(0.0, X.Value(0, 0), 1e-2);
-  EXPECT_NEAR(0.0, X.Value(1, 0), 1e-2);
-  EXPECT_NEAR(0.0, X.Value(2, 0), 1e-2);
-  EXPECT_NEAR(0.0, X.Value(3, 0), 1e-2);
+  EXPECT_NEAR(x_initial(0), X.Value(0, 0), 1e-2);
+  EXPECT_NEAR(x_initial(1), X.Value(1, 0), 1e-2);
+  EXPECT_NEAR(x_initial(2), X.Value(2, 0), 1e-2);
+  EXPECT_NEAR(x_initial(3), X.Value(3, 0), 1e-2);
 
   // Verify solution
   for (int k = 0; k < N; ++k) {
@@ -121,10 +123,10 @@ TEST(OptimizationProblemTest, CartPole) {
   }
 
   // Verify final state
-  EXPECT_NEAR(d.value(), X.Value(0, N), 1e-2);
-  EXPECT_NEAR(std::numbers::pi, X.Value(1, N), 1e-2);
-  EXPECT_NEAR(0.0, X.Value(2, N), 1e-2);
-  EXPECT_NEAR(0.0, X.Value(3, N), 1e-2);
+  EXPECT_NEAR(x_final(0), X.Value(0, N), 1e-2);
+  EXPECT_NEAR(x_final(1), X.Value(1, N), 1e-2);
+  EXPECT_NEAR(x_final(2), X.Value(2, N), 1e-2);
+  EXPECT_NEAR(x_final(3), X.Value(3, N), 1e-2);
 
   // Log states for offline viewing
   std::ofstream states{"OptimizationProblem Cart-pole states.csv"};
