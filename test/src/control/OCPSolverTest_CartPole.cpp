@@ -54,6 +54,9 @@ TEST(OCPSolverTest, CartPole) {
         std::lerp(x_initial(1), x_final(1), static_cast<double>(k) / N));
   }
 
+  // u = f_x
+  auto U = problem.U();
+
   // Initial conditions
   problem.ConstrainInitialState(x_initial);
 
@@ -71,7 +74,7 @@ TEST(OCPSolverTest, CartPole) {
   // Minimize sum squared inputs
   sleipnir::Variable J = 0.0;
   for (int k = 0; k < N; ++k) {
-    J += problem.U().Col(k).T() * problem.U().Col(k);
+    J += U.Col(k).T() * U.Col(k);
   }
   problem.Minimize(J);
 
@@ -106,7 +109,13 @@ TEST(OCPSolverTest, CartPole) {
     Eigen::Matrix<double, 4, 1> x{0.0, 0.0, 0.0, 0.0};
     Eigen::Matrix<double, 1, 1> u{0.0};
     for (int k = 0; k < N; ++k) {
-      u = problem.U().Col(k).Value();
+      // Cart position constraints
+      EXPECT_GE(X(0, k), 0.0);
+      EXPECT_LE(X(0, k), d_max.value());
+
+      // Input constraints
+      EXPECT_GE(U(0, k), -u_max.value());
+      EXPECT_LE(U(0, k), u_max.value());
 
       // Verify state
       EXPECT_NEAR(x(0), X.Value(0, k), 1e-2) << fmt::format("  k = {}", k);
