@@ -140,21 +140,22 @@ Eigen::VectorXd InteriorPoint(
     if (config.diagnostics) {
       auto solveEndTime = std::chrono::system_clock::now();
 
-      fmt::print("\nSolve time: {} ms\n",
+      fmt::print("\nSolve time: {:.3f} ms\n",
                  ToMilliseconds(solveEndTime - solveStartTime));
-      fmt::print("  ↳ {} ms (IPM setup)\n",
+      fmt::print("  ↳ {:.3f} ms (IPM setup)\n",
                  ToMilliseconds(iterationsStartTime - solveStartTime));
       if (iterations > 0) {
         fmt::print(
-            "  ↳ {} ms ({} IPM iterations; {} ms average)\n",
+            "  ↳ {:.3f} ms ({} IPM iterations; {:.3f} ms average)\n",
             ToMilliseconds(solveEndTime - iterationsStartTime), iterations,
             ToMilliseconds((solveEndTime - iterationsStartTime) / iterations));
       }
       fmt::print("\n");
 
-      constexpr auto format = "{:>8}  {:>10}  {:>14}  {:>6}\n";
-      fmt::print(format, "autodiff", "setup (ms)", "avg solve (ms)", "solves");
-      fmt::print("{:=^44}\n", "");
+      fmt::print("{:^8}   {:^10}   {:^14}   {:^6}\n", "autodiff", "setup (ms)",
+                 "avg solve (ms)", "solves");
+      fmt::print("{:=^47}\n", "");
+      constexpr auto format = "{:^8}   {:10.3f}   {:14.3f}   {:6}\n";
       fmt::print(format, "∇f(x)", gradientF.GetProfiler().SetupDuration(),
                  gradientF.GetProfiler().AverageSolveDuration(),
                  gradientF.GetProfiler().SolveMeasurements());

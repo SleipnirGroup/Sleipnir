@@ -49,8 +49,8 @@ class SLEIPNIR_DLLEXPORT Profiler {
    */
   double SetupDuration() const {
     using std::chrono::duration_cast;
-    using std::chrono::microseconds;
-    return duration_cast<microseconds>(m_setupDuration).count() / 1000.0;
+    using std::chrono::nanoseconds;
+    return duration_cast<nanoseconds>(m_setupDuration).count() / 1e6;
   }
 
   /**
@@ -63,8 +63,8 @@ class SLEIPNIR_DLLEXPORT Profiler {
    */
   double AverageSolveDuration() const {
     using std::chrono::duration_cast;
-    using std::chrono::microseconds;
-    return duration_cast<microseconds>(m_averageSolveDuration).count() / 1000.0;
+    using std::chrono::nanoseconds;
+    return duration_cast<nanoseconds>(m_averageSolveDuration).count() / 1e6;
   }
 
  private:
