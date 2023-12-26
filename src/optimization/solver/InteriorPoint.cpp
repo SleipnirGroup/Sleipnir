@@ -660,13 +660,13 @@ Eigen::VectorXd InteriorPoint(
     // Diagnostics for current iteration
     if (config.diagnostics) {
       if (iterations % 20 == 0) {
-        fmt::print("{:>4}   {:>10}  {:>10}   {:>16}  {:>19}\n", "iter",
+        fmt::print("{:^4}   {:^9}   {:^12}   {:^12}   {:^12}\n", "iter",
                    "time (ms)", "error", "cost", "infeasibility");
-        fmt::print("{:=^70}\n", "");
+        fmt::print("{:=^62}\n", "");
       }
 
       FilterEntry entry{f.value(), μ, s, c_e, c_i};
-      fmt::print("{:>4}  {:>9}  {:>15e}  {:>16e}   {:>16e}\n", iterations,
+      fmt::print("{:4}   {:9.3f}   {:12e}   {:12e}   {:12e}\n", iterations,
                  ToMilliseconds(innerIterEndTime - innerIterStartTime), E_0,
                  entry.cost, entry.constraintViolation);
     }
