@@ -186,7 +186,7 @@ SolverStatus OptimizationProblem::Solve(const SolverConfig& config) {
 
   // Solve the optimization problem
   Eigen::VectorXd solution =
-      InteriorPoint(m_decisionVariables, m_f, m_equalityConstraints,
+      InteriorPoint(m_decisionVariables, m_f.value(), m_equalityConstraints,
                     m_inequalityConstraints, m_callback, config, x, &status);
 
   if (config.diagnostics) {
