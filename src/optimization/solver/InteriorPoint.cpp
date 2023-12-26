@@ -48,15 +48,15 @@ Eigen::VectorXd InteriorPoint(
   VariableMatrix c_iAD{inequalityConstraints};
 
   // Create autodiff variables for s, y, and z for Lagrangian
-  VariableMatrix sAD(inequalityConstraints.size(), 1);
+  VariableMatrix sAD(inequalityConstraints.size());
   for (auto& s : sAD) {
     s.SetValue(1.0);
   }
-  VariableMatrix yAD(equalityConstraints.size(), 1);
+  VariableMatrix yAD(equalityConstraints.size());
   for (auto& y : yAD) {
     y.SetValue(0.0);
   }
-  VariableMatrix zAD(inequalityConstraints.size(), 1);
+  VariableMatrix zAD(inequalityConstraints.size());
   for (auto& z : zAD) {
     z.SetValue(1.0);
   }
