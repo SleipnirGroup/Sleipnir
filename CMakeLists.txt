@@ -84,9 +84,6 @@ target_compile_definitions(Sleipnir PRIVATE SLEIPNIR_EXPORTS)
 
 include(FetchContent)
 
-# Disable Eigen's Fortran compiler check, which takes a long time in Windows CI
-set(CMAKE_Fortran_COMPILER "" CACHE STRING "" FORCE)
-
 # Options for using a package manager (e.g., vcpkg) for certain dependencies
 option(USE_SYSTEM_EIGEN "Use system eigen" OFF)
 option(USE_SYSTEM_FMT "Use system fmt" OFF)
@@ -99,6 +96,10 @@ if(NOT USE_SYSTEM_EIGEN)
         GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
         # master on 2023-12-20
         GIT_TAG 9697d481c8439ee49f028d74eed445d0a7d565a2
+        PATCH_COMMAND
+            git apply
+            ${CMAKE_CURRENT_SOURCE_DIR}/cmake/eigen-disable-fortran-support.patch
+        UPDATE_DISCONNECTED 1
     )
     fetchcontent_makeavailable(Eigen3)
 else()

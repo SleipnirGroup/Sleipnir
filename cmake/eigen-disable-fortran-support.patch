@@ -1,0 +1,31 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 8477d8122..f0e9f8d3e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -572,16 +572,16 @@ if(EIGEN_BUILD_TESTING)
+   add_subdirectory(failtest)
+ endif()
+ 
+-include(CMakeDetermineFortranCompiler)
+-option(EIGEN_BUILD_BLAS "Toggles the building of the Eigen Blas library" ${CMAKE_Fortran_COMPILER})
+-option(EIGEN_BUILD_LAPACK "Toggles the building of the included Eigen LAPACK library" ${CMAKE_Fortran_COMPILER})
+-if(EIGEN_LEAVE_TEST_IN_ALL_TARGET)
+-  add_subdirectory(blas)
+-  add_subdirectory(lapack)
+-else()
+-  add_subdirectory(blas EXCLUDE_FROM_ALL)
+-  add_subdirectory(lapack EXCLUDE_FROM_ALL)
+-endif()
++# include(CMakeDetermineFortranCompiler)
++# option(EIGEN_BUILD_BLAS "Toggles the building of the Eigen Blas library" ${CMAKE_Fortran_COMPILER})
++# option(EIGEN_BUILD_LAPACK "Toggles the building of the included Eigen LAPACK library" ${CMAKE_Fortran_COMPILER})
++# if(EIGEN_LEAVE_TEST_IN_ALL_TARGET)
++#   add_subdirectory(blas)
++#   add_subdirectory(lapack)
++# else()
++#   add_subdirectory(blas EXCLUDE_FROM_ALL)
++#   add_subdirectory(lapack EXCLUDE_FROM_ALL)
++# endif()
+ 
+ add_subdirectory(unsupported)
+ 

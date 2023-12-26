@@ -25,6 +25,7 @@ include = [
   "CMakeLists.txt",
   "SleipnirConfig.cmake.in",
   "cmake/modules/*.cmake",
+  "cmake/*.patch",
   "jormungandr/*",
   "include/*",
   "src/*"
