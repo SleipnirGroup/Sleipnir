@@ -22,9 +22,9 @@ enum class SolverExitCondition {
   kTooFewDOFs = -1,
   /// The solver determined the problem to be locally infeasible and gave up.
   kLocallyInfeasible = -2,
-  /// The solver failed to reach the desired tolerance due to a bad search
-  /// direction.
-  kBadSearchDirection = -3,
+  /// The solver failed to reach the desired tolerance, and feasibility
+  /// restoration failed to converge.
+  kFeasibilityRestorationFailed = -3,
   /// The solver failed to reach the desired tolerance due to the maximum search
   /// direction becoming too small.
   kMaxSearchDirectionTooSmall = -4,

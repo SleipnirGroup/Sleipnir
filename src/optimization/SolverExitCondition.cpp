@@ -25,8 +25,8 @@ void PrintTo(const SolverExitCondition& cond, std::ostream* os) {
     case kLocallyInfeasible:
       *os << "kLocallyInfeasible";
       break;
-    case kBadSearchDirection:
-      *os << "kBadSearchDirection";
+    case kFeasibilityRestorationFailed:
+      *os << "kFeasibilityRestorationFailed";
       break;
     case kMaxSearchDirectionTooSmall:
       *os << "kMaxSearchDirectionTooSmall";

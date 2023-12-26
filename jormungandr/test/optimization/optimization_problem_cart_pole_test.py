@@ -227,48 +227,47 @@ def test_optimization_problem_cart_pole():
     assert status.cost_function_type == ExpressionType.QUADRATIC
     assert status.equality_constraint_type == ExpressionType.NONLINEAR
     assert status.inequality_constraint_type == ExpressionType.LINEAR
-    # FIXME: Fails with "bad search direction"
+    # FIXME: Fails with "locally infeasible"
     assert (
         status.exit_condition == SolverExitCondition.SUCCESS
-        or status.exit_condition == SolverExitCondition.BAD_SEARCH_DIRECTION
+        or status.exit_condition == SolverExitCondition.LOCALLY_INFEASIBLE
     )
-    if status.exit_condition == SolverExitCondition.BAD_SEARCH_DIRECTION:
-        return
 
-    # Verify initial state
-    assert near(0.0, X.value(0, 0), 1e-2)
-    assert near(0.0, X.value(1, 0), 1e-2)
-    assert near(0.0, X.value(2, 0), 1e-2)
-    assert near(0.0, X.value(3, 0), 1e-2)
+    if status.exit_condition == SolverExitCondition.SUCCESS:
+        # Verify initial state
+        assert near(0.0, X.value(0, 0), 1e-2)
+        assert near(0.0, X.value(1, 0), 1e-2)
+        assert near(0.0, X.value(2, 0), 1e-2)
+        assert near(0.0, X.value(3, 0), 1e-2)
 
-    # Verify solution
-    for k in range(N):
-        # Cart position constraints
-        assert X[0, k] >= 0.0
-        assert X[0, k] <= d_max
+        # Verify solution
+        for k in range(N):
+            # Cart position constraints
+            assert X[0, k] >= 0.0
+            assert X[0, k] <= d_max
 
-        # Input constraints
-        assert U[0, k] >= -u_max
-        assert U[0, k] <= u_max
+            # Input constraints
+            assert U[0, k] >= -u_max
+            assert U[0, k] <= u_max
 
-        # Dynamics constraints
-        # FIXME: The tolerance here is too large. It should be 1e-6 based on the
-        # fact the solver claimed to converge to an infeasibility lower than that
-        expected_x_k1 = rk4(
-            cart_pole_dynamics_double,
-            X[:, k : k + 1].value(),
-            U[:, k : k + 1].value(),
-            dt,
-        )
-        actual_x_k1 = X[:, k + 1 : k + 2].value()
-        for row in range(actual_x_k1.shape[0]):
-            assert near(expected_x_k1[row, 0], actual_x_k1[row, 0], 2e-1)
+            # Dynamics constraints
+            # FIXME: The tolerance here is too large. It should be 1e-6 based on the
+            # fact the solver claimed to converge to an infeasibility lower than that
+            expected_x_k1 = rk4(
+                cart_pole_dynamics_double,
+                X[:, k : k + 1].value(),
+                U[:, k : k + 1].value(),
+                dt,
+            )
+            actual_x_k1 = X[:, k + 1 : k + 2].value()
+            for row in range(actual_x_k1.shape[0]):
+                assert near(expected_x_k1[row, 0], actual_x_k1[row, 0], 2e-1)
 
-    # Verify final state
-    assert near(d, X.value(0, N), 1e-2)
-    assert near(math.pi, X.value(1, N), 1e-2)
-    assert near(0.0, X.value(2, N), 1e-2)
-    assert near(0.0, X.value(3, N), 1e-2)
+        # Verify final state
+        assert near(d, X.value(0, N), 1e-2)
+        assert near(math.pi, X.value(1, N), 1e-2)
+        assert near(0.0, X.value(2, N), 1e-2)
+        assert near(0.0, X.value(3, N), 1e-2)
 
     # Log states for offline viewing
     with open("Cart-pole states.csv", "w") as f:

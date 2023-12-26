@@ -3,6 +3,7 @@
 #pragma once
 
 #include <algorithm>
+#include <cmath>
 #include <limits>
 #include <vector>
 
@@ -114,6 +115,11 @@ class Filter {
    * @param entry The entry to check.
    */
   bool IsAcceptable(const FilterEntry& entry) {
+    if (!std::isfinite(entry.cost) ||
+        !std::isfinite(entry.constraintViolation)) {
+      return false;
+    }
+
     // If current filter entry is better than all prior ones in some respect,
     // accept it
     return std::all_of(m_filter.begin(), m_filter.end(), [&](const auto& elem) {
