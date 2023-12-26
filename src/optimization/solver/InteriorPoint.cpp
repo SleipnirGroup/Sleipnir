@@ -32,7 +32,7 @@
 namespace sleipnir {
 
 Eigen::VectorXd InteriorPoint(
-    std::vector<Variable>& decisionVariables, std::optional<Variable>& f,
+    std::vector<Variable>& decisionVariables, Variable& f,
     std::vector<Variable>& equalityConstraints,
     std::vector<Variable>& inequalityConstraints,
     const std::function<bool(const SolverIterationInfo&)>& callback,
@@ -64,7 +64,7 @@ Eigen::VectorXd InteriorPoint(
   // Lagrangian L
   //
   // L(x, s, y, z)ₖ = f(x)ₖ − yₖᵀcₑ(x)ₖ − zₖᵀ(cᵢ(x)ₖ − sₖ)
-  auto L = f.value() - (yAD.T() * c_eAD)(0) - (zAD.T() * (c_iAD - sAD))(0);
+  auto L = f - (yAD.T() * c_eAD)(0) - (zAD.T() * (c_iAD - sAD))(0);
 
   // Equality constraint Jacobian Aₑ
   //
@@ -85,7 +85,7 @@ Eigen::VectorXd InteriorPoint(
   Eigen::SparseMatrix<double> A_i = jacobianCi.Calculate();
 
   // Gradient of f ∇f
-  Gradient gradientF{f.value(), xAD};
+  Gradient gradientF{f, xAD};
   Eigen::SparseVector<double> g = gradientF.Calculate();
 
   // Hessian of the Lagrangian H
@@ -400,10 +400,10 @@ Eigen::VectorXd InteriorPoint(
       }
       Eigen::VectorXd trial_c_i = c_iAD.Value();
 
-      f.value().Update();
+      f.Update();
 
       // Check whether filter accepts trial iterate
-      FilterEntry entry{f.value(), μ, trial_s, trial_c_e, trial_c_i};
+      FilterEntry entry{f, μ, trial_s, trial_c_e, trial_c_i};
       if (filter.IsAcceptable(entry)) {
         stepAcceptable = true;
         filter.Add(std::move(entry));
@@ -473,10 +473,10 @@ Eigen::VectorXd InteriorPoint(
           }
           trial_c_i = c_iAD.Value();
 
-          f.value().Update();
+          f.Update();
 
           // Check whether filter accepts trial iterate
-          entry = FilterEntry{f.value(), μ, trial_s, trial_c_e, trial_c_i};
+          entry = FilterEntry{f, μ, trial_s, trial_c_e, trial_c_i};
           if (filter.IsAcceptable(entry)) {
             p_x = p_x_cor;
             p_y = p_y_soc;
@@ -666,7 +666,7 @@ Eigen::VectorXd InteriorPoint(
         fmt::print("{:=^62}\n", "");
       }
 
-      FilterEntry entry{f.value(), μ, s, c_e, c_i};
+      FilterEntry entry{f, μ, s, c_e, c_i};
       fmt::print("{:4}   {:9.3f}   {:12e}   {:12e}   {:12e}\n", iterations,
                  ToMilliseconds(innerIterEndTime - innerIterStartTime), E_0,
                  entry.cost, entry.constraintViolation);
