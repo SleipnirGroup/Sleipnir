@@ -55,12 +55,15 @@ jobs:
           - artifact-name: Windows - python
             cmake-config-env-vars:
             os: windows-2022
+            py: py311
           - artifact-name: Linux - python
             cmake-config-env-vars:
             os: ubuntu-22.04
+            py: py310
           - artifact-name: macOS - python
             cmake-config-env-vars: CFLAGS="$CFLAGS -arch x86_64 -arch arm64" CXXFLAGS="$CXXFLAGS -arch x86_64 -arch arm64"
             os: macOS-12
+            py: py311
 
     name: "${{ matrix.artifact-name }}"
     runs-on: ${{ matrix.os }}
@@ -68,16 +71,13 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install build and tox Python packages
-        run: pip3 install --user build tox
+        run: pip3 install build tox
 
       - name: Build
         run: ${{ matrix.cmake-config-env-vars }} python3 -m build
 
       - name: Test
-        run: |
-          pip3 install --user dist/sleipnirgroup_jormungandr-*.whl
-          python3 -m tox
-        shell: bash
+        run: python3 -m tox -e ${{ matrix.py }}
 
       - uses: actions/upload-artifact@v3
         with:
