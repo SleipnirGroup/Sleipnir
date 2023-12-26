@@ -13,8 +13,8 @@ namespace sleipnir {
 template <typename Rep, typename Period = std::ratio<1>>
 double ToMilliseconds(const std::chrono::duration<Rep, Period>& duration) {
   using std::chrono::duration_cast;
-  using std::chrono::microseconds;
-  return duration_cast<microseconds>(duration).count() / 1000.0;
+  using std::chrono::nanoseconds;
+  return duration_cast<nanoseconds>(duration).count() / 1e6;
 }
 
 }  // namespace sleipnir
