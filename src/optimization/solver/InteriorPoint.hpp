@@ -3,7 +3,7 @@
 #pragma once
 
 #include <functional>
-#include <vector>
+#include <span>
 
 #include <Eigen/Core>
 
@@ -41,9 +41,9 @@ are the inequality constraints.
 @return The optimal state.
 */
 Eigen::VectorXd InteriorPoint(
-    std::vector<Variable>& decisionVariables, Variable& f,
-    std::vector<Variable>& equalityConstraints,
-    std::vector<Variable>& inequalityConstraints,
+    std::span<Variable> decisionVariables, Variable& f,
+    std::span<Variable> equalityConstraints,
+    std::span<Variable> inequalityConstraints,
     const std::function<bool(const SolverIterationInfo&)>& callback,
     const SolverConfig& config,
     const Eigen::Ref<const Eigen::VectorXd>& initialGuess,
