@@ -2,7 +2,8 @@ name: Website
 
 on:
   push:
-    branches: ["main"]
+    branches:
+      - main
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -21,6 +22,8 @@ concurrency:
 jobs:
   # Single deploy job since we're just deploying
   deploy:
+    if: ${{ github.repository_owner == 'SleipnirGroup' }}
+
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
