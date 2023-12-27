@@ -143,11 +143,11 @@ Eigen::VectorXd InteriorPoint(
 
       fmt::print("\nSolve time: {:.3f} ms\n",
                  ToMilliseconds(solveEndTime - solveStartTime));
-      fmt::print("  ↳ {:.3f} ms (IPM setup)\n",
+      fmt::print("  ↳ {:.3f} ms (solver setup)\n",
                  ToMilliseconds(iterationsStartTime - solveStartTime));
       if (iterations > 0) {
         fmt::print(
-            "  ↳ {:.3f} ms ({} IPM iterations; {:.3f} ms average)\n",
+            "  ↳ {:.3f} ms ({} solver iterations; {:.3f} ms average)\n",
             ToMilliseconds(solveEndTime - iterationsStartTime), iterations,
             ToMilliseconds((solveEndTime - iterationsStartTime) / iterations));
       }
