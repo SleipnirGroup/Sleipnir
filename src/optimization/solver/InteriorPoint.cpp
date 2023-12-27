@@ -384,8 +384,6 @@ Eigen::VectorXd InteriorPoint(
     bool stepAcceptable = false;
     while (!stepAcceptable) {
       Eigen::VectorXd trial_x = x + α * p_x;
-      Eigen::VectorXd trial_s = s + α * p_s;
-
       Eigen::VectorXd trial_y = y + α_z * p_y;
       Eigen::VectorXd trial_z = z + α_z * p_z;
 
@@ -400,6 +398,17 @@ Eigen::VectorXd InteriorPoint(
         c_iAD(row).Update();
       }
       Eigen::VectorXd trial_c_i = c_iAD.Value();
+
+      Eigen::VectorXd trial_s;
+      if (config.feasibleIPM && c_i.cwiseGreater(0.0).all()) {
+        // If the inequality constraints are all feasible, prevent them from
+        // becoming infeasible again.
+        //
+        // See equation (19.30) in [1].
+        trial_s = trial_c_i;
+      } else {
+        trial_s = s + α * p_s;
+      }
 
       f.Update();
 
