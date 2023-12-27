@@ -21,7 +21,7 @@ jobs:
             os: ubuntu-22.04
           - artifact-name: macOS - native
             cmake-config-env-vars: CFLAGS="$CFLAGS -arch x86_64 -arch arm64" CXXFLAGS="$CXXFLAGS -arch x86_64 -arch arm64"
-            os: macOS-12
+            os: macOS-13
 
     name: "${{ matrix.artifact-name }}"
     runs-on: ${{ matrix.os }}
@@ -62,7 +62,7 @@ jobs:
             py: py310
           - artifact-name: macOS - python
             cmake-config-env-vars: CFLAGS="$CFLAGS -arch x86_64 -arch arm64" CXXFLAGS="$CXXFLAGS -arch x86_64 -arch arm64"
-            os: macOS-12
+            os: macOS-13
             py: py311
 
     name: "${{ matrix.artifact-name }}"
