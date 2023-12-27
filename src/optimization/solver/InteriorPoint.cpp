@@ -7,6 +7,7 @@
 #include <chrono>
 #include <fstream>
 #include <limits>
+#include <vector>
 
 #include <fmt/core.h>
 
@@ -32,9 +33,9 @@
 namespace sleipnir {
 
 Eigen::VectorXd InteriorPoint(
-    std::vector<Variable>& decisionVariables, Variable& f,
-    std::vector<Variable>& equalityConstraints,
-    std::vector<Variable>& inequalityConstraints,
+    std::span<Variable> decisionVariables, Variable& f,
+    std::span<Variable> equalityConstraints,
+    std::span<Variable> inequalityConstraints,
     const std::function<bool(const SolverIterationInfo&)>& callback,
     const SolverConfig& config,
     const Eigen::Ref<const Eigen::VectorXd>& initialGuess,
