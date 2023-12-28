@@ -154,8 +154,8 @@ SolverStatus OptimizationProblem::Solve(const SolverConfig& config) {
   }
 
   if (config.diagnostics) {
-    constexpr std::array<const char*, 5> kExprTypeToName = {
-        "empty", "constant", "linear", "quadratic", "nonlinear"};
+    constexpr std::array kExprTypeToName{"empty", "constant", "linear",
+                                         "quadratic", "nonlinear"};
 
     // Print cost function and constraint expression types
     fmt::print("The cost function is {}.\n",
