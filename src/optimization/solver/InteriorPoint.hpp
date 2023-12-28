@@ -16,8 +16,8 @@
 namespace sleipnir {
 
 /**
-Find the optimal solution to the nonlinear program using an interior-point
-solver.
+Finds the optimal solution to a nonlinear program using the interior-point
+method.
 
 A nonlinear program has the form:
 
