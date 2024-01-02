@@ -8,6 +8,21 @@
 #include <sleipnir/autodiff/VariableMatrix.hpp>
 #include <sleipnir/optimization/Constraints.hpp>
 
+TEST(VariableMatrixTest, ConstructFromEigenMatrixBase) {
+  sleipnir::VariableMatrix mat{
+      Eigen::MatrixXd{{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}}};
+
+  Eigen::MatrixXd expected{{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}};
+  EXPECT_EQ(expected, mat.Value());
+}
+
+TEST(VariableMatrixTest, ConstructFromEigenDiagonalBase) {
+  sleipnir::VariableMatrix mat{Eigen::VectorXd{{1.0, 2.0, 3.0}}.asDiagonal()};
+
+  Eigen::MatrixXd expected{{1.0, 0.0, 0.0}, {0.0, 2.0, 0.0}, {0.0, 0.0, 3.0}};
+  EXPECT_EQ(expected, mat.Value());
+}
+
 TEST(VariableMatrixTest, AssignmentToDefault) {
   sleipnir::VariableMatrix mat;
 
