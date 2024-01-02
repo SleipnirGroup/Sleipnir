@@ -85,6 +85,25 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
   }
 
   /**
+   * Constructs a VariableMatrix from an Eigen diagonal matrix.
+   */
+  template <typename Derived>
+  VariableMatrix(const Eigen::DiagonalBase<Derived>& values)  // NOLINT
+      : m_rows{static_cast<int>(values.rows())},
+        m_cols{static_cast<int>(values.cols())} {
+    m_storage.reserve(values.rows() * values.cols());
+    for (int row = 0; row < values.rows(); ++row) {
+      for (int col = 0; col < values.cols(); ++col) {
+        if (row == col) {
+          m_storage.emplace_back(values.diagonal()(row));
+        } else {
+          m_storage.emplace_back(0.0);
+        }
+      }
+    }
+  }
+
+  /**
    * Assigns an Eigen matrix to a VariableMatrix.
    */
   template <typename Derived>
