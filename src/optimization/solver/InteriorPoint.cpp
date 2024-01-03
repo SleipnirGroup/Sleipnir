@@ -10,10 +10,12 @@
 #include <limits>
 #include <vector>
 
+#include <Eigen/SparseCholesky>
 #include <fmt/core.h>
 
 #include "optimization/RegularizedLDLT.hpp"
 #include "optimization/solver/util/ErrorEstimate.hpp"
+#include "optimization/solver/util/FeasibilityRestoration.hpp"
 #include "optimization/solver/util/Filter.hpp"
 #include "optimization/solver/util/FractionToTheBoundaryRule.hpp"
 #include "optimization/solver/util/IsLocallyInfeasible.hpp"
@@ -40,7 +42,7 @@ Eigen::VectorXd InteriorPoint(
     const std::function<bool(const SolverIterationInfo&)>& callback,
     const SolverConfig& config,
     const Eigen::Ref<const Eigen::VectorXd>& initialGuess,
-    SolverStatus* status) {
+    bool feasibilityRestoration, SolverStatus* status) {
   const auto solveStartTime = std::chrono::system_clock::now();
 
   // Map decision variables and constraints to VariableMatrices for Lagrangian
@@ -129,7 +131,7 @@ Eigen::VectorXd InteriorPoint(
     H_spy.open("H.spy");
   }
 
-  if (config.diagnostics) {
+  if (config.diagnostics && !feasibilityRestoration) {
     fmt::print("Error tolerance: {}\n\n", config.tolerance);
   }
 
@@ -139,7 +141,7 @@ Eigen::VectorXd InteriorPoint(
 
   // Prints final diagnostics when the solver exits
   scope_exit exit{[&] {
-    if (config.diagnostics) {
+    if (config.diagnostics && !feasibilityRestoration) {
       auto solveEndTime = std::chrono::system_clock::now();
 
       fmt::print("\nSolve time: {:.3f} ms\n",
@@ -383,6 +385,9 @@ Eigen::VectorXd InteriorPoint(
     // αₖᶻ = max(α ∈ (0, 1] : zₖ + αpₖᶻ ≥ (1−τⱼ)zₖ)
     double α_z = FractionToTheBoundaryRule(z, p_z, τ);
 
+    // True if current trial step came from feasibility restoration
+    bool fromFeasibilityRestoration = false;
+
     bool stepAcceptable = false;
     while (!stepAcceptable) {
       Eigen::VectorXd trial_x = x + α * p_x;
@@ -426,9 +431,19 @@ Eigen::VectorXd InteriorPoint(
       // Check whether filter accepts trial iterate
       FilterEntry entry{f, μ, trial_s, trial_c_e, trial_c_i};
       if (filter.IsAcceptable(entry)) {
+        // Clear flag after accepting trial step from feasibility restoration
+        if (fromFeasibilityRestoration) {
+          fromFeasibilityRestoration = false;
+        }
+
         stepAcceptable = true;
         filter.Add(std::move(entry));
         continue;
+      } else if (fromFeasibilityRestoration) {
+        // If trial step from feasibility restoration was rejected, problem is
+        // locally infeasible
+        status->exitCondition = SolverExitCondition::kLocallyInfeasible;
+        return x;
       }
 
       double prevConstraintViolation = c_e.lpNorm<1>() + (c_i - s).lpNorm<1>();
@@ -575,9 +590,104 @@ Eigen::VectorXd InteriorPoint(
             continue;
           }
 
-          // TODO: Feasibility restoration phase
-          status->exitCondition = SolverExitCondition::kBadSearchDirection;
-          return x;
+          // If the step direction was bad and feasibility restoration is
+          // already running, running it again won't help
+          if (feasibilityRestoration) {
+            status->exitCondition = SolverExitCondition::kLocallyInfeasible;
+            return x;
+          }
+
+          // Feasibility restoration phase
+          SolverStatus fr_status;
+          Eigen::VectorXd fr_x = FeasibilityRestoration(
+              decisionVariables, f, equalityConstraints, inequalityConstraints,
+              x, s, μ, callback, config, &fr_status);
+
+          if (fr_status.exitCondition != SolverExitCondition::kSuccess) {
+            status->exitCondition =
+                SolverExitCondition::kFeasibilityRestorationFailed;
+            return fr_x;
+          } else {
+            p_x = fr_x - x;
+
+            // TODO: Return s from feasibility restoration instead of recovering
+            // an s estimate from cᵢ(x)
+            xAD.SetValue(fr_x);
+            for (int row = 0; row < c_i.rows(); ++row) {
+              c_iAD(row).Update();
+            }
+            p_s = c_iAD.Value().cwiseMax(0.0) - s;
+
+            // Lagrange mutliplier estimates
+            //
+            //   [y] = (ÂÂᵀ)⁻¹Â[ ∇f]
+            //   [z]           [−μe]
+            //
+            //   where Â = [Aₑ   0]
+            //             [Aᵢ  −S]
+            //
+            // See equation (19.37) of [1].
+            {
+              xAD.SetValue(fr_x);
+              sAD.SetValue(c_iAD.Value());
+
+              A_e = jacobianCe.Calculate();
+              A_i = jacobianCi.Calculate();
+              g = gradientF.Calculate();
+
+              // Â = [Aₑ   0]
+              //     [Aᵢ  −S]
+              triplets.clear();
+              triplets.reserve(A_e.nonZeros() + A_i.nonZeros() + s.rows());
+              for (int col = 0; col < A_e.cols(); ++col) {
+                // Append column of Aₑ in top-left quadrant
+                for (Eigen::SparseMatrix<double>::InnerIterator it{A_e, col};
+                     it; ++it) {
+                  triplets.emplace_back(it.row(), it.col(), it.value());
+                }
+                // Append column of Aᵢ in bottom-left quadrant
+                for (Eigen::SparseMatrix<double>::InnerIterator it{A_i, col};
+                     it; ++it) {
+                  triplets.emplace_back(A_e.rows() + it.row(), it.col(),
+                                        it.value());
+                }
+              }
+              // Append −S in bottom-right quadrant
+              for (int i = 0; i < s.rows(); ++i) {
+                triplets.emplace_back(A_e.rows() + i, A_e.cols() + i, -s(i));
+              }
+              Eigen::SparseMatrix<double> Ahat{A_e.rows() + A_i.rows(),
+                                               A_e.cols() + s.rows()};
+              Ahat.setFromSortedTriplets(
+                  triplets.begin(), triplets.end(),
+                  [](const auto& a, const auto& b) { return b; });
+
+              // lhs = ÂÂᵀ
+              Eigen::SparseMatrix<double> lhs = Ahat * Ahat.transpose();
+
+              // rhs = Â[ ∇f]
+              //        [−μe]
+              Eigen::VectorXd rhsTemp{g.rows() + e.rows()};
+              rhsTemp.block(0, 0, g.rows(), 1) = g;
+              rhsTemp.block(g.rows(), 0, s.rows(), 1) = -μ * e;
+              Eigen::VectorXd rhs = Ahat * rhsTemp;
+
+              Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>> yzEstimator{
+                  lhs};
+              Eigen::VectorXd sol = yzEstimator.solve(rhs);
+
+              p_y = y - sol.block(0, 0, y.rows(), 1);
+              p_z = z - sol.block(y.rows(), 0, z.rows(), 1);
+            }
+
+            α = 1.0;
+            α_z = 1.0;
+
+            // Tell main loop the next trial step to try is from feasibility
+            // restoration
+            fromFeasibilityRestoration = true;
+            continue;
+          }
         }
       }
     }
@@ -681,13 +791,14 @@ Eigen::VectorXd InteriorPoint(
     // Diagnostics for current iteration
     if (config.diagnostics) {
       if (iterations % 20 == 0) {
-        fmt::print("{:^4}   {:^9}   {:^12}   {:^12}   {:^12}\n", "iter",
+        fmt::print("{:^4}    {:^9}   {:^12}   {:^12}   {:^12}\n", "iter",
                    "time (ms)", "error", "cost", "infeasibility");
-        fmt::print("{:=^62}\n", "");
+        fmt::print("{:=^63}\n", "");
       }
 
       FilterEntry entry{f, μ, s, c_e, c_i};
-      fmt::print("{:4}   {:9.3f}   {:12e}   {:12e}   {:12e}\n", iterations,
+      fmt::print("{:4}{}   {:9.3f}   {:12e}   {:12e}   {:12e}\n", iterations,
+                 feasibilityRestoration ? "r" : " ",
                  ToMilliseconds(innerIterEndTime - innerIterStartTime), E_0,
                  entry.cost, entry.constraintViolation);
     }
@@ -731,6 +842,6 @@ Eigen::VectorXd InteriorPoint(
   }
 
   return x;
-}
+}  // NOLINT(readability/fn_size)
 
 }  // namespace sleipnir

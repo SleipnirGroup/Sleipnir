@@ -93,10 +93,10 @@ TEST(OCPSolverTest, CartPole) {
   EXPECT_EQ(sleipnir::ExpressionType::kNonlinear,
             status.equalityConstraintType);
   EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.inequalityConstraintType);
-  // FIXME: Fails with "bad search direction"
+  // FIXME: Fails with "locally infeasible"
   EXPECT_TRUE(status.exitCondition == sleipnir::SolverExitCondition::kSuccess ||
               status.exitCondition ==
-                  sleipnir::SolverExitCondition::kBadSearchDirection);
+                  sleipnir::SolverExitCondition::kLocallyInfeasible);
 
   if (status.exitCondition == sleipnir::SolverExitCondition::kSuccess) {
     // Verify initial state

@@ -7,6 +7,7 @@
 #include <fmt/core.h>
 
 #include "optimization/solver/InteriorPoint.hpp"
+#include "sleipnir/optimization/SolverExitCondition.hpp"
 
 using namespace sleipnir;
 
@@ -185,9 +186,9 @@ SolverStatus OptimizationProblem::Solve(const SolverConfig& config) {
   }
 
   // Solve the optimization problem
-  Eigen::VectorXd solution =
-      InteriorPoint(m_decisionVariables, m_f.value(), m_equalityConstraints,
-                    m_inequalityConstraints, m_callback, config, x, &status);
+  Eigen::VectorXd solution = InteriorPoint(
+      m_decisionVariables, m_f.value(), m_equalityConstraints,
+      m_inequalityConstraints, m_callback, config, x, false, &status);
 
   if (config.diagnostics) {
     PrintExitCondition(status.exitCondition);
@@ -220,10 +221,10 @@ void OptimizationProblem::PrintExitCondition(
     case kLocallyInfeasible:
       fmt::print("problem is locally infeasible");
       break;
-    case kBadSearchDirection:
+    case kFeasibilityRestorationFailed:
       fmt::print(
-          "solver failed to reach the desired tolerance due to a bad search "
-          "direction");
+          "solver failed to reach the desired tolerance, and feasibility "
+          "restoration failed to converge");
       break;
     case kMaxSearchDirectionTooSmall:
       fmt::print(

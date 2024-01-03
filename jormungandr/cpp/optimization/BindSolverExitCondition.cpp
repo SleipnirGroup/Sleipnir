@@ -17,7 +17,8 @@ void BindSolverExitCondition(py::module_& optimization) {
           SolverExitCondition::kCallbackRequestedStop);
   e.value("TOO_FEW_DOFS", SolverExitCondition::kTooFewDOFs);
   e.value("LOCALLY_INFEASIBLE", SolverExitCondition::kLocallyInfeasible);
-  e.value("BAD_SEARCH_DIRECTION", SolverExitCondition::kBadSearchDirection);
+  e.value("FEASIBILITY_RESTORATION_FAILED",
+          SolverExitCondition::kFeasibilityRestorationFailed);
   e.value("MAX_SEARCH_DIRECTION_TOO_SMALL",
           SolverExitCondition::kMaxSearchDirectionTooSmall);
   e.value("DIVERGING_ITERATES", SolverExitCondition::kDivergingIterates);

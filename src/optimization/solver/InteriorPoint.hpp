@@ -37,6 +37,8 @@ are the inequality constraints.
 @param[in] callback The user callback.
 @param[in] config Configuration options for the solver.
 @param[in] initialGuess The initial guess.
+@param[in] feasibilityRestoration Whether to use feasibility restoration instead
+  of the normal algorithm.
 @param[out] status The solver status.
 @return The optimal state.
 */
@@ -47,6 +49,6 @@ Eigen::VectorXd InteriorPoint(
     const std::function<bool(const SolverIterationInfo&)>& callback,
     const SolverConfig& config,
     const Eigen::Ref<const Eigen::VectorXd>& initialGuess,
-    SolverStatus* status);
+    bool feasibilityRestoration, SolverStatus* status);
 
 }  // namespace sleipnir
