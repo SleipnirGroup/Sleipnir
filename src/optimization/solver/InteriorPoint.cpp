@@ -64,24 +64,24 @@ Eigen::VectorXd InteriorPoint(
 
   // Lagrangian L
   //
-  // L(x, s, y, z)ₖ = f(x)ₖ − yₖᵀcₑ(x)ₖ − zₖᵀ(cᵢ(x)ₖ − sₖ)
+  // L(xₖ, sₖ, yₖ, zₖ) = f(xₖ) − yₖᵀcₑ(xₖ) − zₖᵀ(cᵢ(xₖ) − sₖ)
   auto L = f - (yAD.T() * c_eAD)(0) - (zAD.T() * (c_iAD - sAD))(0);
 
   // Equality constraint Jacobian Aₑ
   //
-  //         [∇ᵀcₑ₁(x)ₖ]
-  // Aₑ(x) = [∇ᵀcₑ₂(x)ₖ]
+  //         [∇ᵀcₑ₁(xₖ)]
+  // Aₑ(x) = [∇ᵀcₑ₂(xₖ)]
   //         [    ⋮    ]
-  //         [∇ᵀcₑₘ(x)ₖ]
+  //         [∇ᵀcₑₘ(xₖ)]
   Jacobian jacobianCe{c_eAD, xAD};
   Eigen::SparseMatrix<double> A_e = jacobianCe.Calculate();
 
   // Inequality constraint Jacobian Aᵢ
   //
-  //         [∇ᵀcᵢ₁(x)ₖ]
-  // Aᵢ(x) = [∇ᵀcᵢ₂(x)ₖ]
+  //         [∇ᵀcᵢ₁(xₖ)]
+  // Aᵢ(x) = [∇ᵀcᵢ₂(xₖ)]
   //         [    ⋮    ]
-  //         [∇ᵀcᵢₘ(x)ₖ]
+  //         [∇ᵀcᵢₘ(xₖ)]
   Jacobian jacobianCi{c_iAD, xAD};
   Eigen::SparseMatrix<double> A_i = jacobianCi.Calculate();
 
@@ -91,7 +91,7 @@ Eigen::VectorXd InteriorPoint(
 
   // Hessian of the Lagrangian H
   //
-  // Hₖ = ∇²ₓₓL(x, s, y, z)ₖ
+  // Hₖ = ∇²ₓₓL(xₖ, sₖ, yₖ, zₖ)
   Hessian hessianL{L, xAD};
   Eigen::SparseMatrix<double> H = hessianL.Calculate();
 
@@ -445,7 +445,7 @@ Eigen::VectorXd InteriorPoint(
           // rhs = −[∇f − Aₑᵀy + Aᵢᵀ(S⁻¹(Zcᵢ − μe) − z)]
           //        [              cₑˢᵒᶜ               ]
           //
-          // where cₑˢᵒᶜ = αc(xₖ) + c(xₖ + αp_x)
+          // where cₑˢᵒᶜ = αc(xₖ) + c(xₖ + αpₖˣ)
           c_e_soc = α_soc * c_e_soc + trial_c_e;
           rhs.bottomRows(y.rows()) = -c_e_soc;
 
@@ -596,9 +596,9 @@ Eigen::VectorXd InteriorPoint(
     }
 
     // xₖ₊₁ = xₖ + αₖpₖˣ
-    // sₖ₊₁ = xₖ + αₖpₖˢ
-    // yₖ₊₁ = xₖ + αₖᶻpₖʸ
-    // zₖ₊₁ = xₖ + αₖᶻpₖᶻ
+    // sₖ₊₁ = sₖ + αₖpₖˢ
+    // yₖ₊₁ = yₖ + αₖᶻpₖʸ
+    // zₖ₊₁ = zₖ + αₖᶻpₖᶻ
     x += α * p_x;
     s += α * p_s;
     y += α_z * p_y;
