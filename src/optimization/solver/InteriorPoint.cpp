@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <array>
 #include <chrono>
+#include <cmath>
 #include <fstream>
 #include <limits>
 #include <vector>
@@ -221,6 +222,7 @@ Eigen::VectorXd InteriorPoint(
   RegularizedLDLT solver;
 
   // Variables for determining when a step is acceptable
+  constexpr double α_red_factor = 0.5;
   int acceptableIterCounter = 0;
   constexpr int maxAcceptableIterations = 15;
   const double acceptableTolerance = config.tolerance * 100;
@@ -389,6 +391,8 @@ Eigen::VectorXd InteriorPoint(
 
       xAD.SetValue(trial_x);
 
+      f.Update();
+
       for (int row = 0; row < c_e.rows(); ++row) {
         c_eAD(row).Update();
       }
@@ -398,6 +402,15 @@ Eigen::VectorXd InteriorPoint(
         c_iAD(row).Update();
       }
       Eigen::VectorXd trial_c_i = c_iAD.Value();
+
+      // If f(xₖ + αpₖˣ), cₑ(xₖ + αpₖˣ), or cᵢ(xₖ + αpₖˣ) aren't finite, reduce
+      // step size immediately
+      if (!std::isfinite(f.Value()) || !trial_c_e.allFinite() ||
+          !trial_c_i.allFinite()) {
+        // Reduce step size
+        α *= α_red_factor;
+        continue;
+      }
 
       Eigen::VectorXd trial_s;
       if (config.feasibleIPM && c_i.cwiseGreater(0.0).all()) {
@@ -409,8 +422,6 @@ Eigen::VectorXd InteriorPoint(
       } else {
         trial_s = s + α * p_s;
       }
-
-      f.Update();
 
       // Check whether filter accepts trial iterate
       FilterEntry entry{f, μ, trial_s, trial_c_e, trial_c_i};
@@ -473,6 +484,8 @@ Eigen::VectorXd InteriorPoint(
 
           xAD.SetValue(trial_x);
 
+          f.Update();
+
           for (int row = 0; row < c_e.rows(); ++row) {
             c_eAD(row).Update();
           }
@@ -482,8 +495,6 @@ Eigen::VectorXd InteriorPoint(
             c_iAD(row).Update();
           }
           trial_c_i = c_iAD.Value();
-
-          f.Update();
 
           // Check whether filter accepts trial iterate
           entry = FilterEntry{f, μ, trial_s, trial_c_e, trial_c_i};
@@ -521,7 +532,6 @@ Eigen::VectorXd InteriorPoint(
         }
 
         // Reduce step size
-        constexpr double α_red_factor = 0.5;
         α *= α_red_factor;
 
         // Safety factor for the minimal step size
