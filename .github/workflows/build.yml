@@ -90,7 +90,7 @@ jobs:
       matrix:
         include:
           - artifact-name: roboRIO
-            container: wpilib/roborio-cross-ubuntu:2023-22.04
+            container: wpilib/roborio-cross-ubuntu:2024-22.04
             toolchain: /usr/local/toolchain-config.cmake
 
     name: "${{ matrix.artifact-name }}"
