@@ -16,6 +16,9 @@ struct SolverIterationInfo {
   /// The decision variables.
   const Eigen::VectorXd& x;
 
+  /// The inequality constraint slack variables.
+  const Eigen::VectorXd& s;
+
   /// The gradient of the cost function.
   const Eigen::SparseVector<double>& g;
 

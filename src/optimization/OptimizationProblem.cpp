@@ -186,16 +186,17 @@ SolverStatus OptimizationProblem::Solve(const SolverConfig& config) {
   }
 
   // Solve the optimization problem
-  Eigen::VectorXd solution = InteriorPoint(
-      m_decisionVariables, m_f.value(), m_equalityConstraints,
-      m_inequalityConstraints, m_callback, config, x, false, &status);
+  Eigen::VectorXd s = Eigen::VectorXd::Ones(m_inequalityConstraints.size());
+  InteriorPoint(m_decisionVariables, m_equalityConstraints,
+                m_inequalityConstraints, m_f.value(), m_callback, config, false,
+                x, s, &status);
 
   if (config.diagnostics) {
     PrintExitCondition(status.exitCondition);
   }
 
   // Assign the solution to the original Variable instances
-  VariableMatrix{m_decisionVariables}.SetValue(solution);
+  VariableMatrix{m_decisionVariables}.SetValue(x);
 
   return status;
 }
