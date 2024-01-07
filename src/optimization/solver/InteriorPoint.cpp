@@ -226,8 +226,6 @@ Eigen::VectorXd InteriorPoint(
   // Variables for determining when a step is acceptable
   constexpr double α_red_factor = 0.5;
   int acceptableIterCounter = 0;
-  constexpr int maxAcceptableIterations = 15;
-  const double acceptableTolerance = config.tolerance * 100;
 
   int fullStepRejectedCounter = 0;
   int stepTooSmallCounter = 0;
@@ -238,7 +236,7 @@ Eigen::VectorXd InteriorPoint(
   iterationsStartTime = std::chrono::system_clock::now();
 
   while (E_0 > config.tolerance &&
-         acceptableIterCounter < maxAcceptableIterations) {
+         acceptableIterCounter < config.maxAcceptableIterations) {
     auto innerIterStartTime = std::chrono::system_clock::now();
 
     // Check for local equality constraint infeasibility
@@ -770,7 +768,7 @@ Eigen::VectorXd InteriorPoint(
 
     // Update the error estimate
     E_0 = ErrorEstimate(g, A_e, c_e, A_i, c_i, s, y, z, 0.0);
-    if (E_0 < acceptableTolerance) {
+    if (E_0 < config.acceptableTolerance) {
       ++acceptableIterCounter;
     } else {
       acceptableIterCounter = 0;
@@ -823,7 +821,7 @@ Eigen::VectorXd InteriorPoint(
 
     // Check for solve to acceptable tolerance
     if (E_0 > config.tolerance &&
-        acceptableIterCounter == maxAcceptableIterations) {
+        acceptableIterCounter == config.maxAcceptableIterations) {
       status->exitCondition = SolverExitCondition::kSolvedToAcceptableTolerance;
       return x;
     }
