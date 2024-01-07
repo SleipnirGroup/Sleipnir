@@ -603,7 +603,11 @@ Eigen::VectorXd InteriorPoint(
               decisionVariables, f, equalityConstraints, inequalityConstraints,
               x, s, μ, callback, config, &fr_status);
 
-          if (fr_status.exitCondition != SolverExitCondition::kSuccess) {
+          if (fr_status.exitCondition ==
+              SolverExitCondition::kCallbackRequestedStop) {
+            status->exitCondition = SolverExitCondition::kCallbackRequestedStop;
+            return fr_x;
+          } else if (fr_status.exitCondition != SolverExitCondition::kSuccess) {
             status->exitCondition =
                 SolverExitCondition::kFeasibilityRestorationFailed;
             return fr_x;
