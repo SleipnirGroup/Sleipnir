@@ -143,7 +143,7 @@ sleipnir::VariableMatrix CartPoleDynamics(const sleipnir::VariableMatrix& x,
 
   //          [     0      ]
   // τ_g(q) = [-m_p gl sinθ]
-  sleipnir::VariableMatrix tau_g{2, 1};
+  sleipnir::VariableMatrix tau_g{2};
   tau_g(0) = 0;
   tau_g(1) = -m_p * g * l * sin(theta);  // NOLINT
 
@@ -152,7 +152,7 @@ sleipnir::VariableMatrix CartPoleDynamics(const sleipnir::VariableMatrix& x,
   Eigen::Matrix<double, 2, 1> B{{1}, {0}};
 
   // q̈ = M⁻¹(q)(τ_g(q) − C(q, q̇)q̇ + Bu)
-  sleipnir::VariableMatrix qddot{4, 1};
+  sleipnir::VariableMatrix qddot{4};
   qddot.Segment(0, 2) = qdot;
   qddot.Segment(2, 2) = Minv * (tau_g - C * qdot + B * u);
   return qddot;
