@@ -3,6 +3,7 @@
 #pragma once
 
 #include <iosfwd>
+#include <string_view>
 
 #include "sleipnir/util/SymbolExports.hpp"
 
@@ -40,12 +41,50 @@ enum class SolverExitCondition {
 };
 
 /**
+ * Returns user-readable message corresponding to the exit condition.
+ *
+ * @param exitCondition Solver exit condition.
+ */
+SLEIPNIR_DLLEXPORT constexpr std::string_view ToMessage(
+    const SolverExitCondition& exitCondition) {
+  using enum SolverExitCondition;
+
+  switch (exitCondition) {
+    case kSuccess:
+      return "solved to desired tolerance";
+    case kSolvedToAcceptableTolerance:
+      return "solved to acceptable tolerance";
+    case kCallbackRequestedStop:
+      return "callback requested stop";
+    case kTooFewDOFs:
+      return "problem has too few degrees of freedom";
+    case kLocallyInfeasible:
+      return "problem is locally infeasible";
+    case kFeasibilityRestorationFailed:
+      return "solver failed to reach the desired tolerance, and feasibility "
+             "restoration failed to converge";
+    case kMaxSearchDirectionTooSmall:
+      return "solver failed to reach the desired tolerance due to the maximum "
+             "search direction becoming too small";
+    case kDivergingIterates:
+      return "solver encountered diverging primal iterates pₖˣ and/or pₖˢ and "
+             "gave up";
+    case kMaxIterationsExceeded:
+      return "solution returned after maximum iterations exceeded";
+    case kMaxWallClockTimeExceeded:
+      return "solution returned after maximum wall time exceeded";
+    default:
+      return "unknown";
+  }
+}
+
+/**
  * GoogleTest value formatter for SolverExitCondition.
  *
- * @param cond SolverExitCondition to print.
+ * @param exitCondition Solver exit condition to print.
  * @param os Output stream to which to print.
  */
-SLEIPNIR_DLLEXPORT void PrintTo(const SolverExitCondition& cond,
+SLEIPNIR_DLLEXPORT void PrintTo(const SolverExitCondition& exitCondition,
                                 std::ostream* os);
 
 }  // namespace sleipnir

@@ -6,10 +6,10 @@
 
 namespace sleipnir {
 
-void PrintTo(const SolverExitCondition& cond, std::ostream* os) {
+void PrintTo(const SolverExitCondition& exitCondition, std::ostream* os) {
   using enum sleipnir::SolverExitCondition;
 
-  switch (cond) {
+  switch (exitCondition) {
     case kSuccess:
       *os << "kSuccess";
       break;
