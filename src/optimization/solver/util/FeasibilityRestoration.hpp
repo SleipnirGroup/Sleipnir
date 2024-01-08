@@ -62,6 +62,9 @@ inline void FeasibilityRestoration(
   // by
   //
   //   D_R = diag(min(1, 1/|x_R⁽¹⁾|), …, min(1, 1/|x_R|⁽ⁿ⁾)
+
+  constexpr double ρ = 1000.0;
+
   std::vector<Variable> fr_decisionVariables;
   fr_decisionVariables.reserve(decisionVariables.size() +
                                2 * equalityConstraints.size() +
@@ -82,27 +85,74 @@ inline void FeasibilityRestoration(
 
   VariableMatrix p_eq{{&fr_decisionVariables[decisionVariables.size()],
                        equalityConstraints.size()}};
-  for (auto& p_i : p_eq) {
-    p_i.SetValue(1.0);
-  }
   VariableMatrix n_eq{{&fr_decisionVariables[decisionVariables.size() +
                                              equalityConstraints.size()],
                        equalityConstraints.size()}};
-  for (auto& n_i : n_eq) {
-    n_i.SetValue(1.0);
-  }
   VariableMatrix p_ineq{{&fr_decisionVariables[decisionVariables.size() +
                                                2 * equalityConstraints.size()],
                          inequalityConstraints.size()}};
-  for (auto& p_i : p_ineq) {
-    p_i.SetValue(1.0);
-  }
   VariableMatrix n_ineq{{&fr_decisionVariables[decisionVariables.size() +
                                                2 * equalityConstraints.size() +
                                                inequalityConstraints.size()],
                          inequalityConstraints.size()}};
-  for (auto& n_i : n_ineq) {
-    n_i.SetValue(1.0);
+
+  // Set initial values for pₑ, nₑ, pᵢ, and nᵢ.
+  //
+  //
+  // From equation (33) of [2]:
+  //                      ______________________
+  //       μ − ρ c(x) +  /(μ − ρ c(x))²   μ c(x)
+  //   n = −−−−−−−−−−   / (−−−−−−−−−−)  + −−−−−−     (1)
+  //           2ρ      √  (    2ρ    )      2ρ
+  //
+  // The quadratic formula:
+  //             ________
+  //       -b + √b² - 4ac
+  //   x = −−−−−−−−−−−−−−                            (2)
+  //             2a
+  //
+  // Rearrange (1) to fit the quadratic formula better:
+  //                     _________________________
+  //       μ - ρ c(x) + √(μ - ρ c(x))² + 2ρ μ c(x)
+  //   n = −−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−
+  //                         2ρ
+  //
+  // Solve for coefficients:
+  //
+  //   a = ρ                                         (3)
+  //   b = ρ c(x) - μ                                (4)
+  //
+  //   -4ac = μ c(x) 2ρ
+  //   -4(ρ)c = 2ρ μ c(x)
+  //   -4c = 2μ c(x)
+  //   c = -μ c(x)/2                                 (5)
+  //
+  //   p = c(x) + n                                  (6)
+  for (int row = 0; row < p_eq.Rows(); ++row) {
+    double c_e = equalityConstraints[row].Value();
+
+    constexpr double a = 2 * ρ;
+    double b = ρ * c_e - μ;
+    double c = -μ * c_e / 2.0;
+
+    double n = -b * std::sqrt(b * b - 4.0 * a * c) / (2.0 * a);
+    double p = c_e + n;
+
+    p_eq(row).SetValue(p);
+    n_eq(row).SetValue(n);
+  }
+  for (int row = 0; row < p_ineq.Rows(); ++row) {
+    double c_i = inequalityConstraints[row].Value() - s(row);
+
+    constexpr double a = 2 * ρ;
+    double b = ρ * c_i - μ;
+    double c = -μ * c_i / 2.0;
+
+    double n = -b * std::sqrt(b * b - 4.0 * a * c) / (2.0 * a);
+    double p = c_i + n;
+
+    p_ineq(row).SetValue(p);
+    n_ineq(row).SetValue(n);
   }
 
   std::vector<Variable> fr_equalityConstraints;
@@ -149,7 +199,6 @@ inline void FeasibilityRestoration(
     J += n_i;
   }
 
-  constexpr double ρ = 1000.0;
   J *= ρ;
 
   // D_R = diag(min(1, 1/|x_R⁽¹⁾|), …, min(1, 1/|x_R|⁽ⁿ⁾)
