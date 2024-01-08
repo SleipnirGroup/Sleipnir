@@ -192,57 +192,11 @@ SolverStatus OptimizationProblem::Solve(const SolverConfig& config) {
                 x, s, &status);
 
   if (config.diagnostics) {
-    PrintExitCondition(status.exitCondition);
+    fmt::print("Exit condition: {}\n", ToMessage(status.exitCondition));
   }
 
   // Assign the solution to the original Variable instances
   VariableMatrix{m_decisionVariables}.SetValue(x);
 
   return status;
-}
-
-void OptimizationProblem::PrintExitCondition(
-    const SolverExitCondition& exitCondition) {
-  using enum SolverExitCondition;
-
-  fmt::print("Exit condition: ");
-  switch (exitCondition) {
-    case kSuccess:
-      fmt::print("solved to desired tolerance");
-      break;
-    case kSolvedToAcceptableTolerance:
-      fmt::print("solved to acceptable tolerance");
-      break;
-    case kCallbackRequestedStop:
-      fmt::print("callback requested stop");
-      break;
-    case kTooFewDOFs:
-      fmt::print("problem has too few degrees of freedom");
-      break;
-    case kLocallyInfeasible:
-      fmt::print("problem is locally infeasible");
-      break;
-    case kFeasibilityRestorationFailed:
-      fmt::print(
-          "solver failed to reach the desired tolerance, and feasibility "
-          "restoration failed to converge");
-      break;
-    case kMaxSearchDirectionTooSmall:
-      fmt::print(
-          "solver failed to reach the desired tolerance due to the maximum "
-          "search direction becoming too small");
-      break;
-    case kDivergingIterates:
-      fmt::print(
-          "solver encountered diverging primal iterates pₖˣ and/or pₖˢ and "
-          "gave up");
-      break;
-    case kMaxIterationsExceeded:
-      fmt::print("solution returned after maximum iterations exceeded");
-      break;
-    case kMaxWallClockTimeExceeded:
-      fmt::print("solution returned after maximum wall time exceeded");
-      break;
-  }
-  fmt::print("\n");
 }

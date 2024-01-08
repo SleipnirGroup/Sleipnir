@@ -386,13 +386,6 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
   // The user callback
   std::function<bool(const SolverIterationInfo&)> m_callback =
       [](const SolverIterationInfo&) { return false; };
-
-  /**
-   * Prints exit condition as a user-readable message.
-   *
-   * @param exitCondition The solver exit condition.
-   */
-  static void PrintExitCondition(const SolverExitCondition& exitCondition);
 };
 
 }  // namespace sleipnir
