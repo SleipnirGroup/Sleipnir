@@ -813,11 +813,10 @@ void InteriorPoint(
         fmt::print("{:=^63}\n", "");
       }
 
-      FilterEntry entry{f, μ, s, c_e, c_i};
       fmt::print("{:4}{}   {:9.3f}   {:12e}   {:12e}   {:12e}\n", iterations,
                  feasibilityRestoration ? "r" : " ",
                  ToMilliseconds(innerIterEndTime - innerIterStartTime), E_0,
-                 entry.cost, entry.constraintViolation);
+                 f.Value(), c_e.lpNorm<1>() + (c_i - s).lpNorm<1>());
     }
 
     ++iterations;
