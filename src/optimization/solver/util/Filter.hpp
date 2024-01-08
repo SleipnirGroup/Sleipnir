@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <utility>
 #include <vector>
 
 #include <Eigen/Core>
@@ -61,11 +62,43 @@ class Filter {
 
   /**
    * Construct an empty filter.
+   *
+   * @param f The cost function.
+   * @param μ The barrier parameter.
    */
-  Filter() {
+  explicit Filter(Variable& f, double μ) {
+    m_f = &f;
+    m_μ = μ;
+
     // Initial filter entry rejects constraint violations above max
     m_filter.emplace_back(std::numeric_limits<double>::infinity(),
                           maxConstraintViolation);
+  }
+
+  /**
+   * Reset the filter.
+   *
+   * @param μ The new barrier parameter.
+   */
+  void Reset(double μ) {
+    m_μ = μ;
+    m_filter.clear();
+
+    // Initial filter entry rejects constraint violations above max
+    m_filter.emplace_back(std::numeric_limits<double>::infinity(),
+                          maxConstraintViolation);
+  }
+
+  /**
+   * Creates a new filter entry.
+   *
+   * @param s The inequality constraint slack variables.
+   * @param c_e The equality constraint values (nonzero means violation).
+   * @param c_i The inequality constraint values (negative means violation).
+   */
+  FilterEntry MakeEntry(Eigen::VectorXd& s, const Eigen::VectorXd& c_e,
+                        const Eigen::VectorXd& c_i) {
+    return FilterEntry{*m_f, m_μ, s, c_e, c_i};
   }
 
   /**
@@ -99,14 +132,31 @@ class Filter {
   }
 
   /**
-   * Reset the filter.
+   * Returns true if the given iterate is accepted by the filter.
+   *
+   * @param entry The entry to attempt adding to the filter.
    */
-  void Reset() {
-    m_filter.clear();
+  bool TryAdd(const FilterEntry& entry) {
+    if (IsAcceptable(entry)) {
+      Add(entry);
+      return true;
+    } else {
+      return false;
+    }
+  }
 
-    // Initial filter entry rejects constraint violations above max
-    m_filter.emplace_back(std::numeric_limits<double>::infinity(),
-                          maxConstraintViolation);
+  /**
+   * Returns true if the given iterate is accepted by the filter.
+   *
+   * @param entry The entry to attempt adding to the filter.
+   */
+  bool TryAdd(FilterEntry&& entry) {
+    if (IsAcceptable(entry)) {
+      Add(std::move(entry));
+      return true;
+    } else {
+      return false;
+    }
   }
 
   /**
@@ -130,6 +180,8 @@ class Filter {
   }
 
  private:
+  Variable* m_f = nullptr;
+  double m_μ = 0.0;
   std::vector<FilterEntry> m_filter;
 };
 

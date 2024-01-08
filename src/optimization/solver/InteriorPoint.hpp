@@ -31,24 +31,25 @@ where f(x) is the cost function, cₑ(x) are the equality constraints, and cᵢ(
 are the inequality constraints.
 
 @param[in] decisionVariables The list of decision variables.
-@param[in] f The cost function.
 @param[in] equalityConstraints The list of equality constraints.
 @param[in] inequalityConstraints The list of inequality constraints.
+@param[in] f The cost function.
 @param[in] callback The user callback.
 @param[in] config Configuration options for the solver.
-@param[in] initialGuess The initial guess.
 @param[in] feasibilityRestoration Whether to use feasibility restoration instead
   of the normal algorithm.
+@param[in,out] x The initial guess and output location for the decision
+  variables.
+@param[in,out] s The initial guess and output location for the inequality
+  constraint slack variables.
 @param[out] status The solver status.
-@return The optimal state.
 */
-Eigen::VectorXd InteriorPoint(
-    std::span<Variable> decisionVariables, Variable& f,
+void InteriorPoint(
+    std::span<Variable> decisionVariables,
     std::span<Variable> equalityConstraints,
-    std::span<Variable> inequalityConstraints,
+    std::span<Variable> inequalityConstraints, Variable& f,
     const std::function<bool(const SolverIterationInfo&)>& callback,
-    const SolverConfig& config,
-    const Eigen::Ref<const Eigen::VectorXd>& initialGuess,
-    bool feasibilityRestoration, SolverStatus* status);
+    const SolverConfig& config, bool feasibilityRestoration, Eigen::VectorXd& x,
+    Eigen::VectorXd& s, SolverStatus* status);
 
 }  // namespace sleipnir

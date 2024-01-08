@@ -25,28 +25,27 @@ namespace sleipnir {
  * interior-point method fails to converge to a feasible point.
  *
  * @param[in] decisionVariables The list of decision variables.
- * @param[in] f The cost function.
  * @param[in] equalityConstraints The list of equality constraints.
  * @param[in] inequalityConstraints The list of inequality constraints.
- * @param[in] x The current iterate from the normal solve.
- * @param[in] s The current inequality constraint slack variables from the
- *   normal solve.
- * @param μ Barrier parameter.
+ * @param[in] f The cost function.
+ * @param[in] μ Barrier parameter.
  * @param[in] callback The user callback.
  * @param[in] config Configuration options for the solver.
+ * @param[in,out] x The current iterate from the normal solve.
+ * @param[in,out] s The current inequality constraint slack variables from the
+ *   normal solve.
  * @param[out] status The solver status.
- * @return The optimal state.
  */
-inline Eigen::VectorXd FeasibilityRestoration(
-    std::span<Variable> decisionVariables, Variable& f,
+inline void FeasibilityRestoration(
+    std::span<Variable> decisionVariables,
     std::span<Variable> equalityConstraints,
-    std::span<Variable> inequalityConstraints, const Eigen::VectorXd& x,
-    const Eigen::VectorXd& s, double μ,
+    std::span<Variable> inequalityConstraints, Variable& f, double μ,
     const std::function<bool(const SolverIterationInfo&)>& callback,
-    const SolverConfig& config, SolverStatus* status) {
+    const SolverConfig& config, Eigen::VectorXd& x, Eigen::VectorXd& s,
+    SolverStatus* status) {
   // Feasibility restoration
   //
-  //        min  Σ (pₑ + nₑ + pᵢ + nᵢ) + ζ/2 (x - x_R)ᵀD_R(x - x_R)
+  //        min  ρ Σ (pₑ + nₑ + pᵢ + nᵢ) + ζ/2 (x - x_R)ᵀD_R(x - x_R)
   //         x
   //       pₑ,nₑ
   //       pᵢ,nᵢ
@@ -58,8 +57,9 @@ inline Eigen::VectorXd FeasibilityRestoration(
   //        pᵢ ≥ 0
   //        nᵢ ≥ 0
   //
-  // where ζ = √μ where μ is the barrier parameter, x_R is original iterate
-  // before feasibility restoration, and D_R is a scaling matrix defined by
+  // where ρ = 1000, ζ = √μ where μ is the barrier parameter, x_R is original
+  // iterate before feasibility restoration, and D_R is a scaling matrix defined
+  // by
   //
   //   D_R = diag(min(1, 1/|x_R⁽¹⁾|), …, min(1, 1/|x_R|⁽ⁿ⁾)
   std::vector<Variable> fr_decisionVariables;
@@ -149,6 +149,9 @@ inline Eigen::VectorXd FeasibilityRestoration(
     J += n_i;
   }
 
+  constexpr double ρ = 1000.0;
+  J *= ρ;
+
   // D_R = diag(min(1, 1/|x_R⁽¹⁾|), …, min(1, 1/|x_R|⁽ⁿ⁾)
   Eigen::VectorXd D_R{x.rows()};
   for (int row = 0; row < D_R.rows(); ++row) {
@@ -160,11 +163,21 @@ inline Eigen::VectorXd FeasibilityRestoration(
     J += std::sqrt(μ) / 2.0 * D_R(row) * sleipnir::pow(xAD(row) - x(row), 2);
   }
 
-  return InteriorPoint(fr_decisionVariables, J, fr_equalityConstraints,
-                       fr_inequalityConstraints, callback, config,
-                       VariableMatrix{fr_decisionVariables}.Value(), true,
-                       status)
-      .segment(0, decisionVariables.size());
+  Eigen::VectorXd fr_x = VariableMatrix{fr_decisionVariables}.Value();
+
+  // Set up initial value for inequality constraint slack variables
+  Eigen::VectorXd fr_s{fr_inequalityConstraints.size()};
+  fr_s.segment(0, inequalityConstraints.size()) = s;
+  fr_s.segment(inequalityConstraints.size(),
+               fr_s.size() - inequalityConstraints.size())
+      .setOnes();
+
+  InteriorPoint(fr_decisionVariables, fr_equalityConstraints,
+                fr_inequalityConstraints, J, callback, config, true, fr_x, fr_s,
+                status);
+
+  x = fr_x.segment(0, decisionVariables.size());
+  s = fr_s.segment(0, inequalityConstraints.size());
 }
 
 }  // namespace sleipnir

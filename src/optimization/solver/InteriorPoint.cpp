@@ -35,27 +35,24 @@
 
 namespace sleipnir {
 
-Eigen::VectorXd InteriorPoint(
-    std::span<Variable> decisionVariables, Variable& f,
+void InteriorPoint(
+    std::span<Variable> decisionVariables,
     std::span<Variable> equalityConstraints,
-    std::span<Variable> inequalityConstraints,
+    std::span<Variable> inequalityConstraints, Variable& f,
     const std::function<bool(const SolverIterationInfo&)>& callback,
-    const SolverConfig& config,
-    const Eigen::Ref<const Eigen::VectorXd>& initialGuess,
-    bool feasibilityRestoration, SolverStatus* status) {
+    const SolverConfig& config, bool feasibilityRestoration, Eigen::VectorXd& x,
+    Eigen::VectorXd& s, SolverStatus* status) {
   const auto solveStartTime = std::chrono::system_clock::now();
 
   // Map decision variables and constraints to VariableMatrices for Lagrangian
   VariableMatrix xAD{decisionVariables};
-  xAD.SetValue(initialGuess);
+  xAD.SetValue(x);
   VariableMatrix c_eAD{equalityConstraints};
   VariableMatrix c_iAD{inequalityConstraints};
 
   // Create autodiff variables for s, y, and z for Lagrangian
   VariableMatrix sAD(inequalityConstraints.size());
-  for (auto& s : sAD) {
-    s.SetValue(1.0);
-  }
+  sAD.SetValue(s);
   VariableMatrix yAD(equalityConstraints.size());
   for (auto& y : yAD) {
     y.SetValue(0.0);
@@ -98,8 +95,6 @@ Eigen::VectorXd InteriorPoint(
   Hessian hessianL{L, xAD};
   Eigen::SparseMatrix<double> H = hessianL.Calculate();
 
-  Eigen::VectorXd x = initialGuess;
-  Eigen::VectorXd s = sAD.Value();
   Eigen::VectorXd y = yAD.Value();
   Eigen::VectorXd z = zAD.Value();
   Eigen::VectorXd c_e = c_eAD.Value();
@@ -118,7 +113,7 @@ Eigen::VectorXd InteriorPoint(
     }
 
     status->exitCondition = SolverExitCondition::kTooFewDOFs;
-    return x;
+    return;
   }
 
   // Sparsity pattern files written when spy flag is set in SolverConfig
@@ -188,7 +183,7 @@ Eigen::VectorXd InteriorPoint(
   // Fraction-to-the-boundary rule scale factor τ
   double τ = τ_min;
 
-  Filter filter;
+  Filter filter{f, μ};
 
   // This should be run when the error estimate is below a desired threshold for
   // the current barrier parameter
@@ -215,7 +210,7 @@ Eigen::VectorXd InteriorPoint(
     τ = std::max(τ_min, 1.0 - μ);
 
     // Reset the filter when the barrier parameter is updated
-    filter.Reset();
+    filter.Reset(μ);
   };
 
   // Kept outside the loop so its storage can be reused
@@ -255,7 +250,7 @@ Eigen::VectorXd InteriorPoint(
       }
 
       status->exitCondition = SolverExitCondition::kLocallyInfeasible;
-      return x;
+      return;
     }
 
     // Check for local inequality constraint infeasibility
@@ -274,7 +269,7 @@ Eigen::VectorXd InteriorPoint(
       }
 
       status->exitCondition = SolverExitCondition::kLocallyInfeasible;
-      return x;
+      return;
     }
 
     // Write out spy file contents if that's enabled
@@ -292,9 +287,9 @@ Eigen::VectorXd InteriorPoint(
     }
 
     // Call user callback
-    if (callback({iterations, x, g, H, A_e, A_i})) {
+    if (callback({iterations, x, s, g, H, A_e, A_i})) {
       status->exitCondition = SolverExitCondition::kCallbackRequestedStop;
-      return x;
+      return;
     }
 
     //     [s₁ 0 ⋯ 0 ]
@@ -383,9 +378,6 @@ Eigen::VectorXd InteriorPoint(
     // αₖᶻ = max(α ∈ (0, 1] : zₖ + αpₖᶻ ≥ (1−τⱼ)zₖ)
     double α_z = FractionToTheBoundaryRule(z, p_z, τ);
 
-    // True if current trial step came from feasibility restoration
-    bool fromFeasibilityRestoration = false;
-
     bool stepAcceptable = false;
     while (!stepAcceptable) {
       Eigen::VectorXd trial_x = x + α * p_x;
@@ -427,21 +419,10 @@ Eigen::VectorXd InteriorPoint(
       }
 
       // Check whether filter accepts trial iterate
-      FilterEntry entry{f, μ, trial_s, trial_c_e, trial_c_i};
-      if (filter.IsAcceptable(entry)) {
-        // Clear flag after accepting trial step from feasibility restoration
-        if (fromFeasibilityRestoration) {
-          fromFeasibilityRestoration = false;
-        }
-
+      auto entry = filter.MakeEntry(trial_s, trial_c_e, trial_c_i);
+      if (filter.TryAdd(entry)) {
         stepAcceptable = true;
-        filter.Add(std::move(entry));
         continue;
-      } else if (fromFeasibilityRestoration) {
-        // If trial step from feasibility restoration was rejected, problem is
-        // locally infeasible
-        status->exitCondition = SolverExitCondition::kLocallyInfeasible;
-        return x;
       }
 
       double prevConstraintViolation = c_e.lpNorm<1>() + (c_i - s).lpNorm<1>();
@@ -510,8 +491,8 @@ Eigen::VectorXd InteriorPoint(
           trial_c_i = c_iAD.Value();
 
           // Check whether filter accepts trial iterate
-          entry = FilterEntry{f, μ, trial_s, trial_c_e, trial_c_i};
-          if (filter.IsAcceptable(entry)) {
+          entry = filter.MakeEntry(trial_s, trial_c_e, trial_c_i);
+          if (filter.TryAdd(entry)) {
             p_x = p_x_cor;
             p_y = p_y_soc;
             p_z = p_z_soc;
@@ -519,7 +500,6 @@ Eigen::VectorXd InteriorPoint(
             α = α_soc;
             α_z = α_z_soc;
             stepAcceptable = true;
-            filter.Add(std::move(entry));
           }
         }
       }
@@ -540,7 +520,7 @@ Eigen::VectorXd InteriorPoint(
         if (fullStepRejectedCounter == 4 &&
             filter.maxConstraintViolation > entry.constraintViolation / 10.0) {
           filter.maxConstraintViolation *= 0.1;
-          filter.Reset();
+          filter.Reset(μ);
           continue;
         }
 
@@ -592,33 +572,61 @@ Eigen::VectorXd InteriorPoint(
           // already running, running it again won't help
           if (feasibilityRestoration) {
             status->exitCondition = SolverExitCondition::kLocallyInfeasible;
-            return x;
+            return;
           }
 
+          auto initialEntry = filter.MakeEntry(s, c_e, c_i);
+
           // Feasibility restoration phase
+          Eigen::VectorXd fr_x = x;
+          Eigen::VectorXd fr_s = s;
           SolverStatus fr_status;
-          Eigen::VectorXd fr_x = FeasibilityRestoration(
-              decisionVariables, f, equalityConstraints, inequalityConstraints,
-              x, s, μ, callback, config, &fr_status);
+          FeasibilityRestoration(
+              decisionVariables, equalityConstraints, inequalityConstraints, f,
+              μ,
+              [&](const SolverIterationInfo& info) {
+                Eigen::VectorXd trial_x =
+                    info.x.segment(0, decisionVariables.size());
+                xAD.SetValue(trial_x);
+
+                Eigen::VectorXd trial_s =
+                    info.s.segment(0, inequalityConstraints.size());
+                sAD.SetValue(trial_s);
+
+                for (int row = 0; row < c_e.rows(); ++row) {
+                  c_eAD(row).Update();
+                }
+                Eigen::VectorXd trial_c_e = c_eAD.Value();
+
+                for (int row = 0; row < c_i.rows(); ++row) {
+                  c_iAD(row).Update();
+                }
+                Eigen::VectorXd trial_c_i = c_iAD.Value();
+
+                for (int row = 0; row < c_i.rows(); ++row) {
+                  c_iAD(row).Update();
+                }
+
+                f.Update();
+
+                // If current iterate is acceptable to normal filter and
+                // constraint violation has sufficiently reduced, stop
+                // feasibility restoration
+                auto entry = filter.MakeEntry(trial_s, trial_c_e, trial_c_i);
+                if (filter.IsAcceptable(entry) &&
+                    entry.constraintViolation <
+                        0.9 * initialEntry.constraintViolation) {
+                  return true;
+                }
+
+                return false;
+              },
+              config, fr_x, fr_s, &fr_status);
 
           if (fr_status.exitCondition ==
               SolverExitCondition::kCallbackRequestedStop) {
-            status->exitCondition = SolverExitCondition::kCallbackRequestedStop;
-            return fr_x;
-          } else if (fr_status.exitCondition != SolverExitCondition::kSuccess) {
-            status->exitCondition =
-                SolverExitCondition::kFeasibilityRestorationFailed;
-            return fr_x;
-          } else {
             p_x = fr_x - x;
-
-            // TODO: Return s from feasibility restoration instead of recovering
-            // an s estimate from cᵢ(x)
-            xAD.SetValue(fr_x);
-            for (int row = 0; row < c_i.rows(); ++row) {
-              c_iAD(row).Update();
-            }
-            p_s = c_iAD.Value().cwiseMax(0.0) - s;
+            p_s = fr_s - s;
 
             // Lagrange mutliplier estimates
             //
@@ -685,10 +693,17 @@ Eigen::VectorXd InteriorPoint(
             α = 1.0;
             α_z = 1.0;
 
-            // Tell main loop the next trial step to try is from feasibility
-            // restoration
-            fromFeasibilityRestoration = true;
+            stepAcceptable = true;
             continue;
+          } else if (fr_status.exitCondition == SolverExitCondition::kSuccess) {
+            status->exitCondition = SolverExitCondition::kLocallyInfeasible;
+            x = fr_x;
+            return;
+          } else {
+            status->exitCondition =
+                SolverExitCondition::kFeasibilityRestorationFailed;
+            x = fr_x;
+            return;
           }
         }
       }
@@ -698,7 +713,7 @@ Eigen::VectorXd InteriorPoint(
     if (p_x.lpNorm<Eigen::Infinity>() > 1e20 ||
         p_s.lpNorm<Eigen::Infinity>() > 1e20) {
       status->exitCondition = SolverExitCondition::kDivergingIterates;
-      return x;
+      return;
     }
 
     // Handle very small search directions by letting αₖ = αₖᵐᵃˣ when
@@ -810,20 +825,20 @@ Eigen::VectorXd InteriorPoint(
     // Check for max iterations
     if (iterations >= config.maxIterations) {
       status->exitCondition = SolverExitCondition::kMaxIterationsExceeded;
-      return x;
+      return;
     }
 
     // Check for max wall clock time
     if (innerIterEndTime - solveStartTime > config.timeout) {
       status->exitCondition = SolverExitCondition::kMaxWallClockTimeExceeded;
-      return x;
+      return;
     }
 
     // Check for solve to acceptable tolerance
     if (E_0 > config.tolerance &&
         acceptableIterCounter == config.maxAcceptableIterations) {
       status->exitCondition = SolverExitCondition::kSolvedToAcceptableTolerance;
-      return x;
+      return;
     }
 
     // The search direction has been very small twice, so assume the problem has
@@ -838,12 +853,10 @@ Eigen::VectorXd InteriorPoint(
       } else {
         status->exitCondition =
             SolverExitCondition::kMaxSearchDirectionTooSmall;
-        return x;
+        return;
       }
     }
   }
-
-  return x;
 }  // NOLINT(readability/fn_size)
 
 }  // namespace sleipnir
