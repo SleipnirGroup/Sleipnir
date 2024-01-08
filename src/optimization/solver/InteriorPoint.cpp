@@ -808,12 +808,12 @@ void InteriorPoint(
     // Diagnostics for current iteration
     if (config.diagnostics) {
       if (iterations % 20 == 0) {
-        fmt::print("{:^4}    {:^9}   {:^12}   {:^12}   {:^12}\n", "iter",
+        fmt::print("{:^4}   {:^9}  {:^13}  {:^13}  {:^13}\n", "iter",
                    "time (ms)", "error", "cost", "infeasibility");
-        fmt::print("{:=^63}\n", "");
+        fmt::print("{:=^61}\n", "");
       }
 
-      fmt::print("{:4}{}   {:9.3f}   {:12e}   {:12e}   {:12e}\n", iterations,
+      fmt::print("{:4}{}  {:9.3f}  {:13e}  {:13e}  {:13e}\n", iterations,
                  feasibilityRestoration ? "r" : " ",
                  ToMilliseconds(innerIterEndTime - innerIterStartTime), E_0,
                  f.Value(), c_e.lpNorm<1>() + (c_i - s).lpNorm<1>());
