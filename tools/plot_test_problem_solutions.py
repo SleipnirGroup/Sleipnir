@@ -169,22 +169,15 @@ def main():
 
         # Plot X-Y datasets. If the file doesn't have all the required keys,
         # skip it.
-        if not (
-            set(["X reference", "Y reference", "X estimate", "Y estimate"])
-            - set(name_groups.keys())
-        ):
+        if not (set(["X position", "Y position"]) - set(name_groups.keys())):
             print(f"  [y vs x] {category}")
             fig, ax = plt.subplots(1, 1)
             ax.set_title(f"{category} trajectory")
 
-            ax.plot(
-                name_groups["X reference"].series, name_groups["Y reference"].series
-            )
-            ax.plot(name_groups["X estimate"].series, name_groups["Y estimate"].series)
+            ax.plot(name_groups["X position"].series, name_groups["Y position"].series)
 
             ax.set_xlabel("X (m)")
             ax.set_ylabel("Y (m)")
-            ax.legend(["Reference", "Estimate"])
 
             # This equalizes the X and Y axes so the trajectories aren't warped
             ax.axis("equal")
