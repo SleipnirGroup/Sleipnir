@@ -12,6 +12,7 @@
 #include <units/time.h>
 #include <units/voltage.h>
 
+#include "CmdlineArguments.hpp"
 #include "DifferentialDriveUtil.hpp"
 #include "RK4.hpp"
 
@@ -68,13 +69,16 @@ TEST(OptimizationProblemTest, DifferentialDrive) {
   }
   problem.Minimize(J);
 
-  auto end1 = std::chrono::system_clock::now();
-  using std::chrono::duration_cast;
-  using std::chrono::microseconds;
-  fmt::print("Setup time: {} ms\n\n",
-             duration_cast<microseconds>(end1 - start).count() / 1000.0);
+  [[maybe_unused]] auto end1 = std::chrono::system_clock::now();
+  if (Argv().Contains("--enable-diagnostics")) {
+    using std::chrono::duration_cast;
+    using std::chrono::microseconds;
+    fmt::print("Setup time: {} ms\n\n",
+               duration_cast<microseconds>(end1 - start).count() / 1000.0);
+  }
 
-  auto status = problem.Solve({.diagnostics = true});
+  auto status =
+      problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
 
   EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
   EXPECT_EQ(sleipnir::ExpressionType::kNonlinear,
