@@ -472,86 +472,38 @@ ExpressionPtr hypot(  // NOLINT
     return Zero();
   }
 
+  // Evaluate the expression's type
+  ExpressionType type;
   if (IsZero(x) && !IsZero(y)) {
-    // Evaluate the expression's type
-    ExpressionType type;
-    if (y->type == ExpressionType::kConstant) {
-      type = ExpressionType::kConstant;
-    } else {
-      type = ExpressionType::kNonlinear;
-    }
-
-    return MakeExpressionPtr(
-        type, [](double x, double y) { return std::hypot(x, y); },
-        [](double x, double y, double parentAdjoint) {
-          return parentAdjoint * x / std::hypot(x, y);
-        },
-        [](double x, double y, double parentAdjoint) {
-          return parentAdjoint * y / std::hypot(x, y);
-        },
-        [](const ExpressionPtr& x, const ExpressionPtr& y,
-           const ExpressionPtr& parentAdjoint) {
-          return parentAdjoint * x / sleipnir::detail::hypot(x, y);
-        },
-        [](const ExpressionPtr& x, const ExpressionPtr& y,
-           const ExpressionPtr& parentAdjoint) {
-          return parentAdjoint * y / sleipnir::detail::hypot(x, y);
-        },
-        MakeExpressionPtr(0.0), y);
+    type = y->type;
   } else if (!IsZero(x) && IsZero(y)) {
-    // Evaluate the expression's type
-    ExpressionType type;
-    if (x->type == ExpressionType::kConstant) {
-      type = ExpressionType::kConstant;
-    } else {
-      type = ExpressionType::kNonlinear;
-    }
-
-    return MakeExpressionPtr(
-        type, [](double x, double y) { return std::hypot(x, y); },
-        [](double x, double y, double parentAdjoint) {
-          return parentAdjoint * x / std::hypot(x, y);
-        },
-        [](double x, double y, double parentAdjoint) {
-          return parentAdjoint * y / std::hypot(x, y);
-        },
-        [](const ExpressionPtr& x, const ExpressionPtr& y,
-           const ExpressionPtr& parentAdjoint) {
-          return parentAdjoint * x / sleipnir::detail::hypot(x, y);
-        },
-        [](const ExpressionPtr& x, const ExpressionPtr& y,
-           const ExpressionPtr& parentAdjoint) {
-          return parentAdjoint * y / sleipnir::detail::hypot(x, y);
-        },
-        x, MakeExpressionPtr(0.0));
+    type = x->type;
   } else {
-    // Evaluate the expression's type
-    ExpressionType type;
     if (x->type == ExpressionType::kConstant &&
         y->type == ExpressionType::kConstant) {
       type = ExpressionType::kConstant;
     } else {
       type = ExpressionType::kNonlinear;
     }
-
-    return MakeExpressionPtr(
-        type, [](double x, double y) { return std::hypot(x, y); },
-        [](double x, double y, double parentAdjoint) {
-          return parentAdjoint * x / std::hypot(x, y);
-        },
-        [](double x, double y, double parentAdjoint) {
-          return parentAdjoint * y / std::hypot(x, y);
-        },
-        [](const ExpressionPtr& x, const ExpressionPtr& y,
-           const ExpressionPtr& parentAdjoint) {
-          return parentAdjoint * x / sleipnir::detail::hypot(x, y);
-        },
-        [](const ExpressionPtr& x, const ExpressionPtr& y,
-           const ExpressionPtr& parentAdjoint) {
-          return parentAdjoint * y / sleipnir::detail::hypot(x, y);
-        },
-        x, y);
   }
+
+  return MakeExpressionPtr(
+      type, [](double x, double y) { return std::hypot(x, y); },
+      [](double x, double y, double parentAdjoint) {
+        return parentAdjoint * x / std::hypot(x, y);
+      },
+      [](double x, double y, double parentAdjoint) {
+        return parentAdjoint * y / std::hypot(x, y);
+      },
+      [](const ExpressionPtr& x, const ExpressionPtr& y,
+         const ExpressionPtr& parentAdjoint) {
+        return parentAdjoint * x / sleipnir::detail::hypot(x, y);
+      },
+      [](const ExpressionPtr& x, const ExpressionPtr& y,
+         const ExpressionPtr& parentAdjoint) {
+        return parentAdjoint * y / sleipnir::detail::hypot(x, y);
+      },
+      x, y);
 }
 
 ExpressionPtr log(  // NOLINT
