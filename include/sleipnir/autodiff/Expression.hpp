@@ -274,11 +274,6 @@ static ExpressionPtr MakeExpressionPtr(Args&&... args) {
 }
 
 /**
- * Returns true if this expression is the constant zero.
- */
-SLEIPNIR_DLLEXPORT bool IsZero(const ExpressionPtr& ptr);
-
-/**
  * std::abs() for Expressions.
  *
  * @param x The argument.

@@ -195,10 +195,6 @@ ExpressionPtr operator+(const ExpressionPtr& lhs) {
       lhs);
 }
 
-bool IsZero(const ExpressionPtr& ptr) {
-  return ptr == Zero();
-}
-
 ExpressionPtr abs(  // NOLINT
     const ExpressionPtr& x) {
   if (x->IsConstant(0.0)) {
