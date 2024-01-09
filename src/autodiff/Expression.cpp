@@ -46,14 +46,18 @@ Expression::Expression(ExpressionType type, BinaryFuncDouble valueFunc,
       gradientFuncs{lhsGradientFunc, rhsGradientFunc},
       args{lhs, rhs} {}
 
+bool Expression::IsConstant(double constant) const {
+  return type == ExpressionType::kConstant && value == constant;
+}
+
 ExpressionPtr operator*(const ExpressionPtr& lhs, const ExpressionPtr& rhs) {
-  if (IsZero(lhs)) {
+  if (lhs->IsConstant(0.0)) {
     return Zero();
-  } else if (IsZero(rhs)) {
+  } else if (rhs->IsConstant(0.0)) {
     return Zero();
-  } else if (lhs->type == ExpressionType::kConstant && lhs->value == 1.0) {
+  } else if (lhs->IsConstant(1.0)) {
     return rhs;
-  } else if (rhs->type == ExpressionType::kConstant && rhs->value == 1.0) {
+  } else if (rhs->IsConstant(1.0)) {
     return lhs;
   }
 
@@ -86,7 +90,7 @@ ExpressionPtr operator*(const ExpressionPtr& lhs, const ExpressionPtr& rhs) {
 }
 
 ExpressionPtr operator/(const ExpressionPtr& lhs, const ExpressionPtr& rhs) {
-  if (IsZero(lhs)) {
+  if (lhs->IsConstant(0.0)) {
     return Zero();
   }
 
@@ -116,9 +120,9 @@ ExpressionPtr operator/(const ExpressionPtr& lhs, const ExpressionPtr& rhs) {
 }
 
 ExpressionPtr operator+(const ExpressionPtr& lhs, const ExpressionPtr& rhs) {
-  if (IsZero(lhs)) {
+  if (lhs->IsConstant(0.0)) {
     return rhs;
-  } else if (IsZero(rhs)) {
+  } else if (rhs->IsConstant(0.0)) {
     return lhs;
   }
 
@@ -139,13 +143,13 @@ ExpressionPtr operator+(const ExpressionPtr& lhs, const ExpressionPtr& rhs) {
 }
 
 ExpressionPtr operator-(const ExpressionPtr& lhs, const ExpressionPtr& rhs) {
-  if (IsZero(lhs)) {
-    if (IsZero(rhs)) {
+  if (lhs->IsConstant(0.0)) {
+    if (rhs->IsConstant(0.0)) {
       return Zero();
     } else {
       return -rhs;
     }
-  } else if (IsZero(rhs)) {
+  } else if (rhs->IsConstant(0.0)) {
     return lhs;
   }
 
@@ -166,7 +170,7 @@ ExpressionPtr operator-(const ExpressionPtr& lhs, const ExpressionPtr& rhs) {
 }
 
 ExpressionPtr operator-(const ExpressionPtr& lhs) {
-  if (IsZero(lhs)) {
+  if (lhs->IsConstant(0.0)) {
     return Zero();
   }
 
@@ -179,7 +183,7 @@ ExpressionPtr operator-(const ExpressionPtr& lhs) {
 }
 
 ExpressionPtr operator+(const ExpressionPtr& lhs) {
-  if (IsZero(lhs)) {
+  if (lhs->IsConstant(0.0)) {
     return Zero();
   }
 
@@ -197,7 +201,7 @@ bool IsZero(const ExpressionPtr& ptr) {
 
 ExpressionPtr abs(  // NOLINT
     const ExpressionPtr& x) {
-  if (IsZero(x)) {
+  if (x->IsConstant(0.0)) {
     return Zero();
   }
 
@@ -235,7 +239,7 @@ ExpressionPtr abs(  // NOLINT
 
 ExpressionPtr acos(  // NOLINT
     const ExpressionPtr& x) {
-  if (IsZero(x)) {
+  if (x->IsConstant(0.0)) {
     return MakeExpressionPtr(std::numbers::pi / 2.0);
   }
 
@@ -262,7 +266,7 @@ ExpressionPtr acos(  // NOLINT
 
 ExpressionPtr asin(  // NOLINT
     const ExpressionPtr& x) {
-  if (IsZero(x)) {
+  if (x->IsConstant(0.0)) {
     return Zero();
   }
 
@@ -289,7 +293,7 @@ ExpressionPtr asin(  // NOLINT
 
 ExpressionPtr atan(  // NOLINT
     const ExpressionPtr& x) {
-  if (IsZero(x)) {
+  if (x->IsConstant(0.0)) {
     return Zero();
   }
 
@@ -315,9 +319,9 @@ ExpressionPtr atan(  // NOLINT
 
 ExpressionPtr atan2(  // NOLINT
     const ExpressionPtr& y, const ExpressionPtr& x) {
-  if (IsZero(y)) {
+  if (y->IsConstant(0.0)) {
     return Zero();
-  } else if (IsZero(x)) {
+  } else if (x->IsConstant(0.0)) {
     return MakeExpressionPtr(std::numbers::pi / 2.0);
   }
 
@@ -351,7 +355,7 @@ ExpressionPtr atan2(  // NOLINT
 
 ExpressionPtr cos(  // NOLINT
     const ExpressionPtr& x) {
-  if (IsZero(x)) {
+  if (x->IsConstant(0.0)) {
     return MakeExpressionPtr(1.0);
   }
 
@@ -377,7 +381,7 @@ ExpressionPtr cos(  // NOLINT
 
 ExpressionPtr cosh(  // NOLINT
     const ExpressionPtr& x) {
-  if (IsZero(x)) {
+  if (x->IsConstant(0.0)) {
     return MakeExpressionPtr(1.0);
   }
 
@@ -403,7 +407,7 @@ ExpressionPtr cosh(  // NOLINT
 
 ExpressionPtr erf(  // NOLINT
     const ExpressionPtr& x) {
-  if (IsZero(x)) {
+  if (x->IsConstant(0.0)) {
     return Zero();
   }
 
@@ -432,7 +436,7 @@ ExpressionPtr erf(  // NOLINT
 
 ExpressionPtr exp(  // NOLINT
     const ExpressionPtr& x) {
-  if (IsZero(x)) {
+  if (x->IsConstant(0.0)) {
     return MakeExpressionPtr(1.0);
   }
 
@@ -458,15 +462,15 @@ ExpressionPtr exp(  // NOLINT
 
 ExpressionPtr hypot(  // NOLINT
     const ExpressionPtr& x, const ExpressionPtr& y) {
-  if (IsZero(x) && IsZero(y)) {
+  if (x->IsConstant(0.0) && y->IsConstant(0.0)) {
     return Zero();
   }
 
   // Evaluate the expression's type
   ExpressionType type;
-  if (IsZero(x) && !IsZero(y)) {
+  if (x->IsConstant(0.0) && !y->IsConstant(0.0)) {
     type = y->type;
-  } else if (!IsZero(x) && IsZero(y)) {
+  } else if (!x->IsConstant(0.0) && y->IsConstant(0.0)) {
     type = x->type;
   } else {
     if (x->type == ExpressionType::kConstant &&
@@ -498,7 +502,7 @@ ExpressionPtr hypot(  // NOLINT
 
 ExpressionPtr log(  // NOLINT
     const ExpressionPtr& x) {
-  if (IsZero(x)) {
+  if (x->IsConstant(0.0)) {
     return Zero();
   }
 
@@ -520,7 +524,7 @@ ExpressionPtr log(  // NOLINT
 
 ExpressionPtr log10(  // NOLINT
     const ExpressionPtr& x) {
-  if (IsZero(x)) {
+  if (x->IsConstant(0.0)) {
     return Zero();
   }
 
@@ -546,10 +550,10 @@ ExpressionPtr log10(  // NOLINT
 
 ExpressionPtr pow(  // NOLINT
     const ExpressionPtr& base, const ExpressionPtr& power) {
-  if (IsZero(base)) {
+  if (base->IsConstant(0.0)) {
     return Zero();
   }
-  if (IsZero(power)) {
+  if (power->IsConstant(0.0)) {
     return MakeExpressionPtr(1.0);
   }
 
@@ -558,16 +562,14 @@ ExpressionPtr pow(  // NOLINT
   if (base->type == ExpressionType::kConstant &&
       power->type == ExpressionType::kConstant) {
     type = ExpressionType::kConstant;
-  } else if (power->type == ExpressionType::kConstant && power->value == 0.0) {
+  } else if (power->IsConstant(0.0)) {
     type = ExpressionType::kConstant;
-  } else if (base->type == ExpressionType::kLinear &&
-             power->type == ExpressionType::kConstant && power->value == 1.0) {
+  } else if (base->type == ExpressionType::kLinear && power->IsConstant(1.0)) {
     type = ExpressionType::kLinear;
-  } else if (base->type == ExpressionType::kLinear &&
-             power->type == ExpressionType::kConstant && power->value == 2.0) {
+  } else if (base->type == ExpressionType::kLinear && power->IsConstant(2.0)) {
     type = ExpressionType::kQuadratic;
   } else if (base->type == ExpressionType::kQuadratic &&
-             power->type == ExpressionType::kConstant && power->value == 1.0) {
+             power->IsConstant(1.0)) {
     type = ExpressionType::kQuadratic;
   } else {
     type = ExpressionType::kNonlinear;
@@ -608,7 +610,7 @@ ExpressionPtr pow(  // NOLINT
 }
 
 ExpressionPtr sign(const ExpressionPtr& x) {
-  if (IsZero(x)) {
+  if (x->IsConstant(0.0)) {
     return Zero();
   }
 
@@ -639,7 +641,7 @@ ExpressionPtr sign(const ExpressionPtr& x) {
 
 ExpressionPtr sin(  // NOLINT
     const ExpressionPtr& x) {
-  if (IsZero(x)) {
+  if (x->IsConstant(0.0)) {
     return Zero();
   }
 
@@ -664,7 +666,7 @@ ExpressionPtr sin(  // NOLINT
 }
 
 ExpressionPtr sinh(const ExpressionPtr& x) {
-  if (IsZero(x)) {
+  if (x->IsConstant(0.0)) {
     return Zero();
   }
 
@@ -690,7 +692,7 @@ ExpressionPtr sinh(const ExpressionPtr& x) {
 
 ExpressionPtr sqrt(  // NOLINT
     const ExpressionPtr& x) {
-  if (IsZero(x)) {
+  if (x->IsConstant(0.0)) {
     return Zero();
   }
 
@@ -717,7 +719,7 @@ ExpressionPtr sqrt(  // NOLINT
 
 ExpressionPtr tan(  // NOLINT
     const ExpressionPtr& x) {
-  if (IsZero(x)) {
+  if (x->IsConstant(0.0)) {
     return Zero();
   }
 
@@ -743,7 +745,7 @@ ExpressionPtr tan(  // NOLINT
 }
 
 ExpressionPtr tanh(const ExpressionPtr& x) {
-  if (IsZero(x)) {
+  if (x->IsConstant(0.0)) {
     return Zero();
   }
 
