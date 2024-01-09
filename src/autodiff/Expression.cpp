@@ -47,24 +47,14 @@ Expression::Expression(ExpressionType type, BinaryFuncDouble valueFunc,
       args{lhs, rhs} {}
 
 ExpressionPtr operator*(const ExpressionPtr& lhs, const ExpressionPtr& rhs) {
-  if (IsZero(lhs) || IsZero(rhs)) {
+  if (IsZero(lhs)) {
     return Zero();
-  }
-
-  if (lhs->type == ExpressionType::kConstant) {
-    if (lhs->value == 1.0) {
-      return rhs;
-    } else if (lhs->value == 0.0) {
-      return Zero();
-    }
-  }
-
-  if (rhs->type == ExpressionType::kConstant) {
-    if (rhs->value == 1.0) {
-      return lhs;
-    } else if (rhs->value == 0.0) {
-      return Zero();
-    }
+  } else if (IsZero(rhs)) {
+    return Zero();
+  } else if (lhs->type == ExpressionType::kConstant && lhs->value == 1.0) {
+    return rhs;
+  } else if (rhs->type == ExpressionType::kConstant && rhs->value == 1.0) {
+    return lhs;
   }
 
   // Evaluate the expression's type
@@ -150,10 +140,10 @@ ExpressionPtr operator+(const ExpressionPtr& lhs, const ExpressionPtr& rhs) {
 
 ExpressionPtr operator-(const ExpressionPtr& lhs, const ExpressionPtr& rhs) {
   if (IsZero(lhs)) {
-    if (!IsZero(rhs)) {
-      return -rhs;
-    } else {
+    if (IsZero(rhs)) {
       return Zero();
+    } else {
+      return -rhs;
     }
   } else if (IsZero(rhs)) {
     return lhs;
@@ -600,7 +590,7 @@ ExpressionPtr pow(  // NOLINT
       [](const ExpressionPtr& base, const ExpressionPtr& power,
          const ExpressionPtr& parentAdjoint) {
         return parentAdjoint *
-               sleipnir::detail::pow(base, power - MakeExpressionPtr(1)) *
+               sleipnir::detail::pow(base, power - MakeExpressionPtr(1.0)) *
                power;
       },
       [](const ExpressionPtr& base, const ExpressionPtr& power,
@@ -610,7 +600,7 @@ ExpressionPtr pow(  // NOLINT
           return Zero();
         } else {
           return parentAdjoint *
-                 sleipnir::detail::pow(base, power - MakeExpressionPtr(1)) *
+                 sleipnir::detail::pow(base, power - MakeExpressionPtr(1.0)) *
                  base * sleipnir::detail::log(base);
         }
       },
