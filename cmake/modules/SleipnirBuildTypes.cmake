@@ -66,28 +66,28 @@ if(NOT MSVC)
     sleipnir_add_build_type(
       allowedBuildTypes
       "Asan"
-      "${CMAKE_C_FLAGS_DEBUG} -fsanitize=address -fno-omit-frame-pointer"
-      "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address -fno-omit-frame-pointer"
-      "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} -fsanitize=address"
-      "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} -fsanitize=address"
+      "${CMAKE_C_FLAGS_RELWITHDEBINFO} -fsanitize=address -fno-omit-frame-pointer"
+      "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -fsanitize=address -fno-omit-frame-pointer"
+      "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO} -fsanitize=address"
+      "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO} -fsanitize=address"
     )
 
     sleipnir_add_build_type(
       allowedBuildTypes
       "Tsan"
-      "${CMAKE_C_FLAGS_DEBUG} -fsanitize=thread -fno-omit-frame-pointer"
-      "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=thread -fno-omit-frame-pointer"
-      "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} -fsanitize=thread"
-      "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} -fsanitize=thread"
+      "${CMAKE_C_FLAGS_RELWITHDEBINFO} -fsanitize=thread -fno-omit-frame-pointer"
+      "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -fsanitize=thread -fno-omit-frame-pointer"
+      "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO} -fsanitize=thread"
+      "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO} -fsanitize=thread"
     )
 
     sleipnir_add_build_type(
       allowedBuildTypes
       "Ubsan"
-      "${CMAKE_C_FLAGS_DEBUG} -fsanitize=undefined -fno-sanitize-recover=all -fno-omit-frame-pointer"
-      "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=undefined -fno-sanitize-recover=all -fno-omit-frame-pointer"
-      "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} -fsanitize=undefined -fno-sanitize-recover=all"
-      "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} -fsanitize=undefined"
+      "${CMAKE_C_FLAGS_RELWITHDEBINFO} -fsanitize=undefined -fno-sanitize-recover=all -fno-omit-frame-pointer"
+      "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -fsanitize=undefined -fno-sanitize-recover=all -fno-omit-frame-pointer"
+      "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO} -fsanitize=undefined -fno-sanitize-recover=all"
+      "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO} -fsanitize=undefined"
     )
 
     sleipnir_add_build_type(
@@ -96,7 +96,7 @@ if(NOT MSVC)
       "${CMAKE_C_FLAGS_RELWITHDEBINFO} -fno-omit-frame-pointer"
       "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -fno-omit-frame-pointer"
       "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO}"
-      "${CMAKE_SHARED_LINKER_FLAGS_DEBUG}"
+      "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO}"
     )
 
     sleipnir_check_build_type(allowedBuildTypes)
