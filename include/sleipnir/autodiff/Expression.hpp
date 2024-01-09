@@ -157,6 +157,13 @@ struct SLEIPNIR_DLLEXPORT Expression {
              ExpressionPtr lhs, ExpressionPtr rhs);
 
   /**
+   * Returns true if the expression is the given constant.
+   *
+   * @param constant The constant.
+   */
+  bool IsConstant(double constant) const;
+
+  /**
    * Expression-Expression multiplication operator.
    *
    * @param lhs Operator left-hand side.

@@ -3,6 +3,7 @@
 #include "CurrentManager.hpp"
 
 #include <algorithm>
+#include <limits>
 #include <stdexcept>
 
 CurrentManager::CurrentManager(
@@ -13,7 +14,8 @@ CurrentManager::CurrentManager(
           m_problem.DecisionVariable(currentTolerances.size())} {
   // Ensure m_desiredCurrents contains initialized Variables
   for (int row = 0; row < m_desiredCurrents.Rows(); ++row) {
-    m_desiredCurrents(row) = 0.0;
+    // Don't initialize to 0 or 1, because those will get folded by Sleipnir
+    m_desiredCurrents(row) = std::numeric_limits<double>::infinity();
   }
 
   sleipnir::Variable J = 0.0;
