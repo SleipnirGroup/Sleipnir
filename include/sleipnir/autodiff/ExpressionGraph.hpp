@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <concepts>
 #include <vector>
 
 #include "sleipnir/autodiff/Expression.hpp"
@@ -44,7 +45,7 @@ class SLEIPNIR_DLLEXPORT ExpressionGraph {
    * @param func A function that takes two arguments: an int for the gradient
    *   row, and a double for the adjoint (gradient value).
    */
-  template <typename F>
+  template <std::invocable<int, double> F>
   void ComputeAdjoints(F&& func) {
     // Zero adjoints. The root node's adjoint is 1.0 as df/df is always 1.
     m_adjointList[0]->adjoint = 1.0;

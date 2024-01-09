@@ -426,7 +426,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param unaryOp The unary operator to use for the transform operation.
    */
   template <std::invocable<const Variable&> UnaryOp>
-  VariableMatrix CwiseTransform(UnaryOp unaryOp) const {
+  VariableMatrix CwiseTransform(UnaryOp&& unaryOp) const {
     VariableMatrix result{Rows(), Cols()};
 
     for (int row = 0; row < Rows(); ++row) {
@@ -565,7 +565,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
  */
 template <std::invocable<const Variable&, const Variable&> BinaryOp>
 VariableMatrix CwiseReduce(const VariableMatrix& lhs, const VariableMatrix& rhs,
-                           BinaryOp binaryOp) {
+                           BinaryOp&& binaryOp) {
   assert(lhs.Rows() == rhs.Rows());
   assert(lhs.Rows() == rhs.Rows());
 
