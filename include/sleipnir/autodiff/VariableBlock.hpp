@@ -473,7 +473,7 @@ class VariableBlock {
    * @param unaryOp The unary operator to use for the transform operation.
    */
   template <std::invocable<const Variable&> UnaryOp>
-  std::remove_cv_t<Mat> CwiseTransform(UnaryOp unaryOp) const {
+  std::remove_cv_t<Mat> CwiseTransform(UnaryOp&& unaryOp) const {
     std::remove_cv_t<Mat> result{Rows(), Cols()};
 
     for (int row = 0; row < Rows(); ++row) {
