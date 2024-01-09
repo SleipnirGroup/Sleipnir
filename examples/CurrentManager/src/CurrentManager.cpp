@@ -28,7 +28,7 @@ CurrentManager::CurrentManager(
     currentSum += m_allocatedCurrents(i);
 
     // Currents must be nonnegative
-    m_problem.SubjectTo(m_allocatedCurrents(i) >= 0);
+    m_problem.SubjectTo(m_allocatedCurrents(i) >= 0.0);
   }
   m_problem.Minimize(J);
 
