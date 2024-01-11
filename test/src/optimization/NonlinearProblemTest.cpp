@@ -106,3 +106,28 @@ TEST(NonlinearProblemTest, RosenbrockWithDiskConstraint) {
     }
   }
 }
+
+TEST(NonlinearProblemTest, NarrowFeasibleRegion) {
+  sleipnir::OptimizationProblem problem;
+
+  auto x = problem.DecisionVariable();
+  x.SetValue(20.0);
+
+  auto y = problem.DecisionVariable();
+  y.SetValue(50.0);
+
+  problem.Minimize(sleipnir::sqrt(x * x + y * y));
+
+  problem.SubjectTo(y == -x + 5.0);
+
+  auto status =
+      problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
+
+  EXPECT_EQ(sleipnir::ExpressionType::kNonlinear, status.costFunctionType);
+  EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.equalityConstraintType);
+  EXPECT_EQ(sleipnir::ExpressionType::kNone, status.inequalityConstraintType);
+  EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
+
+  EXPECT_NEAR(2.5, x.Value(), 1e-2);
+  EXPECT_NEAR(2.5, y.Value(), 1e-2);
+}
