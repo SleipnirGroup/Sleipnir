@@ -144,12 +144,12 @@ const Variable& VariableMatrix::operator()(int row, int col) const {
 
 Variable& VariableMatrix::operator()(int row) {
   assert(row >= 0 && row < Rows() * Cols());
-  return m_storage[row * Cols()];
+  return m_storage[row];
 }
 
 const Variable& VariableMatrix::operator()(int row) const {
   assert(row >= 0 && row < Rows() * Cols());
-  return m_storage[row * Cols()];
+  return m_storage[row];
 }
 
 VariableBlock<VariableMatrix> VariableMatrix::Block(int rowOffset,

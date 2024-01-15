@@ -215,7 +215,7 @@ class VariableBlock {
     requires(!std::is_const_v<Mat2>)
   Variable& operator()(int row) {
     assert(row >= 0 && row < Rows() * Cols());
-    return (*m_mat)(row);
+    return (*this)(row / Cols(), row % Cols());
   }
 
   /**
@@ -225,7 +225,7 @@ class VariableBlock {
    */
   const Variable& operator()(int row) const {
     assert(row >= 0 && row < Rows() * Cols());
-    return (*m_mat)(row);
+    return (*this)(row / Cols(), row % Cols());
   }
 
   /**
