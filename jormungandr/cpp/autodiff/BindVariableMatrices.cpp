@@ -502,6 +502,7 @@ void BindVariableMatrix(py::module_& autodiff,
         return lhs >= rhs;
       },
       py::is_operator());
+  variable_matrix.def("__len__", &VariableMatrix::size);
 }
 
 void BindVariableBlock(
@@ -856,6 +857,7 @@ void BindVariableBlock(
   variable_block.def(py::self >= int());
   variable_block.def(double() >= py::self);
   variable_block.def(int() >= py::self);
+  variable_block.def("__len__", &VariableBlock<VariableMatrix>::size);
   py::implicitly_convertible<VariableBlock<VariableMatrix>, VariableMatrix>();
 }
 

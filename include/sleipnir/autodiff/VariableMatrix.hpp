@@ -535,6 +535,11 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
   const_iterator cend() const { return const_iterator(this, Rows(), 0); }
 
   /**
+   * Returns number of elements in matrix.
+   */
+  size_t size() const { return m_rows * m_cols; }
+
+  /**
    * Returns a variable matrix filled with zeroes.
    *
    * @param rows The number of matrix rows.
