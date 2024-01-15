@@ -2,6 +2,9 @@
 
 #include "sleipnir/autodiff/VariableMatrix.hpp"
 
+#include <algorithm>
+#include <iterator>
+
 namespace sleipnir {
 
 VariableMatrix::VariableMatrix(int rows) : m_rows{rows}, m_cols{1} {
@@ -35,9 +38,7 @@ VariableMatrix::VariableMatrix(
 
   m_storage.reserve(Rows() * Cols());
   for (const auto& row : list) {
-    for (const auto& elem : row) {
-      m_storage.emplace_back(elem);
-    }
+    std::copy(row.begin(), row.end(), std::back_inserter(m_storage));
   }
 }
 
@@ -56,9 +57,7 @@ VariableMatrix::VariableMatrix(std::vector<std::vector<double>> list) {
 
   m_storage.reserve(Rows() * Cols());
   for (const auto& row : list) {
-    for (const auto& elem : row) {
-      m_storage.emplace_back(elem);
-    }
+    std::copy(row.begin(), row.end(), std::back_inserter(m_storage));
   }
 }
 
@@ -77,9 +76,7 @@ VariableMatrix::VariableMatrix(std::vector<std::vector<Variable>> list) {
 
   m_storage.reserve(Rows() * Cols());
   for (const auto& row : list) {
-    for (const auto& elem : row) {
-      m_storage.emplace_back(elem);
-    }
+    std::copy(row.begin(), row.end(), std::back_inserter(m_storage));
   }
 }
 

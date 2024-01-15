@@ -2,7 +2,9 @@
 
 #include "sleipnir/optimization/OptimizationProblem.hpp"
 
+#include <algorithm>
 #include <array>
+#include <iterator>
 
 #include <fmt/core.h>
 
@@ -79,45 +81,31 @@ void OptimizationProblem::Maximize(Variable&& cost) {
 }
 
 void OptimizationProblem::SubjectTo(const EqualityConstraints& constraint) {
-  auto& storage = constraint.constraints;
-
-  m_equalityConstraints.reserve(m_equalityConstraints.size() + storage.size());
-
-  for (size_t i = 0; i < storage.size(); ++i) {
-    m_equalityConstraints.emplace_back(storage[i]);
-  }
+  m_equalityConstraints.reserve(m_equalityConstraints.size() +
+                                constraint.constraints.size());
+  std::copy(constraint.constraints.begin(), constraint.constraints.end(),
+            std::back_inserter(m_equalityConstraints));
 }
 
 void OptimizationProblem::SubjectTo(EqualityConstraints&& constraint) {
-  auto& storage = constraint.constraints;
-
-  m_equalityConstraints.reserve(m_equalityConstraints.size() + storage.size());
-
-  for (size_t i = 0; i < storage.size(); ++i) {
-    m_equalityConstraints.emplace_back(std::move(storage[i]));
-  }
+  m_equalityConstraints.reserve(m_equalityConstraints.size() +
+                                constraint.constraints.size());
+  std::copy(constraint.constraints.begin(), constraint.constraints.end(),
+            std::back_inserter(m_equalityConstraints));
 }
 
 void OptimizationProblem::SubjectTo(const InequalityConstraints& constraint) {
-  auto& storage = constraint.constraints;
-
   m_inequalityConstraints.reserve(m_inequalityConstraints.size() +
-                                  storage.size());
-
-  for (size_t i = 0; i < storage.size(); ++i) {
-    m_inequalityConstraints.emplace_back(storage[i]);
-  }
+                                  constraint.constraints.size());
+  std::copy(constraint.constraints.begin(), constraint.constraints.end(),
+            std::back_inserter(m_inequalityConstraints));
 }
 
 void OptimizationProblem::SubjectTo(InequalityConstraints&& constraint) {
-  auto& storage = constraint.constraints;
-
   m_inequalityConstraints.reserve(m_inequalityConstraints.size() +
-                                  storage.size());
-
-  for (size_t i = 0; i < storage.size(); ++i) {
-    m_inequalityConstraints.emplace_back(std::move(storage[i]));
-  }
+                                  constraint.constraints.size());
+  std::copy(constraint.constraints.begin(), constraint.constraints.end(),
+            std::back_inserter(m_inequalityConstraints));
 }
 
 SolverStatus OptimizationProblem::Solve(const SolverConfig& config) {

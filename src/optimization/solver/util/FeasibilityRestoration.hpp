@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cmath>
 #include <functional>
+#include <iterator>
 #include <span>
 #include <vector>
 
@@ -83,18 +84,18 @@ inline void FeasibilityRestoration(
 
   VariableMatrix xAD{{&fr_decisionVariables[0], decisionVariables.size()}};
 
-  VariableMatrix p_eq{{&fr_decisionVariables[decisionVariables.size()],
-                       equalityConstraints.size()}};
-  VariableMatrix n_eq{{&fr_decisionVariables[decisionVariables.size() +
-                                             equalityConstraints.size()],
-                       equalityConstraints.size()}};
-  VariableMatrix p_ineq{{&fr_decisionVariables[decisionVariables.size() +
-                                               2 * equalityConstraints.size()],
-                         inequalityConstraints.size()}};
-  VariableMatrix n_ineq{{&fr_decisionVariables[decisionVariables.size() +
-                                               2 * equalityConstraints.size() +
-                                               inequalityConstraints.size()],
-                         inequalityConstraints.size()}};
+  VariableMatrix p_e{{&fr_decisionVariables[decisionVariables.size()],
+                      equalityConstraints.size()}};
+  VariableMatrix n_e{{&fr_decisionVariables[decisionVariables.size() +
+                                            equalityConstraints.size()],
+                      equalityConstraints.size()}};
+  VariableMatrix p_i{{&fr_decisionVariables[decisionVariables.size() +
+                                            2 * equalityConstraints.size()],
+                      inequalityConstraints.size()}};
+  VariableMatrix n_i{{&fr_decisionVariables[decisionVariables.size() +
+                                            2 * equalityConstraints.size() +
+                                            inequalityConstraints.size()],
+                      inequalityConstraints.size()}};
 
   // Set initial values for pₑ, nₑ, pᵢ, and nᵢ.
   //
@@ -128,7 +129,7 @@ inline void FeasibilityRestoration(
   //   c = -μ c(x)/2                                 (5)
   //
   //   p = c(x) + n                                  (6)
-  for (int row = 0; row < p_eq.Rows(); ++row) {
+  for (int row = 0; row < p_e.Rows(); ++row) {
     double c_e = equalityConstraints[row].Value();
 
     constexpr double a = 2 * ρ;
@@ -138,10 +139,10 @@ inline void FeasibilityRestoration(
     double n = -b * std::sqrt(b * b - 4.0 * a * c) / (2.0 * a);
     double p = c_e + n;
 
-    p_eq(row).SetValue(p);
-    n_eq(row).SetValue(n);
+    p_e(row).SetValue(p);
+    n_e(row).SetValue(n);
   }
-  for (int row = 0; row < p_ineq.Rows(); ++row) {
+  for (int row = 0; row < p_i.Rows(); ++row) {
     double c_i = inequalityConstraints[row].Value() - s(row);
 
     constexpr double a = 2 * ρ;
@@ -151,54 +152,59 @@ inline void FeasibilityRestoration(
     double n = -b * std::sqrt(b * b - 4.0 * a * c) / (2.0 * a);
     double p = c_i + n;
 
-    p_ineq(row).SetValue(p);
-    n_ineq(row).SetValue(n);
+    p_i(row).SetValue(p);
+    n_i(row).SetValue(n);
   }
 
+  // cₑ(x) - pₑ + nₑ = 0
   std::vector<Variable> fr_equalityConstraints;
   fr_equalityConstraints.assign(equalityConstraints.begin(),
                                 equalityConstraints.end());
   for (size_t row = 0; row < fr_equalityConstraints.size(); ++row) {
     auto& constraint = fr_equalityConstraints[row];
-    constraint = constraint - p_eq(row) + n_eq(row);
+    constraint = constraint - p_e(row) + n_e(row);
   }
 
+  // cᵢ(x) - s - pᵢ + nᵢ = 0
   std::vector<Variable> fr_inequalityConstraints;
   fr_inequalityConstraints.assign(inequalityConstraints.begin(),
                                   inequalityConstraints.end());
   for (size_t row = 0; row < fr_inequalityConstraints.size(); ++row) {
     auto& constraint = fr_inequalityConstraints[row];
-    constraint = constraint - s(row) - p_ineq(row) + n_ineq(row);
+    constraint = constraint - s(row) - p_i(row) + n_i(row);
   }
-  // Require p ≥ 0
-  for (auto& p_i : p_eq) {
-    fr_inequalityConstraints.emplace_back(p_i);
-  }
-  for (auto& p_i : p_ineq) {
-    fr_inequalityConstraints.emplace_back(p_i);
-  }
-  // Require n ≥ 0
-  for (auto& n_i : n_eq) {
-    fr_inequalityConstraints.emplace_back(n_i);
-  }
-  for (auto& n_i : n_ineq) {
-    fr_inequalityConstraints.emplace_back(n_i);
-  }
+
+  // pₑ ≥ 0
+  std::copy(p_e.begin(), p_e.end(),
+            std::back_inserter(fr_inequalityConstraints));
+
+  // pᵢ ≥ 0
+  std::copy(p_i.begin(), p_i.end(),
+            std::back_inserter(fr_inequalityConstraints));
+
+  // nₑ ≥ 0
+  std::copy(n_e.begin(), n_e.end(),
+            std::back_inserter(fr_inequalityConstraints));
+
+  // nᵢ ≥ 0
+  std::copy(n_i.begin(), n_i.end(),
+            std::back_inserter(fr_inequalityConstraints));
 
   Variable J = 0.0;
-  for (auto& p_i : p_eq) {
-    J += p_i;
-  }
-  for (auto& p_i : p_ineq) {
-    J += p_i;
-  }
-  for (auto& n_i : n_eq) {
-    J += n_i;
-  }
-  for (auto& n_i : n_ineq) {
-    J += n_i;
-  }
 
+  // J += ρ Σ (pₑ + nₑ + pᵢ + nᵢ)
+  for (auto& elem : p_e) {
+    J += elem;
+  }
+  for (auto& elem : p_i) {
+    J += elem;
+  }
+  for (auto& elem : n_e) {
+    J += elem;
+  }
+  for (auto& elem : n_i) {
+    J += elem;
+  }
   J *= ρ;
 
   // D_R = diag(min(1, 1/|x_R⁽¹⁾|), …, min(1, 1/|x_R|⁽ⁿ⁾)
@@ -207,7 +213,7 @@ inline void FeasibilityRestoration(
     D_R(row) = std::min(1.0, 1.0 / std::abs(x(row)));
   }
 
-  // ζ/2 (x - x_R)ᵀD_R(x - x_R)
+  // J += ζ/2 (x - x_R)ᵀD_R(x - x_R)
   for (int row = 0; row < x.rows(); ++row) {
     J += std::sqrt(μ) / 2.0 * D_R(row) * sleipnir::pow(xAD(row) - x(row), 2);
   }
