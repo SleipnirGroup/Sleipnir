@@ -4,7 +4,8 @@ function(pybind11_stubgen target)
         TARGET ${target}
         POST_BUILD
         COMMAND
-            ${Python3_EXECUTABLE} -m pybind11_stubgen
+            ${Python3_EXECUTABLE} -m pybind11_stubgen --ignore-all-errors
+            --print-invalid-expressions-as-is --exit-code
             $<TARGET_FILE_BASE_NAME:${target}> -o $<TARGET_FILE_DIR:${target}>
         WORKING_DIRECTORY $<TARGET_FILE_DIR:${target}>
         USES_TERMINAL
