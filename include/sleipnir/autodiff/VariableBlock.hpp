@@ -581,6 +581,11 @@ class VariableBlock {
    */
   const_iterator cend() const { return const_iterator(this, Rows(), 0); }
 
+  /**
+   * Returns number of elements in matrix.
+   */
+  size_t size() const { return m_blockRows * m_blockCols; }
+
  private:
   Mat* m_mat = nullptr;
   int m_rowOffset = 0;
