@@ -135,9 +135,13 @@ void BindVariableMatrix(py::module_& autodiff,
           value.cast<int>();
     }
   });
-  variable_matrix.def(
-      "__getitem__",
-      [](VariableMatrix& self, int row) -> Variable& { return self(row); });
+  variable_matrix.def("__getitem__",
+                      [](VariableMatrix& self, int row) -> Variable& {
+                        if (row < 0) {
+                          row = self.size() + row;
+                        }
+                        return self(row);
+                      });
   // TODO: Support slice stride other than 1
   variable_matrix.def(
       "__getitem__", [](VariableMatrix& self, py::tuple slices) -> py::object {
@@ -157,6 +161,12 @@ void BindVariableMatrix(py::module_& autodiff,
             throw std::out_of_range("Index out of bounds");
           }
 
+          if (row < 0) {
+            row = self.Rows() + row;
+          }
+          if (col < 0) {
+            col = self.Cols() + col;
+          }
           return py::cast(self(row, col));
         }
 
@@ -594,9 +604,14 @@ void BindVariableBlock(
           value.cast<int>();
     }
   });
-  variable_block.def("__getitem__",
-                     [](VariableBlock<VariableMatrix>& self,
-                        int row) -> Variable& { return self(row); });
+  variable_block.def(
+      "__getitem__",
+      [](VariableBlock<VariableMatrix>& self, int row) -> Variable& {
+        if (row < 0) {
+          row = self.size() + row;
+        }
+        return self(row);
+      });
   // TODO: Support slice stride other than 1
   variable_block.def(
       "__getitem__",
@@ -617,6 +632,12 @@ void BindVariableBlock(
             throw std::out_of_range("Index out of bounds");
           }
 
+          if (row < 0) {
+            row = self.Rows() + row;
+          }
+          if (col < 0) {
+            col = self.Cols() + col;
+          }
           return py::cast(self(row, col));
         }
 
