@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <Eigen/Core>
 #include <Eigen/SparseCore>
 
 namespace sleipnir {
