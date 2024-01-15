@@ -32,6 +32,45 @@ def test_assignment_to_default():
     assert mat[1, 1] == 4.0
 
 
+def test_slicing():
+    mat = VariableMatrix(
+        [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]]
+    )
+    assert mat.shape == (4, 4)
+
+    # Single-arg index operator on full matrix
+    for i in range(mat.shape[0] * mat.shape[1]):
+        assert mat[i] == i + 1
+
+    # Slice from beginning
+    s = mat[1:, 2:]
+    assert s.shape == (3, 2)
+    # Single-arg index operator on forward slice
+    assert s[0] == 7.0
+    assert s[1] == 8.0
+    assert s[2] == 11.0
+    assert s[3] == 12.0
+    assert s[4] == 15.0
+    assert s[5] == 16.0
+    # Double-arg index operator on forward slice
+    assert s[0, 0] == 7.0
+    assert s[0, 1] == 8.0
+    assert s[1, 0] == 11.0
+    assert s[1, 1] == 12.0
+    assert s[2, 0] == 15.0
+    assert s[2, 1] == 16.0
+
+    # Slice from end
+    s = mat[-1:, -2:]
+    assert s.shape == (1, 2)
+    # Single-arg index operator on reverse slice
+    assert s[0] == 15.0
+    assert s[1] == 16.0
+    # Double-arg index operator on reverse slice
+    assert s[0, 0] == 15.0
+    assert s[0, 1] == 16.0
+
+
 def test_cwise_transform():
     # VariableMatrix CwiseTransform
     A = VariableMatrix([[-2.0, -3.0, -4.0], [-5.0, -6.0, -7.0]])
