@@ -52,7 +52,7 @@ def cart_pole_dynamics_double(x, u):
     g = 9.806  # Acceleration due to gravity (m/s²)
 
     q = x[:2, :]
-    qdot = x[:2:, :]
+    qdot = x[2:, :]
     theta = q[1, 0]
     thetadot = qdot[1, 0]
 
@@ -127,7 +127,7 @@ def cart_pole_dynamics(x, u):
     g = 9.806  # Acceleration due to gravity (m/s²)
 
     q = x[:2, :]
-    qdot = x[:2:, :]
+    qdot = x[2:, :]
     theta = q[1, 0]
     thetadot = qdot[1, 0]
 
