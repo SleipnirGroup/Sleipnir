@@ -138,12 +138,12 @@ TEST(HessianTest, ProductOfSines) {
     for (int j = 0; j < x.Rows(); ++j) {
       if (i == j) {
         EXPECT_NEAR(
-            (g(i) / tan(x(i))).Value() *
+            (g(i) / sleipnir::tan(x(i))).Value() *
                 (1.0 - 1.0 / (sleipnir::cos(x(i)) * sleipnir::cos(x(i))))
                     .Value(),
             H(i, j), 1e-14);
       } else {
-        EXPECT_DOUBLE_EQ((g(j) / tan(x(i))).Value(), H(i, j));
+        EXPECT_DOUBLE_EQ((g(j) / sleipnir::tan(x(i))).Value(), H(i, j));
       }
     }
   }
