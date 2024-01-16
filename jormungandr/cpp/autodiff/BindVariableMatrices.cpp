@@ -546,8 +546,16 @@ void BindVariableMatrix(py::module_& autodiff,
         return lhs >= rhs;
       },
       py::is_operator(), DOC(sleipnir, operator, ge));
+
   variable_matrix.def("__len__", &VariableMatrix::Rows,
                       DOC(sleipnir, VariableMatrix, Rows));
+
+  variable_matrix.def(
+      "__iter__",
+      [](const VariableMatrix& self) {
+        return py::make_iterator(self.begin(), self.end());
+      },
+      py::keep_alive<0, 1>());
 }
 
 void BindVariableBlock(
@@ -938,8 +946,17 @@ void BindVariableBlock(
   variable_block.def(py::self >= int(), DOC(sleipnir, operator, ge));
   variable_block.def(double() >= py::self, DOC(sleipnir, operator, ge));
   variable_block.def(int() >= py::self, DOC(sleipnir, operator, ge));
+
   variable_block.def("__len__", &VariableBlock<VariableMatrix>::Rows,
                      DOC(sleipnir, VariableBlock, Rows));
+
+  variable_block.def(
+      "__iter__",
+      [](const VariableBlock<VariableMatrix>& self) {
+        return py::make_iterator(self.begin(), self.end());
+      },
+      py::keep_alive<0, 1>());
+
   py::implicitly_convertible<VariableBlock<VariableMatrix>, VariableMatrix>();
 }
 
