@@ -369,4 +369,28 @@ if(BUILD_PYTHON)
         pybind11_stubgen(_jormungandr)
         pybind11_stubgen_install(_jormungandr ${PY_DEST})
     endif()
+
+    # Generate docs for the Python module
+    # pybind11_mkdoc supports Windows and macOS but not Windows
+    if(NOT WIN32 AND NOT CMAKE_CROSSCOMPILING)
+        # pybind11_mkdoc dependency
+        fetchcontent_declare(
+            pybind11_mkdoc
+            GIT_REPOSITORY https://github.com/pybind/pybind11_mkdoc.git
+            GIT_TAG master
+            GIT_SUBMODULES ""
+        )
+        fetchcontent_makeavailable(pybind11_mkdoc)
+
+        file(
+            GLOB_RECURSE sleipnir_headers
+            include/sleipnir/autodiff/*.hpp
+            include/sleipnir/control/*.hpp
+            include/sleipnir/optimization/*.hpp
+        )
+
+        include(cmake/modules/Pybind11Mkdoc.cmake)
+        pybind11_mkdoc(_jormungandr "${sleipnir_headers}")
+        add_dependencies(_jormungandr _jormungandr_docstrings)
+    endif()
 endif()

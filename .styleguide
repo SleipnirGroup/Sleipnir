@@ -26,4 +26,5 @@ includeOtherLibs {
 
 modifiableFileExclude {
   \.patch$
+  jormungandr/cpp/Docstrings\.hpp$
 }
