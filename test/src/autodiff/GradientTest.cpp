@@ -392,7 +392,6 @@ TEST(GradientTest, Hypot) {
 TEST(GradientTest, Miscellaneous) {
   sleipnir::Variable x;
   x.SetValue(3.0);
-  sleipnir::Variable y = x;
 
   EXPECT_DOUBLE_EQ(std::abs(x.Value()), sleipnir::abs(x).Value());
   EXPECT_DOUBLE_EQ(1.0, sleipnir::Gradient(x, x).Calculate().coeff(0));
