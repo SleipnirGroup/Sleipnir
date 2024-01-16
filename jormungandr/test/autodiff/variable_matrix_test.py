@@ -71,6 +71,28 @@ def test_slicing():
     assert s[0, 1] == 16.0
 
 
+def test_iterators():
+    A = VariableMatrix([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]])
+
+    # VariableMatrix iterator
+    assert 9 == sum(1 for e in A)
+
+    i = 1
+    for elem in A:
+        assert i == elem.value()
+        i += 1
+
+    Asub = A[2:3, 1:3]
+
+    # VariableBlock iterator
+    assert 2 == sum(1 for e in Asub)
+
+    i = 8
+    for elem in Asub:
+        assert i == elem.value()
+        i += 1
+
+
 def test_cwise_transform():
     # VariableMatrix CwiseTransform
     A = VariableMatrix([[-2.0, -3.0, -4.0], [-5.0, -6.0, -7.0]])
