@@ -92,6 +92,8 @@ ExpressionPtr operator*(const ExpressionPtr& lhs, const ExpressionPtr& rhs) {
 ExpressionPtr operator/(const ExpressionPtr& lhs, const ExpressionPtr& rhs) {
   if (lhs->IsConstant(0.0)) {
     return Zero();
+  } else if (rhs->IsConstant(1.0)) {
+    return lhs;
   }
 
   // Evaluate the expression's type
@@ -185,14 +187,9 @@ ExpressionPtr operator-(const ExpressionPtr& lhs) {
 ExpressionPtr operator+(const ExpressionPtr& lhs) {
   if (lhs->IsConstant(0.0)) {
     return Zero();
+  } else {
+    return lhs;
   }
-
-  return MakeExpressionPtr(
-      lhs->type, [](double lhs, double) { return lhs; },
-      [](double lhs, double, double parentAdjoint) { return parentAdjoint; },
-      [](const ExpressionPtr& lhs, const ExpressionPtr& rhs,
-         const ExpressionPtr& parentAdjoint) { return parentAdjoint; },
-      lhs);
 }
 
 ExpressionPtr abs(  // NOLINT
@@ -460,6 +457,10 @@ ExpressionPtr hypot(  // NOLINT
     const ExpressionPtr& x, const ExpressionPtr& y) {
   if (x->IsConstant(0.0) && y->IsConstant(0.0)) {
     return Zero();
+  } else if (x->IsConstant(0.0)) {
+    return y;
+  } else if (y->IsConstant(0.0)) {
+    return x;
   }
 
   // Evaluate the expression's type
@@ -548,9 +549,13 @@ ExpressionPtr pow(  // NOLINT
     const ExpressionPtr& base, const ExpressionPtr& power) {
   if (base->IsConstant(0.0)) {
     return Zero();
+  } else if (base->IsConstant(1.0)) {
+    return base;
   }
   if (power->IsConstant(0.0)) {
     return MakeExpressionPtr(1.0);
+  } else if (power->IsConstant(1.0)) {
+    return base;
   }
 
   // Evaluate the expression's type
@@ -690,6 +695,8 @@ ExpressionPtr sqrt(  // NOLINT
     const ExpressionPtr& x) {
   if (x->IsConstant(0.0)) {
     return Zero();
+  } else if (x->IsConstant(1.0)) {
+    return x;
   }
 
   // Evaluate the expression's type
