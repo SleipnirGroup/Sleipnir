@@ -116,6 +116,13 @@ void InteriorPoint(
     return;
   }
 
+  // Check whether initial guess has finite f(xₖ), cₑ(xₖ), and cᵢ(xₖ)
+  if (!std::isfinite(f.Value()) || !c_e.allFinite() || !c_i.allFinite()) {
+    status->exitCondition =
+        SolverExitCondition::kNonfiniteInitialCostOrConstraints;
+    return;
+  }
+
   // Sparsity pattern files written when spy flag is set in SolverConfig
   std::ofstream H_spy;
   std::ofstream A_e_spy;

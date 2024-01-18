@@ -31,6 +31,9 @@ void PrintTo(const SolverExitCondition& exitCondition, std::ostream* os) {
     case kMaxSearchDirectionTooSmall:
       *os << "kMaxSearchDirectionTooSmall";
       break;
+    case kNonfiniteInitialCostOrConstraints:
+      *os << "kNonfiniteInitialCostOrConstraints";
+      break;
     case kDivergingIterates:
       *os << "kDivergingIterates";
       break;

@@ -31,6 +31,10 @@ void BindSolverExitCondition(py::module_& optimization) {
   e.value("MAX_SEARCH_DIRECTION_TOO_SMALL",
           SolverExitCondition::kMaxSearchDirectionTooSmall,
           DOC(sleipnir, SolverExitCondition, kMaxSearchDirectionTooSmall));
+  e.value(
+      "NONFINITE_INITIAL_COST_OR_CONSTRAINTS",
+      SolverExitCondition::kNonfiniteInitialCostOrConstraints,
+      DOC(sleipnir, SolverExitCondition, kNonfiniteInitialCostOrConstraints));
   e.value("DIVERGING_ITERATES", SolverExitCondition::kDivergingIterates,
           DOC(sleipnir, SolverExitCondition, kDivergingIterates));
   e.value("MAX_ITERATIONS_EXCEEDED",
