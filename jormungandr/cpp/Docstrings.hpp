@@ -865,6 +865,10 @@ static const char *__doc_sleipnir_SolverExitCondition_kMaxWallClockTimeExceeded 
 R"doc(The solver returned its solution so far after exceeding the maximum
 elapsed wall clock time.)doc";
 
+static const char *__doc_sleipnir_SolverExitCondition_kNonfiniteInitialCostOrConstraints =
+R"doc(The solver encountered nonfinite initial cost or constraints and gave
+up.)doc";
+
 static const char *__doc_sleipnir_SolverExitCondition_kSolvedToAcceptableTolerance =
 R"doc(Solved the problem to an acceptable tolerance, but not the desired
 one.)doc";
