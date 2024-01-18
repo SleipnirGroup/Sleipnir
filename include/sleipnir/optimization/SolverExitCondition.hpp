@@ -29,8 +29,7 @@ enum class SolverExitCondition {
   /// The solver failed to reach the desired tolerance due to the maximum search
   /// direction becoming too small.
   kMaxSearchDirectionTooSmall = -4,
-  /// The solver encountered diverging primal iterates pₖˣ and/or pₖˢ and gave
-  /// up.
+  /// The solver encountered diverging primal iterates xₖ and/or sₖ and gave up.
   kDivergingIterates = -5,
   /// The solver returned its solution so far after exceeding the maximum number
   /// of iterations.
@@ -67,7 +66,7 @@ SLEIPNIR_DLLEXPORT constexpr std::string_view ToMessage(
       return "solver failed to reach the desired tolerance due to the maximum "
              "search direction becoming too small";
     case kDivergingIterates:
-      return "solver encountered diverging primal iterates pₖˣ and/or pₖˢ and "
+      return "solver encountered diverging primal iterates xₖ and/or sₖ and "
              "gave up";
     case kMaxIterationsExceeded:
       return "solution returned after maximum iterations exceeded";

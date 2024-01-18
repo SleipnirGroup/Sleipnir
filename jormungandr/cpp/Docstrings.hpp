@@ -842,8 +842,8 @@ R"doc(The solver returned its solution so far after the user requested a
 stop.)doc";
 
 static const char *__doc_sleipnir_SolverExitCondition_kDivergingIterates =
-R"doc(The solver encountered diverging primal iterates pₖˣ and/or pₖˢ and
-gave up.)doc";
+R"doc(The solver encountered diverging primal iterates xₖ and/or sₖ and gave
+up.)doc";
 
 static const char *__doc_sleipnir_SolverExitCondition_kFeasibilityRestorationFailed =
 R"doc(The solver failed to reach the desired tolerance, and feasibility
