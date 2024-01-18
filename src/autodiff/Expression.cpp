@@ -51,9 +51,10 @@ bool Expression::IsConstant(double constant) const {
 }
 
 ExpressionPtr operator*(const ExpressionPtr& lhs, const ExpressionPtr& rhs) {
-  if (lhs->IsConstant(0.0)) {
-    return Zero();
-  } else if (rhs->IsConstant(0.0)) {
+  using enum ExpressionType;
+
+  // Prune expression
+  if (lhs->IsConstant(0.0) || rhs->IsConstant(0.0)) {
     return Zero();
   } else if (lhs->IsConstant(1.0)) {
     return rhs;
@@ -61,14 +62,18 @@ ExpressionPtr operator*(const ExpressionPtr& lhs, const ExpressionPtr& rhs) {
     return lhs;
   }
 
-  // Evaluate the expression's type
+  // Evaluate constant
+  if (lhs->type == kConstant && rhs->type == kConstant) {
+    return MakeExpressionPtr(lhs->value * rhs->value);
+  }
+
+  // Evaluate expression type
   ExpressionType type;
-  if (lhs->type == ExpressionType::kConstant) {
+  if (lhs->type == kConstant) {
     type = rhs->type;
-  } else if (rhs->type == ExpressionType::kConstant) {
+  } else if (rhs->type == kConstant) {
     type = lhs->type;
-  } else if (lhs->type == ExpressionType::kLinear &&
-             rhs->type == ExpressionType::kLinear) {
+  } else if (lhs->type == kLinear && rhs->type == kLinear) {
     type = ExpressionType::kQuadratic;
   } else {
     type = ExpressionType::kNonlinear;
@@ -90,15 +95,23 @@ ExpressionPtr operator*(const ExpressionPtr& lhs, const ExpressionPtr& rhs) {
 }
 
 ExpressionPtr operator/(const ExpressionPtr& lhs, const ExpressionPtr& rhs) {
+  using enum ExpressionType;
+
+  // Prune expression
   if (lhs->IsConstant(0.0)) {
     return Zero();
   } else if (rhs->IsConstant(1.0)) {
     return lhs;
   }
 
-  // Evaluate the expression's type
+  // Evaluate constant
+  if (lhs->type == kConstant && rhs->type == kConstant) {
+    return MakeExpressionPtr(lhs->value / rhs->value);
+  }
+
+  // Evaluate expression type
   ExpressionType type;
-  if (rhs->type == ExpressionType::kConstant) {
+  if (rhs->type == kConstant) {
     type = lhs->type;
   } else {
     type = ExpressionType::kNonlinear;
@@ -122,10 +135,18 @@ ExpressionPtr operator/(const ExpressionPtr& lhs, const ExpressionPtr& rhs) {
 }
 
 ExpressionPtr operator+(const ExpressionPtr& lhs, const ExpressionPtr& rhs) {
+  using enum ExpressionType;
+
+  // Prune expression
   if (lhs->IsConstant(0.0)) {
     return rhs;
   } else if (rhs->IsConstant(0.0)) {
     return lhs;
+  }
+
+  // Evaluate constant
+  if (lhs->type == kConstant && rhs->type == kConstant) {
+    return MakeExpressionPtr(lhs->value + rhs->value);
   }
 
   return MakeExpressionPtr(
@@ -145,6 +166,9 @@ ExpressionPtr operator+(const ExpressionPtr& lhs, const ExpressionPtr& rhs) {
 }
 
 ExpressionPtr operator-(const ExpressionPtr& lhs, const ExpressionPtr& rhs) {
+  using enum ExpressionType;
+
+  // Prune expression
   if (lhs->IsConstant(0.0)) {
     if (rhs->IsConstant(0.0)) {
       return Zero();
@@ -153,6 +177,11 @@ ExpressionPtr operator-(const ExpressionPtr& lhs, const ExpressionPtr& rhs) {
     }
   } else if (rhs->IsConstant(0.0)) {
     return lhs;
+  }
+
+  // Evaluate constant
+  if (lhs->type == kConstant && rhs->type == kConstant) {
+    return MakeExpressionPtr(lhs->value - rhs->value);
   }
 
   return MakeExpressionPtr(
@@ -172,8 +201,16 @@ ExpressionPtr operator-(const ExpressionPtr& lhs, const ExpressionPtr& rhs) {
 }
 
 ExpressionPtr operator-(const ExpressionPtr& lhs) {
+  using enum ExpressionType;
+
+  // Prune expression
   if (lhs->IsConstant(0.0)) {
     return Zero();
+  }
+
+  // Evaluate constant
+  if (lhs->type == kConstant) {
+    return MakeExpressionPtr(-lhs->value);
   }
 
   return MakeExpressionPtr(
@@ -185,6 +222,7 @@ ExpressionPtr operator-(const ExpressionPtr& lhs) {
 }
 
 ExpressionPtr operator+(const ExpressionPtr& lhs) {
+  // Prune expression
   if (lhs->IsConstant(0.0)) {
     return Zero();
   } else {
@@ -192,22 +230,21 @@ ExpressionPtr operator+(const ExpressionPtr& lhs) {
   }
 }
 
-ExpressionPtr abs(  // NOLINT
-    const ExpressionPtr& x) {
+ExpressionPtr abs(const ExpressionPtr& x) {  // NOLINT
+  using enum ExpressionType;
+
+  // Prune expression
   if (x->IsConstant(0.0)) {
     return Zero();
   }
 
-  // Evaluate the expression's type
-  ExpressionType type;
-  if (x->type == ExpressionType::kConstant) {
-    type = ExpressionType::kConstant;
-  } else {
-    type = ExpressionType::kNonlinear;
+  // Evaluate constant
+  if (x->type == kConstant) {
+    return MakeExpressionPtr(std::abs(x->value));
   }
 
   return MakeExpressionPtr(
-      type, [](double x, double) { return std::abs(x); },
+      kNonlinear, [](double x, double) { return std::abs(x); },
       [](double x, double, double parentAdjoint) {
         if (x < 0.0) {
           return -parentAdjoint;
@@ -230,22 +267,21 @@ ExpressionPtr abs(  // NOLINT
       x);
 }
 
-ExpressionPtr acos(  // NOLINT
-    const ExpressionPtr& x) {
+ExpressionPtr acos(const ExpressionPtr& x) {  // NOLINT
+  using enum ExpressionType;
+
+  // Prune expression
   if (x->IsConstant(0.0)) {
     return MakeExpressionPtr(std::numbers::pi / 2.0);
   }
 
-  // Evaluate the expression's type
-  ExpressionType type;
-  if (x->type == ExpressionType::kConstant) {
-    type = ExpressionType::kConstant;
-  } else {
-    type = ExpressionType::kNonlinear;
+  // Evaluate constant
+  if (x->type == kConstant) {
+    return MakeExpressionPtr(std::acos(x->value));
   }
 
   return MakeExpressionPtr(
-      type, [](double x, double) { return std::acos(x); },
+      kNonlinear, [](double x, double) { return std::acos(x); },
       [](double x, double, double parentAdjoint) {
         return -parentAdjoint / std::sqrt(1.0 - x * x);
       },
@@ -259,20 +295,20 @@ ExpressionPtr acos(  // NOLINT
 
 ExpressionPtr asin(  // NOLINT
     const ExpressionPtr& x) {
+  using enum ExpressionType;
+
+  // Prune expression
   if (x->IsConstant(0.0)) {
     return Zero();
   }
 
-  // Evaluate the expression's type
-  ExpressionType type;
-  if (x->type == ExpressionType::kConstant) {
-    type = ExpressionType::kConstant;
-  } else {
-    type = ExpressionType::kNonlinear;
+  // Evaluate constant
+  if (x->type == kConstant) {
+    return MakeExpressionPtr(std::asin(x->value));
   }
 
   return MakeExpressionPtr(
-      type, [](double x, double) { return std::asin(x); },
+      kNonlinear, [](double x, double) { return std::asin(x); },
       [](double x, double, double parentAdjoint) {
         return parentAdjoint / std::sqrt(1.0 - x * x);
       },
@@ -284,22 +320,21 @@ ExpressionPtr asin(  // NOLINT
       x);
 }
 
-ExpressionPtr atan(  // NOLINT
-    const ExpressionPtr& x) {
+ExpressionPtr atan(const ExpressionPtr& x) {  // NOLINT
+  using enum ExpressionType;
+
+  // Prune expression
   if (x->IsConstant(0.0)) {
     return Zero();
   }
 
-  // Evaluate the expression's type
-  ExpressionType type;
-  if (x->type == ExpressionType::kConstant) {
-    type = ExpressionType::kConstant;
-  } else {
-    type = ExpressionType::kNonlinear;
+  // Evaluate constant
+  if (x->type == kConstant) {
+    return MakeExpressionPtr(std::atan(x->value));
   }
 
   return MakeExpressionPtr(
-      type, [](double x, double) { return std::atan(x); },
+      kNonlinear, [](double x, double) { return std::atan(x); },
       [](double x, double, double parentAdjoint) {
         return parentAdjoint / (1.0 + x * x);
       },
@@ -310,25 +345,23 @@ ExpressionPtr atan(  // NOLINT
       x);
 }
 
-ExpressionPtr atan2(  // NOLINT
-    const ExpressionPtr& y, const ExpressionPtr& x) {
+ExpressionPtr atan2(const ExpressionPtr& y, const ExpressionPtr& x) {  // NOLINT
+  using enum ExpressionType;
+
+  // Prune expression
   if (y->IsConstant(0.0)) {
     return Zero();
   } else if (x->IsConstant(0.0)) {
     return MakeExpressionPtr(std::numbers::pi / 2.0);
   }
 
-  // Evaluate the expression's type
-  ExpressionType type;
-  if (y->type == ExpressionType::kConstant &&
-      x->type == ExpressionType::kConstant) {
-    type = ExpressionType::kConstant;
-  } else {
-    type = ExpressionType::kNonlinear;
+  // Evaluate constant
+  if (y->type == kConstant && x->type == kConstant) {
+    return MakeExpressionPtr(std::atan2(y->value, x->value));
   }
 
   return MakeExpressionPtr(
-      type, [](double y, double x) { return std::atan2(y, x); },
+      kNonlinear, [](double y, double x) { return std::atan2(y, x); },
       [](double y, double x, double parentAdjoint) {
         return parentAdjoint * x / (y * y + x * x);
       },
@@ -346,22 +379,21 @@ ExpressionPtr atan2(  // NOLINT
       y, x);
 }
 
-ExpressionPtr cos(  // NOLINT
-    const ExpressionPtr& x) {
+ExpressionPtr cos(const ExpressionPtr& x) {  // NOLINT
+  using enum ExpressionType;
+
+  // Prune expression
   if (x->IsConstant(0.0)) {
     return MakeExpressionPtr(1.0);
   }
 
-  // Evaluate the expression's type
-  ExpressionType type;
-  if (x->type == ExpressionType::kConstant) {
-    type = ExpressionType::kConstant;
-  } else {
-    type = ExpressionType::kNonlinear;
+  // Evaluate constant
+  if (x->type == kConstant) {
+    return MakeExpressionPtr(std::cos(x->value));
   }
 
   return MakeExpressionPtr(
-      type, [](double x, double) { return std::cos(x); },
+      kNonlinear, [](double x, double) { return std::cos(x); },
       [](double x, double, double parentAdjoint) {
         return -parentAdjoint * std::sin(x);
       },
@@ -372,22 +404,21 @@ ExpressionPtr cos(  // NOLINT
       x);
 }
 
-ExpressionPtr cosh(  // NOLINT
-    const ExpressionPtr& x) {
+ExpressionPtr cosh(const ExpressionPtr& x) {  // NOLINT
+  using enum ExpressionType;
+
+  // Prune expression
   if (x->IsConstant(0.0)) {
     return MakeExpressionPtr(1.0);
   }
 
-  // Evaluate the expression's type
-  ExpressionType type;
-  if (x->type == ExpressionType::kConstant) {
-    type = ExpressionType::kConstant;
-  } else {
-    type = ExpressionType::kNonlinear;
+  // Evaluate constant
+  if (x->type == kConstant) {
+    return MakeExpressionPtr(std::cosh(x->value));
   }
 
   return MakeExpressionPtr(
-      type, [](double x, double) { return std::cosh(x); },
+      kNonlinear, [](double x, double) { return std::cosh(x); },
       [](double x, double, double parentAdjoint) {
         return parentAdjoint * std::sinh(x);
       },
@@ -398,22 +429,21 @@ ExpressionPtr cosh(  // NOLINT
       x);
 }
 
-ExpressionPtr erf(  // NOLINT
-    const ExpressionPtr& x) {
+ExpressionPtr erf(const ExpressionPtr& x) {  // NOLINT
+  using enum ExpressionType;
+
+  // Prune expression
   if (x->IsConstant(0.0)) {
     return Zero();
   }
 
-  // Evaluate the expression's type
-  ExpressionType type;
-  if (x->type == ExpressionType::kConstant) {
-    type = ExpressionType::kConstant;
-  } else {
-    type = ExpressionType::kNonlinear;
+  // Evaluate constant
+  if (x->type == kConstant) {
+    return MakeExpressionPtr(std::erf(x->value));
   }
 
   return MakeExpressionPtr(
-      type, [](double x, double) { return std::erf(x); },
+      kNonlinear, [](double x, double) { return std::erf(x); },
       [](double x, double, double parentAdjoint) {
         return parentAdjoint * 2.0 * std::numbers::inv_sqrtpi *
                std::exp(-x * x);
@@ -427,22 +457,21 @@ ExpressionPtr erf(  // NOLINT
       x);
 }
 
-ExpressionPtr exp(  // NOLINT
-    const ExpressionPtr& x) {
+ExpressionPtr exp(const ExpressionPtr& x) {  // NOLINT
+  using enum ExpressionType;
+
+  // Prune expression
   if (x->IsConstant(0.0)) {
     return MakeExpressionPtr(1.0);
   }
 
-  // Evaluate the expression's type
-  ExpressionType type;
-  if (x->type == ExpressionType::kConstant) {
-    type = ExpressionType::kConstant;
-  } else {
-    type = ExpressionType::kNonlinear;
+  // Evaluate constant
+  if (x->type == kConstant) {
+    return MakeExpressionPtr(std::exp(x->value));
   }
 
   return MakeExpressionPtr(
-      type, [](double x, double) { return std::exp(x); },
+      kNonlinear, [](double x, double) { return std::exp(x); },
       [](double x, double, double parentAdjoint) {
         return parentAdjoint * std::exp(x);
       },
@@ -453,8 +482,10 @@ ExpressionPtr exp(  // NOLINT
       x);
 }
 
-ExpressionPtr hypot(  // NOLINT
-    const ExpressionPtr& x, const ExpressionPtr& y) {
+ExpressionPtr hypot(const ExpressionPtr& x, const ExpressionPtr& y) {  // NOLINT
+  using enum ExpressionType;
+
+  // Prune expression
   if (x->IsConstant(0.0) && y->IsConstant(0.0)) {
     return Zero();
   } else if (x->IsConstant(0.0)) {
@@ -463,19 +494,19 @@ ExpressionPtr hypot(  // NOLINT
     return x;
   }
 
-  // Evaluate the expression's type
+  // Evaluate constant
+  if (x->type == kConstant && y->type == kConstant) {
+    return MakeExpressionPtr(std::hypot(x->value, y->value));
+  }
+
+  // Evaluate expression type
   ExpressionType type;
-  if (x->IsConstant(0.0) && !y->IsConstant(0.0)) {
+  if (x->IsConstant(0.0)) {
     type = y->type;
-  } else if (!x->IsConstant(0.0) && y->IsConstant(0.0)) {
+  } else if (y->IsConstant(0.0)) {
     type = x->type;
   } else {
-    if (x->type == ExpressionType::kConstant &&
-        y->type == ExpressionType::kConstant) {
-      type = ExpressionType::kConstant;
-    } else {
-      type = ExpressionType::kNonlinear;
-    }
+    type = kNonlinear;
   }
 
   return MakeExpressionPtr(
@@ -497,44 +528,42 @@ ExpressionPtr hypot(  // NOLINT
       x, y);
 }
 
-ExpressionPtr log(  // NOLINT
-    const ExpressionPtr& x) {
+ExpressionPtr log(const ExpressionPtr& x) {  // NOLINT
+  using enum ExpressionType;
+
+  // Prune expression
   if (x->IsConstant(0.0)) {
     return Zero();
   }
 
-  // Evaluate the expression's type
-  ExpressionType type;
-  if (x->type == ExpressionType::kConstant) {
-    type = ExpressionType::kConstant;
-  } else {
-    type = ExpressionType::kNonlinear;
+  // Evaluate constant
+  if (x->type == kConstant) {
+    return MakeExpressionPtr(std::log(x->value));
   }
 
   return MakeExpressionPtr(
-      type, [](double x, double) { return std::log(x); },
+      kNonlinear, [](double x, double) { return std::log(x); },
       [](double x, double, double parentAdjoint) { return parentAdjoint / x; },
       [](const ExpressionPtr& x, const ExpressionPtr&,
          const ExpressionPtr& parentAdjoint) { return parentAdjoint / x; },
       x);
 }
 
-ExpressionPtr log10(  // NOLINT
-    const ExpressionPtr& x) {
+ExpressionPtr log10(const ExpressionPtr& x) {  // NOLINT
+  using enum ExpressionType;
+
+  // Prune expression
   if (x->IsConstant(0.0)) {
     return Zero();
   }
 
-  // Evaluate the expression's type
-  ExpressionType type;
-  if (x->type == ExpressionType::kConstant) {
-    type = ExpressionType::kConstant;
-  } else {
-    type = ExpressionType::kNonlinear;
+  // Evaluate constant
+  if (x->type == kConstant) {
+    return MakeExpressionPtr(std::log10(x->value));
   }
 
   return MakeExpressionPtr(
-      type, [](double x, double) { return std::log10(x); },
+      kNonlinear, [](double x, double) { return std::log10(x); },
       [](double x, double, double parentAdjoint) {
         return parentAdjoint / (std::numbers::ln10 * x);
       },
@@ -545,8 +574,11 @@ ExpressionPtr log10(  // NOLINT
       x);
 }
 
-ExpressionPtr pow(  // NOLINT
-    const ExpressionPtr& base, const ExpressionPtr& power) {
+ExpressionPtr pow(const ExpressionPtr& base,  // NOLINT
+                  const ExpressionPtr& power) {
+  using enum ExpressionType;
+
+  // Prune expression
   if (base->IsConstant(0.0)) {
     return Zero();
   } else if (base->IsConstant(1.0)) {
@@ -558,26 +590,14 @@ ExpressionPtr pow(  // NOLINT
     return base;
   }
 
-  // Evaluate the expression's type
-  ExpressionType type;
-  if (base->type == ExpressionType::kConstant &&
-      power->type == ExpressionType::kConstant) {
-    type = ExpressionType::kConstant;
-  } else if (power->IsConstant(0.0)) {
-    type = ExpressionType::kConstant;
-  } else if (base->type == ExpressionType::kLinear && power->IsConstant(1.0)) {
-    type = ExpressionType::kLinear;
-  } else if (base->type == ExpressionType::kLinear && power->IsConstant(2.0)) {
-    type = ExpressionType::kQuadratic;
-  } else if (base->type == ExpressionType::kQuadratic &&
-             power->IsConstant(1.0)) {
-    type = ExpressionType::kQuadratic;
-  } else {
-    type = ExpressionType::kNonlinear;
+  // Evaluate constant
+  if (base->type == kConstant && power->type == kConstant) {
+    return MakeExpressionPtr(std::pow(base->value, power->value));
   }
 
   return MakeExpressionPtr(
-      type, [](double base, double power) { return std::pow(base, power); },
+      base->type == kLinear && power->IsConstant(2.0) ? kQuadratic : kNonlinear,
+      [](double base, double power) { return std::pow(base, power); },
       [](double base, double power, double parentAdjoint) {
         return parentAdjoint * std::pow(base, power - 1) * power;
       },
@@ -611,20 +631,26 @@ ExpressionPtr pow(  // NOLINT
 }
 
 ExpressionPtr sign(const ExpressionPtr& x) {
+  using enum ExpressionType;
+
+  // Prune expression
   if (x->IsConstant(0.0)) {
     return Zero();
   }
 
-  // Evaluate the expression's type
-  ExpressionType type;
-  if (x->type == ExpressionType::kConstant) {
-    type = ExpressionType::kConstant;
-  } else {
-    type = ExpressionType::kNonlinear;
+  // Evaluate constant
+  if (x->type == kConstant) {
+    if (x->value < 0.0) {
+      return MakeExpressionPtr(-1.0);
+    } else if (x->value == 0.0) {
+      return MakeExpressionPtr(0.0);
+    } else {
+      return MakeExpressionPtr(1.0);
+    }
   }
 
   return MakeExpressionPtr(
-      type,
+      kNonlinear,
       [](double x, double) {
         if (x < 0.0) {
           return -1.0;
@@ -640,22 +666,21 @@ ExpressionPtr sign(const ExpressionPtr& x) {
       x);
 }
 
-ExpressionPtr sin(  // NOLINT
-    const ExpressionPtr& x) {
+ExpressionPtr sin(const ExpressionPtr& x) {  // NOLINT
+  using enum ExpressionType;
+
+  // Prune expression
   if (x->IsConstant(0.0)) {
     return Zero();
   }
 
-  // Evaluate the expression's type
-  ExpressionType type;
-  if (x->type == ExpressionType::kConstant) {
-    type = ExpressionType::kConstant;
-  } else {
-    type = ExpressionType::kNonlinear;
+  // Evaluate constant
+  if (x->type == kConstant) {
+    return MakeExpressionPtr(std::sin(x->value));
   }
 
   return MakeExpressionPtr(
-      type, [](double x, double) { return std::sin(x); },
+      kNonlinear, [](double x, double) { return std::sin(x); },
       [](double x, double, double parentAdjoint) {
         return parentAdjoint * std::cos(x);
       },
@@ -667,20 +692,20 @@ ExpressionPtr sin(  // NOLINT
 }
 
 ExpressionPtr sinh(const ExpressionPtr& x) {
+  using enum ExpressionType;
+
+  // Prune expression
   if (x->IsConstant(0.0)) {
     return Zero();
   }
 
-  // Evaluate the expression's type
-  ExpressionType type;
-  if (x->type == ExpressionType::kConstant) {
-    type = ExpressionType::kConstant;
-  } else {
-    type = ExpressionType::kNonlinear;
+  // Evaluate constant
+  if (x->type == kConstant) {
+    return MakeExpressionPtr(std::sinh(x->value));
   }
 
   return MakeExpressionPtr(
-      type, [](double x, double) { return std::sinh(x); },
+      kNonlinear, [](double x, double) { return std::sinh(x); },
       [](double x, double, double parentAdjoint) {
         return parentAdjoint * std::cosh(x);
       },
@@ -691,24 +716,23 @@ ExpressionPtr sinh(const ExpressionPtr& x) {
       x);
 }
 
-ExpressionPtr sqrt(  // NOLINT
-    const ExpressionPtr& x) {
+ExpressionPtr sqrt(const ExpressionPtr& x) {  // NOLINT
+  using enum ExpressionType;
+
+  // Prune expression
   if (x->IsConstant(0.0)) {
     return Zero();
   } else if (x->IsConstant(1.0)) {
     return x;
   }
 
-  // Evaluate the expression's type
-  ExpressionType type;
-  if (x->type == ExpressionType::kConstant) {
-    type = ExpressionType::kConstant;
-  } else {
-    type = ExpressionType::kNonlinear;
+  // Evaluate constant
+  if (x->type == kConstant) {
+    return MakeExpressionPtr(std::sqrt(x->value));
   }
 
   return MakeExpressionPtr(
-      type, [](double x, double) { return std::sqrt(x); },
+      kNonlinear, [](double x, double) { return std::sqrt(x); },
       [](double x, double, double parentAdjoint) {
         return parentAdjoint / (2.0 * std::sqrt(x));
       },
@@ -720,22 +744,21 @@ ExpressionPtr sqrt(  // NOLINT
       x);
 }
 
-ExpressionPtr tan(  // NOLINT
-    const ExpressionPtr& x) {
+ExpressionPtr tan(const ExpressionPtr& x) {  // NOLINT
+  using enum ExpressionType;
+
+  // Prune expression
   if (x->IsConstant(0.0)) {
     return Zero();
   }
 
-  // Evaluate the expression's type
-  ExpressionType type;
-  if (x->type == ExpressionType::kConstant) {
-    type = ExpressionType::kConstant;
-  } else {
-    type = ExpressionType::kNonlinear;
+  // Evaluate constant
+  if (x->type == kConstant) {
+    return MakeExpressionPtr(std::tan(x->value));
   }
 
   return MakeExpressionPtr(
-      type, [](double x, double) { return std::tan(x); },
+      kNonlinear, [](double x, double) { return std::tan(x); },
       [](double x, double, double parentAdjoint) {
         return parentAdjoint / (std::cos(x) * std::cos(x));
       },
@@ -748,20 +771,20 @@ ExpressionPtr tan(  // NOLINT
 }
 
 ExpressionPtr tanh(const ExpressionPtr& x) {
+  using enum ExpressionType;
+
+  // Prune expression
   if (x->IsConstant(0.0)) {
     return Zero();
   }
 
-  // Evaluate the expression's type
-  ExpressionType type;
-  if (x->type == ExpressionType::kConstant) {
-    type = ExpressionType::kConstant;
-  } else {
-    type = ExpressionType::kNonlinear;
+  // Evaluate constant
+  if (x->type == kConstant) {
+    return MakeExpressionPtr(std::tanh(x->value));
   }
 
   return MakeExpressionPtr(
-      type, [](double x, double) { return std::tanh(x); },
+      kNonlinear, [](double x, double) { return std::tanh(x); },
       [](double x, double, double parentAdjoint) {
         return parentAdjoint / (std::cosh(x) * std::cosh(x));
       },
