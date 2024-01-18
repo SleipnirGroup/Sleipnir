@@ -92,8 +92,8 @@ def cart_pole_dynamics_double(x, u):
 
     # q̈ = M⁻¹(q)(τ_g(q) − C(q, q̇)q̇ + Bu)
     qddot = np.empty((4, 1))
-    qddot[:2, :] = qdot
-    qddot[2:, :] = Minv @ (tau_g - C @ qdot + B @ u)
+    qddot[:2, 0] = qdot
+    qddot[2:, 0] = Minv @ (tau_g - C @ qdot + B @ u)
     return qddot
 
 
@@ -167,9 +167,13 @@ def cart_pole_dynamics(x, u):
 
     # q̈ = M⁻¹(q)(τ_g(q) − C(q, q̇)q̇ + Bu)
     qddot = VariableMatrix(4, 1)
-    qddot[:2, :] = qdot
-    qddot[2:, :] = Minv @ (tau_g - C @ qdot + B @ u)
+    qddot[:2, 0] = qdot
+    qddot[2:, 0] = Minv @ (tau_g - C @ qdot + B @ u)
     return qddot
+
+
+def lerp(a, b, t):
+    return a + t * (b - a)
 
 
 @pytest.mark.skip(reason="Crashes on Windows")
@@ -182,24 +186,27 @@ def test_optimization_problem_cart_pole():
     d = 1.0  # m
     d_max = 2.0  # m
 
+    x_initial = np.zeros((4, 1))
+    x_final = np.array([[1.0], [math.pi], [0.0], [0.0]])
+
     problem = OptimizationProblem()
 
     # x = [q, q̇]ᵀ = [x, θ, ẋ, θ̇]ᵀ
     X = problem.decision_variable(4, N + 1)
 
     # Initial guess
-    for k in range(N):
-        X[0, k].set_value(float(k) / N * d)
-        X[1, k].set_value(float(k) / N * math.pi)
+    for k in range(N + 1):
+        X[0, k].set_value(lerp(x_initial[0, 0], x_final[0, 0], k / N))
+        X[1, k].set_value(lerp(x_initial[1, 0], x_final[1, 0], k / N))
 
     # u = f_x
     U = problem.decision_variable(1, N)
 
     # Initial conditions
-    problem.subject_to(X[:, :1] == np.zeros((4, 1)))
+    problem.subject_to(X[:, :1] == x_initial)
 
     # Final conditions
-    problem.subject_to(X[:, N : N + 1] == np.array([[d], [math.pi], [0.0], [0.0]]))
+    problem.subject_to(X[:, N : N + 1] == x_final)
 
     # Cart position constraints
     problem.subject_to(X[:1, :] >= 0.0)
@@ -235,10 +242,10 @@ def test_optimization_problem_cart_pole():
 
     if status.exit_condition == SolverExitCondition.SUCCESS:
         # Verify initial state
-        assert near(0.0, X.value(0, 0), 1e-2)
-        assert near(0.0, X.value(1, 0), 1e-2)
-        assert near(0.0, X.value(2, 0), 1e-2)
-        assert near(0.0, X.value(3, 0), 1e-2)
+        assert near(x_initial[0, 0], X.value(0, 0), 1e-2)
+        assert near(x_initial[1, 0], X.value(1, 0), 1e-2)
+        assert near(x_initial[2, 0], X.value(2, 0), 1e-2)
+        assert near(x_initial[3, 0], X.value(3, 0), 1e-2)
 
         # Verify solution
         for k in range(N):
@@ -264,10 +271,10 @@ def test_optimization_problem_cart_pole():
                 assert near(expected_x_k1[row, 0], actual_x_k1[row, 0], 2e-1)
 
         # Verify final state
-        assert near(d, X.value(0, N), 1e-2)
-        assert near(math.pi, X.value(1, N), 1e-2)
-        assert near(0.0, X.value(2, N), 1e-2)
-        assert near(0.0, X.value(3, N), 1e-2)
+        assert near(x_final[0, 0], X.value(0, N), 1e-2)
+        assert near(x_final[1, 0], X.value(1, N), 1e-2)
+        assert near(x_final[2, 0], X.value(2, N), 1e-2)
+        assert near(x_final[3, 0], X.value(3, N), 1e-2)
 
     # Log states for offline viewing
     with open("Cart-pole states.csv", "w") as f:
