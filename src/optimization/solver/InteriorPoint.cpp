@@ -272,6 +272,13 @@ void InteriorPoint(
       return;
     }
 
+    // Check for diverging iterates
+    if (x.lpNorm<Eigen::Infinity>() > 1e20 || !x.allFinite() ||
+        s.lpNorm<Eigen::Infinity>() > 1e20 || !s.allFinite()) {
+      status->exitCondition = SolverExitCondition::kDivergingIterates;
+      return;
+    }
+
     // Write out spy file contents if that's enabled
     if (config.spy) {
       // Gap between sparsity patterns
@@ -715,13 +722,6 @@ void InteriorPoint(
     // If full step was accepted, reset full-step rejected counter
     if (α == α_max) {
       fullStepRejectedCounter = 0;
-    }
-
-    // Check for diverging iterates
-    if (p_x.lpNorm<Eigen::Infinity>() > 1e20 ||
-        p_s.lpNorm<Eigen::Infinity>() > 1e20) {
-      status->exitCondition = SolverExitCondition::kDivergingIterates;
-      return;
     }
 
     // Handle very small search directions by letting αₖ = αₖᵐᵃˣ when
