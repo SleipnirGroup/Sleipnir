@@ -183,7 +183,6 @@ def test_optimization_problem_cart_pole():
     N = int(T / dt)
 
     u_max = 20.0  # N
-    d = 1.0  # m
     d_max = 2.0  # m
 
     x_initial = np.zeros((4, 1))
