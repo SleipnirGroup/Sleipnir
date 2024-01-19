@@ -143,10 +143,10 @@ void BindVariableMatrix(py::module_& autodiff,
     } else if (py::isinstance<VariableBlock<VariableMatrix>>(value)) {
       self.Block(rowOffset, colOffset, blockRows, blockCols) =
           value.cast<VariableBlock<VariableMatrix>>();
-    } else if (py::isinstance<double>(value)) {
+    } else if (py::isinstance<py::float_>(value)) {
       self.Block(rowOffset, colOffset, blockRows, blockCols) =
           value.cast<double>();
-    } else if (py::isinstance<int>(value)) {
+    } else if (py::isinstance<py::int_>(value)) {
       self.Block(rowOffset, colOffset, blockRows, blockCols) =
           value.cast<int>();
     }
@@ -652,10 +652,10 @@ void BindVariableBlock(
     } else if (py::isinstance<VariableBlock<VariableMatrix>>(value)) {
       self.Block(rowOffset, colOffset, blockRows, blockCols) =
           value.cast<VariableBlock<VariableMatrix>>();
-    } else if (py::isinstance<double>(value)) {
+    } else if (py::isinstance<py::float_>(value)) {
       self.Block(rowOffset, colOffset, blockRows, blockCols) =
           value.cast<double>();
-    } else if (py::isinstance<int>(value)) {
+    } else if (py::isinstance<py::int_>(value)) {
       self.Block(rowOffset, colOffset, blockRows, blockCols) =
           value.cast<int>();
     }
