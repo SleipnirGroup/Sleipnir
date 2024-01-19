@@ -84,6 +84,9 @@ void TestFlywheel(std::string testName, Eigen::Matrix<double, 1, 1> A,
                                        A_discrete) *
       r;
 
+  // Verify initial state
+  EXPECT_NEAR(0.0, solver.X().Value(0, 0), 1e-8);
+
   // Verify solution
   Eigen::Matrix<double, 1, 1> x{0.0};
   Eigen::Matrix<double, 1, 1> u{0.0};
@@ -119,7 +122,7 @@ void TestFlywheel(std::string testName, Eigen::Matrix<double, 1, 1> A,
   }
 
   // Verify final state
-  EXPECT_NEAR(r(0), solver.X().Value(0, N - 1), 1e-2);
+  EXPECT_NEAR(r(0), solver.X().Value(0, N - 1), 1e-7);
 
   // Log states for offline viewing
   std::ofstream states{fmt::format("{} states.csv", testName)};

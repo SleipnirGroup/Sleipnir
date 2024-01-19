@@ -87,11 +87,11 @@ TEST(OptimizationProblemTest, DifferentialDrive) {
   EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
 
   // Verify initial state
-  EXPECT_NEAR(x_initial(0), X.Value(0, 0), 1e-2);
-  EXPECT_NEAR(x_initial(1), X.Value(1, 0), 1e-2);
-  EXPECT_NEAR(x_initial(2), X.Value(2, 0), 1e-2);
-  EXPECT_NEAR(x_initial(3), X.Value(3, 0), 1e-2);
-  EXPECT_NEAR(x_initial(4), X.Value(4, 0), 1e-2);
+  EXPECT_NEAR(x_initial(0), X.Value(0, 0), 1e-8);
+  EXPECT_NEAR(x_initial(1), X.Value(1, 0), 1e-8);
+  EXPECT_NEAR(x_initial(2), X.Value(2, 0), 1e-8);
+  EXPECT_NEAR(x_initial(3), X.Value(3, 0), 1e-8);
+  EXPECT_NEAR(x_initial(4), X.Value(4, 0), 1e-8);
 
   // Verify solution
   Eigen::Vector<double, 5> x{0.0, 0.0, 0.0, 0.0, 0.0};
@@ -106,22 +106,22 @@ TEST(OptimizationProblemTest, DifferentialDrive) {
     EXPECT_LE(U(1, k).Value(), u_max.value());
 
     // Verify state
-    EXPECT_NEAR(x(0), X.Value(0, k), 1e-2) << fmt::format("  k = {}", k);
-    EXPECT_NEAR(x(1), X.Value(1, k), 1e-2) << fmt::format("  k = {}", k);
-    EXPECT_NEAR(x(2), X.Value(2, k), 1e-2) << fmt::format("  k = {}", k);
-    EXPECT_NEAR(x(3), X.Value(3, k), 1e-2) << fmt::format("  k = {}", k);
-    EXPECT_NEAR(x(4), X.Value(4, k), 1e-2) << fmt::format("  k = {}", k);
+    EXPECT_NEAR(x(0), X.Value(0, k), 1e-8) << fmt::format("  k = {}", k);
+    EXPECT_NEAR(x(1), X.Value(1, k), 1e-8) << fmt::format("  k = {}", k);
+    EXPECT_NEAR(x(2), X.Value(2, k), 1e-8) << fmt::format("  k = {}", k);
+    EXPECT_NEAR(x(3), X.Value(3, k), 1e-8) << fmt::format("  k = {}", k);
+    EXPECT_NEAR(x(4), X.Value(4, k), 1e-8) << fmt::format("  k = {}", k);
 
     // Project state forward
     x = RK4(DifferentialDriveDynamicsDouble, x, u, dt);
   }
 
   // Verify final state
-  EXPECT_NEAR(x_final(0), X.Value(0, N), 1e-2);
-  EXPECT_NEAR(x_final(1), X.Value(1, N), 1e-2);
-  EXPECT_NEAR(x_final(2), X.Value(2, N), 1e-2);
-  EXPECT_NEAR(x_final(3), X.Value(3, N), 1e-2);
-  EXPECT_NEAR(x_final(4), X.Value(4, N), 1e-2);
+  EXPECT_NEAR(x_final(0), X.Value(0, N), 1e-8);
+  EXPECT_NEAR(x_final(1), X.Value(1, N), 1e-8);
+  EXPECT_NEAR(x_final(2), X.Value(2, N), 1e-8);
+  EXPECT_NEAR(x_final(3), X.Value(3, N), 1e-8);
+  EXPECT_NEAR(x_final(4), X.Value(4, N), 1e-8);
 
   // Log states for offline viewing
   std::ofstream states{"Differential drive states.csv"};

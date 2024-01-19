@@ -95,10 +95,10 @@ TEST(OptimizationProblemTest, CartPole) {
   EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
 
   // Verify initial state
-  EXPECT_NEAR(x_initial(0), X.Value(0, 0), 1e-2);
-  EXPECT_NEAR(x_initial(1), X.Value(1, 0), 1e-2);
-  EXPECT_NEAR(x_initial(2), X.Value(2, 0), 1e-2);
-  EXPECT_NEAR(x_initial(3), X.Value(3, 0), 1e-2);
+  EXPECT_NEAR(x_initial(0), X.Value(0, 0), 1e-8);
+  EXPECT_NEAR(x_initial(1), X.Value(1, 0), 1e-8);
+  EXPECT_NEAR(x_initial(2), X.Value(2, 0), 1e-8);
+  EXPECT_NEAR(x_initial(3), X.Value(3, 0), 1e-8);
 
   // Verify solution
   for (int k = 0; k < N; ++k) {
@@ -111,22 +111,20 @@ TEST(OptimizationProblemTest, CartPole) {
     EXPECT_LE(U(0, k), u_max.value());
 
     // Dynamics constraints
-    // FIXME: The tolerance here is too large. It should be 1e-6 based on the
-    // fact the solver claimed to converge to an infeasibility lower than that
     Eigen::VectorXd expected_x_k1 =
         RK4(CartPoleDynamicsDouble, X.Col(k).Value(), U.Col(k).Value(), dt);
     Eigen::VectorXd actual_x_k1 = X.Col(k + 1).Value();
     for (int row = 0; row < actual_x_k1.rows(); ++row) {
-      EXPECT_NEAR(expected_x_k1(row), actual_x_k1(row), 2e-1)
+      EXPECT_NEAR(expected_x_k1(row), actual_x_k1(row), 1e-8)
           << "  x(" << row << ") @ k = " << k;
     }
   }
 
   // Verify final state
-  EXPECT_NEAR(x_final(0), X.Value(0, N), 1e-2);
-  EXPECT_NEAR(x_final(1), X.Value(1, N), 1e-2);
-  EXPECT_NEAR(x_final(2), X.Value(2, N), 1e-2);
-  EXPECT_NEAR(x_final(3), X.Value(3, N), 1e-2);
+  EXPECT_NEAR(x_final(0), X.Value(0, N), 1e-8);
+  EXPECT_NEAR(x_final(1), X.Value(1, N), 1e-8);
+  EXPECT_NEAR(x_final(2), X.Value(2, N), 1e-8);
+  EXPECT_NEAR(x_final(3), X.Value(3, N), 1e-8);
 
   // Log states for offline viewing
   std::ofstream states{"OptimizationProblem Cart-pole states.csv"};

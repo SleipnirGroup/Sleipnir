@@ -57,6 +57,9 @@ def test_optimization_problem_flywheel():
     # uₖ = B⁺(I − A)rₖ
     u_ss = np.linalg.solve(B, np.eye(A.shape[0]) - A) @ r
 
+    # Verify initial state
+    assert near(0.0, X.value(0, 0), 1e-8)
+
     # Verify solution
     x = np.array([[0.0]])
     u = np.array([[0.0]])
@@ -85,13 +88,13 @@ def test_optimization_problem_flywheel():
             assert u[0, 0] >= u_ss[0, 0]
             assert u[0, 0] <= 12.0
         else:
-            assert near(u[0, 0], U.value(0, k), 1e-2)
+            assert near(u[0, 0], U.value(0, k), 1e-4)
 
         # Project state forward
         x = A @ x + B @ u
 
     # Verify final state
-    assert near(r[0, 0], X.value(0, N), 1e-2)
+    assert near(r[0, 0], X.value(0, N), 1e-7)
 
     # Log states for offline viewing
     with open("Flywheel states.csv", "w") as f:

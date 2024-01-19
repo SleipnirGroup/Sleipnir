@@ -100,10 +100,10 @@ TEST(OCPSolverTest, CartPole) {
 
   if (status.exitCondition == sleipnir::SolverExitCondition::kSuccess) {
     // Verify initial state
-    EXPECT_NEAR(x_initial(0), X.Value(0, 0), 1e-2);
-    EXPECT_NEAR(x_initial(1), X.Value(1, 0), 1e-2);
-    EXPECT_NEAR(x_initial(2), X.Value(2, 0), 1e-2);
-    EXPECT_NEAR(x_initial(3), X.Value(3, 0), 1e-2);
+    EXPECT_NEAR(x_initial(0), X.Value(0, 0), 1e-8);
+    EXPECT_NEAR(x_initial(1), X.Value(1, 0), 1e-8);
+    EXPECT_NEAR(x_initial(2), X.Value(2, 0), 1e-8);
+    EXPECT_NEAR(x_initial(3), X.Value(3, 0), 1e-8);
 
     // Verify solution
     Eigen::Matrix<double, 4, 1> x{0.0, 0.0, 0.0, 0.0};
@@ -128,10 +128,10 @@ TEST(OCPSolverTest, CartPole) {
     }
 
     // Verify final state
-    EXPECT_NEAR(x_final(0), X.Value(0, N - 1), 1e-2);
-    EXPECT_NEAR(x_final(1), X.Value(1, N - 1), 1e-2);
-    EXPECT_NEAR(x_final(2), X.Value(2, N - 1), 1e-2);
-    EXPECT_NEAR(x_final(3), X.Value(3, N - 1), 1e-2);
+    EXPECT_NEAR(x_final(0), X.Value(0, N - 1), 1e-8);
+    EXPECT_NEAR(x_final(1), X.Value(1, N - 1), 1e-8);
+    EXPECT_NEAR(x_final(2), X.Value(2, N - 1), 1e-8);
+    EXPECT_NEAR(x_final(3), X.Value(3, N - 1), 1e-8);
   }
 
   // Log states for offline viewing

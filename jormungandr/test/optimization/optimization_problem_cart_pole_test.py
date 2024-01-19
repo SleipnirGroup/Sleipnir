@@ -242,10 +242,10 @@ def test_optimization_problem_cart_pole():
 
     if status.exit_condition == SolverExitCondition.SUCCESS:
         # Verify initial state
-        assert near(x_initial[0, 0], X.value(0, 0), 1e-2)
-        assert near(x_initial[1, 0], X.value(1, 0), 1e-2)
-        assert near(x_initial[2, 0], X.value(2, 0), 1e-2)
-        assert near(x_initial[3, 0], X.value(3, 0), 1e-2)
+        assert near(x_initial[0, 0], X.value(0, 0), 1e-8)
+        assert near(x_initial[1, 0], X.value(1, 0), 1e-8)
+        assert near(x_initial[2, 0], X.value(2, 0), 1e-8)
+        assert near(x_initial[3, 0], X.value(3, 0), 1e-8)
 
         # Verify solution
         for k in range(N):
@@ -258,8 +258,6 @@ def test_optimization_problem_cart_pole():
             assert U[0, k] <= u_max
 
             # Dynamics constraints
-            # FIXME: The tolerance here is too large. It should be 1e-6 based on the
-            # fact the solver claimed to converge to an infeasibility lower than that
             expected_x_k1 = rk4(
                 cart_pole_dynamics_double,
                 X[:, k : k + 1].value(),
@@ -268,13 +266,13 @@ def test_optimization_problem_cart_pole():
             )
             actual_x_k1 = X[:, k + 1 : k + 2].value()
             for row in range(actual_x_k1.shape[0]):
-                assert near(expected_x_k1[row, 0], actual_x_k1[row, 0], 2e-1)
+                assert near(expected_x_k1[row, 0], actual_x_k1[row, 0], 1e-8)
 
         # Verify final state
-        assert near(x_final[0, 0], X.value(0, N), 1e-2)
-        assert near(x_final[1, 0], X.value(1, N), 1e-2)
-        assert near(x_final[2, 0], X.value(2, N), 1e-2)
-        assert near(x_final[3, 0], X.value(3, N), 1e-2)
+        assert near(x_final[0, 0], X.value(0, N), 1e-8)
+        assert near(x_final[1, 0], X.value(1, N), 1e-8)
+        assert near(x_final[2, 0], X.value(2, N), 1e-8)
+        assert near(x_final[3, 0], X.value(3, N), 1e-8)
 
     # Log states for offline viewing
     with open("Cart-pole states.csv", "w") as f:
