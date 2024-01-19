@@ -83,6 +83,10 @@ TEST(OptimizationProblemTest, DoubleIntegrator) {
   Eigen::Matrix<double, 2, 2> A{{1.0, dt.value()}, {0.0, 1.0}};
   Eigen::Matrix<double, 2, 1> B{0.5 * dt.value() * dt.value(), dt.value()};
 
+  // Verify initial state
+  EXPECT_NEAR(0.0, X.Value(0, 0), 1e-8);
+  EXPECT_NEAR(0.0, X.Value(1, 0), 1e-8);
+
   // Verify solution
   Eigen::Matrix<double, 2, 1> x{0.0, 0.0};
   Eigen::Matrix<double, 1, 1> u{0.0};
@@ -114,7 +118,7 @@ TEST(OptimizationProblemTest, DoubleIntegrator) {
       EXPECT_GE(u(0), -1.0) << fmt::format("  k = {}", k);
       EXPECT_LE(u(0), 1.0) << fmt::format("  k = {}", k);
     } else {
-      EXPECT_NEAR(u(0), U.Value(0, k), 1e-2) << fmt::format("  k = {}", k);
+      EXPECT_NEAR(u(0), U.Value(0, k), 1e-4) << fmt::format("  k = {}", k);
     }
 
     // Project state forward
@@ -122,8 +126,8 @@ TEST(OptimizationProblemTest, DoubleIntegrator) {
   }
 
   // Verify final state
-  EXPECT_NEAR(r, X.Value(0, N), 1e-2);
-  EXPECT_NEAR(0.0, X.Value(1, N), 1e-2);
+  EXPECT_NEAR(r, X.Value(0, N), 1e-8);
+  EXPECT_NEAR(0.0, X.Value(1, N), 1e-8);
 
   // Log states for offline viewing
   std::ofstream states{"OptimizationProblem Double Integrator states.csv"};

@@ -83,6 +83,9 @@ TEST(OptimizationProblemTest, Flywheel) {
   Eigen::Matrix<double, 1, 1> u_ss =
       B.householderQr().solve(decltype(A)::Identity() - A) * r;
 
+  // Verify initial state
+  EXPECT_NEAR(0.0, X.Value(0, 0), 1e-8);
+
   // Verify solution
   Eigen::Matrix<double, 1, 1> x{0.0};
   Eigen::Matrix<double, 1, 1> u{0.0};
@@ -108,7 +111,7 @@ TEST(OptimizationProblemTest, Flywheel) {
       EXPECT_GE(u(0), u_ss(0)) << fmt::format("  k = {}", k);
       EXPECT_LE(u(0), 12.0) << fmt::format("  k = {}", k);
     } else {
-      EXPECT_NEAR(u(0), U.Value(0, k), 1e-2) << fmt::format("  k = {}", k);
+      EXPECT_NEAR(u(0), U.Value(0, k), 1e-4) << fmt::format("  k = {}", k);
     }
 
     // Project state forward
@@ -116,7 +119,7 @@ TEST(OptimizationProblemTest, Flywheel) {
   }
 
   // Verify final state
-  EXPECT_NEAR(r(0), X.Value(0, N), 1e-2);
+  EXPECT_NEAR(r(0), X.Value(0, N), 1e-7);
 
   // Log states for offline viewing
   std::ofstream states{"OptimizationProblem Flywheel states.csv"};

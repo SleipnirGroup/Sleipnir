@@ -65,6 +65,10 @@ def test_optimization_problem_double_integrator():
     A = np.array([[1.0, dt], [0.0, 1.0]])
     B = np.array([[0.5 * dt * dt], [dt]])
 
+    # Verify initial state
+    assert near(0.0, X.value(0, 0), 1e-8)
+    assert near(0.0, X.value(1, 0), 1e-8)
+
     # Verify solution
     x = np.zeros((2, 1))
     u = np.zeros((1, 1))
@@ -98,14 +102,14 @@ def test_optimization_problem_double_integrator():
             assert u[0, 0] >= -1.0
             assert u[0, 0] <= 1.0
         else:
-            assert near(u[0, 0], U.value(0, k), 1e-2)
+            assert near(u[0, 0], U.value(0, k), 1e-4)
 
         # Project state forward
         x = A @ x + B @ u
 
     # Verify final state
-    assert near(r, X.value(0, N), 1e-2)
-    assert near(0.0, X.value(1, N), 1e-2)
+    assert near(r, X.value(0, N), 1e-8)
+    assert near(0.0, X.value(1, N), 1e-8)
 
     # Log states for offline viewing
     with open("Double integrator states.csv", "w") as f:
