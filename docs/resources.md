@@ -6,6 +6,12 @@ Here's an introductory video on autodiff.
 
 > Ari Seff. What is Automatic Differentation?. 2020. https://www.youtube.com/watch?v=wG_nF1awSSY
 
+## Linear algebra
+
+3Blue1Brown's _Essence of Linear Algebra_ video series provides geometric intuition for linear algebra.
+
+> 3Blue1Brown. _Essence of Linear Algebra_, 2016. https://www.3blue1brown.com/topics/linear-algebra
+
 ## Convex optimization
 
 Visually Explained's _Convex Optimization_ video series provides geometric intuition for convex optimization and the interior-point method.
