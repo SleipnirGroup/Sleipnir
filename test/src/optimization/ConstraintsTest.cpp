@@ -54,6 +54,16 @@ TEST(ConstraintsTest, EqualityConstraintBooleanComparisons) {
   for (const auto& [lhs, rhs] : args) {
     EXPECT_EQ(VariableMatrix{{lhs}} == VariableMatrix{{rhs}}, lhs == rhs);
   }
+
+  // Eigen::MatrixXd-VariableMatrix
+  for (const auto& [lhs, rhs] : args) {
+    EXPECT_EQ(Eigen::MatrixXd{{lhs}} == VariableMatrix{{rhs}}, lhs == rhs);
+  }
+
+  // VariableMatrix-Eigen::MatrixXd
+  for (const auto& [lhs, rhs] : args) {
+    EXPECT_EQ(VariableMatrix{{lhs}} == Eigen::MatrixXd{{rhs}}, lhs == rhs);
+  }
 }
 
 // For the purposes of optimization, a < constraint is treated the same as a <=
@@ -127,5 +137,21 @@ TEST(ConstraintsTest, InequalityConstraintBooleanComparisons) {
     EXPECT_EQ(VariableMatrix{{lhs}} <= VariableMatrix{{rhs}}, lhs <= rhs);
     EXPECT_EQ(VariableMatrix{{lhs}} > VariableMatrix{{rhs}}, lhs >= rhs);
     EXPECT_EQ(VariableMatrix{{lhs}} >= VariableMatrix{{rhs}}, lhs >= rhs);
+  }
+
+  // Eigen::MatrixXd-VariableMatrix
+  for (const auto& [lhs, rhs] : args) {
+    EXPECT_EQ(Eigen::MatrixXd{{lhs}} < VariableMatrix{{rhs}}, lhs <= rhs);
+    EXPECT_EQ(Eigen::MatrixXd{{lhs}} <= VariableMatrix{{rhs}}, lhs <= rhs);
+    EXPECT_EQ(Eigen::MatrixXd{{lhs}} > VariableMatrix{{rhs}}, lhs >= rhs);
+    EXPECT_EQ(Eigen::MatrixXd{{lhs}} >= VariableMatrix{{rhs}}, lhs >= rhs);
+  }
+
+  // VariableMatrix-Eigen::MatrixXd
+  for (const auto& [lhs, rhs] : args) {
+    EXPECT_EQ(VariableMatrix{{lhs}} < Eigen::MatrixXd{{rhs}}, lhs <= rhs);
+    EXPECT_EQ(VariableMatrix{{lhs}} <= Eigen::MatrixXd{{rhs}}, lhs <= rhs);
+    EXPECT_EQ(VariableMatrix{{lhs}} > Eigen::MatrixXd{{rhs}}, lhs >= rhs);
+    EXPECT_EQ(VariableMatrix{{lhs}} >= Eigen::MatrixXd{{rhs}}, lhs >= rhs);
   }
 }

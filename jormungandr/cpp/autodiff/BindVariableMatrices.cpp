@@ -556,6 +556,36 @@ void BindVariableMatrix(py::module_& autodiff,
         return lhs >= rhs;
       },
       py::is_operator(), DOC(sleipnir, operator, ge));
+  variable_matrix.def(
+      "__eq__",
+      [](const VariableMatrix& lhs, const py::array_t<double>& rhs) {
+        return lhs == rhs.cast<Eigen::MatrixXd>();
+      },
+      py::is_operator(), DOC(sleipnir, operator, eq));
+  variable_matrix.def(
+      "__lt__",
+      [](const VariableMatrix& lhs, const py::array_t<double>& rhs) {
+        return lhs < rhs.cast<Eigen::MatrixXd>();
+      },
+      py::is_operator(), DOC(sleipnir, operator, lt));
+  variable_matrix.def(
+      "__le__",
+      [](const VariableMatrix& lhs, const py::array_t<double>& rhs) {
+        return lhs <= rhs.cast<Eigen::MatrixXd>();
+      },
+      py::is_operator(), DOC(sleipnir, operator, le));
+  variable_matrix.def(
+      "__gt__",
+      [](const VariableMatrix& lhs, const py::array_t<double>& rhs) {
+        return lhs > rhs.cast<Eigen::MatrixXd>();
+      },
+      py::is_operator(), DOC(sleipnir, operator, gt));
+  variable_matrix.def(
+      "__ge__",
+      [](const VariableMatrix& lhs, const py::array_t<double>& rhs) {
+        return lhs >= rhs.cast<Eigen::MatrixXd>();
+      },
+      py::is_operator(), DOC(sleipnir, operator, ge));
 
   variable_matrix.def("__len__", &VariableMatrix::Rows,
                       DOC(sleipnir, VariableMatrix, Rows));
@@ -566,7 +596,7 @@ void BindVariableMatrix(py::module_& autodiff,
         return py::make_iterator(self.begin(), self.end());
       },
       py::keep_alive<0, 1>());
-}
+}  // NOLINT(readability/fn_size)
 
 void BindVariableBlock(
     py::module_& autodiff,
@@ -966,6 +996,41 @@ void BindVariableBlock(
   variable_block.def(Variable() >= py::self, DOC(sleipnir, operator, ge));
   variable_block.def(double() >= py::self, DOC(sleipnir, operator, ge));
   variable_block.def(int() >= py::self, DOC(sleipnir, operator, ge));
+  variable_block.def(
+      "__eq__",
+      [](const VariableBlock<VariableMatrix>& lhs,
+         const py::array_t<double>& rhs) {
+        return lhs == rhs.cast<Eigen::MatrixXd>();
+      },
+      py::is_operator(), DOC(sleipnir, operator, eq));
+  variable_block.def(
+      "__lt__",
+      [](const VariableBlock<VariableMatrix>& lhs,
+         const py::array_t<double>& rhs) {
+        return lhs < rhs.cast<Eigen::MatrixXd>();
+      },
+      py::is_operator(), DOC(sleipnir, operator, lt));
+  variable_block.def(
+      "__le__",
+      [](const VariableBlock<VariableMatrix>& lhs,
+         const py::array_t<double>& rhs) {
+        return lhs <= rhs.cast<Eigen::MatrixXd>();
+      },
+      py::is_operator(), DOC(sleipnir, operator, le));
+  variable_block.def(
+      "__gt__",
+      [](const VariableBlock<VariableMatrix>& lhs,
+         const py::array_t<double>& rhs) {
+        return lhs > rhs.cast<Eigen::MatrixXd>();
+      },
+      py::is_operator(), DOC(sleipnir, operator, gt));
+  variable_block.def(
+      "__ge__",
+      [](const VariableBlock<VariableMatrix>& lhs,
+         const py::array_t<double>& rhs) {
+        return lhs >= rhs.cast<Eigen::MatrixXd>();
+      },
+      py::is_operator(), DOC(sleipnir, operator, ge));
 
   variable_block.def("__len__", &VariableBlock<VariableMatrix>::Rows,
                      DOC(sleipnir, VariableBlock, Rows));
