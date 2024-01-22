@@ -28,6 +28,31 @@ int main() {
 }
 ```
 
+```python
+#!/usr/bin/env python3
+
+import jormungandr as jmg
+
+
+def main():
+    # Find the x, y pair with the largest product for which x + 3y = 36
+    problem = jmg.optimization.OptimizationProblem()
+
+    x = problem.decision_variable()
+    y = problem.decision_variable()
+
+    problem.maximize(x * y)
+    problem.subject_to(x + 3 * y == 36)
+    problem.solve()
+
+    # x = 18.0, y = 6.0
+    print(f"x = {x.value()}, y = {y.value()}")
+
+
+if __name__ == "__main__":
+    main()
+```
+
 Sleipnir's internals are intended to be readable by those who aren't domain experts with links to explanatory material for its algorithms.
 
 ## Benchmarks
