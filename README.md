@@ -129,7 +129,8 @@ git clone git@github.com:SleipnirGroup/Sleipnir
 cd Sleipnir
 ```
 
-Use the following instructions to build and install the C++ library.
+### C++ library
+
 ```
 # Configure; automatically downloads library dependencies
 cmake -B build -S .
@@ -146,7 +147,8 @@ cd ..
 cmake --install build --prefix pkgdir
 ```
 
-Use the following instructions to build and install the Python library.
+### Python library
+
 ```
 # Setup
 pip install --user build
