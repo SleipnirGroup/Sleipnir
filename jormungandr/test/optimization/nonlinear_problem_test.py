@@ -85,3 +85,27 @@ def test_rosenbrock_with_disk_constraint():
 
             assert near(1.0, x.value(), 1e-1)
             assert near(1.0, y.value(), 1e-1)
+
+
+def test_narrow_feasible_region():
+    problem = OptimizationProblem()
+
+    x = problem.decision_variable()
+    x.set_value(20.0)
+
+    y = problem.decision_variable()
+    y.set_value(50.0)
+
+    problem.minimize(autodiff.sqrt(x * x + y * y))
+
+    problem.subject_to(y == -x + 5.0)
+
+    status = problem.solve(diagnostics=True)
+
+    assert status.cost_function_type == ExpressionType.NONLINEAR
+    assert status.equality_constraint_type == ExpressionType.LINEAR
+    assert status.inequality_constraint_type == ExpressionType.NONE
+    assert status.exit_condition == SolverExitCondition.SUCCESS
+
+    assert near(2.5, x.value(), 1e-2)
+    assert near(2.5, y.value(), 1e-2)
