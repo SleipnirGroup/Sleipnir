@@ -42,9 +42,17 @@ def test_equality_constraint_boolean_comparisons():
     for lhs, rhs in args:
         assert bool(np.array([[lhs]]) == VariableMatrix([[rhs]])) == (lhs == rhs)
 
+    # np.array-VariableBlock
+    for lhs, rhs in args:
+        assert bool(np.array([[lhs]]) == VariableMatrix([[rhs]])[:, :]) == (lhs == rhs)
+
     # VariableMatrix-np.array
     for lhs, rhs in args:
         assert bool(VariableMatrix([[lhs]]) == np.array([[rhs]])) == (lhs == rhs)
+
+    # VariableBlock-np.array
+    for lhs, rhs in args:
+        assert bool(VariableMatrix([[lhs]])[:, :] == np.array([[rhs]])) == (lhs == rhs)
 
 
 # For the purposes of optimization, a < constraint is treated the same as a <=
@@ -108,9 +116,23 @@ def test_inequality_constraint_boolean_comparisons():
         assert bool(np.array([[lhs]]) > VariableMatrix([[rhs]])) == (lhs >= rhs)
         assert bool(np.array([[lhs]]) >= VariableMatrix([[rhs]])) == (lhs >= rhs)
 
+    # np.array-VariableBlock
+    for lhs, rhs in args:
+        assert bool(np.array([[lhs]]) < VariableMatrix([[rhs]])[:, :]) == (lhs <= rhs)
+        assert bool(np.array([[lhs]]) <= VariableMatrix([[rhs]])[:, :]) == (lhs <= rhs)
+        assert bool(np.array([[lhs]]) > VariableMatrix([[rhs]])[:, :]) == (lhs >= rhs)
+        assert bool(np.array([[lhs]]) >= VariableMatrix([[rhs]])[:, :]) == (lhs >= rhs)
+
     # VariableMatrix-np.array
     for lhs, rhs in args:
         assert bool(VariableMatrix([[lhs]]) < np.array([[rhs]])) == (lhs <= rhs)
         assert bool(VariableMatrix([[lhs]]) <= np.array([[rhs]])) == (lhs <= rhs)
         assert bool(VariableMatrix([[lhs]]) > np.array([[rhs]])) == (lhs >= rhs)
         assert bool(VariableMatrix([[lhs]]) >= np.array([[rhs]])) == (lhs >= rhs)
+
+    # VariableBlock-np.array
+    for lhs, rhs in args:
+        assert bool(VariableMatrix([[lhs]])[:, :] < np.array([[rhs]])) == (lhs <= rhs)
+        assert bool(VariableMatrix([[lhs]])[:, :] <= np.array([[rhs]])) == (lhs <= rhs)
+        assert bool(VariableMatrix([[lhs]])[:, :] > np.array([[rhs]])) == (lhs >= rhs)
+        assert bool(VariableMatrix([[lhs]])[:, :] >= np.array([[rhs]])) == (lhs >= rhs)

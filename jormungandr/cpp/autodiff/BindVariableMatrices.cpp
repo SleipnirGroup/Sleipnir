@@ -159,7 +159,7 @@ void BindVariableMatrix(py::module_& autodiff,
         }
         return self(row);
       },
-      DOC(sleipnir, VariableMatrix, operator, call, 3));
+      py::keep_alive<0, 1>(), DOC(sleipnir, VariableMatrix, operator, call, 3));
   // TODO: Support slice stride other than 1
   variable_matrix.def(
       "__getitem__",
@@ -231,7 +231,7 @@ void BindVariableMatrix(py::module_& autodiff,
 
         return py::cast(self.Block(rowOffset, colOffset, blockRows, blockCols));
       },
-      DOC(sleipnir, VariableMatrix, operator, call));
+      py::keep_alive<0, 1>(), DOC(sleipnir, VariableMatrix, operator, call));
   variable_matrix.def("row", py::overload_cast<int>(&VariableMatrix::Row),
                       DOC(sleipnir, VariableMatrix, Row));
   variable_matrix.def("col", py::overload_cast<int>(&VariableMatrix::Col),
@@ -708,7 +708,7 @@ void BindVariableBlock(
         }
         return self(row);
       },
-      DOC(sleipnir, VariableBlock, operator, call, 3));
+      py::keep_alive<0, 1>(), DOC(sleipnir, VariableBlock, operator, call, 3));
   // TODO: Support slice stride other than 1
   variable_block.def(
       "__getitem__",
@@ -780,7 +780,7 @@ void BindVariableBlock(
 
         return py::cast(self.Block(rowOffset, colOffset, blockRows, blockCols));
       },
-      DOC(sleipnir, VariableBlock, operator, call));
+      py::keep_alive<0, 1>(), DOC(sleipnir, VariableBlock, operator, call));
   variable_block.def(
       "row", py::overload_cast<int>(&VariableBlock<VariableMatrix>::Row),
       DOC(sleipnir, VariableBlock, Row));
