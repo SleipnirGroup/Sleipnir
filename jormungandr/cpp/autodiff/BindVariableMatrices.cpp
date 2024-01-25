@@ -143,12 +143,21 @@ void BindVariableMatrix(py::module_& autodiff,
     } else if (py::isinstance<VariableBlock<VariableMatrix>>(value)) {
       self.Block(rowOffset, colOffset, blockRows, blockCols) =
           value.cast<VariableBlock<VariableMatrix>>();
+    } else if (py::isinstance<py::array_t<double>>(value)) {
+      self.Block(rowOffset, colOffset, blockRows, blockCols) =
+          value.cast<Eigen::MatrixXd>();
+    } else if (py::isinstance<Variable>(value)) {
+      self.Block(rowOffset, colOffset, blockRows, blockCols) =
+          value.cast<Variable>();
     } else if (py::isinstance<py::float_>(value)) {
       self.Block(rowOffset, colOffset, blockRows, blockCols) =
           value.cast<double>();
     } else if (py::isinstance<py::int_>(value)) {
       self.Block(rowOffset, colOffset, blockRows, blockCols) =
           value.cast<int>();
+    } else {
+      fmt::print(
+          "error: VariableMatrix.__setitem__ not implemented for value\n");
     }
   });
   variable_matrix.def(
@@ -692,12 +701,21 @@ void BindVariableBlock(
     } else if (py::isinstance<VariableBlock<VariableMatrix>>(value)) {
       self.Block(rowOffset, colOffset, blockRows, blockCols) =
           value.cast<VariableBlock<VariableMatrix>>();
+    } else if (py::isinstance<py::array_t<double>>(value)) {
+      self.Block(rowOffset, colOffset, blockRows, blockCols) =
+          value.cast<Eigen::MatrixXd>();
+    } else if (py::isinstance<Variable>(value)) {
+      self.Block(rowOffset, colOffset, blockRows, blockCols) =
+          value.cast<Variable>();
     } else if (py::isinstance<py::float_>(value)) {
       self.Block(rowOffset, colOffset, blockRows, blockCols) =
           value.cast<double>();
     } else if (py::isinstance<py::int_>(value)) {
       self.Block(rowOffset, colOffset, blockRows, blockCols) =
           value.cast<int>();
+    } else {
+      fmt::print(
+          "error: VariableBlock.__setitem__ not implemented for value\n");
     }
   });
   variable_block.def(
