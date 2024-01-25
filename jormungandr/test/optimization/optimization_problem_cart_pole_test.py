@@ -4,7 +4,6 @@ import jormungandr.autodiff as autodiff
 from jormungandr.autodiff import ExpressionType, VariableMatrix
 from jormungandr.optimization import OptimizationProblem, SolverExitCondition
 import numpy as np
-import pytest
 
 
 def near(expected, actual, tolerance):
@@ -176,8 +175,13 @@ def lerp(a, b, t):
     return a + t * (b - a)
 
 
-@pytest.mark.skip(reason="Crashes on Windows")
 def test_optimization_problem_cart_pole():
+    import platform
+
+    if platform.system() == "Windows":
+        # FIXME: This test crashes on Windows
+        return
+
     T = 5.0  # s
     dt = 0.05  # s
     N = int(T / dt)
@@ -233,11 +237,7 @@ def test_optimization_problem_cart_pole():
     assert status.cost_function_type == ExpressionType.QUADRATIC
     assert status.equality_constraint_type == ExpressionType.NONLINEAR
     assert status.inequality_constraint_type == ExpressionType.LINEAR
-    # FIXME: Fails with "locally infeasible"
-    assert (
-        status.exit_condition == SolverExitCondition.SUCCESS
-        or status.exit_condition == SolverExitCondition.LOCALLY_INFEASIBLE
-    )
+    assert status.exit_condition == SolverExitCondition.SUCCESS
 
     if status.exit_condition == SolverExitCondition.SUCCESS:
         # Verify initial state
