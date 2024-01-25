@@ -157,6 +157,7 @@ void BindVariableMatrix(py::module_& autodiff,
           value.cast<int>();
     } else {
       fmt::print(
+          stderr,
           "error: VariableMatrix.__setitem__ not implemented for value\n");
     }
   });
@@ -340,10 +341,10 @@ void BindVariableMatrix(py::module_& autodiff,
           }
         }
 
-        fmt::print(
-            "error: numpy method {}, ufunc {} not implemented for "
-            "VariableMatrix\n",
-            method_name, ufunc_name);
+        fmt::print(stderr,
+                   "error: numpy method {}, ufunc {} not implemented for "
+                   "VariableMatrix\n",
+                   method_name, ufunc_name);
         return py::cast(VariableMatrix{self});
       });
 
@@ -715,6 +716,7 @@ void BindVariableBlock(
           value.cast<int>();
     } else {
       fmt::print(
+          stderr,
           "error: VariableBlock.__setitem__ not implemented for value\n");
     }
   });
@@ -897,10 +899,10 @@ void BindVariableBlock(
           }
         }
 
-        fmt::print(
-            "error: numpy method {}, ufunc {} not implemented for "
-            "VariableBlock\n",
-            method_name, ufunc_name);
+        fmt::print(stderr,
+                   "error: numpy method {}, ufunc {} not implemented for "
+                   "VariableBlock\n",
+                   method_name, ufunc_name);
         return py::cast(VariableMatrix{self});
       });
 
