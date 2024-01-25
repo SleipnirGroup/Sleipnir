@@ -281,7 +281,7 @@ def test_optimization_problem_cart_pole():
 
         for k in range(N + 1):
             f.write(
-                f"{k * dt},{X.value(0, k)},{X.value(1, k)},{X.value(2, k)}, {X.value(3, k)}\n"
+                f"{k * dt},{X.value(0, k)},{X.value(1, k)},{X.value(2, k)},{X.value(3, k)}\n"
             )
 
     # Log inputs for offline viewing
