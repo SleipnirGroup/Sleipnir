@@ -1033,7 +1033,7 @@ Parameter ``index``:
 
 static const char *__doc_sleipnir_VariableBlock_Value_3 = R"doc(Returns the contents of the variable matrix.)doc";
 
-static const char *__doc_sleipnir_VariableBlock_VariableBlock = R"doc(Copy constructs a VariableBlock to the block.)doc";
+static const char *__doc_sleipnir_VariableBlock_VariableBlock = R"doc()doc";
 
 static const char *__doc_sleipnir_VariableBlock_VariableBlock_2 = R"doc()doc";
 
@@ -1121,7 +1121,7 @@ static const char *__doc_sleipnir_VariableBlock_m_rowOffset = R"doc()doc";
 
 static const char *__doc_sleipnir_VariableBlock_operator_assign = R"doc(Assigns a VariableBlock to the block.)doc";
 
-static const char *__doc_sleipnir_VariableBlock_operator_assign_2 = R"doc()doc";
+static const char *__doc_sleipnir_VariableBlock_operator_assign_2 = R"doc(Assigns a VariableBlock to the block.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_operator_assign_3 =
 R"doc(Assigns a double to the block.

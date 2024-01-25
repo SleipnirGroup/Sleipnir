@@ -22,21 +22,12 @@ namespace sleipnir {
 template <typename Mat>
 class VariableBlock {
  public:
-  /**
-   * Copy constructs a VariableBlock to the block.
-   */
-  VariableBlock(const VariableBlock<Mat>& values) {
-    m_mat = values.m_mat;
-    m_rowOffset = values.m_rowOffset;
-    m_colOffset = values.m_colOffset;
-    m_blockRows = values.m_blockRows;
-    m_blockCols = values.m_blockCols;
-  }
+  VariableBlock(const VariableBlock<Mat>& values) = default;
 
   /**
    * Assigns a VariableBlock to the block.
    */
-  VariableBlock<Mat>& operator=(VariableBlock<Mat>& values) {
+  VariableBlock<Mat>& operator=(const VariableBlock<Mat>& values) {
     if (this == &values) {
       return *this;
     }
@@ -62,7 +53,34 @@ class VariableBlock {
   }
 
   VariableBlock(VariableBlock<Mat>&&) = default;
-  VariableBlock<Mat>& operator=(VariableBlock<Mat>&&) = default;
+
+  /**
+   * Assigns a VariableBlock to the block.
+   */
+  VariableBlock<Mat>& operator=(VariableBlock<Mat>&& values) {
+    if (this == &values) {
+      return *this;
+    }
+
+    if (m_mat == nullptr) {
+      m_mat = values.m_mat;
+      m_rowOffset = values.m_rowOffset;
+      m_colOffset = values.m_colOffset;
+      m_blockRows = values.m_blockRows;
+      m_blockCols = values.m_blockCols;
+    } else {
+      assert(Rows() == values.Rows());
+      assert(Cols() == values.Cols());
+
+      for (int row = 0; row < Rows(); ++row) {
+        for (int col = 0; col < Cols(); ++col) {
+          (*this)(row, col) = values(row, col);
+        }
+      }
+    }
+
+    return *this;
+  }
 
   /**
    * Constructs a Variable block pointing to all of the given matrix.
