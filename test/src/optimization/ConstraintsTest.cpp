@@ -55,6 +55,11 @@ TEST(ConstraintsTest, EqualityConstraintBooleanComparisons) {
     EXPECT_EQ(VariableMatrix{{lhs}} == VariableMatrix{{rhs}}, lhs == rhs);
   }
 
+  // Eigen::MatrixXd-Variable
+  for (const auto& [lhs, rhs] : args) {
+    EXPECT_EQ(Eigen::MatrixXd{{lhs}} == Variable{rhs}, lhs == rhs);
+  }
+
   // Eigen::MatrixXd-VariableMatrix
   for (const auto& [lhs, rhs] : args) {
     EXPECT_EQ(Eigen::MatrixXd{{lhs}} == VariableMatrix{{rhs}}, lhs == rhs);
@@ -64,6 +69,11 @@ TEST(ConstraintsTest, EqualityConstraintBooleanComparisons) {
   for (const auto& [lhs, rhs] : args) {
     EXPECT_EQ(Eigen::MatrixXd{{lhs}} == VariableMatrix{{rhs}}.Block(0, 0, 1, 1),
               lhs == rhs);
+  }
+
+  // Variable-Eigen::MatrixXd
+  for (const auto& [lhs, rhs] : args) {
+    EXPECT_EQ(Variable{lhs} == Eigen::MatrixXd{{rhs}}, lhs == rhs);
   }
 
   // VariableMatrix-Eigen::MatrixXd
@@ -151,6 +161,14 @@ TEST(ConstraintsTest, InequalityConstraintBooleanComparisons) {
     EXPECT_EQ(VariableMatrix{{lhs}} >= VariableMatrix{{rhs}}, lhs >= rhs);
   }
 
+  // Eigen::MatrixXd-Variable
+  for (const auto& [lhs, rhs] : args) {
+    EXPECT_EQ(Eigen::MatrixXd{{lhs}} < Variable{rhs}, lhs <= rhs);
+    EXPECT_EQ(Eigen::MatrixXd{{lhs}} <= Variable{rhs}, lhs <= rhs);
+    EXPECT_EQ(Eigen::MatrixXd{{lhs}} > Variable{rhs}, lhs >= rhs);
+    EXPECT_EQ(Eigen::MatrixXd{{lhs}} >= Variable{rhs}, lhs >= rhs);
+  }
+
   // Eigen::MatrixXd-VariableMatrix
   for (const auto& [lhs, rhs] : args) {
     EXPECT_EQ(Eigen::MatrixXd{{lhs}} < VariableMatrix{{rhs}}, lhs <= rhs);
@@ -169,6 +187,14 @@ TEST(ConstraintsTest, InequalityConstraintBooleanComparisons) {
               lhs >= rhs);
     EXPECT_EQ(Eigen::MatrixXd{{lhs}} >= VariableMatrix{{rhs}}.Block(0, 0, 1, 1),
               lhs >= rhs);
+  }
+
+  // Variable-Eigen::MatrixXd
+  for (const auto& [lhs, rhs] : args) {
+    EXPECT_EQ(Variable{lhs} < Eigen::MatrixXd{{rhs}}, lhs <= rhs);
+    EXPECT_EQ(Variable{lhs} <= Eigen::MatrixXd{{rhs}}, lhs <= rhs);
+    EXPECT_EQ(Variable{lhs} > Eigen::MatrixXd{{rhs}}, lhs >= rhs);
+    EXPECT_EQ(Variable{lhs} >= Eigen::MatrixXd{{rhs}}, lhs >= rhs);
   }
 
   // VariableMatrix-Eigen::MatrixXd
