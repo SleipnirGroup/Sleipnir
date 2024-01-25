@@ -83,8 +83,8 @@ def cart_pole_dynamics_double(x, u):
     #          [     0      ]
     # τ_g(q) = [-m_p gl sinθ]
     tau_g = np.empty((2, 1))
-    tau_g[0, 0] = 0.0
-    tau_g[1, 0] = -m_p * g * l * math.sin(theta)
+    tau_g[0, :] = 0.0
+    tau_g[1, :] = -m_p * g * l * math.sin(theta)
 
     #     [1]
     # B = [0]
@@ -92,8 +92,8 @@ def cart_pole_dynamics_double(x, u):
 
     # q̈ = M⁻¹(q)(τ_g(q) − C(q, q̇)q̇ + Bu)
     qddot = np.empty((4, 1))
-    qddot[:2, 0] = qdot
-    qddot[2:, 0] = Minv @ (tau_g - C @ qdot + B @ u)
+    qddot[:2, :] = qdot
+    qddot[2:, :] = Minv @ (tau_g - C @ qdot + B @ u)
     return qddot
 
 
@@ -158,8 +158,8 @@ def cart_pole_dynamics(x, u):
     #          [     0      ]
     # τ_g(q) = [-m_p gl sinθ]
     tau_g = VariableMatrix(2, 1)
-    tau_g[0, 0] = 0.0
-    tau_g[1, 0] = -m_p * g * l * autodiff.sin(theta)
+    tau_g[0, :] = 0.0
+    tau_g[1, :] = -m_p * g * l * autodiff.sin(theta)
 
     #     [1]
     # B = [0]
@@ -167,8 +167,8 @@ def cart_pole_dynamics(x, u):
 
     # q̈ = M⁻¹(q)(τ_g(q) − C(q, q̇)q̇ + Bu)
     qddot = VariableMatrix(4, 1)
-    qddot[:2, 0] = qdot
-    qddot[2:, 0] = Minv @ (tau_g - C @ qdot + B @ u)
+    qddot[:2, :] = qdot
+    qddot[2:, :] = Minv @ (tau_g - C @ qdot + B @ u)
     return qddot
 
 
