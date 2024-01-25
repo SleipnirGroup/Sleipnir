@@ -242,7 +242,8 @@ class VariableBlock {
     assert(colOffset >= 0 && colOffset <= Cols());
     assert(blockRows >= 0 && blockRows <= Rows() - rowOffset);
     assert(blockCols >= 0 && blockCols <= Cols() - colOffset);
-    return VariableBlock{*m_mat, rowOffset, colOffset, blockRows, blockCols};
+    return VariableBlock{*m_mat, m_rowOffset + rowOffset,
+                         m_colOffset + colOffset, blockRows, blockCols};
   }
 
   /**
@@ -259,7 +260,8 @@ class VariableBlock {
     assert(colOffset >= 0 && colOffset <= Cols());
     assert(blockRows >= 0 && blockRows <= Rows() - rowOffset);
     assert(blockCols >= 0 && blockCols <= Cols() - colOffset);
-    return VariableBlock{*m_mat, rowOffset, colOffset, blockRows, blockCols};
+    return VariableBlock{*m_mat, m_rowOffset + rowOffset,
+                         m_colOffset + colOffset, blockRows, blockCols};
   }
 
   /**

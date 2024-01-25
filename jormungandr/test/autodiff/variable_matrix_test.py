@@ -71,6 +71,24 @@ def test_slicing():
     assert s[0, 1] == 16.0
 
 
+def test_subslicing():
+    A = VariableMatrix([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]])
+
+    # Block assignment
+    assert A[1:3, 1:3].shape == (2, 2)
+    A[1:3, 1:3] = np.array([[10.0, 11.0], [12.0, 13.0]])
+
+    expected1 = np.array([[1.0, 2.0, 3.0], [4.0, 10.0, 11.0], [7.0, 12.0, 13.0]])
+    assert (expected1 == A.value()).all()
+
+    # Block-of-block assignment
+    assert A[1:3, 1:3][1:, 1:].shape == (1, 1)
+    A[1:3, 1:3][1:, 1:] = 14.0
+
+    expected2 = np.array([[1.0, 2.0, 3.0], [4.0, 10.0, 11.0], [7.0, 12.0, 14.0]])
+    assert (expected2 == A.value()).all()
+
+
 def test_iterators():
     A = VariableMatrix([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]])
 

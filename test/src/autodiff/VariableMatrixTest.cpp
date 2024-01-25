@@ -70,6 +70,24 @@ TEST(VariableMatrixTest, AssignmentAliasing) {
   EXPECT_EQ(expectedB, B);
 }
 
+TEST(VariableMatrixTest, BlockMemberFunction) {
+  sleipnir::VariableMatrix A{{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}, {7.0, 8.0, 9.0}};
+
+  // Block assignment
+  A.Block(1, 1, 2, 2) = Eigen::Matrix<double, 2, 2>{{10.0, 11.0}, {12.0, 13.0}};
+
+  Eigen::Matrix<double, 3, 3> expected1{
+      {1.0, 2.0, 3.0}, {4.0, 10.0, 11.0}, {7.0, 12.0, 13.0}};
+  EXPECT_EQ(expected1, A.Value());
+
+  // Block-of-block assignment
+  A.Block(1, 1, 2, 2).Block(1, 1, 1, 1) = 14.0;
+
+  Eigen::Matrix<double, 3, 3> expected2{
+      {1.0, 2.0, 3.0}, {4.0, 10.0, 11.0}, {7.0, 12.0, 14.0}};
+  EXPECT_EQ(expected2, A.Value());
+}
+
 TEST(VariableMatrixTest, Iterators) {
   sleipnir::VariableMatrix A{{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}, {7.0, 8.0, 9.0}};
 
