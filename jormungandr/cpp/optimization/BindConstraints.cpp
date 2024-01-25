@@ -1,6 +1,6 @@
 // Copyright (c) Sleipnir contributors
 
-#include "autodiff/BindConstraints.hpp"
+#include "optimization/BindConstraints.hpp"
 
 #include <pybind11/operators.h>
 #include <sleipnir/optimization/Constraints.hpp>

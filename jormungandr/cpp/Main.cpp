@@ -2,10 +2,10 @@
 
 #include <pybind11/pybind11.h>
 
-#include "autodiff/BindConstraints.hpp"
 #include "autodiff/BindExpressionType.hpp"
 #include "autodiff/BindVariable.hpp"
 #include "autodiff/BindVariableMatrices.hpp"
+#include "optimization/BindConstraints.hpp"
 #include "optimization/BindOptimizationProblem.hpp"
 #include "optimization/BindSolverExitCondition.hpp"
 #include "optimization/BindSolverIterationInfo.hpp"
