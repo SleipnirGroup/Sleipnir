@@ -386,6 +386,9 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
   // The user callback
   std::function<bool(const SolverIterationInfo&)> m_callback =
       [](const SolverIterationInfo&) { return false; };
+
+  // The solver status
+  SolverStatus status;
 };
 
 }  // namespace sleipnir
