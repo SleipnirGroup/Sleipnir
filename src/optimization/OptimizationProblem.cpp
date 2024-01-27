@@ -64,23 +64,33 @@ VariableMatrix OptimizationProblem::SymmetricDecisionVariable(int rows) {
 
 void OptimizationProblem::Minimize(const Variable& cost) {
   m_f = cost;
+  status.costFunctionType = m_f.value().Type();
 }
 
 void OptimizationProblem::Minimize(Variable&& cost) {
   m_f = std::move(cost);
+  status.costFunctionType = m_f.value().Type();
 }
 
 void OptimizationProblem::Maximize(const Variable& cost) {
   // Maximizing a cost function is the same as minimizing its negative
   m_f = -cost;
+  status.costFunctionType = m_f.value().Type();
 }
 
 void OptimizationProblem::Maximize(Variable&& cost) {
   // Maximizing a cost function is the same as minimizing its negative
   m_f = -std::move(cost);
+  status.costFunctionType = m_f.value().Type();
 }
 
 void OptimizationProblem::SubjectTo(const EqualityConstraints& constraint) {
+  // Get the highest order equality constraint expression type
+  for (const auto& c : constraint.constraints) {
+    status.equalityConstraintType =
+        std::max(status.equalityConstraintType, c.Type());
+  }
+
   m_equalityConstraints.reserve(m_equalityConstraints.size() +
                                 constraint.constraints.size());
   std::copy(constraint.constraints.begin(), constraint.constraints.end(),
@@ -88,6 +98,12 @@ void OptimizationProblem::SubjectTo(const EqualityConstraints& constraint) {
 }
 
 void OptimizationProblem::SubjectTo(EqualityConstraints&& constraint) {
+  // Get the highest order equality constraint expression type
+  for (const auto& c : constraint.constraints) {
+    status.equalityConstraintType =
+        std::max(status.equalityConstraintType, c.Type());
+  }
+
   m_equalityConstraints.reserve(m_equalityConstraints.size() +
                                 constraint.constraints.size());
   std::copy(constraint.constraints.begin(), constraint.constraints.end(),
@@ -95,6 +111,12 @@ void OptimizationProblem::SubjectTo(EqualityConstraints&& constraint) {
 }
 
 void OptimizationProblem::SubjectTo(const InequalityConstraints& constraint) {
+  // Get the highest order inequality constraint expression type
+  for (const auto& c : constraint.constraints) {
+    status.inequalityConstraintType =
+        std::max(status.inequalityConstraintType, c.Type());
+  }
+
   m_inequalityConstraints.reserve(m_inequalityConstraints.size() +
                                   constraint.constraints.size());
   std::copy(constraint.constraints.begin(), constraint.constraints.end(),
@@ -102,6 +124,12 @@ void OptimizationProblem::SubjectTo(const InequalityConstraints& constraint) {
 }
 
 void OptimizationProblem::SubjectTo(InequalityConstraints&& constraint) {
+  // Get the highest order inequality constraint expression type
+  for (const auto& c : constraint.constraints) {
+    status.inequalityConstraintType =
+        std::max(status.inequalityConstraintType, c.Type());
+  }
+
   m_inequalityConstraints.reserve(m_inequalityConstraints.size() +
                                   constraint.constraints.size());
   std::copy(constraint.constraints.begin(), constraint.constraints.end(),
@@ -115,31 +143,11 @@ SolverStatus OptimizationProblem::Solve(const SolverConfig& config) {
     x(i) = m_decisionVariables[i].Value();
   }
 
-  SolverStatus status;
+  status.exitCondition = SolverExitCondition::kSuccess;
 
-  if (m_f.has_value()) {
-    // If there's a cost function, get its expression type. The default is
-    // "none".
-    status.costFunctionType = m_f.value().Type();
-  } else {
-    // If there's no cost function, make it zero and continue
+  // If there's no cost function, make it zero and continue
+  if (!m_f.has_value()) {
     m_f = Variable();
-  }
-
-  // Get the highest order equality constraint expression type
-  for (const auto& constraint : m_equalityConstraints) {
-    auto constraintType = constraint.Type();
-    if (status.equalityConstraintType < constraintType) {
-      status.equalityConstraintType = constraintType;
-    }
-  }
-
-  // Get the highest order inequality constraint expression type
-  for (const auto& constraint : m_inequalityConstraints) {
-    auto constraintType = constraint.Type();
-    if (status.inequalityConstraintType < constraintType) {
-      status.inequalityConstraintType = constraintType;
-    }
   }
 
   if (config.diagnostics) {
