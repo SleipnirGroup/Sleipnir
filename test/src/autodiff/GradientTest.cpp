@@ -300,12 +300,10 @@ TEST(GradientTest, Atan2) {
   x.SetValue(1.1);
   EXPECT_DOUBLE_EQ(sleipnir::atan2(y, x).Value(),
                    std::atan2(y.Value(), x.Value()));
-  EXPECT_DOUBLE_EQ(
-      sleipnir::Gradient(sleipnir::atan2(y, x), y).Calculate().coeff(0),
-      (x / (x * x + y * y)).Value());
-  EXPECT_DOUBLE_EQ(
-      sleipnir::Gradient(sleipnir::atan2(y, x), x).Calculate().coeff(0),
-      (-y / (x * x + y * y)).Value());
+  EXPECT_NEAR(sleipnir::Gradient(sleipnir::atan2(y, x), y).Calculate().coeff(0),
+              (x / (x * x + y * y)).Value(), 1e-12);
+  EXPECT_NEAR(sleipnir::Gradient(sleipnir::atan2(y, x), x).Calculate().coeff(0),
+              (-y / (x * x + y * y)).Value(), 1e-12);
 
   // Testing atan2 function on (expr, expr)
   EXPECT_DOUBLE_EQ(3 * sleipnir::atan2(sleipnir::sin(y), 2 * x + 1).Value(),

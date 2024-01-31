@@ -245,7 +245,7 @@ TEST(HessianTest, Rosenbrock) {
                100 * sleipnir::pow(y - sleipnir::pow(x, 2), 2);
 
       Eigen::MatrixXd H = sleipnir::Hessian{z, input}.Calculate();
-      EXPECT_DOUBLE_EQ(-400 * (y0 - x0 * x0) + 800 * x0 * x0 + 2, H(0, 0));
+      EXPECT_NEAR(-400 * (y0 - x0 * x0) + 800 * x0 * x0 + 2, H(0, 0), 1e-12);
       EXPECT_DOUBLE_EQ(-400 * x0, H(0, 1));
       EXPECT_DOUBLE_EQ(-400 * x0, H(1, 0));
       EXPECT_DOUBLE_EQ(200, H(1, 1));

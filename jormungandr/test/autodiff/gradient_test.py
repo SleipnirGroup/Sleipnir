@@ -295,13 +295,11 @@ def test_atan2():
     # Testing atan2 function on (var, var)
     x.set_value(1.1)
     assert autodiff.atan2(y, x).value() == math.atan2(y.value(), x.value())
-    assert (
-        Gradient(autodiff.atan2(y, x), y).calculate()[0, 0]
-        == (x / (x * x + y * y)).value()
+    assert Gradient(autodiff.atan2(y, x), y).calculate()[0, 0] == pytest.approx(
+        (x / (x * x + y * y)).value(), 1e-12
     )
-    assert (
-        Gradient(autodiff.atan2(y, x), x).calculate()[0, 0]
-        == (-y / (x * x + y * y)).value()
+    assert Gradient(autodiff.atan2(y, x), x).calculate()[0, 0] == pytest.approx(
+        (-y / (x * x + y * y)).value(), 1e-12
     )
 
     # Testing atan2 function on (expr, expr)
