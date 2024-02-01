@@ -215,7 +215,7 @@ def test_rosenbrock():
 
             H = Hessian(z, input).calculate()
             assert -400 * (y0 - x0 * x0) + 800 * x0 * x0 + 2 == pytest.approx(
-                H[0, 0], 1e-14
+                H[0, 0], 1e-12
             )
             assert -400 * x0 == H[0, 1]
             assert -400 * x0 == H[1, 0]

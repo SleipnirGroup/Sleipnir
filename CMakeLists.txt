@@ -353,9 +353,15 @@ if(BUILD_PYTHON)
     )
 
     # Generate stubs for the Python module
-    # FIXME: pybind11-stubgen fails in Windows CI with
+    # FIXME: pybind11-stubgen fails in Windows and macOS arm64 CI with
     #        "ImportError: No module named _jormungandr"
-    if(NOT WIN32 AND NOT CMAKE_CROSSCOMPILING)
+    if(
+        NOT (
+            WIN32
+            OR (APPLE AND ${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "arm64")
+            OR (CMAKE_CROSSCOMPILING)
+        )
+    )
         # pybind11-stubgen dependency
         fetchcontent_declare(
             pybind11-stubgen
@@ -371,8 +377,15 @@ if(BUILD_PYTHON)
     endif()
 
     # Generate docs for the Python module
-    # pybind11_mkdoc supports Windows and macOS but not Windows
-    if(NOT WIN32 AND NOT CMAKE_CROSSCOMPILING)
+    # pybind11_mkdoc supports Linux and macOS x86_64 but not Windows or macOS
+    # arm64
+    if(
+        NOT (
+            WIN32
+            OR (APPLE AND ${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "arm64")
+            OR (CMAKE_CROSSCOMPILING)
+        )
+    )
         # pybind11_mkdoc dependency
         fetchcontent_declare(
             pybind11_mkdoc

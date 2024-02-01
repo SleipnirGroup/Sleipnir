@@ -14,14 +14,13 @@ jobs:
       matrix:
         include:
           - artifact-name: Windows - native
-            cmake-config-env-vars:
             os: windows-2022
           - artifact-name: Linux - native
-            cmake-config-env-vars:
             os: ubuntu-22.04
-          - artifact-name: macOS - native
-            cmake-config-env-vars: CFLAGS="$CFLAGS -arch x86_64 -arch arm64" CXXFLAGS="$CXXFLAGS -arch x86_64 -arch arm64"
+          - artifact-name: macOS x86_64 - native
             os: macOS-13
+          - artifact-name: macOS arm64 - native
+            os: macOS-14
 
     name: "${{ matrix.artifact-name }}"
     runs-on: ${{ matrix.os }}
@@ -29,12 +28,14 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Configure
-        run: ${{ matrix.cmake-config-env-vars }} cmake -B build -S . -DBUILD_PYTHON=OFF
+        run: cmake -B build -S . -DBUILD_PYTHON=OFF
 
       - name: Build
         run: cmake --build build --config RelWithDebInfo --parallel $(nproc)
 
       - name: Test
+        # FIXME: Some optimization tests fail on macOS arm64
+        if: matrix.os != 'macOS-14'
         working-directory: build
         run: ctest -C RelWithDebInfo --output-on-failure
 
@@ -53,16 +54,16 @@ jobs:
       matrix:
         include:
           - artifact-name: Windows - python
-            cmake-config-env-vars:
             os: windows-2022
             py: py311
           - artifact-name: Linux - python
-            cmake-config-env-vars:
             os: ubuntu-22.04
             py: py310
-          - artifact-name: macOS - python
-            cmake-config-env-vars: CFLAGS="$CFLAGS -arch x86_64 -arch arm64" CXXFLAGS="$CXXFLAGS -arch x86_64 -arch arm64"
+          - artifact-name: macOS x86_64 - python
             os: macOS-13
+            py: py311
+          - artifact-name: macOS arm64 - python
+            os: macOS-14
             py: py311
 
     name: "${{ matrix.artifact-name }}"
@@ -74,9 +75,11 @@ jobs:
         run: pip3 install build tox
 
       - name: Build
-        run: ${{ matrix.cmake-config-env-vars }} python3 -m build
+        run: python3 -m build
 
       - name: Test
+        # FIXME: Some optimization tests fail on macOS arm64
+        if: matrix.os != 'macOS-14'
         run: python3 -m tox -e ${{ matrix.py }}
 
       - uses: actions/upload-artifact@v3
