@@ -5,11 +5,14 @@
 #include <cmath>
 #include <numbers>
 
+#include <Eigen/Core>
+#include <units/acceleration.h>
 #include <units/angle.h>
 #include <units/angular_acceleration.h>
 #include <units/angular_velocity.h>
 #include <units/force.h>
 #include <units/length.h>
+#include <units/mass.h>
 #include <units/voltage.h>
 
 /**
@@ -34,6 +37,8 @@ T RK4(F&& f, T x, U u, units::second_t dt) {
 
 casadi::MX CartPoleDynamics(const casadi::MX& x, const casadi::MX& u) {
   // https://underactuated.mit.edu/acrobot.html#cart_pole
+  //
+  // θ is CCW+ measured from negative y-axis.
   //
   // q = [x, θ]ᵀ
   // q̇ = [ẋ, θ̇]ᵀ
@@ -109,47 +114,54 @@ casadi::MX CartPoleDynamics(const casadi::MX& x, const casadi::MX& u) {
 }
 
 casadi::Opti CartPoleCasADi(units::second_t dt, int N) {
-  casadi::Opti opti;
-  casadi::Slice all;
-
   constexpr auto u_max = 20_N;
-  constexpr auto d = 1_m;
   constexpr auto d_max = 2_m;
 
+  constexpr Eigen::Vector<double, 4> x_initial{{0.0, 0.0, 0.0, 0.0}};
+  constexpr Eigen::Vector<double, 4> x_final{{1.0, std::numbers::pi, 0.0, 0.0}};
+
+  casadi::Opti problem;
+  casadi::Slice all;
+
   // x = [q, q̇]ᵀ = [x, θ, ẋ, θ̇]ᵀ
-  auto X = opti.variable(4, N + 1);
+  auto X = problem.variable(4, N + 1);
 
   // Initial guess
   for (int k = 0; k < N + 1; ++k) {
-    opti.set_initial(X(0, k), static_cast<double>(k) / N * d.value());
-    opti.set_initial(X(1, k), static_cast<double>(k) / N * std::numbers::pi);
+    problem.set_initial(X(0, k), std::lerp(x_initial(0), x_final(0),
+                                           static_cast<double>(k) / N));
+    problem.set_initial(X(1, k), std::lerp(x_initial(1), x_final(1),
+                                           static_cast<double>(k) / N));
   }
 
   // u = f_x
-  auto U = opti.variable(1, N);
+  auto U = problem.variable(1, N);
 
   // Initial conditions
-  opti.subject_to(X(all, 0) == 0.0);
+  problem.subject_to(X(0, 0) == x_initial(0));
+  problem.subject_to(X(1, 0) == x_initial(1));
+  problem.subject_to(X(2, 0) == x_initial(2));
+  problem.subject_to(X(3, 0) == x_initial(3));
 
   // Final conditions
-  opti.subject_to(X(0, N) == 1.0);
-  opti.subject_to(X(1, N) == std::numbers::pi);
-  opti.subject_to(X(2, N) == 0.0);
-  opti.subject_to(X(3, N) == 0.0);
+  problem.subject_to(X(0, N) == x_final(0));
+  problem.subject_to(X(1, N) == x_final(1));
+  problem.subject_to(X(2, N) == x_final(2));
+  problem.subject_to(X(3, N) == x_final(3));
 
   // Cart position constraints
-  opti.subject_to(X(0, all) >= 0.0);
-  opti.subject_to(X(0, all) <= d_max.value());
+  problem.subject_to(X(0, all) >= 0.0);
+  problem.subject_to(X(0, all) <= d_max.value());
 
   // Input constraints
-  opti.subject_to(U >= -u_max.value());
-  opti.subject_to(U <= u_max.value());
+  problem.subject_to(U >= -u_max.value());
+  problem.subject_to(U <= u_max.value());
 
   // Dynamics constraints - RK4 integration
   for (int k = 0; k < N; ++k) {
-    opti.subject_to(X(all, k + 1) ==
-                    RK4<decltype(CartPoleDynamics), casadi::MX, casadi::MX>(
-                        CartPoleDynamics, X(all, k), U(all, k), dt));
+    problem.subject_to(X(all, k + 1) ==
+                       RK4<decltype(CartPoleDynamics), casadi::MX, casadi::MX>(
+                           CartPoleDynamics, X(all, k), U(all, k), dt));
   }
 
   // Minimize sum squared inputs
@@ -157,7 +169,7 @@ casadi::Opti CartPoleCasADi(units::second_t dt, int N) {
   for (int k = 0; k < N; ++k) {
     J += U(all, k).T() * U(all, k);
   }
-  opti.minimize(J);
+  problem.minimize(J);
 
-  return opti;
+  return problem;
 }

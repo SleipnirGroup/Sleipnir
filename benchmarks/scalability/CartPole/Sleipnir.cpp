@@ -56,7 +56,7 @@ sleipnir::VariableMatrix CartPoleDynamics(const sleipnir::VariableMatrix& x,
   // C(q, q̇) = [0       0      ]
   //
   //          [     0      ]
-  // τ_g(q) = [-m_p gl sinθ]
+  // τ_g(q) = [−m_p gl sinθ]
   //
   //     [1]
   // B = [0]
@@ -113,8 +113,10 @@ sleipnir::VariableMatrix CartPoleDynamics(const sleipnir::VariableMatrix& x,
 
 sleipnir::OptimizationProblem CartPoleSleipnir(units::second_t dt, int N) {
   constexpr auto u_max = 20_N;
-  constexpr auto d = 1_m;
   constexpr auto d_max = 2_m;
+
+  constexpr Eigen::Vector<double, 4> x_initial{{0.0, 0.0, 0.0, 0.0}};
+  constexpr Eigen::Vector<double, 4> x_final{{1.0, std::numbers::pi, 0.0, 0.0}};
 
   sleipnir::OptimizationProblem problem;
 
@@ -123,20 +125,20 @@ sleipnir::OptimizationProblem CartPoleSleipnir(units::second_t dt, int N) {
 
   // Initial guess
   for (int k = 0; k < N + 1; ++k) {
-    X(0, k).SetValue(static_cast<double>(k) / N * d.value());
-    X(1, k).SetValue(static_cast<double>(k) / N * std::numbers::pi);
+    X(0, k).SetValue(
+        std::lerp(x_initial(0), x_final(0), static_cast<double>(k) / N));
+    X(1, k).SetValue(
+        std::lerp(x_initial(1), x_final(1), static_cast<double>(k) / N));
   }
 
   // u = f_x
   auto U = problem.DecisionVariable(1, N);
 
   // Initial conditions
-  problem.SubjectTo(X.Col(0) ==
-                    Eigen::Matrix<double, 4, 1>{0.0, 0.0, 0.0, 0.0});
+  problem.SubjectTo(X.Col(0) == x_initial);
 
   // Final conditions
-  problem.SubjectTo(X.Col(N) == Eigen::Matrix<double, 4, 1>{
-                                    d.value(), std::numbers::pi, 0.0, 0.0});
+  problem.SubjectTo(X.Col(N) == x_final);
 
   // Cart position constraints
   problem.SubjectTo(X.Row(0) >= 0.0);
