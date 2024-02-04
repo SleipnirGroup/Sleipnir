@@ -734,6 +734,8 @@ static const char *__doc_sleipnir_OptimizationProblem_m_f = R"doc()doc";
 
 static const char *__doc_sleipnir_OptimizationProblem_m_inequalityConstraints = R"doc()doc";
 
+static const char *__doc_sleipnir_OptimizationProblem_status = R"doc()doc";
+
 static const char *__doc_sleipnir_PrintTo =
 R"doc(GoogleTest value formatter for ExpressionType.
 
