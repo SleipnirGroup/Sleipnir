@@ -181,11 +181,11 @@ pip install --user build
 # Build
 python -m build --wheel
 
-# Test
-pytest
-
 # Install
 pip install --user dist/sleipnirgroup_jormungandr-*.whl
+
+# Test
+pytest
 ```
 
 ### Supported build types
