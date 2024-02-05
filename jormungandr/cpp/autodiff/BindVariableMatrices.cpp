@@ -17,6 +17,20 @@
 
 namespace py = pybind11;
 
+namespace {
+
+/**
+ * Returns true if the given function input is a NumPy array containing an
+ * arithmetic type.
+ */
+bool IsNumPyArithmeticArray(const auto& input) {
+  return py::isinstance<py::array_t<double>>(input) ||
+         py::isinstance<py::array_t<int64_t>>(input) ||
+         py::isinstance<py::array_t<int32_t>>(input);
+}
+
+}  // namespace
+
 namespace sleipnir {
 
 void BindVariableMatrix(py::module_& autodiff,
@@ -143,7 +157,7 @@ void BindVariableMatrix(py::module_& autodiff,
     } else if (py::isinstance<VariableBlock<VariableMatrix>>(value)) {
       self.Block(rowOffset, colOffset, blockRows, blockCols) =
           value.cast<VariableBlock<VariableMatrix>>();
-    } else if (py::isinstance<py::array_t<double>>(value)) {
+    } else if (IsNumPyArithmeticArray(value)) {
       self.Block(rowOffset, colOffset, blockRows, blockCols) =
           value.cast<Eigen::MatrixXd>();
     } else if (py::isinstance<Variable>(value)) {
@@ -275,76 +289,62 @@ void BindVariableMatrix(py::module_& autodiff,
 
         if (method_name == "__call__") {
           if (ufunc_name == "<ufunc 'matmul'>") {
-            if (py::isinstance<py::array_t<double>>(inputs[0]) ||
-                py::isinstance<py::array_t<int64_t>>(inputs[0])) {
+            if (IsNumPyArithmeticArray(inputs[0])) {
               return py::cast(inputs[0].cast<Eigen::MatrixXd>() * self);
-            } else if (py::isinstance<py::array_t<double>>(inputs[1]) ||
-                       py::isinstance<py::array_t<int64_t>>(inputs[1])) {
+            } else if (IsNumPyArithmeticArray(inputs[1])) {
               return py::cast(self * inputs[1].cast<Eigen::MatrixXd>());
             }
           } else if (ufunc_name == "<ufunc 'add'>") {
-            if (py::isinstance<py::array_t<double>>(inputs[0]) ||
-                py::isinstance<py::array_t<int64_t>>(inputs[0])) {
+            if (IsNumPyArithmeticArray(inputs[0])) {
               return py::cast(inputs[0].cast<Eigen::MatrixXd>() + self);
-            } else if (py::isinstance<py::array_t<double>>(inputs[1]) ||
-                       py::isinstance<py::array_t<int64_t>>(inputs[1])) {
+            } else if (IsNumPyArithmeticArray(inputs[1])) {
               return py::cast(self + inputs[1].cast<Eigen::MatrixXd>());
             }
           } else if (ufunc_name == "<ufunc 'subtract'>") {
-            if (py::isinstance<py::array_t<double>>(inputs[0]) ||
-                py::isinstance<py::array_t<int64_t>>(inputs[0])) {
+            if (IsNumPyArithmeticArray(inputs[0])) {
               return py::cast(inputs[0].cast<Eigen::MatrixXd>() - self);
-            } else if (py::isinstance<py::array_t<double>>(inputs[1]) ||
-                       py::isinstance<py::array_t<int64_t>>(inputs[1])) {
+            } else if (IsNumPyArithmeticArray(inputs[1])) {
               return py::cast(self - inputs[1].cast<Eigen::MatrixXd>());
             }
           } else if (ufunc_name == "<ufunc 'equal'>") {
-            if (py::isinstance<py::array_t<double>>(inputs[0]) ||
-                py::isinstance<py::array_t<int64_t>>(inputs[0])) {
+            if (IsNumPyArithmeticArray(inputs[0])) {
               return py::cast(inputs[0].cast<Eigen::MatrixXd>() == self);
-            } else if (py::isinstance<py::array_t<double>>(inputs[1]) ||
-                       py::isinstance<py::array_t<int64_t>>(inputs[1])) {
+            } else if (IsNumPyArithmeticArray(inputs[1])) {
               return py::cast(self == inputs[1].cast<Eigen::MatrixXd>());
             }
           } else if (ufunc_name == "<ufunc 'less'>") {
-            if (py::isinstance<py::array_t<double>>(inputs[0]) ||
-                py::isinstance<py::array_t<int64_t>>(inputs[0])) {
+            if (IsNumPyArithmeticArray(inputs[0])) {
               return py::cast(inputs[0].cast<Eigen::MatrixXd>() < self);
-            } else if (py::isinstance<py::array_t<double>>(inputs[1]) ||
-                       py::isinstance<py::array_t<int64_t>>(inputs[1])) {
+            } else if (IsNumPyArithmeticArray(inputs[1])) {
               return py::cast(self < inputs[1].cast<Eigen::MatrixXd>());
             }
           } else if (ufunc_name == "<ufunc 'less_equal'>") {
-            if (py::isinstance<py::array_t<double>>(inputs[0]) ||
-                py::isinstance<py::array_t<int64_t>>(inputs[0])) {
+            if (IsNumPyArithmeticArray(inputs[0])) {
               return py::cast(inputs[0].cast<Eigen::MatrixXd>() <= self);
-            } else if (py::isinstance<py::array_t<double>>(inputs[1]) ||
-                       py::isinstance<py::array_t<int64_t>>(inputs[1])) {
+            } else if (IsNumPyArithmeticArray(inputs[1])) {
               return py::cast(self <= inputs[1].cast<Eigen::MatrixXd>());
             }
           } else if (ufunc_name == "<ufunc 'greater'>") {
-            if (py::isinstance<py::array_t<double>>(inputs[0]) ||
-                py::isinstance<py::array_t<int64_t>>(inputs[0])) {
+            if (IsNumPyArithmeticArray(inputs[0])) {
               return py::cast(inputs[0].cast<Eigen::MatrixXd>() > self);
-            } else if (py::isinstance<py::array_t<double>>(inputs[1]) ||
-                       py::isinstance<py::array_t<int64_t>>(inputs[1])) {
+            } else if (IsNumPyArithmeticArray(inputs[1])) {
               return py::cast(self > inputs[1].cast<Eigen::MatrixXd>());
             }
           } else if (ufunc_name == "<ufunc 'greater_equal'>") {
-            if (py::isinstance<py::array_t<double>>(inputs[0]) ||
-                py::isinstance<py::array_t<int64_t>>(inputs[0])) {
+            if (IsNumPyArithmeticArray(inputs[0])) {
               return py::cast(inputs[0].cast<Eigen::MatrixXd>() >= self);
-            } else if (py::isinstance<py::array_t<double>>(inputs[1]) ||
-                       py::isinstance<py::array_t<int64_t>>(inputs[1])) {
+            } else if (IsNumPyArithmeticArray(inputs[1])) {
               return py::cast(self >= inputs[1].cast<Eigen::MatrixXd>());
             }
           }
         }
 
+        std::string input1_name = inputs[0].attr("__repr__")().cast<py::str>();
+        std::string input2_name = inputs[1].attr("__repr__")().cast<py::str>();
         fmt::print(stderr,
-                   "error: numpy method {}, ufunc {} not implemented for "
-                   "VariableMatrix\n",
-                   method_name, ufunc_name);
+                   "error: VariableMatrix: numpy method {}, ufunc {} not "
+                   "implemented for ({}, {})\n",
+                   method_name, ufunc_name, input1_name, input2_name);
         return py::cast(VariableMatrix{self});
       });
 
@@ -702,7 +702,7 @@ void BindVariableBlock(
     } else if (py::isinstance<VariableBlock<VariableMatrix>>(value)) {
       self.Block(rowOffset, colOffset, blockRows, blockCols) =
           value.cast<VariableBlock<VariableMatrix>>();
-    } else if (py::isinstance<py::array_t<double>>(value)) {
+    } else if (IsNumPyArithmeticArray(value)) {
       self.Block(rowOffset, colOffset, blockRows, blockCols) =
           value.cast<Eigen::MatrixXd>();
     } else if (py::isinstance<Variable>(value)) {
@@ -833,76 +833,62 @@ void BindVariableBlock(
 
         if (method_name == "__call__") {
           if (ufunc_name == "<ufunc 'matmul'>") {
-            if (py::isinstance<py::array_t<double>>(inputs[0]) ||
-                py::isinstance<py::array_t<int64_t>>(inputs[0])) {
+            if (IsNumPyArithmeticArray(inputs[0])) {
               return py::cast(inputs[0].cast<Eigen::MatrixXd>() * self);
-            } else if (py::isinstance<py::array_t<double>>(inputs[1]) ||
-                       py::isinstance<py::array_t<int64_t>>(inputs[1])) {
+            } else if (IsNumPyArithmeticArray(inputs[1])) {
               return py::cast(self * inputs[1].cast<Eigen::MatrixXd>());
             }
           } else if (ufunc_name == "<ufunc 'add'>") {
-            if (py::isinstance<py::array_t<double>>(inputs[0]) ||
-                py::isinstance<py::array_t<int64_t>>(inputs[0])) {
+            if (IsNumPyArithmeticArray(inputs[0])) {
               return py::cast(inputs[0].cast<Eigen::MatrixXd>() + self);
-            } else if (py::isinstance<py::array_t<double>>(inputs[1]) ||
-                       py::isinstance<py::array_t<int64_t>>(inputs[1])) {
+            } else if (IsNumPyArithmeticArray(inputs[1])) {
               return py::cast(self + inputs[1].cast<Eigen::MatrixXd>());
             }
           } else if (ufunc_name == "<ufunc 'subtract'>") {
-            if (py::isinstance<py::array_t<double>>(inputs[0]) ||
-                py::isinstance<py::array_t<int64_t>>(inputs[0])) {
+            if (IsNumPyArithmeticArray(inputs[0])) {
               return py::cast(inputs[0].cast<Eigen::MatrixXd>() - self);
-            } else if (py::isinstance<py::array_t<double>>(inputs[1]) ||
-                       py::isinstance<py::array_t<int64_t>>(inputs[1])) {
+            } else if (IsNumPyArithmeticArray(inputs[1])) {
               return py::cast(self - inputs[1].cast<Eigen::MatrixXd>());
             }
           } else if (ufunc_name == "<ufunc 'equal'>") {
-            if (py::isinstance<py::array_t<double>>(inputs[0]) ||
-                py::isinstance<py::array_t<int64_t>>(inputs[0])) {
+            if (IsNumPyArithmeticArray(inputs[0])) {
               return py::cast(inputs[0].cast<Eigen::MatrixXd>() == self);
-            } else if (py::isinstance<py::array_t<double>>(inputs[1]) ||
-                       py::isinstance<py::array_t<int64_t>>(inputs[1])) {
+            } else if (IsNumPyArithmeticArray(inputs[1])) {
               return py::cast(self == inputs[1].cast<Eigen::MatrixXd>());
             }
           } else if (ufunc_name == "<ufunc 'less'>") {
-            if (py::isinstance<py::array_t<double>>(inputs[0]) ||
-                py::isinstance<py::array_t<int64_t>>(inputs[0])) {
+            if (IsNumPyArithmeticArray(inputs[0])) {
               return py::cast(inputs[0].cast<Eigen::MatrixXd>() < self);
-            } else if (py::isinstance<py::array_t<double>>(inputs[1]) ||
-                       py::isinstance<py::array_t<int64_t>>(inputs[1])) {
+            } else if (IsNumPyArithmeticArray(inputs[1])) {
               return py::cast(self < inputs[1].cast<Eigen::MatrixXd>());
             }
           } else if (ufunc_name == "<ufunc 'less_equal'>") {
-            if (py::isinstance<py::array_t<double>>(inputs[0]) ||
-                py::isinstance<py::array_t<int64_t>>(inputs[0])) {
+            if (IsNumPyArithmeticArray(inputs[0])) {
               return py::cast(inputs[0].cast<Eigen::MatrixXd>() <= self);
-            } else if (py::isinstance<py::array_t<double>>(inputs[1]) ||
-                       py::isinstance<py::array_t<int64_t>>(inputs[1])) {
+            } else if (IsNumPyArithmeticArray(inputs[1])) {
               return py::cast(self <= inputs[1].cast<Eigen::MatrixXd>());
             }
           } else if (ufunc_name == "<ufunc 'greater'>") {
-            if (py::isinstance<py::array_t<double>>(inputs[0]) ||
-                py::isinstance<py::array_t<int64_t>>(inputs[0])) {
+            if (IsNumPyArithmeticArray(inputs[0])) {
               return py::cast(inputs[0].cast<Eigen::MatrixXd>() > self);
-            } else if (py::isinstance<py::array_t<double>>(inputs[1]) ||
-                       py::isinstance<py::array_t<int64_t>>(inputs[1])) {
+            } else if (IsNumPyArithmeticArray(inputs[1])) {
               return py::cast(self > inputs[1].cast<Eigen::MatrixXd>());
             }
           } else if (ufunc_name == "<ufunc 'greater_equal'>") {
-            if (py::isinstance<py::array_t<double>>(inputs[0]) ||
-                py::isinstance<py::array_t<int64_t>>(inputs[0])) {
+            if (IsNumPyArithmeticArray(inputs[0])) {
               return py::cast(inputs[0].cast<Eigen::MatrixXd>() >= self);
-            } else if (py::isinstance<py::array_t<double>>(inputs[1]) ||
-                       py::isinstance<py::array_t<int64_t>>(inputs[1])) {
+            } else if (IsNumPyArithmeticArray(inputs[1])) {
               return py::cast(self >= inputs[1].cast<Eigen::MatrixXd>());
             }
           }
         }
 
+        std::string input1_name = inputs[0].attr("__repr__")().cast<py::str>();
+        std::string input2_name = inputs[1].attr("__repr__")().cast<py::str>();
         fmt::print(stderr,
-                   "error: numpy method {}, ufunc {} not implemented for "
-                   "VariableBlock\n",
-                   method_name, ufunc_name);
+                   "error: VariableBlock: numpy method {}, ufunc {} not "
+                   "implemented for ({}, {})\n",
+                   method_name, ufunc_name, input1_name, input2_name);
         return py::cast(VariableMatrix{self});
       });
 

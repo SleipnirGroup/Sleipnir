@@ -176,12 +176,6 @@ def lerp(a, b, t):
 
 
 def test_optimization_problem_cart_pole():
-    import platform
-
-    if platform.system() == "Windows":
-        # FIXME: This test crashes on Windows
-        return
-
     T = 5.0  # s
     dt = 0.05  # s
     N = int(T / dt)
