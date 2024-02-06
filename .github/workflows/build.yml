@@ -82,6 +82,11 @@ jobs:
       - name: Build
         run: python3 -m build
 
+      - name: Repair wheel (Linux)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: python3 ../.github/workflows/repair_wheel.py sleipnirgroup_jormungandr-*.whl
+        working-directory: dist
+
       - name: Test
         # FIXME: Some optimization tests fail on macOS arm64
         if: matrix.os != 'macOS-14'
