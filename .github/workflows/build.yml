@@ -82,8 +82,8 @@ jobs:
       - name: Build
         run: python3 -m build
 
-      - name: Repair wheel (Linux)
-        if: startsWith(matrix.os, 'ubuntu')
+      - name: Repair wheel
+        if: startsWith(matrix.os, 'ubuntu') || startsWith(matrix.os, 'macOS')
         run: python3 ../.github/workflows/repair_wheel.py sleipnirgroup_jormungandr-*.whl
         working-directory: dist
 
