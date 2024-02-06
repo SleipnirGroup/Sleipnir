@@ -12,17 +12,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - artifact-name: Windows - native
-            os: windows-2022
-          - artifact-name: Linux - native
-            os: ubuntu-22.04
-          - artifact-name: macOS x86_64 - native
-            os: macOS-13
-          - artifact-name: macOS arm64 - native
-            os: macOS-14
+        # Windows, Linux, macOS x86_64, macOS arm64
+        os: [windows-2022, ubuntu-22.04, macOS-13, macOS-14]
 
-    name: "${{ matrix.artifact-name }}"
+    name: "${{ matrix.os }} - native"
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -42,9 +35,9 @@ jobs:
       - name: Install
         run: cmake --install build --config RelWithDebInfo --prefix pkg
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.artifact-name }}
+          name: ${{ matrix.os }} - native
           path: pkg
 
   build-python:
@@ -52,26 +45,24 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - artifact-name: Windows - python
-            os: windows-2022
-            py: py311
-          - artifact-name: Linux - python
-            os: ubuntu-22.04
-            py: py310
-          - artifact-name: macOS x86_64 - python
-            os: macOS-13
-            py: py311
-          - artifact-name: macOS arm64 - python
-            os: macOS-14
-            py: py311
+        # Windows, Linux, macOS x86_64, macOS arm64
+        os: [windows-2022, ubuntu-22.04, macOS-13, macOS-14]
+        version: ['3.9', '3.10', '3.11', '3.12']
+        exclude:
+          - os: macOS-14
+            version: '3.9'
 
-    name: "${{ matrix.artifact-name }}"
+    name: "${{ matrix.os }} - python ${{ matrix.version }}"
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Set up Python ${{ matrix.version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.version }}
 
       - name: Update version string
         run: python3 ./tools/update_version.py
@@ -90,11 +81,11 @@ jobs:
       - name: Test
         # FIXME: Some optimization tests fail on macOS arm64
         if: matrix.os != 'macOS-14'
-        run: python3 -m tox -e ${{ matrix.py }}
+        run: python3 -m tox -e ${{ matrix.version }}
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.artifact-name }}
+          name: ${{ matrix.os }} - python ${{ matrix.version }}
           path: dist
 
   build-cross:
@@ -121,7 +112,7 @@ jobs:
       - name: Install
         run: cmake --install build --config RelWithDebInfo --prefix pkg
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact-name }}
           path: pkg
@@ -144,7 +135,7 @@ jobs:
       - name: Install
         run: cmake --install build --config Release --prefix pkg
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: Wasm
           path: pkg
@@ -160,21 +151,10 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
-          name: Windows - python
           path: dist
-      - uses: actions/download-artifact@v3
-        with:
-          name: Linux - python
-          path: dist
-      - uses: actions/download-artifact@v3
-        with:
-          name: macOS x86_64 - python
-          path: dist
-      - uses: actions/download-artifact@v3
-        with:
-          name: macOS arm64 - python
-          path: dist
+          pattern: '* - python *'
+          merge-multiple: true
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
