@@ -74,7 +74,7 @@ jobs:
           fetch-depth: 0
 
       - name: Update version string
-        run: ./tools/update_version.py
+        run: python3 ./tools/update_version.py
 
       - name: Install build and tox Python packages
         run: pip3 install build tox
