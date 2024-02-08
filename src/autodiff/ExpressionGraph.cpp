@@ -86,7 +86,7 @@ void ExpressionGraph::Update() {
 }
 
 sleipnir::VariableMatrix ExpressionGraph::GenerateGradientTree(
-    const VariableMatrix& wrt) {
+    const VariableMatrix& wrt) const {
   // Read docs/algorithms.md#Reverse_accumulation_automatic_differentiation for
   // background on reverse accumulation automatic differentiation.
 

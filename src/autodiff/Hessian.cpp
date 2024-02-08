@@ -10,8 +10,12 @@ Hessian::Hessian(Variable variable, const VariableMatrix& wrt) noexcept
     : m_jacobian{detail::ExpressionGraph{variable}.GenerateGradientTree(wrt),
                  wrt} {}
 
-const Eigen::SparseMatrix<double>& Hessian::Calculate() {
-  return m_jacobian.Calculate();
+VariableMatrix Hessian::Get() const {
+  return m_jacobian.Get();
+}
+
+const Eigen::SparseMatrix<double>& Hessian::Value() {
+  return m_jacobian.Value();
 }
 
 void Hessian::Update() {

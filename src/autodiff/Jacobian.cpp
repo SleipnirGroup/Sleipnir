@@ -30,7 +30,7 @@ Jacobian::Jacobian(const VariableMatrix& variables,
       });
     } else if (m_variables(row).Type() > ExpressionType::kLinear) {
       // If the row is quadratic or nonlinear, add it to the list of nonlinear
-      // rows to be recomputed in Calculate().
+      // rows to be recomputed in Value().
       m_nonlinearRows.emplace_back(row);
     }
   }
@@ -46,7 +46,17 @@ Jacobian::Jacobian(const VariableMatrix& variables,
   m_profiler.StopSetup();
 }
 
-const Eigen::SparseMatrix<double>& Jacobian::Calculate() {
+VariableMatrix Jacobian::Get() const {
+  VariableMatrix result{m_variables.Rows(), m_wrt.Rows()};
+
+  for (int row = 0; row < m_variables.Rows(); ++row) {
+    result.Row(row) = m_graphs[row].GenerateGradientTree(m_wrt);
+  }
+
+  return result;
+}
+
+const Eigen::SparseMatrix<double>& Jacobian::Value() {
   if (m_nonlinearRows.empty()) {
     return m_J;
   }

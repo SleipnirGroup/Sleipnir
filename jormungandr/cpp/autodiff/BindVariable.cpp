@@ -218,12 +218,13 @@ void BindVariable(py::module_& autodiff) {
     cls.def(py::init<Variable, Variable>(), DOC(sleipnir, Gradient, Gradient))
         .def(py::init<Variable, VariableMatrix>(),
              DOC(sleipnir, Gradient, Gradient, 2))
+        .def("get", &Gradient::Get, DOC(sleipnir, Gradient, Get))
         .def(
-            "calculate",
+            "value",
             [](Gradient& self) {
-              return Eigen::SparseMatrix<double>{self.Calculate()};
+              return Eigen::SparseMatrix<double>{self.Value()};
             },
-            DOC(sleipnir, Gradient, Calculate))
+            DOC(sleipnir, Gradient, Value))
         .def("update", &Gradient::Update, DOC(sleipnir, Gradient, Update));
   }
 
@@ -232,8 +233,8 @@ void BindVariable(py::module_& autodiff) {
     py::class_<Jacobian> cls{autodiff, "Jacobian", DOC(sleipnir, Jacobian)};
     cls.def(py::init<VariableMatrix, VariableMatrix>(),
             DOC(sleipnir, Jacobian, Jacobian))
-        .def("calculate", &Jacobian::Calculate,
-             DOC(sleipnir, Jacobian, Calculate))
+        .def("get", &Jacobian::Get, DOC(sleipnir, Jacobian, Get))
+        .def("value", &Jacobian::Value, DOC(sleipnir, Jacobian, Value))
         .def("update", &Jacobian::Update, DOC(sleipnir, Jacobian, Update));
   }
 
@@ -242,8 +243,8 @@ void BindVariable(py::module_& autodiff) {
     py::class_<Hessian> cls{autodiff, "Hessian", DOC(sleipnir, Hessian)};
     cls.def(py::init<Variable, VariableMatrix>(),
             DOC(sleipnir, Hessian, Hessian))
-        .def("calculate", &Hessian::Calculate,
-             DOC(sleipnir, Hessian, Calculate))
+        .def("get", &Hessian::Get, DOC(sleipnir, Hessian, Get))
+        .def("value", &Hessian::Value, DOC(sleipnir, Hessian, Value))
         .def("update", &Hessian::Update, DOC(sleipnir, Hessian, Update));
   }
 }

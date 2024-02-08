@@ -34,9 +34,17 @@ class SLEIPNIR_DLLEXPORT Jacobian {
   Jacobian(const VariableMatrix& variables, const VariableMatrix& wrt) noexcept;
 
   /**
-   * Calculates the Jacobian.
+   * Returns the Jacobian as a VariableMatrix.
+   *
+   * This is useful when constructing optimization problems with derivatives in
+   * them.
    */
-  const Eigen::SparseMatrix<double>& Calculate();
+  VariableMatrix Get() const;
+
+  /**
+   * Evaluates the Jacobian at wrt's value.
+   */
+  const Eigen::SparseMatrix<double>& Value();
 
   /**
    * Updates the values of the variables.
@@ -60,7 +68,7 @@ class SLEIPNIR_DLLEXPORT Jacobian {
   std::vector<Eigen::Triplet<double>> m_cachedTriplets;
 
   // List of row indices for nonlinear rows whose graients will be computed in
-  // Calculate()
+  // Value()
   std::vector<int> m_nonlinearRows;
 
   Profiler m_profiler;

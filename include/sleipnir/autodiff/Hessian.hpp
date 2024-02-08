@@ -31,9 +31,17 @@ class SLEIPNIR_DLLEXPORT Hessian {
   Hessian(Variable variable, const VariableMatrix& wrt) noexcept;
 
   /**
-   * Calculates the Hessian.
+   * Returns the Hessian as a VariableMatrix.
+   *
+   * This is useful when constructing optimization problems with derivatives in
+   * them.
    */
-  const Eigen::SparseMatrix<double>& Calculate();
+  VariableMatrix Get() const;
+
+  /**
+   * Evaluates the Hessian at wrt's value.
+   */
+  const Eigen::SparseMatrix<double>& Value();
 
   /**
    * Updates the values of the gradient tree.

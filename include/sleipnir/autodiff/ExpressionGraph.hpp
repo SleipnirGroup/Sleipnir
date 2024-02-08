@@ -36,7 +36,7 @@ class SLEIPNIR_DLLEXPORT ExpressionGraph {
    *
    * @param wrt Variables with respect to which to compute the gradient.
    */
-  VariableMatrix GenerateGradientTree(const VariableMatrix& wrt);
+  VariableMatrix GenerateGradientTree(const VariableMatrix& wrt) const;
 
   /**
    * Updates the adjoints in the expression graph, effectively computing the
