@@ -106,7 +106,11 @@ vector of variables.
 The gradient is only recomputed if the variable expression is
 quadratic or higher order.)doc";
 
-static const char *__doc_sleipnir_Gradient_Calculate = R"doc(Calculates the gradient.)doc";
+static const char *__doc_sleipnir_Gradient_Get =
+R"doc(Returns the gradient as a VariableMatrix.
+
+This is useful when constructing optimization problems with
+derivatives in them.)doc";
 
 static const char *__doc_sleipnir_Gradient_GetProfiler = R"doc(Returns the profiler.)doc";
 
@@ -130,6 +134,8 @@ Parameter ``wrt``:
 
 static const char *__doc_sleipnir_Gradient_Update = R"doc(Updates the value of the variable.)doc";
 
+static const char *__doc_sleipnir_Gradient_Value = R"doc(Evaluates the gradient at wrt's value.)doc";
+
 static const char *__doc_sleipnir_Gradient_m_g = R"doc()doc";
 
 static const char *__doc_sleipnir_Gradient_m_jacobian = R"doc()doc";
@@ -142,7 +148,11 @@ The gradient tree is cached so subsequent Hessian calculations are
 faster, and the Hessian is only recomputed if the variable expression
 is nonlinear.)doc";
 
-static const char *__doc_sleipnir_Hessian_Calculate = R"doc(Calculates the Hessian.)doc";
+static const char *__doc_sleipnir_Hessian_Get =
+R"doc(Returns the Hessian as a VariableMatrix.
+
+This is useful when constructing optimization problems with
+derivatives in them.)doc";
 
 static const char *__doc_sleipnir_Hessian_GetProfiler = R"doc(Returns the profiler.)doc";
 
@@ -156,6 +166,8 @@ Parameter ``wrt``:
     Vector of variables with respect to which to compute the Hessian.)doc";
 
 static const char *__doc_sleipnir_Hessian_Update = R"doc(Updates the values of the gradient tree.)doc";
+
+static const char *__doc_sleipnir_Hessian_Value = R"doc(Evaluates the Hessian at wrt's value.)doc";
 
 static const char *__doc_sleipnir_Hessian_m_jacobian = R"doc()doc";
 
@@ -187,7 +199,11 @@ quadratic or higher order.)doc";
 
 static const char *__doc_sleipnir_Jacobian_2 = R"doc()doc";
 
-static const char *__doc_sleipnir_Jacobian_Calculate = R"doc(Calculates the Jacobian.)doc";
+static const char *__doc_sleipnir_Jacobian_Get =
+R"doc(Returns the Jacobian as a VariableMatrix.
+
+This is useful when constructing optimization problems with
+derivatives in them.)doc";
 
 static const char *__doc_sleipnir_Jacobian_GetProfiler = R"doc(Returns the profiler.)doc";
 
@@ -201,6 +217,8 @@ Parameter ``wrt``:
     Vector of variables with respect to which to compute the Jacobian.)doc";
 
 static const char *__doc_sleipnir_Jacobian_Update = R"doc(Updates the values of the variables.)doc";
+
+static const char *__doc_sleipnir_Jacobian_Value = R"doc(Evaluates the Jacobian at wrt's value.)doc";
 
 static const char *__doc_sleipnir_Jacobian_m_J = R"doc()doc";
 

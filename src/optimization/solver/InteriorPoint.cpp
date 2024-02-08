@@ -74,7 +74,7 @@ void InteriorPoint(
   //         [    ⋮    ]
   //         [∇ᵀcₑₘ(xₖ)]
   Jacobian jacobianCe{c_eAD, xAD};
-  Eigen::SparseMatrix<double> A_e = jacobianCe.Calculate();
+  Eigen::SparseMatrix<double> A_e = jacobianCe.Value();
 
   // Inequality constraint Jacobian Aᵢ
   //
@@ -83,17 +83,17 @@ void InteriorPoint(
   //         [    ⋮    ]
   //         [∇ᵀcᵢₘ(xₖ)]
   Jacobian jacobianCi{c_iAD, xAD};
-  Eigen::SparseMatrix<double> A_i = jacobianCi.Calculate();
+  Eigen::SparseMatrix<double> A_i = jacobianCi.Value();
 
   // Gradient of f ∇f
   Gradient gradientF{f, xAD};
-  Eigen::SparseVector<double> g = gradientF.Calculate();
+  Eigen::SparseVector<double> g = gradientF.Value();
 
   // Hessian of the Lagrangian H
   //
   // Hₖ = ∇²ₓₓL(xₖ, sₖ, yₖ, zₖ)
   Hessian hessianL{L, xAD};
-  Eigen::SparseMatrix<double> H = hessianL.Calculate();
+  Eigen::SparseMatrix<double> H = hessianL.Value();
 
   Eigen::VectorXd y = yAD.Value();
   Eigen::VectorXd z = zAD.Value();
@@ -576,9 +576,9 @@ void InteriorPoint(
         }
         Eigen::VectorXd trial_c_i = c_iAD.Value();
 
-        double nextKKTError = KKTError(
-            gradientF.Calculate(), jacobianCe.Calculate(), trial_c_e,
-            jacobianCi.Calculate(), trial_c_i, trial_s, trial_y, trial_z, μ);
+        double nextKKTError = KKTError(gradientF.Value(), jacobianCe.Value(),
+                                       trial_c_e, jacobianCi.Value(), trial_c_i,
+                                       trial_s, trial_y, trial_z, μ);
 
         // If the step using αᵐᵃˣ reduced the KKT error, accept it anyway
         if (nextKKTError <= 0.999 * currentKKTError) {
@@ -660,9 +660,9 @@ void InteriorPoint(
             xAD.SetValue(fr_x);
             sAD.SetValue(c_iAD.Value());
 
-            A_e = jacobianCe.Calculate();
-            A_i = jacobianCi.Calculate();
-            g = gradientF.Calculate();
+            A_e = jacobianCe.Value();
+            A_i = jacobianCi.Value();
+            g = gradientF.Value();
 
             // Â = [Aₑ   0]
             //     [Aᵢ  −S]
@@ -779,10 +779,10 @@ void InteriorPoint(
     sAD.SetValue(s);
     yAD.SetValue(y);
     zAD.SetValue(z);
-    A_e = jacobianCe.Calculate();
-    A_i = jacobianCi.Calculate();
-    g = gradientF.Calculate();
-    H = hessianL.Calculate();
+    A_e = jacobianCe.Value();
+    A_i = jacobianCi.Value();
+    g = gradientF.Value();
+    H = hessianL.Value();
 
     // Update cₑ
     for (int row = 0; row < c_e.rows(); ++row) {

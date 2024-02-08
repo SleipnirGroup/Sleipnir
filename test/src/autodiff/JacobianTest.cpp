@@ -16,7 +16,7 @@ TEST(JacobianTest, YvsX) {
   // dy/dx = [0  1  0]
   //         [0  0  1]
   y = x;
-  Eigen::MatrixXd J = sleipnir::Jacobian{y, x}.Calculate();
+  Eigen::MatrixXd J = sleipnir::Jacobian{y, x}.Value();
 
   for (int row = 0; row < 3; ++row) {
     for (int col = 0; col < 3; ++col) {
@@ -42,7 +42,7 @@ TEST(JacobianTest, Yvs3X) {
   // dy/dx = [0  3  0]
   //         [0  0  3]
   y = 3 * x;
-  Eigen::MatrixXd J = sleipnir::Jacobian{y, x}.Calculate();
+  Eigen::MatrixXd J = sleipnir::Jacobian{y, x}.Value();
 
   for (int row = 0; row < 3; ++row) {
     for (int col = 0; col < 3; ++col) {
@@ -76,7 +76,7 @@ TEST(JacobianTest, Products) {
   y(0) = x(0) * x(1);
   y(1) = x(1) * x(2);
   y(2) = x(0) * x(2);
-  Eigen::MatrixXd J = sleipnir::Jacobian{y, x}.Calculate();
+  Eigen::MatrixXd J = sleipnir::Jacobian{y, x}.Value();
 
   EXPECT_DOUBLE_EQ(2.0, J(0, 0));
   EXPECT_DOUBLE_EQ(1.0, J(0, 1));
@@ -97,7 +97,7 @@ TEST(JacobianTest, DISABLED_NestedProducts) {
   x(1) = 2 * z(0);
   x(2) = 3 * z(0);
 
-  Eigen::MatrixXd J = sleipnir::Jacobian{x, z}.Calculate();
+  Eigen::MatrixXd J = sleipnir::Jacobian{x, z}.Value();
   EXPECT_DOUBLE_EQ(1.0, J(0, 0));
   EXPECT_DOUBLE_EQ(2.0, J(1, 0));
   EXPECT_DOUBLE_EQ(3.0, J(2, 0));
@@ -117,7 +117,7 @@ TEST(JacobianTest, DISABLED_NestedProducts) {
   y(0) = x(0) * x(1);
   y(1) = x(1) * x(2);
   y(2) = x(0) * x(2);
-  J = sleipnir::Jacobian{y, x}.Calculate();
+  J = sleipnir::Jacobian{y, x}.Value();
 
   EXPECT_DOUBLE_EQ(2.0, J(0, 0));
   EXPECT_DOUBLE_EQ(1.0, J(0, 1));
@@ -141,7 +141,7 @@ TEST(JacobianTest, NonSquare) {
   //
   // dy/dx = [1  3  −5]
   y(0) = x(0) + 3 * x(1) - 5 * x(2);
-  Eigen::MatrixXd J = sleipnir::Jacobian{y, x}.Calculate();
+  Eigen::MatrixXd J = sleipnir::Jacobian{y, x}.Value();
 
   EXPECT_EQ(1, J.rows());
   EXPECT_EQ(3, J.cols());
@@ -163,7 +163,7 @@ TEST(JacobianTest, Reuse) {
 
   // dy/dx = [x₂  x₁]
   // dy/dx = [2  1]
-  Eigen::MatrixXd J = jacobian.Calculate();
+  Eigen::MatrixXd J = jacobian.Value();
 
   EXPECT_EQ(1, J.rows());
   EXPECT_EQ(2, J.cols());
@@ -174,7 +174,7 @@ TEST(JacobianTest, Reuse) {
   x(1).SetValue(1);
   // dy/dx = [x₂  x₁]
   // dy/dx = [1  2]
-  J = jacobian.Calculate();
+  J = jacobian.Value();
 
   EXPECT_EQ(1, J.rows());
   EXPECT_EQ(2, J.cols());

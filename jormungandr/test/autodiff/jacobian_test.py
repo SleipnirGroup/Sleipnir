@@ -18,7 +18,7 @@ def test_y_vs_x():
     # dy/dx = [0  1  0]
     #         [0  0  1]
     y = x
-    J = Jacobian(y, x).calculate()
+    J = Jacobian(y, x).value()
 
     for row in range(3):
         for col in range(3):
@@ -41,7 +41,7 @@ def test_y_vs_3x():
     # dy/dx = [0  3  0]
     #         [0  0  3]
     y = 3 * x
-    J = Jacobian(y, x).calculate()
+    J = Jacobian(y, x).value()
 
     for row in range(3):
         for col in range(3):
@@ -72,7 +72,7 @@ def test_products():
     y[0] = x[0] * x[1]
     y[1] = x[1] * x[2]
     y[2] = x[0] * x[2]
-    J = Jacobian(y, x).calculate()
+    J = Jacobian(y, x).value()
 
     assert 2.0 == J[0, 0]
     assert 1.0 == J[0, 1]
@@ -94,7 +94,7 @@ def test_nested_products():
     x[1] = 2 * z[0]
     x[2] = 3 * z[0]
 
-    J = Jacobian(x, z).calculate()
+    J = Jacobian(x, z).value()
     assert 1.0 == J[0, 0]
     assert 2.0 == J[1, 0]
     assert 3.0 == J[2, 0]
@@ -114,7 +114,7 @@ def test_nested_products():
     y[0] = x[0] * x[1]
     y[1] = x[1] * x[2]
     y[2] = x[0] * x[2]
-    J = Jacobian(y, x).calculate()
+    J = Jacobian(y, x).value()
 
     assert 2.0 == J[0, 0]
     assert 1.0 == J[0, 1]
@@ -138,7 +138,7 @@ def test_non_square():
     #
     # dy/dx = [1  3  −5]
     y[0] = x[0] + 3 * x[1] - 5 * x[2]
-    J = Jacobian(y, x).calculate()
+    J = Jacobian(y, x).value()
 
     assert J.shape == (1, 3)
     assert 1.0 == J[0, 0]
@@ -159,7 +159,7 @@ def test_reuse():
 
     # dy/dx = [x₂  x₁]
     # dy/dx = [2  1]
-    J = jacobian.calculate()
+    J = jacobian.value()
 
     assert J.shape == (1, 2)
     assert 2.0 == J[0, 0]
@@ -169,7 +169,7 @@ def test_reuse():
     x[1].set_value(1)
     # dy/dx = [x₂  x₁]
     # dy/dx = [1  2]
-    J = jacobian.calculate()
+    J = jacobian.value()
 
     assert J.shape == (1, 2)
     assert 1.0 == J[0, 0]

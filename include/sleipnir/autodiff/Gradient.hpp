@@ -40,9 +40,17 @@ class SLEIPNIR_DLLEXPORT Gradient {
   Gradient(Variable variable, const VariableMatrix& wrt) noexcept;
 
   /**
-   * Calculates the gradient.
+   * Returns the gradient as a VariableMatrix.
+   *
+   * This is useful when constructing optimization problems with derivatives in
+   * them.
    */
-  const Eigen::SparseVector<double>& Calculate();
+  VariableMatrix Get() const;
+
+  /**
+   * Evaluates the gradient at wrt's value.
+   */
+  const Eigen::SparseVector<double>& Value();
 
   /**
    * Updates the value of the variable.

@@ -10,8 +10,12 @@ Gradient::Gradient(Variable variable, Variable wrt) noexcept
 Gradient::Gradient(Variable variable, const VariableMatrix& wrt) noexcept
     : m_jacobian{variable, wrt} {}
 
-const Eigen::SparseVector<double>& Gradient::Calculate() {
-  m_g = m_jacobian.Calculate();
+VariableMatrix Gradient::Get() const {
+  return m_jacobian.Get();
+}
+
+const Eigen::SparseVector<double>& Gradient::Value() {
+  m_g = m_jacobian.Value();
 
   return m_g;
 }
