@@ -108,7 +108,7 @@ VariableMatrix::VariableMatrix(
   }
 }
 
-VariableMatrix::VariableMatrix(std::span<Variable> values)
+VariableMatrix::VariableMatrix(std::span<const Variable> values)
     : m_rows{static_cast<int>(values.size())}, m_cols{1} {
   for (int row = 0; row < Rows(); ++row) {
     for (int col = 0; col < Cols(); ++col) {
@@ -117,7 +117,8 @@ VariableMatrix::VariableMatrix(std::span<Variable> values)
   }
 }
 
-VariableMatrix::VariableMatrix(std::span<Variable> values, int rows, int cols)
+VariableMatrix::VariableMatrix(std::span<const Variable> values, int rows,
+                               int cols)
     : m_rows{rows}, m_cols{cols} {
   assert(static_cast<int>(values.size()) == Rows() * Cols());
   for (int row = 0; row < Rows(); ++row) {

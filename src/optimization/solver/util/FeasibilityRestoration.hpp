@@ -82,34 +82,35 @@ inline void FeasibilityRestoration(
     fr_decisionVariables.emplace_back();
   }
 
-  VariableMatrix xAD{{&fr_decisionVariables[0], decisionVariables.size()}};
+  auto it = fr_decisionVariables.cbegin();
 
-  VariableMatrix p_e{{&fr_decisionVariables[decisionVariables.size()],
-                      equalityConstraints.size()}};
-  VariableMatrix n_e{{&fr_decisionVariables[decisionVariables.size() +
-                                            equalityConstraints.size()],
-                      equalityConstraints.size()}};
-  VariableMatrix p_i{{&fr_decisionVariables[decisionVariables.size() +
-                                            2 * equalityConstraints.size()],
-                      inequalityConstraints.size()}};
-  VariableMatrix n_i{{&fr_decisionVariables[decisionVariables.size() +
-                                            2 * equalityConstraints.size() +
-                                            inequalityConstraints.size()],
-                      inequalityConstraints.size()}};
+  VariableMatrix xAD{std::span{it, it + decisionVariables.size()}};
+  it += decisionVariables.size();
+
+  VariableMatrix p_e{std::span{it, it + equalityConstraints.size()}};
+  it += equalityConstraints.size();
+
+  VariableMatrix n_e{std::span{it, it + equalityConstraints.size()}};
+  it += equalityConstraints.size();
+
+  VariableMatrix p_i{std::span{it, it + inequalityConstraints.size()}};
+  it += inequalityConstraints.size();
+
+  VariableMatrix n_i{std::span{it, it + inequalityConstraints.size()}};
 
   // Set initial values for pₑ, nₑ, pᵢ, and nᵢ.
   //
   //
   // From equation (33) of [2]:
-  //                      ______________________
-  //       μ − ρ c(x) +  /(μ − ρ c(x))²   μ c(x)
-  //   n = −−−−−−−−−−   / (−−−−−−−−−−)  + −−−−−−     (1)
-  //           2ρ      √  (    2ρ    )      2ρ
+  //                       ______________________
+  //       μ − ρ c(x)     /(μ − ρ c(x))²   μ c(x)
+  //   n = −−−−−−−−−− +  / (−−−−−−−−−−)  + −−−−−−     (1)
+  //           2ρ       √  (    2ρ    )      2ρ
   //
   // The quadratic formula:
   //             ________
   //       -b + √b² - 4ac
-  //   x = −−−−−−−−−−−−−−                            (2)
+  //   x = −−−−−−−−−−−−−−                             (2)
   //             2a
   //
   // Rearrange (1) to fit the quadratic formula better:

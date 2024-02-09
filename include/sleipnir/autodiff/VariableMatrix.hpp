@@ -163,7 +163,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    *
    * @param values Variable array to wrap.
    */
-  explicit VariableMatrix(std::span<Variable> values);
+  explicit VariableMatrix(std::span<const Variable> values);
 
   /**
    * Constructs a matrix wrapper around a Variable array.
@@ -172,7 +172,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param rows The number of matrix rows.
    * @param cols The number of matrix columns.
    */
-  VariableMatrix(std::span<Variable> values, int rows, int cols);
+  VariableMatrix(std::span<const Variable> values, int rows, int cols);
 
   /**
    * Returns a block pointing to the given row and column.
