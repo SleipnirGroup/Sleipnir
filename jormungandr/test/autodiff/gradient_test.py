@@ -19,7 +19,7 @@ def test_trivial_case():
     assert 0 == Gradient(c, b).value()[0, 0]
 
 
-def test_positive_operator():
+def test_unary_plus():
     a = Variable()
     a.set_value(10)
     c = +a
@@ -28,7 +28,7 @@ def test_positive_operator():
     assert 1.0 == Gradient(c, a).value()[0, 0]
 
 
-def test_negative_operator():
+def test_unary_minus():
     a = Variable()
     a.set_value(10)
     c = -a

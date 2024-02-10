@@ -19,7 +19,7 @@ TEST(GradientTest, TrivialCase) {
   EXPECT_DOUBLE_EQ(0, sleipnir::Gradient(c, b).Value().coeff(0));
 }
 
-TEST(GradientTest, PositiveOperator) {
+TEST(GradientTest, UnaryPlus) {
   sleipnir::Variable a;
   a.SetValue(10);
   sleipnir::Variable c = +a;
@@ -28,7 +28,7 @@ TEST(GradientTest, PositiveOperator) {
   EXPECT_DOUBLE_EQ(1.0, sleipnir::Gradient(c, a).Value().coeff(0));
 }
 
-TEST(GradientTest, NegativeOperator) {
+TEST(GradientTest, UnaryMinus) {
   sleipnir::Variable a;
   a.SetValue(10);
   sleipnir::Variable c = -a;
