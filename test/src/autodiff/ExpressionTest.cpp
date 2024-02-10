@@ -2,210 +2,210 @@
 
 #include <numbers>
 
-#include <gtest/gtest.h>
+#include <catch2/catch_test_macros.hpp>
 #include <sleipnir/autodiff/Expression.hpp>
 
 using sleipnir::detail::MakeExpressionPtr;
 using sleipnir::detail::Zero;
 
-TEST(ExpressionTest, DefaultConstructor) {
+TEST_CASE("Default constructor", "[Expression]") {
   auto expr = MakeExpressionPtr();
 
-  EXPECT_EQ(0.0, expr->value);
-  EXPECT_EQ(sleipnir::ExpressionType::kConstant, expr->type);
+  CHECK(0.0 == expr->value);
+  CHECK(sleipnir::ExpressionType::kConstant == expr->type);
 }
 
-TEST(ExpressionTest, Zero) {
-  EXPECT_TRUE(Zero()->IsConstant(0.0));
+TEST_CASE("Zero", "[Expression]") {
+  CHECK(Zero()->IsConstant(0.0));
 }
 
-TEST(ExpressionTest, PruneMultiply) {
+TEST_CASE("Prune multiply", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
   auto one = MakeExpressionPtr(1.0);
   auto two = MakeExpressionPtr(2.0);
 
-  EXPECT_EQ(zero * one, Zero());
-  EXPECT_EQ(zero * two, Zero());
-  EXPECT_EQ(one * zero, Zero());
-  EXPECT_EQ(one * one, one);
-  EXPECT_EQ(one * two, two);
-  EXPECT_EQ(two * one, two);
+  CHECK(zero * one == Zero());
+  CHECK(zero * two == Zero());
+  CHECK(one * zero == Zero());
+  CHECK(one * one == one);
+  CHECK(one * two == two);
+  CHECK(two * one == two);
 }
 
-TEST(ExpressionTest, PruneDivide) {
+TEST_CASE("Prune divide", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
   auto one = MakeExpressionPtr(1.0);
   auto two = MakeExpressionPtr(2.0);
 
-  EXPECT_EQ(zero / one, Zero());
-  EXPECT_EQ(one / one, one);
-  EXPECT_EQ(two / one, two);
+  CHECK(zero / one == Zero());
+  CHECK(one / one == one);
+  CHECK(two / one == two);
 }
 
-TEST(ExpressionTest, PruneBinaryPlus) {
+TEST_CASE("Prune binary plus", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
   auto one = MakeExpressionPtr(1.0);
   auto two = MakeExpressionPtr(2.0);
 
-  EXPECT_EQ(zero + zero, zero);
-  EXPECT_EQ(zero + one, one);
-  EXPECT_EQ(zero + two, two);
-  EXPECT_EQ(one + zero, one);
-  EXPECT_EQ(two + zero, two);
+  CHECK(zero + zero == zero);
+  CHECK(zero + one == one);
+  CHECK(zero + two == two);
+  CHECK(one + zero == one);
+  CHECK(two + zero == two);
 }
 
-TEST(ExpressionTest, PruneBinaryMinus) {
+TEST_CASE("Prune binary minus", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
   auto one = MakeExpressionPtr(1.0);
   auto two = MakeExpressionPtr(2.0);
 
-  EXPECT_EQ(zero - zero, Zero());
-  EXPECT_EQ(one - zero, one);
-  EXPECT_EQ(two - zero, two);
+  CHECK(zero - zero == Zero());
+  CHECK(one - zero == one);
+  CHECK(two - zero == two);
 }
 
-TEST(ExpressionTest, PruneUnaryPlus) {
+TEST_CASE("Prune unary plus", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
   auto one = MakeExpressionPtr(1.0);
   auto two = MakeExpressionPtr(2.0);
 
-  EXPECT_EQ(+zero, Zero());
-  EXPECT_EQ(+one, one);
-  EXPECT_EQ(+two, two);
+  CHECK(+zero == Zero());
+  CHECK(+one == one);
+  CHECK(+two == two);
 }
 
-TEST(ExpressionTest, PruneUnaryMinus) {
+TEST_CASE("Prune unary minus", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
 
-  EXPECT_EQ(-zero, Zero());
+  CHECK(-zero == Zero());
 }
 
-TEST(ExpressionTest, PruneAbs) {
+TEST_CASE("Prune abs()", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
 
-  EXPECT_EQ(abs(zero), Zero());  // NOLINT
+  CHECK(abs(zero) == Zero());  // NOLINT
 }
 
-TEST(ExpressionTest, PruneAcos) {
+TEST_CASE("Prune acos()", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
 
-  EXPECT_EQ(acos(zero)->value, std::numbers::pi / 2.0);  // NOLINT
+  CHECK(acos(zero)->value == std::numbers::pi / 2.0);  // NOLINT
 }
 
-TEST(ExpressionTest, PruneAsin) {
+TEST_CASE("Prune asin()", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
 
-  EXPECT_EQ(asin(zero), Zero());  // NOLINT
+  CHECK(asin(zero) == Zero());  // NOLINT
 }
 
-TEST(ExpressionTest, PruneAtan) {
+TEST_CASE("Prune atan()", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
 
-  EXPECT_EQ(atan(zero), Zero());  // NOLINT
+  CHECK(atan(zero) == Zero());  // NOLINT
 }
 
-TEST(ExpressionTest, PruneAtan2) {
-  auto zero = MakeExpressionPtr(0.0);
-  auto one = MakeExpressionPtr(1.0);
-
-  EXPECT_EQ(atan2(zero, one), Zero());                         // NOLINT
-  EXPECT_EQ(atan2(one, zero)->value, std::numbers::pi / 2.0);  // NOLINT
-}
-
-TEST(ExpressionTest, PruneCos) {
-  auto zero = MakeExpressionPtr(0.0);
-
-  EXPECT_EQ(cos(zero)->value, 1.0);  // NOLINT
-}
-
-TEST(ExpressionTest, PruneCosh) {
-  auto zero = MakeExpressionPtr(0.0);
-
-  EXPECT_EQ(cosh(zero)->value, 1.0);  // NOLINT
-}
-
-TEST(ExpressionTest, PruneErf) {
-  auto zero = MakeExpressionPtr(0.0);
-
-  EXPECT_EQ(erf(zero), Zero());  // NOLINT
-}
-
-TEST(ExpressionTest, PruneExp) {
-  auto zero = MakeExpressionPtr(0.0);
-
-  EXPECT_EQ(exp(zero)->value, 1.0);  // NOLINT
-}
-
-TEST(ExpressionTest, PruneHypot) {
+TEST_CASE("Prune atan2()", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
   auto one = MakeExpressionPtr(1.0);
 
-  EXPECT_EQ(hypot(zero, zero), Zero());  // NOLINT
-  EXPECT_EQ(hypot(zero, one), one);      // NOLINT
-  EXPECT_EQ(hypot(one, zero), one);      // NOLINT
+  CHECK(atan2(zero, one) == Zero());                         // NOLINT
+  CHECK(atan2(one, zero)->value == std::numbers::pi / 2.0);  // NOLINT
 }
 
-TEST(ExpressionTest, PruneLog) {
+TEST_CASE("Prune cos()", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
 
-  EXPECT_EQ(log(zero), Zero());  // NOLINT
+  CHECK(cos(zero)->value == 1.0);  // NOLINT
 }
 
-TEST(ExpressionTest, PruneLog10) {
+TEST_CASE("Prune cosh()", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
 
-  EXPECT_EQ(log10(zero), Zero());  // NOLINT
+  CHECK(cosh(zero)->value == 1.0);  // NOLINT
 }
 
-TEST(ExpressionTest, PrunePow) {
+TEST_CASE("Prune erf()", "[Expression]") {
+  auto zero = MakeExpressionPtr(0.0);
+
+  CHECK(erf(zero) == Zero());  // NOLINT
+}
+
+TEST_CASE("Prune exp()", "[Expression]") {
+  auto zero = MakeExpressionPtr(0.0);
+
+  CHECK(exp(zero)->value == 1.0);  // NOLINT
+}
+
+TEST_CASE("Prune hypot()", "[Expression]") {
+  auto zero = MakeExpressionPtr(0.0);
+  auto one = MakeExpressionPtr(1.0);
+
+  CHECK(hypot(zero, zero) == Zero());  // NOLINT
+  CHECK(hypot(zero, one) == one);      // NOLINT
+  CHECK(hypot(one, zero) == one);      // NOLINT
+}
+
+TEST_CASE("Prune log()", "[Expression]") {
+  auto zero = MakeExpressionPtr(0.0);
+
+  CHECK(log(zero) == Zero());  // NOLINT
+}
+
+TEST_CASE("Prune log10()", "[Expression]") {
+  auto zero = MakeExpressionPtr(0.0);
+
+  CHECK(log10(zero) == Zero());  // NOLINT
+}
+
+TEST_CASE("Prune pow()", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
   auto one = MakeExpressionPtr(1.0);
   auto two = MakeExpressionPtr(2.0);
 
-  EXPECT_EQ(pow(zero, zero), Zero());     // NOLINT
-  EXPECT_EQ(pow(zero, one), Zero());      // NOLINT
-  EXPECT_EQ(pow(zero, two), Zero());      // NOLINT
-  EXPECT_EQ(pow(one, zero), one);         // NOLINT
-  EXPECT_EQ(pow(one, one), one);          // NOLINT
-  EXPECT_EQ(pow(one, two), one);          // NOLINT
-  EXPECT_EQ(pow(two, zero)->value, 1.0);  // NOLINT
-  EXPECT_EQ(pow(two, one), two);          // NOLINT
+  CHECK(pow(zero, zero) == Zero());     // NOLINT
+  CHECK(pow(zero, one) == Zero());      // NOLINT
+  CHECK(pow(zero, two) == Zero());      // NOLINT
+  CHECK(pow(one, zero) == one);         // NOLINT
+  CHECK(pow(one, one) == one);          // NOLINT
+  CHECK(pow(one, two) == one);          // NOLINT
+  CHECK(pow(two, zero)->value == 1.0);  // NOLINT
+  CHECK(pow(two, one) == two);          // NOLINT
 }
 
-TEST(ExpressionTest, PruneSign) {
+TEST_CASE("Prune sign()", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
 
-  EXPECT_EQ(sign(zero), Zero());
+  CHECK(sign(zero) == Zero());
 }
 
-TEST(ExpressionTest, PruneSin) {
+TEST_CASE("Prune sin()", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
 
-  EXPECT_EQ(sin(zero), Zero());  // NOLINT
+  CHECK(sin(zero) == Zero());  // NOLINT
 }
 
-TEST(ExpressionTest, PruneSinh) {
+TEST_CASE("Prune sinh()", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
 
-  EXPECT_EQ(sinh(zero), Zero());
+  CHECK(sinh(zero) == Zero());
 }
 
-TEST(ExpressionTest, PruneSqrt) {
+TEST_CASE("Prune sqrt()", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
   auto one = MakeExpressionPtr(1.0);
 
-  EXPECT_EQ(sqrt(zero), Zero());  // NOLINT
-  EXPECT_EQ(sqrt(one), one);      // NOLINT
+  CHECK(sqrt(zero) == Zero());  // NOLINT
+  CHECK(sqrt(one) == one);      // NOLINT
 }
 
-TEST(ExpressionTest, PruneTan) {
+TEST_CASE("Prune tan()", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
 
-  EXPECT_EQ(tan(zero), Zero());  // NOLINT
+  CHECK(tan(zero) == Zero());  // NOLINT
 }
 
-TEST(ExpressionTest, PruneTanh) {
+TEST_CASE("Prune tanh()", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
 
-  EXPECT_EQ(tanh(zero), Zero());
+  CHECK(tanh(zero) == Zero());
 }

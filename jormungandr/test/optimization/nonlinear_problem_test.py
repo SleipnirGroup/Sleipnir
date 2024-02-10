@@ -1,11 +1,9 @@
 import jormungandr.autodiff as autodiff
 from jormungandr.autodiff import ExpressionType
 from jormungandr.optimization import OptimizationProblem, SolverExitCondition
+
 import numpy as np
-
-
-def near(expected, actual, tolerance):
-    return abs(expected - actual) < tolerance
+import pytest
 
 
 def test_quartic():
@@ -25,7 +23,7 @@ def test_quartic():
     assert status.inequality_constraint_type == ExpressionType.LINEAR
     assert status.exit_condition == SolverExitCondition.SUCCESS
 
-    assert near(1.0, x.value(), 1e-6)
+    assert x.value() == pytest.approx(1.0, abs=1e-6)
 
 
 def test_rosenbrock_with_cubic_and_line_constraint():
@@ -55,8 +53,12 @@ def test_rosenbrock_with_cubic_and_line_constraint():
 
             # Local minimum at (0.0, 0.0)
             # Global minimum at (1.0, 1.0)
-            assert near(0.0, x.value(), 1e-2) or near(1.0, x.value(), 1e-2)
-            assert near(0.0, y.value(), 1e-2) or near(1.0, y.value(), 1e-2)
+            assert x.value() == pytest.approx(
+                0.0, abs=1e-2
+            ) or x.value() == pytest.approx(1.0, abs=1e-2)
+            assert y.value() == pytest.approx(
+                0.0, abs=1e-2
+            ) or y.value() == pytest.approx(1.0, abs=1e-2)
 
 
 def test_rosenbrock_with_disk_constraint():
@@ -83,8 +85,8 @@ def test_rosenbrock_with_disk_constraint():
             assert status.inequality_constraint_type == ExpressionType.QUADRATIC
             assert status.exit_condition == SolverExitCondition.SUCCESS
 
-            assert near(1.0, x.value(), 1e-1)
-            assert near(1.0, y.value(), 1e-1)
+            assert x.value() == pytest.approx(1.0, abs=1e-1)
+            assert y.value() == pytest.approx(1.0, abs=1e-1)
 
 
 def test_narrow_feasible_region():
@@ -107,5 +109,5 @@ def test_narrow_feasible_region():
     assert status.inequality_constraint_type == ExpressionType.NONE
     assert status.exit_condition == SolverExitCondition.SUCCESS
 
-    assert near(2.5, x.value(), 1e-2)
-    assert near(2.5, y.value(), 1e-2)
+    assert x.value() == pytest.approx(2.5, abs=1e-2)
+    assert y.value() == pytest.approx(2.5, abs=1e-2)

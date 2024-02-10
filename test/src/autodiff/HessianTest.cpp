@@ -5,31 +5,30 @@
 #include <numeric>
 
 #include <Eigen/Core>
-#include <gtest/gtest.h>
+#include <catch2/catch_approx.hpp>
+#include <catch2/catch_test_macros.hpp>
 #include <sleipnir/autodiff/Gradient.hpp>
 #include <sleipnir/autodiff/Hessian.hpp>
 #include <sleipnir/autodiff/Variable.hpp>
 
 #include "Range.hpp"
 
-TEST(HessianTest, Linear) {
+TEST_CASE("Linear", "[Hessian]") {
   // y = x
   sleipnir::VariableMatrix x{1};
   x(0).SetValue(3);
   sleipnir::Variable y = x(0);
 
   // dy/dx = 1
-  double g = sleipnir::Gradient{y, x(0)}.Value().coeff(0);
-  EXPECT_DOUBLE_EQ(1.0, g);
+  double g = sleipnir::Gradient(y, x(0)).Value().coeff(0);
+  CHECK(g == 1.0);
 
-  // d²y/dx² = d/dx(x (rhs) + x (lhs))
-  //         = 1 + 1
-  //         = 2
-  Eigen::MatrixXd H = sleipnir::Hessian{y, x}.Value();
-  EXPECT_DOUBLE_EQ(0.0, H(0, 0));
+  // d²y/dx² = 0
+  Eigen::MatrixXd H = sleipnir::Hessian(y, x).Value();
+  CHECK(H(0, 0) == 0.0);
 }
 
-TEST(HessianTest, Quadratic) {
+TEST_CASE("Quadratic", "[Hessian]") {
   // y = x²
   // y = x * x
   sleipnir::VariableMatrix x{1};
@@ -39,17 +38,17 @@ TEST(HessianTest, Quadratic) {
   // dy/dx = x (rhs) + x (lhs)
   //       = (3) + (3)
   //       = 6
-  double g = sleipnir::Gradient{y, x(0)}.Value().coeff(0);
-  EXPECT_DOUBLE_EQ(6.0, g);
+  double g = sleipnir::Gradient(y, x(0)).Value().coeff(0);
+  CHECK(g == 6.0);
 
   // d²y/dx² = d/dx(x (rhs) + x (lhs))
   //         = 1 + 1
   //         = 2
-  Eigen::MatrixXd H = sleipnir::Hessian{y, x}.Value();
-  EXPECT_DOUBLE_EQ(2.0, H(0, 0));
+  Eigen::MatrixXd H = sleipnir::Hessian(y, x).Value();
+  CHECK(H(0, 0) == 2.0);
 }
 
-TEST(HessianTest, Sum) {
+TEST_CASE("Sum", "[Hessian]") {
   sleipnir::Variable y;
   Eigen::VectorXd g;
   Eigen::MatrixXd H;
@@ -62,22 +61,22 @@ TEST(HessianTest, Sum) {
 
   // y = sum(x)
   y = std::accumulate(x.begin(), x.end(), sleipnir::Variable{0.0});
-  g = sleipnir::Gradient{y, x}.Value();
+  g = sleipnir::Gradient(y, x).Value();
 
-  EXPECT_DOUBLE_EQ(15.0, y.Value());
+  CHECK(y.Value() == 15.0);
   for (int i = 0; i < x.Rows(); ++i) {
-    EXPECT_DOUBLE_EQ(1.0, g(i));
+    CHECK(g(i) == 1.0);
   }
 
-  H = sleipnir::Hessian{y, x}.Value();
+  H = sleipnir::Hessian(y, x).Value();
   for (int i = 0; i < x.Rows(); ++i) {
     for (int j = 0; j < x.Rows(); ++j) {
-      EXPECT_DOUBLE_EQ(0.0, H(i, j));
+      CHECK(H(i, j) == 0.0);
     }
   }
 }
 
-TEST(HessianTest, SumOfProducts) {
+TEST_CASE("Sum of products", "[Hessian]") {
   sleipnir::Variable y;
   Eigen::VectorXd g;
   Eigen::MatrixXd H;
@@ -90,26 +89,26 @@ TEST(HessianTest, SumOfProducts) {
 
   // y = ||x||²
   y = x.T() * x;
-  g = sleipnir::Gradient{y, x}.Value();
+  g = sleipnir::Gradient(y, x).Value();
 
-  EXPECT_DOUBLE_EQ(1 + 2 * 2 + 3 * 3 + 4 * 4 + 5 * 5, y.Value());
+  CHECK(y.Value() == 1 + 2 * 2 + 3 * 3 + 4 * 4 + 5 * 5);
   for (int i = 0; i < x.Rows(); ++i) {
-    EXPECT_DOUBLE_EQ((2 * x(i)).Value(), g(i));
+    CHECK(g(i) == (2 * x(i)).Value());
   }
 
-  H = sleipnir::Hessian{y, x}.Value();
+  H = sleipnir::Hessian(y, x).Value();
   for (int i = 0; i < x.Rows(); ++i) {
     for (int j = 0; j < x.Rows(); ++j) {
       if (i == j) {
-        EXPECT_DOUBLE_EQ(2.0, H(i, j));
+        CHECK(H(i, j) == 2.0);
       } else {
-        EXPECT_DOUBLE_EQ(0.0, H(i, j));
+        CHECK(H(i, j) == 0.0);
       }
     }
   }
 }
 
-TEST(HessianTest, ProductOfSines) {
+TEST_CASE("Product of sines", "[Hessian]") {
   sleipnir::Variable y;
   Eigen::VectorXd g;
   Eigen::MatrixXd H;
@@ -124,32 +123,34 @@ TEST(HessianTest, ProductOfSines) {
   auto temp = x.CwiseTransform(sleipnir::sin);
   y = std::accumulate(temp.begin(), temp.end(), sleipnir::Variable{1.0},
                       std::multiplies{});
-  g = sleipnir::Gradient{y, x}.Value();
+  g = sleipnir::Gradient(y, x).Value();
 
-  EXPECT_DOUBLE_EQ(
-      std::sin(1) * std::sin(2) * std::sin(3) * std::sin(4) * std::sin(5),
-      y.Value());
+  CHECK(y.Value() ==
+        std::sin(1) * std::sin(2) * std::sin(3) * std::sin(4) * std::sin(5));
   for (int i = 0; i < x.Rows(); ++i) {
-    EXPECT_DOUBLE_EQ((y / sleipnir::tan(x(i))).Value(), g(i));
+    CHECK(g(i) ==
+          Catch::Approx((y / sleipnir::tan(x(i))).Value()).margin(1e-15));
   }
 
-  H = sleipnir::Hessian{y, x}.Value();
+  H = sleipnir::Hessian(y, x).Value();
   for (int i = 0; i < x.Rows(); ++i) {
     for (int j = 0; j < x.Rows(); ++j) {
       if (i == j) {
-        EXPECT_NEAR(
-            (g(i) / sleipnir::tan(x(i))).Value() *
-                (1.0 - 1.0 / (sleipnir::cos(x(i)) * sleipnir::cos(x(i))))
-                    .Value(),
-            H(i, j), 1e-14);
+        CHECK(H(i, j) == Catch::Approx((g(i) / sleipnir::tan(x(i))).Value() *
+                                       (1.0 - 1.0 / (sleipnir::cos(x(i)) *
+                                                     sleipnir::cos(x(i))))
+                                           .Value())
+                             .margin(1e-15));
       } else {
-        EXPECT_DOUBLE_EQ((g(j) / sleipnir::tan(x(i))).Value(), H(i, j));
+        CHECK(
+            H(i, j) ==
+            Catch::Approx((g(j) / sleipnir::tan(x(i))).Value()).margin(1e-15));
       }
     }
   }
 }
 
-TEST(HessianTest, SumOfSquaredResiduals) {
+TEST_CASE("Sum of squared residuals", "[Hessian]") {
   sleipnir::Variable y;
   Eigen::VectorXd g;
   Eigen::MatrixXd H;
@@ -166,44 +167,30 @@ TEST(HessianTest, SumOfSquaredResiduals) {
                     return sleipnir::pow(x, 2);
                   });
   y = std::accumulate(temp.begin(), temp.end(), sleipnir::Variable{0.0});
-  g = sleipnir::Gradient{y, x}.Value();
+  g = sleipnir::Gradient(y, x).Value();
 
-  EXPECT_DOUBLE_EQ(0.0, y.Value());
-  EXPECT_DOUBLE_EQ((2 * x(0) - 2 * x(1)).Value(), g(0));
-  EXPECT_DOUBLE_EQ((-2 * x(0) + 4 * x(1) - 2 * x(2)).Value(), g(1));
-  EXPECT_DOUBLE_EQ((-2 * x(1) + 4 * x(2) - 2 * x(3)).Value(), g(2));
-  EXPECT_DOUBLE_EQ((-2 * x(2) + 4 * x(3) - 2 * x(4)).Value(), g(3));
-  EXPECT_DOUBLE_EQ((-2 * x(3) + 2 * x(4)).Value(), g(4));
+  CHECK(y.Value() == 0.0);
+  CHECK(g(0) == (2 * x(0) - 2 * x(1)).Value());
+  CHECK(g(1) == (-2 * x(0) + 4 * x(1) - 2 * x(2)).Value());
+  CHECK(g(2) == (-2 * x(1) + 4 * x(2) - 2 * x(3)).Value());
+  CHECK(g(3) == (-2 * x(2) + 4 * x(3) - 2 * x(4)).Value());
+  CHECK(g(4) == (-2 * x(3) + 2 * x(4)).Value());
 
-  H = sleipnir::Hessian{y, x}.Value();
-  EXPECT_DOUBLE_EQ(2.0, H(0, 0));
-  EXPECT_DOUBLE_EQ(-2.0, H(0, 1));
-  EXPECT_DOUBLE_EQ(0.0, H(0, 2));
-  EXPECT_DOUBLE_EQ(0.0, H(0, 3));
-  EXPECT_DOUBLE_EQ(0.0, H(0, 4));
-  EXPECT_DOUBLE_EQ(-2.0, H(1, 0));
-  EXPECT_DOUBLE_EQ(4.0, H(1, 1));
-  EXPECT_DOUBLE_EQ(-2.0, H(1, 2));
-  EXPECT_DOUBLE_EQ(0.0, H(1, 3));
-  EXPECT_DOUBLE_EQ(0.0, H(1, 4));
-  EXPECT_DOUBLE_EQ(0.0, H(2, 0));
-  EXPECT_DOUBLE_EQ(-2.0, H(2, 1));
-  EXPECT_DOUBLE_EQ(4.0, H(2, 2));
-  EXPECT_DOUBLE_EQ(-2.0, H(2, 3));
-  EXPECT_DOUBLE_EQ(0.0, H(2, 4));
-  EXPECT_DOUBLE_EQ(0.0, H(3, 0));
-  EXPECT_DOUBLE_EQ(0.0, H(3, 1));
-  EXPECT_DOUBLE_EQ(-2.0, H(3, 2));
-  EXPECT_DOUBLE_EQ(4.0, H(3, 3));
-  EXPECT_DOUBLE_EQ(-2.0, H(3, 4));
-  EXPECT_DOUBLE_EQ(0.0, H(4, 0));
-  EXPECT_DOUBLE_EQ(0.0, H(4, 1));
-  EXPECT_DOUBLE_EQ(0.0, H(4, 2));
-  EXPECT_DOUBLE_EQ(-2.0, H(4, 3));
-  EXPECT_DOUBLE_EQ(2.0, H(4, 4));
+  H = sleipnir::Hessian(y, x).Value();
+
+  Eigen::MatrixXd expectedH{{2.0, -2.0, 0.0, 0.0, 0.0},
+                            {-2.0, 4.0, -2.0, 0.0, 0.0},
+                            {0.0, -2.0, 4.0, -2.0, 0.0},
+                            {0.0, 0.0, -2.0, 4.0, -2.0},
+                            {0.0, 0.0, 0.0, -2.0, 2.0}};
+  for (int i = 0; i < x.Rows(); ++i) {
+    for (int j = 0; j < x.Rows(); ++j) {
+      CHECK(H(i, j) == expectedH(i, j));
+    }
+  }
 }
 
-TEST(HessianTest, SumOfSquares) {
+TEST_CASE("Sum of squares", "[Hessian]") {
   sleipnir::VariableMatrix r{4};
   r(0).SetValue(25.0);
   r(1).SetValue(10.0);
@@ -220,19 +207,19 @@ TEST(HessianTest, SumOfSquares) {
     J += (r(i) - x(i)) * (r(i) - x(i));
   }
 
-  Eigen::MatrixXd H = sleipnir::Hessian{J, x}.Value();
+  Eigen::MatrixXd H = sleipnir::Hessian(J, x).Value();
   for (int row = 0; row < 4; ++row) {
     for (int col = 0; col < 4; ++col) {
       if (row == col) {
-        EXPECT_DOUBLE_EQ(2.0, H(row, col));
+        CHECK(H(row, col) == 2.0);
       } else {
-        EXPECT_DOUBLE_EQ(0.0, H(row, col));
+        CHECK(H(row, col) == 0.0);
       }
     }
   }
 }
 
-TEST(HessianTest, Rosenbrock) {
+TEST_CASE("Rosenbrock", "[Hessian]") {
   sleipnir::VariableMatrix input{2};
   auto& x = input(0);
   auto& y = input(1);
@@ -244,16 +231,17 @@ TEST(HessianTest, Rosenbrock) {
       auto z = sleipnir::pow(1 - x, 2) +
                100 * sleipnir::pow(y - sleipnir::pow(x, 2), 2);
 
-      Eigen::MatrixXd H = sleipnir::Hessian{z, input}.Value();
-      EXPECT_NEAR(-400 * (y0 - x0 * x0) + 800 * x0 * x0 + 2, H(0, 0), 1e-12);
-      EXPECT_DOUBLE_EQ(-400 * x0, H(0, 1));
-      EXPECT_DOUBLE_EQ(-400 * x0, H(1, 0));
-      EXPECT_DOUBLE_EQ(200, H(1, 1));
+      Eigen::MatrixXd H = sleipnir::Hessian(z, input).Value();
+      CHECK(H(0, 0) == Catch::Approx(-400 * (y0 - x0 * x0) + 800 * x0 * x0 + 2)
+                           .margin(1e-12));
+      CHECK(H(0, 1) == -400 * x0);
+      CHECK(H(1, 0) == -400 * x0);
+      CHECK(H(1, 1) == 200);
     }
   }
 }
 
-TEST(HessianTest, Reuse) {
+TEST_CASE("Reuse", "[Hessian]") {
   sleipnir::Variable y;
   sleipnir::VariableMatrix x{1};
 
@@ -267,16 +255,16 @@ TEST(HessianTest, Reuse) {
   // H = 6
   Eigen::MatrixXd H = hessian.Value();
 
-  EXPECT_EQ(1, H.rows());
-  EXPECT_EQ(1, H.cols());
-  EXPECT_DOUBLE_EQ(6.0, H(0, 0));
+  CHECK(H.rows() == 1);
+  CHECK(H.cols() == 1);
+  CHECK(H(0, 0) == 6.0);
 
   x(0).SetValue(2);
   // d²y/dx² = 6x
   // H = 12
   H = hessian.Value();
 
-  EXPECT_EQ(1, H.rows());
-  EXPECT_EQ(1, H.cols());
-  EXPECT_DOUBLE_EQ(12.0, H(0, 0));
+  CHECK(H.rows() == 1);
+  CHECK(H.cols() == 1);
+  CHECK(H(0, 0) == 12.0);
 }

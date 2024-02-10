@@ -6,8 +6,9 @@
 #include <numbers>
 
 #include <Eigen/Core>
+#include <catch2/catch_approx.hpp>
+#include <catch2/catch_test_macros.hpp>
 #include <fmt/core.h>
-#include <gtest/gtest.h>
 #include <sleipnir/control/OCPSolver.hpp>
 #include <units/acceleration.h>
 #include <units/force.h>
@@ -18,7 +19,7 @@
 #include "CmdlineArguments.hpp"
 #include "RK4.hpp"
 
-TEST(OCPSolverTest, CartPole) {
+TEST_CASE("Cart-pole", "[OCPSolver]") {
   constexpr auto T = 5_s;
   constexpr units::second_t dt = 50_ms;
   constexpr int N = T / dt;
@@ -89,49 +90,49 @@ TEST(OCPSolverTest, CartPole) {
   auto status =
       problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
 
-  EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
-  EXPECT_EQ(sleipnir::ExpressionType::kNonlinear,
-            status.equalityConstraintType);
-  EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.inequalityConstraintType);
+  CHECK(status.costFunctionType == sleipnir::ExpressionType::kQuadratic);
+  CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kNonlinear);
+  CHECK(status.inequalityConstraintType == sleipnir::ExpressionType::kLinear);
   // FIXME: Fails with "locally infeasible"
-  EXPECT_TRUE(status.exitCondition == sleipnir::SolverExitCondition::kSuccess ||
-              status.exitCondition ==
-                  sleipnir::SolverExitCondition::kLocallyInfeasible);
+  CHECK((status.exitCondition == sleipnir::SolverExitCondition::kSuccess ||
+         status.exitCondition ==
+             sleipnir::SolverExitCondition::kLocallyInfeasible));
 
   if (status.exitCondition == sleipnir::SolverExitCondition::kSuccess) {
     // Verify initial state
-    EXPECT_NEAR(x_initial(0), X.Value(0, 0), 1e-8);
-    EXPECT_NEAR(x_initial(1), X.Value(1, 0), 1e-8);
-    EXPECT_NEAR(x_initial(2), X.Value(2, 0), 1e-8);
-    EXPECT_NEAR(x_initial(3), X.Value(3, 0), 1e-8);
+    CHECK(X.Value(0, 0) == Catch::Approx(x_initial(0)).margin(1e-8));
+    CHECK(X.Value(1, 0) == Catch::Approx(x_initial(1)).margin(1e-8));
+    CHECK(X.Value(2, 0) == Catch::Approx(x_initial(2)).margin(1e-8));
+    CHECK(X.Value(3, 0) == Catch::Approx(x_initial(3)).margin(1e-8));
 
     // Verify solution
     Eigen::Matrix<double, 4, 1> x{0.0, 0.0, 0.0, 0.0};
     Eigen::Matrix<double, 1, 1> u{0.0};
     for (int k = 0; k < N; ++k) {
       // Cart position constraints
-      EXPECT_GE(X(0, k), 0.0);
-      EXPECT_LE(X(0, k), d_max.value());
+      CHECK(X(0, k) >= 0.0);
+      CHECK(X(0, k) <= d_max.value());
 
       // Input constraints
-      EXPECT_GE(U(0, k), -u_max.value());
-      EXPECT_LE(U(0, k), u_max.value());
+      CHECK(U(0, k) >= -u_max.value());
+      CHECK(U(0, k) <= u_max.value());
 
       // Verify state
-      EXPECT_NEAR(x(0), X.Value(0, k), 1e-2) << fmt::format("  k = {}", k);
-      EXPECT_NEAR(x(1), X.Value(1, k), 1e-2) << fmt::format("  k = {}", k);
-      EXPECT_NEAR(x(2), X.Value(2, k), 1e-2) << fmt::format("  k = {}", k);
-      EXPECT_NEAR(x(3), X.Value(3, k), 1e-2) << fmt::format("  k = {}", k);
+      CHECK(X.Value(0, k) == Catch::Approx(x(0)).margin(1e-2));
+      CHECK(X.Value(1, k) == Catch::Approx(x(1)).margin(1e-2));
+      CHECK(X.Value(2, k) == Catch::Approx(x(2)).margin(1e-2));
+      CHECK(X.Value(3, k) == Catch::Approx(x(3)).margin(1e-2));
+      INFO(fmt::format("  k = {}", k));
 
       // Project state forward
       x = RK4(CartPoleDynamicsDouble, x, u, dt);
     }
 
     // Verify final state
-    EXPECT_NEAR(x_final(0), X.Value(0, N - 1), 1e-8);
-    EXPECT_NEAR(x_final(1), X.Value(1, N - 1), 1e-8);
-    EXPECT_NEAR(x_final(2), X.Value(2, N - 1), 1e-8);
-    EXPECT_NEAR(x_final(3), X.Value(3, N - 1), 1e-8);
+    CHECK(X.Value(0, N - 1) == Catch::Approx(x_final(0)).margin(1e-8));
+    CHECK(X.Value(1, N - 1) == Catch::Approx(x_final(1)).margin(1e-8));
+    CHECK(X.Value(2, N - 1) == Catch::Approx(x_final(2)).margin(1e-8));
+    CHECK(X.Value(3, N - 1) == Catch::Approx(x_final(3)).margin(1e-8));
   }
 
   // Log states for offline viewing

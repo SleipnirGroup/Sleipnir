@@ -83,12 +83,12 @@ SLEIPNIR_DLLEXPORT constexpr std::string_view ToMessage(
 }
 
 /**
- * GoogleTest value formatter for SolverExitCondition.
+ * Catch2 value formatter for SolverExitCondition.
  *
- * @param exitCondition Solver exit condition to print.
  * @param os Output stream to which to print.
+ * @param exitCondition Solver exit condition to print.
  */
-SLEIPNIR_DLLEXPORT void PrintTo(const SolverExitCondition& exitCondition,
-                                std::ostream* os);
+SLEIPNIR_DLLEXPORT std::ostream& operator<<(
+    std::ostream& os, const SolverExitCondition& exitCondition);
 
 }  // namespace sleipnir

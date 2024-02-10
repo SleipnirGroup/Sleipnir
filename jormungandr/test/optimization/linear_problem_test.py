@@ -1,9 +1,7 @@
 from jormungandr.autodiff import ExpressionType
 from jormungandr.optimization import OptimizationProblem, SolverExitCondition
 
-
-def near(expected, actual, tolerance):
-    return abs(expected - actual) < tolerance
+import pytest
 
 
 def test_maximize():
@@ -30,5 +28,5 @@ def test_maximize():
     assert status.inequality_constraint_type == ExpressionType.LINEAR
     assert status.exit_condition == SolverExitCondition.SUCCESS
 
-    assert near(375.0, x.value(), 1e-6)
-    assert near(250.0, y.value(), 1e-6)
+    assert x.value() == pytest.approx(375.0, abs=1e-6)
+    assert y.value() == pytest.approx(250.0, abs=1e-6)

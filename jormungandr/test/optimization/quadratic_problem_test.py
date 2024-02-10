@@ -1,10 +1,7 @@
 from jormungandr.autodiff import ExpressionType
 from jormungandr.optimization import OptimizationProblem, SolverExitCondition
 import numpy as np
-
-
-def near(expected, actual, tolerance):
-    return abs(expected - actual) < tolerance
+import pytest
 
 
 def test_unconstrained1d():
@@ -22,7 +19,7 @@ def test_unconstrained1d():
     assert status.inequality_constraint_type == ExpressionType.NONE
     assert status.exit_condition == SolverExitCondition.SUCCESS
 
-    assert near(3.0, x.value(), 1e-6)
+    assert x.value() == pytest.approx(3.0, abs=1e-6)
 
 
 def test_unconstrained2d_1():
@@ -42,8 +39,8 @@ def test_unconstrained2d_1():
     assert status.inequality_constraint_type == ExpressionType.NONE
     assert status.exit_condition == SolverExitCondition.SUCCESS
 
-    assert near(0.0, x.value(), 1e-6)
-    assert near(0.0, y.value(), 1e-6)
+    assert x.value() == pytest.approx(0.0, abs=1e-6)
+    assert y.value() == pytest.approx(0.0, abs=1e-6)
 
 
 def test_unconstrained2d_2():
@@ -62,8 +59,8 @@ def test_unconstrained2d_2():
     assert status.inequality_constraint_type == ExpressionType.NONE
     assert status.exit_condition == SolverExitCondition.SUCCESS
 
-    assert near(0.0, x.value(0), 1e-6)
-    assert near(0.0, x.value(1), 1e-6)
+    assert x.value(0) == pytest.approx(0.0, abs=1e-6)
+    assert x.value(1) == pytest.approx(0.0, abs=1e-6)
 
 
 # Maximize xy subject to x + 3y = 36.
@@ -121,8 +118,8 @@ def test_equality_constrained_1():
     assert status.inequality_constraint_type == ExpressionType.NONE
     assert status.exit_condition == SolverExitCondition.SUCCESS
 
-    assert near(18.0, x.value(), 1e-5)
-    assert near(6.0, y.value(), 1e-5)
+    assert x.value() == pytest.approx(18.0, abs=1e-5)
+    assert y.value() == pytest.approx(6.0, abs=1e-5)
 
 
 def test_equality_constrained_2():
@@ -143,5 +140,5 @@ def test_equality_constrained_2():
     assert status.inequality_constraint_type == ExpressionType.NONE
     assert status.exit_condition == SolverExitCondition.SUCCESS
 
-    assert near(3.0, x.value(0), 1e-5)
-    assert near(3.0, x.value(1), 1e-5)
+    assert x.value(0) == pytest.approx(3.0, abs=1e-5)
+    assert x.value(1) == pytest.approx(3.0, abs=1e-5)

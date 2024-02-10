@@ -2,14 +2,15 @@
 
 #include <vector>
 
+#include <catch2/catch_approx.hpp>
+#include <catch2/catch_test_macros.hpp>
 #include <fmt/core.h>
-#include <gtest/gtest.h>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 
 #include "CmdlineArguments.hpp"
 #include "Range.hpp"
 
-TEST(NonlinearProblemTest, Quartic) {
+TEST_CASE("Quartic", "[NonlinearProblem]") {
   sleipnir::OptimizationProblem problem;
 
   auto x = problem.DecisionVariable();
@@ -22,15 +23,15 @@ TEST(NonlinearProblemTest, Quartic) {
   auto status =
       problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
 
-  EXPECT_EQ(sleipnir::ExpressionType::kNonlinear, status.costFunctionType);
-  EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
-  EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.inequalityConstraintType);
-  EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
+  CHECK(status.costFunctionType == sleipnir::ExpressionType::kNonlinear);
+  CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kNone);
+  CHECK(status.inequalityConstraintType == sleipnir::ExpressionType::kLinear);
+  CHECK(status.exitCondition == sleipnir::SolverExitCondition::kSuccess);
 
-  EXPECT_NEAR(1.0, x.Value(), 1e-6);
+  CHECK(x.Value() == Catch::Approx(1.0).margin(1e-6));
 }
 
-TEST(NonlinearProblemTest, RosenbrockWithCubicAndLineConstraint) {
+TEST_CASE("Rosenbrock with cubic and line constraint", "[NonlinearProblem]") {
   // https://en.wikipedia.org/wiki/Test_functions_for_optimization#Test_functions_for_constrained_optimization
   for (auto x0 : Range(-1.5, 1.5, 0.1)) {
     for (auto y0 : Range(-0.5, 2.5, 0.1)) {
@@ -50,11 +51,11 @@ TEST(NonlinearProblemTest, RosenbrockWithCubicAndLineConstraint) {
       auto status = problem.Solve(
           {.diagnostics = Argv().Contains("--enable-diagnostics")});
 
-      EXPECT_EQ(sleipnir::ExpressionType::kNonlinear, status.costFunctionType);
-      EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
-      EXPECT_EQ(sleipnir::ExpressionType::kNonlinear,
-                status.inequalityConstraintType);
-      EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
+      CHECK(status.costFunctionType == sleipnir::ExpressionType::kNonlinear);
+      CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kNone);
+      CHECK(status.inequalityConstraintType ==
+            sleipnir::ExpressionType::kNonlinear);
+      CHECK(status.exitCondition == sleipnir::SolverExitCondition::kSuccess);
 
       auto Near = [](double expected, double actual, double tolerance) {
         return std::abs(expected - actual) < tolerance;
@@ -62,17 +63,17 @@ TEST(NonlinearProblemTest, RosenbrockWithCubicAndLineConstraint) {
 
       // Local minimum at (0.0, 0.0)
       // Global minimum at (1.0, 1.0)
-      EXPECT_TRUE(Near(0.0, x.Value(), 1e-2) || Near(1.0, x.Value(), 1e-2))
-          << fmt::format("  (x₀, y₀) = ({}, {})\n", x0, y0)
-          << fmt::format("  x.Value(0) = {}", x.Value());
-      EXPECT_TRUE(Near(0.0, y.Value(), 1e-2) || Near(1.0, y.Value(), 1e-2))
-          << fmt::format("  (x₀, y₀) = ({}, {})\n", x0, y0)
-          << fmt::format("  y.Value(0) = {}", y.Value());
+      CHECK((Near(0.0, x.Value(), 1e-2) || Near(1.0, x.Value(), 1e-2)));
+      INFO(fmt::format("  (x₀, y₀) = ({}, {})\n", x0, y0));
+      INFO(fmt::format("  x.Value(0) = {}", x.Value()));
+      CHECK((Near(0.0, y.Value(), 1e-2) || Near(1.0, y.Value(), 1e-2)));
+      INFO(fmt::format("  (x₀, y₀) = ({}, {})\n", x0, y0));
+      INFO(fmt::format("  y.Value(0) = {}", y.Value()));
     }
   }
 }
 
-TEST(NonlinearProblemTest, RosenbrockWithDiskConstraint) {
+TEST_CASE("Rosenbrock with disk constraint", "[NonlinearProblem]") {
   // https://en.wikipedia.org/wiki/Test_functions_for_optimization#Test_functions_for_constrained_optimization
   for (auto x0 : Range(-1.5, 1.5, 0.1)) {
     for (auto y0 : Range(-1.5, 1.5, 0.1)) {
@@ -91,23 +92,23 @@ TEST(NonlinearProblemTest, RosenbrockWithDiskConstraint) {
       auto status = problem.Solve(
           {.diagnostics = Argv().Contains("--enable-diagnostics")});
 
-      EXPECT_EQ(sleipnir::ExpressionType::kNonlinear, status.costFunctionType);
-      EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
-      EXPECT_EQ(sleipnir::ExpressionType::kQuadratic,
-                status.inequalityConstraintType);
-      EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
+      CHECK(status.costFunctionType == sleipnir::ExpressionType::kNonlinear);
+      CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kNone);
+      CHECK(status.inequalityConstraintType ==
+            sleipnir::ExpressionType::kQuadratic);
+      CHECK(status.exitCondition == sleipnir::SolverExitCondition::kSuccess);
 
-      EXPECT_NEAR(1.0, x.Value(), 1e-1)
-          << fmt::format("  (x₀, y₀) = ({}, {})\n", x0, y0)
-          << fmt::format("  x.Value(0) = {}", x.Value());
-      EXPECT_NEAR(1.0, y.Value(), 1e-1)
-          << fmt::format("  (x₀, y₀) = ({}, {})\n", x0, y0)
-          << fmt::format("  x.Value(0) = {}", x.Value());
+      CHECK(x.Value() == Catch::Approx(1.0).margin(1e-1));
+      INFO(fmt::format("  (x₀, y₀) = ({}, {})\n", x0, y0));
+      INFO(fmt::format("  x.Value(0) = {}", x.Value()));
+      CHECK(y.Value() == Catch::Approx(1.0).margin(1e-1));
+      INFO(fmt::format("  (x₀, y₀) = ({}, {})\n", x0, y0));
+      INFO(fmt::format("  x.Value(0) = {}", x.Value()));
     }
   }
 }
 
-TEST(NonlinearProblemTest, NarrowFeasibleRegion) {
+TEST_CASE("Narrow feasible region", "[NonlinearProblem]") {
   sleipnir::OptimizationProblem problem;
 
   auto x = problem.DecisionVariable();
@@ -123,11 +124,11 @@ TEST(NonlinearProblemTest, NarrowFeasibleRegion) {
   auto status =
       problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
 
-  EXPECT_EQ(sleipnir::ExpressionType::kNonlinear, status.costFunctionType);
-  EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.equalityConstraintType);
-  EXPECT_EQ(sleipnir::ExpressionType::kNone, status.inequalityConstraintType);
-  EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
+  CHECK(status.costFunctionType == sleipnir::ExpressionType::kNonlinear);
+  CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kLinear);
+  CHECK(status.inequalityConstraintType == sleipnir::ExpressionType::kNone);
+  CHECK(status.exitCondition == sleipnir::SolverExitCondition::kSuccess);
 
-  EXPECT_NEAR(2.5, x.Value(), 1e-2);
-  EXPECT_NEAR(2.5, y.Value(), 1e-2);
+  CHECK(x.Value() == Catch::Approx(2.5).margin(1e-2));
+  CHECK(y.Value() == Catch::Approx(2.5).margin(1e-2));
 }

@@ -1,10 +1,7 @@
 from jormungandr.autodiff import ExpressionType
 from jormungandr.optimization import OptimizationProblem, SolverExitCondition
 import numpy as np
-
-
-def near(expected, actual, tolerance):
-    return abs(expected - actual) < tolerance
+import pytest
 
 
 def test_optimization_problem_double_integrator():
@@ -66,16 +63,16 @@ def test_optimization_problem_double_integrator():
     B = np.array([[0.5 * dt * dt], [dt]])
 
     # Verify initial state
-    assert near(0.0, X.value(0, 0), 1e-8)
-    assert near(0.0, X.value(1, 0), 1e-8)
+    assert X.value(0, 0) == pytest.approx(0.0, abs=1e-8)
+    assert X.value(1, 0) == pytest.approx(0.0, abs=1e-8)
 
     # Verify solution
     x = np.zeros((2, 1))
     u = np.zeros((1, 1))
     for k in range(N):
         # Verify state
-        assert near(x[0, 0], X.value(0, k), 1e-2)
-        assert near(x[1, 0], X.value(1, k), 1e-2)
+        assert X.value(0, k) == pytest.approx(x[0, 0], abs=1e-2)
+        assert X.value(1, k) == pytest.approx(x[1, 0], abs=1e-2)
 
         # Determine expected input for this timestep
         if k * dt < 1.0:
@@ -99,17 +96,17 @@ def test_optimization_problem_double_integrator():
         ):
             # If control input is transitioning between -1, 0, or 1, ensure it's
             # within (-1, 1)
-            assert u[0, 0] >= -1.0
-            assert u[0, 0] <= 1.0
+            assert U.value(0, k) >= -1.0
+            assert U.value(0, k) <= 1.0
         else:
-            assert near(u[0, 0], U.value(0, k), 1e-4)
+            assert U.value(0, k) == pytest.approx(u[0, 0], abs=1e-4)
 
         # Project state forward
         x = A @ x + B @ u
 
     # Verify final state
-    assert near(r, X.value(0, N), 1e-8)
-    assert near(0.0, X.value(1, N), 1e-8)
+    assert X.value(0, N) == pytest.approx(r, abs=1e-8)
+    assert X.value(1, N) == pytest.approx(0.0, abs=1e-8)
 
     # Log states for offline viewing
     with open("Double integrator states.csv", "w") as f:

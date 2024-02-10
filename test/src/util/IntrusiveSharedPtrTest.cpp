@@ -5,7 +5,7 @@
 #include <type_traits>
 #include <utility>
 
-#include <gtest/gtest.h>
+#include <catch2/catch_test_macros.hpp>
 #include <sleipnir/util/IntrusiveSharedPtr.hpp>
 
 // NOLINTBEGIN (clang-analyzer-cplusplus.NewDeleteLeaks)
@@ -35,145 +35,146 @@ inline void IntrusiveSharedPtrDecRefCount(Mock* obj) {
 #pragma GCC diagnostic pop
 #endif  // __GNUC__ == 12 && !defined(__clang__)
 
-TEST(IntrusiveSharedPtrTest, Traits) {
+TEST_CASE("Traits", "[IntrusiveSharedPtr]") {
   using Ptr = sleipnir::IntrusiveSharedPtr<Mock>;
 
-  EXPECT_EQ(sizeof(Ptr), sizeof(sleipnir::IntrusiveSharedPtr<Mock>*));
-  EXPECT_EQ(std::alignment_of_v<Ptr>,
-            std::alignment_of_v<sleipnir::IntrusiveSharedPtr<Mock>*>);
+  CHECK(sizeof(sleipnir::IntrusiveSharedPtr<Mock>*) == sizeof(Ptr));
+  CHECK(std::alignment_of_v<sleipnir::IntrusiveSharedPtr<Mock>*> ==
+        std::alignment_of_v<Ptr>);
 
-  EXPECT_TRUE(std::is_default_constructible_v<Ptr>);
-  EXPECT_TRUE(std::is_nothrow_default_constructible_v<Ptr>);
-  EXPECT_TRUE(!std::is_trivially_default_constructible_v<Ptr>);
+  CHECK(std::is_default_constructible_v<Ptr>);
+  CHECK(std::is_nothrow_default_constructible_v<Ptr>);
+  CHECK_FALSE(std::is_trivially_default_constructible_v<Ptr>);
 
-  EXPECT_TRUE(std::is_copy_constructible_v<Ptr>);
-  EXPECT_TRUE(!std::is_trivially_copy_constructible_v<Ptr>);
-  EXPECT_TRUE(std::is_nothrow_copy_constructible_v<Ptr>);
+  CHECK(std::is_copy_constructible_v<Ptr>);
+  CHECK_FALSE(std::is_trivially_copy_constructible_v<Ptr>);
+  CHECK(std::is_nothrow_copy_constructible_v<Ptr>);
 
-  EXPECT_TRUE(std::is_move_constructible_v<Ptr>);
-  EXPECT_TRUE(!std::is_trivially_move_constructible_v<Ptr>);
-  EXPECT_TRUE(std::is_nothrow_move_constructible_v<Ptr>);
+  CHECK(std::is_move_constructible_v<Ptr>);
+  CHECK_FALSE(std::is_trivially_move_constructible_v<Ptr>);
+  CHECK(std::is_nothrow_move_constructible_v<Ptr>);
 
-  EXPECT_TRUE(std::is_copy_assignable_v<Ptr>);
-  EXPECT_TRUE(!std::is_trivially_copy_assignable_v<Ptr>);
-  EXPECT_TRUE(std::is_nothrow_copy_assignable_v<Ptr>);
+  CHECK(std::is_copy_assignable_v<Ptr>);
+  CHECK_FALSE(std::is_trivially_copy_assignable_v<Ptr>);
+  CHECK(std::is_nothrow_copy_assignable_v<Ptr>);
 
-  EXPECT_TRUE(std::is_move_assignable_v<Ptr>);
-  EXPECT_TRUE(!std::is_trivially_move_assignable_v<Ptr>);
-  EXPECT_TRUE(std::is_nothrow_move_assignable_v<Ptr>);
+  CHECK(std::is_move_assignable_v<Ptr>);
+  CHECK_FALSE(std::is_trivially_move_assignable_v<Ptr>);
+  CHECK(std::is_nothrow_move_assignable_v<Ptr>);
 
-  EXPECT_TRUE(std::is_swappable_v<Ptr>);
-  EXPECT_TRUE(std::is_nothrow_swappable_v<Ptr>);
+  CHECK(std::is_swappable_v<Ptr>);
+  CHECK(std::is_nothrow_swappable_v<Ptr>);
 
-  EXPECT_TRUE(std::is_destructible_v<Ptr>);
-  EXPECT_TRUE(!std::is_trivially_destructible_v<Ptr>);
-  EXPECT_TRUE(std::is_nothrow_destructible_v<Ptr>);
+  CHECK(std::is_destructible_v<Ptr>);
+  CHECK_FALSE(std::is_trivially_destructible_v<Ptr>);
+  CHECK(std::is_nothrow_destructible_v<Ptr>);
 
-  EXPECT_TRUE((std::is_constructible_v<Ptr, std::nullptr_t>));
-  EXPECT_TRUE((std::is_nothrow_constructible_v<Ptr, std::nullptr_t>));
-  EXPECT_TRUE((!std::is_trivially_constructible_v<Ptr, std::nullptr_t>));
+  CHECK(std::is_constructible_v<Ptr, std::nullptr_t>);
+  CHECK(std::is_nothrow_constructible_v<Ptr, std::nullptr_t>);
+  CHECK_FALSE(std::is_trivially_constructible_v<Ptr, std::nullptr_t>);
 }
 
-TEST(IntrusiveSharedPtrTest, DefaultConstruction) {
+TEST_CASE("Default construction", "[IntrusiveSharedPtr]") {
   sleipnir::IntrusiveSharedPtr<Mock> ptr;
 
-  EXPECT_EQ(ptr.Get(), nullptr);
-  EXPECT_FALSE(static_cast<bool>(ptr));
-  EXPECT_EQ(ptr.operator->(), nullptr);
+  CHECK(ptr.Get() == nullptr);
+  CHECK_FALSE(static_cast<bool>(ptr));
+  CHECK(ptr.operator->() == nullptr);
 }
 
-TEST(IntrusiveSharedPtrTest, ConstuctedFromNullptr) {
+TEST_CASE("Constructed from nullptr", "[IntrusiveSharedPtr]") {
   sleipnir::IntrusiveSharedPtr<Mock> ptr{nullptr};
 
-  EXPECT_EQ(ptr.Get(), nullptr);
-  EXPECT_FALSE(static_cast<bool>(ptr));
-  EXPECT_EQ(ptr.operator->(), nullptr);
+  CHECK(ptr.Get() == nullptr);
+  CHECK_FALSE(static_cast<bool>(ptr));
+  CHECK(ptr.operator->() == nullptr);
 }
 
-TEST(IntrusiveSharedPtrTest, CompareToEmptySharedPtr) {
+TEST_CASE("Compare to empty IntrusiveSharedPtr", "[IntrusiveSharedPtr]") {
   sleipnir::IntrusiveSharedPtr<Mock> ptr1;
   sleipnir::IntrusiveSharedPtr<Mock> ptr2;
 
-  EXPECT_EQ(ptr1, ptr2);
-  EXPECT_FALSE(ptr1 != ptr2);
+  CHECK(ptr1 == ptr2);
+  CHECK_FALSE(ptr1 != ptr2);
 }
 
-TEST(IntrusiveSharedPtrTest, CompareToSharedPtrCreatedFromNullptr) {
+TEST_CASE("Compare to IntrusiveSharedPtr created from nullptr",
+          "[IntrusiveSharedPtr]") {
   sleipnir::IntrusiveSharedPtr<Mock> ptr1;
   sleipnir::IntrusiveSharedPtr<Mock> ptr2(nullptr);
 
-  EXPECT_EQ(ptr1, ptr2);
-  EXPECT_FALSE(ptr1 != ptr2);
+  CHECK(ptr1 == ptr2);
+  CHECK_FALSE(ptr1 != ptr2);
 
-  EXPECT_EQ(ptr2, ptr1);
-  EXPECT_FALSE(ptr2 != ptr1);
+  CHECK(ptr2 == ptr1);
+  CHECK_FALSE(ptr2 != ptr1);
 }
 
-TEST(IntrusiveSharedPtrTest, AttachAndRef) {
+TEST_CASE("Attach and ref", "[IntrusiveSharedPtr]") {
   auto object = new Mock{};
 
   // Attach
   sleipnir::IntrusiveSharedPtr<Mock> ptr1{object};
-  EXPECT_EQ(object, ptr1.Get());
-  EXPECT_EQ(object->refCount, 1u);
-  EXPECT_TRUE(static_cast<bool>(ptr1));
-  EXPECT_EQ(ptr1.operator->(), object);
+  CHECK(ptr1.Get() == object);
+  CHECK(object->refCount == 1u);
+  CHECK(static_cast<bool>(ptr1));
+  CHECK(ptr1.operator->() == object);
 
   // Ref
   sleipnir::IntrusiveSharedPtr<Mock> ptr2{object};
-  EXPECT_EQ(object, ptr2.Get());
-  EXPECT_EQ(object->refCount, 2u);
-  EXPECT_TRUE(static_cast<bool>(ptr2));
-  EXPECT_EQ(ptr2.operator->(), object);
+  CHECK(ptr2.Get() == object);
+  CHECK(object->refCount == 2u);
+  CHECK(static_cast<bool>(ptr2));
+  CHECK(ptr2.operator->() == object);
 }
 
-TEST(IntrusiveSharedPtrTest, CopyAndAssignment) {
+TEST_CASE("Copy and assignment", "[IntrusiveSharedPtr]") {
   auto object = new Mock{};
   sleipnir::IntrusiveSharedPtr<Mock> ptr1{object};
-  EXPECT_EQ(object->refCount, 1u);
+  CHECK(object->refCount == 1u);
 
   sleipnir::IntrusiveSharedPtr<Mock> ptr2{ptr1};
-  EXPECT_EQ(object->refCount, 2u);
+  CHECK(object->refCount == 2u);
 
   sleipnir::IntrusiveSharedPtr<Mock> ptr3{object};
-  EXPECT_EQ(object->refCount, 3u);
+  CHECK(object->refCount == 3u);
 }
 
-TEST(IntrusiveSharedPtrTest, Move) {
+TEST_CASE("Move", "[IntrusiveSharedPtr]") {
   auto object = new Mock{};
 
   sleipnir::IntrusiveSharedPtr<Mock> ptr1{object};
-  EXPECT_EQ(ptr1.Get(), object);
-  EXPECT_EQ(object->refCount, 1u);
+  CHECK(ptr1.Get() == object);
+  CHECK(object->refCount == 1u);
 
   sleipnir::IntrusiveSharedPtr<Mock> ptr2;
-  EXPECT_EQ(ptr2.Get(), nullptr);
+  CHECK(ptr2.Get() == nullptr);
 
   ptr2 = std::move(ptr1);
-  EXPECT_EQ(ptr2.Get(), object);
-  EXPECT_EQ(object->refCount, 1u);
+  CHECK(ptr2.Get() == object);
+  CHECK(object->refCount == 1u);
 }
 
-TEST(IntrusiveSharedPtrTest, SelfAssignment) {
+TEST_CASE("Self-assignment", "[IntrusiveSharedPtr]") {
   auto object = new Mock{};
 
   sleipnir::IntrusiveSharedPtr<Mock> ptr1{object};
-  EXPECT_EQ(ptr1.Get(), object);
-  EXPECT_EQ(object->refCount, 1u);
+  CHECK(ptr1.Get() == object);
+  CHECK(object->refCount == 1u);
 
   sleipnir::IntrusiveSharedPtr<Mock> ptr2{object};
-  EXPECT_EQ(ptr2.Get(), object);
-  EXPECT_EQ(object->refCount, 2u);
+  CHECK(ptr2.Get() == object);
+  CHECK(object->refCount == 2u);
 
   ptr1 = ptr2;
-  EXPECT_EQ(ptr1.Get(), object);
-  EXPECT_EQ(ptr2.Get(), object);
-  EXPECT_EQ(object->refCount, 2u);
+  CHECK(ptr1.Get() == object);
+  CHECK(ptr2.Get() == object);
+  CHECK(object->refCount == 2u);
 
   ptr1 = std::move(ptr2);
-  EXPECT_EQ(ptr1.Get(), object);
-  EXPECT_EQ(ptr2.Get(), object);
-  EXPECT_EQ(object->refCount, 2u);
+  CHECK(ptr1.Get() == object);
+  CHECK(ptr2.Get() == object);
+  CHECK(object->refCount == 2u);
 }
 
 // NOLINTEND (clang-analyzer-cplusplus.NewDeleteLeaks)

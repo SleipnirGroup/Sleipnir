@@ -1,11 +1,10 @@
 from jormungandr.autodiff import Jacobian, Variable, VariableMatrix
 import jormungandr.autodiff as autodiff
-
 import numpy as np
 import pytest
 
 
-def test_y_vs_x():
+def test_y_eq_x():
     y = VariableMatrix(3)
     x = VariableMatrix(3)
     x[0].set_value(1)
@@ -23,12 +22,12 @@ def test_y_vs_x():
     for row in range(3):
         for col in range(3):
             if row == col:
-                assert 1.0 == J[row, col]
+                assert J[row, col] == 1.0
             else:
-                assert 0.0 == J[row, col]
+                assert J[row, col] == 0.0
 
 
-def test_y_vs_3x():
+def test_y_eq_3x():
     y = VariableMatrix(3)
     x = VariableMatrix(3)
     x[0].set_value(1)
@@ -46,9 +45,9 @@ def test_y_vs_3x():
     for row in range(3):
         for col in range(3):
             if row == col:
-                assert 3.0 == J[row, col]
+                assert J[row, col] == 3.0
             else:
-                assert 0.0 == J[row, col]
+                assert J[row, col] == 0.0
 
 
 def test_products():
@@ -74,15 +73,10 @@ def test_products():
     y[2] = x[0] * x[2]
     J = Jacobian(y, x).value()
 
-    assert 2.0 == J[0, 0]
-    assert 1.0 == J[0, 1]
-    assert 0.0 == J[0, 2]
-    assert 0.0 == J[1, 0]
-    assert 3.0 == J[1, 1]
-    assert 2.0 == J[1, 2]
-    assert 3.0 == J[2, 0]
-    assert 0.0 == J[2, 1]
-    assert 1.0 == J[2, 2]
+    expected_J = np.array([[2.0, 1.0, 0.0], [0.0, 3.0, 2.0], [3.0, 0.0, 1.0]])
+    for i in range(x.rows()):
+        for j in range(x.rows()):
+            assert J[i, j] == expected_J[i, j]
 
 
 @pytest.mark.skip(reason="Fails")
@@ -95,9 +89,9 @@ def test_nested_products():
     x[2] = 3 * z[0]
 
     J = Jacobian(x, z).value()
-    assert 1.0 == J[0, 0]
-    assert 2.0 == J[1, 0]
-    assert 3.0 == J[2, 0]
+    assert J[0, 0] == 1.0
+    assert J[1, 0] == 2.0
+    assert J[2, 0] == 3.0
 
     #     [x₁x₂]
     # y = [x₂x₃]
@@ -116,15 +110,10 @@ def test_nested_products():
     y[2] = x[0] * x[2]
     J = Jacobian(y, x).value()
 
-    assert 2.0 == J[0, 0]
-    assert 1.0 == J[0, 1]
-    assert 0.0 == J[0, 2]
-    assert 0.0 == J[1, 0]
-    assert 3.0 == J[1, 1]
-    assert 2.0 == J[1, 2]
-    assert 3.0 == J[2, 0]
-    assert 0.0 == J[2, 1]
-    assert 1.0 == J[2, 2]
+    expected_J = np.array([[2.0, 1.0, 0.0], [0.0, 3.0, 2.0], [3.0, 0.0, 1.0]])
+    for i in range(x.rows()):
+        for j in range(x.rows()):
+            assert J[i, j] == expected_J[i, j]
 
 
 def test_non_square():
@@ -141,9 +130,9 @@ def test_non_square():
     J = Jacobian(y, x).value()
 
     assert J.shape == (1, 3)
-    assert 1.0 == J[0, 0]
-    assert 3.0 == J[0, 1]
-    assert -5.0 == J[0, 2]
+    assert J[0, 0] == 1.0
+    assert J[0, 1] == 3.0
+    assert J[0, 2] == -5.0
 
 
 def test_reuse():
@@ -162,8 +151,8 @@ def test_reuse():
     J = jacobian.value()
 
     assert J.shape == (1, 2)
-    assert 2.0 == J[0, 0]
-    assert 1.0 == J[0, 1]
+    assert J[0, 0] == 2.0
+    assert J[0, 1] == 1.0
 
     x[0].set_value(2)
     x[1].set_value(1)
@@ -172,5 +161,5 @@ def test_reuse():
     J = jacobian.value()
 
     assert J.shape == (1, 2)
-    assert 1.0 == J[0, 0]
-    assert 2.0 == J[0, 1]
+    assert J[0, 0] == 1.0
+    assert J[0, 1] == 2.0

@@ -1,11 +1,12 @@
 // Copyright (c) Sleipnir contributors
 
-#include <gtest/gtest.h>
+#include <catch2/catch_approx.hpp>
+#include <catch2/catch_test_macros.hpp>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 
 #include "CmdlineArguments.hpp"
 
-TEST(QuadraticProblemTest, Unconstrained1d) {
+TEST_CASE("Unconstrained 1D", "[QuadraticProblem]") {
   sleipnir::OptimizationProblem problem;
 
   auto x = problem.DecisionVariable();
@@ -16,15 +17,15 @@ TEST(QuadraticProblemTest, Unconstrained1d) {
   auto status =
       problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
 
-  EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
-  EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
-  EXPECT_EQ(sleipnir::ExpressionType::kNone, status.inequalityConstraintType);
-  EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
+  CHECK(status.costFunctionType == sleipnir::ExpressionType::kQuadratic);
+  CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kNone);
+  CHECK(status.inequalityConstraintType == sleipnir::ExpressionType::kNone);
+  CHECK(status.exitCondition == sleipnir::SolverExitCondition::kSuccess);
 
-  EXPECT_NEAR(3.0, x.Value(), 1e-6);
+  CHECK(x.Value() == Catch::Approx(3.0).margin(1e-6));
 }
 
-TEST(QuadraticProblemTest, Unconstrained2d) {
+TEST_CASE("Unconstrained 2D", "[QuadraticProblem]") {
   {
     sleipnir::OptimizationProblem problem;
 
@@ -38,13 +39,13 @@ TEST(QuadraticProblemTest, Unconstrained2d) {
     auto status =
         problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
 
-    EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
-    EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
-    EXPECT_EQ(sleipnir::ExpressionType::kNone, status.inequalityConstraintType);
-    EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
+    CHECK(status.costFunctionType == sleipnir::ExpressionType::kQuadratic);
+    CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kNone);
+    CHECK(status.inequalityConstraintType == sleipnir::ExpressionType::kNone);
+    CHECK(status.exitCondition == sleipnir::SolverExitCondition::kSuccess);
 
-    EXPECT_NEAR(0.0, x.Value(), 1e-6);
-    EXPECT_NEAR(0.0, y.Value(), 1e-6);
+    CHECK(x.Value() == Catch::Approx(0.0).margin(1e-6));
+    CHECK(y.Value() == Catch::Approx(0.0).margin(1e-6));
   }
 
   {
@@ -59,17 +60,17 @@ TEST(QuadraticProblemTest, Unconstrained2d) {
     auto status =
         problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
 
-    EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
-    EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
-    EXPECT_EQ(sleipnir::ExpressionType::kNone, status.inequalityConstraintType);
-    EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
+    CHECK(status.costFunctionType == sleipnir::ExpressionType::kQuadratic);
+    CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kNone);
+    CHECK(status.inequalityConstraintType == sleipnir::ExpressionType::kNone);
+    CHECK(status.exitCondition == sleipnir::SolverExitCondition::kSuccess);
 
-    EXPECT_NEAR(0.0, x.Value(0), 1e-6);
-    EXPECT_NEAR(0.0, x.Value(1), 1e-6);
+    CHECK(x.Value(0) == Catch::Approx(0.0).margin(1e-6));
+    CHECK(x.Value(1) == Catch::Approx(0.0).margin(1e-6));
   }
 }
 
-TEST(QuadraticProblemTest, EqualityConstrained) {
+TEST_CASE("Equality-constrained", "[QuadraticProblem]") {
   // Maximize xy subject to x + 3y = 36.
   //
   // Maximize f(x,y) = xy
@@ -121,13 +122,13 @@ TEST(QuadraticProblemTest, EqualityConstrained) {
     auto status =
         problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
 
-    EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
-    EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.equalityConstraintType);
-    EXPECT_EQ(sleipnir::ExpressionType::kNone, status.inequalityConstraintType);
-    EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
+    CHECK(status.costFunctionType == sleipnir::ExpressionType::kQuadratic);
+    CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kLinear);
+    CHECK(status.inequalityConstraintType == sleipnir::ExpressionType::kNone);
+    CHECK(status.exitCondition == sleipnir::SolverExitCondition::kSuccess);
 
-    EXPECT_NEAR(18.0, x.Value(), 1e-5);
-    EXPECT_NEAR(6.0, y.Value(), 1e-5);
+    CHECK(x.Value() == Catch::Approx(18.0).margin(1e-5));
+    CHECK(y.Value() == Catch::Approx(6.0).margin(1e-5));
   }
 
   {
@@ -144,12 +145,12 @@ TEST(QuadraticProblemTest, EqualityConstrained) {
     auto status =
         problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
 
-    EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
-    EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.equalityConstraintType);
-    EXPECT_EQ(sleipnir::ExpressionType::kNone, status.inequalityConstraintType);
-    EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
+    CHECK(status.costFunctionType == sleipnir::ExpressionType::kQuadratic);
+    CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kLinear);
+    CHECK(status.inequalityConstraintType == sleipnir::ExpressionType::kNone);
+    CHECK(status.exitCondition == sleipnir::SolverExitCondition::kSuccess);
 
-    EXPECT_NEAR(3.0, x.Value(0), 1e-5);
-    EXPECT_NEAR(3.0, x.Value(1), 1e-5);
+    CHECK(x.Value(0) == Catch::Approx(3.0).margin(1e-5));
+    CHECK(x.Value(1) == Catch::Approx(3.0).margin(1e-5));
   }
 }
