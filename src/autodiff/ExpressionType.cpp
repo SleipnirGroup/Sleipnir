@@ -6,26 +6,28 @@
 
 namespace sleipnir {
 
-void PrintTo(const ExpressionType& type, std::ostream* os) {
+std::ostream& operator<<(std::ostream& os, const ExpressionType& type) {
   using enum sleipnir::ExpressionType;
 
   switch (type) {
     case kNone:
-      *os << "kNone";
+      os << "kNone";
       break;
     case kConstant:
-      *os << "kConstant";
+      os << "kConstant";
       break;
     case kLinear:
-      *os << "kLinear";
+      os << "kLinear";
       break;
     case kQuadratic:
-      *os << "kQuadratic";
+      os << "kQuadratic";
       break;
     case kNonlinear:
-      *os << "kNonlinear";
+      os << "kNonlinear";
       break;
   }
+
+  return os;
 }
 
 }  // namespace sleipnir

@@ -1,68 +1,68 @@
 // Copyright (c) Sleipnir contributors
 
 #include <Eigen/Core>
-#include <gtest/gtest.h>
+#include <catch2/catch_test_macros.hpp>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 
-TEST(DecisionVariableTest, ScalarInitAssign) {
+TEST_CASE("Scalar init assign", "[DecisionVariable]") {
   sleipnir::OptimizationProblem problem;
 
   // Scalar zero init
   auto x = problem.DecisionVariable();
-  EXPECT_DOUBLE_EQ(0.0, x.Value());
+  CHECK(x.Value() == 0.0);
 
   // Scalar assignment
   x.SetValue(1.0);
-  EXPECT_DOUBLE_EQ(1.0, x.Value());
+  CHECK(x.Value() == 1.0);
   x.SetValue(2.0);
-  EXPECT_DOUBLE_EQ(2.0, x.Value());
+  CHECK(x.Value() == 2.0);
 }
 
-TEST(DecisionVariableTest, VectorInitAssign) {
+TEST_CASE("Vector init assign", "[DecisionVariable]") {
   sleipnir::OptimizationProblem problem;
 
   // Vector zero init
   auto y = problem.DecisionVariable(2);
-  EXPECT_DOUBLE_EQ(0.0, y.Value(0));
-  EXPECT_DOUBLE_EQ(0.0, y.Value(1));
+  CHECK(y.Value(0) == 0.0);
+  CHECK(y.Value(1) == 0.0);
 
   // Vector assignment
   y(0).SetValue(1.0);
   y(1).SetValue(2.0);
-  EXPECT_DOUBLE_EQ(1.0, y.Value(0));
-  EXPECT_DOUBLE_EQ(2.0, y.Value(1));
+  CHECK(y.Value(0) == 1.0);
+  CHECK(y.Value(1) == 2.0);
   y(0).SetValue(3.0);
   y(1).SetValue(4.0);
-  EXPECT_DOUBLE_EQ(3.0, y.Value(0));
-  EXPECT_DOUBLE_EQ(4.0, y.Value(1));
+  CHECK(y.Value(0) == 3.0);
+  CHECK(y.Value(1) == 4.0);
 }
 
-TEST(DecisionVariableTest, StaticMatrixInitAssign) {
+TEST_CASE("Static matrix init assign", "[DecisionVariable]") {
   sleipnir::OptimizationProblem problem;
 
   // Matrix zero init
   auto z = problem.DecisionVariable(3, 2);
-  EXPECT_DOUBLE_EQ(0.0, z.Value(0, 0));
-  EXPECT_DOUBLE_EQ(0.0, z.Value(0, 1));
-  EXPECT_DOUBLE_EQ(0.0, z.Value(1, 0));
-  EXPECT_DOUBLE_EQ(0.0, z.Value(1, 1));
-  EXPECT_DOUBLE_EQ(0.0, z.Value(2, 0));
-  EXPECT_DOUBLE_EQ(0.0, z.Value(2, 1));
+  CHECK(z.Value(0, 0) == 0.0);
+  CHECK(z.Value(0, 1) == 0.0);
+  CHECK(z.Value(1, 0) == 0.0);
+  CHECK(z.Value(1, 1) == 0.0);
+  CHECK(z.Value(2, 0) == 0.0);
+  CHECK(z.Value(2, 1) == 0.0);
 
   // Matrix assignment; element comparison
   z.SetValue(Eigen::Matrix<double, 3, 2>{{1.0, 2.0}, {3.0, 4.0}, {5.0, 6.0}});
-  EXPECT_DOUBLE_EQ(1.0, z.Value(0, 0));
-  EXPECT_DOUBLE_EQ(2.0, z.Value(0, 1));
-  EXPECT_DOUBLE_EQ(3.0, z.Value(1, 0));
-  EXPECT_DOUBLE_EQ(4.0, z.Value(1, 1));
-  EXPECT_DOUBLE_EQ(5.0, z.Value(2, 0));
-  EXPECT_DOUBLE_EQ(6.0, z.Value(2, 1));
+  CHECK(z.Value(0, 0) == 1.0);
+  CHECK(z.Value(0, 1) == 2.0);
+  CHECK(z.Value(1, 0) == 3.0);
+  CHECK(z.Value(1, 1) == 4.0);
+  CHECK(z.Value(2, 0) == 5.0);
+  CHECK(z.Value(2, 1) == 6.0);
 
   // Matrix assignment; matrix comparison
   {
     Eigen::Matrix<double, 3, 2> expected{{7.0, 8.0}, {9.0, 10.0}, {11.0, 12.0}};
     z.SetValue(expected);
-    EXPECT_EQ(expected, z.Value());
+    CHECK(z.Value() == expected);
   }
 
   // Block assignment
@@ -72,7 +72,7 @@ TEST(DecisionVariableTest, StaticMatrixInitAssign) {
 
     Eigen::Matrix<double, 3, 2> expectedResult{
         {1.0, 8.0}, {1.0, 10.0}, {11.0, 12.0}};
-    EXPECT_EQ(expectedResult, z.Value());
+    CHECK(z.Value() == expectedResult);
   }
 
   // Segment assignment
@@ -82,33 +82,33 @@ TEST(DecisionVariableTest, StaticMatrixInitAssign) {
 
     Eigen::Matrix<double, 3, 2> expectedResult{
         {1.0, 8.0}, {1.0, 10.0}, {11.0, 12.0}};
-    EXPECT_EQ(expectedResult, z.Value());
+    CHECK(z.Value() == expectedResult);
   }
 }
 
-TEST(DecisionVariableTest, DynamicMatrixInitAssign) {
+TEST_CASE("Dynamic matrix init assign", "[DecisionVariable]") {
   sleipnir::OptimizationProblem problem;
 
   // Matrix zero init
   auto z = problem.DecisionVariable(3, 2);
-  EXPECT_DOUBLE_EQ(0.0, z.Value(0, 0));
-  EXPECT_DOUBLE_EQ(0.0, z.Value(0, 1));
-  EXPECT_DOUBLE_EQ(0.0, z.Value(1, 0));
-  EXPECT_DOUBLE_EQ(0.0, z.Value(1, 1));
-  EXPECT_DOUBLE_EQ(0.0, z.Value(2, 0));
-  EXPECT_DOUBLE_EQ(0.0, z.Value(2, 1));
+  CHECK(z.Value(0, 0) == 0.0);
+  CHECK(z.Value(0, 1) == 0.0);
+  CHECK(z.Value(1, 0) == 0.0);
+  CHECK(z.Value(1, 1) == 0.0);
+  CHECK(z.Value(2, 0) == 0.0);
+  CHECK(z.Value(2, 1) == 0.0);
 
   // Matrix assignment; element comparison
   {
     Eigen::MatrixXd expected{3, 2};
     expected << 1.0, 2.0, 3.0, 4.0, 5.0, 6.0;
     z.SetValue(expected);
-    EXPECT_DOUBLE_EQ(1.0, z.Value(0, 0));
-    EXPECT_DOUBLE_EQ(2.0, z.Value(0, 1));
-    EXPECT_DOUBLE_EQ(3.0, z.Value(1, 0));
-    EXPECT_DOUBLE_EQ(4.0, z.Value(1, 1));
-    EXPECT_DOUBLE_EQ(5.0, z.Value(2, 0));
-    EXPECT_DOUBLE_EQ(6.0, z.Value(2, 1));
+    CHECK(z.Value(0, 0) == 1.0);
+    CHECK(z.Value(0, 1) == 2.0);
+    CHECK(z.Value(1, 0) == 3.0);
+    CHECK(z.Value(1, 1) == 4.0);
+    CHECK(z.Value(2, 0) == 5.0);
+    CHECK(z.Value(2, 1) == 6.0);
   }
 
   // Matrix assignment; matrix comparison
@@ -116,7 +116,7 @@ TEST(DecisionVariableTest, DynamicMatrixInitAssign) {
     Eigen::MatrixXd expected{3, 2};
     expected << 7.0, 8.0, 9.0, 10.0, 11.0, 12.0;
     z.SetValue(expected);
-    EXPECT_EQ(expected, z.Value());
+    CHECK(z.Value() == expected);
   }
 
   // Block assignment
@@ -127,7 +127,7 @@ TEST(DecisionVariableTest, DynamicMatrixInitAssign) {
 
     Eigen::MatrixXd expectedResult{3, 2};
     expectedResult << 1.0, 8.0, 1.0, 10.0, 11.0, 12.0;
-    EXPECT_EQ(expectedResult, z.Value());
+    CHECK(z.Value() == expectedResult);
   }
 
   // Segment assignment
@@ -138,19 +138,19 @@ TEST(DecisionVariableTest, DynamicMatrixInitAssign) {
 
     Eigen::MatrixXd expectedResult{3, 2};
     expectedResult << 1.0, 8.0, 1.0, 10.0, 11.0, 12.0;
-    EXPECT_EQ(expectedResult, z.Value());
+    CHECK(z.Value() == expectedResult);
   }
 }
 
-TEST(DecisionVariableTest, SymmetricMatrix) {
+TEST_CASE("Symmetric matrix", "[DecisionVariable]") {
   sleipnir::OptimizationProblem problem;
 
   // Matrix zero init
   auto A = problem.SymmetricDecisionVariable(2);
-  EXPECT_DOUBLE_EQ(0.0, A.Value(0, 0));
-  EXPECT_DOUBLE_EQ(0.0, A.Value(0, 1));
-  EXPECT_DOUBLE_EQ(0.0, A.Value(1, 0));
-  EXPECT_DOUBLE_EQ(0.0, A.Value(1, 1));
+  CHECK(A.Value(0, 0) == 0.0);
+  CHECK(A.Value(0, 1) == 0.0);
+  CHECK(A.Value(1, 0) == 0.0);
+  CHECK(A.Value(1, 1) == 0.0);
 
   // Assign to lower triangle
   A(0, 0).SetValue(1.0);
@@ -158,8 +158,8 @@ TEST(DecisionVariableTest, SymmetricMatrix) {
   A(1, 1).SetValue(3.0);
 
   // Confirm whole matrix changed
-  EXPECT_DOUBLE_EQ(1.0, A.Value(0, 0));
-  EXPECT_DOUBLE_EQ(2.0, A.Value(0, 1));
-  EXPECT_DOUBLE_EQ(2.0, A.Value(1, 0));
-  EXPECT_DOUBLE_EQ(3.0, A.Value(1, 1));
+  CHECK(A.Value(0, 0) == 1.0);
+  CHECK(A.Value(0, 1) == 2.0);
+  CHECK(A.Value(1, 0) == 2.0);
+  CHECK(A.Value(1, 1) == 3.0);
 }

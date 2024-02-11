@@ -1,11 +1,11 @@
 // Copyright (c) Sleipnir contributors
 
-#include <gtest/gtest.h>
+#include <catch2/catch_test_macros.hpp>
 #include <sleipnir/autodiff/Variable.hpp>
 
-TEST(VariableTest, DefaultConstructor) {
+TEST_CASE("Default constructor", "[Variable]") {
   sleipnir::Variable a;
 
-  EXPECT_EQ(0.0, a.Value());
-  EXPECT_EQ(sleipnir::ExpressionType::kLinear, a.Type());
+  CHECK(a.Value() == 0.0);
+  CHECK(a.Type() == sleipnir::ExpressionType::kLinear);
 }

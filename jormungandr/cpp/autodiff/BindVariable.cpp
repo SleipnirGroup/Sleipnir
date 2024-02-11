@@ -69,6 +69,7 @@ void BindVariable(py::module_& autodiff) {
   variable.def(-py::self);
   variable.def(+py::self);
   variable.def("value", &Variable::Value, DOC(sleipnir, Variable, Value));
+  variable.def("type", &Variable::Type, DOC(sleipnir, Variable, Type));
   variable.def("update", &Variable::Update, DOC(sleipnir, Variable, Update));
   variable.def(py::self == py::self, DOC(sleipnir, operator, eq));
   variable.def(py::self < py::self, DOC(sleipnir, operator, lt));

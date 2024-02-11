@@ -210,21 +210,14 @@ if(BUILD_BENCHMARKING)
     endif()
 endif()
 
-# GoogleTest dependency (static linkage)
-set(BUILD_SHARED_LIBS_SAVE ${BUILD_SHARED_LIBS})
-set(BUILD_SHARED_LIBS OFF)
-option(INSTALL_GMOCK "Install GoogleTest's GMock" OFF)
-option(INSTALL_GTEST "Install GoogleTest's GTest" OFF)
+# Catch2 dependency
 fetchcontent_declare(
-    googletest
-    GIT_REPOSITORY https://github.com/google/googletest.git
-    GIT_TAG v1.14.0
+    Catch2
+    GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+    GIT_TAG v3.5.2
     CMAKE_ARGS
-    "-DCMAKE_BUILD_TYPE=ReleaseWithDebInfo"
-    FIND_PACKAGE_ARGS NAMES GTest
 )
-fetchcontent_makeavailable(googletest)
-set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_SAVE})
+fetchcontent_makeavailable(Catch2)
 
 include(CMakeDependentOption)
 
@@ -237,7 +230,8 @@ cmake_dependent_option(
 )
 if(BUILD_TESTING)
     enable_testing()
-    include(GoogleTest)
+    list(APPEND CMAKE_MODULE_PATH ${Catch2_SOURCE_DIR}/extras)
+    include(Catch)
 endif()
 
 # Build Sleipnir tests
@@ -252,9 +246,9 @@ if(BUILD_TESTING)
             ${CMAKE_CURRENT_SOURCE_DIR}/test/include
             ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/units/include
     )
-    target_link_libraries(SleipnirTest PRIVATE Sleipnir GTest::gtest)
+    target_link_libraries(SleipnirTest PRIVATE Sleipnir Catch2::Catch2)
     if(NOT CMAKE_TOOLCHAIN_FILE)
-        gtest_discover_tests(SleipnirTest)
+        catch_discover_tests(SleipnirTest)
     endif()
 endif()
 
@@ -298,10 +292,10 @@ foreach(example ${EXAMPLES})
         )
         target_link_libraries(
             ${example}Test
-            PRIVATE Sleipnir GTest::gtest GTest::gtest_main
+            PRIVATE Sleipnir Catch2::Catch2WithMain
         )
         if(NOT CMAKE_TOOLCHAIN_FILE)
-            gtest_discover_tests(${example}Test)
+            catch_discover_tests(${example}Test)
         endif()
     endif()
 endforeach()

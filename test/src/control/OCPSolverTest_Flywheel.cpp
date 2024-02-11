@@ -6,8 +6,9 @@
 
 #include <Eigen/Core>
 #include <Eigen/QR>
+#include <catch2/catch_approx.hpp>
+#include <catch2/catch_test_macros.hpp>
 #include <fmt/core.h>
-#include <gtest/gtest.h>
 #include <sleipnir/control/OCPSolver.hpp>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 #include <units/angle.h>
@@ -68,10 +69,10 @@ void TestFlywheel(std::string testName, Eigen::Matrix<double, 1, 1> A,
   auto status =
       solver.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
 
-  EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
-  EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.equalityConstraintType);
-  EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.inequalityConstraintType);
-  EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
+  CHECK(status.costFunctionType == sleipnir::ExpressionType::kQuadratic);
+  CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kLinear);
+  CHECK(status.inequalityConstraintType == sleipnir::ExpressionType::kLinear);
+  CHECK(status.exitCondition == sleipnir::SolverExitCondition::kSuccess);
 
   // Voltage for steady-state velocity:
   //
@@ -85,15 +86,14 @@ void TestFlywheel(std::string testName, Eigen::Matrix<double, 1, 1> A,
       r;
 
   // Verify initial state
-  EXPECT_NEAR(0.0, solver.X().Value(0, 0), 1e-8);
+  CHECK(solver.X().Value(0, 0) == Catch::Approx(0.0).margin(1e-8));
 
   // Verify solution
   Eigen::Matrix<double, 1, 1> x{0.0};
   Eigen::Matrix<double, 1, 1> u{0.0};
   for (int k = 0; k < N; ++k) {
     // Verify state
-    EXPECT_NEAR(x(0), solver.X().Value(0, k), 1e-2)
-        << fmt::format("  k = {}", k);
+    CHECK(solver.X().Value(0, k) == Catch::Approx(x(0)).margin(1e-2));
 
     // Determine expected input for this timestep
     double error = r(0) - x(0);
@@ -110,19 +110,20 @@ void TestFlywheel(std::string testName, Eigen::Matrix<double, 1, 1> A,
         Near(u_ss(0), solver.U().Value(0, k + 1), 1e-2)) {
       // If control input is transitioning between 12 and u_ss, ensure it's
       // within (u_ss, 12)
-      EXPECT_GE(u(0), u_ss(0)) << fmt::format("  k = {}", k);
-      EXPECT_LE(u(0), 12.0) << fmt::format("  k = {}", k);
+      CHECK(solver.U().Value(0, k) >= u_ss(0));
+      CHECK(solver.U().Value(0, k) <= 12.0);
     } else {
-      EXPECT_NEAR(u(0), solver.U().Value(0, k), 1.0)
-          << fmt::format("  k = {}", k);
+      CHECK(solver.U().Value(0, k) == Catch::Approx(u(0)).margin(1.0));
     }
+
+    INFO(fmt::format("  k = {}", k));
 
     // Project state forward
     x = A_discrete * x + B_discrete * u;
   }
 
   // Verify final state
-  EXPECT_NEAR(r(0), solver.X().Value(0, N - 1), 1e-7);
+  CHECK(solver.X().Value(0, N) == Catch::Approx(r(0)).margin(1e-7));
 
   // Log states for offline viewing
   std::ofstream states{fmt::format("{} states.csv", testName)};
@@ -151,7 +152,7 @@ void TestFlywheel(std::string testName, Eigen::Matrix<double, 1, 1> A,
   }
 }
 
-TEST(OCPSolverTest, FlywheelExplicit) {
+TEST_CASE("Flywheel (explicit)", "[OCPSolver]") {
   Eigen::Matrix<double, 1, 1> A{-1.0};
   Eigen::Matrix<double, 1, 1> B{1.0};
 
@@ -170,7 +171,7 @@ TEST(OCPSolverTest, FlywheelExplicit) {
                sleipnir::TranscriptionMethod::kSingleShooting);
 }
 
-TEST(OCPSolverTest, FlywheelDiscrete) {
+TEST_CASE("Flywheel (discrete)", "[OCPSolver]") {
   Eigen::Matrix<double, 1, 1> A{-1.0};
   Eigen::Matrix<double, 1, 1> B{1.0};
   constexpr units::second_t dt = 5_ms;

@@ -4,10 +4,7 @@ import jormungandr.autodiff as autodiff
 from jormungandr.autodiff import ExpressionType, VariableMatrix
 from jormungandr.optimization import OptimizationProblem, SolverExitCondition
 import numpy as np
-
-
-def near(expected, actual, tolerance):
-    return abs(expected - actual) < tolerance
+import pytest
 
 
 def rk4(f, x, u, dt):
@@ -235,10 +232,10 @@ def test_optimization_problem_cart_pole():
 
     if status.exit_condition == SolverExitCondition.SUCCESS:
         # Verify initial state
-        assert near(x_initial[0, 0], X.value(0, 0), 1e-8)
-        assert near(x_initial[1, 0], X.value(1, 0), 1e-8)
-        assert near(x_initial[2, 0], X.value(2, 0), 1e-8)
-        assert near(x_initial[3, 0], X.value(3, 0), 1e-8)
+        assert X.value(0, 0) == pytest.approx(x_initial[0, 0], abs=1e-8)
+        assert X.value(1, 0) == pytest.approx(x_initial[1, 0], abs=1e-8)
+        assert X.value(2, 0) == pytest.approx(x_initial[2, 0], abs=1e-8)
+        assert X.value(3, 0) == pytest.approx(x_initial[3, 0], abs=1e-8)
 
         # Verify solution
         for k in range(N):
@@ -259,13 +256,15 @@ def test_optimization_problem_cart_pole():
             )
             actual_x_k1 = X[:, k + 1 : k + 2].value()
             for row in range(actual_x_k1.shape[0]):
-                assert near(expected_x_k1[row, 0], actual_x_k1[row, 0], 1e-8)
+                assert actual_x_k1[row, 0] == pytest.approx(
+                    expected_x_k1[row, 0], abs=1e-8
+                )
 
         # Verify final state
-        assert near(x_final[0, 0], X.value(0, N), 1e-8)
-        assert near(x_final[1, 0], X.value(1, N), 1e-8)
-        assert near(x_final[2, 0], X.value(2, N), 1e-8)
-        assert near(x_final[3, 0], X.value(3, N), 1e-8)
+        assert X.value(0, N) == pytest.approx(x_final[0, 0], abs=1e-8)
+        assert X.value(1, N) == pytest.approx(x_final[1, 0], abs=1e-8)
+        assert X.value(2, N) == pytest.approx(x_final[2, 0], abs=1e-8)
+        assert X.value(3, N) == pytest.approx(x_final[3, 0], abs=1e-8)
 
     # Log states for offline viewing
     with open("Cart-pole states.csv", "w") as f:

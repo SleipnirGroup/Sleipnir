@@ -4,73 +4,73 @@
 #include <iterator>
 
 #include <Eigen/Core>
-#include <gtest/gtest.h>
+#include <catch2/catch_test_macros.hpp>
 #include <sleipnir/autodiff/VariableMatrix.hpp>
 #include <sleipnir/optimization/Constraints.hpp>
 
-TEST(VariableMatrixTest, ConstructFromEigenMatrixBase) {
+TEST_CASE("Construct from Eigen::MatrixBase", "[VariableMatrix]") {
   sleipnir::VariableMatrix mat{
       Eigen::MatrixXd{{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}}};
 
   Eigen::MatrixXd expected{{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}};
-  EXPECT_EQ(expected, mat.Value());
+  CHECK(mat.Value() == expected);
 }
 
-TEST(VariableMatrixTest, ConstructFromEigenDiagonalBase) {
+TEST_CASE("Construct from Eigen::DiagonalBase", "[VariableMatrix]") {
   sleipnir::VariableMatrix mat{Eigen::VectorXd{{1.0, 2.0, 3.0}}.asDiagonal()};
 
   Eigen::MatrixXd expected{{1.0, 0.0, 0.0}, {0.0, 2.0, 0.0}, {0.0, 0.0, 3.0}};
-  EXPECT_EQ(expected, mat.Value());
+  CHECK(mat.Value() == expected);
 }
 
-TEST(VariableMatrixTest, AssignmentToDefault) {
+TEST_CASE("Assignment to default", "[VariableMatrix]") {
   sleipnir::VariableMatrix mat;
 
-  EXPECT_EQ(0, mat.Rows());
-  EXPECT_EQ(0, mat.Cols());
+  CHECK(mat.Rows() == 0);
+  CHECK(mat.Cols() == 0);
 
   mat = sleipnir::VariableMatrix{2, 2};
 
-  EXPECT_EQ(2, mat.Rows());
-  EXPECT_EQ(2, mat.Cols());
-  EXPECT_EQ(0.0, mat(0, 0));
-  EXPECT_EQ(0.0, mat(0, 1));
-  EXPECT_EQ(0.0, mat(1, 0));
-  EXPECT_EQ(0.0, mat(1, 1));
+  CHECK(mat.Rows() == 2);
+  CHECK(mat.Cols() == 2);
+  CHECK(mat(0, 0) == 0.0);
+  CHECK(mat(0, 1) == 0.0);
+  CHECK(mat(1, 0) == 0.0);
+  CHECK(mat(1, 1) == 0.0);
 
   mat(0, 0) = 1.0;
   mat(0, 1) = 2.0;
   mat(1, 0) = 3.0;
   mat(1, 1) = 4.0;
 
-  EXPECT_EQ(1.0, mat(0, 0));
-  EXPECT_EQ(2.0, mat(0, 1));
-  EXPECT_EQ(3.0, mat(1, 0));
-  EXPECT_EQ(4.0, mat(1, 1));
+  CHECK(mat(0, 0) == 1.0);
+  CHECK(mat(0, 1) == 2.0);
+  CHECK(mat(1, 0) == 3.0);
+  CHECK(mat(1, 1) == 4.0);
 }
 
-TEST(VariableMatrixTest, AssignmentAliasing) {
+TEST_CASE("Assignment aliasing", "[VariableMatrix]") {
   sleipnir::VariableMatrix A{{1.0, 2.0}, {3.0, 4.0}};
   sleipnir::VariableMatrix B{{5.0, 6.0}, {7.0, 8.0}};
 
   Eigen::MatrixXd expectedA{{1.0, 2.0}, {3.0, 4.0}};
   Eigen::MatrixXd expectedB{{5.0, 6.0}, {7.0, 8.0}};
-  EXPECT_EQ(expectedA, A);
-  EXPECT_EQ(expectedB, B);
+  CHECK(A == expectedA);
+  CHECK(B == expectedB);
 
   A = B;
 
-  EXPECT_EQ(expectedB, A);
-  EXPECT_EQ(expectedB, B);
+  CHECK(A == expectedB);
+  CHECK(B == expectedB);
 
   B(0, 0).SetValue(2.0);
   expectedB(0, 0) = 2.0;
 
-  EXPECT_EQ(expectedB, A);
-  EXPECT_EQ(expectedB, B);
+  CHECK(A == expectedB);
+  CHECK(B == expectedB);
 }
 
-TEST(VariableMatrixTest, BlockMemberFunction) {
+TEST_CASE("Block() member function", "[VariableMatrix]") {
   sleipnir::VariableMatrix A{{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}, {7.0, 8.0, 9.0}};
 
   // Block assignment
@@ -78,59 +78,59 @@ TEST(VariableMatrixTest, BlockMemberFunction) {
 
   Eigen::Matrix<double, 3, 3> expected1{
       {1.0, 2.0, 3.0}, {4.0, 10.0, 11.0}, {7.0, 12.0, 13.0}};
-  EXPECT_EQ(expected1, A.Value());
+  CHECK(A.Value() == expected1);
 
   // Block-of-block assignment
   A.Block(1, 1, 2, 2).Block(1, 1, 1, 1) = 14.0;
 
   Eigen::Matrix<double, 3, 3> expected2{
       {1.0, 2.0, 3.0}, {4.0, 10.0, 11.0}, {7.0, 12.0, 14.0}};
-  EXPECT_EQ(expected2, A.Value());
+  CHECK(A.Value() == expected2);
 }
 
-TEST(VariableMatrixTest, Iterators) {
+TEST_CASE("Iterators", "[VariableMatrix]") {
   sleipnir::VariableMatrix A{{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}, {7.0, 8.0, 9.0}};
 
   // VariableMatrix iterator
-  EXPECT_EQ(9, std::distance(A.begin(), A.end()));
+  CHECK(std::distance(A.begin(), A.end()) == 9);
 
   int i = 1;
   for (auto& elem : A) {
-    EXPECT_EQ(i, elem.Value());
+    CHECK(elem.Value() == i);
     ++i;
   }
 
   // VariableMatrix const_iterator
-  EXPECT_EQ(9, std::distance(A.cbegin(), A.cend()));
+  CHECK(std::distance(A.cbegin(), A.cend()) == 9);
 
   i = 1;
   for (const auto& elem : A) {
-    EXPECT_EQ(i, elem.Value());
+    CHECK(elem.Value() == i);
     ++i;
   }
 
   auto Asub = A.Block(2, 1, 1, 2);
 
   // VariableBlock iterator
-  EXPECT_EQ(2, std::distance(Asub.begin(), Asub.end()));
+  CHECK(std::distance(Asub.begin(), Asub.end()) == 2);
 
   i = 8;
   for (auto& elem : Asub) {
-    EXPECT_EQ(i, elem.Value());
+    CHECK(elem.Value() == i);
     ++i;
   }
 
   // VariableBlock const_iterator
-  EXPECT_EQ(2, std::distance(Asub.begin(), Asub.end()));
+  CHECK(std::distance(Asub.begin(), Asub.end()) == 2);
 
   i = 8;
   for (const auto& elem : Asub) {
-    EXPECT_EQ(i, elem.Value());
+    CHECK(elem.Value() == i);
     ++i;
   }
 }
 
-TEST(VariableMatrixTest, CwiseTransform) {
+TEST_CASE("CwiseTransform()", "[VariableMatrix]") {
   // VariableMatrix CwiseTransform
   sleipnir::VariableMatrix A{{-2.0, -3.0, -4.0}, {-5.0, -6.0, -7.0}};
 
@@ -138,9 +138,9 @@ TEST(VariableMatrixTest, CwiseTransform) {
   Eigen::Matrix<double, 2, 3> expected1{{2.0, 3.0, 4.0}, {5.0, 6.0, 7.0}};
 
   // Don't modify original matrix
-  EXPECT_EQ(-expected1, A.Value());
+  CHECK(A.Value() == -expected1);
 
-  EXPECT_EQ(expected1, result1.Value());
+  CHECK(result1.Value() == expected1);
 
   // VariableBlock CwiseTransform
   auto Asub = A.Block(0, 0, 2, 2);
@@ -149,55 +149,55 @@ TEST(VariableMatrixTest, CwiseTransform) {
   Eigen::Matrix<double, 2, 2> expected2{{2.0, 3.0}, {5.0, 6.0}};
 
   // Don't modify original matrix
-  EXPECT_EQ(-expected1, A.Value());
-  EXPECT_EQ(-expected2, Asub.Value());
+  CHECK(A.Value() == -expected1);
+  CHECK(Asub.Value() == -expected2);
 
-  EXPECT_EQ(expected2, result2.Value());
+  CHECK(result2.Value() == expected2);
 }
 
-TEST(VariableMatrixTest, ZeroStaticFunction) {
+TEST_CASE("Zero() static function", "[VariableMatrix]") {
   auto A = sleipnir::VariableMatrix::Zero(2, 3);
 
   for (const auto& elem : A) {
-    EXPECT_EQ(0.0, elem.Value());
+    CHECK(elem.Value() == 0.0);
   }
 }
 
-TEST(VariableMatrixTest, OnesStaticFunction) {
+TEST_CASE("Ones() static function", "[VariableMatrix]") {
   auto A = sleipnir::VariableMatrix::Ones(2, 3);
 
   for (const auto& elem : A) {
-    EXPECT_EQ(1.0, elem.Value());
+    CHECK(elem.Value() == 1.0);
   }
 }
 
-TEST(VariableMatrixTest, CwiseReduce) {
+TEST_CASE("CwiseReduce()", "[VariableMatrix]") {
   sleipnir::VariableMatrix A{{2.0, 3.0, 4.0}, {5.0, 6.0, 7.0}};
   sleipnir::VariableMatrix B{{8.0, 9.0, 10.0}, {11.0, 12.0, 13.0}};
   sleipnir::VariableMatrix result =
       sleipnir::CwiseReduce(A, B, std::multiplies<>{});
 
   Eigen::Matrix<double, 2, 3> expected{{16.0, 27.0, 40.0}, {55.0, 72.0, 91.0}};
-  EXPECT_EQ(expected, result.Value());
+  CHECK(result.Value() == expected);
 }
 
-TEST(VariableMatrixTest, BlockFreeFunction) {
+TEST_CASE("Block() free function", "[VariableMatrix]") {
   sleipnir::VariableMatrix A{{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}};
   sleipnir::VariableMatrix B{{7.0}, {8.0}};
 
   sleipnir::VariableMatrix mat1 = sleipnir::Block({{A, B}});
   Eigen::Matrix<double, 2, 4> expected1{{1.0, 2.0, 3.0, 7.0},
                                         {4.0, 5.0, 6.0, 8.0}};
-  EXPECT_EQ(2, mat1.Rows());
-  EXPECT_EQ(4, mat1.Cols());
-  EXPECT_EQ(expected1, mat1.Value());
+  CHECK(mat1.Rows() == 2);
+  CHECK(mat1.Cols() == 4);
+  CHECK(mat1.Value() == expected1);
 
   sleipnir::VariableMatrix C{{9.0, 10.0, 11.0, 12.0}};
 
   sleipnir::VariableMatrix mat2 = sleipnir::Block({{A, B}, {C}});
   Eigen::Matrix<double, 3, 4> expected2{
       {1.0, 2.0, 3.0, 7.0}, {4.0, 5.0, 6.0, 8.0}, {9.0, 10.0, 11.0, 12.0}};
-  EXPECT_EQ(3, mat2.Rows());
-  EXPECT_EQ(4, mat2.Cols());
-  EXPECT_EQ(expected2, mat2.Value());
+  CHECK(mat2.Rows() == 3);
+  CHECK(mat2.Cols() == 4);
+  CHECK(mat2.Value() == expected2);
 }

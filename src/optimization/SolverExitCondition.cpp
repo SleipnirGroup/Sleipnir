@@ -6,44 +6,47 @@
 
 namespace sleipnir {
 
-void PrintTo(const SolverExitCondition& exitCondition, std::ostream* os) {
+std::ostream& operator<<(std::ostream& os,
+                         const SolverExitCondition& exitCondition) {
   using enum sleipnir::SolverExitCondition;
 
   switch (exitCondition) {
     case kSuccess:
-      *os << "kSuccess";
+      os << "kSuccess";
       break;
     case kSolvedToAcceptableTolerance:
-      *os << "kSolvedToAcceptableTolerance";
+      os << "kSolvedToAcceptableTolerance";
       break;
     case kCallbackRequestedStop:
-      *os << "kCallbackRequestedStop";
+      os << "kCallbackRequestedStop";
       break;
     case kTooFewDOFs:
-      *os << "kTooFewDOFs";
+      os << "kTooFewDOFs";
       break;
     case kLocallyInfeasible:
-      *os << "kLocallyInfeasible";
+      os << "kLocallyInfeasible";
       break;
     case kFeasibilityRestorationFailed:
-      *os << "kFeasibilityRestorationFailed";
+      os << "kFeasibilityRestorationFailed";
       break;
     case kMaxSearchDirectionTooSmall:
-      *os << "kMaxSearchDirectionTooSmall";
+      os << "kMaxSearchDirectionTooSmall";
       break;
     case kNonfiniteInitialCostOrConstraints:
-      *os << "kNonfiniteInitialCostOrConstraints";
+      os << "kNonfiniteInitialCostOrConstraints";
       break;
     case kDivergingIterates:
-      *os << "kDivergingIterates";
+      os << "kDivergingIterates";
       break;
     case kMaxIterationsExceeded:
-      *os << "kMaxIterationsExceeded";
+      os << "kMaxIterationsExceeded";
       break;
     case kMaxWallClockTimeExceeded:
-      *os << "kMaxWallClockTimeExceeded";
+      os << "kMaxWallClockTimeExceeded";
       break;
   }
+
+  return os;
 }
 
 }  // namespace sleipnir

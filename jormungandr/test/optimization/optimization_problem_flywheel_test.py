@@ -3,6 +3,7 @@ import math
 from jormungandr.autodiff import ExpressionType
 from jormungandr.optimization import OptimizationProblem, SolverExitCondition
 import numpy as np
+import pytest
 
 
 def near(expected, actual, tolerance):
@@ -58,14 +59,14 @@ def test_optimization_problem_flywheel():
     u_ss = np.linalg.solve(B, np.eye(A.shape[0]) - A) @ r
 
     # Verify initial state
-    assert near(0.0, X.value(0, 0), 1e-8)
+    assert X.value(0, 0) == pytest.approx(0.0, abs=1e-8)
 
     # Verify solution
     x = np.array([[0.0]])
     u = np.array([[0.0]])
     for k in range(N):
         # Verify state
-        assert near(x[0, 0], X.value(0, k), 1e-2)
+        assert X.value(0, k) == pytest.approx(x[0, 0], abs=1e-2)
 
         # Determine expected input for this timestep
         error = r[0, 0] - x[0, 0]
@@ -85,16 +86,16 @@ def test_optimization_problem_flywheel():
         ):
             # If control input is transitioning between 12 and u_ss, ensure it's
             # within (u_ss, 12)
-            assert u[0, 0] >= u_ss[0, 0]
-            assert u[0, 0] <= 12.0
+            assert U.value(0, k) >= u_ss[0, 0]
+            assert U.value(0, k) <= 12.0
         else:
-            assert near(u[0, 0], U.value(0, k), 1e-4)
+            assert U.value(0, k) == pytest.approx(u[0, 0], abs=1e-4)
 
         # Project state forward
         x = A @ x + B @ u
 
     # Verify final state
-    assert near(r[0, 0], X.value(0, N), 1e-7)
+    assert X.value(0, N) == pytest.approx(r[0, 0], abs=1e-7)
 
     # Log states for offline viewing
     with open("Flywheel states.csv", "w") as f:

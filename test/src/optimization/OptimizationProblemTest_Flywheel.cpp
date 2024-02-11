@@ -6,8 +6,9 @@
 
 #include <Eigen/Core>
 #include <Eigen/QR>
+#include <catch2/catch_approx.hpp>
+#include <catch2/catch_test_macros.hpp>
 #include <fmt/core.h>
-#include <gtest/gtest.h>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 #include <units/angle.h>
 #include <units/angular_acceleration.h>
@@ -23,7 +24,7 @@ bool Near(double expected, double actual, double tolerance) {
 }
 }  // namespace
 
-TEST(OptimizationProblemTest, Flywheel) {
+TEST_CASE("Flywheel", "[OptimizationProblem]") {
   auto start = std::chrono::system_clock::now();
 
   constexpr auto T = 5_s;
@@ -69,10 +70,10 @@ TEST(OptimizationProblemTest, Flywheel) {
   auto status =
       problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
 
-  EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
-  EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.equalityConstraintType);
-  EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.inequalityConstraintType);
-  EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
+  CHECK(status.costFunctionType == sleipnir::ExpressionType::kQuadratic);
+  CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kLinear);
+  CHECK(status.inequalityConstraintType == sleipnir::ExpressionType::kLinear);
+  CHECK(status.exitCondition == sleipnir::SolverExitCondition::kSuccess);
 
   // Voltage for steady-state velocity:
   //
@@ -84,14 +85,14 @@ TEST(OptimizationProblemTest, Flywheel) {
       B.householderQr().solve(decltype(A)::Identity() - A) * r;
 
   // Verify initial state
-  EXPECT_NEAR(0.0, X.Value(0, 0), 1e-8);
+  CHECK(X.Value(0, 0) == Catch::Approx(0.0).margin(1e-8));
 
   // Verify solution
   Eigen::Matrix<double, 1, 1> x{0.0};
   Eigen::Matrix<double, 1, 1> u{0.0};
   for (int k = 0; k < N; ++k) {
     // Verify state
-    EXPECT_NEAR(x(0), X.Value(0, k), 1e-2) << fmt::format("  k = {}", k);
+    CHECK(X.Value(0, k) == Catch::Approx(x(0)).margin(1e-2));
 
     // Determine expected input for this timestep
     double error = r(0) - x(0);
@@ -108,18 +109,20 @@ TEST(OptimizationProblemTest, Flywheel) {
         Near(u_ss(0), U.Value(0, k + 1), 1e-2)) {
       // If control input is transitioning between 12 and u_ss, ensure it's
       // within (u_ss, 12)
-      EXPECT_GE(u(0), u_ss(0)) << fmt::format("  k = {}", k);
-      EXPECT_LE(u(0), 12.0) << fmt::format("  k = {}", k);
+      CHECK(U.Value(0, k) >= u_ss(0));
+      CHECK(U.Value(0, k) <= 12.0);
     } else {
-      EXPECT_NEAR(u(0), U.Value(0, k), 1e-4) << fmt::format("  k = {}", k);
+      CHECK(U.Value(0, k) == Catch::Approx(u(0)).margin(1e-4));
     }
+
+    INFO(fmt::format("  k = {}", k));
 
     // Project state forward
     x = A * x + B * u;
   }
 
   // Verify final state
-  EXPECT_NEAR(r(0), X.Value(0, N), 1e-7);
+  CHECK(X.Value(0, N) == Catch::Approx(r(0)).margin(1e-7));
 
   // Log states for offline viewing
   std::ofstream states{"OptimizationProblem Flywheel states.csv"};

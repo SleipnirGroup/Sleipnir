@@ -138,7 +138,7 @@ See the [examples](https://github.com/SleipnirGroup/Sleipnir/tree/main/examples)
 * [Eigen](https://gitlab.com/libeigen/eigen)
 * [fmtlib](https://github.com/fmtlib/fmt) (internal only)
 * [pybind11](https://github.com/pybind/pybind11) (build only)
-* [googletest](https://github.com/google/googletest) (tests only)
+* [Catch2](https://github.com/catchorg/Catch2) (tests only)
 
 Library dependencies which aren't installed locally will be automatically downloaded and built by CMake.
 

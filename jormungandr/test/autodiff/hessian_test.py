@@ -20,13 +20,11 @@ def test_linear():
 
     # dy/dx = 1
     g = Gradient(y, x[0]).value()[0, 0]
-    assert 1.0 == g
+    assert g == 1.0
 
-    # d²y/dx² = d/dx(x (rhs) + x (lhs))
-    #         = 1 + 1
-    #         = 2
+    # d²y/dx² = 0
     H = Hessian(y, x).value()
-    assert 0.0 == H[0, 0]
+    assert H[0, 0] == 0.0
 
 
 def test_quartic():
@@ -40,13 +38,13 @@ def test_quartic():
     #       = (3) + (3)
     #       = 6
     g = Gradient(y, x[0]).value()[0, 0]
-    assert 6.0 == g
+    assert g == 6.0
 
     # d²y/dx² = d/dx(x (rhs) + x (lhs))
     #         = 1 + 1
     #         = 2
     H = Hessian(y, x).value()
-    assert 2.0 == H[0, 0]
+    assert H[0, 0] == 2.0
 
 
 def test_sum():
@@ -61,14 +59,14 @@ def test_sum():
     y = sum(x)
     g = Gradient(y, x).value()
 
-    assert 15.0 == y.value()
+    assert y.value() == 15.0
     for i in range(x.rows()):
-        assert 1.0 == g[i]
+        assert g[i] == 1.0
 
     H = Hessian(y, x).value()
     for i in range(x.rows()):
         for j in range(x.rows()):
-            assert 0.0 == H[i, j]
+            assert H[i, j] == 0.0
 
 
 def test_sum_of_products():
@@ -84,17 +82,17 @@ def test_sum_of_products():
     y = (x.T @ x)[0, 0]
     g = Gradient(y, x).value()
 
-    assert 1 + 2 * 2 + 3 * 3 + 4 * 4 + 5 * 5 == y.value()
+    assert y.value() == 1 + 2 * 2 + 3 * 3 + 4 * 4 + 5 * 5
     for i in range(x.rows()):
-        assert (2 * x[i]).value() == g[i]
+        assert g[i] == (2 * x[i]).value()
 
     H = Hessian(y, x).value()
     for i in range(x.rows()):
         for j in range(x.rows()):
             if i == j:
-                assert 2.0 == H[i, j]
+                assert H[i, j] == 2.0
             else:
-                assert 0.0 == H[i, j]
+                assert H[i, j] == 0.0
 
 
 def test_product_of_sines():
@@ -110,22 +108,24 @@ def test_product_of_sines():
     y = prod(x.cwise_transform(autodiff.sin))
     g = Gradient(y, x).value()
 
-    assert (
-        math.sin(1) * math.sin(2) * math.sin(3) * math.sin(4) * math.sin(5) == y.value()
-    )
+    assert y.value() == math.sin(1) * math.sin(2) * math.sin(3) * math.sin(
+        4
+    ) * math.sin(5)
     for i in range(x.rows()):
-        assert (y / autodiff.tan(x[i])).value() == pytest.approx(g[i, 0], 1e-14)
+        assert g[i, 0] == pytest.approx((y / autodiff.tan(x[i])).value(), abs=1e-15)
 
     H = Hessian(y, x).value()
     for i in range(x.rows()):
         for j in range(x.rows()):
             if i == j:
-                assert (g[i, 0] / autodiff.tan(x[i])).value() * (
-                    1.0 - 1.0 / (autodiff.cos(x[i]) * autodiff.cos(x[i]))
-                ).value() == pytest.approx(H[i, j], 1e-14)
+                assert H[i, j] == pytest.approx(
+                    (g[i, 0] / autodiff.tan(x[i])).value()
+                    * (1.0 - 1.0 / (autodiff.cos(x[i]) * autodiff.cos(x[i]))).value(),
+                    abs=1e-15,
+                )
             else:
-                assert (g[j, 0] / autodiff.tan(x[i])).value() == pytest.approx(
-                    H[i, j], 1e-14
+                assert H[i, j] == pytest.approx(
+                    (g[j, 0] / autodiff.tan(x[i])).value(), abs=1e-15
                 )
 
 
@@ -142,39 +142,27 @@ def test_sum_of_squared_residuals():
     y = sum((x[:4, :1] - x[1:5, :1]).cwise_transform(lambda x: x**2))
     g = Gradient(y, x).value()
 
-    assert 0.0 == y.value()
-    assert (2 * x[0] - 2 * x[1]).value() == g[0, 0]
-    assert (-2 * x[0] + 4 * x[1] - 2 * x[2]).value() == g[1, 0]
-    assert (-2 * x[1] + 4 * x[2] - 2 * x[3]).value() == g[2, 0]
-    assert (-2 * x[2] + 4 * x[3] - 2 * x[4]).value() == g[3, 0]
-    assert (-2 * x[3] + 2 * x[4]).value() == g[4, 0]
+    assert y.value() == 0.0
+    assert g[0, 0] == (2 * x[0] - 2 * x[1]).value()
+    assert g[1, 0] == (-2 * x[0] + 4 * x[1] - 2 * x[2]).value()
+    assert g[2, 0] == (-2 * x[1] + 4 * x[2] - 2 * x[3]).value()
+    assert g[3, 0] == (-2 * x[2] + 4 * x[3] - 2 * x[4]).value()
+    assert g[4, 0] == (-2 * x[3] + 2 * x[4]).value()
 
     H = Hessian(y, x).value()
-    assert 2.0 == H[0, 0]
-    assert -2.0 == H[0, 1]
-    assert 0.0 == H[0, 2]
-    assert 0.0 == H[0, 3]
-    assert 0.0 == H[0, 4]
-    assert -2.0 == H[1, 0]
-    assert 4.0 == H[1, 1]
-    assert -2.0 == H[1, 2]
-    assert 0.0 == H[1, 3]
-    assert 0.0 == H[1, 4]
-    assert 0.0 == H[2, 0]
-    assert -2.0 == H[2, 1]
-    assert 4.0 == H[2, 2]
-    assert -2.0 == H[2, 3]
-    assert 0.0 == H[2, 4]
-    assert 0.0 == H[3, 0]
-    assert 0.0 == H[3, 1]
-    assert -2.0 == H[3, 2]
-    assert 4.0 == H[3, 3]
-    assert -2.0 == H[3, 4]
-    assert 0.0 == H[4, 0]
-    assert 0.0 == H[4, 1]
-    assert 0.0 == H[4, 2]
-    assert -2.0 == H[4, 3]
-    assert 2.0 == H[4, 4]
+
+    expected_H = np.array(
+        [
+            [2.0, -2.0, 0.0, 0.0, 0.0],
+            [-2.0, 4.0, -2.0, 0.0, 0.0],
+            [0.0, -2.0, 4.0, -2.0, 0.0],
+            [0.0, 0.0, -2.0, 4.0, -2.0],
+            [0.0, 0.0, 0.0, -2.0, 2.0],
+        ]
+    )
+    for i in range(x.rows()):
+        for j in range(x.rows()):
+            assert H[i, j] == expected_H[i, j]
 
 
 def test_sum_of_squares():
@@ -197,9 +185,9 @@ def test_sum_of_squares():
     for row in range(4):
         for col in range(4):
             if row == col:
-                assert 2.0 == H[row, col]
+                assert H[row, col] == 2.0
             else:
-                assert 0.0 == H[row, col]
+                assert H[row, col] == 0.0
 
 
 def test_rosenbrock():
@@ -214,12 +202,12 @@ def test_rosenbrock():
             z = (1 - x) ** 2 + 100 * (y - x**2) ** 2
 
             H = Hessian(z, input).value()
-            assert -400 * (y0 - x0 * x0) + 800 * x0 * x0 + 2 == pytest.approx(
-                H[0, 0], 1e-12
+            assert H[0, 0] == pytest.approx(
+                -400 * (y0 - x0 * x0) + 800 * x0 * x0 + 2, abs=1e-12
             )
-            assert -400 * x0 == H[0, 1]
-            assert -400 * x0 == H[1, 0]
-            assert 200 == H[1, 1]
+            assert H[0, 1] == -400 * x0
+            assert H[1, 0] == -400 * x0
+            assert H[1, 1] == 200
 
 
 def test_reuse():
@@ -237,7 +225,7 @@ def test_reuse():
     H = hessian.value()
 
     assert H.shape == (1, 1)
-    assert 6.0 == H[0, 0]
+    assert H[0, 0] == 6.0
 
     x[0].set_value(2)
     # d²y/dx² = 6x
@@ -245,4 +233,4 @@ def test_reuse():
     H = hessian.value()
 
     assert H.shape == (1, 1)
-    assert 12.0 == H[0, 0]
+    assert H[0, 0] == 12.0

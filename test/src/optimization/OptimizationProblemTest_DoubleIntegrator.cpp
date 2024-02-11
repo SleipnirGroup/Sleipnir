@@ -5,14 +5,15 @@
 #include <fstream>
 
 #include <Eigen/Core>
+#include <catch2/catch_approx.hpp>
+#include <catch2/catch_test_macros.hpp>
 #include <fmt/core.h>
-#include <gtest/gtest.h>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 #include <units/time.h>
 
 #include "CmdlineArguments.hpp"
 
-TEST(OptimizationProblemTest, DoubleIntegrator) {
+TEST_CASE("Double integrator", "[OptimizationProblem]") {
   auto start = std::chrono::system_clock::now();
 
   constexpr auto T = 3.5_s;
@@ -75,25 +76,25 @@ TEST(OptimizationProblemTest, DoubleIntegrator) {
   auto status =
       problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
 
-  EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
-  EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.equalityConstraintType);
-  EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.inequalityConstraintType);
-  EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
+  CHECK(status.costFunctionType == sleipnir::ExpressionType::kQuadratic);
+  CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kLinear);
+  CHECK(status.inequalityConstraintType == sleipnir::ExpressionType::kLinear);
+  CHECK(status.exitCondition == sleipnir::SolverExitCondition::kSuccess);
 
   Eigen::Matrix<double, 2, 2> A{{1.0, dt.value()}, {0.0, 1.0}};
   Eigen::Matrix<double, 2, 1> B{0.5 * dt.value() * dt.value(), dt.value()};
 
   // Verify initial state
-  EXPECT_NEAR(0.0, X.Value(0, 0), 1e-8);
-  EXPECT_NEAR(0.0, X.Value(1, 0), 1e-8);
+  CHECK(X.Value(0, 0) == Catch::Approx(0.0).margin(1e-8));
+  CHECK(X.Value(1, 0) == Catch::Approx(0.0).margin(1e-8));
 
   // Verify solution
   Eigen::Matrix<double, 2, 1> x{0.0, 0.0};
   Eigen::Matrix<double, 1, 1> u{0.0};
   for (int k = 0; k < N; ++k) {
     // Verify state
-    EXPECT_NEAR(x(0), X.Value(0, k), 1e-2) << fmt::format("  k = {}", k);
-    EXPECT_NEAR(x(1), X.Value(1, k), 1e-2) << fmt::format("  k = {}", k);
+    CHECK(X.Value(0, k) == Catch::Approx(x(0)).margin(1e-2));
+    CHECK(X.Value(1, k) == Catch::Approx(x(1)).margin(1e-2));
 
     // Determine expected input for this timestep
     if (k * dt < 1_s) {
@@ -115,19 +116,21 @@ TEST(OptimizationProblemTest, DoubleIntegrator) {
         std::abs(U.Value(0, k - 1) - U.Value(0, k + 1)) >= 1.0 - 1e-2) {
       // If control input is transitioning between -1, 0, or 1, ensure it's
       // within (-1, 1)
-      EXPECT_GE(u(0), -1.0) << fmt::format("  k = {}", k);
-      EXPECT_LE(u(0), 1.0) << fmt::format("  k = {}", k);
+      CHECK(U.Value(0, k) >= -1.0);
+      CHECK(U.Value(0, k) <= 1.0);
     } else {
-      EXPECT_NEAR(u(0), U.Value(0, k), 1e-4) << fmt::format("  k = {}", k);
+      CHECK(U.Value(0, k) == Catch::Approx(u(0)).margin(1e-4));
     }
+
+    INFO(fmt::format("  k = {}", k));
 
     // Project state forward
     x = A * x + B * u;
   }
 
   // Verify final state
-  EXPECT_NEAR(r, X.Value(0, N), 1e-8);
-  EXPECT_NEAR(0.0, X.Value(1, N), 1e-8);
+  CHECK(X.Value(0, N) == Catch::Approx(r).margin(1e-8));
+  CHECK(X.Value(1, N) == Catch::Approx(0.0).margin(1e-8));
 
   // Log states for offline viewing
   std::ofstream states{"OptimizationProblem Double Integrator states.csv"};

@@ -1,23 +1,23 @@
 // Copyright (c) Sleipnir contributors
 
-#include <gtest/gtest.h>
+#include <catch2/catch_test_macros.hpp>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 
 #include "CmdlineArguments.hpp"
 
-TEST(TrivialProblemTest, Empty) {
+TEST_CASE("Empty", "[TrivialProblem]") {
   sleipnir::OptimizationProblem problem;
 
   auto status =
       problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
 
-  EXPECT_EQ(sleipnir::ExpressionType::kNone, status.costFunctionType);
-  EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
-  EXPECT_EQ(sleipnir::ExpressionType::kNone, status.inequalityConstraintType);
-  EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
+  CHECK(status.costFunctionType == sleipnir::ExpressionType::kNone);
+  CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kNone);
+  CHECK(status.inequalityConstraintType == sleipnir::ExpressionType::kNone);
+  CHECK(status.exitCondition == sleipnir::SolverExitCondition::kSuccess);
 }
 
-TEST(TrivialProblemTest, NoCostUnconstrained) {
+TEST_CASE("No cost, unconstrained", "[TrivialProblem]") {
   {
     sleipnir::OptimizationProblem problem;
 
@@ -26,14 +26,14 @@ TEST(TrivialProblemTest, NoCostUnconstrained) {
     auto status =
         problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
 
-    EXPECT_EQ(sleipnir::ExpressionType::kNone, status.costFunctionType);
-    EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
-    EXPECT_EQ(sleipnir::ExpressionType::kNone, status.inequalityConstraintType);
-    EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
+    CHECK(status.costFunctionType == sleipnir::ExpressionType::kNone);
+    CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kNone);
+    CHECK(status.inequalityConstraintType == sleipnir::ExpressionType::kNone);
+    CHECK(status.exitCondition == sleipnir::SolverExitCondition::kSuccess);
 
     for (int row = 0; row < X.Rows(); ++row) {
       for (int col = 0; col < X.Cols(); ++col) {
-        EXPECT_EQ(0.0, X.Value(row, col));
+        CHECK(X.Value(row, col) == 0.0);
       }
     }
   }
@@ -47,14 +47,14 @@ TEST(TrivialProblemTest, NoCostUnconstrained) {
     auto status =
         problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
 
-    EXPECT_EQ(sleipnir::ExpressionType::kNone, status.costFunctionType);
-    EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
-    EXPECT_EQ(sleipnir::ExpressionType::kNone, status.inequalityConstraintType);
-    EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
+    CHECK(status.costFunctionType == sleipnir::ExpressionType::kNone);
+    CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kNone);
+    CHECK(status.inequalityConstraintType == sleipnir::ExpressionType::kNone);
+    CHECK(status.exitCondition == sleipnir::SolverExitCondition::kSuccess);
 
     for (int row = 0; row < X.Rows(); ++row) {
       for (int col = 0; col < X.Cols(); ++col) {
-        EXPECT_EQ(1.0, X.Value(row, col));
+        CHECK(X.Value(row, col) == 1.0);
       }
     }
   }

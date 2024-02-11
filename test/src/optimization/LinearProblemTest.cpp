@@ -1,11 +1,12 @@
 // Copyright (c) Sleipnir contributors
 
-#include <gtest/gtest.h>
+#include <catch2/catch_approx.hpp>
+#include <catch2/catch_test_macros.hpp>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 
 #include "CmdlineArguments.hpp"
 
-TEST(LinearProblemTest, Maximize) {
+TEST_CASE("Maximize", "[LinearProblem]") {
   sleipnir::OptimizationProblem problem;
 
   auto x = problem.DecisionVariable();
@@ -25,11 +26,11 @@ TEST(LinearProblemTest, Maximize) {
   auto status =
       problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
 
-  EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.costFunctionType);
-  EXPECT_EQ(sleipnir::ExpressionType::kNone, status.equalityConstraintType);
-  EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.inequalityConstraintType);
-  EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
+  CHECK(status.costFunctionType == sleipnir::ExpressionType::kLinear);
+  CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kNone);
+  CHECK(status.inequalityConstraintType == sleipnir::ExpressionType::kLinear);
+  CHECK(status.exitCondition == sleipnir::SolverExitCondition::kSuccess);
 
-  EXPECT_NEAR(375.0, x.Value(), 1e-6);
-  EXPECT_NEAR(250.0, y.Value(), 1e-6);
+  CHECK(x.Value() == Catch::Approx(375.0).margin(1e-6));
+  CHECK(y.Value() == Catch::Approx(250.0).margin(1e-6));
 }

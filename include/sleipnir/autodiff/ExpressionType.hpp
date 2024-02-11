@@ -27,11 +27,12 @@ enum class ExpressionType {
 };
 
 /**
- * GoogleTest value formatter for ExpressionType.
+ * Catch2 value formatter for ExpressionType.
  *
- * @param type ExpressionType to print.
  * @param os Output stream to which to print.
+ * @param type ExpressionType to print.
  */
-SLEIPNIR_DLLEXPORT void PrintTo(const ExpressionType& type, std::ostream* os);
+SLEIPNIR_DLLEXPORT std::ostream& operator<<(std::ostream& os,
+                                            const ExpressionType& type);
 
 }  // namespace sleipnir

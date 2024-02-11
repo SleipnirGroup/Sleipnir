@@ -5,8 +5,9 @@
 #include <fstream>
 
 #include <Eigen/Core>
+#include <catch2/catch_approx.hpp>
+#include <catch2/catch_test_macros.hpp>
 #include <fmt/core.h>
-#include <gtest/gtest.h>
 #include <sleipnir/control/OCPSolver.hpp>
 #include <units/acceleration.h>
 #include <units/angle.h>
@@ -19,7 +20,7 @@
 #include "DifferentialDriveUtil.hpp"
 #include "RK4.hpp"
 
-TEST(OCPSolverTest, DifferentialDrive) {
+TEST_CASE("Differential drive", "[OCPSolver]") {
   auto start = std::chrono::system_clock::now();
 
   constexpr int N = 50;
@@ -97,26 +98,25 @@ TEST(OCPSolverTest, DifferentialDrive) {
       problem.Solve({.maxIterations = 1000,
                      .diagnostics = Argv().Contains("--enable-diagnostics")});
 
-  EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.costFunctionType);
-  EXPECT_EQ(sleipnir::ExpressionType::kNonlinear,
-            status.equalityConstraintType);
-  EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.inequalityConstraintType);
+  CHECK(status.costFunctionType == sleipnir::ExpressionType::kLinear);
+  CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kNonlinear);
+  CHECK(status.inequalityConstraintType == sleipnir::ExpressionType::kLinear);
 #if defined(_MSC_VER)
   // FIXME: Solver doesn't converge with MSVC
-  EXPECT_EQ(sleipnir::SolverExitCondition::kLocallyInfeasible,
-            status.exitCondition);
+  CHECK(status.exitCondition ==
+        sleipnir::SolverExitCondition::kLocallyInfeasible);
 #else
-  EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
+  CHECK(status.exitCondition == sleipnir::SolverExitCondition::kSuccess);
 
   auto X = problem.X();
   auto U = problem.U();
 
   // Verify initial state
-  EXPECT_NEAR(x_initial(0), X.Value(0, 0), 1e-8);
-  EXPECT_NEAR(x_initial(1), X.Value(1, 0), 1e-8);
-  EXPECT_NEAR(x_initial(2), X.Value(2, 0), 1e-8);
-  EXPECT_NEAR(x_initial(3), X.Value(3, 0), 1e-8);
-  EXPECT_NEAR(x_initial(4), X.Value(4, 0), 1e-8);
+  CHECK(X.Value(0, 0) == Catch::Approx(x_initial(0)).margin(1e-8));
+  CHECK(X.Value(1, 0) == Catch::Approx(x_initial(1)).margin(1e-8));
+  CHECK(X.Value(2, 0) == Catch::Approx(x_initial(2)).margin(1e-8));
+  CHECK(X.Value(3, 0) == Catch::Approx(x_initial(3)).margin(1e-8));
+  CHECK(X.Value(4, 0) == Catch::Approx(x_initial(4)).margin(1e-8));
 
   // Verify solution
   Eigen::Vector<double, 5> x{0.0, 0.0, 0.0, 0.0, 0.0};
@@ -125,17 +125,19 @@ TEST(OCPSolverTest, DifferentialDrive) {
     u = U.Col(k).Value();
 
     // Input constraints
-    EXPECT_GE(U(0, k).Value(), -u_max(0));
-    EXPECT_LE(U(0, k).Value(), u_max(0));
-    EXPECT_GE(U(1, k).Value(), -u_max(1));
-    EXPECT_LE(U(1, k).Value(), u_max(1));
+    CHECK(U(0, k).Value() >= -u_max(0));
+    CHECK(U(0, k).Value() <= u_max(0));
+    CHECK(U(1, k).Value() >= -u_max(1));
+    CHECK(U(1, k).Value() <= u_max(1));
 
     // Verify state
-    EXPECT_NEAR(x(0), X.Value(0, k), 1e-8) << fmt::format("  k = {}", k);
-    EXPECT_NEAR(x(1), X.Value(1, k), 1e-8) << fmt::format("  k = {}", k);
-    EXPECT_NEAR(x(2), X.Value(2, k), 1e-8) << fmt::format("  k = {}", k);
-    EXPECT_NEAR(x(3), X.Value(3, k), 1e-8) << fmt::format("  k = {}", k);
-    EXPECT_NEAR(x(4), X.Value(4, k), 1e-8) << fmt::format("  k = {}", k);
+    CHECK(X.Value(0, k) == Catch::Approx(x(0)).margin(1e-8));
+    CHECK(X.Value(1, k) == Catch::Approx(x(1)).margin(1e-8));
+    CHECK(X.Value(2, k) == Catch::Approx(x(2)).margin(1e-8));
+    CHECK(X.Value(3, k) == Catch::Approx(x(3)).margin(1e-8));
+    CHECK(X.Value(4, k) == Catch::Approx(x(4)).margin(1e-8));
+
+    INFO(fmt::format("  k = {}", k));
 
     // Project state forward
     x = RK4(DifferentialDriveDynamicsDouble, x, u,
@@ -143,11 +145,11 @@ TEST(OCPSolverTest, DifferentialDrive) {
   }
 
   // Verify final state
-  EXPECT_NEAR(x_final(0), X.Value(0, N), 1e-8);
-  EXPECT_NEAR(x_final(1), X.Value(1, N), 1e-8);
-  EXPECT_NEAR(x_final(2), X.Value(2, N), 1e-8);
-  EXPECT_NEAR(x_final(3), X.Value(3, N), 1e-8);
-  EXPECT_NEAR(x_final(4), X.Value(4, N), 1e-8);
+  CHECK(X.Value(0, N) == Catch::Approx(x_final(0)).margin(1e-8));
+  CHECK(X.Value(1, N) == Catch::Approx(x_final(1)).margin(1e-8));
+  CHECK(X.Value(2, N) == Catch::Approx(x_final(2)).margin(1e-8));
+  CHECK(X.Value(3, N) == Catch::Approx(x_final(3)).margin(1e-8));
+  CHECK(X.Value(4, N) == Catch::Approx(x_final(4)).margin(1e-8));
 #endif
 
   // Log states for offline viewing

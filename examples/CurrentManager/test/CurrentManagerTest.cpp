@@ -2,22 +2,23 @@
 
 #include <array>
 
-#include <gtest/gtest.h>
+#include <catch2/catch_approx.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include "CurrentManager.hpp"
 
-TEST(CurrentManagerTest, EnoughCurrent) {
+TEST_CASE("Enough current", "[CurrentManager]") {
   CurrentManager manager{std::array{1_A, 5_A, 10_A, 5_A}, 40_A};
 
   auto currents = manager.Calculate(std::array{25_A, 10_A, 5_A, 0_A});
 
-  EXPECT_NEAR(25.0, currents[0].value(), 1e-2);
-  EXPECT_NEAR(10.0, currents[1].value(), 1e-2);
-  EXPECT_NEAR(5.0, currents[2].value(), 1e-2);
-  EXPECT_NEAR(0.0, currents[3].value(), 1e-2);
+  CHECK(currents[0].value() == Catch::Approx(25.0).margin(1e-3));
+  CHECK(currents[1].value() == Catch::Approx(10.0).margin(1e-3));
+  CHECK(currents[2].value() == Catch::Approx(5.0).margin(1e-3));
+  CHECK(currents[3].value() == Catch::Approx(0.0).margin(1e-3));
 }
 
-TEST(CurrentManagerTest, NotEnoughCurrent) {
+TEST_CASE("Not enough current", "[CurrentManager]") {
   CurrentManager manager{std::array{1_A, 5_A, 10_A, 5_A}, 40_A};
 
   auto currents = manager.Calculate(std::array{30_A, 10_A, 5_A, 0_A});
@@ -52,8 +53,8 @@ TEST(CurrentManagerTest, NotEnoughCurrent) {
   //
   // opti.solver("ipopt")
   // print(opti.solve().value(allocated_currents))
-  EXPECT_NEAR(29.960, currents[0].value(), 1e-2);
-  EXPECT_NEAR(9.00793, currents[1].value(), 1e-2);
-  EXPECT_NEAR(1.0317, currents[2].value(), 1e-2);
-  EXPECT_NEAR(1.454e-09, currents[3].value(), 1e-2);
+  CHECK(currents[0].value() == Catch::Approx(29.960).margin(1e-3));
+  CHECK(currents[1].value() == Catch::Approx(9.007).margin(1e-3));
+  CHECK(currents[2].value() == Catch::Approx(1.032).margin(1e-3));
+  CHECK(currents[3].value() == Catch::Approx(0.0).margin(1e-3));
 }

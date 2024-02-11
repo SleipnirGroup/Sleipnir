@@ -754,24 +754,6 @@ static const char *__doc_sleipnir_OptimizationProblem_m_inequalityConstraints = 
 
 static const char *__doc_sleipnir_OptimizationProblem_status = R"doc()doc";
 
-static const char *__doc_sleipnir_PrintTo =
-R"doc(GoogleTest value formatter for ExpressionType.
-
-Parameter ``type``:
-    ExpressionType to print.
-
-Parameter ``os``:
-    Output stream to which to print.)doc";
-
-static const char *__doc_sleipnir_PrintTo_2 =
-R"doc(GoogleTest value formatter for SolverExitCondition.
-
-Parameter ``exitCondition``:
-    Solver exit condition to print.
-
-Parameter ``os``:
-    Output stream to which to print.)doc";
-
 static const char *__doc_sleipnir_Profiler =
 R"doc(Records the number of profiler measurements (start/stop pairs) and the
 average duration between each start and stop call.)doc";
@@ -2046,6 +2028,24 @@ Parameter ``lhs``:
 
 Parameter ``rhs``:
     Left-hand side.)doc";
+
+static const char *__doc_sleipnir_operator_lshift =
+R"doc(Catch2 value formatter for ExpressionType.
+
+Parameter ``os``:
+    Output stream to which to print.
+
+Parameter ``type``:
+    ExpressionType to print.)doc";
+
+static const char *__doc_sleipnir_operator_lshift_2 =
+R"doc(Catch2 value formatter for SolverExitCondition.
+
+Parameter ``os``:
+    Output stream to which to print.
+
+Parameter ``exitCondition``:
+    Solver exit condition to print.)doc";
 
 static const char *__doc_sleipnir_operator_lt =
 R"doc(Less-than comparison operator that returns an inequality constraint

@@ -86,28 +86,28 @@ def test_subslicing():
     A[1:3, 1:3][1:, 1:] = 14.0
 
     expected2 = np.array([[1.0, 2.0, 3.0], [4.0, 10.0, 11.0], [7.0, 12.0, 14.0]])
-    assert (expected2 == A.value()).all()
+    assert (A.value() == expected2).all()
 
 
 def test_iterators():
     A = VariableMatrix([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]])
 
     # VariableMatrix iterator
-    assert 9 == sum(1 for e in A)
+    assert sum(1 for e in A) == 9
 
     i = 1
     for elem in A:
-        assert i == elem.value()
+        assert elem.value() == i
         i += 1
 
     Asub = A[2:3, 1:3]
 
     # VariableBlock iterator
-    assert 2 == sum(1 for e in Asub)
+    assert sum(1 for e in Asub) == 2
 
     i = 8
     for elem in Asub:
-        assert i == elem.value()
+        assert elem.value() == i
         i += 1
 
 
@@ -119,9 +119,9 @@ def test_cwise_transform():
     expected1 = np.array([[2.0, 3.0, 4.0], [5.0, 6.0, 7.0]])
 
     # Don't modify original matrix
-    assert (-expected1 == A.value()).all()
+    assert (A.value() == -expected1).all()
 
-    assert (expected1 == result1.value()).all()
+    assert (result1.value() == expected1).all()
 
     # VariableBlock CwiseTransform
     Asub = A[:2, :2]
@@ -130,10 +130,10 @@ def test_cwise_transform():
     expected2 = np.array([[2.0, 3.0], [5.0, 6.0]])
 
     # Don't modify original matrix
-    assert (-expected1 == A.value()).all()
-    assert (-expected2 == Asub.value()).all()
+    assert (A.value() == -expected1).all()
+    assert (Asub.value() == -expected2).all()
 
-    assert (expected2 == result2.value()).all()
+    assert (result2.value() == expected2).all()
 
 
 def test_zero_static_function():
@@ -157,7 +157,7 @@ def test_cwise_reduce():
     B = VariableMatrix([[8.0, 9.0, 10.0], [11.0, 12.0, 13.0]])
     result = autodiff.cwise_reduce(A, B, lambda a, b: a * b)
 
-    assert (np.array([[16.0, 27.0, 40.0], [55.0, 72.0, 91.0]]) == result.value()).all()
+    assert (result.value() == np.array([[16.0, 27.0, 40.0], [55.0, 72.0, 91.0]])).all()
 
 
 def test_block_free_function():
@@ -167,7 +167,7 @@ def test_block_free_function():
     mat1 = autodiff.block([[A, B]])
     expected1 = np.array([[1.0, 2.0, 3.0, 7.0], [4.0, 5.0, 6.0, 8.0]])
     assert mat1.shape == (2, 4)
-    assert (expected1 == mat1.value()).all()
+    assert (mat1.value() == expected1).all()
 
     C = VariableMatrix([[9.0, 10.0, 11.0, 12.0]])
 
@@ -176,4 +176,4 @@ def test_block_free_function():
         [[1.0, 2.0, 3.0, 7.0], [4.0, 5.0, 6.0, 8.0], [9.0, 10.0, 11.0, 12.0]]
     )
     assert mat2.shape == (3, 4)
-    assert (expected2 == mat2.value()).all()
+    assert (mat2.value() == expected2).all()

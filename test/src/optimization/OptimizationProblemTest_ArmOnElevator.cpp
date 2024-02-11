@@ -1,6 +1,6 @@
 // Copyright (c) Sleipnir contributors
 
-#include <gtest/gtest.h>
+#include <catch2/catch_test_macros.hpp>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 #include <units/acceleration.h>
 #include <units/angle.h>
@@ -13,7 +13,7 @@
 #include "CmdlineArguments.hpp"
 
 // This problem tests the case where regularization fails
-TEST(OptimizationProblemTest, ArmOnElevator) {
+TEST_CASE("Arm on elevator", "[OptimizationProblem]") {
   constexpr int N = 800;
 
   constexpr auto kElevatorStartHeight = 1_m;
@@ -97,9 +97,9 @@ TEST(OptimizationProblemTest, ArmOnElevator) {
   auto status =
       problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
 
-  EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
-  EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.equalityConstraintType);
-  EXPECT_EQ(sleipnir::ExpressionType::kNonlinear,
-            status.inequalityConstraintType);
-  EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
+  CHECK(status.costFunctionType == sleipnir::ExpressionType::kQuadratic);
+  CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kLinear);
+  CHECK(status.inequalityConstraintType ==
+        sleipnir::ExpressionType::kNonlinear);
+  CHECK(status.exitCondition == sleipnir::SolverExitCondition::kSuccess);
 }

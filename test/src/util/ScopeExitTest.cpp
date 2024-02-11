@@ -1,22 +1,22 @@
 // Copyright (c) Sleipnir contributors
 
-#include <gtest/gtest.h>
+#include <catch2/catch_test_macros.hpp>
 
 #include "util/ScopeExit.hpp"
 
-TEST(ScopeExitTest, ScopeExit) {
+TEST_CASE("Scope exit", "[scope_exit]") {
   int exitCount = 0;
 
   {
     sleipnir::scope_exit exit{[&] { ++exitCount; }};
 
-    EXPECT_EQ(0, exitCount);
+    CHECK(exitCount == 0);
   }
 
-  EXPECT_EQ(1, exitCount);
+  CHECK(exitCount == 1);
 }
 
-TEST(ScopeExitTest, Release) {
+TEST_CASE("Release", "[scope_exit]") {
   int exitCount = 0;
 
   {
@@ -24,13 +24,13 @@ TEST(ScopeExitTest, Release) {
     sleipnir::scope_exit exit2 = std::move(exit1);
     sleipnir::scope_exit exit3 =
         std::move(exit1);  // NOLINT (clang-analyzer-cplusplus.Move)
-    EXPECT_EQ(0, exitCount);
+    CHECK(exitCount == 0);
   }
-  EXPECT_EQ(1, exitCount);
+  CHECK(exitCount == 1);
 
   {
     sleipnir::scope_exit exit{[&] { ++exitCount; }};
     exit.release();
   }
-  EXPECT_EQ(1, exitCount);
+  CHECK(exitCount == 1);
 }

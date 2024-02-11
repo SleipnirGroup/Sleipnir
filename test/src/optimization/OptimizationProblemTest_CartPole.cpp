@@ -6,8 +6,9 @@
 #include <numbers>
 
 #include <Eigen/Core>
+#include <catch2/catch_approx.hpp>
+#include <catch2/catch_test_macros.hpp>
 #include <fmt/core.h>
-#include <gtest/gtest.h>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 #include <units/acceleration.h>
 #include <units/angle.h>
@@ -19,7 +20,7 @@
 #include "CmdlineArguments.hpp"
 #include "RK4.hpp"
 
-TEST(OptimizationProblemTest, CartPole) {
+TEST_CASE("Cart-pole", "[OptimizationProblem]") {
   constexpr auto T = 5_s;
   constexpr units::second_t dt = 50_ms;
   constexpr int N = T / dt;
@@ -88,43 +89,42 @@ TEST(OptimizationProblemTest, CartPole) {
   auto status =
       problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
 
-  EXPECT_EQ(sleipnir::ExpressionType::kQuadratic, status.costFunctionType);
-  EXPECT_EQ(sleipnir::ExpressionType::kNonlinear,
-            status.equalityConstraintType);
-  EXPECT_EQ(sleipnir::ExpressionType::kLinear, status.inequalityConstraintType);
-  EXPECT_EQ(sleipnir::SolverExitCondition::kSuccess, status.exitCondition);
+  CHECK(status.costFunctionType == sleipnir::ExpressionType::kQuadratic);
+  CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kNonlinear);
+  CHECK(status.inequalityConstraintType == sleipnir::ExpressionType::kLinear);
+  CHECK(status.exitCondition == sleipnir::SolverExitCondition::kSuccess);
 
   // Verify initial state
-  EXPECT_NEAR(x_initial(0), X.Value(0, 0), 1e-8);
-  EXPECT_NEAR(x_initial(1), X.Value(1, 0), 1e-8);
-  EXPECT_NEAR(x_initial(2), X.Value(2, 0), 1e-8);
-  EXPECT_NEAR(x_initial(3), X.Value(3, 0), 1e-8);
+  CHECK(X.Value(0, 0) == Catch::Approx(x_initial(0)).margin(1e-8));
+  CHECK(X.Value(1, 0) == Catch::Approx(x_initial(1)).margin(1e-8));
+  CHECK(X.Value(2, 0) == Catch::Approx(x_initial(2)).margin(1e-8));
+  CHECK(X.Value(3, 0) == Catch::Approx(x_initial(3)).margin(1e-8));
 
   // Verify solution
   for (int k = 0; k < N; ++k) {
     // Cart position constraints
-    EXPECT_GE(X(0, k), 0.0);
-    EXPECT_LE(X(0, k), d_max.value());
+    CHECK(X(0, k) >= 0.0);
+    CHECK(X(0, k) <= d_max.value());
 
     // Input constraints
-    EXPECT_GE(U(0, k), -u_max.value());
-    EXPECT_LE(U(0, k), u_max.value());
+    CHECK(U(0, k) >= -u_max.value());
+    CHECK(U(0, k) <= u_max.value());
 
     // Dynamics constraints
     Eigen::VectorXd expected_x_k1 =
         RK4(CartPoleDynamicsDouble, X.Col(k).Value(), U.Col(k).Value(), dt);
     Eigen::VectorXd actual_x_k1 = X.Col(k + 1).Value();
     for (int row = 0; row < actual_x_k1.rows(); ++row) {
-      EXPECT_NEAR(expected_x_k1(row), actual_x_k1(row), 1e-8)
-          << "  x(" << row << ") @ k = " << k;
+      CHECK(actual_x_k1(row) == Catch::Approx(expected_x_k1(row)).margin(1e-8));
+      INFO(fmt::format("  x({} @ k = {}", row, k));
     }
   }
 
   // Verify final state
-  EXPECT_NEAR(x_final(0), X.Value(0, N), 1e-8);
-  EXPECT_NEAR(x_final(1), X.Value(1, N), 1e-8);
-  EXPECT_NEAR(x_final(2), X.Value(2, N), 1e-8);
-  EXPECT_NEAR(x_final(3), X.Value(3, N), 1e-8);
+  CHECK(X.Value(0, N) == Catch::Approx(x_final(0)).margin(1e-8));
+  CHECK(X.Value(1, N) == Catch::Approx(x_final(1)).margin(1e-8));
+  CHECK(X.Value(2, N) == Catch::Approx(x_final(2)).margin(1e-8));
+  CHECK(X.Value(3, N) == Catch::Approx(x_final(3)).margin(1e-8));
 
   // Log states for offline viewing
   std::ofstream states{"OptimizationProblem Cart-pole states.csv"};
