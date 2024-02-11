@@ -49,22 +49,22 @@ class RegularizedLDLT {
 
     const Inertia idealInertia{m_numDecisionVariables, m_numEqualityConstraints,
                                0};
+    Inertia inertia;
 
     double δ = 0.0;
     double γ = 0.0;
 
-    if (!m_analyzedPattern) {
-      m_solver.analyzePattern(lhs);
-      m_analyzedPattern = true;
-    }
+    AnalyzePattern(lhs);
     m_solver.factorize(lhs);
-    Inertia inertia{m_solver};
 
-    // If the decomposition succeeded and the inertia is ideal, don't regularize
-    // the system
-    if (m_solver.info() == Eigen::Success && inertia == idealInertia) {
-      m_info = Eigen::Success;
-      return;
+    if (m_solver.info() == Eigen::Success) {
+      inertia = Inertia{m_solver};
+
+      // If the inertia is ideal, don't regularize the system
+      if (inertia == idealInertia) {
+        m_info = Eigen::Success;
+        return;
+      }
     }
 
     // If the decomposition succeeded and the inertia has some zero eigenvalues,
@@ -89,7 +89,9 @@ class RegularizedLDLT {
       //
       // lhs = [H + AᵢᵀΣAᵢ + δI   Aₑᵀ]
       //       [       Aₑ        −γI ]
-      m_solver.factorize(lhs + Regularization(δ, γ));
+      Eigen::SparseMatrix<double> lhsReg = lhs + Regularization(δ, γ);
+      AnalyzePattern(lhsReg);
+      m_solver.factorize(lhsReg);
       inertia = Inertia{m_solver};
 
       // If the inertia is ideal, store that value of δ and return.
@@ -124,7 +126,6 @@ class RegularizedLDLT {
 
  private:
   Solver m_solver;
-  bool m_analyzedPattern = false;
 
   Eigen::ComputationInfo m_info = Eigen::Success;
 
@@ -136,6 +137,22 @@ class RegularizedLDLT {
 
   /// The value of δ from the previous run of Compute().
   double m_δOld = 0.0;
+
+  // Number of non-zeros in LHS.
+  int m_nonZeros = -1;
+
+  /**
+   * Reanalize LHS matrix's sparsity pattern if it changed.
+   *
+   * @param lhs Matrix to analyze.
+   */
+  void AnalyzePattern(const Eigen::SparseMatrix<double>& lhs) {
+    int nonZeros = lhs.nonZeros();
+    if (m_nonZeros != nonZeros) {
+      m_solver.analyzePattern(lhs);
+      m_nonZeros = nonZeros;
+    }
+  }
 
   /**
    * Returns regularization matrix.

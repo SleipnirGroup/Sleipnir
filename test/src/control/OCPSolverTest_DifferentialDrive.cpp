@@ -96,11 +96,6 @@ TEST_CASE("OCPSolver - Differential drive", "[OCPSolver]") {
   CHECK(status.costFunctionType == sleipnir::ExpressionType::kLinear);
   CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kNonlinear);
   CHECK(status.inequalityConstraintType == sleipnir::ExpressionType::kLinear);
-#if defined(_MSC_VER)
-  // FIXME: Solver doesn't converge with MSVC
-  CHECK(status.exitCondition ==
-        sleipnir::SolverExitCondition::kLocallyInfeasible);
-#else
   CHECK(status.exitCondition == sleipnir::SolverExitCondition::kSuccess);
 
   auto X = problem.X();
@@ -145,7 +140,6 @@ TEST_CASE("OCPSolver - Differential drive", "[OCPSolver]") {
   CHECK(X.Value(2, N) == Catch::Approx(x_final(2)).margin(1e-8));
   CHECK(X.Value(3, N) == Catch::Approx(x_final(3)).margin(1e-8));
   CHECK(X.Value(4, N) == Catch::Approx(x_final(4)).margin(1e-8));
-#endif
 
   // Log states for offline viewing
   std::ofstream states{"OCPSolver Differential drive states.csv"};
