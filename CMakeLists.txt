@@ -126,7 +126,6 @@ if(NOT USE_SYSTEM_FMT)
         GIT_TAG 10.2.1
     )
     fetchcontent_makeavailable(fmt)
-    set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_SAVE})
 else()
     find_package(fmt CONFIG REQUIRED)
 endif()
