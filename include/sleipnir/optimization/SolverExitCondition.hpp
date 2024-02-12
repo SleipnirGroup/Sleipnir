@@ -26,19 +26,16 @@ enum class SolverExitCondition {
   /// The solver failed to reach the desired tolerance, and feasibility
   /// restoration failed to converge.
   kFeasibilityRestorationFailed = -3,
-  /// The solver failed to reach the desired tolerance due to the maximum search
-  /// direction becoming too small.
-  kMaxSearchDirectionTooSmall = -4,
   /// The solver encountered nonfinite initial cost or constraints and gave up.
-  kNonfiniteInitialCostOrConstraints = -5,
+  kNonfiniteInitialCostOrConstraints = -4,
   /// The solver encountered diverging primal iterates xₖ and/or sₖ and gave up.
-  kDivergingIterates = -6,
+  kDivergingIterates = -5,
   /// The solver returned its solution so far after exceeding the maximum number
   /// of iterations.
-  kMaxIterationsExceeded = -7,
+  kMaxIterationsExceeded = -6,
   /// The solver returned its solution so far after exceeding the maximum
   /// elapsed wall clock time.
-  kMaxWallClockTimeExceeded = -8
+  kMaxWallClockTimeExceeded = -7
 };
 
 /**
@@ -64,9 +61,6 @@ SLEIPNIR_DLLEXPORT constexpr std::string_view ToMessage(
     case kFeasibilityRestorationFailed:
       return "solver failed to reach the desired tolerance, and feasibility "
              "restoration failed to converge";
-    case kMaxSearchDirectionTooSmall:
-      return "solver failed to reach the desired tolerance due to the maximum "
-             "search direction becoming too small";
     case kNonfiniteInitialCostOrConstraints:
       return "solver encountered nonfinite initial cost or constraints and "
              "gave up";

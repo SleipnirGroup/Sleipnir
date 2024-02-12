@@ -860,15 +860,9 @@ void InteriorPoint(
     // barrier parameter.
     //
     // See section 3.9 of [2].
-    if (stepTooSmallCounter == 2) {
-      if (μ > μ_min) {
-        UpdateBarrierParameterAndResetFilter();
-        continue;
-      } else {
-        status->exitCondition =
-            SolverExitCondition::kMaxSearchDirectionTooSmall;
-        return;
-      }
+    if (stepTooSmallCounter >= 2 && μ > μ_min) {
+      UpdateBarrierParameterAndResetFilter();
+      continue;
     }
   }
 }  // NOLINT(readability/fn_size)

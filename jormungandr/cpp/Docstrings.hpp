@@ -859,10 +859,6 @@ static const char *__doc_sleipnir_SolverExitCondition_kMaxIterationsExceeded =
 R"doc(The solver returned its solution so far after exceeding the maximum
 number of iterations.)doc";
 
-static const char *__doc_sleipnir_SolverExitCondition_kMaxSearchDirectionTooSmall =
-R"doc(The solver failed to reach the desired tolerance due to the maximum
-search direction becoming too small.)doc";
-
 static const char *__doc_sleipnir_SolverExitCondition_kMaxWallClockTimeExceeded =
 R"doc(The solver returned its solution so far after exceeding the maximum
 elapsed wall clock time.)doc";
