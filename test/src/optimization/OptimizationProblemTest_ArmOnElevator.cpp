@@ -11,7 +11,7 @@
 #include <units/velocity.h>
 
 // This problem tests the case where regularization fails
-TEST_CASE("Arm on elevator", "[OptimizationProblem]") {
+TEST_CASE("OptimizationProblem - Arm on elevator", "[OptimizationProblem]") {
   constexpr int N = 800;
 
   constexpr auto kElevatorStartHeight = 1_m;

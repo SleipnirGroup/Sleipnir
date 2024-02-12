@@ -35,7 +35,7 @@ inline void IntrusiveSharedPtrDecRefCount(Mock* obj) {
 #pragma GCC diagnostic pop
 #endif  // __GNUC__ == 12 && !defined(__clang__)
 
-TEST_CASE("Traits", "[IntrusiveSharedPtr]") {
+TEST_CASE("IntrusiveSharedPtr - Traits", "[IntrusiveSharedPtr]") {
   using Ptr = sleipnir::IntrusiveSharedPtr<Mock>;
 
   CHECK(sizeof(sleipnir::IntrusiveSharedPtr<Mock>*) == sizeof(Ptr));
@@ -74,7 +74,7 @@ TEST_CASE("Traits", "[IntrusiveSharedPtr]") {
   CHECK_FALSE(std::is_trivially_constructible_v<Ptr, std::nullptr_t>);
 }
 
-TEST_CASE("Default construction", "[IntrusiveSharedPtr]") {
+TEST_CASE("IntrusiveSharedPtr - Default construction", "[IntrusiveSharedPtr]") {
   sleipnir::IntrusiveSharedPtr<Mock> ptr;
 
   CHECK(ptr.Get() == nullptr);
@@ -82,7 +82,8 @@ TEST_CASE("Default construction", "[IntrusiveSharedPtr]") {
   CHECK(ptr.operator->() == nullptr);
 }
 
-TEST_CASE("Constructed from nullptr", "[IntrusiveSharedPtr]") {
+TEST_CASE("IntrusiveSharedPtr - Constructed from nullptr",
+          "[IntrusiveSharedPtr]") {
   sleipnir::IntrusiveSharedPtr<Mock> ptr{nullptr};
 
   CHECK(ptr.Get() == nullptr);
@@ -90,7 +91,8 @@ TEST_CASE("Constructed from nullptr", "[IntrusiveSharedPtr]") {
   CHECK(ptr.operator->() == nullptr);
 }
 
-TEST_CASE("Compare to empty IntrusiveSharedPtr", "[IntrusiveSharedPtr]") {
+TEST_CASE("IntrusiveSharedPtr - Compare to empty IntrusiveSharedPtr",
+          "[IntrusiveSharedPtr]") {
   sleipnir::IntrusiveSharedPtr<Mock> ptr1;
   sleipnir::IntrusiveSharedPtr<Mock> ptr2;
 
@@ -98,8 +100,9 @@ TEST_CASE("Compare to empty IntrusiveSharedPtr", "[IntrusiveSharedPtr]") {
   CHECK_FALSE(ptr1 != ptr2);
 }
 
-TEST_CASE("Compare to IntrusiveSharedPtr created from nullptr",
-          "[IntrusiveSharedPtr]") {
+TEST_CASE(
+    "IntrusiveSharedPtr - Compare to IntrusiveSharedPtr created from nullptr",
+    "[IntrusiveSharedPtr]") {
   sleipnir::IntrusiveSharedPtr<Mock> ptr1;
   sleipnir::IntrusiveSharedPtr<Mock> ptr2(nullptr);
 
@@ -110,7 +113,7 @@ TEST_CASE("Compare to IntrusiveSharedPtr created from nullptr",
   CHECK_FALSE(ptr2 != ptr1);
 }
 
-TEST_CASE("Attach and ref", "[IntrusiveSharedPtr]") {
+TEST_CASE("IntrusiveSharedPtr - Attach and ref", "[IntrusiveSharedPtr]") {
   auto object = new Mock{};
 
   // Attach
@@ -128,7 +131,7 @@ TEST_CASE("Attach and ref", "[IntrusiveSharedPtr]") {
   CHECK(ptr2.operator->() == object);
 }
 
-TEST_CASE("Copy and assignment", "[IntrusiveSharedPtr]") {
+TEST_CASE("IntrusiveSharedPtr - Copy and assignment", "[IntrusiveSharedPtr]") {
   auto object = new Mock{};
   sleipnir::IntrusiveSharedPtr<Mock> ptr1{object};
   CHECK(object->refCount == 1u);
@@ -140,7 +143,7 @@ TEST_CASE("Copy and assignment", "[IntrusiveSharedPtr]") {
   CHECK(object->refCount == 3u);
 }
 
-TEST_CASE("Move", "[IntrusiveSharedPtr]") {
+TEST_CASE("IntrusiveSharedPtr - Move", "[IntrusiveSharedPtr]") {
   auto object = new Mock{};
 
   sleipnir::IntrusiveSharedPtr<Mock> ptr1{object};
@@ -155,7 +158,7 @@ TEST_CASE("Move", "[IntrusiveSharedPtr]") {
   CHECK(object->refCount == 1u);
 }
 
-TEST_CASE("Self-assignment", "[IntrusiveSharedPtr]") {
+TEST_CASE("IntrusiveSharedPtr - Self-assignment", "[IntrusiveSharedPtr]") {
   auto object = new Mock{};
 
   sleipnir::IntrusiveSharedPtr<Mock> ptr1{object};

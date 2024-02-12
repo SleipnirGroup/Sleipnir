@@ -13,7 +13,7 @@
 
 #include "Range.hpp"
 
-TEST_CASE("Linear", "[Hessian]") {
+TEST_CASE("Hessian - Linear", "[Hessian]") {
   // y = x
   sleipnir::VariableMatrix x{1};
   x(0).SetValue(3);
@@ -28,7 +28,7 @@ TEST_CASE("Linear", "[Hessian]") {
   CHECK(H(0, 0) == 0.0);
 }
 
-TEST_CASE("Quadratic", "[Hessian]") {
+TEST_CASE("Hessian - Quadratic", "[Hessian]") {
   // y = x²
   // y = x * x
   sleipnir::VariableMatrix x{1};
@@ -48,7 +48,7 @@ TEST_CASE("Quadratic", "[Hessian]") {
   CHECK(H(0, 0) == 2.0);
 }
 
-TEST_CASE("Sum", "[Hessian]") {
+TEST_CASE("Hessian - Sum", "[Hessian]") {
   sleipnir::Variable y;
   Eigen::VectorXd g;
   Eigen::MatrixXd H;
@@ -76,7 +76,7 @@ TEST_CASE("Sum", "[Hessian]") {
   }
 }
 
-TEST_CASE("Sum of products", "[Hessian]") {
+TEST_CASE("Hessian - Sum of products", "[Hessian]") {
   sleipnir::Variable y;
   Eigen::VectorXd g;
   Eigen::MatrixXd H;
@@ -108,7 +108,7 @@ TEST_CASE("Sum of products", "[Hessian]") {
   }
 }
 
-TEST_CASE("Product of sines", "[Hessian]") {
+TEST_CASE("Hessian - Product of sines", "[Hessian]") {
   sleipnir::Variable y;
   Eigen::VectorXd g;
   Eigen::MatrixXd H;
@@ -150,7 +150,7 @@ TEST_CASE("Product of sines", "[Hessian]") {
   }
 }
 
-TEST_CASE("Sum of squared residuals", "[Hessian]") {
+TEST_CASE("Hessian - Sum of squared residuals", "[Hessian]") {
   sleipnir::Variable y;
   Eigen::VectorXd g;
   Eigen::MatrixXd H;
@@ -190,7 +190,7 @@ TEST_CASE("Sum of squared residuals", "[Hessian]") {
   }
 }
 
-TEST_CASE("Sum of squares", "[Hessian]") {
+TEST_CASE("Hessian - Sum of squares", "[Hessian]") {
   sleipnir::VariableMatrix r{4};
   r(0).SetValue(25.0);
   r(1).SetValue(10.0);
@@ -219,7 +219,7 @@ TEST_CASE("Sum of squares", "[Hessian]") {
   }
 }
 
-TEST_CASE("Rosenbrock", "[Hessian]") {
+TEST_CASE("Hessian - Rosenbrock", "[Hessian]") {
   sleipnir::VariableMatrix input{2};
   auto& x = input(0);
   auto& y = input(1);
@@ -241,7 +241,7 @@ TEST_CASE("Rosenbrock", "[Hessian]") {
   }
 }
 
-TEST_CASE("Reuse", "[Hessian]") {
+TEST_CASE("Hessian - Reuse", "[Hessian]") {
   sleipnir::Variable y;
   sleipnir::VariableMatrix x{1};
 

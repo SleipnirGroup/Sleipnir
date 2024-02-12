@@ -6,7 +6,7 @@
 #include <fmt/format.h>
 #include <sleipnir/util/Formatters.hpp>
 
-TEST_CASE("Eigen", "[formatters]") {
+TEST_CASE("Formatters - Eigen", "[formatters]") {
   Eigen::Matrix<double, 3, 2> A{{0.0, 1.0}, {2.0, 3.0}, {4.0, 5.0}};
   CHECK(fmt::format("{:f}", A) ==
         "  0.000000  1.000000\n"
@@ -33,11 +33,11 @@ TEST_CASE("Eigen", "[formatters]") {
         "  4.000000  5.000000");
 }
 
-TEST_CASE("Variable", "[formatters]") {
+TEST_CASE("Formatters - Variable", "[formatters]") {
   CHECK(fmt::format("{:f}", sleipnir::Variable{4.0}) == "4.000000");
 }
 
-TEST_CASE("VariableMatrix", "[formatters]") {
+TEST_CASE("Formatters - VariableMatrix", "[formatters]") {
   Eigen::Matrix<double, 3, 2> A{{0.0, 1.0}, {2.0, 3.0}, {4.0, 5.0}};
 
   sleipnir::VariableMatrix B{3, 2};

@@ -19,7 +19,7 @@
 #include "CartPoleUtil.hpp"
 #include "RK4.hpp"
 
-TEST_CASE("Cart-pole", "[OptimizationProblem]") {
+TEST_CASE("OptimizationProblem - Cart-pole", "[OptimizationProblem]") {
   constexpr auto T = 5_s;
   constexpr units::second_t dt = 50_ms;
   constexpr int N = T / dt;

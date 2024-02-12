@@ -3,7 +3,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 
-TEST_CASE("Empty", "[TrivialProblem]") {
+TEST_CASE("TrivialProblem - Empty", "[TrivialProblem]") {
   sleipnir::OptimizationProblem problem;
 
   auto status = problem.Solve({.diagnostics = true});
@@ -14,7 +14,7 @@ TEST_CASE("Empty", "[TrivialProblem]") {
   CHECK(status.exitCondition == sleipnir::SolverExitCondition::kSuccess);
 }
 
-TEST_CASE("No cost, unconstrained", "[TrivialProblem]") {
+TEST_CASE("TrivialProblem - No cost, unconstrained", "[TrivialProblem]") {
   {
     sleipnir::OptimizationProblem problem;
 

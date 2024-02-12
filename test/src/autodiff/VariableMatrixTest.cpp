@@ -8,7 +8,8 @@
 #include <sleipnir/autodiff/VariableMatrix.hpp>
 #include <sleipnir/optimization/Constraints.hpp>
 
-TEST_CASE("Construct from Eigen::MatrixBase", "[VariableMatrix]") {
+TEST_CASE("VariableMatrix - Construct from Eigen::MatrixBase",
+          "[VariableMatrix]") {
   sleipnir::VariableMatrix mat{
       Eigen::MatrixXd{{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}}};
 
@@ -16,14 +17,15 @@ TEST_CASE("Construct from Eigen::MatrixBase", "[VariableMatrix]") {
   CHECK(mat.Value() == expected);
 }
 
-TEST_CASE("Construct from Eigen::DiagonalBase", "[VariableMatrix]") {
+TEST_CASE("VariableMatrix - Construct from Eigen::DiagonalBase",
+          "[VariableMatrix]") {
   sleipnir::VariableMatrix mat{Eigen::VectorXd{{1.0, 2.0, 3.0}}.asDiagonal()};
 
   Eigen::MatrixXd expected{{1.0, 0.0, 0.0}, {0.0, 2.0, 0.0}, {0.0, 0.0, 3.0}};
   CHECK(mat.Value() == expected);
 }
 
-TEST_CASE("Assignment to default", "[VariableMatrix]") {
+TEST_CASE("VariableMatrix - Assignment to default", "[VariableMatrix]") {
   sleipnir::VariableMatrix mat;
 
   CHECK(mat.Rows() == 0);
@@ -49,7 +51,7 @@ TEST_CASE("Assignment to default", "[VariableMatrix]") {
   CHECK(mat(1, 1) == 4.0);
 }
 
-TEST_CASE("Assignment aliasing", "[VariableMatrix]") {
+TEST_CASE("VariableMatrix - Assignment aliasing", "[VariableMatrix]") {
   sleipnir::VariableMatrix A{{1.0, 2.0}, {3.0, 4.0}};
   sleipnir::VariableMatrix B{{5.0, 6.0}, {7.0, 8.0}};
 
@@ -70,7 +72,7 @@ TEST_CASE("Assignment aliasing", "[VariableMatrix]") {
   CHECK(B == expectedB);
 }
 
-TEST_CASE("Block() member function", "[VariableMatrix]") {
+TEST_CASE("VariableMatrix - Block() member function", "[VariableMatrix]") {
   sleipnir::VariableMatrix A{{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}, {7.0, 8.0, 9.0}};
 
   // Block assignment
@@ -88,7 +90,7 @@ TEST_CASE("Block() member function", "[VariableMatrix]") {
   CHECK(A.Value() == expected2);
 }
 
-TEST_CASE("Iterators", "[VariableMatrix]") {
+TEST_CASE("VariableMatrix - Iterators", "[VariableMatrix]") {
   sleipnir::VariableMatrix A{{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}, {7.0, 8.0, 9.0}};
 
   // VariableMatrix iterator
@@ -130,7 +132,7 @@ TEST_CASE("Iterators", "[VariableMatrix]") {
   }
 }
 
-TEST_CASE("CwiseTransform()", "[VariableMatrix]") {
+TEST_CASE("VariableMatrix - CwiseTransform()", "[VariableMatrix]") {
   // VariableMatrix CwiseTransform
   sleipnir::VariableMatrix A{{-2.0, -3.0, -4.0}, {-5.0, -6.0, -7.0}};
 
@@ -155,7 +157,7 @@ TEST_CASE("CwiseTransform()", "[VariableMatrix]") {
   CHECK(result2.Value() == expected2);
 }
 
-TEST_CASE("Zero() static function", "[VariableMatrix]") {
+TEST_CASE("VariableMatrix - Zero() static function", "[VariableMatrix]") {
   auto A = sleipnir::VariableMatrix::Zero(2, 3);
 
   for (const auto& elem : A) {
@@ -163,7 +165,7 @@ TEST_CASE("Zero() static function", "[VariableMatrix]") {
   }
 }
 
-TEST_CASE("Ones() static function", "[VariableMatrix]") {
+TEST_CASE("VariableMatrix - Ones() static function", "[VariableMatrix]") {
   auto A = sleipnir::VariableMatrix::Ones(2, 3);
 
   for (const auto& elem : A) {
@@ -171,7 +173,7 @@ TEST_CASE("Ones() static function", "[VariableMatrix]") {
   }
 }
 
-TEST_CASE("CwiseReduce()", "[VariableMatrix]") {
+TEST_CASE("VariableMatrix - CwiseReduce()", "[VariableMatrix]") {
   sleipnir::VariableMatrix A{{2.0, 3.0, 4.0}, {5.0, 6.0, 7.0}};
   sleipnir::VariableMatrix B{{8.0, 9.0, 10.0}, {11.0, 12.0, 13.0}};
   sleipnir::VariableMatrix result =
@@ -181,7 +183,7 @@ TEST_CASE("CwiseReduce()", "[VariableMatrix]") {
   CHECK(result.Value() == expected);
 }
 
-TEST_CASE("Block() free function", "[VariableMatrix]") {
+TEST_CASE("VariableMatrix - Block() free function", "[VariableMatrix]") {
   sleipnir::VariableMatrix A{{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}};
   sleipnir::VariableMatrix B{{7.0}, {8.0}};
 

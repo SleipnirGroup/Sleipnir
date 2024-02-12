@@ -4,7 +4,7 @@
 
 #include "util/ScopeExit.hpp"
 
-TEST_CASE("Scope exit", "[scope_exit]") {
+TEST_CASE("scope_exit - Scope exit", "[scope_exit]") {
   int exitCount = 0;
 
   {
@@ -16,7 +16,7 @@ TEST_CASE("Scope exit", "[scope_exit]") {
   CHECK(exitCount == 1);
 }
 
-TEST_CASE("Release", "[scope_exit]") {
+TEST_CASE("scope_exit - Release", "[scope_exit]") {
   int exitCount = 0;
 
   {

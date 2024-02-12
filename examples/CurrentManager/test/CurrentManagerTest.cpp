@@ -7,7 +7,7 @@
 
 #include "CurrentManager.hpp"
 
-TEST_CASE("Enough current", "[CurrentManager]") {
+TEST_CASE("CurrentManager - Enough current", "[CurrentManager]") {
   CurrentManager manager{std::array{1_A, 5_A, 10_A, 5_A}, 40_A};
 
   auto currents = manager.Calculate(std::array{25_A, 10_A, 5_A, 0_A});
@@ -18,7 +18,7 @@ TEST_CASE("Enough current", "[CurrentManager]") {
   CHECK(currents[3].value() == Catch::Approx(0.0).margin(1e-3));
 }
 
-TEST_CASE("Not enough current", "[CurrentManager]") {
+TEST_CASE("CurrentManager - Not enough current", "[CurrentManager]") {
   CurrentManager manager{std::array{1_A, 5_A, 10_A, 5_A}, 40_A};
 
   auto currents = manager.Calculate(std::array{30_A, 10_A, 5_A, 0_A});
