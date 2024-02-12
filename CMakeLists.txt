@@ -346,8 +346,8 @@ if(BUILD_PYTHON)
     )
 
     # Generate stubs for the Python module
-    # FIXME: pybind11-stubgen fails in Windows and macOS arm64 CI with
-    #        "ImportError: No module named _jormungandr"
+    # pybind11-stubgen supports Linux and macOS x86_64 but not Windows or macOS
+    # arm64
     if(
         NOT (
             WIN32
