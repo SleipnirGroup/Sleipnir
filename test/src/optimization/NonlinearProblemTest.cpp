@@ -7,7 +7,6 @@
 #include <fmt/core.h>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 
-#include "CmdlineArguments.hpp"
 #include "Range.hpp"
 
 TEST_CASE("Quartic", "[NonlinearProblem]") {
@@ -20,8 +19,7 @@ TEST_CASE("Quartic", "[NonlinearProblem]") {
 
   problem.SubjectTo(x >= 1);
 
-  auto status =
-      problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
+  auto status = problem.Solve({.diagnostics = true});
 
   CHECK(status.costFunctionType == sleipnir::ExpressionType::kNonlinear);
   CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kNone);
@@ -48,8 +46,7 @@ TEST_CASE("Rosenbrock with cubic and line constraint", "[NonlinearProblem]") {
       problem.SubjectTo(sleipnir::pow(x - 1, 3) - y + 1 <= 0);
       problem.SubjectTo(x + y - 2 <= 0);
 
-      auto status = problem.Solve(
-          {.diagnostics = Argv().Contains("--enable-diagnostics")});
+      auto status = problem.Solve({.diagnostics = true});
 
       CHECK(status.costFunctionType == sleipnir::ExpressionType::kNonlinear);
       CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kNone);
@@ -89,8 +86,7 @@ TEST_CASE("Rosenbrock with disk constraint", "[NonlinearProblem]") {
 
       problem.SubjectTo(sleipnir::pow(x, 2) + sleipnir::pow(y, 2) <= 2);
 
-      auto status = problem.Solve(
-          {.diagnostics = Argv().Contains("--enable-diagnostics")});
+      auto status = problem.Solve({.diagnostics = true});
 
       CHECK(status.costFunctionType == sleipnir::ExpressionType::kNonlinear);
       CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kNone);
@@ -121,8 +117,7 @@ TEST_CASE("Narrow feasible region", "[NonlinearProblem]") {
 
   problem.SubjectTo(y == -x + 5.0);
 
-  auto status =
-      problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
+  auto status = problem.Solve({.diagnostics = true});
 
   CHECK(status.costFunctionType == sleipnir::ExpressionType::kNonlinear);
   CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kLinear);

@@ -3,13 +3,10 @@
 #include <catch2/catch_test_macros.hpp>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 
-#include "CmdlineArguments.hpp"
-
 TEST_CASE("Empty", "[TrivialProblem]") {
   sleipnir::OptimizationProblem problem;
 
-  auto status =
-      problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
+  auto status = problem.Solve({.diagnostics = true});
 
   CHECK(status.costFunctionType == sleipnir::ExpressionType::kNone);
   CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kNone);
@@ -23,8 +20,7 @@ TEST_CASE("No cost, unconstrained", "[TrivialProblem]") {
 
     auto X = problem.DecisionVariable(2, 3);
 
-    auto status =
-        problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
+    auto status = problem.Solve({.diagnostics = true});
 
     CHECK(status.costFunctionType == sleipnir::ExpressionType::kNone);
     CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kNone);
@@ -44,8 +40,7 @@ TEST_CASE("No cost, unconstrained", "[TrivialProblem]") {
     auto X = problem.DecisionVariable(2, 3);
     X.SetValue(Eigen::Matrix<double, 2, 3>{{1.0, 1.0, 1.0}, {1.0, 1.0, 1.0}});
 
-    auto status =
-        problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
+    auto status = problem.Solve({.diagnostics = true});
 
     CHECK(status.costFunctionType == sleipnir::ExpressionType::kNone);
     CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kNone);
