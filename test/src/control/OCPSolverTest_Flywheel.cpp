@@ -147,7 +147,7 @@ void TestFlywheel(std::string testName, Eigen::Matrix<double, 1, 1> A,
   }
 }
 
-TEST_CASE("Flywheel (explicit)", "[OCPSolver]") {
+TEST_CASE("OCPSolver - Flywheel (explicit)", "[OCPSolver]") {
   Eigen::Matrix<double, 1, 1> A{-1.0};
   Eigen::Matrix<double, 1, 1> B{1.0};
 
@@ -166,7 +166,7 @@ TEST_CASE("Flywheel (explicit)", "[OCPSolver]") {
                sleipnir::TranscriptionMethod::kSingleShooting);
 }
 
-TEST_CASE("Flywheel (discrete)", "[OCPSolver]") {
+TEST_CASE("OCPSolver - Flywheel (discrete)", "[OCPSolver]") {
   Eigen::Matrix<double, 1, 1> A{-1.0};
   Eigen::Matrix<double, 1, 1> B{1.0};
   constexpr units::second_t dt = 5_ms;

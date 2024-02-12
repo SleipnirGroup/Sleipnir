@@ -4,7 +4,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 
-TEST_CASE("Maximize", "[LinearProblem]") {
+TEST_CASE("LinearProblem - Maximize", "[LinearProblem]") {
   sleipnir::OptimizationProblem problem;
 
   auto x = problem.DecisionVariable();

@@ -19,7 +19,7 @@
 #include "DifferentialDriveUtil.hpp"
 #include "RK4.hpp"
 
-TEST_CASE("Differential drive", "[OCPSolver]") {
+TEST_CASE("OCPSolver - Differential drive", "[OCPSolver]") {
   auto start = std::chrono::system_clock::now();
 
   constexpr int N = 50;

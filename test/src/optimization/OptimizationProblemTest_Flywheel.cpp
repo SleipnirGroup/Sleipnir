@@ -22,7 +22,7 @@ bool Near(double expected, double actual, double tolerance) {
 }
 }  // namespace
 
-TEST_CASE("Flywheel", "[OptimizationProblem]") {
+TEST_CASE("OptimizationProblem - Flywheel", "[OptimizationProblem]") {
   auto start = std::chrono::system_clock::now();
 
   constexpr auto T = 5_s;

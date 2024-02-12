@@ -8,7 +8,8 @@
 #include <sleipnir/autodiff/VariableMatrix.hpp>
 #include <sleipnir/optimization/Constraints.hpp>
 
-TEST_CASE("Equality constraint boolean comparison", "[Constraints]") {
+TEST_CASE("Constraints - Equality constraint boolean comparison",
+          "[Constraints]") {
   using sleipnir::Variable;
   using sleipnir::VariableMatrix;
 
@@ -90,7 +91,8 @@ TEST_CASE("Equality constraint boolean comparison", "[Constraints]") {
 
 // For the purposes of optimization, a < constraint is treated the same as a <=
 // constraint
-TEST_CASE("Inequality constraint boolean comparisons", "[Constraints]") {
+TEST_CASE("Constraints - Inequality constraint boolean comparisons",
+          "[Constraints]") {
   using sleipnir::Variable;
   using sleipnir::VariableMatrix;
 

@@ -4,7 +4,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 
-TEST_CASE("Unconstrained 1D", "[QuadraticProblem]") {
+TEST_CASE("QuadraticProblem - Unconstrained 1D", "[QuadraticProblem]") {
   sleipnir::OptimizationProblem problem;
 
   auto x = problem.DecisionVariable();
@@ -22,7 +22,7 @@ TEST_CASE("Unconstrained 1D", "[QuadraticProblem]") {
   CHECK(x.Value() == Catch::Approx(3.0).margin(1e-6));
 }
 
-TEST_CASE("Unconstrained 2D", "[QuadraticProblem]") {
+TEST_CASE("QuadraticProblem - Unconstrained 2D", "[QuadraticProblem]") {
   {
     sleipnir::OptimizationProblem problem;
 
@@ -65,7 +65,7 @@ TEST_CASE("Unconstrained 2D", "[QuadraticProblem]") {
   }
 }
 
-TEST_CASE("Equality-constrained", "[QuadraticProblem]") {
+TEST_CASE("QuadraticProblem - Equality-constrained", "[QuadraticProblem]") {
   // Maximize xy subject to x + 3y = 36.
   //
   // Maximize f(x,y) = xy

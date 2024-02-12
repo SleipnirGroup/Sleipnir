@@ -8,18 +8,18 @@
 using sleipnir::detail::MakeExpressionPtr;
 using sleipnir::detail::Zero;
 
-TEST_CASE("Default constructor", "[Expression]") {
+TEST_CASE("Expression - Default constructor", "[Expression]") {
   auto expr = MakeExpressionPtr();
 
   CHECK(0.0 == expr->value);
   CHECK(sleipnir::ExpressionType::kConstant == expr->type);
 }
 
-TEST_CASE("Zero", "[Expression]") {
+TEST_CASE("Expression - Zero", "[Expression]") {
   CHECK(Zero()->IsConstant(0.0));
 }
 
-TEST_CASE("Prune multiply", "[Expression]") {
+TEST_CASE("Expression - Prune multiply", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
   auto one = MakeExpressionPtr(1.0);
   auto two = MakeExpressionPtr(2.0);
@@ -32,7 +32,7 @@ TEST_CASE("Prune multiply", "[Expression]") {
   CHECK(two * one == two);
 }
 
-TEST_CASE("Prune divide", "[Expression]") {
+TEST_CASE("Expression - Prune divide", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
   auto one = MakeExpressionPtr(1.0);
   auto two = MakeExpressionPtr(2.0);
@@ -42,7 +42,7 @@ TEST_CASE("Prune divide", "[Expression]") {
   CHECK(two / one == two);
 }
 
-TEST_CASE("Prune binary plus", "[Expression]") {
+TEST_CASE("Expression - Prune binary plus", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
   auto one = MakeExpressionPtr(1.0);
   auto two = MakeExpressionPtr(2.0);
@@ -54,7 +54,7 @@ TEST_CASE("Prune binary plus", "[Expression]") {
   CHECK(two + zero == two);
 }
 
-TEST_CASE("Prune binary minus", "[Expression]") {
+TEST_CASE("Expression - Prune binary minus", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
   auto one = MakeExpressionPtr(1.0);
   auto two = MakeExpressionPtr(2.0);
@@ -64,7 +64,7 @@ TEST_CASE("Prune binary minus", "[Expression]") {
   CHECK(two - zero == two);
 }
 
-TEST_CASE("Prune unary plus", "[Expression]") {
+TEST_CASE("Expression - Prune unary plus", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
   auto one = MakeExpressionPtr(1.0);
   auto two = MakeExpressionPtr(2.0);
@@ -74,37 +74,37 @@ TEST_CASE("Prune unary plus", "[Expression]") {
   CHECK(+two == two);
 }
 
-TEST_CASE("Prune unary minus", "[Expression]") {
+TEST_CASE("Expression - Prune unary minus", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
 
   CHECK(-zero == Zero());
 }
 
-TEST_CASE("Prune abs()", "[Expression]") {
+TEST_CASE("Expression - Prune abs()", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
 
   CHECK(abs(zero) == Zero());  // NOLINT
 }
 
-TEST_CASE("Prune acos()", "[Expression]") {
+TEST_CASE("Expression - Prune acos()", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
 
   CHECK(acos(zero)->value == std::numbers::pi / 2.0);  // NOLINT
 }
 
-TEST_CASE("Prune asin()", "[Expression]") {
+TEST_CASE("Expression - Prune asin()", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
 
   CHECK(asin(zero) == Zero());  // NOLINT
 }
 
-TEST_CASE("Prune atan()", "[Expression]") {
+TEST_CASE("Expression - Prune atan()", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
 
   CHECK(atan(zero) == Zero());  // NOLINT
 }
 
-TEST_CASE("Prune atan2()", "[Expression]") {
+TEST_CASE("Expression - Prune atan2()", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
   auto one = MakeExpressionPtr(1.0);
 
@@ -112,31 +112,31 @@ TEST_CASE("Prune atan2()", "[Expression]") {
   CHECK(atan2(one, zero)->value == std::numbers::pi / 2.0);  // NOLINT
 }
 
-TEST_CASE("Prune cos()", "[Expression]") {
+TEST_CASE("Expression - Prune cos()", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
 
   CHECK(cos(zero)->value == 1.0);  // NOLINT
 }
 
-TEST_CASE("Prune cosh()", "[Expression]") {
+TEST_CASE("Expression - Prune cosh()", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
 
   CHECK(cosh(zero)->value == 1.0);  // NOLINT
 }
 
-TEST_CASE("Prune erf()", "[Expression]") {
+TEST_CASE("Expression - Prune erf()", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
 
   CHECK(erf(zero) == Zero());  // NOLINT
 }
 
-TEST_CASE("Prune exp()", "[Expression]") {
+TEST_CASE("Expression - Prune exp()", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
 
   CHECK(exp(zero)->value == 1.0);  // NOLINT
 }
 
-TEST_CASE("Prune hypot()", "[Expression]") {
+TEST_CASE("Expression - Prune hypot()", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
   auto one = MakeExpressionPtr(1.0);
 
@@ -145,19 +145,19 @@ TEST_CASE("Prune hypot()", "[Expression]") {
   CHECK(hypot(one, zero) == one);      // NOLINT
 }
 
-TEST_CASE("Prune log()", "[Expression]") {
+TEST_CASE("Expression - Prune log()", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
 
   CHECK(log(zero) == Zero());  // NOLINT
 }
 
-TEST_CASE("Prune log10()", "[Expression]") {
+TEST_CASE("Expression - Prune log10()", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
 
   CHECK(log10(zero) == Zero());  // NOLINT
 }
 
-TEST_CASE("Prune pow()", "[Expression]") {
+TEST_CASE("Expression - Prune pow()", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
   auto one = MakeExpressionPtr(1.0);
   auto two = MakeExpressionPtr(2.0);
@@ -172,25 +172,25 @@ TEST_CASE("Prune pow()", "[Expression]") {
   CHECK(pow(two, one) == two);          // NOLINT
 }
 
-TEST_CASE("Prune sign()", "[Expression]") {
+TEST_CASE("Expression - Prune sign()", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
 
   CHECK(sign(zero) == Zero());
 }
 
-TEST_CASE("Prune sin()", "[Expression]") {
+TEST_CASE("Expression - Prune sin()", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
 
   CHECK(sin(zero) == Zero());  // NOLINT
 }
 
-TEST_CASE("Prune sinh()", "[Expression]") {
+TEST_CASE("Expression - Prune sinh()", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
 
   CHECK(sinh(zero) == Zero());
 }
 
-TEST_CASE("Prune sqrt()", "[Expression]") {
+TEST_CASE("Expression - Prune sqrt()", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
   auto one = MakeExpressionPtr(1.0);
 
@@ -198,13 +198,13 @@ TEST_CASE("Prune sqrt()", "[Expression]") {
   CHECK(sqrt(one) == one);      // NOLINT
 }
 
-TEST_CASE("Prune tan()", "[Expression]") {
+TEST_CASE("Expression - Prune tan()", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
 
   CHECK(tan(zero) == Zero());  // NOLINT
 }
 
-TEST_CASE("Prune tanh()", "[Expression]") {
+TEST_CASE("Expression - Prune tanh()", "[Expression]") {
   auto zero = MakeExpressionPtr(0.0);
 
   CHECK(tanh(zero) == Zero());

@@ -5,7 +5,8 @@
 
 // These tests ensure coverage of the off-nominal solver exit conditions
 
-TEST_CASE("Callback requested stop", "[SolverExitCondition]") {
+TEST_CASE("SolverExitCondition - Callback requested stop",
+          "[SolverExitCondition]") {
   sleipnir::OptimizationProblem problem;
 
   auto x = problem.DecisionVariable();
@@ -37,7 +38,7 @@ TEST_CASE("Callback requested stop", "[SolverExitCondition]") {
         sleipnir::SolverExitCondition::kCallbackRequestedStop);
 }
 
-TEST_CASE("Too few DOFs", "[SolverExitCondition]") {
+TEST_CASE("SolverExitCondition - Too few DOFs", "[SolverExitCondition]") {
   sleipnir::OptimizationProblem problem;
 
   auto x = problem.DecisionVariable();
@@ -57,7 +58,7 @@ TEST_CASE("Too few DOFs", "[SolverExitCondition]") {
   CHECK(status.exitCondition == sleipnir::SolverExitCondition::kTooFewDOFs);
 }
 
-TEST_CASE("Locally infeasible", "[SolverExitCondition]") {
+TEST_CASE("SolverExitCondition - Locally infeasible", "[SolverExitCondition]") {
   // Equality constraints
   {
     sleipnir::OptimizationProblem problem;
@@ -101,7 +102,7 @@ TEST_CASE("Locally infeasible", "[SolverExitCondition]") {
   }
 }
 
-TEST_CASE("Diverging iterates", "[SolverExitCondition]") {
+TEST_CASE("SolverExitCondition - Diverging iterates", "[SolverExitCondition]") {
   sleipnir::OptimizationProblem problem;
 
   auto x = problem.DecisionVariable();
@@ -116,7 +117,8 @@ TEST_CASE("Diverging iterates", "[SolverExitCondition]") {
         sleipnir::SolverExitCondition::kDivergingIterates);
 }
 
-TEST_CASE("Max iterations exceeded", "[SolverExitCondition]") {
+TEST_CASE("SolverExitCondition - Max iterations exceeded",
+          "[SolverExitCondition]") {
   sleipnir::OptimizationProblem problem;
 
   auto x = problem.DecisionVariable();
@@ -131,7 +133,7 @@ TEST_CASE("Max iterations exceeded", "[SolverExitCondition]") {
         sleipnir::SolverExitCondition::kMaxIterationsExceeded);
 }
 
-TEST_CASE("Timeout", "[SolverExitCondition]") {
+TEST_CASE("SolverExitCondition - Timeout", "[SolverExitCondition]") {
   using namespace std::chrono_literals;
 
   sleipnir::OptimizationProblem problem;

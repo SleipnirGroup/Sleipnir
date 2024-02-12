@@ -3,7 +3,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <sleipnir/autodiff/Jacobian.hpp>
 
-TEST_CASE("y = x", "[Jacobian]") {
+TEST_CASE("Jacobian - y = x", "[Jacobian]") {
   sleipnir::VariableMatrix y{3};
   sleipnir::VariableMatrix x{3};
   x(0).SetValue(1);
@@ -29,7 +29,7 @@ TEST_CASE("y = x", "[Jacobian]") {
   }
 }
 
-TEST_CASE("y = 3x", "[Jacobian]") {
+TEST_CASE("Jacobian - y = 3x", "[Jacobian]") {
   sleipnir::VariableMatrix y{3};
   sleipnir::VariableMatrix x{3};
   x(0).SetValue(1);
@@ -55,7 +55,7 @@ TEST_CASE("y = 3x", "[Jacobian]") {
   }
 }
 
-TEST_CASE("Products", "[Jacobian]") {
+TEST_CASE("Jacobian - Products", "[Jacobian]") {
   sleipnir::VariableMatrix y{3};
   sleipnir::VariableMatrix x{3};
   x(0).SetValue(1);
@@ -86,7 +86,7 @@ TEST_CASE("Products", "[Jacobian]") {
   }
 }
 
-TEST_CASE("Nested products", "[Jacobian]") {
+TEST_CASE("Jacobian - Nested products", "[Jacobian]") {
   SKIP("Fails");
 
   sleipnir::VariableMatrix z{1};
@@ -126,7 +126,7 @@ TEST_CASE("Nested products", "[Jacobian]") {
   }
 }
 
-TEST_CASE("Non-square", "[Jacobian]") {
+TEST_CASE("Jacobian - Non-square", "[Jacobian]") {
   sleipnir::VariableMatrix y{1};
   sleipnir::VariableMatrix x{3};
   x(0).SetValue(1);
@@ -146,7 +146,7 @@ TEST_CASE("Non-square", "[Jacobian]") {
   CHECK(J(0, 2) == -5.0);
 }
 
-TEST_CASE("Reuse", "[Jacobian]") {
+TEST_CASE("Jacobian - Reuse", "[Jacobian]") {
   sleipnir::VariableMatrix y{1};
   sleipnir::VariableMatrix x{2};
 

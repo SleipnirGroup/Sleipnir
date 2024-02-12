@@ -11,7 +11,7 @@
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 #include <units/time.h>
 
-TEST_CASE("Double integrator", "[OptimizationProblem]") {
+TEST_CASE("OptimizationProblem - Double integrator", "[OptimizationProblem]") {
   auto start = std::chrono::system_clock::now();
 
   constexpr auto T = 3.5_s;

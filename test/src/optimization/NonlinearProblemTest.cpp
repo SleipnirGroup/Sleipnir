@@ -9,7 +9,7 @@
 
 #include "Range.hpp"
 
-TEST_CASE("Quartic", "[NonlinearProblem]") {
+TEST_CASE("NonlinearProblem - Quartic", "[NonlinearProblem]") {
   sleipnir::OptimizationProblem problem;
 
   auto x = problem.DecisionVariable();
@@ -29,7 +29,8 @@ TEST_CASE("Quartic", "[NonlinearProblem]") {
   CHECK(x.Value() == Catch::Approx(1.0).margin(1e-6));
 }
 
-TEST_CASE("Rosenbrock with cubic and line constraint", "[NonlinearProblem]") {
+TEST_CASE("NonlinearProblem - Rosenbrock with cubic and line constraint",
+          "[NonlinearProblem]") {
   // https://en.wikipedia.org/wiki/Test_functions_for_optimization#Test_functions_for_constrained_optimization
   for (auto x0 : Range(-1.5, 1.5, 0.1)) {
     for (auto y0 : Range(-0.5, 2.5, 0.1)) {
@@ -70,7 +71,8 @@ TEST_CASE("Rosenbrock with cubic and line constraint", "[NonlinearProblem]") {
   }
 }
 
-TEST_CASE("Rosenbrock with disk constraint", "[NonlinearProblem]") {
+TEST_CASE("NonlinearProblem - Rosenbrock with disk constraint",
+          "[NonlinearProblem]") {
   // https://en.wikipedia.org/wiki/Test_functions_for_optimization#Test_functions_for_constrained_optimization
   for (auto x0 : Range(-1.5, 1.5, 0.1)) {
     for (auto y0 : Range(-1.5, 1.5, 0.1)) {
@@ -104,7 +106,7 @@ TEST_CASE("Rosenbrock with disk constraint", "[NonlinearProblem]") {
   }
 }
 
-TEST_CASE("Narrow feasible region", "[NonlinearProblem]") {
+TEST_CASE("NonlinearProblem - Narrow feasible region", "[NonlinearProblem]") {
   sleipnir::OptimizationProblem problem;
 
   auto x = problem.DecisionVariable();

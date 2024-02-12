@@ -7,7 +7,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <sleipnir/autodiff/Gradient.hpp>
 
-TEST_CASE("Trivial case", "[Gradient]") {
+TEST_CASE("Gradient - Trivial case", "[Gradient]") {
   sleipnir::Variable a;
   a.SetValue(10);
   sleipnir::Variable b;
@@ -20,7 +20,7 @@ TEST_CASE("Trivial case", "[Gradient]") {
   CHECK(sleipnir::Gradient(c, b).Value().coeff(0) == 0.0);
 }
 
-TEST_CASE("Unary plus", "[Gradient]") {
+TEST_CASE("Gradient - Unary plus", "[Gradient]") {
   sleipnir::Variable a;
   a.SetValue(10);
   sleipnir::Variable c = +a;
@@ -29,7 +29,7 @@ TEST_CASE("Unary plus", "[Gradient]") {
   CHECK(sleipnir::Gradient(c, a).Value().coeff(0) == 1.0);
 }
 
-TEST_CASE("Unary minus", "[Gradient]") {
+TEST_CASE("Gradient - Unary minus", "[Gradient]") {
   sleipnir::Variable a;
   a.SetValue(10);
   sleipnir::Variable c = -a;
@@ -38,7 +38,7 @@ TEST_CASE("Unary minus", "[Gradient]") {
   CHECK(sleipnir::Gradient(c, a).Value().coeff(0) == -1.0);
 }
 
-TEST_CASE("Identical variables", "[Gradient]") {
+TEST_CASE("Gradient - Identical variables", "[Gradient]") {
   sleipnir::Variable a;
   a.SetValue(10);
   sleipnir::Variable x = a;
@@ -51,7 +51,7 @@ TEST_CASE("Identical variables", "[Gradient]") {
         2 * a.Value() * sleipnir::Gradient(x, a).Value().coeff(0) + 1);
 }
 
-TEST_CASE("Elementary", "[Gradient]") {
+TEST_CASE("Gradient - Elementary", "[Gradient]") {
   sleipnir::Variable a;
   a.SetValue(1.0);
   sleipnir::Variable b;
@@ -84,7 +84,7 @@ TEST_CASE("Elementary", "[Gradient]") {
   CHECK(sleipnir::Gradient(c, a).Value().coeff(0) == 1.0);
 }
 
-TEST_CASE("Comparison", "[Gradient]") {
+TEST_CASE("Gradient - Comparison", "[Gradient]") {
   sleipnir::Variable x;
   x.SetValue(10.0);
   sleipnir::Variable a;
@@ -145,7 +145,7 @@ TEST_CASE("Comparison", "[Gradient]") {
   CHECK(a.Value() >= (a - a).Value());
 }
 
-TEST_CASE("Trigonometry", "[Gradient]") {
+TEST_CASE("Gradient - Trigonometry", "[Gradient]") {
   sleipnir::Variable x;
   x.SetValue(0.5);
 
@@ -214,7 +214,7 @@ TEST_CASE("Hyperbolic", "[Gradient]") {
         1.0 / (std::cosh(x.Value()) * std::cosh(x.Value())));
 }
 
-TEST_CASE("Exponential", "[Gradient]") {
+TEST_CASE("Gradient - Exponential", "[Gradient]") {
   sleipnir::Variable x;
   x.SetValue(1.0);
 
@@ -237,7 +237,7 @@ TEST_CASE("Exponential", "[Gradient]") {
   CHECK(g.Value().coeff(0) == std::exp(x.Value()));
 }
 
-TEST_CASE("Power", "[Gradient]") {
+TEST_CASE("Gradient - Power", "[Gradient]") {
   sleipnir::Variable x;
   x.SetValue(1.0);
   sleipnir::Variable a;
@@ -305,7 +305,7 @@ TEST_CASE("Power", "[Gradient]") {
         std::log(x.Value()) * std::pow(x.Value(), y.Value()));
 }
 
-TEST_CASE("abs()", "[Gradient]") {
+TEST_CASE("Gradient - std::abs()", "[Gradient]") {
   sleipnir::Variable x;
   auto g = sleipnir::Gradient(sleipnir::abs(x), x);
 
@@ -325,7 +325,7 @@ TEST_CASE("abs()", "[Gradient]") {
   CHECK(g.Value().coeff(0) == 0.0);
 }
 
-TEST_CASE("atan2()", "[Gradient]") {
+TEST_CASE("Gradient - std::atan2()", "[Gradient]") {
   // Testing atan2 function on (double, var)
   sleipnir::Variable x;
   x.SetValue(1.0);
@@ -368,7 +368,7 @@ TEST_CASE("atan2()", "[Gradient]") {
                              .margin(1e-15));
 }
 
-TEST_CASE("hypot()", "[Gradient]") {
+TEST_CASE("Gradient - std::hypot()", "[Gradient]") {
   // Testing hypot function on (var, double)
   sleipnir::Variable x;
   x.SetValue(1.8);
@@ -421,7 +421,7 @@ TEST_CASE("hypot()", "[Gradient]") {
         (z / std::hypot(x.Value(), y.Value(), z.Value())).Value());
 }
 
-TEST_CASE("Miscellaneous", "[Gradient]") {
+TEST_CASE("Gradient - Miscellaneous", "[Gradient]") {
   sleipnir::Variable x;
 
   // dx/dx
@@ -441,7 +441,7 @@ TEST_CASE("Miscellaneous", "[Gradient]") {
         2 / std::sqrt(std::numbers::pi) * std::exp(-x.Value() * x.Value()));
 }
 
-TEST_CASE("Reuse", "[Gradient]") {
+TEST_CASE("Gradient - Reuse", "[Gradient]") {
   sleipnir::Variable a;
   a.SetValue(10);
 
@@ -460,7 +460,7 @@ TEST_CASE("Reuse", "[Gradient]") {
   CHECK(g.Value().coeff(0) == 10.0);
 }
 
-TEST_CASE("sign()", "[Gradient]") {
+TEST_CASE("Gradient - sign()", "[Gradient]") {
   auto sign = [](double x) {
     if (x < 0.0) {
       return -1.0;

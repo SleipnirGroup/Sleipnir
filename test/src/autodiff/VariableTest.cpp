@@ -3,7 +3,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <sleipnir/autodiff/Variable.hpp>
 
-TEST_CASE("Default constructor", "[Variable]") {
+TEST_CASE("Variable - Default constructor", "[Variable]") {
   sleipnir::Variable a;
 
   CHECK(a.Value() == 0.0);

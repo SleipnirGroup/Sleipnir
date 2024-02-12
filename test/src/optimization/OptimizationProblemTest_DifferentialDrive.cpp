@@ -16,7 +16,7 @@
 #include "DifferentialDriveUtil.hpp"
 #include "RK4.hpp"
 
-TEST_CASE("Differential drive", "[OptimizationProblem]") {
+TEST_CASE("OptimizationProblem - Differential drive", "[OptimizationProblem]") {
   constexpr auto T = 5_s;
   constexpr units::second_t dt = 50_ms;
   constexpr int N = T / dt;

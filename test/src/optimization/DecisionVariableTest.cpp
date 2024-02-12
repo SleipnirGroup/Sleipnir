@@ -4,7 +4,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 
-TEST_CASE("Scalar init assign", "[DecisionVariable]") {
+TEST_CASE("DecisionVariable - Scalar init assign", "[DecisionVariable]") {
   sleipnir::OptimizationProblem problem;
 
   // Scalar zero init
@@ -18,7 +18,7 @@ TEST_CASE("Scalar init assign", "[DecisionVariable]") {
   CHECK(x.Value() == 2.0);
 }
 
-TEST_CASE("Vector init assign", "[DecisionVariable]") {
+TEST_CASE("DecisionVariable - Vector init assign", "[DecisionVariable]") {
   sleipnir::OptimizationProblem problem;
 
   // Vector zero init
@@ -37,7 +37,8 @@ TEST_CASE("Vector init assign", "[DecisionVariable]") {
   CHECK(y.Value(1) == 4.0);
 }
 
-TEST_CASE("Static matrix init assign", "[DecisionVariable]") {
+TEST_CASE("DecisionVariable - Static matrix init assign",
+          "[DecisionVariable]") {
   sleipnir::OptimizationProblem problem;
 
   // Matrix zero init
@@ -86,7 +87,8 @@ TEST_CASE("Static matrix init assign", "[DecisionVariable]") {
   }
 }
 
-TEST_CASE("Dynamic matrix init assign", "[DecisionVariable]") {
+TEST_CASE("DecisionVariable - Dynamic matrix init assign",
+          "[DecisionVariable]") {
   sleipnir::OptimizationProblem problem;
 
   // Matrix zero init
@@ -142,7 +144,7 @@ TEST_CASE("Dynamic matrix init assign", "[DecisionVariable]") {
   }
 }
 
-TEST_CASE("Symmetric matrix", "[DecisionVariable]") {
+TEST_CASE("DecisionVariable - Symmetric matrix", "[DecisionVariable]") {
   sleipnir::OptimizationProblem problem;
 
   // Matrix zero init
