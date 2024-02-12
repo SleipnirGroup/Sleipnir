@@ -28,9 +28,6 @@ void BindSolverExitCondition(py::module_& optimization) {
   e.value("FEASIBILITY_RESTORATION_FAILED",
           SolverExitCondition::kFeasibilityRestorationFailed,
           DOC(sleipnir, SolverExitCondition, kFeasibilityRestorationFailed));
-  e.value("MAX_SEARCH_DIRECTION_TOO_SMALL",
-          SolverExitCondition::kMaxSearchDirectionTooSmall,
-          DOC(sleipnir, SolverExitCondition, kMaxSearchDirectionTooSmall));
   e.value(
       "NONFINITE_INITIAL_COST_OR_CONSTRAINTS",
       SolverExitCondition::kNonfiniteInitialCostOrConstraints,

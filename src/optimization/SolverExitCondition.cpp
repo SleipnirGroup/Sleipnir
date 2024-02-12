@@ -29,9 +29,6 @@ std::ostream& operator<<(std::ostream& os,
     case kFeasibilityRestorationFailed:
       os << "kFeasibilityRestorationFailed";
       break;
-    case kMaxSearchDirectionTooSmall:
-      os << "kMaxSearchDirectionTooSmall";
-      break;
     case kNonfiniteInitialCostOrConstraints:
       os << "kNonfiniteInitialCostOrConstraints";
       break;
