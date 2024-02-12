@@ -11,8 +11,6 @@
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 #include <units/time.h>
 
-#include "CmdlineArguments.hpp"
-
 TEST_CASE("Double integrator", "[OptimizationProblem]") {
   auto start = std::chrono::system_clock::now();
 
@@ -65,16 +63,13 @@ TEST_CASE("Double integrator", "[OptimizationProblem]") {
   }
   problem.Minimize(J);
 
-  [[maybe_unused]] auto end1 = std::chrono::system_clock::now();
-  if (Argv().Contains("--enable-diagnostics")) {
-    using std::chrono::duration_cast;
-    using std::chrono::microseconds;
-    fmt::print("Setup time: {} ms\n\n",
-               duration_cast<microseconds>(end1 - start).count() / 1000.0);
-  }
+  auto end1 = std::chrono::system_clock::now();
+  using std::chrono::duration_cast;
+  using std::chrono::microseconds;
+  fmt::print("Setup time: {} ms\n\n",
+             duration_cast<microseconds>(end1 - start).count() / 1000.0);
 
-  auto status =
-      problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
+  auto status = problem.Solve({.diagnostics = true});
 
   CHECK(status.costFunctionType == sleipnir::ExpressionType::kQuadratic);
   CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kLinear);

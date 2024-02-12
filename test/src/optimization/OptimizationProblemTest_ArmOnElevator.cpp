@@ -10,8 +10,6 @@
 #include <units/time.h>
 #include <units/velocity.h>
 
-#include "CmdlineArguments.hpp"
-
 // This problem tests the case where regularization fails
 TEST_CASE("Arm on elevator", "[OptimizationProblem]") {
   constexpr int N = 800;
@@ -94,8 +92,7 @@ TEST_CASE("Arm on elevator", "[OptimizationProblem]") {
   }
   problem.Minimize(J);
 
-  auto status =
-      problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
+  auto status = problem.Solve({.diagnostics = true});
 
   CHECK(status.costFunctionType == sleipnir::ExpressionType::kQuadratic);
   CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kLinear);

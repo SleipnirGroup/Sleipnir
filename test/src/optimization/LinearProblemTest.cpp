@@ -4,8 +4,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 
-#include "CmdlineArguments.hpp"
-
 TEST_CASE("Maximize", "[LinearProblem]") {
   sleipnir::OptimizationProblem problem;
 
@@ -23,8 +21,7 @@ TEST_CASE("Maximize", "[LinearProblem]") {
   problem.SubjectTo(x >= 0);
   problem.SubjectTo(y >= 0);
 
-  auto status =
-      problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
+  auto status = problem.Solve({.diagnostics = true});
 
   CHECK(status.costFunctionType == sleipnir::ExpressionType::kLinear);
   CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kNone);

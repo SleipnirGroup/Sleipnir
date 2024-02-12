@@ -3,8 +3,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 
-#include "CmdlineArguments.hpp"
-
 // These tests ensure coverage of the off-nominal solver exit conditions
 
 TEST_CASE("Callback requested stop", "[SolverExitCondition]") {
@@ -14,8 +12,7 @@ TEST_CASE("Callback requested stop", "[SolverExitCondition]") {
   problem.Minimize(x * x);
 
   problem.Callback([](const sleipnir::SolverIterationInfo&) {});
-  auto status =
-      problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
+  auto status = problem.Solve({.diagnostics = true});
 
   CHECK(status.costFunctionType == sleipnir::ExpressionType::kQuadratic);
   CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kNone);
@@ -23,8 +20,7 @@ TEST_CASE("Callback requested stop", "[SolverExitCondition]") {
   CHECK(status.exitCondition == sleipnir::SolverExitCondition::kSuccess);
 
   problem.Callback([](const sleipnir::SolverIterationInfo&) { return false; });
-  status =
-      problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
+  status = problem.Solve({.diagnostics = true});
 
   CHECK(status.costFunctionType == sleipnir::ExpressionType::kQuadratic);
   CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kNone);
@@ -32,8 +28,7 @@ TEST_CASE("Callback requested stop", "[SolverExitCondition]") {
   CHECK(status.exitCondition == sleipnir::SolverExitCondition::kSuccess);
 
   problem.Callback([](const sleipnir::SolverIterationInfo&) { return true; });
-  status =
-      problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
+  status = problem.Solve({.diagnostics = true});
 
   CHECK(status.costFunctionType == sleipnir::ExpressionType::kQuadratic);
   CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kNone);
@@ -54,8 +49,7 @@ TEST_CASE("Too few DOFs", "[SolverExitCondition]") {
   problem.SubjectTo(y == 1);
   problem.SubjectTo(z == 1);
 
-  auto status =
-      problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
+  auto status = problem.Solve({.diagnostics = true});
 
   CHECK(status.costFunctionType == sleipnir::ExpressionType::kNone);
   CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kLinear);
@@ -76,8 +70,7 @@ TEST_CASE("Locally infeasible", "[SolverExitCondition]") {
     problem.SubjectTo(y == z + 1);
     problem.SubjectTo(z == x + 1);
 
-    auto status =
-        problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
+    auto status = problem.Solve({.diagnostics = true});
 
     CHECK(status.costFunctionType == sleipnir::ExpressionType::kNone);
     CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kLinear);
@@ -98,8 +91,7 @@ TEST_CASE("Locally infeasible", "[SolverExitCondition]") {
     problem.SubjectTo(y >= z + 1);
     problem.SubjectTo(z >= x + 1);
 
-    auto status =
-        problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
+    auto status = problem.Solve({.diagnostics = true});
 
     CHECK(status.costFunctionType == sleipnir::ExpressionType::kNone);
     CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kNone);
@@ -115,8 +107,7 @@ TEST_CASE("Diverging iterates", "[SolverExitCondition]") {
   auto x = problem.DecisionVariable();
   problem.Minimize(x);
 
-  auto status =
-      problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
+  auto status = problem.Solve({.diagnostics = true});
 
   CHECK(status.costFunctionType == sleipnir::ExpressionType::kLinear);
   CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kNone);
@@ -131,9 +122,7 @@ TEST_CASE("Max iterations exceeded", "[SolverExitCondition]") {
   auto x = problem.DecisionVariable();
   problem.Minimize(x * x);
 
-  auto status =
-      problem.Solve({.maxIterations = 0,
-                     .diagnostics = Argv().Contains("--enable-diagnostics")});
+  auto status = problem.Solve({.maxIterations = 0, .diagnostics = true});
 
   CHECK(status.costFunctionType == sleipnir::ExpressionType::kQuadratic);
   CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kNone);
@@ -150,8 +139,7 @@ TEST_CASE("Timeout", "[SolverExitCondition]") {
   auto x = problem.DecisionVariable();
   problem.Minimize(x * x);
 
-  auto status = problem.Solve(
-      {.timeout = 0s, .diagnostics = Argv().Contains("--enable-diagnostics")});
+  auto status = problem.Solve({.timeout = 0s, .diagnostics = true});
 
   CHECK(status.costFunctionType == sleipnir::ExpressionType::kQuadratic);
   CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kNone);

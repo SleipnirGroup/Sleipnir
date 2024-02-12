@@ -4,8 +4,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 
-#include "CmdlineArguments.hpp"
-
 TEST_CASE("Unconstrained 1D", "[QuadraticProblem]") {
   sleipnir::OptimizationProblem problem;
 
@@ -14,8 +12,7 @@ TEST_CASE("Unconstrained 1D", "[QuadraticProblem]") {
 
   problem.Minimize(x * x - 6.0 * x);
 
-  auto status =
-      problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
+  auto status = problem.Solve({.diagnostics = true});
 
   CHECK(status.costFunctionType == sleipnir::ExpressionType::kQuadratic);
   CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kNone);
@@ -36,8 +33,7 @@ TEST_CASE("Unconstrained 2D", "[QuadraticProblem]") {
 
     problem.Minimize(x * x + y * y);
 
-    auto status =
-        problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
+    auto status = problem.Solve({.diagnostics = true});
 
     CHECK(status.costFunctionType == sleipnir::ExpressionType::kQuadratic);
     CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kNone);
@@ -57,8 +53,7 @@ TEST_CASE("Unconstrained 2D", "[QuadraticProblem]") {
 
     problem.Minimize(x.T() * x);
 
-    auto status =
-        problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
+    auto status = problem.Solve({.diagnostics = true});
 
     CHECK(status.costFunctionType == sleipnir::ExpressionType::kQuadratic);
     CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kNone);
@@ -119,8 +114,7 @@ TEST_CASE("Equality-constrained", "[QuadraticProblem]") {
 
     problem.SubjectTo(x + 3 * y == 36);
 
-    auto status =
-        problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
+    auto status = problem.Solve({.diagnostics = true});
 
     CHECK(status.costFunctionType == sleipnir::ExpressionType::kQuadratic);
     CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kLinear);
@@ -142,8 +136,7 @@ TEST_CASE("Equality-constrained", "[QuadraticProblem]") {
 
     problem.SubjectTo(x == Eigen::Matrix<double, 2, 1>{{3.0, 3.0}});
 
-    auto status =
-        problem.Solve({.diagnostics = Argv().Contains("--enable-diagnostics")});
+    auto status = problem.Solve({.diagnostics = true});
 
     CHECK(status.costFunctionType == sleipnir::ExpressionType::kQuadratic);
     CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kLinear);
