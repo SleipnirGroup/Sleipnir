@@ -94,8 +94,8 @@ if(NOT USE_SYSTEM_EIGEN)
     fetchcontent_declare(
         Eigen3
         GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
-        # master on 2024-02-11
-        GIT_TAG d1d87973f4d90f6eba2aaded072ca641e465feab
+        # master on 2024-02-13
+        GIT_TAG 6ea33f95df71ef71b6bfe9b462591e8eb806bc73
         PATCH_COMMAND
             git apply
             ${CMAKE_CURRENT_SOURCE_DIR}/cmake/eigen-disable-fortran-support.patch
