@@ -2,9 +2,9 @@
 
 #include <chrono>
 #include <cmath>
+#include <print>
 
 #include <Eigen/Core>
-#include <fmt/core.h>
 #include <sleipnir/control/OCPSolver.hpp>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 
@@ -51,9 +51,9 @@ int main() {
   solver.Solve();
 
   // The first state
-  fmt::println("x₀ = {}", solver.X().Value(0, 0));
+  std::println("x₀ = {}", solver.X().Value(0, 0));
 
   // The first input
-  fmt::println("u₀ = {}", solver.U().Value(0, 0));
+  std::println("u₀ = {}", solver.U().Value(0, 0));
 }
 #endif

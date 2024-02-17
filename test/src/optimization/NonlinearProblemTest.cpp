@@ -1,10 +1,10 @@
 // Copyright (c) Sleipnir contributors
 
+#include <format>
 #include <vector>
 
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
-#include <fmt/core.h>
 #include <sleipnir/optimization/Multistart.hpp>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 
@@ -64,11 +64,11 @@ TEST_CASE("NonlinearProblem - Rosenbrock with cubic and line constraint",
       // Local minimum at (0.0, 0.0)
       // Global minimum at (1.0, 1.0)
       CHECK((Near(0.0, x.Value(), 1e-2) || Near(1.0, x.Value(), 1e-2)));
-      INFO(fmt::format("  (x₀, y₀) = ({}, {})\n", x0, y0));
-      INFO(fmt::format("  x.Value(0) = {}", x.Value()));
+      INFO(std::format("  (x₀, y₀) = ({}, {})\n", x0, y0));
+      INFO(std::format("  x.Value(0) = {}", x.Value()));
       CHECK((Near(0.0, y.Value(), 1e-2) || Near(1.0, y.Value(), 1e-2)));
-      INFO(fmt::format("  (x₀, y₀) = ({}, {})\n", x0, y0));
-      INFO(fmt::format("  y.Value(0) = {}", y.Value()));
+      INFO(std::format("  (x₀, y₀) = ({}, {})\n", x0, y0));
+      INFO(std::format("  y.Value(0) = {}", y.Value()));
     }
   }
 }
@@ -99,11 +99,11 @@ TEST_CASE("NonlinearProblem - Rosenbrock with disk constraint",
       CHECK(status.exitCondition == sleipnir::SolverExitCondition::kSuccess);
 
       CHECK(x.Value() == Catch::Approx(1.0).margin(1e-1));
-      INFO(fmt::format("  (x₀, y₀) = ({}, {})\n", x0, y0));
-      INFO(fmt::format("  x.Value(0) = {}", x.Value()));
+      INFO(std::format("  (x₀, y₀) = ({}, {})\n", x0, y0));
+      INFO(std::format("  x.Value(0) = {}", x.Value()));
       CHECK(y.Value() == Catch::Approx(1.0).margin(1e-1));
-      INFO(fmt::format("  (x₀, y₀) = ({}, {})\n", x0, y0));
-      INFO(fmt::format("  x.Value(0) = {}", x.Value()));
+      INFO(std::format("  (x₀, y₀) = ({}, {})\n", x0, y0));
+      INFO(std::format("  x.Value(0) = {}", x.Value()));
     }
   }
 }

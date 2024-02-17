@@ -32,7 +32,7 @@ int main(int argc, char* argv[]) {
   }
   sampleSizesToTest.emplace_back(5000);
 
-  fmt::println("Solving flywheel problem from N = {} to N = {}.",
+  std::println("Solving flywheel problem from N = {} to N = {}.",
                sampleSizesToTest.front(), sampleSizesToTest.back());
   if (runCasadi) {
     RunBenchmarksAndLog<casadi::Opti>("flywheel-scalability-results-casadi.csv",

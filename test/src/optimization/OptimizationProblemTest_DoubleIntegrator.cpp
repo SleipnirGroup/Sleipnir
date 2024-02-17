@@ -2,12 +2,12 @@
 
 #include <chrono>
 #include <cmath>
+#include <format>
 #include <fstream>
 
 #include <Eigen/Core>
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
-#include <fmt/core.h>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 
 #include "CatchStringConverters.hpp"
@@ -116,7 +116,7 @@ TEST_CASE("OptimizationProblem - Double integrator", "[OptimizationProblem]") {
       CHECK(U.Value(0, k) == Catch::Approx(u(0)).margin(1e-4));
     }
 
-    INFO(fmt::format("  k = {}", k));
+    INFO(std::format("  k = {}", k));
 
     // Project state forward
     x = A * x + B * u;
@@ -132,7 +132,7 @@ TEST_CASE("OptimizationProblem - Double integrator", "[OptimizationProblem]") {
     states << "Time (s),Position (m),Velocity (m/s)\n";
 
     for (int k = 0; k < N + 1; ++k) {
-      states << fmt::format("{},{},{}\n", k * dt.count(), X.Value(0, k),
+      states << std::format("{},{},{}\n", k * dt.count(), X.Value(0, k),
                             X.Value(1, k));
     }
   }
@@ -144,9 +144,9 @@ TEST_CASE("OptimizationProblem - Double integrator", "[OptimizationProblem]") {
 
     for (int k = 0; k < N + 1; ++k) {
       if (k < N) {
-        inputs << fmt::format("{},{}\n", k * dt.count(), U.Value(0, k));
+        inputs << std::format("{},{}\n", k * dt.count(), U.Value(0, k));
       } else {
-        inputs << fmt::format("{},{}\n", k * dt.count(), 0.0);
+        inputs << std::format("{},{}\n", k * dt.count(), 0.0);
       }
     }
   }

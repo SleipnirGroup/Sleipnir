@@ -1,6 +1,7 @@
 // Copyright (c) Sleipnir contributors
 
-#include <fmt/format.h>
+#include <format>
+
 #include <pybind11/eigen.h>
 #include <pybind11/functional.h>
 #include <pybind11/operators.h>
@@ -54,7 +55,7 @@ void BindVariableBlock(py::module_& autodiff) {
                                        py::tuple slices, py::object value) {
     if (slices.size() != 2) {
       throw py::index_error(
-          fmt::format("Expected 2 slices, got {}.", slices.size()));
+          std::format("Expected 2 slices, got {}.", slices.size()));
     }
 
     int rowOffset = 0;
@@ -133,7 +134,7 @@ void BindVariableBlock(py::module_& autodiff) {
       [](VariableBlock<VariableMatrix>& self, py::tuple slices) -> py::object {
         if (slices.size() != 2) {
           throw py::index_error(
-              fmt::format("Expected 2 slices, got {}.", slices.size()));
+              std::format("Expected 2 slices, got {}.", slices.size()));
         }
 
         // If both indices are integers instead of slices, return Variable
@@ -290,7 +291,7 @@ void BindVariableBlock(py::module_& autodiff) {
         std::string input1_name = inputs[0].attr("__repr__")().cast<py::str>();
         std::string input2_name = inputs[1].attr("__repr__")().cast<py::str>();
         throw py::value_error(
-            fmt::format("VariableBlock: numpy method {}, ufunc {} not "
+            std::format("VariableBlock: numpy method {}, ufunc {} not "
                         "implemented for ({}, {})",
                         method_name, ufunc_name, input1_name, input2_name));
         return py::cast(VariableMatrix{self});

@@ -1,12 +1,12 @@
 // Copyright (c) Sleipnir contributors
 
 #include <chrono>
+#include <format>
 #include <fstream>
 
 #include <Eigen/Core>
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
-#include <fmt/core.h>
 #include <sleipnir/control/OCPSolver.hpp>
 
 #include "CatchStringConverters.hpp"
@@ -119,7 +119,7 @@ TEST_CASE("OCPSolver - Differential drive", "[OCPSolver]") {
     CHECK(X.Value(3, k) == Catch::Approx(x(3)).margin(1e-8));
     CHECK(X.Value(4, k) == Catch::Approx(x(4)).margin(1e-8));
 
-    INFO(fmt::format("  k = {}", k));
+    INFO(std::format("  k = {}", k));
 
     // Project state forward
     x = RK4(DifferentialDriveDynamicsDouble, x, u,
@@ -141,7 +141,7 @@ TEST_CASE("OCPSolver - Differential drive", "[OCPSolver]") {
 
     double time = 0.0;
     for (int k = 0; k < N + 1; ++k) {
-      states << fmt::format("{},{},{},{},{},{}\n", time,
+      states << std::format("{},{},{},{},{},{}\n", time,
                             problem.X().Value(0, k), problem.X().Value(1, k),
                             problem.X().Value(2, k), problem.X().Value(3, k),
                             problem.X().Value(4, k));
@@ -158,10 +158,10 @@ TEST_CASE("OCPSolver - Differential drive", "[OCPSolver]") {
     double time = 0.0;
     for (int k = 0; k < N + 1; ++k) {
       if (k < N) {
-        inputs << fmt::format("{},{},{}\n", time, problem.U().Value(0, k),
+        inputs << std::format("{},{},{}\n", time, problem.U().Value(0, k),
                               problem.U().Value(1, k));
       } else {
-        inputs << fmt::format("{},{},{}\n", time, 0.0, 0.0);
+        inputs << std::format("{},{},{}\n", time, 0.0, 0.0);
       }
 
       time += problem.DT().Value(0, k);

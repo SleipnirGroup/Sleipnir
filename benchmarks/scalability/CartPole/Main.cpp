@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
   }
   sampleSizesToTest.emplace_back(300);
 
-  fmt::println("Solving cart-pole problem from N = {} to N = {}.",
+  std::println("Solving cart-pole problem from N = {} to N = {}.",
                sampleSizesToTest.front(), sampleSizesToTest.back());
   if (runCasadi) {
     RunBenchmarksAndLog<casadi::Opti>(

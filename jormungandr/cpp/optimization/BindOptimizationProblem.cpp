@@ -1,6 +1,7 @@
 // Copyright (c) Sleipnir contributors
 
-#include <fmt/format.h>
+#include <format>
+
 #include <pybind11/functional.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/pytypes.h>
@@ -85,7 +86,7 @@ void BindOptimizationProblem(py::module_& optimization) {
             config.spy = value.cast<bool>();
           } else {
             throw py::key_error(
-                fmt::format("Invalid keyword argument: {}", key_str));
+                std::format("Invalid keyword argument: {}", key_str));
           }
         }
 

@@ -67,13 +67,13 @@ jobs:
         with:
           python-version: 3.12
 
-      - name: Install LLVM 17
+      - name: Install LLVM 18
         run: |
           wget https://apt.llvm.org/llvm.sh
           chmod +x llvm.sh
-          sudo ./llvm.sh 17 all
-          sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-17 200
-          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-17 200
+          sudo ./llvm.sh 18 all
+          sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-18 200
+          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-18 200
           echo "CC=clang" >> $GITHUB_ENV
           echo "CXX=clang++" >> $GITHUB_ENV
           echo "CXXFLAGS=-stdlib=libc++" >> $GITHUB_ENV
@@ -87,4 +87,4 @@ jobs:
         run: wpiformat -list-changed-files
 
       - name: Run clang-tidy
-        run: wpiformat -no-format -tidy-all -compile-commands=build -tidy-extra-args std=c++20 -vv
+        run: wpiformat -no-format -tidy-all -compile-commands=build -tidy-extra-args std=c++23 -vv
