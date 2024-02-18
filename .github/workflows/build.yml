@@ -27,8 +27,6 @@ jobs:
         run: cmake --build build --config RelWithDebInfo --parallel $(nproc)
 
       - name: Test
-        # FIXME: Some optimization tests fail on macOS arm64
-        if: matrix.os != 'macOS-14'
         working-directory: build
         run: ctest -C RelWithDebInfo --output-on-failure
 
