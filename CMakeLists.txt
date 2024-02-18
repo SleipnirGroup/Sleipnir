@@ -82,16 +82,7 @@ set_target_properties(Sleipnir PROPERTIES DEBUG_POSTFIX "d")
 set_property(TARGET Sleipnir PROPERTY FOLDER "libraries")
 target_compile_definitions(Sleipnir PRIVATE SLEIPNIR_EXPORTS)
 
-include(CMakeDependentOption)
-
-cmake_dependent_option(
-    BUILD_TESTING
-    "Enable creation of tests."
-    ON
-    "PROJECT_IS_TOP_LEVEL"
-    OFF
-)
-
+include(CTest)
 include(FetchContent)
 
 # Options for using a package manager (e.g., vcpkg) for certain dependencies
