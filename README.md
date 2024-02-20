@@ -129,12 +129,16 @@ See the [examples](https://github.com/SleipnirGroup/Sleipnir/tree/main/examples)
 
 * C++20 compiler
   * On Windows, install [Visual Studio Community 2022](https://visualstudio.microsoft.com/vs/community/) and select the C++ programming language during installation
-  * On Linux, install GCC 11 or greater via the OS package manager
-  * On macOS, install Xcode command-line build tools 13 or greater via `xcode-select --install`
-* CMake 3.21 or greater
-  * On Windows, install [Visual Studio Community 2022](https://visualstudio.microsoft.com/vs/community/) and select the C++ programming language during installation
-  * On Linux, install via the OS package manager
+  * On Linux, install GCC 11 or greater via `sudo apt install gcc`
+  * On macOS, install the Xcode command-line build tools via `xcode-select --install`. Xcode 13 or later is required.
+* [CMake](https://cmake.org/download/) 3.21 or greater
+  * On Windows, install from the link above
+  * On Linux, install via `sudo apt install cmake`
   * On macOS, install via `brew install cmake`
+* [Python](https://www.python.org/downloads/) 3.11 or greater
+  * On Windows, install from the link above
+  * On Linux, install via `sudo apt install python`
+  * On macOS, install via `brew install python`
 * [Eigen](https://gitlab.com/libeigen/eigen)
 * [fmtlib](https://github.com/fmtlib/fmt) (internal only)
 * [pybind11](https://github.com/pybind/pybind11) (build only)
@@ -156,7 +160,7 @@ cd Sleipnir
 
 ### C++ library
 
-```
+```bash
 # Configure; automatically downloads library dependencies
 cmake -B build -S .
 
@@ -171,24 +175,6 @@ cd ..
 # Install
 cmake --install build --prefix pkgdir
 ```
-
-### Python library
-
-```
-# Setup
-pip install --user build
-
-# Build
-python -m build --wheel
-
-# Install
-pip install --user dist/sleipnirgroup_jormungandr-*.whl
-
-# Test
-pytest
-```
-
-### Supported build types
 
 The following build types can be specified via `-DCMAKE_BUILD_TYPE` during CMake configure:
 
@@ -210,6 +196,22 @@ The following build types can be specified via `-DCMAKE_BUILD_TYPE` during CMake
   * Enables undefined behavior sanitizer
 * Perf
   * RelWithDebInfo build type, but with frame pointer so perf utility can use it
+
+### Python library
+
+```bash
+# Setup
+pip install --user build
+
+# Build
+python -m build --wheel
+
+# Install
+pip install --user dist/sleipnirgroup_jormungandr-*.whl
+
+# Test
+pytest
+```
 
 ## Test diagnostics
 
