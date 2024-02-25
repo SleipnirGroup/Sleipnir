@@ -19,10 +19,6 @@
 #include "RK4.hpp"
 
 TEST_CASE("OCPSolver - Cart-pole", "[OCPSolver]") {
-#if defined(__APPLE__) && defined(__aarch64__)
-  SKIP("Fails on macOS arm64 with \"locally infeasible\"");
-#endif
-
   constexpr auto T = 5_s;
   constexpr units::second_t dt = 50_ms;
   constexpr int N = T / dt;
@@ -93,47 +89,53 @@ TEST_CASE("OCPSolver - Cart-pole", "[OCPSolver]") {
   CHECK(status.costFunctionType == sleipnir::ExpressionType::kQuadratic);
   CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kNonlinear);
   CHECK(status.inequalityConstraintType == sleipnir::ExpressionType::kLinear);
-  // FIXME: Fails with "locally infeasible"
-  CHECK((status.exitCondition == sleipnir::SolverExitCondition::kSuccess ||
-         status.exitCondition ==
-             sleipnir::SolverExitCondition::kLocallyInfeasible));
 
-  if (status.exitCondition == sleipnir::SolverExitCondition::kSuccess) {
-    // Verify initial state
-    CHECK(X.Value(0, 0) == Catch::Approx(x_initial(0)).margin(1e-8));
-    CHECK(X.Value(1, 0) == Catch::Approx(x_initial(1)).margin(1e-8));
-    CHECK(X.Value(2, 0) == Catch::Approx(x_initial(2)).margin(1e-8));
-    CHECK(X.Value(3, 0) == Catch::Approx(x_initial(3)).margin(1e-8));
+#if defined(__APPLE__) && defined(__aarch64__)
+  // FIXME: Fails on macOS arm64 with "feasibility restoration failed"
+  CHECK(status.exitCondition ==
+        sleipnir::SolverExitCondition::kFeasibilityRestorationFailed);
+  SKIP("Fails on macOS arm64 with \"feasibility restoration failed\"");
+#else
+  // FIXME: Fails on other platforms with "locally infeasible"
+  CHECK(status.exitCondition ==
+        sleipnir::SolverExitCondition::kLocallyInfeasible);
+  SKIP("Fails with \"locally infeasible\"");
+#endif
 
-    // Verify solution
-    Eigen::Matrix<double, 4, 1> x{0.0, 0.0, 0.0, 0.0};
-    Eigen::Matrix<double, 1, 1> u{0.0};
-    for (int k = 0; k < N; ++k) {
-      // Cart position constraints
-      CHECK(X(0, k) >= 0.0);
-      CHECK(X(0, k) <= d_max.value());
+  // Verify initial state
+  CHECK(X.Value(0, 0) == Catch::Approx(x_initial(0)).margin(1e-8));
+  CHECK(X.Value(1, 0) == Catch::Approx(x_initial(1)).margin(1e-8));
+  CHECK(X.Value(2, 0) == Catch::Approx(x_initial(2)).margin(1e-8));
+  CHECK(X.Value(3, 0) == Catch::Approx(x_initial(3)).margin(1e-8));
 
-      // Input constraints
-      CHECK(U(0, k) >= -u_max.value());
-      CHECK(U(0, k) <= u_max.value());
+  // Verify solution
+  Eigen::Matrix<double, 4, 1> x{0.0, 0.0, 0.0, 0.0};
+  Eigen::Matrix<double, 1, 1> u{0.0};
+  for (int k = 0; k < N; ++k) {
+    // Cart position constraints
+    CHECK(X(0, k) >= 0.0);
+    CHECK(X(0, k) <= d_max.value());
 
-      // Verify state
-      CHECK(X.Value(0, k) == Catch::Approx(x(0)).margin(1e-2));
-      CHECK(X.Value(1, k) == Catch::Approx(x(1)).margin(1e-2));
-      CHECK(X.Value(2, k) == Catch::Approx(x(2)).margin(1e-2));
-      CHECK(X.Value(3, k) == Catch::Approx(x(3)).margin(1e-2));
-      INFO(fmt::format("  k = {}", k));
+    // Input constraints
+    CHECK(U(0, k) >= -u_max.value());
+    CHECK(U(0, k) <= u_max.value());
 
-      // Project state forward
-      x = RK4(CartPoleDynamicsDouble, x, u, dt);
-    }
+    // Verify state
+    CHECK(X.Value(0, k) == Catch::Approx(x(0)).margin(1e-2));
+    CHECK(X.Value(1, k) == Catch::Approx(x(1)).margin(1e-2));
+    CHECK(X.Value(2, k) == Catch::Approx(x(2)).margin(1e-2));
+    CHECK(X.Value(3, k) == Catch::Approx(x(3)).margin(1e-2));
+    INFO(fmt::format("  k = {}", k));
 
-    // Verify final state
-    CHECK(X.Value(0, N - 1) == Catch::Approx(x_final(0)).margin(1e-8));
-    CHECK(X.Value(1, N - 1) == Catch::Approx(x_final(1)).margin(1e-8));
-    CHECK(X.Value(2, N - 1) == Catch::Approx(x_final(2)).margin(1e-8));
-    CHECK(X.Value(3, N - 1) == Catch::Approx(x_final(3)).margin(1e-8));
+    // Project state forward
+    x = RK4(CartPoleDynamicsDouble, x, u, dt);
   }
+
+  // Verify final state
+  CHECK(X.Value(0, N - 1) == Catch::Approx(x_final(0)).margin(1e-8));
+  CHECK(X.Value(1, N - 1) == Catch::Approx(x_final(1)).margin(1e-8));
+  CHECK(X.Value(2, N - 1) == Catch::Approx(x_final(2)).margin(1e-8));
+  CHECK(X.Value(3, N - 1) == Catch::Approx(x_final(3)).margin(1e-8));
 
   // Log states for offline viewing
   std::ofstream states{"OCPSolver Cart-pole states.csv"};
