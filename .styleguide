@@ -1,8 +1,5 @@
 cppHeaderFileInclude {
-  \.h$
   \.hpp$
-  \.inc$
-  scope$
 }
 
 cppSrcFileInclude {
@@ -17,11 +14,10 @@ generatedFileExclude {
 
 includeOtherLibs {
   ^Eigen/
+  ^catch2/
   ^fmt/
-  ^gtest/
   ^pybind11/
   ^units/
-  ^wpi/
 }
 
 modifiableFileExclude {
