@@ -10,18 +10,18 @@
 #include <catch2/catch_test_macros.hpp>
 #include <fmt/core.h>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
-#include <units/time.h>
-#include <units/voltage.h>
 
 #include "DifferentialDriveUtil.hpp"
 #include "RK4.hpp"
 
 TEST_CASE("OptimizationProblem - Differential drive", "[OptimizationProblem]") {
-  constexpr auto T = 5_s;
-  constexpr units::second_t dt = 50_ms;
+  using namespace std::chrono_literals;
+
+  constexpr std::chrono::duration<double> T = 5s;
+  constexpr std::chrono::duration<double> dt = 50ms;
   constexpr int N = T / dt;
 
-  constexpr auto u_max = 12_V;
+  constexpr double u_max = 12.0;  // V
 
   constexpr Eigen::Vector<double, 5> x_initial{{0.0, 0.0, 0.0, 0.0, 0.0}};
   constexpr Eigen::Vector<double, 5> x_final{{1.0, 1.0, 0.0, 0.0, 0.0}};
@@ -51,8 +51,8 @@ TEST_CASE("OptimizationProblem - Differential drive", "[OptimizationProblem]") {
   problem.SubjectTo(X.Col(N) == x_final);
 
   // Input constraints
-  problem.SubjectTo(U >= -u_max.value());
-  problem.SubjectTo(U <= u_max.value());
+  problem.SubjectTo(U >= -u_max);
+  problem.SubjectTo(U <= u_max);
 
   // Dynamics constraints - RK4 integration
   for (int k = 0; k < N; ++k) {
@@ -96,10 +96,10 @@ TEST_CASE("OptimizationProblem - Differential drive", "[OptimizationProblem]") {
     u = U.Col(k).Value();
 
     // Input constraints
-    CHECK(U(0, k).Value() >= -u_max.value());
-    CHECK(U(0, k).Value() <= u_max.value());
-    CHECK(U(1, k).Value() >= -u_max.value());
-    CHECK(U(1, k).Value() <= u_max.value());
+    CHECK(U(0, k).Value() >= -u_max);
+    CHECK(U(0, k).Value() <= u_max);
+    CHECK(U(1, k).Value() >= -u_max);
+    CHECK(U(1, k).Value() <= u_max);
 
     // Verify state
     CHECK(X.Value(0, k) == Catch::Approx(x(0)).margin(1e-8));
@@ -127,7 +127,7 @@ TEST_CASE("OptimizationProblem - Differential drive", "[OptimizationProblem]") {
               "velocity (m/s),Right velocity (m/s)\n";
 
     for (int k = 0; k < N + 1; ++k) {
-      states << fmt::format("{},{},{},{},{},{}\n", k * dt.value(),
+      states << fmt::format("{},{},{},{},{},{}\n", k * dt.count(),
                             X.Value(0, k), X.Value(1, k), X.Value(2, k),
                             X.Value(3, k), X.Value(4, k));
     }
@@ -140,10 +140,10 @@ TEST_CASE("OptimizationProblem - Differential drive", "[OptimizationProblem]") {
 
     for (int k = 0; k < N + 1; ++k) {
       if (k < N) {
-        inputs << fmt::format("{},{},{}\n", k * dt.value(), U.Value(0, k),
+        inputs << fmt::format("{},{},{}\n", k * dt.count(), U.Value(0, k),
                               U.Value(1, k));
       } else {
-        inputs << fmt::format("{},{},{}\n", k * dt.value(), 0.0, 0.0);
+        inputs << fmt::format("{},{},{}\n", k * dt.count(), 0.0, 0.0);
       }
     }
   }

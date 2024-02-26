@@ -211,9 +211,7 @@ if(BUILD_BENCHMARKING)
             sleipnir_compiler_flags(${benchmark}ScalabilityBenchmark)
             target_include_directories(
                 ${benchmark}ScalabilityBenchmark
-                PRIVATE
-                    ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/scalability
-                    ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/units/include
+                PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/scalability
             )
             target_link_libraries(
                 ${benchmark}ScalabilityBenchmark
@@ -239,7 +237,6 @@ if(BUILD_TESTING)
         PRIVATE
             ${CMAKE_CURRENT_SOURCE_DIR}/src
             ${CMAKE_CURRENT_SOURCE_DIR}/test/include
-            ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/units/include
     )
     target_link_libraries(SleipnirTest PRIVATE Sleipnir Catch2::Catch2)
     if(NOT CMAKE_TOOLCHAIN_FILE)
@@ -258,9 +255,7 @@ if(BUILD_EXAMPLES)
         sleipnir_compiler_flags(${example})
         target_include_directories(
             ${example}
-            PRIVATE
-                ${CMAKE_CURRENT_SOURCE_DIR}/examples/${example}/include
-                ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/units/include
+            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/examples/${example}/include
         )
         target_link_libraries(${example} PRIVATE Sleipnir)
 
@@ -281,9 +276,7 @@ if(BUILD_EXAMPLES)
             target_compile_definitions(${example}Test PUBLIC RUNNING_TESTS)
             target_include_directories(
                 ${example}Test
-                PRIVATE
-                    ${CMAKE_CURRENT_SOURCE_DIR}/examples/${example}/include
-                    ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/units/include
+                PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/examples/${example}/include
             )
             target_link_libraries(
                 ${example}Test

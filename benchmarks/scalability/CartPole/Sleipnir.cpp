@@ -6,14 +6,6 @@
 #include <numbers>
 
 #include <Eigen/Core>
-#include <units/acceleration.h>
-#include <units/angle.h>
-#include <units/angular_acceleration.h>
-#include <units/angular_velocity.h>
-#include <units/force.h>
-#include <units/length.h>
-#include <units/mass.h>
-#include <units/voltage.h>
 
 /**
  * Performs 4th order Runge-Kutta integration of dx/dt = f(x, u) for dt.
@@ -24,8 +16,8 @@
  * @param dt The time over which to integrate.
  */
 template <typename F, typename T, typename U>
-T RK4(F&& f, T x, U u, units::second_t dt) {
-  const auto h = dt.value();
+T RK4(F&& f, T x, U u, std::chrono::duration<double> dt) {
+  const auto h = dt.count();
 
   T k1 = f(x, u);
   T k2 = f(x + h * 0.5 * k1, u);
@@ -60,10 +52,10 @@ sleipnir::VariableMatrix CartPoleDynamics(const sleipnir::VariableMatrix& x,
   //
   //     [1]
   // B = [0]
-  constexpr double m_c = (5_kg).value();        // Cart mass
-  constexpr double m_p = (0.5_kg).value();      // Pole mass
-  constexpr double l = (0.5_m).value();         // Pole length
-  constexpr double g = (9.806_mps_sq).value();  // Acceleration due to gravity
+  constexpr double m_c = 5.0;  // Cart mass (kg)
+  constexpr double m_p = 0.5;  // Pole mass (kg)
+  constexpr double l = 0.5;    // Pole length (m)
+  constexpr double g = 9.806;  // Acceleration due to gravity (m/s²)
 
   auto q = x.Segment(0, 2);
   auto qdot = x.Segment(2, 2);
@@ -111,9 +103,10 @@ sleipnir::VariableMatrix CartPoleDynamics(const sleipnir::VariableMatrix& x,
   return qddot;
 }
 
-sleipnir::OptimizationProblem CartPoleSleipnir(units::second_t dt, int N) {
-  constexpr auto u_max = 20_N;
-  constexpr auto d_max = 2_m;
+sleipnir::OptimizationProblem CartPoleSleipnir(std::chrono::duration<double> dt,
+                                               int N) {
+  constexpr double u_max = 20.0;  // N
+  constexpr double d_max = 2.0;   // m
 
   constexpr Eigen::Vector<double, 4> x_initial{{0.0, 0.0, 0.0, 0.0}};
   constexpr Eigen::Vector<double, 4> x_final{{1.0, std::numbers::pi, 0.0, 0.0}};
@@ -142,11 +135,11 @@ sleipnir::OptimizationProblem CartPoleSleipnir(units::second_t dt, int N) {
 
   // Cart position constraints
   problem.SubjectTo(X.Row(0) >= 0.0);
-  problem.SubjectTo(X.Row(0) <= d_max.value());
+  problem.SubjectTo(X.Row(0) <= d_max);
 
   // Input constraints
-  problem.SubjectTo(U >= -u_max.value());
-  problem.SubjectTo(U <= u_max.value());
+  problem.SubjectTo(U >= -u_max);
+  problem.SubjectTo(U <= u_max);
 
   // Dynamics constraints - RK4 integration
   for (int k = 0; k < N; ++k) {

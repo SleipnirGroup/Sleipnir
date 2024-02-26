@@ -8,20 +8,20 @@
 #include "CurrentManager.hpp"
 
 TEST_CASE("CurrentManager - Enough current", "[CurrentManager]") {
-  CurrentManager manager{std::array{1_A, 5_A, 10_A, 5_A}, 40_A};
+  CurrentManager manager{std::array{1.0, 5.0, 10.0, 5.0}, 40.0};
 
-  auto currents = manager.Calculate(std::array{25_A, 10_A, 5_A, 0_A});
+  auto currents = manager.Calculate(std::array{25.0, 10.0, 5.0, 0.0});
 
-  CHECK(currents[0].value() == Catch::Approx(25.0).margin(1e-3));
-  CHECK(currents[1].value() == Catch::Approx(10.0).margin(1e-3));
-  CHECK(currents[2].value() == Catch::Approx(5.0).margin(1e-3));
-  CHECK(currents[3].value() == Catch::Approx(0.0).margin(1e-3));
+  CHECK(currents[0] == Catch::Approx(25.0).margin(1e-3));
+  CHECK(currents[1] == Catch::Approx(10.0).margin(1e-3));
+  CHECK(currents[2] == Catch::Approx(5.0).margin(1e-3));
+  CHECK(currents[3] == Catch::Approx(0.0).margin(1e-3));
 }
 
 TEST_CASE("CurrentManager - Not enough current", "[CurrentManager]") {
-  CurrentManager manager{std::array{1_A, 5_A, 10_A, 5_A}, 40_A};
+  CurrentManager manager{std::array{1.0, 5.0, 10.0, 5.0}, 40.0};
 
-  auto currents = manager.Calculate(std::array{30_A, 10_A, 5_A, 0_A});
+  auto currents = manager.Calculate(std::array{30.0, 10.0, 5.0, 0.0});
 
   // Expected values are from the following CasADi program:
   //
@@ -53,8 +53,8 @@ TEST_CASE("CurrentManager - Not enough current", "[CurrentManager]") {
   //
   // opti.solver("ipopt")
   // print(opti.solve().value(allocated_currents))
-  CHECK(currents[0].value() == Catch::Approx(29.960).margin(1e-3));
-  CHECK(currents[1].value() == Catch::Approx(9.007).margin(1e-3));
-  CHECK(currents[2].value() == Catch::Approx(1.032).margin(1e-3));
-  CHECK(currents[3].value() == Catch::Approx(0.0).margin(1e-3));
+  CHECK(currents[0] == Catch::Approx(29.960).margin(1e-3));
+  CHECK(currents[1] == Catch::Approx(9.007).margin(1e-3));
+  CHECK(currents[2] == Catch::Approx(1.032).margin(1e-3));
+  CHECK(currents[3] == Catch::Approx(0.0).margin(1e-3));
 }

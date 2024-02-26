@@ -9,16 +9,17 @@
 #include <catch2/catch_test_macros.hpp>
 #include <fmt/core.h>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
-#include <units/time.h>
 
 TEST_CASE("OptimizationProblem - Double integrator", "[OptimizationProblem]") {
+  using namespace std::chrono_literals;
+
   auto start = std::chrono::system_clock::now();
 
-  constexpr auto T = 3.5_s;
-  constexpr units::second_t dt = 5_ms;
+  constexpr std::chrono::duration<double> T = 3.5s;
+  constexpr std::chrono::duration<double> dt = 5ms;
   constexpr int N = T / dt;
 
-  constexpr double r = 2.0;
+  constexpr double r = 2.0;  // m
 
   sleipnir::OptimizationProblem problem;
 
@@ -30,7 +31,7 @@ TEST_CASE("OptimizationProblem - Double integrator", "[OptimizationProblem]") {
 
   // Kinematics constraint assuming constant acceleration between timesteps
   for (int k = 0; k < N; ++k) {
-    constexpr double t = dt.value();
+    constexpr double t = dt.count();
     auto p_k1 = X(0, k + 1);
     auto v_k1 = X(1, k + 1);
     auto p_k = X(0, k);
@@ -76,8 +77,8 @@ TEST_CASE("OptimizationProblem - Double integrator", "[OptimizationProblem]") {
   CHECK(status.inequalityConstraintType == sleipnir::ExpressionType::kLinear);
   CHECK(status.exitCondition == sleipnir::SolverExitCondition::kSuccess);
 
-  Eigen::Matrix<double, 2, 2> A{{1.0, dt.value()}, {0.0, 1.0}};
-  Eigen::Matrix<double, 2, 1> B{0.5 * dt.value() * dt.value(), dt.value()};
+  Eigen::Matrix<double, 2, 2> A{{1.0, dt.count()}, {0.0, 1.0}};
+  Eigen::Matrix<double, 2, 1> B{0.5 * dt.count() * dt.count(), dt.count()};
 
   // Verify initial state
   CHECK(X.Value(0, 0) == Catch::Approx(0.0).margin(1e-8));
@@ -92,13 +93,13 @@ TEST_CASE("OptimizationProblem - Double integrator", "[OptimizationProblem]") {
     CHECK(X.Value(1, k) == Catch::Approx(x(1)).margin(1e-2));
 
     // Determine expected input for this timestep
-    if (k * dt < 1_s) {
+    if (k * dt < 1s) {
       // Accelerate
       u(0) = 1.0;
-    } else if (k * dt < 2.05_s) {
+    } else if (k * dt < 2.05s) {
       // Maintain speed
       u(0) = 0.0;
-    } else if (k * dt < 3.275_s) {
+    } else if (k * dt < 3.275s) {
       // Decelerate
       u(0) = -1.0;
     } else {
@@ -133,7 +134,7 @@ TEST_CASE("OptimizationProblem - Double integrator", "[OptimizationProblem]") {
     states << "Time (s),Position (m),Velocity (m/s)\n";
 
     for (int k = 0; k < N + 1; ++k) {
-      states << fmt::format("{},{},{}\n", k * dt.value(), X.Value(0, k),
+      states << fmt::format("{},{},{}\n", k * dt.count(), X.Value(0, k),
                             X.Value(1, k));
     }
   }
@@ -145,9 +146,9 @@ TEST_CASE("OptimizationProblem - Double integrator", "[OptimizationProblem]") {
 
     for (int k = 0; k < N + 1; ++k) {
       if (k < N) {
-        inputs << fmt::format("{},{}\n", k * dt.value(), U.Value(0, k));
+        inputs << fmt::format("{},{}\n", k * dt.count(), U.Value(0, k));
       } else {
-        inputs << fmt::format("{},{}\n", k * dt.value(), 0.0);
+        inputs << fmt::format("{},{}\n", k * dt.count(), 0.0);
       }
     }
   }

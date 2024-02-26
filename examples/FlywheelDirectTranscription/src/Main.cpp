@@ -1,22 +1,24 @@
 // Copyright (c) Sleipnir contributors
 
+#include <chrono>
 #include <cmath>
 
 #include <fmt/core.h>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
-#include <units/time.h>
 
 #ifndef RUNNING_TESTS
 int main() {
-  constexpr auto T = 5_s;
-  constexpr units::second_t dt = 5_ms;
+  using namespace std::chrono_literals;
+
+  constexpr std::chrono::duration<double> T = 5s;
+  constexpr std::chrono::duration<double> dt = 5ms;
   constexpr int N = T / dt;
 
   // Flywheel model:
   // States: [velocity]
   // Inputs: [voltage]
-  Eigen::Matrix<double, 1, 1> A{std::exp(-dt.value())};
-  Eigen::Matrix<double, 1, 1> B{1.0 - std::exp(-dt.value())};
+  Eigen::Matrix<double, 1, 1> A{std::exp(-dt.count())};
+  Eigen::Matrix<double, 1, 1> B{1.0 - std::exp(-dt.count())};
 
   sleipnir::OptimizationProblem problem;
   auto X = problem.DecisionVariable(1, N + 1);

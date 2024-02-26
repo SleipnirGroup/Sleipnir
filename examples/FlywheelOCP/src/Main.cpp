@@ -7,12 +7,13 @@
 #include <fmt/core.h>
 #include <sleipnir/control/OCPSolver.hpp>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
-#include <units/time.h>
 
 #ifndef RUNNING_TESTS
 int main() {
-  constexpr auto T = 5_s;
-  constexpr units::second_t dt = 5_ms;
+  using namespace std::chrono_literals;
+
+  constexpr std::chrono::duration<double> T = 5s;
+  constexpr std::chrono::duration<double> dt = 5ms;
   constexpr int N = T / dt;
 
   // Flywheel model:
@@ -21,7 +22,7 @@ int main() {
   Eigen::Matrix<double, 1, 1> A{-1.0};
   Eigen::Matrix<double, 1, 1> B{1.0};
 
-  Eigen::Matrix<double, 1, 1> A_discrete{std::exp(A(0) * dt.value())};
+  Eigen::Matrix<double, 1, 1> A_discrete{std::exp(A(0) * dt.count())};
   Eigen::Matrix<double, 1, 1> B_discrete{(1.0 - A_discrete(0)) * B(0)};
 
   auto f_discrete = [=](sleipnir::Variable t, sleipnir::VariableMatrix x,
@@ -32,8 +33,8 @@ int main() {
   Eigen::Matrix<double, 1, 1> r{10.0};
 
   sleipnir::OCPSolver solver(
-      1, 1, std::chrono::duration<double>{dt.value()}, N, f_discrete,
-      sleipnir::DynamicsType::kDiscrete, sleipnir::TimestepMethod::kFixed,
+      1, 1, dt, N, f_discrete, sleipnir::DynamicsType::kDiscrete,
+      sleipnir::TimestepMethod::kFixed,
       sleipnir::TranscriptionMethod::kDirectTranscription);
   solver.ConstrainInitialState(0.0);
   solver.SetUpperInputBound(12);

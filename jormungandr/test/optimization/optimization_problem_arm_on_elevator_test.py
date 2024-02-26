@@ -17,10 +17,10 @@ def test_optimization_problem_arm_on_elevator():
     ELEVATOR_MAX_ACCELERATION = 2.0  # m/s²
 
     ARM_LENGTH = 1.0  # m
-    ARM_START_ANGLE = 0.0  # deg
-    ARM_END_ANGLE = math.radians(180.0)  # rad
-    ARM_MAX_VELOCITY = math.radians(360.0)  # rad/s
-    ARM_MAX_ACCELERATION = math.radians(720.0)  # rad/s²
+    ARM_START_ANGLE = 0.0  # rad
+    ARM_END_ANGLE = math.pi  # rad
+    ARM_MAX_VELOCITY = 2.0 * math.pi  # rad/s
+    ARM_MAX_ACCELERATION = 4.0 * math.pi  # rad/s²
 
     END_EFFECTOR_MAX_HEIGHT = 1.8  # m
 

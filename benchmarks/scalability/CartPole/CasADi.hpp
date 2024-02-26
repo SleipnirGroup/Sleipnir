@@ -2,8 +2,9 @@
 
 #pragma once
 
+#include <chrono>
+
 #include <casadi/casadi.hpp>
-#include <units/time.h>
 
 /**
  * Creates a cart-pole nonlinear optimization problem with CasADi.
@@ -12,4 +13,4 @@
  * @param N Number of samples in the problem.
  * @param diagnostics True if diagnostic prints should be enabled.
  */
-casadi::Opti CartPoleCasADi(units::second_t dt, int N);
+casadi::Opti CartPoleCasADi(std::chrono::duration<double> dt, int N);

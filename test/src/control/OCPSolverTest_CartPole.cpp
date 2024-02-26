@@ -10,21 +10,19 @@
 #include <catch2/catch_test_macros.hpp>
 #include <fmt/core.h>
 #include <sleipnir/control/OCPSolver.hpp>
-#include <units/acceleration.h>
-#include <units/force.h>
-#include <units/length.h>
-#include <units/time.h>
 
 #include "CartPoleUtil.hpp"
 #include "RK4.hpp"
 
 TEST_CASE("OCPSolver - Cart-pole", "[OCPSolver]") {
-  constexpr auto T = 5_s;
-  constexpr units::second_t dt = 50_ms;
+  using namespace std::chrono_literals;
+
+  constexpr std::chrono::duration<double> T = 5s;
+  constexpr std::chrono::duration<double> dt = 50ms;
   constexpr int N = T / dt;
 
-  constexpr auto u_max = 20_N;
-  constexpr auto d_max = 2_m;
+  constexpr double u_max = 20.0;  // N
+  constexpr double d_max = 2.0;   // m
 
   constexpr Eigen::Vector<double, 4> x_initial{{0.0, 0.0, 0.0, 0.0}};
   constexpr Eigen::Vector<double, 4> x_final{{1.0, std::numbers::pi, 0.0, 0.0}};
@@ -38,8 +36,7 @@ TEST_CASE("OCPSolver - Cart-pole", "[OCPSolver]") {
   };
 
   sleipnir::OCPSolver problem(
-      4, 1, std::chrono::duration<double>{dt.value()}, N, dynamicsFunction,
-      sleipnir::DynamicsType::kExplicitODE,
+      4, 1, dt, N, dynamicsFunction, sleipnir::DynamicsType::kExplicitODE,
       sleipnir::TimestepMethod::kVariableSingle,
       sleipnir::TranscriptionMethod::kDirectCollocation);
 
@@ -65,11 +62,11 @@ TEST_CASE("OCPSolver - Cart-pole", "[OCPSolver]") {
 
   // Cart position constraints
   problem.SubjectTo(X.Row(0) >= 0.0);
-  problem.SubjectTo(X.Row(0) <= d_max.value());
+  problem.SubjectTo(X.Row(0) <= d_max);
 
   // Input constraints
-  problem.SetLowerInputBound(-u_max.value());
-  problem.SetUpperInputBound(u_max.value());
+  problem.SetLowerInputBound(-u_max);
+  problem.SetUpperInputBound(u_max);
 
   // Minimize sum squared inputs
   sleipnir::Variable J = 0.0;
@@ -114,11 +111,11 @@ TEST_CASE("OCPSolver - Cart-pole", "[OCPSolver]") {
   for (int k = 0; k < N; ++k) {
     // Cart position constraints
     CHECK(X(0, k) >= 0.0);
-    CHECK(X(0, k) <= d_max.value());
+    CHECK(X(0, k) <= d_max);
 
     // Input constraints
-    CHECK(U(0, k) >= -u_max.value());
-    CHECK(U(0, k) <= u_max.value());
+    CHECK(U(0, k) >= -u_max);
+    CHECK(U(0, k) <= u_max);
 
     // Verify state
     CHECK(X.Value(0, k) == Catch::Approx(x(0)).margin(1e-2));
@@ -144,7 +141,7 @@ TEST_CASE("OCPSolver - Cart-pole", "[OCPSolver]") {
               "Pole angular velocity (rad/s)\n";
 
     for (int k = 0; k < N + 1; ++k) {
-      states << fmt::format("{},{},{},{},{}\n", k * dt.value(), X.Value(0, k),
+      states << fmt::format("{},{},{},{},{}\n", k * dt.count(), X.Value(0, k),
                             X.Value(1, k), X.Value(2, k), X.Value(3, k));
     }
   }
@@ -156,10 +153,10 @@ TEST_CASE("OCPSolver - Cart-pole", "[OCPSolver]") {
 
     for (int k = 0; k < N + 1; ++k) {
       if (k < N) {
-        inputs << fmt::format("{},{}\n", k * dt.value(),
+        inputs << fmt::format("{},{}\n", k * dt.count(),
                               problem.U().Value(0, k));
       } else {
-        inputs << fmt::format("{},{}\n", k * dt.value(), 0.0);
+        inputs << fmt::format("{},{}\n", k * dt.count(), 0.0);
       }
     }
   }

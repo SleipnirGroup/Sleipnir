@@ -1,34 +1,31 @@
 // Copyright (c) Sleipnir contributors
 
+#include <chrono>
+#include <numbers>
+
 #include <catch2/catch_test_macros.hpp>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
-#include <units/acceleration.h>
-#include <units/angle.h>
-#include <units/angular_acceleration.h>
-#include <units/angular_velocity.h>
-#include <units/length.h>
-#include <units/time.h>
-#include <units/velocity.h>
 
 // This problem tests the case where regularization fails
 TEST_CASE("OptimizationProblem - Arm on elevator", "[OptimizationProblem]") {
+  using namespace std::chrono_literals;
+
   constexpr int N = 800;
 
-  constexpr auto kElevatorStartHeight = 1_m;
-  constexpr auto kElevatorEndHeight = 1.25_m;
-  constexpr auto kElevatorMaxVelocity = 1_mps;
-  constexpr auto kElevatorMaxAcceleration = 2_mps_sq;
+  constexpr double kElevatorStartHeight = 1.0;      // m
+  constexpr double kElevatorEndHeight = 1.25;       // m
+  constexpr double kElevatorMaxVelocity = 1.0;      // m/s
+  constexpr double kElevatorMaxAcceleration = 2.0;  // m/s²
 
-  constexpr auto kArmLength = 1_m;
-  constexpr units::radian_t kArmStartAngle = 0_deg;
-  constexpr units::radian_t kArmEndAngle = 180_deg;
-  constexpr units::radians_per_second_t kArmMaxVelocity = 360_deg_per_s;
-  constexpr units::radians_per_second_squared_t kArmMaxAcceleration =
-      720_deg_per_s_sq;
+  constexpr double kArmLength = 1.0;                              // m
+  constexpr double kArmStartAngle = 0.0;                          // rad
+  constexpr double kArmEndAngle = std::numbers::pi;               // rad
+  constexpr double kArmMaxVelocity = 2.0 * std::numbers::pi;      // rad/s
+  constexpr double kArmMaxAcceleration = 4.0 * std::numbers::pi;  // rad/s²
 
-  constexpr auto kEndEffectorMaxHeight = 1.8_m;
+  constexpr double kEndEffectorMaxHeight = 1.8;  // m
 
-  constexpr units::second_t kTotalTime = 4_s;
+  constexpr std::chrono::duration<double> kTotalTime = 4s;
   constexpr auto dt = kTotalTime / N;
 
   sleipnir::OptimizationProblem problem;
@@ -42,53 +39,51 @@ TEST_CASE("OptimizationProblem - Arm on elevator", "[OptimizationProblem]") {
   for (int k = 0; k < N; ++k) {
     // Elevator dynamics constraints
     problem.SubjectTo(elevator(0, k + 1) ==
-                      elevator(0, k) + elevator(1, k) * dt.value());
+                      elevator(0, k) + elevator(1, k) * dt.count());
     problem.SubjectTo(elevator(1, k + 1) ==
-                      elevator(1, k) + elevatorAccel(0, k) * dt.value());
+                      elevator(1, k) + elevatorAccel(0, k) * dt.count());
 
     // Arm dynamics constraints
-    problem.SubjectTo(arm(0, k + 1) == arm(0, k) + arm(1, k) * dt.value());
-    problem.SubjectTo(arm(1, k + 1) == arm(1, k) + armAccel(0, k) * dt.value());
+    problem.SubjectTo(arm(0, k + 1) == arm(0, k) + arm(1, k) * dt.count());
+    problem.SubjectTo(arm(1, k + 1) == arm(1, k) + armAccel(0, k) * dt.count());
   }
 
   // Elevator start and end conditions
   problem.SubjectTo(elevator.Col(0) ==
-                    Eigen::Vector2d({kElevatorStartHeight.value(), 0.0}));
+                    Eigen::Vector2d({kElevatorStartHeight, 0.0}));
   problem.SubjectTo(elevator.Col(N) ==
-                    Eigen::Vector2d({kElevatorEndHeight.value(), 0.0}));
+                    Eigen::Vector2d({kElevatorEndHeight, 0.0}));
 
   // Arm start and end conditions
-  problem.SubjectTo(arm.Col(0) ==
-                    Eigen::Vector2d({kArmStartAngle.value(), 0.0}));
-  problem.SubjectTo(arm.Col(N) == Eigen::Vector2d({kArmEndAngle.value(), 0.0}));
+  problem.SubjectTo(arm.Col(0) == Eigen::Vector2d({kArmStartAngle, 0.0}));
+  problem.SubjectTo(arm.Col(N) == Eigen::Vector2d({kArmEndAngle, 0.0}));
 
   // Elevator velocity limits
-  problem.SubjectTo(-kElevatorMaxVelocity.value() <= elevator.Row(1));
-  problem.SubjectTo(elevator.Row(1) <= kElevatorMaxVelocity.value());
+  problem.SubjectTo(-kElevatorMaxVelocity <= elevator.Row(1));
+  problem.SubjectTo(elevator.Row(1) <= kElevatorMaxVelocity);
 
   // Elevator acceleration limits
-  problem.SubjectTo(-kElevatorMaxAcceleration.value() <= elevatorAccel);
-  problem.SubjectTo(elevatorAccel <= kElevatorMaxAcceleration.value());
+  problem.SubjectTo(-kElevatorMaxAcceleration <= elevatorAccel);
+  problem.SubjectTo(elevatorAccel <= kElevatorMaxAcceleration);
 
   // Arm velocity limits
-  problem.SubjectTo(-kArmMaxVelocity.value() <= arm.Row(1));
-  problem.SubjectTo(arm.Row(1) <= kArmMaxVelocity.value());
+  problem.SubjectTo(-kArmMaxVelocity <= arm.Row(1));
+  problem.SubjectTo(arm.Row(1) <= kArmMaxVelocity);
 
   // Arm acceleration limits
-  problem.SubjectTo(-kArmMaxAcceleration.value() <= armAccel);
-  problem.SubjectTo(armAccel <= kArmMaxAcceleration.value());
+  problem.SubjectTo(-kArmMaxAcceleration <= armAccel);
+  problem.SubjectTo(armAccel <= kArmMaxAcceleration);
 
   // Height limit
   problem.SubjectTo(elevator.Row(0) +
-                        kArmLength.value() *
-                            arm.Row(0).CwiseTransform(sleipnir::sin) <=
-                    kEndEffectorMaxHeight.value());
+                        kArmLength * arm.Row(0).CwiseTransform(sleipnir::sin) <=
+                    kEndEffectorMaxHeight);
 
   // Cost function
   sleipnir::Variable J = 0.0;
   for (int k = 0; k < N + 1; ++k) {
-    J += sleipnir::pow(kElevatorEndHeight.value() - elevator(0, k), 2) +
-         sleipnir::pow(kArmEndAngle.value() - arm(0, k), 2);
+    J += sleipnir::pow(kElevatorEndHeight - elevator(0, k), 2) +
+         sleipnir::pow(kArmEndAngle - arm(0, k), 2);
   }
   problem.Minimize(J);
 

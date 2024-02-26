@@ -6,12 +6,13 @@
 
 #include <Eigen/Core>
 
-sleipnir::OptimizationProblem FlywheelSleipnir(units::second_t dt, int N) {
+sleipnir::OptimizationProblem FlywheelSleipnir(std::chrono::duration<double> dt,
+                                               int N) {
   // Flywheel model:
   // States: [velocity]
   // Inputs: [voltage]
-  Eigen::Matrix<double, 1, 1> A{std::exp(-dt.value())};
-  Eigen::Matrix<double, 1, 1> B{1.0 - std::exp(-dt.value())};
+  Eigen::Matrix<double, 1, 1> A{std::exp(-dt.count())};
+  Eigen::Matrix<double, 1, 1> B{1.0 - std::exp(-dt.count())};
 
   sleipnir::OptimizationProblem problem;
   auto X = problem.DecisionVariable(1, N + 1);

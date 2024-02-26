@@ -6,12 +6,12 @@
 
 #include <Eigen/Core>
 
-casadi::Opti FlywheelCasADi(units::second_t dt, int N) {
+casadi::Opti FlywheelCasADi(std::chrono::duration<double> dt, int N) {
   // Flywheel model:
   // States: [velocity]
   // Inputs: [voltage]
-  Eigen::Matrix<double, 1, 1> A{std::exp(-dt.value())};
-  Eigen::Matrix<double, 1, 1> B{1.0 - std::exp(-dt.value())};
+  Eigen::Matrix<double, 1, 1> A{std::exp(-dt.count())};
+  Eigen::Matrix<double, 1, 1> B{1.0 - std::exp(-dt.count())};
 
   casadi::MX caA = A(0, 0);
   casadi::MX caB = B(0, 0);

@@ -3,15 +3,14 @@
 #include <array>
 
 #include <fmt/core.h>
-#include <units/formatter.h>
 
 #include "CurrentManager.hpp"
 
 #ifndef RUNNING_TESTS
 int main() {
-  CurrentManager manager{std::array{1_A, 5_A, 10_A, 5_A}, 40_A};
+  CurrentManager manager{std::array{1.0, 5.0, 10.0, 5.0}, 40.0};
 
-  auto currents = manager.Calculate(std::array{25_A, 10_A, 5_A, 0_A});
+  auto currents = manager.Calculate(std::array{25.0, 10.0, 5.0, 0.0});
 
   fmt::print("currents = [");
   for (size_t i = 0; i < currents.size(); ++i) {

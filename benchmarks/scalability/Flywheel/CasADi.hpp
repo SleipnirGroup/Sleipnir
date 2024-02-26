@@ -2,8 +2,9 @@
 
 #pragma once
 
+#include <chrono>
+
 #include <casadi/casadi.hpp>
-#include <units/time.h>
 
 /**
  * Creates a flywheel quadratic optimization problem with CasADi.
@@ -11,4 +12,4 @@
  * @param dt Timestep duration.
  * @param N Number of samples in the problem.
  */
-casadi::Opti FlywheelCasADi(units::second_t dt, int N);
+casadi::Opti FlywheelCasADi(std::chrono::duration<double> dt, int N);

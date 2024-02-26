@@ -13,7 +13,6 @@
 #include <casadi/casadi.hpp>
 #include <fmt/core.h>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
-#include <units/time.h>
 
 /**
  * Converts std::chrono::duration to a number of milliseconds rounded to three
@@ -82,9 +81,10 @@ void RunBenchmark(std::ofstream& results, std::function<Problem()> setup,
  *   samples and returns an optimization problem instance.
  */
 template <typename Problem>
-int RunBenchmarksAndLog(std::string_view filename, bool diagnostics,
-                        units::second_t T, std::span<int> sampleSizesToTest,
-                        std::function<Problem(units::second_t, int)> setup) {
+int RunBenchmarksAndLog(
+    std::string_view filename, bool diagnostics,
+    std::chrono::duration<double> T, std::span<int> sampleSizesToTest,
+    std::function<Problem(std::chrono::duration<double>, int)> setup) {
   std::ofstream results{std::string{filename}};
   if (!results.is_open()) {
     return 1;
@@ -98,7 +98,7 @@ int RunBenchmarksAndLog(std::string_view filename, bool diagnostics,
     results << N << ",";
     std::flush(results);
 
-    units::second_t dt = T / N;
+    auto dt = T / N;
 
     fmt::print(stderr, "N = {}...", N);
     RunBenchmark<Problem>(
