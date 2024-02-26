@@ -6,9 +6,8 @@
 #include <limits>
 #include <stdexcept>
 
-CurrentManager::CurrentManager(
-    std::span<const units::ampere_t> currentTolerances,
-    units::ampere_t maxCurrent)
+CurrentManager::CurrentManager(std::span<const double> currentTolerances,
+                               double maxCurrent)
     : m_desiredCurrents{static_cast<int>(currentTolerances.size()), 1},
       m_allocatedCurrents{
           m_problem.DecisionVariable(currentTolerances.size())} {
@@ -24,8 +23,7 @@ CurrentManager::CurrentManager(
     // The weight is 1/tolᵢ² where tolᵢ is the tolerance between the desired
     // and allocated current for subsystem i
     auto error = m_desiredCurrents(i) - m_allocatedCurrents(i);
-    J += error * error /
-         (currentTolerances[i].value() * currentTolerances[i].value());
+    J += error * error / (currentTolerances[i] * currentTolerances[i]);
 
     currentSum += m_allocatedCurrents(i);
 
@@ -35,11 +33,11 @@ CurrentManager::CurrentManager(
   m_problem.Minimize(J);
 
   // Keep total current below maximum
-  m_problem.SubjectTo(currentSum <= maxCurrent.value());
+  m_problem.SubjectTo(currentSum <= maxCurrent);
 }
 
-std::vector<units::ampere_t> CurrentManager::Calculate(
-    std::span<const units::ampere_t> desiredCurrents) {
+std::vector<double> CurrentManager::Calculate(
+    std::span<const double> desiredCurrents) {
   if (m_desiredCurrents.Rows() != static_cast<int>(desiredCurrents.size())) {
     throw std::runtime_error(
         "Number of desired currents must equal the number of tolerances "
@@ -47,12 +45,12 @@ std::vector<units::ampere_t> CurrentManager::Calculate(
   }
 
   for (size_t i = 0; i < desiredCurrents.size(); ++i) {
-    m_desiredCurrents(i).SetValue(desiredCurrents[i].value());
+    m_desiredCurrents(i).SetValue(desiredCurrents[i]);
   }
 
   m_problem.Solve();
 
-  std::vector<units::ampere_t> result;
+  std::vector<double> result;
   for (size_t i = 0; i < desiredCurrents.size(); ++i) {
     result.emplace_back(std::max(m_allocatedCurrents.Value(i), 0.0));
   }

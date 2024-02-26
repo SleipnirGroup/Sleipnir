@@ -1,5 +1,6 @@
 // Copyright (c) Sleipnir contributors
 
+#include <chrono>
 #include <vector>
 
 #include "CasADi.hpp"
@@ -8,6 +9,8 @@
 #include "Util.hpp"
 
 int main(int argc, char* argv[]) {
+  using namespace std::chrono_literals;
+
   CmdlineArgs args{argv, argc};
 
   bool runCasadi = args.Contains("--casadi");
@@ -18,7 +21,7 @@ int main(int argc, char* argv[]) {
   }
   bool diagnostics = args.Contains("--enable-diagnostics");
 
-  constexpr auto T = 5_s;
+  constexpr std::chrono::duration<double> T = 5s;
 
   std::vector<int> sampleSizesToTest;
   for (int N = 100; N < 1000; N += 100) {

@@ -6,7 +6,6 @@
 #include <vector>
 
 #include <sleipnir/optimization/OptimizationProblem.hpp>
-#include <units/current.h>
 
 /**
  * This class computes the optimal current allocation for a list of subsystems
@@ -22,8 +21,7 @@ class CurrentManager {
    * @param currentTolerances The relative current tolerance of each subsystem.
    * @param maxCurrent The current budget to allocate between subsystems.
    */
-  CurrentManager(std::span<const units::ampere_t> currentTolerances,
-                 units::ampere_t maxCurrent);
+  CurrentManager(std::span<const double> currentTolerances, double maxCurrent);
 
   /**
    * Returns the optimal current allocation for a list of subsystems given a
@@ -35,8 +33,7 @@ class CurrentManager {
    * @throws std::runtime_error if the number of desired currents doesn't equal
    *         the number of tolerances passed in the constructor.
    */
-  std::vector<units::ampere_t> Calculate(
-      std::span<const units::ampere_t> desiredCurrents);
+  std::vector<double> Calculate(std::span<const double> desiredCurrents);
 
  private:
   sleipnir::OptimizationProblem m_problem;

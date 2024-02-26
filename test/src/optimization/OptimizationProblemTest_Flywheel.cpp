@@ -10,11 +10,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include <fmt/core.h>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
-#include <units/angle.h>
-#include <units/angular_acceleration.h>
-#include <units/angular_velocity.h>
-#include <units/time.h>
-#include <units/voltage.h>
 
 namespace {
 bool Near(double expected, double actual, double tolerance) {
@@ -23,17 +18,19 @@ bool Near(double expected, double actual, double tolerance) {
 }  // namespace
 
 TEST_CASE("OptimizationProblem - Flywheel", "[OptimizationProblem]") {
+  using namespace std::chrono_literals;
+
   auto start = std::chrono::system_clock::now();
 
-  constexpr auto T = 5_s;
-  constexpr units::second_t dt = 5_ms;
+  constexpr std::chrono::duration<double> T = 5s;
+  constexpr std::chrono::duration<double> dt = 5ms;
   constexpr int N = T / dt;
 
   // Flywheel model:
   // States: [velocity]
   // Inputs: [voltage]
-  Eigen::Matrix<double, 1, 1> A{std::exp(-dt.value())};
-  Eigen::Matrix<double, 1, 1> B{1.0 - std::exp(-dt.value())};
+  Eigen::Matrix<double, 1, 1> A{std::exp(-dt.count())};
+  Eigen::Matrix<double, 1, 1> B{1.0 - std::exp(-dt.count())};
 
   sleipnir::OptimizationProblem problem;
   auto X = problem.DecisionVariable(1, N + 1);
@@ -125,8 +122,7 @@ TEST_CASE("OptimizationProblem - Flywheel", "[OptimizationProblem]") {
     states << "Time (s),Velocity (rad/s)\n";
 
     for (int k = 0; k < N + 1; ++k) {
-      states << fmt::format("{},{}\n", k * units::second_t{dt}.value(),
-                            X.Value(0, k));
+      states << fmt::format("{},{}\n", k * dt.count(), X.Value(0, k));
     }
   }
 
@@ -137,9 +133,9 @@ TEST_CASE("OptimizationProblem - Flywheel", "[OptimizationProblem]") {
 
     for (int k = 0; k < N + 1; ++k) {
       if (k < N) {
-        inputs << fmt::format("{},{}\n", k * dt.value(), U.Value(0, k));
+        inputs << fmt::format("{},{}\n", k * dt.count(), U.Value(0, k));
       } else {
-        inputs << fmt::format("{},{}\n", k * dt.value(), 0.0);
+        inputs << fmt::format("{},{}\n", k * dt.count(), 0.0);
       }
     }
   }

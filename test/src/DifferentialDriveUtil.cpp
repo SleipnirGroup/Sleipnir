@@ -2,20 +2,15 @@
 
 #include "DifferentialDriveUtil.hpp"
 
-#include <units/acceleration.h>
-#include <units/length.h>
-#include <units/velocity.h>
-#include <units/voltage.h>
-
 Eigen::Vector<double, 5> DifferentialDriveDynamicsDouble(
     const Eigen::Vector<double, 5>& x, const Eigen::Vector<double, 2>& u) {
   // x = [x, y, heading, left velocity, right velocity]ᵀ
   // u = [left voltage, right voltage]ᵀ
-  constexpr double trackwidth = (0.699_m).value();
-  constexpr double Kv_linear = (3.02_V / 1_mps).value();
-  constexpr double Ka_linear = (0.642_V / 1_mps_sq).value();
-  constexpr double Kv_angular = (1.382_V / 1_mps).value();
-  constexpr double Ka_angular = (0.08495_V / 1_mps_sq).value();
+  constexpr double trackwidth = 0.699;    // m
+  constexpr double Kv_linear = 3.02;      // V/(m/s)
+  constexpr double Ka_linear = 0.642;     // V/(m/s²)
+  constexpr double Kv_angular = 1.382;    // V/(m/s)
+  constexpr double Ka_angular = 0.08495;  // V/(m/s²)
 
   double v = (x(3) + x(4)) / 2.0;
 
@@ -40,11 +35,11 @@ sleipnir::VariableMatrix DifferentialDriveDynamics(
     const sleipnir::VariableMatrix& x, const sleipnir::VariableMatrix& u) {
   // x = [x, y, heading, left velocity, right velocity]ᵀ
   // u = [left voltage, right voltage]ᵀ
-  constexpr double trackwidth = (0.699_m).value();
-  constexpr double Kv_linear = (3.02_V / 1_mps).value();
-  constexpr double Ka_linear = (0.642_V / 1_mps_sq).value();
-  constexpr double Kv_angular = (1.382_V / 1_mps).value();
-  constexpr double Ka_angular = (0.08495_V / 1_mps_sq).value();
+  constexpr double trackwidth = 0.699;    // m
+  constexpr double Kv_linear = 3.02;      // V/(m/s)
+  constexpr double Ka_linear = 0.642;     // V/(m/s²)
+  constexpr double Kv_angular = 1.382;    // V/(m/s)
+  constexpr double Ka_angular = 0.08495;  // V/(m/s²)
 
   auto v = (x(3) + x(4)) / 2.0;
 

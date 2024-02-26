@@ -2,10 +2,6 @@
 
 #include "CartPoleUtil.hpp"
 
-#include <units/acceleration.h>
-#include <units/length.h>
-#include <units/mass.h>
-
 Eigen::Vector<double, 4> CartPoleDynamicsDouble(
     const Eigen::Vector<double, 4>& x, const Eigen::Vector<double, 1>& u) {
   // https://underactuated.mit.edu/acrobot.html#cart_pole
@@ -31,10 +27,10 @@ Eigen::Vector<double, 4> CartPoleDynamicsDouble(
   //
   //     [1]
   // B = [0]
-  constexpr double m_c = (5_kg).value();        // Cart mass
-  constexpr double m_p = (0.5_kg).value();      // Pole mass
-  constexpr double l = (0.5_m).value();         // Pole length
-  constexpr double g = (9.806_mps_sq).value();  // Acceleration due to gravity
+  constexpr double m_c = 5.0;  // Cart mass (kg)
+  constexpr double m_p = 0.5;  // Pole mass (kg)
+  constexpr double l = 0.5;    // Pole length (m)
+  constexpr double g = 9.806;  // Acceleration due to gravity (m/s²)
 
   Eigen::Vector<double, 2> q = x.segment(0, 2);
   Eigen::Vector<double, 2> qdot = x.segment(2, 2);
@@ -107,10 +103,10 @@ sleipnir::VariableMatrix CartPoleDynamics(const sleipnir::VariableMatrix& x,
   //
   //     [1]
   // B = [0]
-  constexpr double m_c = (5_kg).value();        // Cart mass
-  constexpr double m_p = (0.5_kg).value();      // Pole mass
-  constexpr double l = (0.5_m).value();         // Pole length
-  constexpr double g = (9.806_mps_sq).value();  // Acceleration due to gravity
+  constexpr double m_c = 5.0;  // Cart mass (kg)
+  constexpr double m_p = 0.5;  // Pole mass (kg)
+  constexpr double l = 0.5;    // Pole length (m)
+  constexpr double g = 9.806;  // Acceleration due to gravity (m/s²)
 
   auto q = x.Segment(0, 2);
   auto qdot = x.Segment(2, 2);

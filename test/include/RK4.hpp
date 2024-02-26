@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include <units/time.h>
+#include <chrono>
 
 /**
  * Performs 4th order Runge-Kutta integration of dx/dt = f(x, u) for dt.
@@ -13,8 +13,8 @@
  * @param dt The time over which to integrate.
  */
 template <typename F, typename T, typename U>
-T RK4(F&& f, T x, U u, units::second_t dt) {
-  const auto h = dt.value();
+T RK4(F&& f, T x, U u, std::chrono::duration<double> dt) {
+  const auto h = dt.count();
 
   T k1 = f(x, u);
   T k2 = f(x + h * 0.5 * k1, u);

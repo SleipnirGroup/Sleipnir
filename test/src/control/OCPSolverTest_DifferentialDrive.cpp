@@ -9,17 +9,13 @@
 #include <catch2/catch_test_macros.hpp>
 #include <fmt/core.h>
 #include <sleipnir/control/OCPSolver.hpp>
-#include <units/acceleration.h>
-#include <units/angle.h>
-#include <units/length.h>
-#include <units/time.h>
-#include <units/velocity.h>
-#include <units/voltage.h>
 
 #include "DifferentialDriveUtil.hpp"
 #include "RK4.hpp"
 
 TEST_CASE("OCPSolver - Differential drive", "[OCPSolver]") {
+  using namespace std::chrono_literals;
+
   auto start = std::chrono::system_clock::now();
 
   constexpr int N = 50;
@@ -28,11 +24,11 @@ TEST_CASE("OCPSolver - Differential drive", "[OCPSolver]") {
                       sleipnir::VariableMatrix u, sleipnir::Variable dt) {
     // x = [x, y, heading, left velocity, right velocity]ᵀ
     // u = [left voltage, right voltage]ᵀ
-    constexpr double trackwidth = (0.699_m).value();
-    constexpr double Kv_linear = (3.02_V / 1_mps).value();
-    constexpr double Ka_linear = (0.642_V / 1_mps_sq).value();
-    constexpr double Kv_angular = (1.382_V / 1_mps).value();
-    constexpr double Ka_angular = (0.08495_V / 1_mps_sq).value();
+    constexpr double trackwidth = 0.699;    // m
+    constexpr double Kv_linear = 3.02;      // V/(m/s)
+    constexpr double Ka_linear = 0.642;     // V/(m/s²)
+    constexpr double Kv_angular = 1.382;    // V/(m/s)
+    constexpr double Ka_angular = 0.08495;  // V/(m/s²)
 
     auto v = (x(3) + x(4)) / 2.0;
 
@@ -53,15 +49,14 @@ TEST_CASE("OCPSolver - Differential drive", "[OCPSolver]") {
     return xdot;
   };
 
-  constexpr units::second_t minTimestep = 50_ms;
+  constexpr std::chrono::duration<double> minTimestep = 50ms;
   constexpr Eigen::Vector<double, 5> x_initial{{0.0, 0.0, 0.0, 0.0, 0.0}};
   constexpr Eigen::Vector<double, 5> x_final{{1.0, 1.0, 0.0, 0.0, 0.0}};
   constexpr Eigen::Matrix<double, 2, 1> u_min{{-12.0, -12.0}};
   constexpr Eigen::Matrix<double, 2, 1> u_max{{12.0, 12.0}};
 
   sleipnir::OCPSolver problem(
-      5, 2, std::chrono::duration<double>{minTimestep.value()}, N, dynamics,
-      sleipnir::DynamicsType::kExplicitODE,
+      5, 2, minTimestep, N, dynamics, sleipnir::DynamicsType::kExplicitODE,
       sleipnir::TimestepMethod::kVariableSingle,
       sleipnir::TranscriptionMethod::kDirectTranscription);
 
@@ -79,8 +74,8 @@ TEST_CASE("OCPSolver - Differential drive", "[OCPSolver]") {
 
   // TODO: Solver is unhappy when more than one minimum timestep is constrained.
   // Detect this in either OptimizationProblem or OCPSolver.
-  problem.SetMinTimestep(std::chrono::duration<double>{minTimestep.value()});
-  problem.SetMaxTimestep(std::chrono::duration<double>{3.0});
+  problem.SetMinTimestep(minTimestep);
+  problem.SetMaxTimestep(3s);
 
   // Set up objective
   problem.Minimize(problem.DT() * Eigen::Matrix<double, N + 1, 1>::Ones());
@@ -131,7 +126,7 @@ TEST_CASE("OCPSolver - Differential drive", "[OCPSolver]") {
 
     // Project state forward
     x = RK4(DifferentialDriveDynamicsDouble, x, u,
-            units::second_t{problem.DT().Value(0, k)});
+            std::chrono::duration<double>{problem.DT().Value(0, k)});
   }
 
   // Verify final state

@@ -11,11 +11,8 @@
 #include <fmt/core.h>
 #include <sleipnir/control/OCPSolver.hpp>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
-#include <units/angle.h>
-#include <units/angular_acceleration.h>
-#include <units/angular_velocity.h>
-#include <units/time.h>
-#include <units/voltage.h>
+
+using namespace std::chrono_literals;
 
 namespace {
 bool Near(double expected, double actual, double tolerance) {
@@ -30,20 +27,19 @@ void TestFlywheel(std::string testName, Eigen::Matrix<double, 1, 1> A,
                   sleipnir::TranscriptionMethod method) {
   auto start = std::chrono::system_clock::now();
 
-  constexpr auto T = 5_s;
-  constexpr units::second_t dt = 5_ms;
+  constexpr std::chrono::duration<double> T = 5s;
+  constexpr std::chrono::duration<double> dt = 5ms;
   constexpr int N = T / dt;
 
   // Flywheel model:
   // States: [velocity]
   // Inputs: [voltage]
-  Eigen::Matrix<double, 1, 1> A_discrete{std::exp(A(0) * dt.value())};
+  Eigen::Matrix<double, 1, 1> A_discrete{std::exp(A(0) * dt.count())};
   Eigen::Matrix<double, 1, 1> B_discrete{(1.0 - A_discrete(0)) * B(0)};
   Eigen::Matrix<double, 1, 1> r{10.0};
 
-  sleipnir::OCPSolver solver(1, 1, std::chrono::duration<double>{dt.value()}, N,
-                             F, dynamicsType, sleipnir::TimestepMethod::kFixed,
-                             method);
+  sleipnir::OCPSolver solver(1, 1, dt, N, F, dynamicsType,
+                             sleipnir::TimestepMethod::kFixed, method);
   solver.ConstrainInitialState(0.0);
   solver.SetUpperInputBound(12);
   solver.SetLowerInputBound(-12);
@@ -126,8 +122,7 @@ void TestFlywheel(std::string testName, Eigen::Matrix<double, 1, 1> A,
     states << "Time (s),Velocity (rad/s)\n";
 
     for (int k = 0; k < N + 1; ++k) {
-      states << fmt::format("{},{}\n", k * units::second_t{dt}.value(),
-                            solver.X().Value(0, k));
+      states << fmt::format("{},{}\n", k * dt.count(), solver.X().Value(0, k));
     }
   }
 
@@ -138,10 +133,10 @@ void TestFlywheel(std::string testName, Eigen::Matrix<double, 1, 1> A,
 
     for (int k = 0; k < N + 1; ++k) {
       if (k < N) {
-        inputs << fmt::format("{},{}\n", k * dt.value(),
+        inputs << fmt::format("{},{}\n", k * dt.count(),
                               solver.U().Value(0, k));
       } else {
-        inputs << fmt::format("{},{}\n", k * dt.value(), 0.0);
+        inputs << fmt::format("{},{}\n", k * dt.count(), 0.0);
       }
     }
   }
@@ -169,9 +164,9 @@ TEST_CASE("OCPSolver - Flywheel (explicit)", "[OCPSolver]") {
 TEST_CASE("OCPSolver - Flywheel (discrete)", "[OCPSolver]") {
   Eigen::Matrix<double, 1, 1> A{-1.0};
   Eigen::Matrix<double, 1, 1> B{1.0};
-  constexpr units::second_t dt = 5_ms;
+  constexpr std::chrono::duration<double> dt = 5ms;
 
-  Eigen::Matrix<double, 1, 1> A_discrete{std::exp(A(0) * dt.value())};
+  Eigen::Matrix<double, 1, 1> A_discrete{std::exp(A(0) * dt.count())};
   Eigen::Matrix<double, 1, 1> B_discrete{(1.0 - A_discrete(0)) * B(0)};
 
   auto f_discrete = [=](sleipnir::Variable t, sleipnir::VariableMatrix x,
