@@ -1,7 +1,7 @@
 import math
 
 import jormungandr.autodiff as autodiff
-from jormungandr.autodiff import ExpressionType, VariableMatrix
+from jormungandr.autodiff import ExpressionType, VariableMatrix, Variable
 from jormungandr.optimization import OptimizationProblem, SolverExitCondition
 import numpy as np
 import pytest
@@ -18,35 +18,37 @@ def rk4(f, x, u, dt):
     return x + h / 6.0 * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
 
 
-def cart_pole_dynamics_double(x, u):
-    # https://underactuated.mit.edu/acrobot.html#cart_pole
-    #
-    # θ is CCW+ measured from negative y-axis.
-    #
-    # q = [x, θ]ᵀ
-    # q̇ = [ẋ, θ̇]ᵀ
-    # u = f_x
-    #
-    # M(q)q̈ + C(q, q̇)q̇ = τ_g(q) + Bu
-    # M(q)q̈ = τ_g(q) − C(q, q̇)q̇ + Bu
-    # q̈ = M⁻¹(q)(τ_g(q) − C(q, q̇)q̇ + Bu)
-    #
-    #        [ m_c + m_p  m_p l cosθ]
-    # M(q) = [m_p l cosθ    m_p l²  ]
-    #
-    #           [0  −m_p lθ̇ sinθ]
-    # C(q, q̇) = [0       0      ]
-    #
-    #          [     0      ]
-    # τ_g(q) = [-m_p gl sinθ]
-    #
-    #     [1]
-    # B = [0]
-    m_c = 5.0  # Cart mass (kg)
-    m_p = 0.5  # Pole mass (kg)
-    l = 0.5  # Pole length (m)
-    g = 9.806  # Acceleration due to gravity (m/s²)
+# https://underactuated.mit.edu/acrobot.html#cart_pole
+#
+# θ is CCW+ measured from negative y-axis.
+#
+# q = [x, θ]ᵀ
+# q̇ = [ẋ, θ̇]ᵀ
+# u = f_x
+#
+# M(q)q̈ + C(q, q̇)q̇ = τ_g(q) + Bu
+# M(q)q̈ = τ_g(q) − C(q, q̇)q̇ + Bu
+# q̈ = M⁻¹(q)(τ_g(q) − C(q, q̇)q̇ + Bu)
+#
+#        [ m_c + m_p  m_p l cosθ]
+# M(q) = [m_p l cosθ    m_p l²  ]
+#
+#           [0  −m_p lθ̇ sinθ]
+# C(q, q̇) = [0       0      ]
+#
+#          [     0      ]
+# τ_g(q) = [-m_p gl sinθ]
+#
+#     [1]
+# B = [0]
 
+m_c = 5.0  # Cart mass (kg)
+m_p = 0.5  # Pole mass (kg)
+l = 0.5  # Pole length (m)
+g = 9.806  # Acceleration due to gravity (m/s²)
+
+
+def cart_pole_dynamics_double(x, u):
     q = x[:2, :]
     qdot = x[2:, :]
     theta = q[1, 0]
@@ -54,33 +56,25 @@ def cart_pole_dynamics_double(x, u):
 
     #        [ m_c + m_p  m_p l cosθ]
     # M(q) = [m_p l cosθ    m_p l²  ]
-    M = np.empty((2, 2))
-    M[0, 0] = m_c + m_p
-    M[0, 1] = m_p * l * math.cos(theta)
-    M[1, 0] = m_p * l * math.cos(theta)
-    M[1, 1] = m_p * l**2
+    M = np.array(
+        [
+            [m_c + m_p, m_p * l * math.cos(theta)],
+            [m_p * l * math.cos(theta), m_p * l**2],
+        ]
+    )
 
-    Minv = np.empty((2, 2))
-    Minv[0, 0] = M[1, 1]
-    Minv[0, 1] = -M[0, 1]
-    Minv[1, 0] = -M[1, 0]
-    Minv[1, 1] = M[0, 0]
     detM = M[0, 0] * M[1, 1] - M[0, 1] * M[1, 0]
-    Minv /= detM
+    Minv = np.array(
+        [[M[1, 1] / detM, -M[0, 1] / detM], [-M[1, 0] / detM, M[0, 0] / detM]]
+    )
 
     #           [0  −m_p lθ̇ sinθ]
     # C(q, q̇) = [0       0      ]
-    C = np.empty((2, 2))
-    C[0, 0] = 0.0
-    C[0, 1] = -m_p * l * thetadot * math.sin(theta)
-    C[1, 0] = 0.0
-    C[1, 1] = 0.0
+    C = np.array([[0.0, -m_p * l * thetadot * math.sin(theta)], [0.0, 0.0]])
 
     #          [     0      ]
     # τ_g(q) = [-m_p gl sinθ]
-    tau_g = np.empty((2, 1))
-    tau_g[0, :] = 0.0
-    tau_g[1, :] = -m_p * g * l * math.sin(theta)
+    tau_g = np.array([[0.0], [-m_p * g * l * math.sin(theta)]])
 
     #     [1]
     # B = [0]
@@ -94,34 +88,6 @@ def cart_pole_dynamics_double(x, u):
 
 
 def cart_pole_dynamics(x, u):
-    # https://underactuated.mit.edu/acrobot.html#cart_pole
-    #
-    # θ is CCW+ measured from negative y-axis.
-    #
-    # q = [x, θ]ᵀ
-    # q̇ = [ẋ, θ̇]ᵀ
-    # u = f_x
-    #
-    # M(q)q̈ + C(q, q̇)q̇ = τ_g(q) + Bu
-    # M(q)q̈ = τ_g(q) − C(q, q̇)q̇ + Bu
-    # q̈ = M⁻¹(q)(τ_g(q) − C(q, q̇)q̇ + Bu)
-    #
-    #        [ m_c + m_p  m_p l cosθ]
-    # M(q) = [m_p l cosθ    m_p l²  ]
-    #
-    #           [0  −m_p lθ̇ sinθ]
-    # C(q, q̇) = [0       0      ]
-    #
-    #          [     0      ]
-    # τ_g(q) = [-m_p gl sinθ]
-    #
-    #     [1]
-    # B = [0]
-    m_c = 5.0  # Cart mass (kg)
-    m_p = 0.5  # Pole mass (kg)
-    l = 0.5  # Pole length (m)
-    g = 9.806  # Acceleration due to gravity (m/s²)
-
     q = x[:2, :]
     qdot = x[2:, :]
     theta = q[1, 0]
@@ -129,33 +95,30 @@ def cart_pole_dynamics(x, u):
 
     #        [ m_c + m_p  m_p l cosθ]
     # M(q) = [m_p l cosθ    m_p l²  ]
-    M = VariableMatrix(2, 2)
-    M[0, 0] = m_c + m_p
-    M[0, 1] = m_p * l * autodiff.cos(theta)
-    M[1, 0] = m_p * l * autodiff.cos(theta)
-    M[1, 1] = m_p * l**2
+    M = VariableMatrix(
+        [
+            [Variable(m_c + m_p), m_p * l * autodiff.cos(theta)],
+            [m_p * l * autodiff.cos(theta), Variable(m_p * l**2)],
+        ]
+    )
 
-    Minv = VariableMatrix(2, 2)
-    Minv[0, 0] = M[1, 1]
-    Minv[0, 1] = -M[0, 1]
-    Minv[1, 0] = -M[1, 0]
-    Minv[1, 1] = M[0, 0]
     detM = M[0, 0] * M[1, 1] - M[0, 1] * M[1, 0]
-    Minv /= detM
+    Minv = VariableMatrix(
+        [[M[1, 1] / detM, -M[0, 1] / detM], [-M[1, 0] / detM, M[0, 0] / detM]]
+    )
 
     #           [0  −m_p lθ̇ sinθ]
     # C(q, q̇) = [0       0      ]
-    C = VariableMatrix(2, 2)
-    C[0, 0] = 0.0
-    C[0, 1] = -m_p * l * thetadot * autodiff.sin(theta)
-    C[1, 0] = 0.0
-    C[1, 1] = 0.0
+    C = VariableMatrix(
+        [
+            [Variable(0.0), -m_p * l * thetadot * autodiff.sin(theta)],
+            [Variable(0.0), Variable(0.0)],
+        ]
+    )
 
     #          [     0      ]
     # τ_g(q) = [-m_p gl sinθ]
-    tau_g = VariableMatrix(2, 1)
-    tau_g[0, :] = 0.0
-    tau_g[1, :] = -m_p * g * l * autodiff.sin(theta)
+    tau_g = VariableMatrix([[Variable(0.0)], [-m_p * g * l * autodiff.sin(theta)]])
 
     #     [1]
     # B = [0]
