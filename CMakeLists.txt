@@ -333,14 +333,13 @@ if(BUILD_PYTHON)
         DESTINATION ${PY_DEST}
     )
 
-    # Generate stubs for the Python module
-    # pybind11-stubgen supports Linux and macOS x86_64 but not Windows or macOS
-    # arm64
+    # pybind11-stubgen and pybind11_mkdoc support Linux and macOS x86_64 but not
+    # Windows or macOS arm64
     if(
         NOT (
             WIN32
             OR (APPLE AND ${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "arm64")
-            OR (CMAKE_CROSSCOMPILING)
+            OR CMAKE_CROSSCOMPILING
         )
     )
         # pybind11-stubgen dependency
@@ -352,21 +351,11 @@ if(BUILD_PYTHON)
         )
         fetchcontent_makeavailable(pybind11-stubgen)
 
+        # Generate stubs for the Python module
         include(cmake/modules/Pybind11Stubgen.cmake)
         pybind11_stubgen(_jormungandr)
         pybind11_stubgen_install(_jormungandr ${PY_DEST})
-    endif()
 
-    # Generate docs for the Python module
-    # pybind11_mkdoc supports Linux and macOS x86_64 but not Windows or macOS
-    # arm64
-    if(
-        NOT (
-            WIN32
-            OR (APPLE AND ${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "arm64")
-            OR (CMAKE_CROSSCOMPILING)
-        )
-    )
         # pybind11_mkdoc dependency
         fetchcontent_declare(
             pybind11_mkdoc
@@ -383,6 +372,7 @@ if(BUILD_PYTHON)
             include/sleipnir/optimization/*.hpp
         )
 
+        # Generate docs for the Python module
         include(cmake/modules/Pybind11Mkdoc.cmake)
         pybind11_mkdoc(_jormungandr "${sleipnir_headers}")
         add_dependencies(_jormungandr _jormungandr_docstrings)
