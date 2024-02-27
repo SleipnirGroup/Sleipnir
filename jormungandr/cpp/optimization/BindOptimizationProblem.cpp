@@ -6,9 +6,9 @@
 #include <pybind11/functional.h>
 #include <pybind11/pytypes.h>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
+#include <sleipnir/optimization/SolverConfig.hpp>
 
 #include "Docstrings.hpp"
-#include "sleipnir/optimization/SolverConfig.hpp"
 
 namespace py = pybind11;
 

@@ -6,10 +6,12 @@ cppSrcFileInclude {
   \.cpp$
 }
 
-generatedFileExclude {
-  thirdparty/
+modifiableFileExclude {
+  \.patch$
   \.png$
   \.svg$
+  jormungandr/cpp/Docstrings\.hpp$
+  jormungandr/py\.typed$
 }
 
 includeOtherLibs {
@@ -17,11 +19,5 @@ includeOtherLibs {
   ^catch2/
   ^fmt/
   ^pybind11/
-  ^units/
-}
-
-modifiableFileExclude {
-  \.patch$
-  jormungandr/cpp/Docstrings\.hpp$
-  jormungandr/py\.typed$
+  ^sleipnir/
 }

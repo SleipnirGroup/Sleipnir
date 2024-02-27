@@ -13,7 +13,6 @@
 #include <sleipnir/optimization/Constraints.hpp>
 
 #include "Docstrings.hpp"
-#include "sleipnir/optimization/OptimizationProblem.hpp"
 
 namespace py = pybind11;
 
