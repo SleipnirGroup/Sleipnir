@@ -333,15 +333,8 @@ if(BUILD_PYTHON)
         DESTINATION ${PY_DEST}
     )
 
-    # pybind11-stubgen and pybind11_mkdoc support Linux and macOS x86_64 but not
-    # Windows or macOS arm64
-    if(
-        NOT (
-            WIN32
-            OR (APPLE AND ${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "arm64")
-            OR CMAKE_CROSSCOMPILING
-        )
-    )
+    # pybind11-stubgen and pybind11_mkdoc don't support Windows
+    if(NOT WIN32 AND NOT CMAKE_CROSSCOMPILING)
         # pybind11-stubgen dependency
         fetchcontent_declare(
             pybind11-stubgen
