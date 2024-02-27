@@ -4,10 +4,7 @@ import jormungandr.autodiff as autodiff
 from jormungandr.autodiff import ExpressionType, VariableMatrix
 from jormungandr.optimization import OptimizationProblem, SolverExitCondition
 import numpy as np
-
-
-def near(expected, actual, tolerance):
-    return abs(expected - actual) < tolerance
+import pytest
 
 
 def rk4(f, x, u, dt):
@@ -118,39 +115,40 @@ def test_optimization_problem_differential_drive():
     assert status.inequality_constraint_type == ExpressionType.LINEAR
     assert status.exit_condition == SolverExitCondition.SUCCESS
 
-    if status.exit_condition == SolverExitCondition.SUCCESS:
-        # Verify initial state
-        assert near(x_initial[0, 0], X.value(0, 0), 1e-8)
-        assert near(x_initial[1, 0], X.value(1, 0), 1e-8)
-        assert near(x_initial[2, 0], X.value(2, 0), 1e-8)
-        assert near(x_initial[3, 0], X.value(3, 0), 1e-8)
-        assert near(x_initial[4, 0], X.value(4, 0), 1e-8)
+    # Verify initial state
+    assert X.value(0, 0) == pytest.approx(x_initial[0, 0], abs=1e-8)
+    assert X.value(1, 0) == pytest.approx(x_initial[1, 0], abs=1e-8)
+    assert X.value(2, 0) == pytest.approx(x_initial[2, 0], abs=1e-8)
+    assert X.value(3, 0) == pytest.approx(x_initial[3, 0], abs=1e-8)
+    assert X.value(4, 0) == pytest.approx(x_initial[4, 0], abs=1e-8)
 
-        # Verify solution
-        for k in range(N):
-            # Input constraints
-            assert U[0, k] >= -u_max
-            assert U[0, k] <= u_max
-            assert U[1, k] >= -u_max
-            assert U[1, k] <= u_max
+    # Verify solution
+    x = np.zeros((5, 1))
+    for k in range(N):
+        u = U[:, k : k + 1].value()
 
-            # Dynamics constraints
-            expected_x_k1 = rk4(
-                differential_drive_dynamics_double,
-                X[:, k : k + 1].value(),
-                U[:, k : k + 1].value(),
-                dt,
-            )
-            actual_x_k1 = X[:, k + 1 : k + 2].value()
-            for row in range(actual_x_k1.shape[0]):
-                assert near(expected_x_k1[row, 0], actual_x_k1[row, 0], 1e-8)
+        # Input constraints
+        assert U[0, k].value() >= -u_max
+        assert U[0, k].value() <= u_max
+        assert U[1, k].value() >= -u_max
+        assert U[1, k].value() <= u_max
 
-        # Verify final state
-        assert near(x_final[0, 0], X.value(0, N), 1e-8)
-        assert near(x_final[1, 0], X.value(1, N), 1e-8)
-        assert near(x_final[2, 0], X.value(2, N), 1e-8)
-        assert near(x_final[3, 0], X.value(3, N), 1e-8)
-        assert near(x_final[4, 0], X.value(4, N), 1e-8)
+        # Verify state
+        assert X.value(0, k) == pytest.approx(x[0, 0], abs=1e-8)
+        assert X.value(1, k) == pytest.approx(x[1, 0], abs=1e-8)
+        assert X.value(2, k) == pytest.approx(x[2, 0], abs=1e-8)
+        assert X.value(3, k) == pytest.approx(x[3, 0], abs=1e-8)
+        assert X.value(4, k) == pytest.approx(x[4, 0], abs=1e-8)
+
+        # Project state forward
+        x = rk4(differential_drive_dynamics_double, x, u, dt)
+
+    # Verify final state
+    assert X.value(0, N) == pytest.approx(x_final[0, 0], abs=1e-8)
+    assert X.value(1, N) == pytest.approx(x_final[1, 0], abs=1e-8)
+    assert X.value(2, N) == pytest.approx(x_final[2, 0], abs=1e-8)
+    assert X.value(3, N) == pytest.approx(x_final[3, 0], abs=1e-8)
+    assert X.value(4, N) == pytest.approx(x_final[4, 0], abs=1e-8)
 
     # Log states for offline viewing
     with open("Differential drive states.csv", "w") as f:

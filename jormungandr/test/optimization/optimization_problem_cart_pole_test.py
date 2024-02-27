@@ -193,41 +193,38 @@ def test_optimization_problem_cart_pole():
     assert status.inequality_constraint_type == ExpressionType.LINEAR
     assert status.exit_condition == SolverExitCondition.SUCCESS
 
-    if status.exit_condition == SolverExitCondition.SUCCESS:
-        # Verify initial state
-        assert X.value(0, 0) == pytest.approx(x_initial[0, 0], abs=1e-8)
-        assert X.value(1, 0) == pytest.approx(x_initial[1, 0], abs=1e-8)
-        assert X.value(2, 0) == pytest.approx(x_initial[2, 0], abs=1e-8)
-        assert X.value(3, 0) == pytest.approx(x_initial[3, 0], abs=1e-8)
+    # Verify initial state
+    assert X.value(0, 0) == pytest.approx(x_initial[0, 0], abs=1e-8)
+    assert X.value(1, 0) == pytest.approx(x_initial[1, 0], abs=1e-8)
+    assert X.value(2, 0) == pytest.approx(x_initial[2, 0], abs=1e-8)
+    assert X.value(3, 0) == pytest.approx(x_initial[3, 0], abs=1e-8)
 
-        # Verify solution
-        for k in range(N):
-            # Cart position constraints
-            assert X[0, k] >= 0.0
-            assert X[0, k] <= d_max
+    # Verify solution
+    for k in range(N):
+        # Cart position constraints
+        assert X[0, k] >= 0.0
+        assert X[0, k] <= d_max
 
-            # Input constraints
-            assert U[0, k] >= -u_max
-            assert U[0, k] <= u_max
+        # Input constraints
+        assert U[0, k] >= -u_max
+        assert U[0, k] <= u_max
 
-            # Dynamics constraints
-            expected_x_k1 = rk4(
-                cart_pole_dynamics_double,
-                X[:, k : k + 1].value(),
-                U[:, k : k + 1].value(),
-                dt,
-            )
-            actual_x_k1 = X[:, k + 1 : k + 2].value()
-            for row in range(actual_x_k1.shape[0]):
-                assert actual_x_k1[row, 0] == pytest.approx(
-                    expected_x_k1[row, 0], abs=1e-8
-                )
+        # Dynamics constraints
+        expected_x_k1 = rk4(
+            cart_pole_dynamics_double,
+            X[:, k : k + 1].value(),
+            U[:, k : k + 1].value(),
+            dt,
+        )
+        actual_x_k1 = X[:, k + 1 : k + 2].value()
+        for row in range(actual_x_k1.shape[0]):
+            assert actual_x_k1[row, 0] == pytest.approx(expected_x_k1[row, 0], abs=1e-8)
 
-        # Verify final state
-        assert X.value(0, N) == pytest.approx(x_final[0, 0], abs=1e-8)
-        assert X.value(1, N) == pytest.approx(x_final[1, 0], abs=1e-8)
-        assert X.value(2, N) == pytest.approx(x_final[2, 0], abs=1e-8)
-        assert X.value(3, N) == pytest.approx(x_final[3, 0], abs=1e-8)
+    # Verify final state
+    assert X.value(0, N) == pytest.approx(x_final[0, 0], abs=1e-8)
+    assert X.value(1, N) == pytest.approx(x_final[1, 0], abs=1e-8)
+    assert X.value(2, N) == pytest.approx(x_final[2, 0], abs=1e-8)
+    assert X.value(3, N) == pytest.approx(x_final[3, 0], abs=1e-8)
 
     # Log states for offline viewing
     with open("Cart-pole states.csv", "w") as f:
