@@ -20,8 +20,6 @@ bool Near(double expected, double actual, double tolerance) {
 TEST_CASE("OptimizationProblem - Flywheel", "[OptimizationProblem]") {
   using namespace std::chrono_literals;
 
-  auto start = std::chrono::system_clock::now();
-
   constexpr std::chrono::duration<double> T = 5s;
   constexpr std::chrono::duration<double> dt = 5ms;
   constexpr int N = T / dt;
@@ -53,12 +51,6 @@ TEST_CASE("OptimizationProblem - Flywheel", "[OptimizationProblem]") {
     J += (r - X.Col(k)).T() * (r - X.Col(k));
   }
   problem.Minimize(J);
-
-  auto end1 = std::chrono::system_clock::now();
-  using std::chrono::duration_cast;
-  using std::chrono::microseconds;
-  fmt::print("Setup time: {} ms\n\n",
-             duration_cast<microseconds>(end1 - start).count() / 1000.0);
 
   auto status = problem.Solve({.diagnostics = true});
 

@@ -26,8 +26,6 @@ TEST_CASE("OptimizationProblem - Differential drive", "[OptimizationProblem]") {
   constexpr Eigen::Vector<double, 5> x_initial{{0.0, 0.0, 0.0, 0.0, 0.0}};
   constexpr Eigen::Vector<double, 5> x_final{{1.0, 1.0, 0.0, 0.0, 0.0}};
 
-  auto start = std::chrono::system_clock::now();
-
   sleipnir::OptimizationProblem problem;
 
   // x = [x, y, heading, left velocity, right velocity]ᵀ
@@ -68,12 +66,6 @@ TEST_CASE("OptimizationProblem - Differential drive", "[OptimizationProblem]") {
     J += X.Col(k).T() * X.Col(k) + U.Col(k).T() * U.Col(k);
   }
   problem.Minimize(J);
-
-  auto end1 = std::chrono::system_clock::now();
-  using std::chrono::duration_cast;
-  using std::chrono::microseconds;
-  fmt::print("Setup time: {} ms\n\n",
-             duration_cast<microseconds>(end1 - start).count() / 1000.0);
 
   auto status = problem.Solve({.diagnostics = true});
 

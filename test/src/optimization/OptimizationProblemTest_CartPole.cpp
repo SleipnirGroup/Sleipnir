@@ -27,8 +27,6 @@ TEST_CASE("OptimizationProblem - Cart-pole", "[OptimizationProblem]") {
   constexpr Eigen::Vector<double, 4> x_initial{{0.0, 0.0, 0.0, 0.0}};
   constexpr Eigen::Vector<double, 4> x_final{{1.0, std::numbers::pi, 0.0, 0.0}};
 
-  auto start = std::chrono::system_clock::now();
-
   sleipnir::OptimizationProblem problem;
 
   // x = [q, q̇]ᵀ = [x, θ, ẋ, θ̇]ᵀ
@@ -73,12 +71,6 @@ TEST_CASE("OptimizationProblem - Cart-pole", "[OptimizationProblem]") {
     J += U.Col(k).T() * U.Col(k);
   }
   problem.Minimize(J);
-
-  auto end1 = std::chrono::system_clock::now();
-  using std::chrono::duration_cast;
-  using std::chrono::microseconds;
-  fmt::print("Setup time: {} ms\n\n",
-             duration_cast<microseconds>(end1 - start).count() / 1000.0);
 
   auto status = problem.Solve({.diagnostics = true});
 

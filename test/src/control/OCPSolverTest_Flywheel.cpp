@@ -25,8 +25,6 @@ void TestFlywheel(std::string testName, Eigen::Matrix<double, 1, 1> A,
                   const sleipnir::DynamicsFunction& F,
                   sleipnir::DynamicsType dynamicsType,
                   sleipnir::TranscriptionMethod method) {
-  auto start = std::chrono::system_clock::now();
-
   constexpr std::chrono::duration<double> T = 5s;
   constexpr std::chrono::duration<double> dt = 5ms;
   constexpr int N = T / dt;
@@ -51,12 +49,6 @@ void TestFlywheel(std::string testName, Eigen::Matrix<double, 1, 1> A,
   sleipnir::VariableMatrix objective =
       (r_mat_vmat - solver.X()) * (r_mat_vmat - solver.X()).T();
   solver.Minimize(objective);
-
-  auto end1 = std::chrono::system_clock::now();
-  using std::chrono::duration_cast;
-  using std::chrono::microseconds;
-  fmt::print("Setup time: {} ms\n\n",
-             duration_cast<microseconds>(end1 - start).count() / 1000.0);
 
   auto status = solver.Solve({.diagnostics = true});
 

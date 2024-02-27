@@ -16,8 +16,6 @@
 TEST_CASE("OCPSolver - Differential drive", "[OCPSolver]") {
   using namespace std::chrono_literals;
 
-  auto start = std::chrono::system_clock::now();
-
   constexpr int N = 50;
 
   auto dynamics = [=](sleipnir::Variable t, sleipnir::VariableMatrix x,
@@ -79,12 +77,6 @@ TEST_CASE("OCPSolver - Differential drive", "[OCPSolver]") {
 
   // Set up objective
   problem.Minimize(problem.DT() * Eigen::Matrix<double, N + 1, 1>::Ones());
-
-  auto end1 = std::chrono::system_clock::now();
-  using std::chrono::duration_cast;
-  using std::chrono::microseconds;
-  fmt::print("Setup time: {} ms\n\n",
-             duration_cast<microseconds>(end1 - start).count() / 1000.0);
 
   auto status = problem.Solve({.maxIterations = 1000, .diagnostics = true});
 
