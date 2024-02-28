@@ -67,8 +67,8 @@ option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS FALSE)
 
-option(BUILD_BENCHMARKING "Build CasADi and Sleipnir benchmarks" ON)
-option(BUILD_EXAMPLES "Build examples" ON)
+option(BUILD_BENCHMARKING "Build CasADi and Sleipnir benchmarks" OFF)
+option(BUILD_EXAMPLES "Build examples" OFF)
 option(BUILD_PYTHON "Build Python module" OFF)
 
 include(SleipnirCompilerFlags)
