@@ -21,7 +21,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Configure
-        run: cmake -B build -S . -DBUILD_PYTHON=OFF
+        run: cmake -B build -S . -DBUILD_EXAMPLES=ON
 
       - name: Build
         run: cmake --build build --config RelWithDebInfo --parallel $(nproc)
@@ -102,7 +102,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Configure
-        run: cmake -B build -S . --toolchain ${{ matrix.toolchain }} -DBUILD_PYTHON=OFF
+        run: cmake -B build -S . --toolchain ${{ matrix.toolchain }} -DBUILD_EXAMPLES=ON
 
       - name: Build
         run: cmake --build build --config RelWithDebInfo --parallel $(nproc)
@@ -125,7 +125,7 @@ jobs:
         uses: numworks/setup-emscripten@latest
 
       - name: Configure
-        run: emcmake cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DBUILD_BENCHMARKING=OFF -DBUILD_TESTING=OFF -DBUILD_PYTHON=OFF
+        run: emcmake cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTING=OFF
 
       - name: Build
         run: cmake --build build --config Release --parallel $(nproc)
