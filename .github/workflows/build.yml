@@ -77,8 +77,6 @@ jobs:
         working-directory: dist
 
       - name: Test
-        # FIXME: Some optimization tests fail on macOS arm64
-        if: matrix.os != 'macOS-14'
         run: python3 -m tox -e ${{ matrix.version }}
 
       - uses: actions/upload-artifact@v4
