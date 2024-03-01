@@ -6,8 +6,6 @@
 #include <array>
 #include <iterator>
 
-#include <fmt/core.h>
-
 #include "optimization/solver/InteriorPoint.hpp"
 #include "sleipnir/optimization/SolverExitCondition.hpp"
 #include "util/Print.hpp"

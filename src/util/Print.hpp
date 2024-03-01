@@ -13,7 +13,7 @@ namespace sleipnir {
  * Wrapper around fmt::print() that squelches write failure exceptions.
  */
 template <typename... T>
-void print(fmt::format_string<T...> fmt, T&&... args) {
+inline void print(fmt::format_string<T...> fmt, T&&... args) {
   try {
     fmt::print(fmt, std::forward<T>(args)...);
   } catch (const std::system_error&) {
@@ -24,7 +24,7 @@ void print(fmt::format_string<T...> fmt, T&&... args) {
  * Wrapper around fmt::print() that squelches write failure exceptions.
  */
 template <typename... T>
-void print(std::FILE* f, fmt::format_string<T...> fmt, T&&... args) {
+inline void print(std::FILE* f, fmt::format_string<T...> fmt, T&&... args) {
   try {
     fmt::print(f, fmt, std::forward<T>(args)...);
   } catch (const std::system_error&) {

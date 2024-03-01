@@ -2,8 +2,6 @@
 
 #include "sleipnir/autodiff/Variable.hpp"
 
-#include <fmt/core.h>
-
 #include "sleipnir/autodiff/Expression.hpp"
 #include "sleipnir/autodiff/ExpressionGraph.hpp"
 #include "util/Print.hpp"
