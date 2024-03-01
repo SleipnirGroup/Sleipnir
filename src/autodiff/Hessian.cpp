@@ -4,7 +4,7 @@
 
 #include "sleipnir/autodiff/ExpressionGraph.hpp"
 
-using namespace sleipnir;
+namespace sleipnir {
 
 Hessian::Hessian(Variable variable, const VariableMatrix& wrt) noexcept
     : m_jacobian{detail::ExpressionGraph{variable}.GenerateGradientTree(wrt),
@@ -25,3 +25,5 @@ void Hessian::Update() {
 Profiler& Hessian::GetProfiler() {
   return m_jacobian.GetProfiler();
 }
+
+}  // namespace sleipnir

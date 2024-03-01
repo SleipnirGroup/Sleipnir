@@ -2,7 +2,7 @@
 
 #include "sleipnir/autodiff/Jacobian.hpp"
 
-using namespace sleipnir;
+namespace sleipnir {
 
 Jacobian::Jacobian(const VariableMatrix& variables,
                    const VariableMatrix& wrt) noexcept
@@ -92,3 +92,5 @@ void Jacobian::Update() {
 Profiler& Jacobian::GetProfiler() {
   return m_profiler;
 }
+
+}  // namespace sleipnir

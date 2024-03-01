@@ -2,7 +2,7 @@
 
 #include "sleipnir/autodiff/Gradient.hpp"
 
-using namespace sleipnir;
+namespace sleipnir {
 
 Gradient::Gradient(Variable variable, Variable wrt) noexcept
     : Gradient{std::move(variable), VariableMatrix{wrt}} {}
@@ -27,3 +27,5 @@ void Gradient::Update() {
 Profiler& Gradient::GetProfiler() {
   return m_jacobian.GetProfiler();
 }
+
+}  // namespace sleipnir
