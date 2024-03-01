@@ -24,7 +24,7 @@ int main() {
   problem.Solve();
 
   // x = 18.0, y = 6.0
-  fmt::print("x = {}, y = {}\n", x.Value(), y.Value());
+  fmt::println("x = {}, y = {}", x.Value(), y.Value());
 }
 ```
 

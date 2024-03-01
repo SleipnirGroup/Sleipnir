@@ -19,6 +19,6 @@ int main() {
       fmt::print(", ");
     }
   }
-  fmt::print("]\n");
+  fmt::println("]");
 }
 #endif

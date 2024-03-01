@@ -51,9 +51,9 @@ int main() {
   solver.Solve();
 
   // The first state
-  fmt::print("x₀ = {}\n", solver.X().Value(0, 0));
+  fmt::println("x₀ = {}", solver.X().Value(0, 0));
 
   // The first input
-  fmt::print("u₀ = {}\n", solver.U().Value(0, 0));
+  fmt::println("u₀ = {}", solver.U().Value(0, 0));
 }
 #endif
