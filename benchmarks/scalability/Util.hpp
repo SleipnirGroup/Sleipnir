@@ -120,7 +120,7 @@ int RunBenchmarksAndLog(
             }
           }
         });
-    fmt::print(stderr, " done.\n");
+    fmt::println(stderr, " done.");
 
     results << "\n";
     std::flush(results);

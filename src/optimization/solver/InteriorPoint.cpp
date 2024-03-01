@@ -103,11 +103,11 @@ void InteriorPoint(
   // Check for overconstrained problem
   if (equalityConstraints.size() > decisionVariables.size()) {
     if (config.diagnostics) {
-      print("The problem has too few degrees of freedom.\n");
-      print("Violated constraints (cₑ(x) = 0) in order of declaration:\n");
+      println("The problem has too few degrees of freedom.");
+      println("Violated constraints (cₑ(x) = 0) in order of declaration:");
       for (int row = 0; row < c_e.rows(); ++row) {
         if (c_e(row) < 0.0) {
-          print("  {}/{}: {} = 0\n", row + 1, c_e.rows(), c_e(row));
+          println("  {}/{}: {} = 0", row + 1, c_e.rows(), c_e(row));
         }
       }
     }
@@ -134,7 +134,7 @@ void InteriorPoint(
   }
 
   if (config.diagnostics && !feasibilityRestoration) {
-    print("Error tolerance: {}\n\n", config.tolerance);
+    println("Error tolerance: {}\n", config.tolerance);
   }
 
   std::chrono::system_clock::time_point iterationsStartTime;
@@ -146,35 +146,35 @@ void InteriorPoint(
     if (config.diagnostics && !feasibilityRestoration) {
       auto solveEndTime = std::chrono::system_clock::now();
 
-      print("\nSolve time: {:.3f} ms\n",
-            ToMilliseconds(solveEndTime - solveStartTime));
-      print("  ↳ {:.3f} ms (solver setup)\n",
-            ToMilliseconds(iterationsStartTime - solveStartTime));
+      println("\nSolve time: {:.3f} ms",
+              ToMilliseconds(solveEndTime - solveStartTime));
+      println("  ↳ {:.3f} ms (solver setup)",
+              ToMilliseconds(iterationsStartTime - solveStartTime));
       if (iterations > 0) {
-        print(
-            "  ↳ {:.3f} ms ({} solver iterations; {:.3f} ms average)\n",
+        println(
+            "  ↳ {:.3f} ms ({} solver iterations; {:.3f} ms average)",
             ToMilliseconds(solveEndTime - iterationsStartTime), iterations,
             ToMilliseconds((solveEndTime - iterationsStartTime) / iterations));
       }
-      print("\n");
+      println("");
 
-      print("{:^8}   {:^10}   {:^14}   {:^6}\n", "autodiff", "setup (ms)",
-            "avg solve (ms)", "solves");
-      print("{:=^47}\n", "");
-      constexpr auto format = "{:^8}   {:10.3f}   {:14.3f}   {:6}\n";
-      print(format, "∇f(x)", gradientF.GetProfiler().SetupDuration(),
-            gradientF.GetProfiler().AverageSolveDuration(),
-            gradientF.GetProfiler().SolveMeasurements());
-      print(format, "∇²ₓₓL", hessianL.GetProfiler().SetupDuration(),
-            hessianL.GetProfiler().AverageSolveDuration(),
-            hessianL.GetProfiler().SolveMeasurements());
-      print(format, "∂cₑ/∂x", jacobianCe.GetProfiler().SetupDuration(),
-            jacobianCe.GetProfiler().AverageSolveDuration(),
-            jacobianCe.GetProfiler().SolveMeasurements());
-      print(format, "∂cᵢ/∂x", jacobianCi.GetProfiler().SetupDuration(),
-            jacobianCi.GetProfiler().AverageSolveDuration(),
-            jacobianCi.GetProfiler().SolveMeasurements());
-      print("\n");
+      println("{:^8}   {:^10}   {:^14}   {:^6}", "autodiff", "setup (ms)",
+              "avg solve (ms)", "solves");
+      println("{:=^47}", "");
+      constexpr auto format = "{:^8}   {:10.3f}   {:14.3f}   {:6}";
+      println(format, "∇f(x)", gradientF.GetProfiler().SetupDuration(),
+              gradientF.GetProfiler().AverageSolveDuration(),
+              gradientF.GetProfiler().SolveMeasurements());
+      println(format, "∇²ₓₓL", hessianL.GetProfiler().SetupDuration(),
+              hessianL.GetProfiler().AverageSolveDuration(),
+              hessianL.GetProfiler().SolveMeasurements());
+      println(format, "∂cₑ/∂x", jacobianCe.GetProfiler().SetupDuration(),
+              jacobianCe.GetProfiler().AverageSolveDuration(),
+              jacobianCe.GetProfiler().SolveMeasurements());
+      println(format, "∂cᵢ/∂x", jacobianCi.GetProfiler().SetupDuration(),
+              jacobianCi.GetProfiler().AverageSolveDuration(),
+              jacobianCi.GetProfiler().SolveMeasurements());
+      println("");
     }
   }};
 
@@ -244,13 +244,13 @@ void InteriorPoint(
     // Check for local equality constraint infeasibility
     if (IsEqualityLocallyInfeasible(A_e, c_e)) {
       if (config.diagnostics) {
-        print(
+        println(
             "The problem is locally infeasible due to violated equality "
-            "constraints.\n");
-        print("Violated constraints (cₑ(x) = 0) in order of declaration:\n");
+            "constraints.");
+        println("Violated constraints (cₑ(x) = 0) in order of declaration:");
         for (int row = 0; row < c_e.rows(); ++row) {
           if (c_e(row) < 0.0) {
-            print("  {}/{}: {} = 0\n", row + 1, c_e.rows(), c_e(row));
+            println("  {}/{}: {} = 0", row + 1, c_e.rows(), c_e(row));
           }
         }
       }
@@ -262,13 +262,13 @@ void InteriorPoint(
     // Check for local inequality constraint infeasibility
     if (IsInequalityLocallyInfeasible(A_i, c_i)) {
       if (config.diagnostics) {
-        print(
+        println(
             "The problem is infeasible due to violated inequality "
-            "constraints.\n");
-        print("Violated constraints (cᵢ(x) ≥ 0) in order of declaration:\n");
+            "constraints.");
+        println("Violated constraints (cᵢ(x) ≥ 0) in order of declaration:");
         for (int row = 0; row < c_i.rows(); ++row) {
           if (c_i(row) < 0.0) {
-            print("  {}/{}: {} ≥ 0\n", row + 1, c_i.rows(), c_i(row));
+            println("  {}/{}: {} ≥ 0", row + 1, c_i.rows(), c_i(row));
           }
         }
       }
@@ -821,15 +821,15 @@ void InteriorPoint(
     // Diagnostics for current iteration
     if (config.diagnostics) {
       if (iterations % 20 == 0) {
-        print("{:^4}   {:^9}  {:^13}  {:^13}  {:^13}\n", "iter", "time (ms)",
-              "error", "cost", "infeasibility");
-        print("{:=^61}\n", "");
+        println("{:^4}   {:^9}  {:^13}  {:^13}  {:^13}", "iter", "time (ms)",
+                "error", "cost", "infeasibility");
+        println("{:=^61}", "");
       }
 
-      print("{:4}{}  {:9.3f}  {:13e}  {:13e}  {:13e}\n", iterations,
-            feasibilityRestoration ? "r" : " ",
-            ToMilliseconds(innerIterEndTime - innerIterStartTime), E_0,
-            f.Value(), c_e.lpNorm<1>() + (c_i - s).lpNorm<1>());
+      println("{:4}{}  {:9.3f}  {:13e}  {:13e}  {:13e}", iterations,
+              feasibilityRestoration ? "r" : " ",
+              ToMilliseconds(innerIterEndTime - innerIterStartTime), E_0,
+              f.Value(), c_e.lpNorm<1>() + (c_i - s).lpNorm<1>());
     }
 
     ++iterations;

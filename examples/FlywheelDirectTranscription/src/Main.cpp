@@ -45,9 +45,9 @@ int main() {
   problem.Solve();
 
   // The first state
-  fmt::print("x₀ = {}\n", X.Value(0, 0));
+  fmt::println("x₀ = {}", X.Value(0, 0));
 
   // The first input
-  fmt::print("u₀ = {}\n", U.Value(0, 0));
+  fmt::println("u₀ = {}", U.Value(0, 0));
 }
 #endif

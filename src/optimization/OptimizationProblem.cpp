@@ -154,19 +154,19 @@ SolverStatus OptimizationProblem::Solve(const SolverConfig& config) {
                                          "quadratic", "nonlinear"};
 
     // Print cost function and constraint expression types
-    print("The cost function is {}.\n",
-          kExprTypeToName[static_cast<int>(status.costFunctionType)]);
-    print("The equality constraints are {}.\n",
-          kExprTypeToName[static_cast<int>(status.equalityConstraintType)]);
-    print("The inequality constraints are {}.\n",
-          kExprTypeToName[static_cast<int>(status.inequalityConstraintType)]);
-    print("\n");
+    println("The cost function is {}.",
+            kExprTypeToName[static_cast<int>(status.costFunctionType)]);
+    println("The equality constraints are {}.",
+            kExprTypeToName[static_cast<int>(status.equalityConstraintType)]);
+    println("The inequality constraints are {}.",
+            kExprTypeToName[static_cast<int>(status.inequalityConstraintType)]);
+    println("");
 
     // Print problem dimensionality
-    print("Number of decision variables: {}\n", m_decisionVariables.size());
-    print("Number of equality constraints: {}\n", m_equalityConstraints.size());
-    print("Number of inequality constraints: {}\n\n",
-          m_inequalityConstraints.size());
+    println("Number of decision variables: {}", m_decisionVariables.size());
+    println("Number of equality constraints: {}", m_equalityConstraints.size());
+    println("Number of inequality constraints: {}\n",
+            m_inequalityConstraints.size());
   }
 
   // If the problem is empty or constant, there's nothing to do
@@ -183,7 +183,7 @@ SolverStatus OptimizationProblem::Solve(const SolverConfig& config) {
                 x, s, &status);
 
   if (config.diagnostics) {
-    print("Exit condition: {}\n", ToMessage(status.exitCondition));
+    println("Exit condition: {}", ToMessage(status.exitCondition));
   }
 
   // Assign the solution to the original Variable instances

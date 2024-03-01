@@ -29,8 +29,8 @@ int main(int argc, char* argv[]) {
   }
   sampleSizesToTest.emplace_back(300);
 
-  fmt::print("Solving cart-pole problem from N = {} to N = {}.\n",
-             sampleSizesToTest.front(), sampleSizesToTest.back());
+  fmt::println("Solving cart-pole problem from N = {} to N = {}.",
+               sampleSizesToTest.front(), sampleSizesToTest.back());
   if (runCasadi) {
     RunBenchmarksAndLog<casadi::Opti>(
         "cart-pole-scalability-results-casadi.csv", diagnostics, T,
