@@ -6,6 +6,7 @@
 
 #include "sleipnir/autodiff/Expression.hpp"
 #include "sleipnir/autodiff/ExpressionGraph.hpp"
+#include "util/Print.hpp"
 
 namespace sleipnir {
 
@@ -36,9 +37,9 @@ Variable& Variable::SetValue(double value) {
     // We only need to check the first argument since unary and binary operators
     // both use it
     if (expr->args[0] != detail::Zero()) {
-      fmt::print(stderr,
-                 "WARNING: {}:{}: Modified the value of a dependent variable\n",
-                 __FILE__, __LINE__);
+      print(stderr,
+            "WARNING: {}:{}: Modified the value of a dependent variable\n",
+            __FILE__, __LINE__);
     }
     expr->value = value;
   }
@@ -52,9 +53,9 @@ Variable& Variable::SetValue(int value) {
     // We only need to check the first argument since unary and binary operators
     // both use it
     if (expr->args[0] != detail::Zero()) {
-      fmt::print(stderr,
-                 "WARNING: {}:{}: Modified the value of a dependent variable\n",
-                 __FILE__, __LINE__);
+      print(stderr,
+            "WARNING: {}:{}: Modified the value of a dependent variable\n",
+            __FILE__, __LINE__);
     }
     expr->value = value;
   }

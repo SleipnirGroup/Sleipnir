@@ -11,7 +11,6 @@
 #include <vector>
 
 #include <Eigen/SparseCholesky>
-#include <fmt/core.h>
 
 #include "optimization/RegularizedLDLT.hpp"
 #include "optimization/solver/util/ErrorEstimate.hpp"
@@ -25,6 +24,7 @@
 #include "sleipnir/autodiff/Jacobian.hpp"
 #include "sleipnir/optimization/SolverExitCondition.hpp"
 #include "sleipnir/util/Spy.hpp"
+#include "util/Print.hpp"
 #include "util/ScopeExit.hpp"
 #include "util/ToMilliseconds.hpp"
 
@@ -103,11 +103,11 @@ void InteriorPoint(
   // Check for overconstrained problem
   if (equalityConstraints.size() > decisionVariables.size()) {
     if (config.diagnostics) {
-      fmt::print("The problem has too few degrees of freedom.\n");
-      fmt::print("Violated constraints (cₑ(x) = 0) in order of declaration:\n");
+      print("The problem has too few degrees of freedom.\n");
+      print("Violated constraints (cₑ(x) = 0) in order of declaration:\n");
       for (int row = 0; row < c_e.rows(); ++row) {
         if (c_e(row) < 0.0) {
-          fmt::print("  {}/{}: {} = 0\n", row + 1, c_e.rows(), c_e(row));
+          print("  {}/{}: {} = 0\n", row + 1, c_e.rows(), c_e(row));
         }
       }
     }
@@ -134,7 +134,7 @@ void InteriorPoint(
   }
 
   if (config.diagnostics && !feasibilityRestoration) {
-    fmt::print("Error tolerance: {}\n\n", config.tolerance);
+    print("Error tolerance: {}\n\n", config.tolerance);
   }
 
   std::chrono::system_clock::time_point iterationsStartTime;
@@ -146,35 +146,35 @@ void InteriorPoint(
     if (config.diagnostics && !feasibilityRestoration) {
       auto solveEndTime = std::chrono::system_clock::now();
 
-      fmt::print("\nSolve time: {:.3f} ms\n",
-                 ToMilliseconds(solveEndTime - solveStartTime));
-      fmt::print("  ↳ {:.3f} ms (solver setup)\n",
-                 ToMilliseconds(iterationsStartTime - solveStartTime));
+      print("\nSolve time: {:.3f} ms\n",
+            ToMilliseconds(solveEndTime - solveStartTime));
+      print("  ↳ {:.3f} ms (solver setup)\n",
+            ToMilliseconds(iterationsStartTime - solveStartTime));
       if (iterations > 0) {
-        fmt::print(
+        print(
             "  ↳ {:.3f} ms ({} solver iterations; {:.3f} ms average)\n",
             ToMilliseconds(solveEndTime - iterationsStartTime), iterations,
             ToMilliseconds((solveEndTime - iterationsStartTime) / iterations));
       }
-      fmt::print("\n");
+      print("\n");
 
-      fmt::print("{:^8}   {:^10}   {:^14}   {:^6}\n", "autodiff", "setup (ms)",
-                 "avg solve (ms)", "solves");
-      fmt::print("{:=^47}\n", "");
+      print("{:^8}   {:^10}   {:^14}   {:^6}\n", "autodiff", "setup (ms)",
+            "avg solve (ms)", "solves");
+      print("{:=^47}\n", "");
       constexpr auto format = "{:^8}   {:10.3f}   {:14.3f}   {:6}\n";
-      fmt::print(format, "∇f(x)", gradientF.GetProfiler().SetupDuration(),
-                 gradientF.GetProfiler().AverageSolveDuration(),
-                 gradientF.GetProfiler().SolveMeasurements());
-      fmt::print(format, "∇²ₓₓL", hessianL.GetProfiler().SetupDuration(),
-                 hessianL.GetProfiler().AverageSolveDuration(),
-                 hessianL.GetProfiler().SolveMeasurements());
-      fmt::print(format, "∂cₑ/∂x", jacobianCe.GetProfiler().SetupDuration(),
-                 jacobianCe.GetProfiler().AverageSolveDuration(),
-                 jacobianCe.GetProfiler().SolveMeasurements());
-      fmt::print(format, "∂cᵢ/∂x", jacobianCi.GetProfiler().SetupDuration(),
-                 jacobianCi.GetProfiler().AverageSolveDuration(),
-                 jacobianCi.GetProfiler().SolveMeasurements());
-      fmt::print("\n");
+      print(format, "∇f(x)", gradientF.GetProfiler().SetupDuration(),
+            gradientF.GetProfiler().AverageSolveDuration(),
+            gradientF.GetProfiler().SolveMeasurements());
+      print(format, "∇²ₓₓL", hessianL.GetProfiler().SetupDuration(),
+            hessianL.GetProfiler().AverageSolveDuration(),
+            hessianL.GetProfiler().SolveMeasurements());
+      print(format, "∂cₑ/∂x", jacobianCe.GetProfiler().SetupDuration(),
+            jacobianCe.GetProfiler().AverageSolveDuration(),
+            jacobianCe.GetProfiler().SolveMeasurements());
+      print(format, "∂cᵢ/∂x", jacobianCi.GetProfiler().SetupDuration(),
+            jacobianCi.GetProfiler().AverageSolveDuration(),
+            jacobianCi.GetProfiler().SolveMeasurements());
+      print("\n");
     }
   }};
 
@@ -244,14 +244,13 @@ void InteriorPoint(
     // Check for local equality constraint infeasibility
     if (IsEqualityLocallyInfeasible(A_e, c_e)) {
       if (config.diagnostics) {
-        fmt::print(
+        print(
             "The problem is locally infeasible due to violated equality "
             "constraints.\n");
-        fmt::print(
-            "Violated constraints (cₑ(x) = 0) in order of declaration:\n");
+        print("Violated constraints (cₑ(x) = 0) in order of declaration:\n");
         for (int row = 0; row < c_e.rows(); ++row) {
           if (c_e(row) < 0.0) {
-            fmt::print("  {}/{}: {} = 0\n", row + 1, c_e.rows(), c_e(row));
+            print("  {}/{}: {} = 0\n", row + 1, c_e.rows(), c_e(row));
           }
         }
       }
@@ -263,14 +262,13 @@ void InteriorPoint(
     // Check for local inequality constraint infeasibility
     if (IsInequalityLocallyInfeasible(A_i, c_i)) {
       if (config.diagnostics) {
-        fmt::print(
+        print(
             "The problem is infeasible due to violated inequality "
             "constraints.\n");
-        fmt::print(
-            "Violated constraints (cᵢ(x) ≥ 0) in order of declaration:\n");
+        print("Violated constraints (cᵢ(x) ≥ 0) in order of declaration:\n");
         for (int row = 0; row < c_i.rows(); ++row) {
           if (c_i(row) < 0.0) {
-            fmt::print("  {}/{}: {} ≥ 0\n", row + 1, c_i.rows(), c_i(row));
+            print("  {}/{}: {} ≥ 0\n", row + 1, c_i.rows(), c_i(row));
           }
         }
       }
@@ -823,15 +821,15 @@ void InteriorPoint(
     // Diagnostics for current iteration
     if (config.diagnostics) {
       if (iterations % 20 == 0) {
-        fmt::print("{:^4}   {:^9}  {:^13}  {:^13}  {:^13}\n", "iter",
-                   "time (ms)", "error", "cost", "infeasibility");
-        fmt::print("{:=^61}\n", "");
+        print("{:^4}   {:^9}  {:^13}  {:^13}  {:^13}\n", "iter", "time (ms)",
+              "error", "cost", "infeasibility");
+        print("{:=^61}\n", "");
       }
 
-      fmt::print("{:4}{}  {:9.3f}  {:13e}  {:13e}  {:13e}\n", iterations,
-                 feasibilityRestoration ? "r" : " ",
-                 ToMilliseconds(innerIterEndTime - innerIterStartTime), E_0,
-                 f.Value(), c_e.lpNorm<1>() + (c_i - s).lpNorm<1>());
+      print("{:4}{}  {:9.3f}  {:13e}  {:13e}  {:13e}\n", iterations,
+            feasibilityRestoration ? "r" : " ",
+            ToMilliseconds(innerIterEndTime - innerIterStartTime), E_0,
+            f.Value(), c_e.lpNorm<1>() + (c_i - s).lpNorm<1>());
     }
 
     ++iterations;
