@@ -10,6 +10,7 @@
 
 #include "optimization/solver/InteriorPoint.hpp"
 #include "sleipnir/optimization/SolverExitCondition.hpp"
+#include "util/Print.hpp"
 
 using namespace sleipnir;
 
@@ -155,23 +156,19 @@ SolverStatus OptimizationProblem::Solve(const SolverConfig& config) {
                                          "quadratic", "nonlinear"};
 
     // Print cost function and constraint expression types
-    fmt::print("The cost function is {}.\n",
-               kExprTypeToName[static_cast<int>(status.costFunctionType)]);
-    fmt::print(
-        "The equality constraints are {}.\n",
-        kExprTypeToName[static_cast<int>(status.equalityConstraintType)]);
-    fmt::print(
-        "The inequality constraints are {}.\n",
-        kExprTypeToName[static_cast<int>(status.inequalityConstraintType)]);
-    fmt::print("\n");
+    print("The cost function is {}.\n",
+          kExprTypeToName[static_cast<int>(status.costFunctionType)]);
+    print("The equality constraints are {}.\n",
+          kExprTypeToName[static_cast<int>(status.equalityConstraintType)]);
+    print("The inequality constraints are {}.\n",
+          kExprTypeToName[static_cast<int>(status.inequalityConstraintType)]);
+    print("\n");
 
     // Print problem dimensionality
-    fmt::print("Number of decision variables: {}\n",
-               m_decisionVariables.size());
-    fmt::print("Number of equality constraints: {}\n",
-               m_equalityConstraints.size());
-    fmt::print("Number of inequality constraints: {}\n\n",
-               m_inequalityConstraints.size());
+    print("Number of decision variables: {}\n", m_decisionVariables.size());
+    print("Number of equality constraints: {}\n", m_equalityConstraints.size());
+    print("Number of inequality constraints: {}\n\n",
+          m_inequalityConstraints.size());
   }
 
   // If the problem is empty or constant, there's nothing to do
@@ -188,7 +185,7 @@ SolverStatus OptimizationProblem::Solve(const SolverConfig& config) {
                 x, s, &status);
 
   if (config.diagnostics) {
-    fmt::print("Exit condition: {}\n", ToMessage(status.exitCondition));
+    print("Exit condition: {}\n", ToMessage(status.exitCondition));
   }
 
   // Assign the solution to the original Variable instances
