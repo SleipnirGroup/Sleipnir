@@ -2,7 +2,7 @@
 
 #include "sleipnir/control/OCPSolver.hpp"
 
-using namespace sleipnir;
+namespace sleipnir {
 
 OCPSolver::OCPSolver(int numStates, int numInputs,
                      std::chrono::duration<double> dt, int numSteps,
@@ -139,3 +139,5 @@ void OCPSolver::ConstrainAlways(
     time += dt;
   }
 }
+
+}  // namespace sleipnir

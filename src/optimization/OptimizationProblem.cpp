@@ -10,7 +10,7 @@
 #include "sleipnir/optimization/SolverExitCondition.hpp"
 #include "util/Print.hpp"
 
-using namespace sleipnir;
+namespace sleipnir {
 
 OptimizationProblem::OptimizationProblem() noexcept {
   m_decisionVariables.reserve(1024);
@@ -191,3 +191,5 @@ SolverStatus OptimizationProblem::Solve(const SolverConfig& config) {
 
   return status;
 }
+
+}  // namespace sleipnir
