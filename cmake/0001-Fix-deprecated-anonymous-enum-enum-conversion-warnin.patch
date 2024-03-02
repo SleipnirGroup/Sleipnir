@@ -1,0 +1,77 @@
+From f5339946c7bb6fd2854d915907a7343302ea1c0d Mon Sep 17 00:00:00 2001
+From: Tyler Veness <calcmogul@gmail.com>
+Date: Fri, 1 Mar 2024 15:37:44 -0800
+Subject: [PATCH] Fix deprecated anonymous enum-enum conversion warnings
+
+---
+ Eigen/src/Core/Matrix.h                      | 4 ++--
+ Eigen/src/Core/TriangularMatrix.h            | 3 ++-
+ Eigen/src/Core/util/XprHelper.h              | 2 +-
+ Eigen/src/SparseCore/SparseSelfAdjointView.h | 2 +-
+ 4 files changed, 6 insertions(+), 5 deletions(-)
+
+diff --git a/Eigen/src/Core/Matrix.h b/Eigen/src/Core/Matrix.h
+index ce0e4e6a2..c11a994a8 100644
+--- a/Eigen/src/Core/Matrix.h
++++ b/Eigen/src/Core/Matrix.h
+@@ -30,7 +30,7 @@ struct traits<Matrix<Scalar_, Rows_, Cols_, Options_, MaxRows_, MaxCols_>> {
+     actual_alignment = ((Options_ & DontAlign) == 0) ? default_alignment : 0,
+     required_alignment = unpacket_traits<PacketScalar>::alignment,
+     packet_access_bit = (packet_traits<Scalar_>::Vectorizable &&
+-                         (EIGEN_UNALIGNED_VECTORIZE || (actual_alignment >= required_alignment)))
++                         (EIGEN_UNALIGNED_VECTORIZE || (int(actual_alignment) >= int(required_alignment))))
+                             ? PacketAccessBit
+                             : 0
+   };
+@@ -48,7 +48,7 @@ struct traits<Matrix<Scalar_, Rows_, Cols_, Options_, MaxRows_, MaxCols_>> {
+     Flags = compute_matrix_flags(Options_),
+     Options = Options_,
+     InnerStrideAtCompileTime = 1,
+-    OuterStrideAtCompileTime = (Options & RowMajor) ? ColsAtCompileTime : RowsAtCompileTime,
++    OuterStrideAtCompileTime = (int(Options) & int(RowMajor)) ? ColsAtCompileTime : RowsAtCompileTime,
+ 
+     // FIXME, the following flag in only used to define NeedsToAlign in PlainObjectBase
+     EvaluatorFlags = LinearAccessBit | DirectAccessBit | packet_access_bit | row_major_bit,
+diff --git a/Eigen/src/Core/TriangularMatrix.h b/Eigen/src/Core/TriangularMatrix.h
+index afdb2425f..2b1683be9 100644
+--- a/Eigen/src/Core/TriangularMatrix.h
++++ b/Eigen/src/Core/TriangularMatrix.h
+@@ -184,7 +184,8 @@ class TriangularView
+   enum {
+     Mode = Mode_,
+     Flags = internal::traits<TriangularView>::Flags,
+-    TransposeMode = (Mode & Upper ? Lower : 0) | (Mode & Lower ? Upper : 0) | (Mode & (UnitDiag)) | (Mode & (ZeroDiag)),
++    TransposeMode = (int(Mode) & int(Upper) ? Lower : 0) | (int(Mode) & int(Lower) ? Upper : 0) |
++                    (int(Mode) & int(UnitDiag)) | (int(Mode) & int(ZeroDiag)),
+     IsVectorAtCompileTime = false
+   };
+ 
+diff --git a/Eigen/src/Core/util/XprHelper.h b/Eigen/src/Core/util/XprHelper.h
+index 5b7bdc077..555faa1cc 100644
+--- a/Eigen/src/Core/util/XprHelper.h
++++ b/Eigen/src/Core/util/XprHelper.h
+@@ -484,7 +484,7 @@ struct nested_eval {
+                                       //      solution could be to count the number of temps?
+     NAsInteger = n == Dynamic ? HugeCost : n,
+     CostEval = (NAsInteger + 1) * ScalarReadCost + CoeffReadCost,
+-    CostNoEval = NAsInteger * CoeffReadCost,
++    CostNoEval = int(NAsInteger) * int(CoeffReadCost),
+     Evaluate = (int(evaluator<T>::Flags) & EvalBeforeNestingBit) || (int(CostEval) < int(CostNoEval))
+   };
+ 
+diff --git a/Eigen/src/SparseCore/SparseSelfAdjointView.h b/Eigen/src/SparseCore/SparseSelfAdjointView.h
+index 129899c45..2f087c9c4 100644
+--- a/Eigen/src/SparseCore/SparseSelfAdjointView.h
++++ b/Eigen/src/SparseCore/SparseSelfAdjointView.h
+@@ -53,7 +53,7 @@ class SparseSelfAdjointView : public EigenBase<SparseSelfAdjointView<MatrixType,
+  public:
+   enum {
+     Mode = Mode_,
+-    TransposeMode = ((Mode & Upper) ? Lower : 0) | ((Mode & Lower) ? Upper : 0),
++    TransposeMode = ((int(Mode) & int(Upper)) ? Lower : 0) | ((int(Mode) & int(Lower)) ? Upper : 0),
+     RowsAtCompileTime = internal::traits<SparseSelfAdjointView>::RowsAtCompileTime,
+     ColsAtCompileTime = internal::traits<SparseSelfAdjointView>::ColsAtCompileTime
+   };
+-- 
+2.44.0
+
