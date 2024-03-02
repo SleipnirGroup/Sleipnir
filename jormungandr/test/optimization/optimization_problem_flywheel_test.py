@@ -18,8 +18,8 @@ def test_optimization_problem_flywheel():
     # Flywheel model:
     # States: [velocity]
     # Inputs: [voltage]
-    A = np.array([[math.exp(-dt)]])
-    B = np.array([[1.0 - math.exp(-dt)]])
+    A = math.exp(-dt)
+    B = 1.0 - math.exp(-dt)
 
     problem = OptimizationProblem()
     X = problem.decision_variable(1, N + 1)
@@ -28,7 +28,7 @@ def test_optimization_problem_flywheel():
     # Dynamics constraint
     for k in range(N):
         problem.subject_to(
-            X[:, k + 1 : k + 2] == A @ X[:, k : k + 1] + B @ U[:, k : k + 1]
+            X[:, k + 1 : k + 2] == A * X[:, k : k + 1] + B * U[:, k : k + 1]
         )
 
     # State and input constraints
@@ -56,23 +56,23 @@ def test_optimization_problem_flywheel():
     # uₖ = B⁺(rₖ₊₁ − Arₖ)
     # uₖ = B⁺(rₖ − Arₖ)
     # uₖ = B⁺(I − A)rₖ
-    u_ss = np.linalg.solve(B, np.eye(A.shape[0]) - A) @ r
+    u_ss = 1.0 / B * (1.0 - A) * r[0, 0]
 
     # Verify initial state
     assert X.value(0, 0) == pytest.approx(0.0, abs=1e-8)
 
     # Verify solution
-    x = np.array([[0.0]])
-    u = np.array([[0.0]])
+    x = 0.0
+    u = 0.0
     for k in range(N):
         # Verify state
-        assert X.value(0, k) == pytest.approx(x[0, 0], abs=1e-2)
+        assert X.value(0, k) == pytest.approx(x, abs=1e-2)
 
         # Determine expected input for this timestep
-        error = r[0, 0] - x[0, 0]
+        error = r[0, 0] - x
         if error > 1e-2:
             # Max control input until the reference is reached
-            u[0, 0] = 12.0
+            u = 12.0
         else:
             # Maintain speed
             u = u_ss
@@ -82,17 +82,17 @@ def test_optimization_problem_flywheel():
             k > 0
             and k < N - 1
             and near(12.0, U.value(0, k - 1), 1e-2)
-            and near(u_ss[0, 0], U.value(0, k + 1), 1e-2)
+            and near(u_ss, U.value(0, k + 1), 1e-2)
         ):
             # If control input is transitioning between 12 and u_ss, ensure it's
             # within (u_ss, 12)
-            assert U.value(0, k) >= u_ss[0, 0]
+            assert U.value(0, k) >= u_ss
             assert U.value(0, k) <= 12.0
         else:
-            assert U.value(0, k) == pytest.approx(u[0, 0], abs=1e-4)
+            assert U.value(0, k) == pytest.approx(u, abs=1e-4)
 
         # Project state forward
-        x = A @ x + B @ u
+        x = A * x + B * u
 
     # Verify final state
     assert X.value(0, N) == pytest.approx(r[0, 0], abs=1e-7)
