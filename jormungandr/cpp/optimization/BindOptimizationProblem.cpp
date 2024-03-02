@@ -2,7 +2,7 @@
 
 #include "optimization/BindOptimizationProblem.hpp"
 
-#include <fmt/core.h>
+#include <fmt/format.h>
 #include <pybind11/functional.h>
 #include <pybind11/pytypes.h>
 #include <sleipnir/optimization/OptimizationProblem.hpp>

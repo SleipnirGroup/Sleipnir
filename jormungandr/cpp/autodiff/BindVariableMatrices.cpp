@@ -169,9 +169,8 @@ void BindVariableMatrix(py::module_& autodiff,
       self.Block(rowOffset, colOffset, blockRows, blockCols) =
           value.cast<int>();
     } else {
-      fmt::println(
-          stderr,
-          "error: VariableMatrix.__setitem__ not implemented for value");
+      throw py::value_error(
+          "VariableMatrix.__setitem__ not implemented for value");
     }
   });
   variable_matrix.def(
@@ -340,10 +339,10 @@ void BindVariableMatrix(py::module_& autodiff,
 
         std::string input1_name = inputs[0].attr("__repr__")().cast<py::str>();
         std::string input2_name = inputs[1].attr("__repr__")().cast<py::str>();
-        fmt::println(stderr,
-                     "error: VariableMatrix: numpy method {}, ufunc {} not "
-                     "implemented for ({}, {})",
-                     method_name, ufunc_name, input1_name, input2_name);
+        throw py::value_error(
+            fmt::format("VariableMatrix: numpy method {}, ufunc {} not "
+                        "implemented for ({}, {})",
+                        method_name, ufunc_name, input1_name, input2_name));
         return py::cast(VariableMatrix{self});
       });
 
@@ -714,8 +713,8 @@ void BindVariableBlock(
       self.Block(rowOffset, colOffset, blockRows, blockCols) =
           value.cast<int>();
     } else {
-      fmt::println(
-          stderr, "error: VariableBlock.__setitem__ not implemented for value");
+      throw py::value_error(
+          "VariableBlock.__setitem__ not implemented for value");
     }
   });
   variable_block.def(
@@ -883,10 +882,10 @@ void BindVariableBlock(
 
         std::string input1_name = inputs[0].attr("__repr__")().cast<py::str>();
         std::string input2_name = inputs[1].attr("__repr__")().cast<py::str>();
-        fmt::println(stderr,
-                     "error: VariableBlock: numpy method {}, ufunc {} not "
-                     "implemented for ({}, {})",
-                     method_name, ufunc_name, input1_name, input2_name);
+        throw py::value_error(
+            fmt::format("VariableBlock: numpy method {}, ufunc {} not "
+                        "implemented for ({}, {})",
+                        method_name, ufunc_name, input1_name, input2_name));
         return py::cast(VariableMatrix{self});
       });
 
