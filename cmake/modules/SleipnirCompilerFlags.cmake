@@ -16,14 +16,6 @@ macro(sleipnir_compiler_flags target)
             )
         endif()
 
-        # Disable warning false positives in Eigen
-        if(
-            ${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU"
-            AND ${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER_EQUAL "12"
-        )
-            target_compile_options(${target} PRIVATE -Wno-array-bounds)
-        endif()
-
         # Disable warning false positives in fmt
         if(
             ${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU"

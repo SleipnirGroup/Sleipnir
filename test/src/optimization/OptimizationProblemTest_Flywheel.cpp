@@ -5,7 +5,6 @@
 #include <fstream>
 
 #include <Eigen/Core>
-#include <Eigen/QR>
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <fmt/core.h>
@@ -27,8 +26,8 @@ TEST_CASE("OptimizationProblem - Flywheel", "[OptimizationProblem]") {
   // Flywheel model:
   // States: [velocity]
   // Inputs: [voltage]
-  Eigen::Matrix<double, 1, 1> A{std::exp(-dt.count())};
-  Eigen::Matrix<double, 1, 1> B{1.0 - std::exp(-dt.count())};
+  double A = std::exp(-dt.count());
+  double B = 1.0 - std::exp(-dt.count());
 
   sleipnir::OptimizationProblem problem;
   auto X = problem.DecisionVariable(1, N + 1);
@@ -45,7 +44,7 @@ TEST_CASE("OptimizationProblem - Flywheel", "[OptimizationProblem]") {
   problem.SubjectTo(U <= 12);
 
   // Cost function - minimize error
-  Eigen::Matrix<double, 1, 1> r{10.0};
+  constexpr Eigen::Matrix<double, 1, 1> r{{10.0}};
   sleipnir::Variable J = 0.0;
   for (int k = 0; k < N + 1; ++k) {
     J += (r - X.Col(k)).T() * (r - X.Col(k));
@@ -65,24 +64,23 @@ TEST_CASE("OptimizationProblem - Flywheel", "[OptimizationProblem]") {
   // uₖ = B⁺(rₖ₊₁ − Arₖ)
   // uₖ = B⁺(rₖ − Arₖ)
   // uₖ = B⁺(I − A)rₖ
-  Eigen::Matrix<double, 1, 1> u_ss =
-      B.householderQr().solve(decltype(A)::Identity() - A) * r;
+  double u_ss = 1.0 / B * (1.0 - A) * r(0);
 
   // Verify initial state
   CHECK(X.Value(0, 0) == Catch::Approx(0.0).margin(1e-8));
 
   // Verify solution
-  Eigen::Matrix<double, 1, 1> x{0.0};
-  Eigen::Matrix<double, 1, 1> u{0.0};
+  double x = 0.0;
+  double u = 0.0;
   for (int k = 0; k < N; ++k) {
     // Verify state
-    CHECK(X.Value(0, k) == Catch::Approx(x(0)).margin(1e-2));
+    CHECK(X.Value(0, k) == Catch::Approx(x).margin(1e-2));
 
     // Determine expected input for this timestep
-    double error = r(0) - x(0);
+    double error = r(0) - x;
     if (error > 1e-2) {
       // Max control input until the reference is reached
-      u(0) = 12.0;
+      u = 12.0;
     } else {
       // Maintain speed
       u = u_ss;
@@ -90,13 +88,13 @@ TEST_CASE("OptimizationProblem - Flywheel", "[OptimizationProblem]") {
 
     // Verify input
     if (k > 0 && k < N - 1 && Near(12.0, U.Value(0, k - 1), 1e-2) &&
-        Near(u_ss(0), U.Value(0, k + 1), 1e-2)) {
+        Near(u_ss, U.Value(0, k + 1), 1e-2)) {
       // If control input is transitioning between 12 and u_ss, ensure it's
       // within (u_ss, 12)
-      CHECK(U.Value(0, k) >= u_ss(0));
+      CHECK(U.Value(0, k) >= u_ss);
       CHECK(U.Value(0, k) <= 12.0);
     } else {
-      CHECK(U.Value(0, k) == Catch::Approx(u(0)).margin(1e-4));
+      CHECK(U.Value(0, k) == Catch::Approx(u).margin(1e-4));
     }
 
     INFO(fmt::format("  k = {}", k));
