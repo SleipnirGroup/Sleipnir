@@ -35,9 +35,9 @@ Variable& Variable::SetValue(double value) {
     // We only need to check the first argument since unary and binary operators
     // both use it
     if (expr->args[0] != detail::Zero()) {
-      println(stderr,
-              "WARNING: {}:{}: Modified the value of a dependent variable",
-              __FILE__, __LINE__);
+      sleipnir::println(
+          stderr, "WARNING: {}:{}: Modified the value of a dependent variable",
+          __FILE__, __LINE__);
     }
     expr->value = value;
   }
@@ -51,9 +51,9 @@ Variable& Variable::SetValue(int value) {
     // We only need to check the first argument since unary and binary operators
     // both use it
     if (expr->args[0] != detail::Zero()) {
-      println(stderr,
-              "WARNING: {}:{}: Modified the value of a dependent variable",
-              __FILE__, __LINE__);
+      sleipnir::println(
+          stderr, "WARNING: {}:{}: Modified the value of a dependent variable",
+          __FILE__, __LINE__);
     }
     expr->value = value;
   }

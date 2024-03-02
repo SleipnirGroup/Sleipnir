@@ -103,11 +103,12 @@ void InteriorPoint(
   // Check for overconstrained problem
   if (equalityConstraints.size() > decisionVariables.size()) {
     if (config.diagnostics) {
-      println("The problem has too few degrees of freedom.");
-      println("Violated constraints (cₑ(x) = 0) in order of declaration:");
+      sleipnir::println("The problem has too few degrees of freedom.");
+      sleipnir::println(
+          "Violated constraints (cₑ(x) = 0) in order of declaration:");
       for (int row = 0; row < c_e.rows(); ++row) {
         if (c_e(row) < 0.0) {
-          println("  {}/{}: {} = 0", row + 1, c_e.rows(), c_e(row));
+          sleipnir::println("  {}/{}: {} = 0", row + 1, c_e.rows(), c_e(row));
         }
       }
     }
@@ -134,7 +135,7 @@ void InteriorPoint(
   }
 
   if (config.diagnostics && !feasibilityRestoration) {
-    println("Error tolerance: {}\n", config.tolerance);
+    sleipnir::println("Error tolerance: {}\n", config.tolerance);
   }
 
   std::chrono::system_clock::time_point iterationsStartTime;
@@ -146,35 +147,38 @@ void InteriorPoint(
     if (config.diagnostics && !feasibilityRestoration) {
       auto solveEndTime = std::chrono::system_clock::now();
 
-      println("\nSolve time: {:.3f} ms",
-              ToMilliseconds(solveEndTime - solveStartTime));
-      println("  ↳ {:.3f} ms (solver setup)",
-              ToMilliseconds(iterationsStartTime - solveStartTime));
+      sleipnir::println("\nSolve time: {:.3f} ms",
+                        ToMilliseconds(solveEndTime - solveStartTime));
+      sleipnir::println("  ↳ {:.3f} ms (solver setup)",
+                        ToMilliseconds(iterationsStartTime - solveStartTime));
       if (iterations > 0) {
-        println(
+        sleipnir::println(
             "  ↳ {:.3f} ms ({} solver iterations; {:.3f} ms average)",
             ToMilliseconds(solveEndTime - iterationsStartTime), iterations,
             ToMilliseconds((solveEndTime - iterationsStartTime) / iterations));
       }
-      println("");
+      sleipnir::println("");
 
-      println("{:^8}   {:^10}   {:^14}   {:^6}", "autodiff", "setup (ms)",
-              "avg solve (ms)", "solves");
-      println("{:=^47}", "");
+      sleipnir::println("{:^8}   {:^10}   {:^14}   {:^6}", "autodiff",
+                        "setup (ms)", "avg solve (ms)", "solves");
+      sleipnir::println("{:=^47}", "");
       constexpr auto format = "{:^8}   {:10.3f}   {:14.3f}   {:6}";
-      println(format, "∇f(x)", gradientF.GetProfiler().SetupDuration(),
-              gradientF.GetProfiler().AverageSolveDuration(),
-              gradientF.GetProfiler().SolveMeasurements());
-      println(format, "∇²ₓₓL", hessianL.GetProfiler().SetupDuration(),
-              hessianL.GetProfiler().AverageSolveDuration(),
-              hessianL.GetProfiler().SolveMeasurements());
-      println(format, "∂cₑ/∂x", jacobianCe.GetProfiler().SetupDuration(),
-              jacobianCe.GetProfiler().AverageSolveDuration(),
-              jacobianCe.GetProfiler().SolveMeasurements());
-      println(format, "∂cᵢ/∂x", jacobianCi.GetProfiler().SetupDuration(),
-              jacobianCi.GetProfiler().AverageSolveDuration(),
-              jacobianCi.GetProfiler().SolveMeasurements());
-      println("");
+      sleipnir::println(format, "∇f(x)",
+                        gradientF.GetProfiler().SetupDuration(),
+                        gradientF.GetProfiler().AverageSolveDuration(),
+                        gradientF.GetProfiler().SolveMeasurements());
+      sleipnir::println(format, "∇²ₓₓL", hessianL.GetProfiler().SetupDuration(),
+                        hessianL.GetProfiler().AverageSolveDuration(),
+                        hessianL.GetProfiler().SolveMeasurements());
+      sleipnir::println(format, "∂cₑ/∂x",
+                        jacobianCe.GetProfiler().SetupDuration(),
+                        jacobianCe.GetProfiler().AverageSolveDuration(),
+                        jacobianCe.GetProfiler().SolveMeasurements());
+      sleipnir::println(format, "∂cᵢ/∂x",
+                        jacobianCi.GetProfiler().SetupDuration(),
+                        jacobianCi.GetProfiler().AverageSolveDuration(),
+                        jacobianCi.GetProfiler().SolveMeasurements());
+      sleipnir::println("");
     }
   }};
 
@@ -244,13 +248,14 @@ void InteriorPoint(
     // Check for local equality constraint infeasibility
     if (IsEqualityLocallyInfeasible(A_e, c_e)) {
       if (config.diagnostics) {
-        println(
+        sleipnir::println(
             "The problem is locally infeasible due to violated equality "
             "constraints.");
-        println("Violated constraints (cₑ(x) = 0) in order of declaration:");
+        sleipnir::println(
+            "Violated constraints (cₑ(x) = 0) in order of declaration:");
         for (int row = 0; row < c_e.rows(); ++row) {
           if (c_e(row) < 0.0) {
-            println("  {}/{}: {} = 0", row + 1, c_e.rows(), c_e(row));
+            sleipnir::println("  {}/{}: {} = 0", row + 1, c_e.rows(), c_e(row));
           }
         }
       }
@@ -262,13 +267,14 @@ void InteriorPoint(
     // Check for local inequality constraint infeasibility
     if (IsInequalityLocallyInfeasible(A_i, c_i)) {
       if (config.diagnostics) {
-        println(
+        sleipnir::println(
             "The problem is infeasible due to violated inequality "
             "constraints.");
-        println("Violated constraints (cᵢ(x) ≥ 0) in order of declaration:");
+        sleipnir::println(
+            "Violated constraints (cᵢ(x) ≥ 0) in order of declaration:");
         for (int row = 0; row < c_i.rows(); ++row) {
           if (c_i(row) < 0.0) {
-            println("  {}/{}: {} ≥ 0", row + 1, c_i.rows(), c_i(row));
+            sleipnir::println("  {}/{}: {} ≥ 0", row + 1, c_i.rows(), c_i(row));
           }
         }
       }
@@ -821,15 +827,16 @@ void InteriorPoint(
     // Diagnostics for current iteration
     if (config.diagnostics) {
       if (iterations % 20 == 0) {
-        println("{:^4}   {:^9}  {:^13}  {:^13}  {:^13}", "iter", "time (ms)",
-                "error", "cost", "infeasibility");
-        println("{:=^61}", "");
+        sleipnir::println("{:^4}   {:^9}  {:^13}  {:^13}  {:^13}", "iter",
+                          "time (ms)", "error", "cost", "infeasibility");
+        sleipnir::println("{:=^61}", "");
       }
 
-      println("{:4}{}  {:9.3f}  {:13e}  {:13e}  {:13e}", iterations,
-              feasibilityRestoration ? "r" : " ",
-              ToMilliseconds(innerIterEndTime - innerIterStartTime), E_0,
-              f.Value(), c_e.lpNorm<1>() + (c_i - s).lpNorm<1>());
+      sleipnir::println("{:4}{}  {:9.3f}  {:13e}  {:13e}  {:13e}", iterations,
+                        feasibilityRestoration ? "r" : " ",
+                        ToMilliseconds(innerIterEndTime - innerIterStartTime),
+                        E_0, f.Value(),
+                        c_e.lpNorm<1>() + (c_i - s).lpNorm<1>());
     }
 
     ++iterations;
