@@ -4,33 +4,11 @@ macro(sleipnir_compiler_flags target)
             ${target}
             PRIVATE -Wall -pedantic -Wextra -Werror -Wno-unused-parameter
         )
-
-        # clang 18 warns on `operator"" _a` in dependencies
-        if(
-            ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang"
-            AND ${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER_EQUAL "18"
-        )
-            target_compile_options(
-                ${target}
-                PRIVATE -Wno-deprecated-literal-operator
-            )
-        endif()
-
-        # Disable warning false positives in fmt
-        if(
-            ${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU"
-            AND ${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER_EQUAL "13"
-        )
-            target_compile_options(
-                ${target}
-                PRIVATE -Wno-dangling-reference -Wno-stringop-overflow
-            )
-        endif()
     else()
-        target_compile_options(
-            ${target}
-            PRIVATE /wd4146 /wd4244 /wd4251 /wd4267 /WX
-        )
+        # Suppress the following warnings:
+        #   * C4244: lossy conversion
+        #   * C4251: missing dllexport/dllimport attribute on data member
+        target_compile_options(${target} PRIVATE /wd4244 /wd4251 /WX)
     endif()
 
     target_compile_features(${target} PUBLIC cxx_std_20)
