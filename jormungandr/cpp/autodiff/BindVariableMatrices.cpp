@@ -233,6 +233,9 @@ void BindVariableMatrix(py::module_& autodiff,
           blockRows = stop - start;
         } else {
           rowOffset = rowElem.cast<int>();
+          if (rowOffset < 0) {
+            rowOffset = self.Rows() + rowOffset;
+          }
           blockRows = 1;
         }
 
@@ -248,6 +251,9 @@ void BindVariableMatrix(py::module_& autodiff,
           blockCols = stop - start;
         } else {
           colOffset = colElem.cast<int>();
+          if (colOffset < 0) {
+            colOffset = self.Cols() + colOffset;
+          }
           blockCols = 1;
         }
 
@@ -777,6 +783,9 @@ void BindVariableBlock(
           blockRows = stop - start;
         } else {
           rowOffset = rowElem.cast<int>();
+          if (rowOffset < 0) {
+            rowOffset = self.Rows() + rowOffset;
+          }
           blockRows = 1;
         }
 
@@ -792,6 +801,9 @@ void BindVariableBlock(
           blockCols = stop - start;
         } else {
           colOffset = colElem.cast<int>();
+          if (colOffset < 0) {
+            colOffset = self.Cols() + colOffset;
+          }
           blockCols = 1;
         }
 
