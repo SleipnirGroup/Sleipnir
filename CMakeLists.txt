@@ -317,6 +317,7 @@ if(BUILD_PYTHON)
     set(fmt_src ${fmt_SOURCE_DIR}/src/format.cc ${fmt_SOURCE_DIR}/src/os.cc)
     pybind11_add_module(_jormungandr ${jormungandr_src} ${fmt_src} ${Sleipnir_src})
     sleipnir_compiler_flags(_jormungandr)
+    target_compile_definitions(_jormungandr PRIVATE JORMUNGANDR=1)
     target_include_directories(
         _jormungandr
         PRIVATE

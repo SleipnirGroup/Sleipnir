@@ -2,12 +2,12 @@
 
 #pragma once
 
-#include <cassert>
 #include <concepts>
 #include <vector>
 
 #include "sleipnir/autodiff/Variable.hpp"
 #include "sleipnir/autodiff/VariableMatrix.hpp"
+#include "sleipnir/util/Assert.hpp"
 #include "sleipnir/util/Concepts.hpp"
 #include "sleipnir/util/SymbolExports.hpp"
 
@@ -92,7 +92,7 @@ std::vector<Variable> MakeConstraints(const LHS& lhs, const RHS& rhs) {
       rhsCols = rhs.Cols();
     }
 
-    assert(lhsRows == rhsRows && lhsCols == rhsCols);
+    Assert(lhsRows == rhsRows && lhsCols == rhsCols);
     constraints.reserve(lhsRows * lhsCols);
 
     for (int row = 0; row < lhsRows; ++row) {
