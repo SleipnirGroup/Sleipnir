@@ -1,7 +1,7 @@
 [project]
 name = "sleipnirgroup-jormungandr"
 description = "A linearity-exploiting sparse nonlinear constrained optimization problem solver that uses the interior-point method."
-version = "0.0.1.dev23"
+version = "0.0.1.dev46"
 readme = "README.md"
 requires-python = ">=3.7"
 dependencies = [ "matplotlib", "numpy", "scipy" ]

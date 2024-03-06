@@ -33,7 +33,7 @@ VariableMatrix::VariableMatrix(
 
   // Assert the first and latest column counts are the same
   for ([[maybe_unused]] const auto& row : list) {
-    assert(list.begin()->size() == row.size());
+    Assert(list.begin()->size() == row.size());
   }
 
   m_storage.reserve(Rows() * Cols());
@@ -52,7 +52,7 @@ VariableMatrix::VariableMatrix(std::vector<std::vector<double>> list) {
 
   // Assert the first and latest column counts are the same
   for ([[maybe_unused]] const auto& row : list) {
-    assert(list.begin()->size() == row.size());
+    Assert(list.begin()->size() == row.size());
   }
 
   m_storage.reserve(Rows() * Cols());
@@ -71,7 +71,7 @@ VariableMatrix::VariableMatrix(std::vector<std::vector<Variable>> list) {
 
   // Assert the first and latest column counts are the same
   for ([[maybe_unused]] const auto& row : list) {
-    assert(list.begin()->size() == row.size());
+    Assert(list.begin()->size() == row.size());
   }
 
   m_storage.reserve(Rows() * Cols());
@@ -120,7 +120,7 @@ VariableMatrix::VariableMatrix(std::span<const Variable> values)
 VariableMatrix::VariableMatrix(std::span<const Variable> values, int rows,
                                int cols)
     : m_rows{rows}, m_cols{cols} {
-  assert(static_cast<int>(values.size()) == Rows() * Cols());
+  Assert(static_cast<int>(values.size()) == Rows() * Cols());
   for (int row = 0; row < Rows(); ++row) {
     for (int col = 0; col < Cols(); ++col) {
       m_storage.emplace_back(values[row * Cols() + col]);
@@ -129,24 +129,24 @@ VariableMatrix::VariableMatrix(std::span<const Variable> values, int rows,
 }
 
 Variable& VariableMatrix::operator()(int row, int col) {
-  assert(row >= 0 && row < Rows());
-  assert(col >= 0 && col < Cols());
+  Assert(row >= 0 && row < Rows());
+  Assert(col >= 0 && col < Cols());
   return m_storage[row * Cols() + col];
 }
 
 const Variable& VariableMatrix::operator()(int row, int col) const {
-  assert(row >= 0 && row < Rows());
-  assert(col >= 0 && col < Cols());
+  Assert(row >= 0 && row < Rows());
+  Assert(col >= 0 && col < Cols());
   return m_storage[row * Cols() + col];
 }
 
 Variable& VariableMatrix::operator()(int row) {
-  assert(row >= 0 && row < Rows() * Cols());
+  Assert(row >= 0 && row < Rows() * Cols());
   return m_storage[row];
 }
 
 const Variable& VariableMatrix::operator()(int row) const {
-  assert(row >= 0 && row < Rows() * Cols());
+  Assert(row >= 0 && row < Rows() * Cols());
   return m_storage[row];
 }
 
@@ -154,57 +154,57 @@ VariableBlock<VariableMatrix> VariableMatrix::Block(int rowOffset,
                                                     int colOffset,
                                                     int blockRows,
                                                     int blockCols) {
-  assert(rowOffset >= 0 && rowOffset <= Rows());
-  assert(colOffset >= 0 && colOffset <= Cols());
-  assert(blockRows >= 0 && blockRows <= Rows() - rowOffset);
-  assert(blockCols >= 0 && blockCols <= Cols() - colOffset);
+  Assert(rowOffset >= 0 && rowOffset <= Rows());
+  Assert(colOffset >= 0 && colOffset <= Cols());
+  Assert(blockRows >= 0 && blockRows <= Rows() - rowOffset);
+  Assert(blockCols >= 0 && blockCols <= Cols() - colOffset);
   return VariableBlock{*this, rowOffset, colOffset, blockRows, blockCols};
 }
 
 const VariableBlock<const VariableMatrix> VariableMatrix::Block(
     int rowOffset, int colOffset, int blockRows, int blockCols) const {
-  assert(rowOffset >= 0 && rowOffset <= Rows());
-  assert(colOffset >= 0 && colOffset <= Cols());
-  assert(blockRows >= 0 && blockRows <= Rows() - rowOffset);
-  assert(blockCols >= 0 && blockCols <= Cols() - colOffset);
+  Assert(rowOffset >= 0 && rowOffset <= Rows());
+  Assert(colOffset >= 0 && colOffset <= Cols());
+  Assert(blockRows >= 0 && blockRows <= Rows() - rowOffset);
+  Assert(blockCols >= 0 && blockCols <= Cols() - colOffset);
   return VariableBlock{*this, rowOffset, colOffset, blockRows, blockCols};
 }
 
 VariableBlock<VariableMatrix> VariableMatrix::Segment(int offset, int length) {
-  assert(offset >= 0 && offset < Rows() * Cols());
-  assert(length >= 0 && length <= Rows() * Cols() - offset);
+  Assert(offset >= 0 && offset < Rows() * Cols());
+  Assert(length >= 0 && length <= Rows() * Cols() - offset);
   return Block(offset, 0, length, 1);
 }
 
 const VariableBlock<const VariableMatrix> VariableMatrix::Segment(
     int offset, int length) const {
-  assert(offset >= 0 && offset < Rows() * Cols());
-  assert(length >= 0 && length <= Rows() * Cols() - offset);
+  Assert(offset >= 0 && offset < Rows() * Cols());
+  Assert(length >= 0 && length <= Rows() * Cols() - offset);
   return Block(offset, 0, length, 1);
 }
 
 VariableBlock<VariableMatrix> VariableMatrix::Row(int row) {
-  assert(row >= 0 && row < Rows());
+  Assert(row >= 0 && row < Rows());
   return Block(row, 0, 1, Cols());
 }
 
 const VariableBlock<const VariableMatrix> VariableMatrix::Row(int row) const {
-  assert(row >= 0 && row < Rows());
+  Assert(row >= 0 && row < Rows());
   return Block(row, 0, 1, Cols());
 }
 
 VariableBlock<VariableMatrix> VariableMatrix::Col(int col) {
-  assert(col >= 0 && col < Cols());
+  Assert(col >= 0 && col < Cols());
   return Block(0, col, Rows(), 1);
 }
 
 const VariableBlock<const VariableMatrix> VariableMatrix::Col(int col) const {
-  assert(col >= 0 && col < Cols());
+  Assert(col >= 0 && col < Cols());
   return Block(0, col, Rows(), 1);
 }
 
 VariableMatrix operator*(const VariableMatrix& lhs, const VariableMatrix& rhs) {
-  assert(lhs.Cols() == rhs.Rows());
+  Assert(lhs.Cols() == rhs.Rows());
 
   VariableMatrix result{lhs.Rows(), rhs.Cols()};
 
@@ -254,7 +254,7 @@ VariableMatrix operator*(double lhs, const VariableMatrix& rhs) {
 }
 
 VariableMatrix& VariableMatrix::operator*=(const VariableMatrix& rhs) {
-  assert(Cols() == rhs.Rows() && Cols() == rhs.Cols());
+  Assert(Cols() == rhs.Rows() && Cols() == rhs.Cols());
 
   for (int i = 0; i < Rows(); ++i) {
     for (int j = 0; j < rhs.Cols(); ++j) {
@@ -360,7 +360,7 @@ VariableMatrix VariableMatrix::T() const {
 }
 
 VariableMatrix::operator Variable() const {
-  assert(Rows() == 1 && Cols() == 1);
+  Assert(Rows() == 1 && Cols() == 1);
   return (*this)(0, 0);
 }
 
@@ -373,13 +373,13 @@ int VariableMatrix::Cols() const {
 }
 
 double VariableMatrix::Value(int row, int col) const {
-  assert(row >= 0 && row < Rows());
-  assert(col >= 0 && col < Cols());
+  Assert(row >= 0 && row < Rows());
+  Assert(col >= 0 && col < Cols());
   return m_storage[row * Cols() + col].Value();
 }
 
 double VariableMatrix::Value(int index) const {
-  assert(index >= 0 && index < Rows() * Cols());
+  Assert(index >= 0 && index < Rows() * Cols());
   return m_storage[index].Value();
 }
 
@@ -429,7 +429,7 @@ VariableMatrix Block(
     int latestCols = 0;
     for (const auto& elem : row) {
       // Assert the first and latest row have the same height
-      assert(row.begin()->Rows() == elem.Rows());
+      Assert(row.begin()->Rows() == elem.Rows());
 
       latestCols += elem.Cols();
     }
@@ -439,7 +439,7 @@ VariableMatrix Block(
     if (cols == -1) {
       cols = latestCols;
     } else {
-      assert(cols == latestCols);
+      Assert(cols == latestCols);
     }
   }
 
@@ -471,7 +471,7 @@ VariableMatrix Block(std::vector<std::vector<VariableMatrix>> list) {
     int latestCols = 0;
     for (const auto& elem : row) {
       // Assert the first and latest row have the same height
-      assert(row.begin()->Rows() == elem.Rows());
+      Assert(row.begin()->Rows() == elem.Rows());
 
       latestCols += elem.Cols();
     }
@@ -481,7 +481,7 @@ VariableMatrix Block(std::vector<std::vector<VariableMatrix>> list) {
     if (cols == -1) {
       cols = latestCols;
     } else {
-      assert(cols == latestCols);
+      Assert(cols == latestCols);
     }
   }
 

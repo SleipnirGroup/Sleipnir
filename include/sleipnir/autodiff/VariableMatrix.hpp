@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include <cassert>
 #include <concepts>
 #include <initializer_list>
 #include <iterator>
@@ -14,6 +13,7 @@
 
 #include "sleipnir/autodiff/Variable.hpp"
 #include "sleipnir/autodiff/VariableBlock.hpp"
+#include "sleipnir/util/Assert.hpp"
 #include "sleipnir/util/SymbolExports.hpp"
 
 namespace sleipnir {
@@ -108,8 +108,8 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    */
   template <typename Derived>
   VariableMatrix& operator=(const Eigen::MatrixBase<Derived>& values) {
-    assert(Rows() == values.rows());
-    assert(Cols() == values.cols());
+    Assert(Rows() == values.rows());
+    Assert(Cols() == values.cols());
 
     for (int row = 0; row < values.rows(); ++row) {
       for (int col = 0; col < values.cols(); ++col) {
@@ -126,8 +126,8 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
   template <typename Derived>
     requires std::same_as<typename Derived::Scalar, double>
   VariableMatrix& SetValue(const Eigen::MatrixBase<Derived>& values) {
-    assert(Rows() == values.rows());
-    assert(Cols() == values.cols());
+    Assert(Rows() == values.rows());
+    Assert(Cols() == values.cols());
 
     for (int row = 0; row < values.rows(); ++row) {
       for (int col = 0; col < values.cols(); ++col) {
@@ -571,8 +571,8 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
 template <std::invocable<const Variable&, const Variable&> BinaryOp>
 VariableMatrix CwiseReduce(const VariableMatrix& lhs, const VariableMatrix& rhs,
                            BinaryOp&& binaryOp) {
-  assert(lhs.Rows() == rhs.Rows());
-  assert(lhs.Rows() == rhs.Rows());
+  Assert(lhs.Rows() == rhs.Rows());
+  Assert(lhs.Rows() == rhs.Rows());
 
   VariableMatrix result{lhs.Rows(), lhs.Cols()};
 

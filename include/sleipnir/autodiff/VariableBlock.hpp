@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include <cassert>
 #include <concepts>
 #include <type_traits>
 #include <utility>
@@ -10,6 +9,7 @@
 #include <Eigen/Core>
 
 #include "sleipnir/autodiff/Variable.hpp"
+#include "sleipnir/util/Assert.hpp"
 #include "sleipnir/util/SymbolExports.hpp"
 
 namespace sleipnir {
@@ -39,8 +39,8 @@ class VariableBlock {
       m_blockRows = values.m_blockRows;
       m_blockCols = values.m_blockCols;
     } else {
-      assert(Rows() == values.Rows());
-      assert(Cols() == values.Cols());
+      Assert(Rows() == values.Rows());
+      Assert(Cols() == values.Cols());
 
       for (int row = 0; row < Rows(); ++row) {
         for (int col = 0; col < Cols(); ++col) {
@@ -69,8 +69,8 @@ class VariableBlock {
       m_blockRows = values.m_blockRows;
       m_blockCols = values.m_blockCols;
     } else {
-      assert(Rows() == values.Rows());
-      assert(Cols() == values.Cols());
+      Assert(Rows() == values.Rows());
+      Assert(Cols() == values.Cols());
 
       for (int row = 0; row < Rows(); ++row) {
         for (int col = 0; col < Cols(); ++col) {
@@ -113,7 +113,7 @@ class VariableBlock {
    * This only works for blocks with one row and one column.
    */
   VariableBlock<Mat>& operator=(double value) {
-    assert(Rows() == 1 && Cols() == 1);
+    Assert(Rows() == 1 && Cols() == 1);
 
     (*this)(0, 0) = value;
 
@@ -126,7 +126,7 @@ class VariableBlock {
    * This only works for blocks with one row and one column.
    */
   VariableBlock<Mat>& SetValue(double value) {
-    assert(Rows() == 1 && Cols() == 1);
+    Assert(Rows() == 1 && Cols() == 1);
 
     (*this)(0, 0).SetValue(value);
 
@@ -138,8 +138,8 @@ class VariableBlock {
    */
   template <typename Derived>
   VariableBlock<Mat>& operator=(const Eigen::MatrixBase<Derived>& values) {
-    assert(Rows() == values.rows());
-    assert(Cols() == values.cols());
+    Assert(Rows() == values.rows());
+    Assert(Cols() == values.cols());
 
     for (int row = 0; row < Rows(); ++row) {
       for (int col = 0; col < Cols(); ++col) {
@@ -156,8 +156,8 @@ class VariableBlock {
   template <typename Derived>
     requires std::same_as<typename Derived::Scalar, double>
   VariableBlock<Mat>& SetValue(const Eigen::MatrixBase<Derived>& values) {
-    assert(Rows() == values.rows());
-    assert(Cols() == values.cols());
+    Assert(Rows() == values.rows());
+    Assert(Cols() == values.cols());
 
     for (int row = 0; row < Rows(); ++row) {
       for (int col = 0; col < Cols(); ++col) {
@@ -172,8 +172,8 @@ class VariableBlock {
    * Assigns a VariableMatrix to the block.
    */
   VariableBlock<Mat>& operator=(const Mat& values) {
-    assert(Rows() == values.Rows());
-    assert(Cols() == values.Cols());
+    Assert(Rows() == values.Rows());
+    Assert(Cols() == values.Cols());
 
     for (int row = 0; row < Rows(); ++row) {
       for (int col = 0; col < Cols(); ++col) {
@@ -187,8 +187,8 @@ class VariableBlock {
    * Assigns a VariableMatrix to the block.
    */
   VariableBlock<Mat>& operator=(Mat&& values) {
-    assert(Rows() == values.Rows());
-    assert(Cols() == values.Cols());
+    Assert(Rows() == values.Rows());
+    Assert(Cols() == values.Cols());
 
     for (int row = 0; row < Rows(); ++row) {
       for (int col = 0; col < Cols(); ++col) {
@@ -207,8 +207,8 @@ class VariableBlock {
   template <typename Mat2 = Mat>
     requires(!std::is_const_v<Mat2>)
   Variable& operator()(int row, int col) {
-    assert(row >= 0 && row < Rows());
-    assert(col >= 0 && col < Cols());
+    Assert(row >= 0 && row < Rows());
+    Assert(col >= 0 && col < Cols());
     return (*m_mat)(m_rowOffset + row, m_colOffset + col);
   }
 
@@ -219,8 +219,8 @@ class VariableBlock {
    * @param col The scalar subblock's column.
    */
   const Variable& operator()(int row, int col) const {
-    assert(row >= 0 && row < Rows());
-    assert(col >= 0 && col < Cols());
+    Assert(row >= 0 && row < Rows());
+    Assert(col >= 0 && col < Cols());
     return (*m_mat)(m_rowOffset + row, m_colOffset + col);
   }
 
@@ -232,7 +232,7 @@ class VariableBlock {
   template <typename Mat2 = Mat>
     requires(!std::is_const_v<Mat2>)
   Variable& operator()(int row) {
-    assert(row >= 0 && row < Rows() * Cols());
+    Assert(row >= 0 && row < Rows() * Cols());
     return (*this)(row / Cols(), row % Cols());
   }
 
@@ -242,7 +242,7 @@ class VariableBlock {
    * @param row The scalar subblock's row.
    */
   const Variable& operator()(int row) const {
-    assert(row >= 0 && row < Rows() * Cols());
+    Assert(row >= 0 && row < Rows() * Cols());
     return (*this)(row / Cols(), row % Cols());
   }
 
@@ -256,10 +256,10 @@ class VariableBlock {
    */
   VariableBlock<Mat> Block(int rowOffset, int colOffset, int blockRows,
                            int blockCols) {
-    assert(rowOffset >= 0 && rowOffset <= Rows());
-    assert(colOffset >= 0 && colOffset <= Cols());
-    assert(blockRows >= 0 && blockRows <= Rows() - rowOffset);
-    assert(blockCols >= 0 && blockCols <= Cols() - colOffset);
+    Assert(rowOffset >= 0 && rowOffset <= Rows());
+    Assert(colOffset >= 0 && colOffset <= Cols());
+    Assert(blockRows >= 0 && blockRows <= Rows() - rowOffset);
+    Assert(blockCols >= 0 && blockCols <= Cols() - colOffset);
     return VariableBlock{*m_mat, m_rowOffset + rowOffset,
                          m_colOffset + colOffset, blockRows, blockCols};
   }
@@ -274,10 +274,10 @@ class VariableBlock {
    */
   const VariableBlock<const Mat> Block(int rowOffset, int colOffset,
                                        int blockRows, int blockCols) const {
-    assert(rowOffset >= 0 && rowOffset <= Rows());
-    assert(colOffset >= 0 && colOffset <= Cols());
-    assert(blockRows >= 0 && blockRows <= Rows() - rowOffset);
-    assert(blockCols >= 0 && blockCols <= Cols() - colOffset);
+    Assert(rowOffset >= 0 && rowOffset <= Rows());
+    Assert(colOffset >= 0 && colOffset <= Cols());
+    Assert(blockRows >= 0 && blockRows <= Rows() - rowOffset);
+    Assert(blockCols >= 0 && blockCols <= Cols() - colOffset);
     return VariableBlock{*m_mat, m_rowOffset + rowOffset,
                          m_colOffset + colOffset, blockRows, blockCols};
   }
@@ -288,7 +288,7 @@ class VariableBlock {
    * @param row The row to slice.
    */
   VariableBlock<Mat> Row(int row) {
-    assert(row >= 0 && row < Rows());
+    Assert(row >= 0 && row < Rows());
     return Block(row, 0, 1, Cols());
   }
 
@@ -298,7 +298,7 @@ class VariableBlock {
    * @param row The row to slice.
    */
   VariableBlock<const Mat> Row(int row) const {
-    assert(row >= 0 && row < Rows());
+    Assert(row >= 0 && row < Rows());
     return Block(row, 0, 1, Cols());
   }
 
@@ -308,7 +308,7 @@ class VariableBlock {
    * @param col The column to slice.
    */
   VariableBlock<Mat> Col(int col) {
-    assert(col >= 0 && col < Cols());
+    Assert(col >= 0 && col < Cols());
     return Block(0, col, Rows(), 1);
   }
 
@@ -318,7 +318,7 @@ class VariableBlock {
    * @param col The column to slice.
    */
   VariableBlock<const Mat> Col(int col) const {
-    assert(col >= 0 && col < Cols());
+    Assert(col >= 0 && col < Cols());
     return Block(0, col, Rows(), 1);
   }
 
@@ -328,7 +328,7 @@ class VariableBlock {
    * @param rhs Variable to multiply.
    */
   VariableBlock<Mat>& operator*=(const VariableBlock<Mat>& rhs) {
-    assert(Cols() == rhs.Rows() && Cols() == rhs.Cols());
+    Assert(Cols() == rhs.Rows() && Cols() == rhs.Cols());
 
     for (int i = 0; i < Rows(); ++i) {
       for (int j = 0; j < rhs.Cols(); ++j) {
@@ -366,7 +366,7 @@ class VariableBlock {
    * @param rhs Variable to divide.
    */
   VariableBlock<Mat>& operator/=(const VariableBlock<Mat>& rhs) {
-    assert(rhs.Rows() == 1 && rhs.Cols() == 1);
+    Assert(rhs.Rows() == 1 && rhs.Cols() == 1);
 
     for (int row = 0; row < Rows(); ++row) {
       for (int col = 0; col < Cols(); ++col) {
@@ -455,8 +455,8 @@ class VariableBlock {
    * @param col The column of the element to return.
    */
   double Value(int row, int col) const {
-    assert(row >= 0 && row < Rows());
-    assert(col >= 0 && col < Cols());
+    Assert(row >= 0 && row < Rows());
+    Assert(col >= 0 && col < Cols());
     return (*m_mat)(m_rowOffset + row, m_colOffset + col).Value();
   }
 
@@ -466,7 +466,7 @@ class VariableBlock {
    * @param index The index of the element to return.
    */
   double Value(int index) const {
-    assert(index >= 0 && index < Rows() * Cols());
+    Assert(index >= 0 && index < Rows() * Cols());
     return (*m_mat)(m_rowOffset + index / m_blockCols,
                     m_colOffset + index % m_blockCols)
         .Value();
