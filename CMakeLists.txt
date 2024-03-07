@@ -99,12 +99,11 @@ if(NOT USE_SYSTEM_EIGEN)
     fetchcontent_declare(
         Eigen3
         GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
-        # master on 2024-02-29
-        GIT_TAG 23f6c26857100b16f4851043d0c230fb5e27027b
+        # master on 2024-03-06
+        GIT_TAG 17f3bf8985021c242eedc9fa26c5c66d43a300f2
         PATCH_COMMAND
             git apply
             ${CMAKE_CURRENT_SOURCE_DIR}/cmake/eigen-disable-fortran-support.patch
-            ${CMAKE_CURRENT_SOURCE_DIR}/cmake/0001-Fix-deprecated-anonymous-enum-enum-conversion-warnin.patch
         UPDATE_DISCONNECTED 1
     )
     fetchcontent_makeavailable(Eigen3)
