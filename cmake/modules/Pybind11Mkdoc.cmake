@@ -15,7 +15,7 @@ function(pybind11_mkdoc target headers)
         COMMAND
             ${env_vars} ${Python3_EXECUTABLE} -m pybind11_mkdoc ${headers} -o
             ${CMAKE_CURRENT_SOURCE_DIR}/jormungandr/cpp/Docstrings.hpp
-            -I/usr/lib/clang/16/include ${target_dirs} ${eigen_dirs} -std=c++20
+            -I/usr/lib/clang/17/include ${target_dirs} ${eigen_dirs} -std=c++20
         DEPENDS ${headers}
         USES_TERMINAL
     )
