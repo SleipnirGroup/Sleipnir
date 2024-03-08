@@ -6,7 +6,6 @@
 #include <vector>
 
 #include "sleipnir/autodiff/Variable.hpp"
-#include "sleipnir/autodiff/VariableMatrix.hpp"
 #include "sleipnir/util/Assert.hpp"
 #include "sleipnir/util/Concepts.hpp"
 #include "sleipnir/util/SymbolExports.hpp"

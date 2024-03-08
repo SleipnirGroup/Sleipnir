@@ -10,7 +10,6 @@
 
 #include "sleipnir/autodiff/Variable.hpp"
 #include "sleipnir/util/Assert.hpp"
-#include "sleipnir/util/SymbolExports.hpp"
 
 namespace sleipnir {
 
