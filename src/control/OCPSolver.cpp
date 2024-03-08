@@ -2,6 +2,8 @@
 
 #include "sleipnir/control/OCPSolver.hpp"
 
+#include "sleipnir/util/Assert.hpp"
+
 namespace sleipnir {
 
 OCPSolver::OCPSolver(int numStates, int numInputs,
@@ -56,9 +58,7 @@ OCPSolver::OCPSolver(int numStates, int numInputs,
 }
 
 void OCPSolver::ConstrainDirectCollocation() {
-  if (m_dynamicsType != DynamicsType::kExplicitODE) {
-    throw std::runtime_error("Direct Collocation requires an explicit ODE");
-  }
+  Assert(m_dynamicsType == DynamicsType::kExplicitODE);
 
   Variable time = 0.0;
 
