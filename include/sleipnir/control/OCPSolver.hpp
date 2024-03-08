@@ -3,7 +3,6 @@
 #pragma once
 
 #include <chrono>
-#include <concepts>
 #include <functional>
 
 #include "sleipnir/autodiff/VariableMatrix.hpp"
