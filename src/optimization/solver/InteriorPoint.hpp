@@ -8,7 +8,6 @@
 #include <Eigen/Core>
 
 #include "sleipnir/autodiff/Variable.hpp"
-#include "sleipnir/optimization/Constraints.hpp"
 #include "sleipnir/optimization/SolverConfig.hpp"
 #include "sleipnir/optimization/SolverIterationInfo.hpp"
 #include "sleipnir/optimization/SolverStatus.hpp"

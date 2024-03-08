@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "sleipnir/autodiff/Expression.hpp"
+#include "sleipnir/autodiff/ExpressionType.hpp"
 #include "sleipnir/optimization/SolverExitCondition.hpp"
 #include "sleipnir/util/SymbolExports.hpp"
 

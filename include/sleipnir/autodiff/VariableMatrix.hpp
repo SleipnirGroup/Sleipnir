@@ -6,7 +6,6 @@
 #include <initializer_list>
 #include <iterator>
 #include <span>
-#include <utility>
 #include <vector>
 
 #include <Eigen/Core>

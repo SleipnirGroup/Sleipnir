@@ -2,8 +2,6 @@
 
 #pragma once
 
-#include <vector>
-
 #include <Eigen/SparseCore>
 
 #include "sleipnir/autodiff/Jacobian.hpp"

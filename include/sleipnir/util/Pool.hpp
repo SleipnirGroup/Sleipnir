@@ -8,8 +8,6 @@
 #include <memory>
 #include <vector>
 
-#include "sleipnir/util/SymbolExports.hpp"
-
 namespace sleipnir {
 
 /**

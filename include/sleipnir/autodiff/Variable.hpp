@@ -2,8 +2,6 @@
 
 #pragma once
 
-#include <vector>
-
 #include "sleipnir/autodiff/Expression.hpp"
 #include "sleipnir/util/SymbolExports.hpp"
 
