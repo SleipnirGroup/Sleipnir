@@ -148,6 +148,8 @@ The gradient tree is cached so subsequent Hessian calculations are
 faster, and the Hessian is only recomputed if the variable expression
 is nonlinear.)doc";
 
+static const char *__doc_sleipnir_Hessian_2 = R"doc()doc";
+
 static const char *__doc_sleipnir_Hessian_Get =
 R"doc(Returns the Hessian as a VariableMatrix.
 
@@ -189,6 +191,49 @@ Parameter ``rhs``:
 static const char *__doc_sleipnir_InequalityConstraints_constraints = R"doc(A vector of scalar inequality constraints.)doc";
 
 static const char *__doc_sleipnir_InequalityConstraints_operator_bool = R"doc(Implicit conversion operator to bool.)doc";
+
+static const char *__doc_sleipnir_InteriorPoint =
+R"doc(Finds the optimal solution to a nonlinear program using the interior-
+point method.
+
+A nonlinear program has the form:
+
+@verbatim min_x f(x) subject to cₑ(x) = 0 cᵢ(x) ≥ 0 @endverbatim
+
+where f(x) is the cost function, cₑ(x) are the equality constraints,
+and cᵢ(x) are the inequality constraints.
+
+Parameter ``decisionVariables``:
+    The list of decision variables.
+
+Parameter ``equalityConstraints``:
+    The list of equality constraints.
+
+Parameter ``inequalityConstraints``:
+    The list of inequality constraints.
+
+Parameter ``f``:
+    The cost function.
+
+Parameter ``callback``:
+    The user callback.
+
+Parameter ``config``:
+    Configuration options for the solver.
+
+Parameter ``feasibilityRestoration``:
+    Whether to use feasibility restoration instead of the normal
+    algorithm.
+
+Parameter ``x``:
+    The initial guess and output location for the decision variables.
+
+Parameter ``s``:
+    The initial guess and output location for the inequality
+    constraint slack variables.
+
+Parameter ``status``:
+    The solver status.)doc";
 
 static const char *__doc_sleipnir_Jacobian =
 R"doc(This class calculates the Jacobian of a vector of variables with
@@ -1649,8 +1694,6 @@ static const char *__doc_sleipnir_detail_ExpressionGraph =
 R"doc(This class is an adaptor type that performs value updates of an
 expression's computational graph in a way that skips duplicates.)doc";
 
-static const char *__doc_sleipnir_detail_ExpressionGraph_2 = R"doc()doc";
-
 static const char *__doc_sleipnir_detail_ExpressionGraph_ComputeAdjoints =
 R"doc(Updates the adjoints in the expression graph, effectively computing
 the gradient.
@@ -1813,10 +1856,6 @@ pool allocator.
 Parameter ``args``:
     Constructor arguments for Expression.)doc";
 
-static const char *__doc_sleipnir_detail_Zero =
-R"doc(Returns an instance of "zero", which has special meaning in expression
-operations.)doc";
-
 static const char *__doc_sleipnir_detail_abs =
 R"doc(std::abs() for Expressions.
 
@@ -1874,6 +1913,12 @@ R"doc(std::exp() for Expressions.
 Parameter ``x``:
     The argument.)doc";
 
+static const char *__doc_sleipnir_detail_exp_2 =
+R"doc(std::exp() for Expressions.
+
+Parameter ``x``:
+    The argument.)doc";
+
 static const char *__doc_sleipnir_detail_hypot =
 R"doc(std::hypot() for Expressions.
 
@@ -1916,13 +1961,31 @@ R"doc(std::sin() for Expressions.
 Parameter ``x``:
     The argument.)doc";
 
+static const char *__doc_sleipnir_detail_sin_2 =
+R"doc(std::sin() for Expressions.
+
+Parameter ``x``:
+    The argument.)doc";
+
 static const char *__doc_sleipnir_detail_sinh =
 R"doc(std::sinh() for Expressions.
 
 Parameter ``x``:
     The argument.)doc";
 
+static const char *__doc_sleipnir_detail_sinh_2 =
+R"doc(std::sinh() for Expressions.
+
+Parameter ``x``:
+    The argument.)doc";
+
 static const char *__doc_sleipnir_detail_sqrt =
+R"doc(std::sqrt() for Expressions.
+
+Parameter ``x``:
+    The argument.)doc";
+
+static const char *__doc_sleipnir_detail_sqrt_2 =
 R"doc(std::sqrt() for Expressions.
 
 Parameter ``x``:
