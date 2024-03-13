@@ -16,8 +16,6 @@ namespace py = pybind11;
 namespace sleipnir {
 
 PYBIND11_MODULE(_jormungandr, m) {
-  using namespace sleipnir;
-
   m.doc() =
       "A linearity-exploiting sparse nonlinear constrained optimization "
       "problem solver that uses the interior-point method.";
