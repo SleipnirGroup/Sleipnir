@@ -1,5 +1,6 @@
 // Copyright (c) Sleipnir contributors
 
+#include <cmath>
 #include <numbers>
 
 #include <Eigen/Core>
