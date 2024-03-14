@@ -189,7 +189,7 @@ TEST_CASE("Gradient - Trigonometry", "[Gradient]") {
   CHECK(g.Value().coeff(0) == 1.0 / (1 + x.Value() * x.Value()));
 }
 
-TEST_CASE("Hyperbolic", "[Gradient]") {
+TEST_CASE("Gradient - Hyperbolic", "[Gradient]") {
   sleipnir::Variable x;
   x.SetValue(1.0);
 
