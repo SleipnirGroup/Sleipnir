@@ -5,7 +5,7 @@
 
 #define __EXPAND(x)                                      x
 #define __COUNT(_1, _2, _3, _4, _5, _6, _7, COUNT, ...)  COUNT
-#define __VA_SIZE(...)                                   __EXPAND(__COUNT(__VA_ARGS__, 7, 6, 5, 4, 3, 2, 1, 0))
+#define __VA_SIZE(...)                                   __EXPAND(__COUNT(__VA_ARGS__, 7, 6, 5, 4, 3, 2, 1))
 #define __CAT1(a, b)                                     a ## b
 #define __CAT2(a, b)                                     __CAT1(a, b)
 #define __DOC1(n1)                                       __doc_##n1

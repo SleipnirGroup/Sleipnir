@@ -1,8 +1,7 @@
 // Copyright (c) Sleipnir contributors
 
-#include "optimization/BindConstraints.hpp"
-
 #include <pybind11/operators.h>
+#include <pybind11/pybind11.h>
 #include <sleipnir/optimization/Constraints.hpp>
 
 #include "Docstrings.hpp"

@@ -1,9 +1,6 @@
 // Copyright (c) Sleipnir contributors
 
-#include "optimization/BindSolverStatus.hpp"
-
-#include <sleipnir/autodiff/Expression.hpp>
-#include <sleipnir/optimization/SolverExitCondition.hpp>
+#include <pybind11/pybind11.h>
 #include <sleipnir/optimization/SolverStatus.hpp>
 
 #include "Docstrings.hpp"
