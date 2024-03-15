@@ -11,6 +11,7 @@
 #include "sleipnir/optimization/SolverConfig.hpp"
 #include "sleipnir/optimization/SolverIterationInfo.hpp"
 #include "sleipnir/optimization/SolverStatus.hpp"
+#include "sleipnir/util/SymbolExports.hpp"
 
 namespace sleipnir {
 
@@ -43,7 +44,7 @@ are the inequality constraints.
   constraint slack variables.
 @param[out] status The solver status.
 */
-void InteriorPoint(
+SLEIPNIR_DLLEXPORT void InteriorPoint(
     std::span<Variable> decisionVariables,
     std::span<Variable> equalityConstraints,
     std::span<Variable> inequalityConstraints, Variable& f,

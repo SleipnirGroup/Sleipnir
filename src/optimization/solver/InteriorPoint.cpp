@@ -1,6 +1,6 @@
 // Copyright (c) Sleipnir contributors
 
-#include "InteriorPoint.hpp"
+#include "sleipnir/optimization/solver/InteriorPoint.hpp"
 
 #include <algorithm>
 #include <chrono>
@@ -22,8 +22,8 @@
 #include "sleipnir/autodiff/Hessian.hpp"
 #include "sleipnir/autodiff/Jacobian.hpp"
 #include "sleipnir/optimization/SolverExitCondition.hpp"
+#include "sleipnir/util/Print.hpp"
 #include "sleipnir/util/Spy.hpp"
-#include "util/Print.hpp"
 #include "util/ScopeExit.hpp"
 #include "util/ToMilliseconds.hpp"
 

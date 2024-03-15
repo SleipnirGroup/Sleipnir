@@ -2,11 +2,14 @@
 
 #pragma once
 
+#include <utility>
+
 #include <Eigen/SparseCore>
 
 #include "sleipnir/autodiff/Jacobian.hpp"
 #include "sleipnir/autodiff/Profiler.hpp"
 #include "sleipnir/autodiff/Variable.hpp"
+#include "sleipnir/autodiff/VariableMatrix.hpp"
 #include "sleipnir/util/SymbolExports.hpp"
 
 namespace sleipnir {
@@ -26,7 +29,8 @@ class SLEIPNIR_DLLEXPORT Gradient {
    * @param variable Variable of which to compute the gradient.
    * @param wrt Variable with respect to which to compute the gradient.
    */
-  Gradient(Variable variable, Variable wrt) noexcept;
+  Gradient(Variable variable, Variable wrt) noexcept
+      : Gradient{std::move(variable), VariableMatrix{wrt}} {}
 
   /**
    * Constructs a Gradient object.
@@ -35,7 +39,8 @@ class SLEIPNIR_DLLEXPORT Gradient {
    * @param wrt Vector of variables with respect to which to compute the
    *   gradient.
    */
-  Gradient(Variable variable, const VariableMatrix& wrt) noexcept;
+  Gradient(Variable variable, const VariableMatrix& wrt) noexcept
+      : m_jacobian{variable, wrt} {}
 
   /**
    * Returns the gradient as a VariableMatrix.
@@ -43,22 +48,26 @@ class SLEIPNIR_DLLEXPORT Gradient {
    * This is useful when constructing optimization problems with derivatives in
    * them.
    */
-  VariableMatrix Get() const;
+  VariableMatrix Get() const { return m_jacobian.Get(); }
 
   /**
    * Evaluates the gradient at wrt's value.
    */
-  const Eigen::SparseVector<double>& Value();
+  const Eigen::SparseVector<double>& Value() {
+    m_g = m_jacobian.Value();
+
+    return m_g;
+  }
 
   /**
    * Updates the value of the variable.
    */
-  void Update();
+  void Update() { m_jacobian.Update(); }
 
   /**
    * Returns the profiler.
    */
-  Profiler& GetProfiler();
+  Profiler& GetProfiler() { return m_jacobian.GetProfiler(); }
 
  private:
   Eigen::SparseVector<double> m_g;

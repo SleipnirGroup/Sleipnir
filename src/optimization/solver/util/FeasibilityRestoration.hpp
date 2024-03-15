@@ -11,12 +11,12 @@
 
 #include <Eigen/Core>
 
-#include "optimization/solver/InteriorPoint.hpp"
 #include "sleipnir/autodiff/Variable.hpp"
 #include "sleipnir/autodiff/VariableMatrix.hpp"
 #include "sleipnir/optimization/SolverConfig.hpp"
 #include "sleipnir/optimization/SolverIterationInfo.hpp"
 #include "sleipnir/optimization/SolverStatus.hpp"
+#include "sleipnir/optimization/solver/InteriorPoint.hpp"
 
 namespace sleipnir {
 

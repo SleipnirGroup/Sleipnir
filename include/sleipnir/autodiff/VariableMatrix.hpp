@@ -2,10 +2,12 @@
 
 #pragma once
 
+#include <algorithm>
 #include <concepts>
 #include <initializer_list>
 #include <iterator>
 #include <span>
+#include <utility>
 #include <vector>
 
 #include <Eigen/Core>
@@ -32,7 +34,11 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    *
    * @param rows The number of matrix rows.
    */
-  explicit VariableMatrix(int rows);
+  explicit VariableMatrix(int rows) : m_rows{rows}, m_cols{1} {
+    for (int row = 0; row < rows; ++row) {
+      m_storage.emplace_back();
+    }
+  }
 
   /**
    * Constructs a VariableMatrix with the given dimensions.
@@ -40,7 +46,13 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param rows The number of matrix rows.
    * @param cols The number of matrix columns.
    */
-  VariableMatrix(int rows, int cols);
+  VariableMatrix(int rows, int cols) : m_rows{rows}, m_cols{cols} {
+    for (int row = 0; row < rows; ++row) {
+      for (int col = 0; col < cols; ++col) {
+        m_storage.emplace_back();
+      }
+    }
+  }
 
   /**
    * Constructs a scalar VariableMatrix from a nested list of Variables.
@@ -48,7 +60,24 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param list The nested list of Variables.
    */
   VariableMatrix(
-      std::initializer_list<std::initializer_list<Variable>> list);  // NOLINT
+      std::initializer_list<std::initializer_list<Variable>> list) {  // NOLINT
+    // Get row and column counts for destination matrix
+    m_rows = list.size();
+    m_cols = 0;
+    if (list.size() > 0) {
+      m_cols = list.begin()->size();
+    }
+
+    // Assert the first and latest column counts are the same
+    for ([[maybe_unused]] const auto& row : list) {
+      Assert(list.begin()->size() == row.size());
+    }
+
+    m_storage.reserve(Rows() * Cols());
+    for (const auto& row : list) {
+      std::copy(row.begin(), row.end(), std::back_inserter(m_storage));
+    }
+  }
 
   /**
    * Constructs a scalar VariableMatrix from a nested list of doubles.
@@ -57,7 +86,24 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    *
    * @param list The nested list of Variables.
    */
-  VariableMatrix(std::vector<std::vector<double>> list);  // NOLINT
+  VariableMatrix(std::vector<std::vector<double>> list) {  // NOLINT
+    // Get row and column counts for destination matrix
+    m_rows = list.size();
+    m_cols = 0;
+    if (list.size() > 0) {
+      m_cols = list.begin()->size();
+    }
+
+    // Assert the first and latest column counts are the same
+    for ([[maybe_unused]] const auto& row : list) {
+      Assert(list.begin()->size() == row.size());
+    }
+
+    m_storage.reserve(Rows() * Cols());
+    for (const auto& row : list) {
+      std::copy(row.begin(), row.end(), std::back_inserter(m_storage));
+    }
+  }
 
   /**
    * Constructs a scalar VariableMatrix from a nested list of Variables.
@@ -66,7 +112,24 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    *
    * @param list The nested list of Variables.
    */
-  VariableMatrix(std::vector<std::vector<Variable>> list);  // NOLINT
+  VariableMatrix(std::vector<std::vector<Variable>> list) {  // NOLINT
+    // Get row and column counts for destination matrix
+    m_rows = list.size();
+    m_cols = 0;
+    if (list.size() > 0) {
+      m_cols = list.begin()->size();
+    }
+
+    // Assert the first and latest column counts are the same
+    for ([[maybe_unused]] const auto& row : list) {
+      Assert(list.begin()->size() == row.size());
+    }
+
+    m_storage.reserve(Rows() * Cols());
+    for (const auto& row : list) {
+      std::copy(row.begin(), row.end(), std::back_inserter(m_storage));
+    }
+  }
 
   /**
    * Constructs a VariableMatrix from an Eigen matrix.
@@ -140,29 +203,55 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
   /**
    * Constructs a scalar VariableMatrix from a Variable.
    */
-  VariableMatrix(const Variable& variable);  // NOLINT
+  VariableMatrix(const Variable& variable)  // NOLINT
+      : m_rows{1}, m_cols{1} {
+    m_storage.emplace_back(variable);
+  }
 
   /**
    * Constructs a scalar VariableMatrix from a Variable.
    */
-  VariableMatrix(Variable&& variable);  // NOLINT
+  VariableMatrix(Variable&& variable) : m_rows{1}, m_cols{1} {  // NOLINT
+    m_storage.emplace_back(std::move(variable));
+  }
 
   /**
    * Constructs a VariableMatrix from a VariableBlock.
    */
-  VariableMatrix(const VariableBlock<VariableMatrix>& values);  // NOLINT
+  VariableMatrix(const VariableBlock<VariableMatrix>& values)  // NOLINT
+      : m_rows{values.Rows()}, m_cols{values.Cols()} {
+    for (int row = 0; row < Rows(); ++row) {
+      for (int col = 0; col < Cols(); ++col) {
+        m_storage.emplace_back(values(row, col));
+      }
+    }
+  }
 
   /**
    * Constructs a VariableMatrix from a VariableBlock.
    */
-  VariableMatrix(const VariableBlock<const VariableMatrix>& values);  // NOLINT
+  VariableMatrix(const VariableBlock<const VariableMatrix>& values)  // NOLINT
+      : m_rows{values.Rows()}, m_cols{values.Cols()} {
+    for (int row = 0; row < Rows(); ++row) {
+      for (int col = 0; col < Cols(); ++col) {
+        m_storage.emplace_back(values(row, col));
+      }
+    }
+  }
 
   /**
    * Constructs a column vector wrapper around a Variable array.
    *
    * @param values Variable array to wrap.
    */
-  explicit VariableMatrix(std::span<const Variable> values);
+  explicit VariableMatrix(std::span<const Variable> values)
+      : m_rows{static_cast<int>(values.size())}, m_cols{1} {
+    for (int row = 0; row < Rows(); ++row) {
+      for (int col = 0; col < Cols(); ++col) {
+        m_storage.emplace_back(values[row * Cols() + col]);
+      }
+    }
+  }
 
   /**
    * Constructs a matrix wrapper around a Variable array.
@@ -171,7 +260,15 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param rows The number of matrix rows.
    * @param cols The number of matrix columns.
    */
-  VariableMatrix(std::span<const Variable> values, int rows, int cols);
+  VariableMatrix(std::span<const Variable> values, int rows, int cols)
+      : m_rows{rows}, m_cols{cols} {
+    Assert(static_cast<int>(values.size()) == Rows() * Cols());
+    for (int row = 0; row < Rows(); ++row) {
+      for (int col = 0; col < Cols(); ++col) {
+        m_storage.emplace_back(values[row * Cols() + col]);
+      }
+    }
+  }
 
   /**
    * Returns a block pointing to the given row and column.
@@ -179,7 +276,11 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param row The block row.
    * @param col The block column.
    */
-  Variable& operator()(int row, int col);
+  Variable& operator()(int row, int col) {
+    Assert(row >= 0 && row < Rows());
+    Assert(col >= 0 && col < Cols());
+    return m_storage[row * Cols() + col];
+  }
 
   /**
    * Returns a block pointing to the given row and column.
@@ -187,21 +288,31 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param row The block row.
    * @param col The block column.
    */
-  const Variable& operator()(int row, int col) const;
+  const Variable& operator()(int row, int col) const {
+    Assert(row >= 0 && row < Rows());
+    Assert(col >= 0 && col < Cols());
+    return m_storage[row * Cols() + col];
+  }
 
   /**
    * Returns a block pointing to the given row.
    *
    * @param row The block row.
    */
-  Variable& operator()(int row);
+  Variable& operator()(int row) {
+    Assert(row >= 0 && row < Rows() * Cols());
+    return m_storage[row];
+  }
 
   /**
    * Returns a block pointing to the given row.
    *
    * @param row The block row.
    */
-  const Variable& operator()(int row) const;
+  const Variable& operator()(int row) const {
+    Assert(row >= 0 && row < Rows() * Cols());
+    return m_storage[row];
+  }
 
   /**
    * Returns a block slice of the variable matrix.
@@ -212,7 +323,13 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param blockCols The number of columns in the block selection.
    */
   VariableBlock<VariableMatrix> Block(int rowOffset, int colOffset,
-                                      int blockRows, int blockCols);
+                                      int blockRows, int blockCols) {
+    Assert(rowOffset >= 0 && rowOffset <= Rows());
+    Assert(colOffset >= 0 && colOffset <= Cols());
+    Assert(blockRows >= 0 && blockRows <= Rows() - rowOffset);
+    Assert(blockCols >= 0 && blockCols <= Cols() - colOffset);
+    return VariableBlock{*this, rowOffset, colOffset, blockRows, blockCols};
+  }
 
   /**
    * Returns a block slice of the variable matrix.
@@ -224,7 +341,13 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    */
   const VariableBlock<const VariableMatrix> Block(int rowOffset, int colOffset,
                                                   int blockRows,
-                                                  int blockCols) const;
+                                                  int blockCols) const {
+    Assert(rowOffset >= 0 && rowOffset <= Rows());
+    Assert(colOffset >= 0 && colOffset <= Cols());
+    Assert(blockRows >= 0 && blockRows <= Rows() - rowOffset);
+    Assert(blockCols >= 0 && blockCols <= Cols() - colOffset);
+    return VariableBlock{*this, rowOffset, colOffset, blockRows, blockCols};
+  }
 
   /**
    * Returns a segment of the variable vector.
@@ -232,7 +355,11 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param offset The offset of the segment.
    * @param length The length of the segment.
    */
-  VariableBlock<VariableMatrix> Segment(int offset, int length);
+  VariableBlock<VariableMatrix> Segment(int offset, int length) {
+    Assert(offset >= 0 && offset < Rows() * Cols());
+    Assert(length >= 0 && length <= Rows() * Cols() - offset);
+    return Block(offset, 0, length, 1);
+  }
 
   /**
    * Returns a segment of the variable vector.
@@ -241,35 +368,51 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param length The length of the segment.
    */
   const VariableBlock<const VariableMatrix> Segment(int offset,
-                                                    int length) const;
+                                                    int length) const {
+    Assert(offset >= 0 && offset < Rows() * Cols());
+    Assert(length >= 0 && length <= Rows() * Cols() - offset);
+    return Block(offset, 0, length, 1);
+  }
 
   /**
    * Returns a row slice of the variable matrix.
    *
    * @param row The row to slice.
    */
-  VariableBlock<VariableMatrix> Row(int row);
+  VariableBlock<VariableMatrix> Row(int row) {
+    Assert(row >= 0 && row < Rows());
+    return Block(row, 0, 1, Cols());
+  }
 
   /**
    * Returns a row slice of the variable matrix.
    *
    * @param row The row to slice.
    */
-  const VariableBlock<const VariableMatrix> Row(int row) const;
+  const VariableBlock<const VariableMatrix> Row(int row) const {
+    Assert(row >= 0 && row < Rows());
+    return Block(row, 0, 1, Cols());
+  }
 
   /**
    * Returns a column slice of the variable matrix.
    *
    * @param col The column to slice.
    */
-  VariableBlock<VariableMatrix> Col(int col);
+  VariableBlock<VariableMatrix> Col(int col) {
+    Assert(col >= 0 && col < Cols());
+    return Block(0, col, Rows(), 1);
+  }
 
   /**
    * Returns a column slice of the variable matrix.
    *
    * @param col The column to slice.
    */
-  const VariableBlock<const VariableMatrix> Col(int col) const;
+  const VariableBlock<const VariableMatrix> Col(int col) const {
+    Assert(col >= 0 && col < Cols());
+    return Block(0, col, Rows(), 1);
+  }
 
   /**
    * Matrix multiplication operator.
@@ -277,8 +420,24 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param lhs Operator left-hand side.
    * @param rhs Operator right-hand side.
    */
-  friend SLEIPNIR_DLLEXPORT VariableMatrix operator*(const VariableMatrix& lhs,
-                                                     const VariableMatrix& rhs);
+  friend SLEIPNIR_DLLEXPORT VariableMatrix
+  operator*(const VariableMatrix& lhs, const VariableMatrix& rhs) {
+    Assert(lhs.Cols() == rhs.Rows());
+
+    VariableMatrix result{lhs.Rows(), rhs.Cols()};
+
+    for (int i = 0; i < lhs.Rows(); ++i) {
+      for (int j = 0; j < rhs.Cols(); ++j) {
+        Variable sum;
+        for (int k = 0; k < lhs.Cols(); ++k) {
+          sum += lhs(i, k) * rhs(k, j);
+        }
+        result(i, j) = sum;
+      }
+    }
+
+    return result;
+  }
 
   /**
    * Matrix-scalar multiplication operator.
@@ -287,7 +446,17 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param rhs Operator right-hand side.
    */
   friend SLEIPNIR_DLLEXPORT VariableMatrix operator*(const VariableMatrix& lhs,
-                                                     const Variable& rhs);
+                                                     const Variable& rhs) {
+    VariableMatrix result{lhs.Rows(), lhs.Cols()};
+
+    for (int row = 0; row < result.Rows(); ++row) {
+      for (int col = 0; col < result.Cols(); ++col) {
+        result(row, col) = lhs(row, col) * rhs;
+      }
+    }
+
+    return result;
+  }
 
   /**
    * Matrix-scalar multiplication operator.
@@ -296,7 +465,9 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param rhs Operator right-hand side.
    */
   friend SLEIPNIR_DLLEXPORT VariableMatrix operator*(const VariableMatrix& lhs,
-                                                     double rhs);
+                                                     double rhs) {
+    return lhs * Variable{rhs};
+  }
 
   /**
    * Scalar-matrix multiplication operator.
@@ -304,8 +475,18 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param lhs Operator left-hand side.
    * @param rhs Operator right-hand side.
    */
-  friend SLEIPNIR_DLLEXPORT VariableMatrix operator*(const Variable& lhs,
-                                                     const VariableMatrix& rhs);
+  friend SLEIPNIR_DLLEXPORT VariableMatrix
+  operator*(const Variable& lhs, const VariableMatrix& rhs) {
+    VariableMatrix result{rhs.Rows(), rhs.Cols()};
+
+    for (int row = 0; row < result.Rows(); ++row) {
+      for (int col = 0; col < result.Cols(); ++col) {
+        result(row, col) = rhs(row, col) * lhs;
+      }
+    }
+
+    return result;
+  }
 
   /**
    * Scalar-matrix multiplication operator.
@@ -313,15 +494,31 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param lhs Operator left-hand side.
    * @param rhs Operator right-hand side.
    */
-  friend SLEIPNIR_DLLEXPORT VariableMatrix operator*(double lhs,
-                                                     const VariableMatrix& rhs);
+  friend SLEIPNIR_DLLEXPORT VariableMatrix
+  operator*(double lhs, const VariableMatrix& rhs) {
+    return Variable{lhs} * rhs;
+  }
 
   /**
    * Compound matrix multiplication-assignment operator.
    *
    * @param rhs Variable to multiply.
    */
-  VariableMatrix& operator*=(const VariableMatrix& rhs);
+  VariableMatrix& operator*=(const VariableMatrix& rhs) {
+    Assert(Cols() == rhs.Rows() && Cols() == rhs.Cols());
+
+    for (int i = 0; i < Rows(); ++i) {
+      for (int j = 0; j < rhs.Cols(); ++j) {
+        Variable sum;
+        for (int k = 0; k < Cols(); ++k) {
+          sum += (*this)(i, k) * rhs(k, j);
+        }
+        (*this)(i, j) = sum;
+      }
+    }
+
+    return *this;
+  }
 
   /**
    * Binary division operator (only enabled when rhs is a scalar).
@@ -330,7 +527,17 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param rhs Operator right-hand side.
    */
   friend SLEIPNIR_DLLEXPORT VariableMatrix operator/(const VariableMatrix& lhs,
-                                                     const Variable& rhs);
+                                                     const Variable& rhs) {
+    VariableMatrix result{lhs.Rows(), lhs.Cols()};
+
+    for (int row = 0; row < result.Rows(); ++row) {
+      for (int col = 0; col < result.Cols(); ++col) {
+        result(row, col) = lhs(row, col) / rhs;
+      }
+    }
+
+    return result;
+  }
 
   /**
    * Compound matrix division-assignment operator (only enabled when rhs
@@ -338,7 +545,15 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    *
    * @param rhs Variable to divide.
    */
-  VariableMatrix& operator/=(const Variable& rhs);
+  VariableMatrix& operator/=(const Variable& rhs) {
+    for (int row = 0; row < Rows(); ++row) {
+      for (int col = 0; col < Cols(); ++col) {
+        (*this)(row, col) /= rhs;
+      }
+    }
+
+    return *this;
+  }
 
   /**
    * Binary addition operator.
@@ -346,15 +561,33 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param lhs Operator left-hand side.
    * @param rhs Operator right-hand side.
    */
-  friend SLEIPNIR_DLLEXPORT VariableMatrix operator+(const VariableMatrix& lhs,
-                                                     const VariableMatrix& rhs);
+  friend SLEIPNIR_DLLEXPORT VariableMatrix
+  operator+(const VariableMatrix& lhs, const VariableMatrix& rhs) {
+    VariableMatrix result{lhs.Rows(), lhs.Cols()};
+
+    for (int row = 0; row < result.Rows(); ++row) {
+      for (int col = 0; col < result.Cols(); ++col) {
+        result(row, col) = lhs(row, col) + rhs(row, col);
+      }
+    }
+
+    return result;
+  }
 
   /**
    * Compound addition-assignment operator.
    *
    * @param rhs Variable to add.
    */
-  VariableMatrix& operator+=(const VariableMatrix& rhs);
+  VariableMatrix& operator+=(const VariableMatrix& rhs) {
+    for (int row = 0; row < Rows(); ++row) {
+      for (int col = 0; col < Cols(); ++col) {
+        (*this)(row, col) += rhs(row, col);
+      }
+    }
+
+    return *this;
+  }
 
   /**
    * Binary subtraction operator.
@@ -362,42 +595,84 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param lhs Operator left-hand side.
    * @param rhs Operator right-hand side.
    */
-  friend SLEIPNIR_DLLEXPORT VariableMatrix operator-(const VariableMatrix& lhs,
-                                                     const VariableMatrix& rhs);
+  friend SLEIPNIR_DLLEXPORT VariableMatrix
+  operator-(const VariableMatrix& lhs, const VariableMatrix& rhs) {
+    VariableMatrix result{lhs.Rows(), lhs.Cols()};
+
+    for (int row = 0; row < result.Rows(); ++row) {
+      for (int col = 0; col < result.Cols(); ++col) {
+        result(row, col) = lhs(row, col) - rhs(row, col);
+      }
+    }
+
+    return result;
+  }
 
   /**
    * Compound subtraction-assignment operator.
    *
    * @param rhs Variable to subtract.
    */
-  VariableMatrix& operator-=(const VariableMatrix& rhs);
+  VariableMatrix& operator-=(const VariableMatrix& rhs) {
+    for (int row = 0; row < Rows(); ++row) {
+      for (int col = 0; col < Cols(); ++col) {
+        (*this)(row, col) -= rhs(row, col);
+      }
+    }
+
+    return *this;
+  }
 
   /**
    * Unary minus operator.
    *
    * @param lhs Operand for unary minus.
    */
-  friend SLEIPNIR_DLLEXPORT VariableMatrix operator-(const VariableMatrix& lhs);
+  friend SLEIPNIR_DLLEXPORT VariableMatrix
+  operator-(const VariableMatrix& lhs) {
+    VariableMatrix result{lhs.Rows(), lhs.Cols()};
+
+    for (int row = 0; row < result.Rows(); ++row) {
+      for (int col = 0; col < result.Cols(); ++col) {
+        result(row, col) = -lhs(row, col);
+      }
+    }
+
+    return result;
+  }
 
   /**
    * Implicit conversion operator from 1x1 VariableMatrix to Variable.
    */
-  operator Variable() const;  // NOLINT
+  operator Variable() const {  // NOLINT
+    Assert(Rows() == 1 && Cols() == 1);
+    return (*this)(0, 0);
+  }
 
   /**
    * Returns the transpose of the variable matrix.
    */
-  VariableMatrix T() const;
+  VariableMatrix T() const {
+    VariableMatrix result{Cols(), Rows()};
+
+    for (int row = 0; row < Rows(); ++row) {
+      for (int col = 0; col < Cols(); ++col) {
+        result(col, row) = (*this)(row, col);
+      }
+    }
+
+    return result;
+  }
 
   /**
    * Returns number of rows in the matrix.
    */
-  int Rows() const;
+  int Rows() const { return m_rows; }
 
   /**
    * Returns number of columns in the matrix.
    */
-  int Cols() const;
+  int Cols() const { return m_cols; }
 
   /**
    * Returns an element of the variable matrix.
@@ -405,19 +680,36 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param row The row of the element to return.
    * @param col The column of the element to return.
    */
-  double Value(int row, int col) const;
+  double Value(int row, int col) const {
+    Assert(row >= 0 && row < Rows());
+    Assert(col >= 0 && col < Cols());
+    return m_storage[row * Cols() + col].Value();
+  }
 
   /**
    * Returns a row of the variable column vector.
    *
    * @param index The index of the element to return.
    */
-  double Value(int index) const;
+  double Value(int index) const {
+    Assert(index >= 0 && index < Rows() * Cols());
+    return m_storage[index].Value();
+  }
 
   /**
    * Returns the contents of the variable matrix.
    */
-  Eigen::MatrixXd Value() const;
+  Eigen::MatrixXd Value() const {
+    Eigen::MatrixXd result{Rows(), Cols()};
+
+    for (int row = 0; row < Rows(); ++row) {
+      for (int col = 0; col < Cols(); ++col) {
+        result(row, col) = Value(row, col);
+      }
+    }
+
+    return result;
+  }
 
   /**
    * Transforms the matrix coefficient-wise with an unary operator.
@@ -544,7 +836,15 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param rows The number of matrix rows.
    * @param cols The number of matrix columns.
    */
-  static VariableMatrix Zero(int rows, int cols);
+  static VariableMatrix Zero(int rows, int cols) {
+    VariableMatrix result{rows, cols};
+
+    for (auto& elem : result) {
+      elem = 0.0;
+    }
+
+    return result;
+  }
 
   /**
    * Returns a variable matrix filled with ones.
@@ -552,7 +852,15 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param rows The number of matrix rows.
    * @param cols The number of matrix columns.
    */
-  static VariableMatrix Ones(int rows, int cols);
+  static VariableMatrix Ones(int rows, int cols) {
+    VariableMatrix result{rows, cols};
+
+    for (auto& elem : result) {
+      elem = 1.0;
+    }
+
+    return result;
+  }
 
  private:
   std::vector<Variable> m_storage;
@@ -594,8 +902,48 @@ VariableMatrix CwiseReduce(const VariableMatrix& lhs, const VariableMatrix& rhs,
  *
  * @param list The nested list of blocks.
  */
-SLEIPNIR_DLLEXPORT VariableMatrix
-Block(std::initializer_list<std::initializer_list<VariableMatrix>> list);
+SLEIPNIR_DLLEXPORT inline VariableMatrix Block(
+    std::initializer_list<std::initializer_list<VariableMatrix>> list) {
+  // Get row and column counts for destination matrix
+  int rows = 0;
+  int cols = -1;
+  for (const auto& row : list) {
+    if (row.size() > 0) {
+      rows += row.begin()->Rows();
+    }
+
+    // Get number of columns in this row
+    int latestCols = 0;
+    for (const auto& elem : row) {
+      // Assert the first and latest row have the same height
+      Assert(row.begin()->Rows() == elem.Rows());
+
+      latestCols += elem.Cols();
+    }
+
+    // If this is the first row, record the column count. Otherwise, assert the
+    // first and latest column counts are the same.
+    if (cols == -1) {
+      cols = latestCols;
+    } else {
+      Assert(cols == latestCols);
+    }
+  }
+
+  VariableMatrix result{rows, cols};
+
+  int rowOffset = 0;
+  for (const auto& row : list) {
+    int colOffset = 0;
+    for (const auto& elem : row) {
+      result.Block(rowOffset, colOffset, elem.Rows(), elem.Cols()) = elem;
+      colOffset += elem.Cols();
+    }
+    rowOffset += row.begin()->Rows();
+  }
+
+  return result;
+}
 
 /**
  * Assemble a VariableMatrix from a nested list of blocks.
@@ -609,7 +957,47 @@ Block(std::initializer_list<std::initializer_list<VariableMatrix>> list);
  *
  * @param list The nested list of blocks.
  */
-SLEIPNIR_DLLEXPORT VariableMatrix
-Block(std::vector<std::vector<VariableMatrix>> list);
+SLEIPNIR_DLLEXPORT inline VariableMatrix Block(
+    std::vector<std::vector<VariableMatrix>> list) {
+  // Get row and column counts for destination matrix
+  int rows = 0;
+  int cols = -1;
+  for (const auto& row : list) {
+    if (row.size() > 0) {
+      rows += row.begin()->Rows();
+    }
+
+    // Get number of columns in this row
+    int latestCols = 0;
+    for (const auto& elem : row) {
+      // Assert the first and latest row have the same height
+      Assert(row.begin()->Rows() == elem.Rows());
+
+      latestCols += elem.Cols();
+    }
+
+    // If this is the first row, record the column count. Otherwise, assert the
+    // first and latest column counts are the same.
+    if (cols == -1) {
+      cols = latestCols;
+    } else {
+      Assert(cols == latestCols);
+    }
+  }
+
+  VariableMatrix result{rows, cols};
+
+  int rowOffset = 0;
+  for (const auto& row : list) {
+    int colOffset = 0;
+    for (const auto& elem : row) {
+      result.Block(rowOffset, colOffset, elem.Rows(), elem.Cols()) = elem;
+      colOffset += elem.Cols();
+    }
+    rowOffset += row.begin()->Rows();
+  }
+
+  return result;
+}
 
 }  // namespace sleipnir
