@@ -19,7 +19,8 @@
  * decimals.
  */
 template <typename Rep, typename Period = std::ratio<1>>
-double ToMilliseconds(const std::chrono::duration<Rep, Period>& duration) {
+constexpr double ToMilliseconds(
+    const std::chrono::duration<Rep, Period>& duration) {
   using std::chrono::duration_cast;
   using std::chrono::nanoseconds;
   return duration_cast<nanoseconds>(duration).count() / 1e6;

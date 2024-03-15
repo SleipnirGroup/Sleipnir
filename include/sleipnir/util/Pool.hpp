@@ -26,12 +26,12 @@ class PoolResource {
   /**
    * Constructs a pool resource with one chunk allocated.
    */
-  PoolResource() { AddChunk(); }
+  constexpr PoolResource() { AddChunk(); }
 
-  PoolResource(const PoolResource&) = delete;
-  PoolResource& operator=(const PoolResource&) = delete;
-  PoolResource(PoolResource&&) = default;
-  PoolResource& operator=(PoolResource&&) = default;
+  constexpr PoolResource(const PoolResource&) = delete;
+  constexpr PoolResource& operator=(const PoolResource&) = delete;
+  constexpr PoolResource(PoolResource&&) = default;
+  constexpr PoolResource& operator=(PoolResource&&) = default;
 
   /**
    * Returns a block of memory from the pool.
@@ -40,7 +40,8 @@ class PoolResource {
    * @param alignment Alignment of the block (unused).
    */
   [[nodiscard]]
-  void* allocate(size_t bytes, size_t alignment = alignof(std::max_align_t)) {
+  constexpr void* allocate(size_t bytes,
+                           size_t alignment = alignof(std::max_align_t)) {
     if (m_freeList.empty()) {
       AddChunk();
     }
@@ -57,15 +58,16 @@ class PoolResource {
    * @param bytes Number of bytes in the block (unused).
    * @param alignment Alignment of the block (unused).
    */
-  void deallocate(void* p, size_t bytes,
-                  size_t alignment = alignof(std::max_align_t)) {
+  constexpr void deallocate(void* p, size_t bytes,
+                            size_t alignment = alignof(std::max_align_t)) {
     m_freeList.emplace_back(static_cast<T*>(p));
   }
 
   /**
    * Returns true if this pool resource has the same backing storage as another.
    */
-  bool is_equal(const PoolResource<T, BlocksPerChunk>& other) const noexcept {
+  constexpr bool is_equal(
+      const PoolResource<T, BlocksPerChunk>& other) const noexcept {
     return this == &other;
   }
 
@@ -79,7 +81,7 @@ class PoolResource {
    * Adds a memory chunk to the pool, partitions it into blocks of size
    * sizeof(T), and appends pointers to them to the free list.
    */
-  void AddChunk() {
+  constexpr void AddChunk() {
     m_buffer.emplace_back(new uint8_t[kBlockSize * BlocksPerChunk]);
     for (int i = BlocksPerChunk - 1; i >= 0; --i) {
       m_freeList.emplace_back(reinterpret_cast<T*>(m_buffer.back().get()) + i);
@@ -106,15 +108,17 @@ class PoolAllocator {
    *
    * @param r The pool resource.
    */
-  explicit PoolAllocator(PoolResource<T, BlocksPerChunk>* r)
+  explicit constexpr PoolAllocator(PoolResource<T, BlocksPerChunk>* r)
       : m_memoryResource{r} {}
 
   /**
    * Copy constructor.
    */
-  PoolAllocator(const PoolAllocator<T, BlocksPerChunk>& other) = default;
+  constexpr PoolAllocator(const PoolAllocator<T, BlocksPerChunk>& other) =
+      default;
 
-  PoolAllocator<T>& operator=(const PoolAllocator<T, BlocksPerChunk>&) = delete;
+  constexpr PoolAllocator<T>& operator=(
+      const PoolAllocator<T, BlocksPerChunk>&) = delete;
 
   /**
    * Returns a block of memory from the pool.
@@ -122,7 +126,7 @@ class PoolAllocator {
    * @param n Number of bytes in the block (unused).
    */
   [[nodiscard]]
-  T* allocate(size_t n) {
+  constexpr T* allocate(size_t n) {
     return static_cast<T*>(m_memoryResource->allocate(n));
   }
 
@@ -132,7 +136,9 @@ class PoolAllocator {
    * @param p A pointer to the block of memory.
    * @param n Number of bytes in the block (unused).
    */
-  void deallocate(T* p, size_t n) { m_memoryResource->deallocate(p, n); }
+  constexpr void deallocate(T* p, size_t n) {
+    m_memoryResource->deallocate(p, n);
+  }
 
  private:
   PoolResource<T, BlocksPerChunk>* m_memoryResource;

@@ -86,7 +86,7 @@ class SLEIPNIR_DLLEXPORT Variable {
     } else {
       // We only need to check the first argument since unary and binary
       // operators both use it
-      if (!expr->args[0]->IsConstant(0.0)) {
+      if (expr->args[0] != nullptr && !expr->args[0]->IsConstant(0.0)) {
         sleipnir::println(
             stderr,
             "WARNING: {}:{}: Modified the value of a dependent variable",
@@ -108,7 +108,7 @@ class SLEIPNIR_DLLEXPORT Variable {
     } else {
       // We only need to check the first argument since unary and binary
       // operators both use it
-      if (!expr->args[0]->IsConstant(0.0)) {
+      if (expr->args[0] != nullptr && !expr->args[0]->IsConstant(0.0)) {
         sleipnir::println(
             stderr,
             "WARNING: {}:{}: Modified the value of a dependent variable",
