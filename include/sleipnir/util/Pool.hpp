@@ -134,17 +134,6 @@ class PoolAllocator {
    */
   void deallocate(T* p, size_t n) { m_memoryResource->deallocate(p, n); }
 
-  /**
-   * Constructs an object of type T at the pointer p with placement new.
-   *
-   * @param p Storage for the object.
-   * @param args Arguments for T's constructor.
-   */
-  template <class... Args>
-  void construct(T* p, Args&&... args) {
-    new (p) T(args...);
-  }
-
  private:
   PoolResource<T, BlocksPerChunk>* m_memoryResource;
 };
