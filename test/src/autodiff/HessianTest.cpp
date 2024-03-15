@@ -1,6 +1,6 @@
 // Copyright (c) Sleipnir contributors
 
-#include <algorithm>
+#include <cmath>
 #include <functional>
 #include <numeric>
 
