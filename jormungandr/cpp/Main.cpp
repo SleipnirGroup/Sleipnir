@@ -2,14 +2,7 @@
 
 #include <pybind11/pybind11.h>
 
-#include "autodiff/BindExpressionType.hpp"
-#include "autodiff/BindVariable.hpp"
-#include "autodiff/BindVariableMatrices.hpp"
-#include "optimization/BindConstraints.hpp"
-#include "optimization/BindOptimizationProblem.hpp"
-#include "optimization/BindSolverExitCondition.hpp"
-#include "optimization/BindSolverIterationInfo.hpp"
-#include "optimization/BindSolverStatus.hpp"
+#include "Binders.hpp"
 
 namespace py = pybind11;
 
@@ -21,13 +14,16 @@ PYBIND11_MODULE(_jormungandr, m) {
       "problem solver that uses the interior-point method.";
 
   py::module_ autodiff = m.def_submodule("autodiff");
-  py::module_ optimization = m.def_submodule("optimization");
-
   BindExpressionType(autodiff);
-  BindConstraints(optimization);
+  BindGradient(autodiff);
+  BindHessian(autodiff);
+  BindJacobian(autodiff);
   BindVariable(autodiff);
-  BindVariableMatrices(autodiff);
+  BindVariableMatrix(autodiff);
+  BindVariableBlock(autodiff);  // Must be bound after VariableMatrix
 
+  py::module_ optimization = m.def_submodule("optimization");
+  BindConstraints(optimization);
   BindSolverExitCondition(optimization);
   BindSolverIterationInfo(optimization);
   BindSolverStatus(optimization);

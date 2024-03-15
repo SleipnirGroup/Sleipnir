@@ -1,9 +1,8 @@
 // Copyright (c) Sleipnir contributors
 
-#include "optimization/BindOptimizationProblem.hpp"
-
 #include <fmt/format.h>
 #include <pybind11/functional.h>
+#include <pybind11/pybind11.h>
 #include <pybind11/pytypes.h>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 #include <sleipnir/optimization/SolverConfig.hpp>

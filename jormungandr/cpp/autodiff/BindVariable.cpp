@@ -1,14 +1,9 @@
 // Copyright (c) Sleipnir contributors
 
-#include "autodiff/BindVariable.hpp"
-
 #include <pybind11/eigen.h>
 #include <pybind11/operators.h>
-#include <sleipnir/autodiff/Gradient.hpp>
-#include <sleipnir/autodiff/Hessian.hpp>
-#include <sleipnir/autodiff/Jacobian.hpp>
+#include <pybind11/pybind11.h>
 #include <sleipnir/autodiff/Variable.hpp>
-#include <sleipnir/autodiff/VariableMatrix.hpp>
 #include <sleipnir/optimization/Constraints.hpp>
 
 #include "Docstrings.hpp"
@@ -212,42 +207,6 @@ void BindVariable(py::module_& autodiff) {
       DOC(sleipnir, tanh));
   autodiff.def("tanh", static_cast<Variable (*)(const Variable&)>(&tanh),
                DOC(sleipnir, tanh));
-
-  // Gradient.hpp
-  {
-    py::class_<Gradient> cls{autodiff, "Gradient", DOC(sleipnir, Gradient)};
-    cls.def(py::init<Variable, Variable>(), DOC(sleipnir, Gradient, Gradient))
-        .def(py::init<Variable, VariableMatrix>(),
-             DOC(sleipnir, Gradient, Gradient, 2))
-        .def("get", &Gradient::Get, DOC(sleipnir, Gradient, Get))
-        .def(
-            "value",
-            [](Gradient& self) {
-              return Eigen::SparseMatrix<double>{self.Value()};
-            },
-            DOC(sleipnir, Gradient, Value))
-        .def("update", &Gradient::Update, DOC(sleipnir, Gradient, Update));
-  }
-
-  // Jacobian.hpp
-  {
-    py::class_<Jacobian> cls{autodiff, "Jacobian", DOC(sleipnir, Jacobian)};
-    cls.def(py::init<VariableMatrix, VariableMatrix>(),
-            DOC(sleipnir, Jacobian, Jacobian))
-        .def("get", &Jacobian::Get, DOC(sleipnir, Jacobian, Get))
-        .def("value", &Jacobian::Value, DOC(sleipnir, Jacobian, Value))
-        .def("update", &Jacobian::Update, DOC(sleipnir, Jacobian, Update));
-  }
-
-  // Hessian.hpp
-  {
-    py::class_<Hessian> cls{autodiff, "Hessian", DOC(sleipnir, Hessian)};
-    cls.def(py::init<Variable, VariableMatrix>(),
-            DOC(sleipnir, Hessian, Hessian))
-        .def("get", &Hessian::Get, DOC(sleipnir, Hessian, Get))
-        .def("value", &Hessian::Value, DOC(sleipnir, Hessian, Value))
-        .def("update", &Hessian::Update, DOC(sleipnir, Hessian, Update));
-  }
 }
 
 }  // namespace sleipnir

@@ -1,7 +1,6 @@
 // Copyright (c) Sleipnir contributors
 
-#include "optimization/BindSolverExitCondition.hpp"
-
+#include <pybind11/pybind11.h>
 #include <sleipnir/optimization/SolverExitCondition.hpp>
 
 #include "Docstrings.hpp"

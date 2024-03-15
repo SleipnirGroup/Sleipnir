@@ -1,10 +1,10 @@
 // Copyright (c) Sleipnir contributors
 
 #include <pybind11/eigen.h>
+#include <pybind11/pybind11.h>
 #include <sleipnir/optimization/SolverIterationInfo.hpp>
 
 #include "Docstrings.hpp"
-#include "optimization/BindSolverStatus.hpp"
 
 namespace py = pybind11;
 

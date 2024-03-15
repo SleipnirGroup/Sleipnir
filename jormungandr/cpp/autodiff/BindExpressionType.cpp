@@ -1,8 +1,7 @@
 // Copyright (c) Sleipnir contributors
 
-#include "autodiff/BindExpressionType.hpp"
-
-#include <sleipnir/autodiff/Expression.hpp>
+#include <pybind11/pybind11.h>
+#include <sleipnir/autodiff/ExpressionType.hpp>
 
 #include "Docstrings.hpp"
 
