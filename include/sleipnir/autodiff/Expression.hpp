@@ -21,6 +21,10 @@ namespace sleipnir::detail {
 
 struct SLEIPNIR_DLLEXPORT Expression;
 
+inline constexpr void IntrusiveSharedPtrIncRefCount(Expression* expr);
+// FIXME: Make constexpr after upgrading to GCC 12+
+inline void IntrusiveSharedPtrDecRefCount(Expression* expr);
+
 /**
  * Typedef for intrusive shared pointer to Expression.
  */
@@ -75,7 +79,7 @@ struct SLEIPNIR_DLLEXPORT Expression {
 
   /// The adjoint of the expression node used during gradient expression tree
   /// generation.
-  ExpressionPtr adjointExpr{kZero};
+  ExpressionPtr adjointExpr;
 
   /// Expression argument type.
   ExpressionType type = ExpressionType::kConstant;
@@ -106,15 +110,19 @@ struct SLEIPNIR_DLLEXPORT Expression {
   ///   <li>parentAdjoint: Adjoint of parent expression.</li>
   /// </ul>
   std::array<TrinaryFuncExpr, 2> gradientFuncs{
-      [](const ExpressionPtr&, const ExpressionPtr&, const ExpressionPtr&) {
-        return kZero;
+      [](const ExpressionPtr&, const ExpressionPtr&,
+         const ExpressionPtr&) -> ExpressionPtr {
+        // Return zero
+        return nullptr;
       },
-      [](const ExpressionPtr&, const ExpressionPtr&, const ExpressionPtr&) {
-        return kZero;
+      [](const ExpressionPtr&, const ExpressionPtr&,
+         const ExpressionPtr&) -> ExpressionPtr {
+        // Return zero
+        return nullptr;
       }};
 
   /// Expression arguments.
-  std::array<ExpressionPtr, 2> args{kZero, kZero};
+  std::array<ExpressionPtr, 2> args{nullptr, nullptr};
 
   /// Reference count for intrusive shared pointer.
   uint32_t refCount = 0;
@@ -122,7 +130,7 @@ struct SLEIPNIR_DLLEXPORT Expression {
   /**
    * Constructs a constant expression with a value of zero.
    */
-  Expression() = default;
+  constexpr Expression() = default;
 
   /**
    * Constructs a nullary expression (an operator with no arguments).
@@ -131,8 +139,8 @@ struct SLEIPNIR_DLLEXPORT Expression {
    * @param type The expression type. It should be either constant (the default)
    *             or linear.
    */
-  explicit Expression(double value,
-                      ExpressionType type = ExpressionType::kConstant)
+  explicit constexpr Expression(double value,
+                                ExpressionType type = ExpressionType::kConstant)
       : value{value}, type{type} {}
 
   /**
@@ -144,18 +152,19 @@ struct SLEIPNIR_DLLEXPORT Expression {
    * @param lhsGradientFunc Gradient with respect to the operand.
    * @param lhs Unary operator's operand.
    */
-  Expression(ExpressionType type, BinaryFuncDouble valueFunc,
-             TrinaryFuncDouble lhsGradientValueFunc,
-             TrinaryFuncExpr lhsGradientFunc, ExpressionPtr lhs)
+  constexpr Expression(ExpressionType type, BinaryFuncDouble valueFunc,
+                       TrinaryFuncDouble lhsGradientValueFunc,
+                       TrinaryFuncExpr lhsGradientFunc, ExpressionPtr lhs)
       : value{valueFunc(lhs->value, 0.0)},
         type{type},
         valueFunc{valueFunc},
         gradientValueFuncs{lhsGradientValueFunc,
                            [](double, double, double) { return 0.0; }},
-        gradientFuncs{lhsGradientFunc,
-                      [](const ExpressionPtr&, const ExpressionPtr&,
-                         const ExpressionPtr&) { return kZero; }},
-        args{lhs, kZero} {}
+        gradientFuncs{
+            lhsGradientFunc,
+            [](const ExpressionPtr&, const ExpressionPtr&,
+               const ExpressionPtr&) -> ExpressionPtr { return nullptr; }},
+        args{lhs, nullptr} {}
 
   /**
    * Constructs a binary expression (an operator with two arguments).
@@ -169,11 +178,12 @@ struct SLEIPNIR_DLLEXPORT Expression {
    * @param lhs Binary operator's left operand.
    * @param rhs Binary operator's right operand.
    */
-  Expression(ExpressionType type, BinaryFuncDouble valueFunc,
-             TrinaryFuncDouble lhsGradientValueFunc,
-             TrinaryFuncDouble rhsGradientValueFunc,
-             TrinaryFuncExpr lhsGradientFunc, TrinaryFuncExpr rhsGradientFunc,
-             ExpressionPtr lhs, ExpressionPtr rhs)
+  constexpr Expression(ExpressionType type, BinaryFuncDouble valueFunc,
+                       TrinaryFuncDouble lhsGradientValueFunc,
+                       TrinaryFuncDouble rhsGradientValueFunc,
+                       TrinaryFuncExpr lhsGradientFunc,
+                       TrinaryFuncExpr rhsGradientFunc, ExpressionPtr lhs,
+                       ExpressionPtr rhs)
       : value{valueFunc(lhs->value, rhs->value)},
         type{type},
         valueFunc{valueFunc},
@@ -186,7 +196,7 @@ struct SLEIPNIR_DLLEXPORT Expression {
    *
    * @param constant The constant.
    */
-  bool IsConstant(double constant) const {
+  constexpr bool IsConstant(double constant) const {
     return type == ExpressionType::kConstant && value == constant;
   }
 
@@ -304,9 +314,9 @@ struct SLEIPNIR_DLLEXPORT Expression {
     using enum ExpressionType;
 
     // Prune expression
-    if (lhs->IsConstant(0.0)) {
+    if (lhs == nullptr || lhs->IsConstant(0.0)) {
       return rhs;
-    } else if (rhs->IsConstant(0.0)) {
+    } else if (rhs == nullptr || rhs->IsConstant(0.0)) {
       return lhs;
     }
 
@@ -409,9 +419,6 @@ struct SLEIPNIR_DLLEXPORT Expression {
   friend SLEIPNIR_DLLEXPORT ExpressionPtr operator+(const ExpressionPtr& lhs) {
     return lhs;
   }
-
- private:
-  static inline ExpressionPtr kZero = MakeExpressionPtr();
 };
 
 SLEIPNIR_DLLEXPORT inline ExpressionPtr exp(const ExpressionPtr& x);
@@ -424,7 +431,7 @@ SLEIPNIR_DLLEXPORT inline ExpressionPtr sqrt(const ExpressionPtr& x);
  *
  * @param expr The shared pointer's managed object.
  */
-inline void IntrusiveSharedPtrIncRefCount(Expression* expr) {
+inline constexpr void IntrusiveSharedPtrIncRefCount(Expression* expr) {
   ++expr->refCount;
 }
 
@@ -433,6 +440,7 @@ inline void IntrusiveSharedPtrIncRefCount(Expression* expr) {
  *
  * @param expr The shared pointer's managed object.
  */
+// FIXME: Make constexpr after upgrading to GCC 12+
 inline void IntrusiveSharedPtrDecRefCount(Expression* expr) {
   // If a deeply nested tree is being deallocated all at once, calling the
   // Expression destructor when expr's refcount reaches zero can cause a stack

@@ -1843,7 +1843,19 @@ R"doc(Refcount decrement for intrusive shared pointer.
 Parameter ``expr``:
     The shared pointer's managed object.)doc";
 
+static const char *__doc_sleipnir_detail_IntrusiveSharedPtrDecRefCount_2 =
+R"doc(Refcount decrement for intrusive shared pointer.
+
+Parameter ``expr``:
+    The shared pointer's managed object.)doc";
+
 static const char *__doc_sleipnir_detail_IntrusiveSharedPtrIncRefCount =
+R"doc(Refcount increment for intrusive shared pointer.
+
+Parameter ``expr``:
+    The shared pointer's managed object.)doc";
+
+static const char *__doc_sleipnir_detail_IntrusiveSharedPtrIncRefCount_2 =
 R"doc(Refcount increment for intrusive shared pointer.
 
 Parameter ``expr``:

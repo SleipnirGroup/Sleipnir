@@ -49,7 +49,7 @@ class SLEIPNIR_DLLEXPORT ExpressionGraph {
       for (auto&& arg : currentNode->args) {
         // Only continue if the node is not a constant and hasn't already been
         // explored.
-        if (arg->type != ExpressionType::kConstant) {
+        if (arg != nullptr && arg->type != ExpressionType::kConstant) {
           // If this is the first instance of the node encountered (it hasn't
           // been explored yet), add it to stack so it's recursed upon
           if (arg->duplications == 0) {
@@ -77,7 +77,7 @@ class SLEIPNIR_DLLEXPORT ExpressionGraph {
       for (auto&& arg : currentNode->args) {
         // Only add node if it's not a constant and doesn't already exist in the
         // tape.
-        if (arg->type != ExpressionType::kConstant) {
+        if (arg != nullptr && arg->type != ExpressionType::kConstant) {
           // Once the number of node visitations equals the number of
           // duplications (the counter hits zero), add it to the stack. Note
           // that this means the node is only enqueued once.
@@ -103,7 +103,15 @@ class SLEIPNIR_DLLEXPORT ExpressionGraph {
       auto& lhs = node->args[0];
       auto& rhs = node->args[1];
 
-      node->value = node->valueFunc(lhs->value, rhs->value);
+      if (lhs != nullptr) {
+        if (rhs != nullptr) {
+          node->value = node->valueFunc(lhs->value, rhs->value);
+        } else {
+          node->value = node->valueFunc(lhs->value, 0.0);
+        }
+      } else {
+        node->value = node->valueFunc(0.0, 0.0);
+      }
     }
   }
 
@@ -141,11 +149,11 @@ class SLEIPNIR_DLLEXPORT ExpressionGraph {
       auto& lhs = node->args[0];
       auto& rhs = node->args[1];
 
-      if (!lhs->IsConstant(0.0)) {
+      if (lhs != nullptr && !lhs->IsConstant(0.0)) {
         lhs->adjointExpr = lhs->adjointExpr +
                            node->gradientFuncs[0](lhs, rhs, node->adjointExpr);
       }
-      if (!rhs->IsConstant(0.0)) {
+      if (rhs != nullptr && !rhs->IsConstant(0.0)) {
         rhs->adjointExpr = rhs->adjointExpr +
                            node->gradientFuncs[1](lhs, rhs, node->adjointExpr);
       }
@@ -188,10 +196,17 @@ class SLEIPNIR_DLLEXPORT ExpressionGraph {
       auto& lhs = node->args[0];
       auto& rhs = node->args[1];
 
-      lhs->adjoint +=
-          node->gradientValueFuncs[0](lhs->value, rhs->value, node->adjoint);
-      rhs->adjoint +=
-          node->gradientValueFuncs[1](lhs->value, rhs->value, node->adjoint);
+      if (lhs != nullptr) {
+        if (rhs != nullptr) {
+          lhs->adjoint += node->gradientValueFuncs[0](lhs->value, rhs->value,
+                                                      node->adjoint);
+          rhs->adjoint += node->gradientValueFuncs[1](lhs->value, rhs->value,
+                                                      node->adjoint);
+        } else {
+          lhs->adjoint +=
+              node->gradientValueFuncs[0](lhs->value, 0.0, node->adjoint);
+        }
+      }
 
       // If variable is a leaf node, assign its adjoint to the gradient.
       int row = m_rowList[col];
