@@ -12,6 +12,7 @@
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 
 #include "CartPoleUtil.hpp"
+#include "CatchStringConverters.hpp"
 #include "RK4.hpp"
 
 TEST_CASE("OptimizationProblem - Cart-pole", "[OptimizationProblem]") {

@@ -3,6 +3,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 
+#include "CatchStringConverters.hpp"
+
 TEST_CASE("TrivialProblem - Empty", "[TrivialProblem]") {
   sleipnir::OptimizationProblem problem;
 

@@ -2,10 +2,6 @@
 
 #pragma once
 
-#include <iosfwd>
-
-#include "sleipnir/util/SymbolExports.hpp"
-
 namespace sleipnir {
 
 /**
@@ -25,14 +21,5 @@ enum class ExpressionType {
   /// The expression is composed of nonlinear and lower-order operators.
   kNonlinear
 };
-
-/**
- * Catch2 value formatter for ExpressionType.
- *
- * @param os Output stream to which to print.
- * @param type ExpressionType to print.
- */
-SLEIPNIR_DLLEXPORT std::ostream& operator<<(std::ostream& os,
-                                            const ExpressionType& type);
 
 }  // namespace sleipnir

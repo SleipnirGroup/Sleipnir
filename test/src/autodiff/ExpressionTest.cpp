@@ -5,6 +5,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <sleipnir/autodiff/Expression.hpp>
 
+#include "CatchStringConverters.hpp"
+
 using sleipnir::detail::MakeExpressionPtr;
 
 TEST_CASE("Expression - Default constructor", "[Expression]") {

@@ -10,6 +10,8 @@
 #include <fmt/core.h>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 
+#include "CatchStringConverters.hpp"
+
 namespace {
 bool Near(double expected, double actual, double tolerance) {
   return std::abs(expected - actual) < tolerance;

@@ -7,6 +7,7 @@
 #include <fmt/core.h>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 
+#include "CatchStringConverters.hpp"
 #include "Range.hpp"
 
 TEST_CASE("NonlinearProblem - Quartic", "[NonlinearProblem]") {

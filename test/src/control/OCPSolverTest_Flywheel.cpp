@@ -11,6 +11,8 @@
 #include <sleipnir/control/OCPSolver.hpp>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 
+#include "CatchStringConverters.hpp"
+
 using namespace std::chrono_literals;
 
 namespace {

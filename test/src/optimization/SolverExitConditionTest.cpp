@@ -3,6 +3,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 
+#include "CatchStringConverters.hpp"
+
 // These tests ensure coverage of the off-nominal solver exit conditions
 
 TEST_CASE("SolverExitCondition - Callback requested stop",
