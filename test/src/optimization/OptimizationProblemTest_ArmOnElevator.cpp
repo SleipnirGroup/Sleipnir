@@ -6,6 +6,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 
+#include "CatchStringConverters.hpp"
+
 // This problem tests the case where regularization fails
 TEST_CASE("OptimizationProblem - Arm on elevator", "[OptimizationProblem]") {
   using namespace std::chrono_literals;

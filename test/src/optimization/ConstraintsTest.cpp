@@ -8,6 +8,8 @@
 #include <sleipnir/autodiff/VariableMatrix.hpp>
 #include <sleipnir/optimization/Constraints.hpp>
 
+#include "CatchStringConverters.hpp"
+
 TEST_CASE("Constraints - Equality constraint boolean comparison",
           "[Constraints]") {
   using sleipnir::Variable;

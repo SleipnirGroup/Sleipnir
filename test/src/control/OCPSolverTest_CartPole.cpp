@@ -12,6 +12,7 @@
 #include <sleipnir/control/OCPSolver.hpp>
 
 #include "CartPoleUtil.hpp"
+#include "CatchStringConverters.hpp"
 #include "RK4.hpp"
 
 TEST_CASE("OCPSolver - Cart-pole", "[OCPSolver]") {

@@ -3,6 +3,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <sleipnir/autodiff/Variable.hpp>
 
+#include "CatchStringConverters.hpp"
+
 TEST_CASE("Variable - Default constructor", "[Variable]") {
   sleipnir::Variable a;
 

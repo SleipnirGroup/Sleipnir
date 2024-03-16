@@ -11,6 +11,7 @@
 #include <fmt/core.h>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 
+#include "CatchStringConverters.hpp"
 #include "DifferentialDriveUtil.hpp"
 #include "RK4.hpp"
 

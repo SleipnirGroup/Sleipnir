@@ -10,6 +10,8 @@
 #include <fmt/core.h>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 
+#include "CatchStringConverters.hpp"
+
 TEST_CASE("OptimizationProblem - Double integrator", "[OptimizationProblem]") {
   using namespace std::chrono_literals;
 

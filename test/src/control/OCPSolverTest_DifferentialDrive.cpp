@@ -9,6 +9,7 @@
 #include <fmt/core.h>
 #include <sleipnir/control/OCPSolver.hpp>
 
+#include "CatchStringConverters.hpp"
 #include "DifferentialDriveUtil.hpp"
 #include "RK4.hpp"
 

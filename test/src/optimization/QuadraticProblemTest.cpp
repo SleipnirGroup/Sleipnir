@@ -4,6 +4,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 
+#include "CatchStringConverters.hpp"
+
 TEST_CASE("QuadraticProblem - Unconstrained 1D", "[QuadraticProblem]") {
   sleipnir::OptimizationProblem problem;
 

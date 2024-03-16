@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include <iosfwd>
 #include <string_view>
 
 #include "sleipnir/util/SymbolExports.hpp"
@@ -75,14 +74,5 @@ SLEIPNIR_DLLEXPORT constexpr std::string_view ToMessage(
       return "unknown";
   }
 }
-
-/**
- * Catch2 value formatter for SolverExitCondition.
- *
- * @param os Output stream to which to print.
- * @param exitCondition Solver exit condition to print.
- */
-SLEIPNIR_DLLEXPORT std::ostream& operator<<(
-    std::ostream& os, const SolverExitCondition& exitCondition);
 
 }  // namespace sleipnir
