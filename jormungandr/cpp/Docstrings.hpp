@@ -2100,24 +2100,6 @@ Parameter ``lhs``:
 Parameter ``rhs``:
     Left-hand side.)doc";
 
-static const char *__doc_sleipnir_operator_lshift =
-R"doc(Catch2 value formatter for ExpressionType.
-
-Parameter ``os``:
-    Output stream to which to print.
-
-Parameter ``type``:
-    ExpressionType to print.)doc";
-
-static const char *__doc_sleipnir_operator_lshift_2 =
-R"doc(Catch2 value formatter for SolverExitCondition.
-
-Parameter ``os``:
-    Output stream to which to print.
-
-Parameter ``exitCondition``:
-    Solver exit condition to print.)doc";
-
 static const char *__doc_sleipnir_operator_lt =
 R"doc(Less-than comparison operator that returns an inequality constraint
 for two Variables.
