@@ -1,7 +1,6 @@
 // Copyright (c) Sleipnir contributors
 
 #include <chrono>
-#include <cmath>
 #include <fstream>
 
 #include <Eigen/Core>
