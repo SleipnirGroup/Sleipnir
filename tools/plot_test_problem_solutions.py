@@ -7,10 +7,11 @@ restricts which CSVs are plotted to those that match the regex.
 """
 
 import argparse
-import matplotlib.pyplot as plt
-import numpy as np
 import os
 import re
+
+import matplotlib.pyplot as plt
+import numpy as np
 
 
 class UnitGroup:
