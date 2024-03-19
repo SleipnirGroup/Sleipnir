@@ -91,8 +91,7 @@ int RunBenchmarksAndLog(
     return 1;
   }
 
-  results << "Samples,"
-          << "Setup time (ms),Solve time (ms)\n";
+  results << "Samples," << "Setup time (ms),Solve time (ms)\n";
   std::flush(results);
 
   for (int N : sampleSizesToTest) {

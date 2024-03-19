@@ -25,7 +25,7 @@ jobs:
       - name: Install wpiformat
         run: pip3 install wpiformat
       - name: Run
-        run: wpiformat
+        run: wpiformat==2024.33
       - name: Check output
         run: git --no-pager diff --exit-code HEAD
       - name: Generate diff

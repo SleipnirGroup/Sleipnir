@@ -69,7 +69,8 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
     }
 
     // Assert the first and latest column counts are the same
-    for ([[maybe_unused]] const auto& row : list) {
+    for ([[maybe_unused]]
+         const auto& row : list) {
       Assert(list.begin()->size() == row.size());
     }
 
@@ -95,7 +96,8 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
     }
 
     // Assert the first and latest column counts are the same
-    for ([[maybe_unused]] const auto& row : list) {
+    for ([[maybe_unused]]
+         const auto& row : list) {
       Assert(list.begin()->size() == row.size());
     }
 
@@ -121,7 +123,8 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
     }
 
     // Assert the first and latest column counts are the same
-    for ([[maybe_unused]] const auto& row : list) {
+    for ([[maybe_unused]]
+         const auto& row : list) {
       Assert(list.begin()->size() == row.size());
     }
 
