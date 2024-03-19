@@ -2,8 +2,6 @@
 
 #pragma once
 
-#include <stdint.h>
-
 #include <cstddef>
 #include <memory>
 #include <vector>
@@ -18,9 +16,9 @@ namespace sleipnir {
  * return pointers to the free list.
  *
  * @tparam T The type of object in the pool.
- * @tparam BlocksPerChunk Number of objects per chunk of memory.
+ * @tparam ObjectsPerChunk Number of objects per chunk of memory.
  */
-template <typename T, size_t BlocksPerChunk>
+template <typename T, size_t ObjectsPerChunk>
 class PoolResource {
  public:
   /**
@@ -67,24 +65,22 @@ class PoolResource {
    * Returns true if this pool resource has the same backing storage as another.
    */
   constexpr bool is_equal(
-      const PoolResource<T, BlocksPerChunk>& other) const noexcept {
+      const PoolResource<T, ObjectsPerChunk>& other) const noexcept {
     return this == &other;
   }
 
  private:
-  static constexpr size_t kBlockSize = sizeof(T);
-
-  std::vector<std::unique_ptr<uint8_t[]>> m_buffer;
-  std::vector<T*> m_freeList;
+  std::vector<std::unique_ptr<std::byte[]>> m_buffer;
+  std::vector<void*> m_freeList;
 
   /**
    * Adds a memory chunk to the pool, partitions it into blocks of size
    * sizeof(T), and appends pointers to them to the free list.
    */
   constexpr void AddChunk() {
-    m_buffer.emplace_back(new uint8_t[kBlockSize * BlocksPerChunk]);
-    for (int i = BlocksPerChunk - 1; i >= 0; --i) {
-      m_freeList.emplace_back(reinterpret_cast<T*>(m_buffer.back().get()) + i);
+    m_buffer.emplace_back(new std::byte[sizeof(T) * ObjectsPerChunk]);
+    for (int i = ObjectsPerChunk - 1; i >= 0; --i) {
+      m_freeList.emplace_back(m_buffer.back().get() + sizeof(T) * i);
     }
   }
 };
@@ -93,9 +89,9 @@ class PoolResource {
  * This class is an allocator for the pool resource.
  *
  * @tparam T The type of object in the pool.
- * @tparam BlocksPerChunk Number of objects per chunk of memory.
+ * @tparam ObjectsPerChunk Number of objects per chunk of memory.
  */
-template <typename T, size_t BlocksPerChunk = 32768>
+template <typename T, size_t ObjectsPerChunk = 32768>
 class PoolAllocator {
  public:
   /**
@@ -108,17 +104,17 @@ class PoolAllocator {
    *
    * @param r The pool resource.
    */
-  explicit constexpr PoolAllocator(PoolResource<T, BlocksPerChunk>* r)
+  explicit constexpr PoolAllocator(PoolResource<T, ObjectsPerChunk>* r)
       : m_memoryResource{r} {}
 
   /**
    * Copy constructor.
    */
-  constexpr PoolAllocator(const PoolAllocator<T, BlocksPerChunk>& other) =
+  constexpr PoolAllocator(const PoolAllocator<T, ObjectsPerChunk>& other) =
       default;
 
   constexpr PoolAllocator<T>& operator=(
-      const PoolAllocator<T, BlocksPerChunk>&) = delete;
+      const PoolAllocator<T, ObjectsPerChunk>&) = delete;
 
   /**
    * Returns a block of memory from the pool.
@@ -141,19 +137,19 @@ class PoolAllocator {
   }
 
  private:
-  PoolResource<T, BlocksPerChunk>* m_memoryResource;
+  PoolResource<T, ObjectsPerChunk>* m_memoryResource;
 };
 
 /**
  * Returns an allocator for a global pool memory resource.
  *
  * @tparam T The type of object in the pool.
- * @tparam BlocksPerChunk Number of objects per chunk of memory.
+ * @tparam ObjectsPerChunk Number of objects per chunk of memory.
  */
-template <typename T, size_t BlocksPerChunk = 32768>
-PoolAllocator<T, BlocksPerChunk> GlobalPoolAllocator() {
-  static PoolResource<T, BlocksPerChunk> pool;
-  return PoolAllocator<T, BlocksPerChunk>{&pool};
+template <typename T, size_t ObjectsPerChunk = 32768>
+PoolAllocator<T, ObjectsPerChunk> GlobalPoolAllocator() {
+  static PoolResource<T, ObjectsPerChunk> pool;
+  return PoolAllocator<T, ObjectsPerChunk>{&pool};
 }
 
 }  // namespace sleipnir
