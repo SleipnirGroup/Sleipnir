@@ -82,8 +82,10 @@ std::vector<Variable> MakeConstraints(const LHS& lhs, const RHS& rhs) {
       lhsCols = lhs.Cols();
     }
 
-    [[maybe_unused]] int rhsRows;
-    [[maybe_unused]] int rhsCols;
+    [[maybe_unused]]
+    int rhsRows;
+    [[maybe_unused]]
+    int rhsCols;
     if constexpr (EigenMatrixLike<RHS>) {
       rhsRows = rhs.rows();
       rhsCols = rhs.cols();
