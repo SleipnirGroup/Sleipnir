@@ -25,7 +25,7 @@ class SLEIPNIR_DLLEXPORT ExpressionGraph {
   explicit ExpressionGraph(ExpressionPtr& root) {
     // If the root type is a constant, Update() is a no-op, so there's no work
     // to do
-    if (root->type == ExpressionType::kConstant) {
+    if (root == nullptr || root->type == ExpressionType::kConstant) {
       return;
     }
 
@@ -129,7 +129,11 @@ class SLEIPNIR_DLLEXPORT ExpressionGraph {
       wrt[row]->row = row;
     }
 
-    std::vector<ExpressionPtr> grad{wrt.size()};
+    std::vector<ExpressionPtr> grad;
+    grad.reserve(wrt.size());
+    for (size_t row = 0; row < wrt.size(); ++row) {
+      grad.emplace_back(MakeExpressionPtr());
+    }
 
     // Zero adjoints. The root node's adjoint is 1.0 as df/df is always 1.
     if (m_adjointList.size() > 0) {
