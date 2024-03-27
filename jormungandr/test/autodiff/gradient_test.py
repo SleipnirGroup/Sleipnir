@@ -454,10 +454,12 @@ def test_miscellaneous():
     x.set_value(0.5)
     g = Gradient(autodiff.erf(x), x)
     assert autodiff.erf(x).value() == math.erf(x.value())
-    assert g.get().value()[0, 0] == 2 / math.sqrt(math.pi) * math.exp(
+    assert g.get().value()[0, 0] == 2.0 / math.sqrt(math.pi) * math.exp(
         -x.value() * x.value()
     )
-    assert g.value()[0, 0] == 2 / math.sqrt(math.pi) * math.exp(-x.value() * x.value())
+    assert g.value()[0, 0] == 2.0 / math.sqrt(math.pi) * math.exp(
+        -x.value() * x.value()
+    )
 
 
 def test_reuse():
