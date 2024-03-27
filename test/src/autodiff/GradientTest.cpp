@@ -437,9 +437,9 @@ TEST_CASE("Gradient - Miscellaneous", "[Gradient]") {
   g = sleipnir::Gradient(sleipnir::erf(x), x);
   CHECK(sleipnir::erf(x).Value() == std::erf(x.Value()));
   CHECK(g.Get().Value().coeff(0) ==
-        2 / std::sqrt(std::numbers::pi) * std::exp(-x.Value() * x.Value()));
+        2.0 * std::numbers::inv_sqrtpi * std::exp(-x.Value() * x.Value()));
   CHECK(g.Value().coeff(0) ==
-        2 / std::sqrt(std::numbers::pi) * std::exp(-x.Value() * x.Value()));
+        2.0 * std::numbers::inv_sqrtpi * std::exp(-x.Value() * x.Value()));
 }
 
 TEST_CASE("Gradient - Reuse", "[Gradient]") {
