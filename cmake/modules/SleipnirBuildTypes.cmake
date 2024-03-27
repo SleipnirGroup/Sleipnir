@@ -99,5 +99,14 @@ if(NOT MSVC)
       "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO}"
     )
 
+    sleipnir_add_build_type(
+      allowedBuildTypes
+      "Coverage"
+      "${CMAKE_C_FLAGS_RELWITHDEBINFO} -fprofile-instr-generate -fcoverage-mapping"
+      "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -fprofile-instr-generate -fcoverage-mapping"
+      "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO}"
+      "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO}"
+    )
+
     sleipnir_check_build_type(allowedBuildTypes)
 endif()

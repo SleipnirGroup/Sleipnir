@@ -1,0 +1,42 @@
+name: Coverage
+
+on: [pull_request, push]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  coverage:
+    name: "Coverage"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # TODO: Remove this once clang 15 is default; clang 14 had a stdlib bug
+      - name: Install clang 15
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install llvm-15-dev libc++-15-dev
+          sudo update-alternatives --install \
+            /usr/bin/clang clang /usr/bin/clang-15 200
+          sudo update-alternatives --install \
+            /usr/bin/clang++ clang++ /usr/bin/clang++-15 200
+          sudo update-alternatives --install \
+            /usr/bin/llvm-cov llvm-cov /usr/bin/llvm-cov-15 200
+          sudo update-alternatives --install \
+            /usr/bin/llvm-profdata llvm-profdata /usr/bin/llvm-profdata-15 200
+
+      - run: ./tools/coverage-generate.sh SleipnirTest
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Coverage report
+          path: ./build-coverage/coverage-line-by-line-SleipnirTest.html
+
+      - name: Write to job summary
+        run: |
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          cat ./build-coverage/coverage-report-SleipnirTest.txt >> $GITHUB_STEP_SUMMARY
+          echo '' >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
