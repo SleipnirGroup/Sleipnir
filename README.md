@@ -213,6 +213,22 @@ pip install --user dist/sleipnirgroup_jormungandr-*.whl
 pytest
 ```
 
+### FRC Support (C++ only)
+
+To the easiest way to use Sleipnir for FRC is to add this project as a git submodule.
+
+```bash
+git submodule add https://github.com/SleipnirGroup/Sleipnir.git sleipnir
+```
+
+You can then edit your settings.gradle to include the project like so:
+
+```gradle
+include 'sleipnir'
+```
+
+You can then build Sleipnir with `./gradlew :sleipnir:build` and include Sleipnir headers in your normal FRC project.
+
 ## Test diagnostics
 
 Passing the `--enable-diagnostics` flag to the test executable enables solver diagnostic prints.
