@@ -848,7 +848,7 @@ void InteriorPoint(
 
     // Check for max wall clock time
     if (innerIterEndTime - solveStartTime > config.timeout) {
-      status->exitCondition = SolverExitCondition::kMaxWallClockTimeExceeded;
+      status->exitCondition = SolverExitCondition::kTimeout;
       return;
     }
 

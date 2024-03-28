@@ -132,4 +132,4 @@ def test_timeout():
     assert status.cost_function_type == ExpressionType.QUADRATIC
     assert status.equality_constraint_type == ExpressionType.NONE
     assert status.inequality_constraint_type == ExpressionType.NONE
-    assert status.exit_condition == SolverExitCondition.MAX_WALL_CLOCK_TIME_EXCEEDED
+    assert status.exit_condition == SolverExitCondition.TIMEOUT

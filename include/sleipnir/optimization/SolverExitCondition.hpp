@@ -34,7 +34,7 @@ enum class SolverExitCondition {
   kMaxIterationsExceeded = -6,
   /// The solver returned its solution so far after exceeding the maximum
   /// elapsed wall clock time.
-  kMaxWallClockTimeExceeded = -7
+  kTimeout = -7
 };
 
 /**
@@ -68,8 +68,8 @@ SLEIPNIR_DLLEXPORT constexpr std::string_view ToMessage(
              "gave up";
     case kMaxIterationsExceeded:
       return "solution returned after maximum iterations exceeded";
-    case kMaxWallClockTimeExceeded:
-      return "solution returned after maximum wall time exceeded";
+    case kTimeout:
+      return "solution returned after maximum wall clock time exceeded";
     default:
       return "unknown";
   }
