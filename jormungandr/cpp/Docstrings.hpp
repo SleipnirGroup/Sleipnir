@@ -320,14 +320,6 @@ single-shooting can use either an ODE or state transition function.
 https://underactuated.mit.edu/trajopt.html goes into more detail on
 each transcription method.)doc";
 
-static const char *__doc_sleipnir_OCPSolver_ConstrainAlways =
-R"doc(Set the constraint evaluation function. This function is called
-`numSteps+1` times, with the corresponding state and input
-VariableMatrices.
-
-Parameter ``constraintFunction``:
-    the constraint function.)doc";
-
 static const char *__doc_sleipnir_OCPSolver_ConstrainDirectCollocation = R"doc()doc";
 
 static const char *__doc_sleipnir_OCPSolver_ConstrainDirectTranscription = R"doc()doc";
@@ -361,6 +353,15 @@ R"doc(Convenience function to get the final state in the trajectory.
 
 Returns:
     The final state of the trajectory.)doc";
+
+static const char *__doc_sleipnir_OCPSolver_ForEachStep =
+R"doc(Set the constraint evaluation function. This function is called
+`numSteps+1` times, with the corresponding state and input
+VariableMatrices.
+
+Parameter ``callback``:
+    The callback f(t, x, u, dt) where t is time, x is the state
+    vector, u is the input vector, and dt is the timestep duration.)doc";
 
 static const char *__doc_sleipnir_OCPSolver_InitialState =
 R"doc(Convenience function to get the initial state in the trajectory.
