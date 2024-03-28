@@ -17,7 +17,7 @@ jobs:
       - name: Install clang 15
         run: |
           sudo apt-get update -q
-          sudo apt-get install llvm-15-dev libc++-15-dev
+          sudo apt-get install -y llvm-15-dev libc++-15-dev
           sudo update-alternatives --install \
             /usr/bin/clang clang /usr/bin/clang-15 200
           sudo update-alternatives --install \
