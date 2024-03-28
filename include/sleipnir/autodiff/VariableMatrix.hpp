@@ -59,8 +59,8 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    *
    * @param list The nested list of Variables.
    */
-  VariableMatrix(
-      std::initializer_list<std::initializer_list<Variable>> list) {  // NOLINT
+  VariableMatrix(  // NOLINT
+      std::initializer_list<std::initializer_list<Variable>> list) {
     // Get row and column counts for destination matrix
     m_rows = list.size();
     m_cols = 0;
