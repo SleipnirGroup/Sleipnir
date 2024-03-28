@@ -905,10 +905,6 @@ static const char *__doc_sleipnir_SolverExitCondition_kMaxIterationsExceeded =
 R"doc(The solver returned its solution so far after exceeding the maximum
 number of iterations.)doc";
 
-static const char *__doc_sleipnir_SolverExitCondition_kMaxWallClockTimeExceeded =
-R"doc(The solver returned its solution so far after exceeding the maximum
-elapsed wall clock time.)doc";
-
 static const char *__doc_sleipnir_SolverExitCondition_kNonfiniteInitialCostOrConstraints =
 R"doc(The solver encountered nonfinite initial cost or constraints and gave
 up.)doc";
@@ -918,6 +914,10 @@ R"doc(Solved the problem to an acceptable tolerance, but not the desired
 one.)doc";
 
 static const char *__doc_sleipnir_SolverExitCondition_kSuccess = R"doc(Solved the problem to the desired tolerance.)doc";
+
+static const char *__doc_sleipnir_SolverExitCondition_kTimeout =
+R"doc(The solver returned its solution so far after exceeding the maximum
+elapsed wall clock time.)doc";
 
 static const char *__doc_sleipnir_SolverExitCondition_kTooFewDOFs = R"doc(The solver determined the problem to be overconstrained and gave up.)doc";
 

@@ -165,6 +165,5 @@ TEST_CASE("SolverExitCondition - Timeout", "[SolverExitCondition]") {
   CHECK(status.costFunctionType == sleipnir::ExpressionType::kQuadratic);
   CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kNone);
   CHECK(status.inequalityConstraintType == sleipnir::ExpressionType::kNone);
-  CHECK(status.exitCondition ==
-        sleipnir::SolverExitCondition::kMaxWallClockTimeExceeded);
+  CHECK(status.exitCondition == sleipnir::SolverExitCondition::kTimeout);
 }

@@ -36,9 +36,8 @@ void BindSolverExitCondition(py::module_& optimization) {
   e.value("MAX_ITERATIONS_EXCEEDED",
           SolverExitCondition::kMaxIterationsExceeded,
           DOC(sleipnir, SolverExitCondition, kMaxIterationsExceeded));
-  e.value("MAX_WALL_CLOCK_TIME_EXCEEDED",
-          SolverExitCondition::kMaxWallClockTimeExceeded,
-          DOC(sleipnir, SolverExitCondition, kMaxWallClockTimeExceeded));
+  e.value("TIMEOUT", SolverExitCondition::kTimeout,
+          DOC(sleipnir, SolverExitCondition, kTimeout));
 }
 
 }  // namespace sleipnir

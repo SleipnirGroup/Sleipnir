@@ -57,8 +57,8 @@ struct StringMaker<sleipnir::SolverExitCondition> {
         return "kDivergingIterates";
       case kMaxIterationsExceeded:
         return "kMaxIterationsExceeded";
-      case kMaxWallClockTimeExceeded:
-        return "kMaxWallClockTimeExceeded";
+      case kTimeout:
+        return "kTimeout";
     }
 
     return "";
