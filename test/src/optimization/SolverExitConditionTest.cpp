@@ -104,6 +104,23 @@ TEST_CASE("SolverExitCondition - Locally infeasible", "[SolverExitCondition]") {
   }
 }
 
+TEST_CASE("SolverExitCondition - Nonfinite initial cost or constraints",
+          "[SolverExitCondition]") {
+  sleipnir::OptimizationProblem problem;
+
+  auto x = problem.DecisionVariable();
+  x.SetValue(-1.0);
+  problem.Minimize(sleipnir::sqrt(x));
+
+  auto status = problem.Solve({.diagnostics = true});
+
+  CHECK(status.costFunctionType == sleipnir::ExpressionType::kNonlinear);
+  CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kNone);
+  CHECK(status.inequalityConstraintType == sleipnir::ExpressionType::kNone);
+  CHECK(status.exitCondition ==
+        sleipnir::SolverExitCondition::kNonfiniteInitialCostOrConstraints);
+}
+
 TEST_CASE("SolverExitCondition - Diverging iterates", "[SolverExitCondition]") {
   sleipnir::OptimizationProblem problem;
 
