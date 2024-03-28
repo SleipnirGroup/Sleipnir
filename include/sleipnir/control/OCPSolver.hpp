@@ -26,15 +26,6 @@ using DynamicsFunction =
                                  const VariableMatrix&, const Variable&)>;
 
 /**
- * Constrain a fixed step OCP. This function is called numSteps + 1 times, once
- * for each step. The arguments are time, X_i (numStates)x1, U_i (numInputs)x1,
- * and the timestep of this segment.
- */
-using OCPConstraintCallback =
-    std::function<void(const Variable&, const VariableMatrix&,
-                       const VariableMatrix&, const Variable&)>;
-
-/**
  * Performs 4th order Runge-Kutta integration of dx/dt = f(t, x, u) for dt.
  *
  * @param f  The function to integrate. It must take two arguments x and u.
@@ -214,16 +205,20 @@ class SLEIPNIR_DLLEXPORT OCPSolver : public OptimizationProblem {
    * `numSteps+1` times, with the corresponding state and input
    * VariableMatrices.
    *
-   * @param constraintFunction the constraint function.
+   * @param callback The callback f(t, x, u, dt) where t is time, x is the state
+   *   vector, u is the input vector, and dt is the timestep duration.
    */
-  void ConstrainAlways(const OCPConstraintCallback& constraintFunction) {
+  void ForEachStep(
+      const std::function<void(const Variable&, const VariableMatrix&,
+                               const VariableMatrix&, const Variable&)>&
+          callback) {
     Variable time = 0.0;
 
     for (int i = 0; i < m_numSteps + 1; ++i) {
       auto x = X().Col(i);
       auto u = U().Col(i);
       auto dt = DT()(0, i);
-      constraintFunction(time, x, u, dt);
+      callback(time, x, u, dt);
 
       time += dt;
     }

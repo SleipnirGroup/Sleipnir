@@ -18,34 +18,35 @@ TEST_CASE("OCPSolver - Differential drive", "[OCPSolver]") {
 
   constexpr int N = 50;
 
-  auto dynamics = [=](sleipnir::Variable t, sleipnir::VariableMatrix x,
-                      sleipnir::VariableMatrix u, sleipnir::Variable dt) {
-    // x = [x, y, heading, left velocity, right velocity]ᵀ
-    // u = [left voltage, right voltage]ᵀ
-    constexpr double trackwidth = 0.699;    // m
-    constexpr double Kv_linear = 3.02;      // V/(m/s)
-    constexpr double Ka_linear = 0.642;     // V/(m/s²)
-    constexpr double Kv_angular = 1.382;    // V/(m/s)
-    constexpr double Ka_angular = 0.08495;  // V/(m/s²)
+  auto dynamics =
+      [=](const sleipnir::Variable& t, const sleipnir::VariableMatrix& x,
+          const sleipnir::VariableMatrix& u, const sleipnir::Variable& dt) {
+        // x = [x, y, heading, left velocity, right velocity]ᵀ
+        // u = [left voltage, right voltage]ᵀ
+        constexpr double trackwidth = 0.699;    // m
+        constexpr double Kv_linear = 3.02;      // V/(m/s)
+        constexpr double Ka_linear = 0.642;     // V/(m/s²)
+        constexpr double Kv_angular = 1.382;    // V/(m/s)
+        constexpr double Ka_angular = 0.08495;  // V/(m/s²)
 
-    auto v = (x(3) + x(4)) / 2.0;
+        auto v = (x(3) + x(4)) / 2.0;
 
-    constexpr double A1 =
-        -(Kv_linear / Ka_linear + Kv_angular / Ka_angular) / 2.0;
-    constexpr double A2 =
-        -(Kv_linear / Ka_linear - Kv_angular / Ka_angular) / 2.0;
-    constexpr double B1 = 0.5 / Ka_linear + 0.5 / Ka_angular;
-    constexpr double B2 = 0.5 / Ka_linear - 0.5 / Ka_angular;
-    Eigen::Matrix<double, 2, 2> A{{A1, A2}, {A2, A1}};
-    Eigen::Matrix<double, 2, 2> B{{B1, B2}, {B2, B1}};
+        constexpr double A1 =
+            -(Kv_linear / Ka_linear + Kv_angular / Ka_angular) / 2.0;
+        constexpr double A2 =
+            -(Kv_linear / Ka_linear - Kv_angular / Ka_angular) / 2.0;
+        constexpr double B1 = 0.5 / Ka_linear + 0.5 / Ka_angular;
+        constexpr double B2 = 0.5 / Ka_linear - 0.5 / Ka_angular;
+        Eigen::Matrix<double, 2, 2> A{{A1, A2}, {A2, A1}};
+        Eigen::Matrix<double, 2, 2> B{{B1, B2}, {B2, B1}};
 
-    sleipnir::VariableMatrix xdot{5};
-    xdot(0) = v * sleipnir::cos(x(2));
-    xdot(1) = v * sleipnir::sin(x(2));
-    xdot(2) = (x(4) - x(3)) / trackwidth;
-    xdot.Segment(3, 2) = A * x.Segment(3, 2) + B * u;
-    return xdot;
-  };
+        sleipnir::VariableMatrix xdot{5};
+        xdot(0) = v * sleipnir::cos(x(2));
+        xdot(1) = v * sleipnir::sin(x(2));
+        xdot(2) = (x(4) - x(3)) / trackwidth;
+        xdot.Segment(3, 2) = A * x.Segment(3, 2) + B * u;
+        return xdot;
+      };
 
   constexpr std::chrono::duration<double> minTimestep = 50ms;
   constexpr Eigen::Vector<double, 5> x_initial{{0.0, 0.0, 0.0, 0.0, 0.0}};
