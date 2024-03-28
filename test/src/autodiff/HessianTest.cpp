@@ -24,8 +24,9 @@ TEST_CASE("Hessian - Linear", "[Hessian]") {
   CHECK(g == 1.0);
 
   // d²y/dx² = 0
-  Eigen::MatrixXd H = sleipnir::Hessian(y, x).Value();
-  CHECK(H(0, 0) == 0.0);
+  auto H = sleipnir::Hessian(y, x);
+  CHECK(H.Get().Value(0, 0) == 0.0);
+  CHECK(H.Value().coeff(0, 0) == 0.0);
 }
 
 TEST_CASE("Hessian - Quadratic", "[Hessian]") {
@@ -44,14 +45,12 @@ TEST_CASE("Hessian - Quadratic", "[Hessian]") {
   // d²y/dx² = d/dx(x (rhs) + x (lhs))
   //         = 1 + 1
   //         = 2
-  Eigen::MatrixXd H = sleipnir::Hessian(y, x).Value();
-  CHECK(H(0, 0) == 2.0);
+  auto H = sleipnir::Hessian(y, x);
+  CHECK(H.Get().Value(0, 0) == 2.0);
+  CHECK(H.Value().coeff(0, 0) == 2.0);
 }
 
 TEST_CASE("Hessian - Sum", "[Hessian]") {
-  sleipnir::Variable y;
-  Eigen::VectorXd g;
-  Eigen::MatrixXd H;
   sleipnir::VariableMatrix x{5};
   x(0).SetValue(1);
   x(1).SetValue(2);
@@ -60,26 +59,19 @@ TEST_CASE("Hessian - Sum", "[Hessian]") {
   x(4).SetValue(5);
 
   // y = sum(x)
-  y = std::accumulate(x.begin(), x.end(), sleipnir::Variable{0.0});
-  g = sleipnir::Gradient(y, x).Value();
-
+  auto y = std::accumulate(x.begin(), x.end(), sleipnir::Variable{0.0});
   CHECK(y.Value() == 15.0);
-  for (int i = 0; i < x.Rows(); ++i) {
-    CHECK(g(i) == 1.0);
-  }
 
-  H = sleipnir::Hessian(y, x).Value();
-  for (int i = 0; i < x.Rows(); ++i) {
-    for (int j = 0; j < x.Rows(); ++j) {
-      CHECK(H(i, j) == 0.0);
-    }
-  }
+  auto g = sleipnir::Gradient(y, x);
+  CHECK(g.Get().Value() == Eigen::MatrixXd::Constant(5, 1, 1.0));
+  CHECK(g.Value().toDense() == Eigen::MatrixXd::Constant(5, 1, 1.0));
+
+  auto H = sleipnir::Hessian(y, x);
+  CHECK(H.Get().Value() == Eigen::MatrixXd::Zero(5, 5));
+  CHECK(H.Value().toDense() == Eigen::MatrixXd::Zero(5, 5));
 }
 
 TEST_CASE("Hessian - Sum of products", "[Hessian]") {
-  sleipnir::Variable y;
-  Eigen::VectorXd g;
-  Eigen::MatrixXd H;
   sleipnir::VariableMatrix x{5};
   x(0).SetValue(1);
   x(1).SetValue(2);
@@ -88,30 +80,21 @@ TEST_CASE("Hessian - Sum of products", "[Hessian]") {
   x(4).SetValue(5);
 
   // y = ||x||²
-  y = x.T() * x;
-  g = sleipnir::Gradient(y, x).Value();
-
+  sleipnir::Variable y = x.T() * x;
   CHECK(y.Value() == 1 + 2 * 2 + 3 * 3 + 4 * 4 + 5 * 5);
-  for (int i = 0; i < x.Rows(); ++i) {
-    CHECK(g(i) == (2 * x(i)).Value());
-  }
 
-  H = sleipnir::Hessian(y, x).Value();
-  for (int i = 0; i < x.Rows(); ++i) {
-    for (int j = 0; j < x.Rows(); ++j) {
-      if (i == j) {
-        CHECK(H(i, j) == 2.0);
-      } else {
-        CHECK(H(i, j) == 0.0);
-      }
-    }
-  }
+  auto g = sleipnir::Gradient(y, x);
+  CHECK(g.Get().Value() == 2 * x.Value());
+  CHECK(g.Value().toDense() == 2 * x.Value());
+
+  auto H = sleipnir::Hessian(y, x);
+
+  Eigen::MatrixXd expectedH = Eigen::VectorXd::Constant(5, 1, 2.0).asDiagonal();
+  CHECK(H.Get().Value() == expectedH);
+  CHECK(H.Value().toDense() == expectedH);
 }
 
 TEST_CASE("Hessian - Product of sines", "[Hessian]") {
-  sleipnir::Variable y;
-  Eigen::VectorXd g;
-  Eigen::MatrixXd H;
   sleipnir::VariableMatrix x{5};
   x(0).SetValue(1);
   x(1).SetValue(2);
@@ -121,31 +104,45 @@ TEST_CASE("Hessian - Product of sines", "[Hessian]") {
 
   // y = prod(sin(x))
   auto temp = x.CwiseTransform(sleipnir::sin);
-  y = std::accumulate(temp.begin(), temp.end(), sleipnir::Variable{1.0},
-                      std::multiplies{});
-  g = sleipnir::Gradient(y, x).Value();
-
+  auto y = std::accumulate(temp.begin(), temp.end(), sleipnir::Variable{1.0},
+                           std::multiplies{});
   CHECK(y.Value() ==
         std::sin(1) * std::sin(2) * std::sin(3) * std::sin(4) * std::sin(5));
+
+  auto g = sleipnir::Gradient(y, x);
   for (int i = 0; i < x.Rows(); ++i) {
-    CHECK(g(i) ==
+    CHECK(g.Get().Value(i) ==
+          Catch::Approx((y / sleipnir::tan(x(i))).Value()).margin(1e-15));
+    CHECK(g.Value().coeff(i) ==
           Catch::Approx((y / sleipnir::tan(x(i))).Value()).margin(1e-15));
   }
 
-  H = sleipnir::Hessian(y, x).Value();
+  auto H = sleipnir::Hessian(y, x);
+
+  Eigen::MatrixXd expectedH{5, 5};
   for (int i = 0; i < x.Rows(); ++i) {
     for (int j = 0; j < x.Rows(); ++j) {
       if (i == j) {
-        CHECK(H(i, j) == Catch::Approx((g(i) / sleipnir::tan(x(i))).Value() *
-                                       (1.0 - 1.0 / (sleipnir::cos(x(i)) *
-                                                     sleipnir::cos(x(i))))
-                                           .Value())
-                             .margin(1e-15));
+        expectedH(i, j) =
+            (g.Value().coeff(i) / sleipnir::tan(x(i))).Value() *
+            (1.0 - 1.0 / (sleipnir::cos(x(i)) * sleipnir::cos(x(i)))).Value();
       } else {
-        CHECK(
-            H(i, j) ==
-            Catch::Approx((g(j) / sleipnir::tan(x(i))).Value()).margin(1e-15));
+        expectedH(i, j) = (g.Value().coeff(j) / sleipnir::tan(x(i))).Value();
       }
+    }
+  }
+
+  auto actual_H = H.Get().Value();
+  for (int i = 0; i < x.Rows(); ++i) {
+    for (int j = 0; j < x.Rows(); ++j) {
+      CHECK(actual_H(i, j) == Catch::Approx(expectedH(i, j)).margin(1e-15));
+    }
+  }
+
+  actual_H = H.Value();
+  for (int i = 0; i < x.Rows(); ++i) {
+    for (int j = 0; j < x.Rows(); ++j) {
+      CHECK(actual_H(i, j) == Catch::Approx(expectedH(i, j)).margin(1e-15));
     }
   }
 }
@@ -207,16 +204,11 @@ TEST_CASE("Hessian - Sum of squares", "[Hessian]") {
     J += (r(i) - x(i)) * (r(i) - x(i));
   }
 
-  Eigen::MatrixXd H = sleipnir::Hessian(J, x).Value();
-  for (int row = 0; row < 4; ++row) {
-    for (int col = 0; col < 4; ++col) {
-      if (row == col) {
-        CHECK(H(row, col) == 2.0);
-      } else {
-        CHECK(H(row, col) == 0.0);
-      }
-    }
-  }
+  auto H = sleipnir::Hessian(J, x);
+
+  Eigen::MatrixXd expectedH = Eigen::VectorXd::Constant(4, 1, 2.0).asDiagonal();
+  CHECK(H.Get().Value() == expectedH);
+  CHECK(H.Value().toDense() == expectedH);
 }
 
 TEST_CASE("Hessian - Rosenbrock", "[Hessian]") {
@@ -241,7 +233,7 @@ TEST_CASE("Hessian - Rosenbrock", "[Hessian]") {
   }
 }
 
-TEST_CASE("Hessian - Reuse", "[Hessian]") {
+TEST_CASE("Hessian - Variable reuse", "[Hessian]") {
   sleipnir::Variable y;
   sleipnir::VariableMatrix x{1};
 

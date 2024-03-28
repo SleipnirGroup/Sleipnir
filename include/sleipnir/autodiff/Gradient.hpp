@@ -48,7 +48,7 @@ class SLEIPNIR_DLLEXPORT Gradient {
    * This is useful when constructing optimization problems with derivatives in
    * them.
    */
-  VariableMatrix Get() const { return m_jacobian.Get(); }
+  VariableMatrix Get() const { return m_jacobian.Get().T(); }
 
   /**
    * Evaluates the gradient at wrt's value.

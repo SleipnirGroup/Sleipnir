@@ -17,14 +17,11 @@ def test_y_eq_x():
     # dy/dx = [0  1  0]
     #         [0  0  1]
     y = x
-    J = Jacobian(y, x).value()
+    J = Jacobian(y, x)
 
-    for row in range(3):
-        for col in range(3):
-            if row == col:
-                assert J[row, col] == 1.0
-            else:
-                assert J[row, col] == 0.0
+    expected_J = np.diag([1.0, 1.0, 1.0])
+    assert (J.get().value() == expected_J).all()
+    assert (J.value() == expected_J).all()
 
 
 def test_y_eq_3x():
@@ -40,14 +37,11 @@ def test_y_eq_3x():
     # dy/dx = [0  3  0]
     #         [0  0  3]
     y = 3 * x
-    J = Jacobian(y, x).value()
+    J = Jacobian(y, x)
 
-    for row in range(3):
-        for col in range(3):
-            if row == col:
-                assert J[row, col] == 3.0
-            else:
-                assert J[row, col] == 0.0
+    expected_J = np.diag([3.0, 3.0, 3.0])
+    assert (J.get().value() == expected_J).all()
+    assert (J.value() == expected_J).all()
 
 
 def test_products():
@@ -71,12 +65,11 @@ def test_products():
     y[0] = x[0] * x[1]
     y[1] = x[1] * x[2]
     y[2] = x[0] * x[2]
-    J = Jacobian(y, x).value()
+    J = Jacobian(y, x)
 
     expected_J = np.array([[2.0, 1.0, 0.0], [0.0, 3.0, 2.0], [3.0, 0.0, 1.0]])
-    for i in range(x.rows()):
-        for j in range(x.rows()):
-            assert J[i, j] == expected_J[i, j]
+    assert (J.get().value() == expected_J).all()
+    assert (J.value() == expected_J).all()
 
 
 @pytest.mark.skip(reason="Fails")
@@ -108,12 +101,11 @@ def test_nested_products():
     y[0] = x[0] * x[1]
     y[1] = x[1] * x[2]
     y[2] = x[0] * x[2]
-    J = Jacobian(y, x).value()
+    J = Jacobian(y, x)
 
     expected_J = np.array([[2.0, 1.0, 0.0], [0.0, 3.0, 2.0], [3.0, 0.0, 1.0]])
-    for i in range(x.rows()):
-        for j in range(x.rows()):
-            assert J[i, j] == expected_J[i, j]
+    assert (J.get().value() == expected_J).all()
+    assert (J.value() == expected_J).all()
 
 
 def test_non_square():
@@ -127,15 +119,20 @@ def test_non_square():
     #
     # dy/dx = [1  3  −5]
     y[0] = x[0] + 3 * x[1] - 5 * x[2]
-    J = Jacobian(y, x).value()
+    J = Jacobian(y, x)
 
-    assert J.shape == (1, 3)
-    assert J[0, 0] == 1.0
-    assert J[0, 1] == 3.0
-    assert J[0, 2] == -5.0
+    expected_J = np.array([[1.0, 3.0, -5.0]])
+
+    J_get_value = J.get().value()
+    assert J_get_value.shape == (1, 3)
+    assert (J_get_value == expected_J).all()
+
+    J_value = J.get().value()
+    assert J_value.shape == (1, 3)
+    assert (J_value == expected_J).all()
 
 
-def test_reuse():
+def test_variable_reuse():
     y = VariableMatrix(1)
     x = VariableMatrix(2)
 
