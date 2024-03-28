@@ -132,15 +132,22 @@ TEST_CASE("IntrusiveSharedPtr - Attach and ref", "[IntrusiveSharedPtr]") {
 }
 
 TEST_CASE("IntrusiveSharedPtr - Copy and assignment", "[IntrusiveSharedPtr]") {
-  auto object = new Mock{};
-  sleipnir::IntrusiveSharedPtr<Mock> ptr1{object};
-  CHECK(object->refCount == 1u);
+  auto object1 = new Mock{};
+  auto object2 = new Mock{};
 
-  sleipnir::IntrusiveSharedPtr<Mock> ptr2{ptr1};
-  CHECK(object->refCount == 2u);
+  sleipnir::IntrusiveSharedPtr<Mock> ptr1{object1};
+  sleipnir::IntrusiveSharedPtr<Mock> ptr2{object2};
+  CHECK(object1->refCount == 1u);
+  CHECK(object2->refCount == 1u);
 
-  sleipnir::IntrusiveSharedPtr<Mock> ptr3{object};
-  CHECK(object->refCount == 3u);
+  sleipnir::IntrusiveSharedPtr<Mock> ptrCopyCtor{ptr1};
+  CHECK(object1->refCount == 2u);
+  CHECK(object2->refCount == 1u);
+
+  sleipnir::IntrusiveSharedPtr<Mock> ptrCopyAssign{ptr1};
+  ptrCopyAssign = ptr2;
+  CHECK(object1->refCount == 2u);
+  CHECK(object2->refCount == 2u);
 }
 
 TEST_CASE("IntrusiveSharedPtr - Move", "[IntrusiveSharedPtr]") {
