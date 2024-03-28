@@ -70,7 +70,8 @@ class SLEIPNIR_DLLEXPORT ExpressionGraph {
       m_rowList.emplace_back(currentNode->row);
       m_adjointList.emplace_back(currentNode);
       if (currentNode->valueFunc != nullptr) {
-        // Constants have no valueFunc and don't need to be updated
+        // Constants are skipped because they have no valueFunc and don't need
+        // to be updated
         m_valueList.emplace_back(currentNode);
       }
 
@@ -109,8 +110,6 @@ class SLEIPNIR_DLLEXPORT ExpressionGraph {
         } else {
           node->value = node->valueFunc(lhs->value, 0.0);
         }
-      } else {
-        node->value = node->valueFunc(0.0, 0.0);
       }
     }
   }
