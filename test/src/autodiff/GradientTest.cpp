@@ -442,7 +442,7 @@ TEST_CASE("Gradient - Miscellaneous", "[Gradient]") {
         2.0 * std::numbers::inv_sqrtpi * std::exp(-x.Value() * x.Value()));
 }
 
-TEST_CASE("Gradient - Reuse", "[Gradient]") {
+TEST_CASE("Gradient - Variable reuse", "[Gradient]") {
   sleipnir::Variable a;
   a.SetValue(10);
 

@@ -23,8 +23,9 @@ def test_linear():
     assert g == 1.0
 
     # d²y/dx² = 0
-    H = Hessian(y, x).value()
-    assert H[0, 0] == 0.0
+    H = Hessian(y, x)
+    assert H.get().value()[0, 0] == 0.0
+    assert H.value()[0, 0] == 0.0
 
 
 def test_quartic():
@@ -43,8 +44,9 @@ def test_quartic():
     # d²y/dx² = d/dx(x (rhs) + x (lhs))
     #         = 1 + 1
     #         = 2
-    H = Hessian(y, x).value()
-    assert H[0, 0] == 2.0
+    H = Hessian(y, x)
+    assert H.get().value()[0, 0] == 2.0
+    assert H.value()[0, 0] == 2.0
 
 
 def test_sum():
@@ -57,20 +59,18 @@ def test_sum():
     x[4].set_value(5)
 
     y = sum(x)
-    g = Gradient(y, x).value()
-
     assert y.value() == 15.0
-    for i in range(x.rows()):
-        assert g[i] == 1.0
 
-    H = Hessian(y, x).value()
-    for i in range(x.rows()):
-        for j in range(x.rows()):
-            assert H[i, j] == 0.0
+    g = Gradient(y, x)
+    assert (g.get().value() == np.full((5, 1), 1.0)).all()
+    assert (g.value() == np.full((5, 1), 1.0)).all()
+
+    H = Hessian(y, x)
+    assert (H.get().value() == np.zeros((5, 5))).all()
+    assert (H.value() == np.zeros((5, 5))).all()
 
 
 def test_sum_of_products():
-    y = Variable()
     x = VariableMatrix(5)
     x[0].set_value(1)
     x[1].set_value(2)
@@ -80,23 +80,20 @@ def test_sum_of_products():
 
     # y = ||x||²
     y = (x.T @ x)[0, 0]
-    g = Gradient(y, x).value()
-
     assert y.value() == 1 + 2 * 2 + 3 * 3 + 4 * 4 + 5 * 5
-    for i in range(x.rows()):
-        assert g[i] == (2 * x[i]).value()
 
-    H = Hessian(y, x).value()
-    for i in range(x.rows()):
-        for j in range(x.rows()):
-            if i == j:
-                assert H[i, j] == 2.0
-            else:
-                assert H[i, j] == 0.0
+    g = Gradient(y, x)
+    assert (g.get().value() == 2 * x.value()).all()
+    assert (g.value() == 2 * x.value()).all()
+
+    H = Hessian(y, x)
+
+    expected_H = np.diag([2.0] * 5)
+    assert (H.get().value() == expected_H).all()
+    assert (H.value() == expected_H).all()
 
 
 def test_product_of_sines():
-    y = Variable()
     x = VariableMatrix(5)
     x[0].set_value(1)
     x[1].set_value(2)
@@ -106,27 +103,40 @@ def test_product_of_sines():
 
     # y = prod(sin(x))
     y = prod(x.cwise_transform(autodiff.sin))
-    g = Gradient(y, x).value()
-
     assert y.value() == math.sin(1) * math.sin(2) * math.sin(3) * math.sin(
         4
     ) * math.sin(5)
-    for i in range(x.rows()):
-        assert g[i, 0] == pytest.approx((y / autodiff.tan(x[i])).value(), abs=1e-15)
 
-    H = Hessian(y, x).value()
+    g = Gradient(y, x)
+    for i in range(x.rows()):
+        assert g.get().value()[i, 0] == pytest.approx(
+            (y / autodiff.tan(x[i])).value(), abs=1e-15
+        )
+        assert g.value()[i, 0] == pytest.approx(
+            (y / autodiff.tan(x[i])).value(), abs=1e-15
+        )
+
+    H = Hessian(y, x)
+
+    expected_H = np.empty((5, 5))
     for i in range(x.rows()):
         for j in range(x.rows()):
             if i == j:
-                assert H[i, j] == pytest.approx(
-                    (g[i, 0] / autodiff.tan(x[i])).value()
-                    * (1.0 - 1.0 / (autodiff.cos(x[i]) * autodiff.cos(x[i]))).value(),
-                    abs=1e-15,
-                )
+                expected_H[i, j] = (g.value()[i, 0] / autodiff.tan(x[i])).value() * (
+                    1.0 - 1.0 / (autodiff.cos(x[i]) * autodiff.cos(x[i]))
+                ).value()
             else:
-                assert H[i, j] == pytest.approx(
-                    (g[j, 0] / autodiff.tan(x[i])).value(), abs=1e-15
-                )
+                expected_H[i, j] = (g.value()[j, 0] / autodiff.tan(x[i])).value()
+
+    actual_H = H.get().value()
+    for i in range(x.rows()):
+        for j in range(x.rows()):
+            assert actual_H[i, j] == pytest.approx(expected_H[i, j], abs=1e-15)
+
+    actual_H = H.value()
+    for i in range(x.rows()):
+        for j in range(x.rows()):
+            assert actual_H[i, j] == pytest.approx(expected_H[i, j], abs=1e-15)
 
 
 def test_sum_of_squared_residuals():
@@ -149,7 +159,7 @@ def test_sum_of_squared_residuals():
     assert g[3, 0] == (-2 * x[2] + 4 * x[3] - 2 * x[4]).value()
     assert g[4, 0] == (-2 * x[3] + 2 * x[4]).value()
 
-    H = Hessian(y, x).value()
+    H = Hessian(y, x)
 
     expected_H = np.array(
         [
@@ -160,9 +170,16 @@ def test_sum_of_squared_residuals():
             [0.0, 0.0, 0.0, -2.0, 2.0],
         ]
     )
+
+    actual_H = H.get().value()
     for i in range(x.rows()):
         for j in range(x.rows()):
-            assert H[i, j] == expected_H[i, j]
+            assert actual_H[i, j] == expected_H[i, j]
+
+    actual_H = H.value()
+    for i in range(x.rows()):
+        for j in range(x.rows()):
+            assert actual_H[i, j] == expected_H[i, j]
 
 
 def test_sum_of_squares():
@@ -181,13 +198,11 @@ def test_sum_of_squares():
     for i in range(4):
         J += (r[i] - x[i]) * (r[i] - x[i])
 
-    H = Hessian(J, x).value()
-    for row in range(4):
-        for col in range(4):
-            if row == col:
-                assert H[row, col] == 2.0
-            else:
-                assert H[row, col] == 0.0
+    H = Hessian(J, x)
+
+    expected_H = np.diag([2.0] * 4)
+    assert (H.get().value() == expected_H).all()
+    assert (H.value() == expected_H).all()
 
 
 def test_rosenbrock():
@@ -210,7 +225,7 @@ def test_rosenbrock():
             assert H[1, 1] == 200
 
 
-def test_reuse():
+def test_variable_reuse():
     y = Variable()
     x = VariableMatrix(1)
 
