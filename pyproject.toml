@@ -40,7 +40,6 @@ install_components = [ "python_modules" ]
 install_args = [ "--strip" ]
 
   [tool.py-build-cmake.cmake.options]
-  BUILD_BENCHMARKING = "OFF"
   BUILD_TESTING = "OFF"
   BUILD_PYTHON = "ON"
 
