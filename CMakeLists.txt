@@ -302,7 +302,7 @@ if(BUILD_PYTHON)
         fetchcontent_declare(
             pybind11
             GIT_REPOSITORY https://github.com/pybind/pybind11.git
-            GIT_TAG v2.11.1
+            GIT_TAG v2.12.0
         )
         fetchcontent_makeavailable(pybind11)
     else()
