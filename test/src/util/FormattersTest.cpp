@@ -19,15 +19,18 @@ TEST_CASE("Formatters - Eigen", "[formatters]") {
         "  2.000000  3.000000\n"
         "  4.000000  5.000000");
 
-  Eigen::SparseMatrix<double> C{3, 2};
+  Eigen::Array2d C{0.0, 1.0};
+  CHECK(fmt::format("{:f}", C) == "  0.000000\n  1.000000");
+
+  Eigen::SparseMatrix<double> D{3, 2};
   std::vector<Eigen::Triplet<double>> triplets;
   triplets.emplace_back(0, 1, 1.0);
   triplets.emplace_back(1, 0, 2.0);
   triplets.emplace_back(1, 1, 3.0);
   triplets.emplace_back(2, 0, 4.0);
   triplets.emplace_back(2, 1, 5.0);
-  C.setFromTriplets(triplets.begin(), triplets.end());
-  CHECK(fmt::format("{:f}", C) ==
+  D.setFromTriplets(triplets.begin(), triplets.end());
+  CHECK(fmt::format("{:f}", D) ==
         "  0.000000  1.000000\n"
         "  2.000000  3.000000\n"
         "  4.000000  5.000000");
