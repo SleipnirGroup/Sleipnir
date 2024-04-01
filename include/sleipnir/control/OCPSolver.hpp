@@ -4,6 +4,7 @@
 
 #include <chrono>
 #include <functional>
+#include <utility>
 
 #include "sleipnir/autodiff/VariableMatrix.hpp"
 #include "sleipnir/optimization/OptimizationProblem.hpp"
@@ -127,7 +128,7 @@ class SLEIPNIR_DLLEXPORT OCPSolver : public OptimizationProblem {
    */
   OCPSolver(
       int numStates, int numInputs, std::chrono::duration<double> dt,
-      int numSteps, const DynamicsFunction& dynamics,
+      int numSteps, DynamicsFunction dynamics,
       DynamicsType dynamicsType = DynamicsType::kExplicitODE,
       TimestepMethod timestepMethod = TimestepMethod::kFixed,
       TranscriptionMethod method = TranscriptionMethod::kDirectTranscription)
@@ -137,7 +138,7 @@ class SLEIPNIR_DLLEXPORT OCPSolver : public OptimizationProblem {
         m_numSteps{numSteps},
         m_transcriptionMethod{method},
         m_dynamicsType{dynamicsType},
-        m_dynamicsFunction{dynamics},
+        m_dynamicsFunction{std::move(dynamics)},
         m_timestepMethod{timestepMethod} {
     // u is numSteps + 1 so that the final constraintFunction evaluation works
     m_U = DecisionVariable(m_numInputs, m_numSteps + 1);
@@ -393,7 +394,7 @@ class SLEIPNIR_DLLEXPORT OCPSolver : public OptimizationProblem {
   TranscriptionMethod m_transcriptionMethod;
 
   DynamicsType m_dynamicsType;
-  const DynamicsFunction& m_dynamicsFunction;
+  DynamicsFunction m_dynamicsFunction;
 
   TimestepMethod m_timestepMethod;
 
