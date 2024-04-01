@@ -43,7 +43,7 @@ class SLEIPNIR_DLLEXPORT ExpressionGraph {
     // Initialize the number of instances of each node in the tree
     // (Expression::duplications)
     while (!stack.empty()) {
-      auto& currentNode = stack.back();
+      auto currentNode = stack.back();
       stack.pop_back();
 
       for (auto&& arg : currentNode->args) {
@@ -63,7 +63,7 @@ class SLEIPNIR_DLLEXPORT ExpressionGraph {
     stack.emplace_back(root.Get());
 
     while (!stack.empty()) {
-      auto& currentNode = stack.back();
+      auto currentNode = stack.back();
       stack.pop_back();
 
       // BFS lists sorted from parent to child.
