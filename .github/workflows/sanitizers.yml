@@ -29,13 +29,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install dependencies
+      - name: Install LLVM 17
         run: |
-          sudo apt-get update -q
-          sudo apt-get install -y clang-15
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 17 all
+          sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-17 200
+          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-17 200
+          echo "CC=clang" >> $GITHUB_ENV
+          echo "CXX=clang++" >> $GITHUB_ENV
+          echo "CXXFLAGS=-stdlib=libc++" >> $GITHUB_ENV
 
       - name: Configure
-        run: cmake -B build -S . -DCMAKE_C_COMPILER:FILEPATH=/usr/bin/clang-15 -DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/clang++-15 ${{ matrix.cmake-flags }} -DBUILD_EXAMPLES=ON
+        run: cmake -B build -S . ${{ matrix.cmake-flags }} -DBUILD_EXAMPLES=ON
 
       - name: Build
         run: cmake --build build --target all --config RelWithDebInfo --parallel $(nproc)
