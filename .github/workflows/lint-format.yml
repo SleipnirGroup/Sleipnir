@@ -72,7 +72,7 @@ jobs:
         with:
           python-version: 3.8
 
-      - name: Install LLVM 17 (Linux)
+      - name: Install LLVM 17
         run: |
           wget https://apt.llvm.org/llvm.sh
           chmod +x llvm.sh
