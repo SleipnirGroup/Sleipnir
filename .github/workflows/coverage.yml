@@ -14,19 +14,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # TODO: Remove this once clang 15 is default; clang 14 had a stdlib bug
-      - name: Install clang 15
+      - name: Install LLVM 17
         run: |
-          sudo apt-get update -q
-          sudo apt-get install -y clang-15 llvm-15-dev
-          sudo update-alternatives --install \
-            /usr/bin/clang clang /usr/bin/clang-15 200
-          sudo update-alternatives --install \
-            /usr/bin/clang++ clang++ /usr/bin/clang++-15 200
-          sudo update-alternatives --install \
-            /usr/bin/llvm-cov llvm-cov /usr/bin/llvm-cov-15 200
-          sudo update-alternatives --install \
-            /usr/bin/llvm-profdata llvm-profdata /usr/bin/llvm-profdata-15 200
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 17 all
+          sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-17 200
+          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-17 200
+          sudo update-alternatives --install /usr/bin/llvm-cov llvm-cov /usr/bin/llvm-cov-17 200
+          sudo update-alternatives --install /usr/bin/llvm-profdata llvm-profdata /usr/bin/llvm-profdata-17 200
+          echo "CC=clang" >> $GITHUB_ENV
+          echo "CXX=clang++" >> $GITHUB_ENV
+          echo "CXXFLAGS=-stdlib=libc++" >> $GITHUB_ENV
 
       - run: ./tools/coverage-generate.sh SleipnirTest
 
