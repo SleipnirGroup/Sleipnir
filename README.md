@@ -10,7 +10,7 @@ Named after Odin's eight-legged horse from Norse mythology, Sleipnir is a linear
 
 ```cpp
 #include <fmt/core.h>
-#include <sleipnir/OptimizationProblem.hpp>
+#include <sleipnir/optimization/OptimizationProblem.hpp>
 
 int main() {
   // Find the x, y pair with the largest product for which x + 3y = 36
