@@ -1154,20 +1154,3 @@ SLEIPNIR_DLLEXPORT inline ExpressionPtr tanh(const ExpressionPtr& x) {
 }
 
 }  // namespace sleipnir::detail
-
-namespace sleipnir {
-
-// FIXME: Doxygen is confused:
-//
-//   Found ';' while parsing initializer list! (doxygen could be confused by a
-//   macro call without semicolon)
-
-//! @cond Doxygen_Suppress
-
-// Instantiate Expression pool in Expression.cpp instead to avoid ODR violation
-extern template EXPORT_TEMPLATE_DECLARE(SLEIPNIR_DLLEXPORT)
-    PoolAllocator<detail::Expression> GlobalPoolAllocator<detail::Expression>();
-
-//! @endcond
-
-}  // namespace sleipnir
