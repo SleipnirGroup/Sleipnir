@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <stdint.h>
+
 namespace sleipnir {
 
 /**
@@ -9,7 +11,7 @@ namespace sleipnir {
  *
  * Used for autodiff caching.
  */
-enum class ExpressionType {
+enum class ExpressionType : uint8_t {
   /// There is no expression.
   kNone,
   /// The expression is a constant.
