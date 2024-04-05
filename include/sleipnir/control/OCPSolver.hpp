@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <stdint.h>
+
 #include <chrono>
 #include <functional>
 #include <utility>
@@ -49,7 +51,7 @@ State RK4(F&& f, State x, Input u, Time t0, Time dt) {
 /**
  * Enum describing an OCP transcription method.
  */
-enum class TranscriptionMethod {
+enum class TranscriptionMethod : uint8_t {
   /// Each state is a decision variable constrained to the integrated dynamics
   /// of the previous state.
   kDirectTranscription,
@@ -64,7 +66,7 @@ enum class TranscriptionMethod {
 /**
  * Enum describing a type of system dynamics constraints.
  */
-enum class DynamicsType {
+enum class DynamicsType : uint8_t {
   /// The dynamics are a function in the form dx/dt = f(t, x, u).
   kExplicitODE,
   /// The dynamics are a function in the form xₖ₊₁ = f(t, xₖ, uₖ).
@@ -74,7 +76,7 @@ enum class DynamicsType {
 /**
  * Enum describing the type of system timestep.
  */
-enum class TimestepMethod {
+enum class TimestepMethod : uint8_t {
   /// The timestep is a fixed constant.
   kFixed,
   /// The timesteps are allowed to vary as independent decision variables.

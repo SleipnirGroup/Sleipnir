@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <stdint.h>
+
 #include <string_view>
 
 #include "sleipnir/util/SymbolExports.hpp"
@@ -11,7 +13,7 @@ namespace sleipnir {
 /**
  * Solver exit condition.
  */
-enum class SolverExitCondition {
+enum class SolverExitCondition : int8_t {
   /// Solved the problem to the desired tolerance.
   kSuccess = 0,
   /// Solved the problem to an acceptable tolerance, but not the desired one.

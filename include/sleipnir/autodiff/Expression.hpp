@@ -71,11 +71,11 @@ struct SLEIPNIR_DLLEXPORT Expression {
 
   /// Tracks the number of instances of this expression yet to be encountered in
   /// an expression tree.
-  int duplications = 0;
+  uint32_t duplications = 0;
 
   /// This expression's row in wrt for autodiff gradient, Jacobian, or Hessian.
   /// This is -1 if the expression isn't in wrt.
-  int row = -1;
+  int32_t row = -1;
 
   /// The adjoint of the expression node used during gradient expression tree
   /// generation.
@@ -83,6 +83,9 @@ struct SLEIPNIR_DLLEXPORT Expression {
 
   /// Expression argument type.
   ExpressionType type = ExpressionType::kConstant;
+
+  /// Reference count for intrusive shared pointer.
+  uint32_t refCount = 0;
 
   /// Either nullary operator with no arguments, unary operator with one
   /// argument, or binary operator with two arguments. This operator is
@@ -123,9 +126,6 @@ struct SLEIPNIR_DLLEXPORT Expression {
 
   /// Expression arguments.
   std::array<ExpressionPtr, 2> args{nullptr, nullptr};
-
-  /// Reference count for intrusive shared pointer.
-  uint32_t refCount = 0;
 
   /**
    * Constructs a constant expression with a value of zero.
