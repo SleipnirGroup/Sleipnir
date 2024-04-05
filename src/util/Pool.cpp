@@ -5,7 +5,7 @@
 namespace sleipnir {
 
 PoolResource& GlobalPoolResource() {
-  static PoolResource pool{16384};
+  thread_local PoolResource pool{16384};
   return pool;
 }
 
