@@ -167,6 +167,17 @@ class SLEIPNIR_DLLEXPORT ExpressionGraph {
       }
     }
 
+    // Unlink adjoints to avoid circular references between them and their
+    // parent expressions. This ensures all expressions are returned to the free
+    // list.
+    for (auto node : m_adjointList) {
+      for (auto& arg : node->args) {
+        if (arg != nullptr) {
+          arg->adjointExpr = nullptr;
+        }
+      }
+    }
+
     for (size_t row = 0; row < wrt.size(); ++row) {
       wrt[row]->row = -1;
     }

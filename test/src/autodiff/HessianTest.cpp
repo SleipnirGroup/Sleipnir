@@ -12,8 +12,12 @@
 #include <sleipnir/autodiff/Variable.hpp>
 
 #include "Range.hpp"
+#include "util/ScopeExit.hpp"
 
 TEST_CASE("Hessian - Linear", "[Hessian]") {
+  sleipnir::scope_exit exit{
+      [] { CHECK(sleipnir::GlobalPoolResource().blocks_in_use() == 0u); }};
+
   // y = x
   sleipnir::VariableMatrix x{1};
   x(0).SetValue(3);
@@ -30,6 +34,9 @@ TEST_CASE("Hessian - Linear", "[Hessian]") {
 }
 
 TEST_CASE("Hessian - Quadratic", "[Hessian]") {
+  sleipnir::scope_exit exit{
+      [] { CHECK(sleipnir::GlobalPoolResource().blocks_in_use() == 0u); }};
+
   // y = x²
   // y = x * x
   sleipnir::VariableMatrix x{1};
@@ -51,6 +58,9 @@ TEST_CASE("Hessian - Quadratic", "[Hessian]") {
 }
 
 TEST_CASE("Hessian - Sum", "[Hessian]") {
+  sleipnir::scope_exit exit{
+      [] { CHECK(sleipnir::GlobalPoolResource().blocks_in_use() == 0u); }};
+
   sleipnir::VariableMatrix x{5};
   x(0).SetValue(1);
   x(1).SetValue(2);
@@ -72,6 +82,9 @@ TEST_CASE("Hessian - Sum", "[Hessian]") {
 }
 
 TEST_CASE("Hessian - Sum of products", "[Hessian]") {
+  sleipnir::scope_exit exit{
+      [] { CHECK(sleipnir::GlobalPoolResource().blocks_in_use() == 0u); }};
+
   sleipnir::VariableMatrix x{5};
   x(0).SetValue(1);
   x(1).SetValue(2);
@@ -95,6 +108,9 @@ TEST_CASE("Hessian - Sum of products", "[Hessian]") {
 }
 
 TEST_CASE("Hessian - Product of sines", "[Hessian]") {
+  sleipnir::scope_exit exit{
+      [] { CHECK(sleipnir::GlobalPoolResource().blocks_in_use() == 0u); }};
+
   sleipnir::VariableMatrix x{5};
   x(0).SetValue(1);
   x(1).SetValue(2);
@@ -148,6 +164,9 @@ TEST_CASE("Hessian - Product of sines", "[Hessian]") {
 }
 
 TEST_CASE("Hessian - Sum of squared residuals", "[Hessian]") {
+  sleipnir::scope_exit exit{
+      [] { CHECK(sleipnir::GlobalPoolResource().blocks_in_use() == 0u); }};
+
   sleipnir::Variable y;
   Eigen::VectorXd g;
   Eigen::MatrixXd H;
@@ -188,6 +207,9 @@ TEST_CASE("Hessian - Sum of squared residuals", "[Hessian]") {
 }
 
 TEST_CASE("Hessian - Sum of squares", "[Hessian]") {
+  sleipnir::scope_exit exit{
+      [] { CHECK(sleipnir::GlobalPoolResource().blocks_in_use() == 0u); }};
+
   sleipnir::VariableMatrix r{4};
   r(0).SetValue(25.0);
   r(1).SetValue(10.0);
@@ -212,6 +234,9 @@ TEST_CASE("Hessian - Sum of squares", "[Hessian]") {
 }
 
 TEST_CASE("Hessian - Rosenbrock", "[Hessian]") {
+  sleipnir::scope_exit exit{
+      [] { CHECK(sleipnir::GlobalPoolResource().blocks_in_use() == 0u); }};
+
   sleipnir::VariableMatrix input{2};
   auto& x = input(0);
   auto& y = input(1);
@@ -234,6 +259,9 @@ TEST_CASE("Hessian - Rosenbrock", "[Hessian]") {
 }
 
 TEST_CASE("Hessian - Variable reuse", "[Hessian]") {
+  sleipnir::scope_exit exit{
+      [] { CHECK(sleipnir::GlobalPoolResource().blocks_in_use() == 0u); }};
+
   sleipnir::Variable y;
   sleipnir::VariableMatrix x{1};
 
