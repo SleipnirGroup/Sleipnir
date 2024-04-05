@@ -7,10 +7,14 @@
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 
 #include "CatchStringConverters.hpp"
+#include "util/ScopeExit.hpp"
 
 // This problem tests the case where regularization fails
 TEST_CASE("OptimizationProblem - Arm on elevator", "[OptimizationProblem]") {
   using namespace std::chrono_literals;
+
+  sleipnir::scope_exit exit{
+      [] { CHECK(sleipnir::GlobalPoolResource().blocks_in_use() == 0u); }};
 
   constexpr int N = 800;
 

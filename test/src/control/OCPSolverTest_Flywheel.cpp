@@ -12,6 +12,7 @@
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 
 #include "CatchStringConverters.hpp"
+#include "util/ScopeExit.hpp"
 
 using namespace std::chrono_literals;
 
@@ -25,6 +26,9 @@ void TestFlywheel(std::string testName, double A, double B,
                   const sleipnir::DynamicsFunction& F,
                   sleipnir::DynamicsType dynamicsType,
                   sleipnir::TranscriptionMethod method) {
+  sleipnir::scope_exit exit{
+      [] { CHECK(sleipnir::GlobalPoolResource().blocks_in_use() == 0u); }};
+
   constexpr std::chrono::duration<double> T = 5s;
   constexpr std::chrono::duration<double> dt = 5ms;
   constexpr int N = T / dt;

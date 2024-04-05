@@ -3,7 +3,12 @@
 #include <catch2/catch_test_macros.hpp>
 #include <sleipnir/autodiff/Jacobian.hpp>
 
+#include "util/ScopeExit.hpp"
+
 TEST_CASE("Jacobian - y = x", "[Jacobian]") {
+  sleipnir::scope_exit exit{
+      [] { CHECK(sleipnir::GlobalPoolResource().blocks_in_use() == 0u); }};
+
   sleipnir::VariableMatrix y{3};
   sleipnir::VariableMatrix x{3};
   x(0).SetValue(1);
@@ -24,6 +29,9 @@ TEST_CASE("Jacobian - y = x", "[Jacobian]") {
 }
 
 TEST_CASE("Jacobian - y = 3x", "[Jacobian]") {
+  sleipnir::scope_exit exit{
+      [] { CHECK(sleipnir::GlobalPoolResource().blocks_in_use() == 0u); }};
+
   sleipnir::VariableMatrix y{3};
   sleipnir::VariableMatrix x{3};
   x(0).SetValue(1);
@@ -44,6 +52,9 @@ TEST_CASE("Jacobian - y = 3x", "[Jacobian]") {
 }
 
 TEST_CASE("Jacobian - Products", "[Jacobian]") {
+  sleipnir::scope_exit exit{
+      [] { CHECK(sleipnir::GlobalPoolResource().blocks_in_use() == 0u); }};
+
   sleipnir::VariableMatrix y{3};
   sleipnir::VariableMatrix x{3};
   x(0).SetValue(1);
@@ -73,6 +84,9 @@ TEST_CASE("Jacobian - Products", "[Jacobian]") {
 
 TEST_CASE("Jacobian - Nested products", "[Jacobian]") {
   SKIP("Fails");
+
+  sleipnir::scope_exit exit{
+      [] { CHECK(sleipnir::GlobalPoolResource().blocks_in_use() == 0u); }};
 
   sleipnir::VariableMatrix z{1};
   z(0).SetValue(1);
@@ -112,6 +126,9 @@ TEST_CASE("Jacobian - Nested products", "[Jacobian]") {
 }
 
 TEST_CASE("Jacobian - Non-square", "[Jacobian]") {
+  sleipnir::scope_exit exit{
+      [] { CHECK(sleipnir::GlobalPoolResource().blocks_in_use() == 0u); }};
+
   sleipnir::VariableMatrix y{1};
   sleipnir::VariableMatrix x{3};
   x(0).SetValue(1);
@@ -138,6 +155,9 @@ TEST_CASE("Jacobian - Non-square", "[Jacobian]") {
 }
 
 TEST_CASE("Jacobian - Variable reuse", "[Jacobian]") {
+  sleipnir::scope_exit exit{
+      [] { CHECK(sleipnir::GlobalPoolResource().blocks_in_use() == 0u); }};
+
   sleipnir::VariableMatrix y{1};
   sleipnir::VariableMatrix x{2};
 
