@@ -14,9 +14,13 @@
 #include "CartPoleUtil.hpp"
 #include "CatchStringConverters.hpp"
 #include "RK4.hpp"
+#include "util/ScopeExit.hpp"
 
 TEST_CASE("OptimizationProblem - Cart-pole", "[OptimizationProblem]") {
   using namespace std::chrono_literals;
+
+  sleipnir::scope_exit exit{
+      [] { CHECK(sleipnir::GlobalPoolResource().blocks_in_use() == 0u); }};
 
   constexpr std::chrono::duration<double> T = 5s;
   constexpr std::chrono::duration<double> dt = 50ms;

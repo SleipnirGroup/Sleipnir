@@ -11,6 +11,7 @@
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 
 #include "CatchStringConverters.hpp"
+#include "util/ScopeExit.hpp"
 
 namespace {
 bool Near(double expected, double actual, double tolerance) {
@@ -20,6 +21,9 @@ bool Near(double expected, double actual, double tolerance) {
 
 TEST_CASE("OptimizationProblem - Flywheel", "[OptimizationProblem]") {
   using namespace std::chrono_literals;
+
+  sleipnir::scope_exit exit{
+      [] { CHECK(sleipnir::GlobalPoolResource().blocks_in_use() == 0u); }};
 
   constexpr std::chrono::duration<double> T = 5s;
   constexpr std::chrono::duration<double> dt = 5ms;

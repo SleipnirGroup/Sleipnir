@@ -12,9 +12,13 @@
 #include "CatchStringConverters.hpp"
 #include "DifferentialDriveUtil.hpp"
 #include "RK4.hpp"
+#include "util/ScopeExit.hpp"
 
 TEST_CASE("OCPSolver - Differential drive", "[OCPSolver]") {
   using namespace std::chrono_literals;
+
+  sleipnir::scope_exit exit{
+      [] { CHECK(sleipnir::GlobalPoolResource().blocks_in_use() == 0u); }};
 
   constexpr int N = 50;
 
