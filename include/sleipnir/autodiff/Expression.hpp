@@ -100,9 +100,7 @@ struct SLEIPNIR_DLLEXPORT Expression {
   ///   <li>rhs: Right argument to binary operator.</li>
   ///   <li>parentAdjoint: Adjoint of parent expression.</li>
   /// </ul>
-  std::array<TrinaryFuncDouble, 2> gradientValueFuncs{
-      [](double, double, double) { return 0.0; },
-      [](double, double, double) { return 0.0; }};
+  std::array<TrinaryFuncDouble, 2> gradientValueFuncs{nullptr, nullptr};
 
   /// Functions returning Variable adjoints of the children expressions.
   ///
@@ -112,17 +110,7 @@ struct SLEIPNIR_DLLEXPORT Expression {
   ///   <li>rhs: Right argument to binary operator.</li>
   ///   <li>parentAdjoint: Adjoint of parent expression.</li>
   /// </ul>
-  std::array<TrinaryFuncExpr, 2> gradientFuncs{
-      [](const ExpressionPtr&, const ExpressionPtr&,
-         const ExpressionPtr&) -> ExpressionPtr {
-        // Return zero
-        return nullptr;
-      },
-      [](const ExpressionPtr&, const ExpressionPtr&,
-         const ExpressionPtr&) -> ExpressionPtr {
-        // Return zero
-        return nullptr;
-      }};
+  std::array<TrinaryFuncExpr, 2> gradientFuncs{nullptr, nullptr};
 
   /// Expression arguments.
   std::array<ExpressionPtr, 2> args{nullptr, nullptr};
@@ -158,12 +146,8 @@ struct SLEIPNIR_DLLEXPORT Expression {
       : value{valueFunc(lhs->value, 0.0)},
         type{type},
         valueFunc{valueFunc},
-        gradientValueFuncs{lhsGradientValueFunc,
-                           [](double, double, double) { return 0.0; }},
-        gradientFuncs{
-            lhsGradientFunc,
-            [](const ExpressionPtr&, const ExpressionPtr&,
-               const ExpressionPtr&) -> ExpressionPtr { return nullptr; }},
+        gradientValueFuncs{lhsGradientValueFunc, nullptr},
+        gradientFuncs{lhsGradientFunc, nullptr},
         args{lhs, nullptr} {}
 
   /**
