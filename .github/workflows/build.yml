@@ -151,6 +151,7 @@ jobs:
         with:
           path: dist
           pattern: '* - python *'
-          merge-multiple: true
+      - name: Manually merge artifacts to avoid corrupting source distribution
+        run: mv dist/**/*.whl dist/**/*.tar.gz dist
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
