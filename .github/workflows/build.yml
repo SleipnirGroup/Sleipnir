@@ -38,7 +38,7 @@ jobs:
           name: ${{ matrix.os }} - native
           path: pkg
 
-  build-python:
+  build-python-wheel:
     timeout-minutes: 10
     strategy:
       fail-fast: false
@@ -50,7 +50,7 @@ jobs:
           - os: macOS-14
             version: '3.9'
 
-    name: "${{ matrix.os }} - python ${{ matrix.version }}"
+    name: "${{ matrix.os }} - python ${{ matrix.version }} wheel"
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -69,7 +69,7 @@ jobs:
         run: pip3 install build tox
 
       - name: Build
-        run: python3 -m build
+        run: python3 -m build --wheel
 
       - name: Repair wheel
         if: startsWith(matrix.os, 'ubuntu') || startsWith(matrix.os, 'macOS')
@@ -81,8 +81,56 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.os }} - python ${{ matrix.version }}
+          name: ${{ matrix.os }} - python ${{ matrix.version }} wheel
           path: dist
+
+  build-python-sdist:
+    timeout-minutes: 10
+
+    name: "Python sdist"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+
+      - name: Update version string
+        run: python3 ./tools/update_version.py
+
+      - name: Install build and tox Python packages
+        run: pip3 install build tox
+
+      - name: Build
+        run: python3 -m build --sdist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Python sdist
+          path: dist
+
+  pypi-publish:
+    name: Upload release to PyPI
+    runs-on: ubuntu-22.04
+    needs: [build-python-wheel, build-python-sdist]
+    if: github.repository_owner == 'SleipnirGroup' && github.ref == 'refs/heads/main'
+    environment:
+      name: pypi
+      url: https://pypi.org/p/sleipnirgroup-jormungandr
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          pattern: '* - python *'
+          merge-multiple: true
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
 
   build-cross:
     strategy:
@@ -135,22 +183,3 @@ jobs:
         with:
           name: Wasm
           path: pkg
-
-  pypi-publish:
-    name: Upload release to PyPI
-    runs-on: ubuntu-22.04
-    needs: [build-python]
-    if: github.repository_owner == 'SleipnirGroup' && github.ref == 'refs/heads/main'
-    environment:
-      name: pypi
-      url: https://pypi.org/p/sleipnirgroup-jormungandr
-    permissions:
-      id-token: write
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          path: dist
-          pattern: '* - python *'
-          merge-multiple: true
-      - name: Publish package distributions to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
