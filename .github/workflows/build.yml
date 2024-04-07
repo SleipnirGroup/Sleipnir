@@ -20,18 +20,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Configure
-        run: cmake -B build -S . -DBUILD_EXAMPLES=ON
-
-      - name: Build
-        run: cmake --build build --config RelWithDebInfo --parallel $(nproc)
-
-      - name: Test
+      - run: cmake -B build -S . -DBUILD_EXAMPLES=ON
+      - run: cmake --build build --config RelWithDebInfo --parallel $(nproc)
+      - run: ctest -C RelWithDebInfo --output-on-failure
         working-directory: build
-        run: ctest -C RelWithDebInfo --output-on-failure
-
-      - name: Install
-        run: cmake --install build --config RelWithDebInfo --prefix pkg
+      - run: cmake --install build --config RelWithDebInfo --prefix pkg
 
       - uses: actions/upload-artifact@v4
         with:
@@ -57,27 +50,17 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Python ${{ matrix.version }}
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.version }}
 
-      - name: Update version string
-        run: python3 ./tools/update_version.py
-
-      - name: Install build and tox Python packages
-        run: pip3 install build tox
-
-      - name: Build
-        run: python3 -m build --wheel
-
-      - name: Repair wheel
+      - run: python3 ./tools/update_version.py
+      - run: pip3 install build tox
+      - run: python3 -m build --wheel
+      - run: python3 ../.github/workflows/repair_wheel.py sleipnirgroup_jormungandr-*.whl
         if: startsWith(matrix.os, 'ubuntu') || startsWith(matrix.os, 'macOS')
-        run: python3 ../.github/workflows/repair_wheel.py sleipnirgroup_jormungandr-*.whl
         working-directory: dist
-
-      - name: Test
-        run: python3 -m tox -e ${{ matrix.version }}
+      - run: python3 -m tox -e ${{ matrix.version }}
 
       - uses: actions/upload-artifact@v4
         with:
@@ -94,19 +77,13 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: 3.12
 
-      - name: Update version string
-        run: python3 ./tools/update_version.py
-
-      - name: Install build and tox Python packages
-        run: pip3 install build tox
-
-      - name: Build
-        run: python3 -m build --sdist
+      - run: python3 ./tools/update_version.py
+      - run: pip3 install build tox
+      - run: python3 -m build --sdist
 
       - uses: actions/upload-artifact@v4
         with:
@@ -147,14 +124,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Configure
-        run: cmake -B build -S . --toolchain ${{ matrix.toolchain }} -DBUILD_EXAMPLES=ON
-
-      - name: Build
-        run: cmake --build build --config RelWithDebInfo --parallel $(nproc)
-
-      - name: Install
-        run: cmake --install build --config RelWithDebInfo --prefix pkg
+      - run: cmake -B build -S . --toolchain ${{ matrix.toolchain }} -DBUILD_EXAMPLES=ON
+      - run: cmake --build build --config RelWithDebInfo --parallel $(nproc)
+      - run: cmake --install build --config RelWithDebInfo --prefix pkg
 
       - uses: actions/upload-artifact@v4
         with:
@@ -167,17 +139,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup emscripten
-        uses: numworks/setup-emscripten@latest
+      - uses: numworks/setup-emscripten@latest
 
-      - name: Configure
-        run: emcmake cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTING=OFF
-
-      - name: Build
-        run: cmake --build build --config Release --parallel $(nproc)
-
-      - name: Install
-        run: cmake --install build --config Release --prefix pkg
+      - run: emcmake cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTING=OFF
+      - run: cmake --build build --config Release --parallel $(nproc)
+      - run: cmake --install build --config Release --prefix pkg
 
       - uses: actions/upload-artifact@v4
         with:

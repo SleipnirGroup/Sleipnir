@@ -40,12 +40,7 @@ jobs:
           echo "CXX=clang++" >> $GITHUB_ENV
           echo "CXXFLAGS=-stdlib=libc++" >> $GITHUB_ENV
 
-      - name: Configure
-        run: cmake -B build -S . ${{ matrix.cmake-flags }} -DBUILD_EXAMPLES=ON
-
-      - name: Build
-        run: cmake --build build --target all --config RelWithDebInfo --parallel $(nproc)
-
-      - name: Test
+      - run: cmake -B build -S . ${{ matrix.cmake-flags }} -DBUILD_EXAMPLES=ON
+      - run: cmake --build build --target all --config RelWithDebInfo --parallel $(nproc)
+      - run: ${{ matrix.ctest-env }} ctest -C RelWithDebInfo --output-on-failure
         working-directory: build
-        run: ${{ matrix.ctest-env }} ctest -C RelWithDebInfo --output-on-failure

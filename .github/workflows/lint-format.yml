@@ -20,16 +20,13 @@ jobs:
           git checkout -b pr
           git branch -f main origin/main
 
-      - name: Set up Python 3.8
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
-          python-version: 3.8
+          python-version: 3.12
 
-      - name: Install wpiformat
-        run: pip3 install wpiformat==2024.33
+      - run: pip3 install wpiformat==2024.33
 
-      - name: Run
-        run: wpiformat==2024.33
+      - run: wpiformat
 
       - name: Check output
         run: git --no-pager diff --exit-code HEAD
@@ -67,10 +64,9 @@ jobs:
           git checkout -b pr
           git branch -f main origin/main
 
-      - name: Set up Python 3.8
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
-          python-version: 3.8
+          python-version: 3.12
 
       - name: Install LLVM 17
         run: |
@@ -83,8 +79,7 @@ jobs:
           echo "CXX=clang++" >> $GITHUB_ENV
           echo "CXXFLAGS=-stdlib=libc++" >> $GITHUB_ENV
 
-      - name: Install wpiformat
-        run: pip3 install wpiformat
+      - run: pip3 install wpiformat
 
       - name: Create compile_commands.json
         run: cmake -B build -S . -DCMAKE_EXPORT_COMPILE_COMMANDS=YES
