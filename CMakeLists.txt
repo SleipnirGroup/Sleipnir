@@ -94,6 +94,11 @@ option(USE_SYSTEM_EIGEN "Use system eigen" OFF)
 option(USE_SYSTEM_FMT "Use system fmt" OFF)
 option(USE_SYSTEM_PYBIND "Use system pybind" OFF)
 
+# Required for std::async()
+find_package(Threads REQUIRED)
+
+target_link_libraries(Sleipnir PUBLIC Threads::Threads)
+
 # Eigen dependency
 if(NOT USE_SYSTEM_EIGEN)
     fetchcontent_declare(
@@ -325,7 +330,10 @@ if(BUILD_PYTHON)
             ${fmt_SOURCE_DIR}/include
             ${CMAKE_CURRENT_SOURCE_DIR}/jormungandr/cpp
     )
-    target_link_libraries(_jormungandr PUBLIC pybind11::module Eigen3::Eigen)
+    target_link_libraries(
+        _jormungandr
+        PUBLIC pybind11::module Threads::Threads Eigen3::Eigen
+    )
 
     install(
         TARGETS _jormungandr

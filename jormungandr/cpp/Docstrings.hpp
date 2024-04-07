@@ -293,6 +293,35 @@ Parameter ``lhs``:
 Parameter ``rhs``:
     Right-hand side.)doc";
 
+static const char *__doc_sleipnir_Multistart =
+R"doc(Solves an optimization problem from different starting points in
+parallel, then returns the solution with the lowest cost.
+
+Each solve is performed on a separate thread. Solutions from
+successful solves are always preferred over solutions from
+unsuccessful solves, and cost (lower is better) is the tiebreaker
+between successful solves.
+
+Template parameter ``DecisionVariables``:
+    The type containing the decision variable initial guess.
+
+Parameter ``solve``:
+    A user-provided function that takes a decision variable initial
+    guess and returns a MultistartResult.
+
+Parameter ``initialGuesses``:
+    A list of decision variable initial guesses to try.)doc";
+
+static const char *__doc_sleipnir_MultistartResult =
+R"doc(The result of a multistart solve.
+
+Template parameter ``DecisionVariables``:
+    The type containing the decision variable initial guess.)doc";
+
+static const char *__doc_sleipnir_MultistartResult_status = R"doc()doc";
+
+static const char *__doc_sleipnir_MultistartResult_variables = R"doc()doc";
+
 static const char *__doc_sleipnir_OCPSolver =
 R"doc(This class allows the user to pose and solve a constrained optimal
 control problem (OCP) in a variety of ways.
