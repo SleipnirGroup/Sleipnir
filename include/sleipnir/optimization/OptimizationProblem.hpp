@@ -431,7 +431,7 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
    *
    * @param config Configuration options for the solver.
    */
-  SolverStatus Solve(const SolverConfig& config = kDefaultConfig) {
+  SolverStatus Solve(const SolverConfig& config = SolverConfig{}) {
     // Create the initial value column vector
     Eigen::VectorXd x{m_decisionVariables.size()};
     for (size_t i = 0; i < m_decisionVariables.size(); ++i) {
@@ -529,12 +529,6 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
   }
 
  private:
-  // GCC incorrectly applies C++14 rules for const static data members, so an
-  // initializer is required here.
-  //
-  // https://stackoverflow.com/a/50639754
-  static constexpr SolverConfig kDefaultConfig{};
-
   // The list of decision variables, which are the root of the problem's
   // expression tree
   std::vector<Variable> m_decisionVariables;
