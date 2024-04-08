@@ -2,11 +2,11 @@
 
 #pragma once
 
-#include <concepts>
 #include <span>
 #include <vector>
 
 #include "sleipnir/autodiff/Expression.hpp"
+#include "sleipnir/util/FunctionRef.hpp"
 #include "sleipnir/util/SymbolExports.hpp"
 
 namespace sleipnir::detail {
@@ -192,8 +192,7 @@ class SLEIPNIR_DLLEXPORT ExpressionGraph {
    * @param func A function that takes two arguments: an int for the gradient
    *   row, and a double for the adjoint (gradient value).
    */
-  template <std::invocable<int, double> F>
-  void ComputeAdjoints(F&& func) {
+  void ComputeAdjoints(function_ref<void(int, double)> func) {
     // Zero adjoints. The root node's adjoint is 1.0 as df/df is always 1.
     m_adjointList[0]->adjoint = 1.0;
     for (auto it = m_adjointList.begin() + 1; it != m_adjointList.end(); ++it) {
