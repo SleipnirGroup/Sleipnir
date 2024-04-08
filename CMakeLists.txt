@@ -101,15 +101,12 @@ target_link_libraries(Sleipnir PUBLIC Threads::Threads)
 
 # Eigen dependency
 if(NOT USE_SYSTEM_EIGEN)
+    set(EIGEN_BUILD_CMAKE_PACKAGE TRUE)
     fetchcontent_declare(
         Eigen3
         GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
-        # master on 2024-04-02
-        GIT_TAG 86aee3d9c5b0ea73f7854901c1ce216135f1228b
-        PATCH_COMMAND
-            git apply
-            ${CMAKE_CURRENT_SOURCE_DIR}/cmake/eigen-disable-fortran-support.patch
-        UPDATE_DISCONNECTED 1
+        # master on 2024-05-01
+        GIT_TAG 9700fc847a39e98dfb7bd85331b5206641050e04
     )
     fetchcontent_makeavailable(Eigen3)
 else()
@@ -117,16 +114,6 @@ else()
 endif()
 
 target_link_libraries(Sleipnir PUBLIC Eigen3::Eigen)
-
-# Prevent Eigen tests from running
-add_custom_command(
-    TARGET Sleipnir
-    PRE_BUILD
-    COMMAND
-        ${CMAKE_COMMAND} -E rm -f
-        ${CMAKE_BINARY_DIR}/_deps/eigen3-build/CTestTestfile.cmake
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-)
 
 # fmt dependency
 if(NOT USE_SYSTEM_FMT)
