@@ -15,6 +15,7 @@
 #include "sleipnir/autodiff/Variable.hpp"
 #include "sleipnir/autodiff/VariableBlock.hpp"
 #include "sleipnir/util/Assert.hpp"
+#include "sleipnir/util/FunctionRef.hpp"
 #include "sleipnir/util/SymbolExports.hpp"
 
 namespace sleipnir {
@@ -719,8 +720,8 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    *
    * @param unaryOp The unary operator to use for the transform operation.
    */
-  template <std::invocable<const Variable&> UnaryOp>
-  VariableMatrix CwiseTransform(UnaryOp&& unaryOp) const {
+  VariableMatrix CwiseTransform(
+      function_ref<Variable(const Variable&)> unaryOp) const {
     VariableMatrix result{Rows(), Cols()};
 
     for (int row = 0; row < Rows(); ++row) {
@@ -878,9 +879,9 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
  * @param rhs The right-hand side of the binary operator.
  * @param binaryOp The binary operator to use for the reduce operation.
  */
-template <std::invocable<const Variable&, const Variable&> BinaryOp>
-VariableMatrix CwiseReduce(const VariableMatrix& lhs, const VariableMatrix& rhs,
-                           BinaryOp&& binaryOp) {
+SLEIPNIR_DLLEXPORT inline VariableMatrix CwiseReduce(
+    const VariableMatrix& lhs, const VariableMatrix& rhs,
+    function_ref<Variable(const Variable&, const Variable&)> binaryOp) {
   Assert(lhs.Rows() == rhs.Rows());
   Assert(lhs.Rows() == rhs.Rows());
 
