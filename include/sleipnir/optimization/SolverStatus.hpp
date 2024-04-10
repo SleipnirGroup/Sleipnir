@@ -24,6 +24,9 @@ struct SLEIPNIR_DLLEXPORT SolverStatus {
 
   /// The solver's exit condition.
   SolverExitCondition exitCondition = SolverExitCondition::kSuccess;
+
+  /// The solution's cost.
+  double cost = 0.0;
 };
 
 }  // namespace sleipnir

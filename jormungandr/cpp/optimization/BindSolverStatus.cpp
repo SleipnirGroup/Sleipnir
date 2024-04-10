@@ -16,11 +16,11 @@ void BindSolverStatus(py::module_& optimization) {
                                DOC(sleipnir, SolverStatus)};
   cls.def(py::init<>());
   cls.def(py::init<ExpressionType, ExpressionType, ExpressionType,
-                   SolverExitCondition>(),
+                   SolverExitCondition, double>(),
           "cost_function_type"_a = ExpressionType::kNone,
           "equality_constraint_type"_a = ExpressionType::kNone,
           "inequality_constraint_type"_a = ExpressionType::kNone,
-          "exit_condition"_a = SolverExitCondition::kSuccess);
+          "exit_condition"_a = SolverExitCondition::kSuccess, "cost"_a = 0.0);
   cls.def_readwrite("cost_function_type", &SolverStatus::costFunctionType,
                     DOC(sleipnir, SolverStatus, costFunctionType));
   cls.def_readwrite("equality_constraint_type",
@@ -31,6 +31,8 @@ void BindSolverStatus(py::module_& optimization) {
                     DOC(sleipnir, SolverStatus, inequalityConstraintType));
   cls.def_readwrite("exit_condition", &SolverStatus::exitCondition,
                     DOC(sleipnir, SolverStatus, exitCondition));
+  cls.def_readwrite("cost", &SolverStatus::cost,
+                    DOC(sleipnir, SolverStatus, cost));
 }
 
 }  // namespace sleipnir

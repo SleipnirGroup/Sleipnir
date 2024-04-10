@@ -941,6 +941,8 @@ static const char *__doc_sleipnir_SolverStatus =
 R"doc(Return value of OptimizationProblem::Solve() containing the cost
 function and constraint types and solver's exit condition.)doc";
 
+static const char *__doc_sleipnir_SolverStatus_cost = R"doc(The solution's cost.)doc";
+
 static const char *__doc_sleipnir_SolverStatus_costFunctionType = R"doc(The cost function type detected by the solver.)doc";
 
 static const char *__doc_sleipnir_SolverStatus_equalityConstraintType = R"doc(The equality constraint type detected by the solver.)doc";
