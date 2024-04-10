@@ -143,6 +143,8 @@ void InteriorPoint(
 
   // Prints final diagnostics when the solver exits
   scope_exit exit{[&] {
+    status->cost = f.Value();
+
     if (config.diagnostics && !feasibilityRestoration) {
       auto solveEndTime = std::chrono::system_clock::now();
 
