@@ -8,7 +8,7 @@ concurrency:
 
 jobs:
   build:
-    timeout-minutes: 10
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
@@ -16,10 +16,9 @@ jobs:
           - name: asan
             cmake-flags: -DCMAKE_BUILD_TYPE=Asan -DBUILD_PYTHON=OFF
             ctest-env:
-          # tsan takes a long time, and we don't currently use threading
-          #- name: tsan
-          #  cmake-flags: -DCMAKE_BUILD_TYPE=Tsan -DBUILD_PYTHON=OFF
-          #  ctest-env: TSAN_OPTIONS=second_deadlock_stack=1
+          - name: tsan
+            cmake-flags: -DCMAKE_BUILD_TYPE=Tsan -DBUILD_PYTHON=OFF
+            ctest-env: TSAN_OPTIONS=second_deadlock_stack=1
           - name: ubsan
             cmake-flags: -DCMAKE_BUILD_TYPE=Ubsan -DBUILD_PYTHON=OFF
             ctest-env:
