@@ -5,13 +5,13 @@
 #include <stdint.h>
 
 #include <chrono>
-#include <functional>
 #include <utility>
 
 #include "sleipnir/autodiff/VariableMatrix.hpp"
 #include "sleipnir/optimization/OptimizationProblem.hpp"
 #include "sleipnir/util/Assert.hpp"
 #include "sleipnir/util/Concepts.hpp"
+#include "sleipnir/util/FunctionRef.hpp"
 #include "sleipnir/util/SymbolExports.hpp"
 
 namespace sleipnir {
@@ -25,8 +25,8 @@ namespace sleipnir {
  * - State transition: xₖ₊₁ = f(t, xₖ, uₖ, dt)
  */
 using DynamicsFunction =
-    std::function<VariableMatrix(const Variable&, const VariableMatrix&,
-                                 const VariableMatrix&, const Variable&)>;
+    function_ref<VariableMatrix(const Variable&, const VariableMatrix&,
+                                const VariableMatrix&, const Variable&)>;
 
 /**
  * Performs 4th order Runge-Kutta integration of dx/dt = f(t, x, u) for dt.
@@ -212,8 +212,8 @@ class SLEIPNIR_DLLEXPORT OCPSolver : public OptimizationProblem {
    *   vector, u is the input vector, and dt is the timestep duration.
    */
   void ForEachStep(
-      const std::function<void(const Variable&, const VariableMatrix&,
-                               const VariableMatrix&, const Variable&)>&
+      const function_ref<void(const Variable&, const VariableMatrix&,
+                              const VariableMatrix&, const Variable&)>
           callback) {
     Variable time = 0.0;
 

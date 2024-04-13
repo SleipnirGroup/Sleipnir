@@ -5,7 +5,6 @@
 #include <chrono>
 #include <concepts>
 #include <fstream>
-#include <functional>
 #include <span>
 #include <string>
 #include <string_view>
@@ -13,6 +12,7 @@
 #include <casadi/casadi.hpp>
 #include <fmt/core.h>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
+#include <sleipnir/util/FunctionRef.hpp>
 
 /**
  * Converts std::chrono::duration to a number of milliseconds rounded to three
@@ -38,8 +38,9 @@ constexpr double ToMilliseconds(
  *   solves it.
  */
 template <typename Problem>
-void RunBenchmark(std::ofstream& results, std::function<Problem()> setup,
-                  std::function<void(Problem&)> solve) {
+void RunBenchmark(std::ofstream& results,
+                  sleipnir::function_ref<Problem()> setup,
+                  sleipnir::function_ref<void(Problem&)> solve) {
   // Record setup time
   auto setupStartTime = std::chrono::system_clock::now();
   auto problem = setup();
@@ -85,7 +86,7 @@ template <typename Problem>
 int RunBenchmarksAndLog(
     std::string_view filename, bool diagnostics,
     std::chrono::duration<double> T, std::span<int> sampleSizesToTest,
-    std::function<Problem(std::chrono::duration<double>, int)> setup) {
+    sleipnir::function_ref<Problem(std::chrono::duration<double>, int)> setup) {
   std::ofstream results{std::string{filename}};
   if (!results.is_open()) {
     return 1;
