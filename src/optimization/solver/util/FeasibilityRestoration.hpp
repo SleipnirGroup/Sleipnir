@@ -4,7 +4,6 @@
 
 #include <algorithm>
 #include <cmath>
-#include <functional>
 #include <iterator>
 #include <span>
 #include <vector>
@@ -17,6 +16,7 @@
 #include "sleipnir/optimization/SolverIterationInfo.hpp"
 #include "sleipnir/optimization/SolverStatus.hpp"
 #include "sleipnir/optimization/solver/InteriorPoint.hpp"
+#include "sleipnir/util/FunctionRef.hpp"
 
 namespace sleipnir {
 
@@ -41,7 +41,7 @@ inline void FeasibilityRestoration(
     std::span<Variable> decisionVariables,
     std::span<Variable> equalityConstraints,
     std::span<Variable> inequalityConstraints, Variable& f, double μ,
-    const std::function<bool(const SolverIterationInfo&)>& callback,
+    function_ref<bool(const SolverIterationInfo&)> callback,
     const SolverConfig& config, Eigen::VectorXd& x, Eigen::VectorXd& s,
     SolverStatus* status) {
   // Feasibility restoration

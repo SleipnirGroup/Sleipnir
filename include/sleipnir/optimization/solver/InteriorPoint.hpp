@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include <functional>
 #include <span>
 
 #include <Eigen/Core>
@@ -11,6 +10,7 @@
 #include "sleipnir/optimization/SolverConfig.hpp"
 #include "sleipnir/optimization/SolverIterationInfo.hpp"
 #include "sleipnir/optimization/SolverStatus.hpp"
+#include "sleipnir/util/FunctionRef.hpp"
 #include "sleipnir/util/SymbolExports.hpp"
 
 namespace sleipnir {
@@ -48,7 +48,7 @@ SLEIPNIR_DLLEXPORT void InteriorPoint(
     std::span<Variable> decisionVariables,
     std::span<Variable> equalityConstraints,
     std::span<Variable> inequalityConstraints, Variable& f,
-    const std::function<bool(const SolverIterationInfo&)>& callback,
+    function_ref<bool(const SolverIterationInfo&)> callback,
     const SolverConfig& config, bool feasibilityRestoration, Eigen::VectorXd& x,
     Eigen::VectorXd& s, SolverStatus* status);
 

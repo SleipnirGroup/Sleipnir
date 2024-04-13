@@ -34,13 +34,13 @@
 
 namespace sleipnir {
 
-void InteriorPoint(
-    std::span<Variable> decisionVariables,
-    std::span<Variable> equalityConstraints,
-    std::span<Variable> inequalityConstraints, Variable& f,
-    const std::function<bool(const SolverIterationInfo&)>& callback,
-    const SolverConfig& config, bool feasibilityRestoration, Eigen::VectorXd& x,
-    Eigen::VectorXd& s, SolverStatus* status) {
+void InteriorPoint(std::span<Variable> decisionVariables,
+                   std::span<Variable> equalityConstraints,
+                   std::span<Variable> inequalityConstraints, Variable& f,
+                   function_ref<bool(const SolverIterationInfo&)> callback,
+                   const SolverConfig& config, bool feasibilityRestoration,
+                   Eigen::VectorXd& x, Eigen::VectorXd& s,
+                   SolverStatus* status) {
   const auto solveStartTime = std::chrono::system_clock::now();
 
   // Map decision variables and constraints to VariableMatrices for Lagrangian
