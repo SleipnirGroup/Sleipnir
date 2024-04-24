@@ -219,9 +219,9 @@ struct SLEIPNIR_DLLEXPORT Expression {
     } else if (rhs->type == kConstant) {
       type = lhs->type;
     } else if (lhs->type == kLinear && rhs->type == kLinear) {
-      type = ExpressionType::kQuadratic;
+      type = kQuadratic;
     } else {
-      type = ExpressionType::kNonlinear;
+      type = kNonlinear;
     }
 
     return MakeExpressionPtr(
@@ -267,7 +267,7 @@ struct SLEIPNIR_DLLEXPORT Expression {
     if (rhs->type == kConstant) {
       type = lhs->type;
     } else {
-      type = ExpressionType::kNonlinear;
+      type = kNonlinear;
     }
 
     return MakeExpressionPtr(
