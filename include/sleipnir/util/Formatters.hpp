@@ -57,8 +57,8 @@ struct fmt::formatter<Derived, CharT> {
 /**
  * Formatter for sleipnir::Variable.
  */
-template <>
-struct fmt::formatter<sleipnir::Variable> {
+template <typename CharT>
+struct fmt::formatter<sleipnir::Variable, CharT> {
   template <typename ParseContext>
   constexpr auto parse(ParseContext& ctx) {
     return m_underlying.parse(ctx);
@@ -76,10 +76,10 @@ struct fmt::formatter<sleipnir::Variable> {
 /**
  * Formatter for sleipnir::VariableBlock or sleipnir::VariableMatrix.
  */
-template <typename T>
+template <typename T, typename CharT>
   requires std::same_as<T, sleipnir::VariableBlock<sleipnir::VariableMatrix>> ||
            std::same_as<T, sleipnir::VariableMatrix>
-struct fmt::formatter<T> {
+struct fmt::formatter<T, CharT> {
   template <typename ParseContext>
   constexpr auto parse(ParseContext& ctx) {
     return m_underlying.parse(ctx);
