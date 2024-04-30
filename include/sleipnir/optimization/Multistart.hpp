@@ -44,11 +44,15 @@ MultistartResult<DecisionVariables> Multistart(
         solve,
     std::span<const DecisionVariables> initialGuesses) {
   std::vector<std::future<MultistartResult<DecisionVariables>>> futures;
+  futures.reserve(initialGuesses.size());
+
   for (const auto& initialGuess : initialGuesses) {
     futures.emplace_back(std::async(std::launch::async, solve, initialGuess));
   }
 
   std::vector<MultistartResult<DecisionVariables>> results;
+  results.reserve(futures.size());
+
   for (auto& future : futures) {
     results.emplace_back(future.get());
   }
