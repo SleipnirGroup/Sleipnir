@@ -142,7 +142,7 @@ class small_vector
     vectorT::insert(vectorT::begin(), first, last);
   }
 
-  small_vector(std::initializer_list<T> init) : small_vector() {
+  small_vector(std::initializer_list<T> init) : small_vector() {  // NOLINT
     vectorT::insert(vectorT::begin(), init);
   }
 
