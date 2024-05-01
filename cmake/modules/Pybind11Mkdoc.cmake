@@ -7,7 +7,8 @@ function(pybind11_mkdoc target headers)
     get_target_property(target_dirs ${target} INCLUDE_DIRECTORIES)
     list(TRANSFORM target_dirs PREPEND "-I")
 
-    get_target_property(eigen_dirs Eigen3::Eigen INCLUDE_DIRECTORIES)
+    get_target_property(eigen_dirs Eigen3::Eigen INTERFACE_INCLUDE_DIRECTORIES)
+    list(FILTER eigen_dirs INCLUDE REGEX "\\$<BUILD_INTERFACE:.*>")
     list(TRANSFORM eigen_dirs PREPEND "-I")
 
     add_custom_command(
