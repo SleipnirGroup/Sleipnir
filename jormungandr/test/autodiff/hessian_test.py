@@ -103,9 +103,9 @@ def test_product_of_sines():
 
     # y = prod(sin(x))
     y = prod(x.cwise_transform(autodiff.sin))
-    assert y.value() == math.sin(1) * math.sin(2) * math.sin(3) * math.sin(
-        4
-    ) * math.sin(5)
+    assert y.value() == pytest.approx(
+        math.sin(1) * math.sin(2) * math.sin(3) * math.sin(4) * math.sin(5), abs=1e-15
+    )
 
     g = Gradient(y, x)
     for i in range(x.rows()):

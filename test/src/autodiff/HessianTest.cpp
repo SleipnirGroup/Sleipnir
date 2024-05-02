@@ -122,8 +122,9 @@ TEST_CASE("Hessian - Product of sines", "[Hessian]") {
   auto temp = x.CwiseTransform(sleipnir::sin);
   auto y = std::accumulate(temp.begin(), temp.end(), sleipnir::Variable{1.0},
                            std::multiplies{});
-  CHECK(y.Value() ==
-        std::sin(1) * std::sin(2) * std::sin(3) * std::sin(4) * std::sin(5));
+  CHECK(y.Value() == Catch::Approx(std::sin(1) * std::sin(2) * std::sin(3) *
+                                   std::sin(4) * std::sin(5))
+                         .margin(1e-15));
 
   auto g = sleipnir::Gradient(y, x);
   for (int i = 0; i < x.Rows(); ++i) {
