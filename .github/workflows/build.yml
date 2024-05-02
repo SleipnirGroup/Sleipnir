@@ -12,15 +12,23 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Windows, Linux, macOS x86_64, macOS arm64
-        os: [windows-2022, ubuntu-22.04, macOS-13, macOS-14]
+        include:
+          - name: Windows x86_64
+            os: windows-2022
+            cmake-args:
+          - name: Linux x86_64
+            os: ubuntu-22.04
+            cmake-args:
+          - name: macOS universal
+            os: macOS-14
+            cmake-args: -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
 
-    name: "${{ matrix.os }} - native"
+    name: ${{ matrix.name }} - native
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
 
-      - run: cmake -B build -S . -DBUILD_EXAMPLES=ON
+      - run: cmake -B build -S . -DBUILD_EXAMPLES=ON ${{ matrix.cmake-args }}
       - run: cmake --build build --config RelWithDebInfo --parallel $(nproc)
       - run: ctest -C RelWithDebInfo --output-on-failure
         working-directory: build
@@ -28,7 +36,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.os }} - native
+          name: ${{ matrix.name }} - native
           path: pkg
 
   build-python-wheel:
@@ -36,14 +44,53 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Windows, Linux, macOS x86_64, macOS arm64
-        os: [windows-2022, ubuntu-22.04, macOS-13, macOS-14]
-        version: ['3.9', '3.10', '3.11', '3.12']
-        exclude:
-          - os: macOS-14
-            version: '3.9'
+        include:
+          - name: Windows x86_64
+            os: windows-2022
+            version: "3.9"
+            cmake-env:
+          - name: Windows x86_64
+            os: windows-2022
+            version: "3.10"
+            cmake-env:
+          - name: Windows x86_64
+            os: windows-2022
+            version: "3.11"
+            cmake-env:
+          - name: Windows x86_64
+            os: windows-2022
+            version: "3.12"
+            cmake-env:
+          - name: Linux x86_64
+            os: ubuntu-22.04
+            version: "3.9"
+            cmake-env:
+          - name: Linux x86_64
+            os: ubuntu-22.04
+            version: "3.10"
+            cmake-env:
+          - name: Linux x86_64
+            os: ubuntu-22.04
+            version: "3.11"
+            cmake-env:
+          - name: Linux x86_64
+            os: ubuntu-22.04
+            version: "3.12"
+            cmake-env:
+          - name: macOS universal
+            os: macOS-14
+            version: "3.10"
+            cmake-env: CMAKE_OSX_ARCHITECTURES="x86_64;arm64"
+          - name: macOS universal
+            os: macOS-14
+            version: "3.11"
+            cmake-env: CMAKE_OSX_ARCHITECTURES="x86_64;arm64"
+          - name: macOS universal
+            os: macOS-14
+            version: "3.12"
+            cmake-env: CMAKE_OSX_ARCHITECTURES="x86_64;arm64"
 
-    name: "${{ matrix.os }} - Python ${{ matrix.version }} wheel"
+    name: ${{ matrix.name }} - Python ${{ matrix.version }} wheel
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -56,7 +103,7 @@ jobs:
 
       - run: python3 ./tools/update_version.py
       - run: pip3 install build tox
-      - run: python3 -m build --wheel
+      - run: ${{ matrix.cmake-env }} python3 -m build --wheel
       - run: python3 ../.github/workflows/repair_wheel.py sleipnirgroup_jormungandr-*.whl
         if: startsWith(matrix.os, 'ubuntu') || startsWith(matrix.os, 'macOS')
         working-directory: dist
@@ -64,13 +111,13 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.os }} - Python ${{ matrix.version }} wheel
+          name: ${{ matrix.name }} - Python ${{ matrix.version }} wheel
           path: dist
 
   build-python-sdist:
     timeout-minutes: 10
 
-    name: "Python sdist"
+    name: Python sdist
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -123,7 +170,7 @@ jobs:
             container: wpilib/roborio-cross-ubuntu:2024-22.04
             toolchain: /usr/local/toolchain-config.cmake
 
-    name: "${{ matrix.artifact-name }}"
+    name: ${{ matrix.artifact-name }}
     runs-on: ubuntu-22.04
     container: ${{ matrix.container }}
     steps:
@@ -139,7 +186,7 @@ jobs:
           path: pkg
 
   build-wasm:
-    name: "Wasm"
+    name: Wasm
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
