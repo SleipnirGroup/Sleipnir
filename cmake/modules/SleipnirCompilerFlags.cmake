@@ -13,6 +13,6 @@ macro(sleipnir_compiler_flags target)
 
     target_compile_features(${target} PUBLIC cxx_std_20)
     if(MSVC)
-        target_compile_options(${target} PUBLIC /utf-8 /bigobj)
+        target_compile_options(${target} PUBLIC /MP /Zf /utf-8 /bigobj)
     endif()
 endmacro()
