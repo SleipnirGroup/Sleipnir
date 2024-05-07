@@ -168,9 +168,7 @@ cmake -B build -S .
 cmake --build build
 
 # Test
-cd build
-ctest
-cd ..
+ctest --test-dir build --output-on-failure
 
 # Install
 cmake --install build --prefix pkgdir

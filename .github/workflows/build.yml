@@ -30,8 +30,7 @@ jobs:
 
       - run: cmake -B build -S . -DBUILD_EXAMPLES=ON ${{ matrix.cmake-args }}
       - run: cmake --build build --config RelWithDebInfo --parallel $(nproc)
-      - run: ctest -C RelWithDebInfo --output-on-failure
-        working-directory: build
+      - run: ctest --test-dir build -C RelWithDebInfo --output-on-failure
       - run: cmake --install build --config RelWithDebInfo --prefix pkg
 
       - uses: actions/upload-artifact@v4
