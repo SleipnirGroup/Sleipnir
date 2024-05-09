@@ -1,7 +1,8 @@
 # Sleipnir
 
 ![Build](https://github.com/SleipnirGroup/Sleipnir/actions/workflows/build.yml/badge.svg)
-[![C++ Documentation](https://img.shields.io/badge/documentation-c%2B%2B-blue)](https://sleipnirgroup.github.io/Sleipnir/)
+[![PyPI Downloads](https://img.shields.io/pypi/dm/sleipnirgroup-jormungandr.svg?label=PyPI%20Downloads)](https://pypi.org/project/sleipnirgroup-jormungandr/)
+[![C++ Documentation](https://img.shields.io/badge/documentation-C%2B%2B-blue?label=Documentation)](https://sleipnirgroup.github.io/Sleipnir/)
 [![Discord](https://img.shields.io/discord/975739302933856277?color=%23738ADB&label=Join%20our%20Discord&logo=discord&logoColor=white)](https://discord.gg/ad2EEZZwsS)
 
 > Sparsity and Linearity-Exploiting Interior-Point solver - Now Internally Readable
