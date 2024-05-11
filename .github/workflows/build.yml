@@ -160,30 +160,6 @@ jobs:
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
 
-  build-cross:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - artifact-name: roboRIO
-            container: wpilib/roborio-cross-ubuntu:2024-22.04
-            toolchain: /usr/local/toolchain-config.cmake
-
-    name: ${{ matrix.artifact-name }}
-    runs-on: ubuntu-22.04
-    container: ${{ matrix.container }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - run: cmake -B build -S . --toolchain ${{ matrix.toolchain }} -DBUILD_EXAMPLES=ON
-      - run: cmake --build build --config RelWithDebInfo --parallel $(nproc)
-      - run: cmake --install build --config RelWithDebInfo --prefix pkg
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.artifact-name }}
-          path: pkg
-
   build-wasm:
     name: Wasm
     runs-on: ubuntu-22.04
