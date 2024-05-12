@@ -23,7 +23,7 @@ jobs:
             cmake-flags: -DCMAKE_BUILD_TYPE=Ubsan -DBUILD_PYTHON=OFF
             ctest-env:
     name: "${{ matrix.name }}"
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
