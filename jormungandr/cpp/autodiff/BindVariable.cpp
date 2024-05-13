@@ -27,10 +27,6 @@ void BindVariable(py::module_& autodiff) {
   variable.def(py::init<>(), DOC(sleipnir, Variable, Variable));
   variable.def(py::init<double>(), DOC(sleipnir, Variable, Variable, 2));
   variable.def(py::init<int>(), DOC(sleipnir, Variable, Variable, 3));
-  variable.def("set", py::overload_cast<double>(&Variable::operator=),
-               DOC(sleipnir, Variable, operator, assign));
-  variable.def("set", py::overload_cast<int>(&Variable::operator=),
-               DOC(sleipnir, Variable, operator, assign, 2));
   variable.def("set_value", py::overload_cast<double>(&Variable::SetValue),
                DOC(sleipnir, Variable, SetValue));
   variable.def("set_value", py::overload_cast<int>(&Variable::SetValue),

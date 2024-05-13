@@ -35,21 +35,11 @@ void BindVariableBlock(py::module_& autodiff) {
   variable_block.def(py::init<VariableMatrix&, int, int, int, int>(),
                      DOC(sleipnir, VariableBlock, VariableBlock, 4));
   variable_block.def(
-      "set",
-      [](VariableBlock<VariableMatrix>& self, double value) { self = value; },
-      DOC(sleipnir, VariableBlock, operator, assign, 3));
-  variable_block.def(
       "set_value",
       [](VariableBlock<VariableMatrix>& self, double value) {
         self.SetValue(value);
       },
       DOC(sleipnir, VariableBlock, SetValue));
-  variable_block.def(
-      "set",
-      [](VariableBlock<VariableMatrix>& self, const Eigen::MatrixXd& values) {
-        self = values;
-      },
-      DOC(sleipnir, VariableBlock, operator, assign, 4));
   variable_block.def(
       "set_value",
       [](VariableBlock<VariableMatrix>& self, const Eigen::MatrixXd& values) {
