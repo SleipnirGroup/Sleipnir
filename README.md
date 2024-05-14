@@ -104,7 +104,7 @@ pip install sleipnirgroup-jormungandr
 
 ## Examples
 
-See the [examples](https://github.com/SleipnirGroup/Sleipnir/tree/main/examples) and [optimization unit tests](https://github.com/SleipnirGroup/Sleipnir/tree/main/test/optimization).
+See the [examples](https://github.com/SleipnirGroup/Sleipnir/tree/main/examples), [C++ optimization unit tests](https://github.com/SleipnirGroup/Sleipnir/tree/main/test/optimization), and [Python optimization unit tests](https://github.com/SleipnirGroup/Sleipnir/tree/main/jormungandr/test/optimization).
 
 ## Build
 

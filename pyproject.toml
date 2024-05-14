@@ -45,4 +45,4 @@ install_args = [ "--strip" ]
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-testpaths = [ "jormungandr/test" ]
+testpaths = [ "jormungandr/test", "examples/CurrentManager/test" ]
