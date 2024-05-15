@@ -51,7 +51,7 @@ jobs:
           pybind11-mkdoc \
           clang
 
-      - run: ./tools/pydoc.sh
+      - run: ./tools/pydoc.py
 
       - uses: mattnotmitt/doxygen-action@edge
         with:

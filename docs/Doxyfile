@@ -945,7 +945,6 @@ WARN_LOGFILE           =
 
 INPUT                  = README.md \
                          include \
-                         jormungandr/_jormungandr \
                          jormungandr/autodiff \
                          jormungandr/optimization \
                          docs
