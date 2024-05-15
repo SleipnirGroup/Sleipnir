@@ -27,6 +27,5 @@ compile_commands.json
 .tox/
 __pycache__/
 dist/
-jormungandr/_jormungandr/
 
 *.spy
