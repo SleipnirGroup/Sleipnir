@@ -1,8 +1,7 @@
 // Copyright (c) Sleipnir contributors
 
 #include <array>
-
-#include <fmt/core.h>
+#include <print>
 
 #include "CurrentManager.hpp"
 
@@ -12,13 +11,13 @@ int main() {
 
   auto currents = manager.Calculate(std::array{25.0, 10.0, 5.0, 0.0});
 
-  fmt::print("currents = [");
+  std::print("currents = [");
   for (size_t i = 0; i < currents.size(); ++i) {
-    fmt::print("{}", currents[i]);
+    std::print("{}", currents[i]);
     if (i < currents.size() - 1) {
-      fmt::print(", ");
+      std::print(", ");
     }
   }
-  fmt::println("]");
+  std::println("]");
 }
 #endif

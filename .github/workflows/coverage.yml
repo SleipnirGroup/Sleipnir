@@ -14,15 +14,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install LLVM 17
+      - name: Install LLVM 18
         run: |
           wget https://apt.llvm.org/llvm.sh
           chmod +x llvm.sh
-          sudo ./llvm.sh 17 all
-          sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-17 200
-          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-17 200
-          sudo update-alternatives --install /usr/bin/llvm-cov llvm-cov /usr/bin/llvm-cov-17 200
-          sudo update-alternatives --install /usr/bin/llvm-profdata llvm-profdata /usr/bin/llvm-profdata-17 200
+          sudo ./llvm.sh 18 all
+          sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-18 200
+          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-18 200
+          sudo update-alternatives --install /usr/bin/llvm-cov llvm-cov /usr/bin/llvm-cov-18 200
+          sudo update-alternatives --install /usr/bin/llvm-profdata llvm-profdata /usr/bin/llvm-profdata-18 200
           echo "CC=clang" >> $GITHUB_ENV
           echo "CXX=clang++" >> $GITHUB_ENV
           echo "CXXFLAGS=-stdlib=libc++" >> $GITHUB_ENV

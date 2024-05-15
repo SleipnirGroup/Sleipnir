@@ -91,7 +91,6 @@ include(FetchContent)
 
 # Options for using a package manager (e.g., vcpkg) for certain dependencies
 option(USE_SYSTEM_EIGEN "Use system eigen" OFF)
-option(USE_SYSTEM_FMT "Use system fmt" OFF)
 option(USE_SYSTEM_PYBIND "Use system pybind" OFF)
 
 # Required for std::async()
@@ -119,20 +118,6 @@ else()
 endif()
 
 target_link_libraries(Sleipnir PUBLIC Eigen3::Eigen)
-
-# fmt dependency
-if(NOT USE_SYSTEM_FMT)
-    fetchcontent_declare(
-        fmt
-        GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-        GIT_TAG 10.2.1
-    )
-    fetchcontent_makeavailable(fmt)
-else()
-    find_package(fmt CONFIG REQUIRED)
-endif()
-
-target_link_libraries(Sleipnir PUBLIC fmt::fmt)
 
 if(BUILD_TESTING)
     # Catch2 dependency
@@ -308,10 +293,9 @@ if(BUILD_PYTHON)
 
     file(GLOB_RECURSE jormungandr_src jormungandr/cpp/*.cpp)
 
-    # Build fmt and Sleipnir dependencies directly into the wheel to avoid having
-    # to configure RPATHs
-    set(fmt_src ${fmt_SOURCE_DIR}/src/format.cc ${fmt_SOURCE_DIR}/src/os.cc)
-    pybind11_add_module(_jormungandr ${jormungandr_src} ${fmt_src} ${Sleipnir_src})
+    # Build Sleipnir dependency directly into the wheel to avoid having to
+    # configure RPATHs
+    pybind11_add_module(_jormungandr ${jormungandr_src} ${Sleipnir_src})
     sleipnir_compiler_flags(_jormungandr)
     target_compile_definitions(_jormungandr PRIVATE JORMUNGANDR=1)
     target_include_directories(
@@ -319,7 +303,6 @@ if(BUILD_PYTHON)
         PRIVATE
             ${CMAKE_CURRENT_SOURCE_DIR}/src
             ${CMAKE_CURRENT_SOURCE_DIR}/include
-            ${fmt_SOURCE_DIR}/include
             ${CMAKE_CURRENT_SOURCE_DIR}/jormungandr/cpp
     )
     target_link_libraries(

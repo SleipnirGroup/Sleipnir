@@ -2,13 +2,13 @@
 
 #include <chrono>
 #include <cmath>
+#include <format>
 #include <fstream>
 #include <numbers>
 
 #include <Eigen/Core>
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
-#include <fmt/core.h>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 
 #include "CartPoleUtil.hpp"
@@ -106,7 +106,7 @@ TEST_CASE("OptimizationProblem - Cart-pole", "[OptimizationProblem]") {
     Eigen::VectorXd actual_x_k1 = X.Col(k + 1).Value();
     for (int row = 0; row < actual_x_k1.rows(); ++row) {
       CHECK(actual_x_k1(row) == Catch::Approx(expected_x_k1(row)).margin(1e-8));
-      INFO(fmt::format("  x({} @ k = {}", row, k));
+      INFO(std::format("  x({} @ k = {}", row, k));
     }
   }
 
@@ -123,7 +123,7 @@ TEST_CASE("OptimizationProblem - Cart-pole", "[OptimizationProblem]") {
               "Pole angular velocity (rad/s)\n";
 
     for (int k = 0; k < N + 1; ++k) {
-      states << fmt::format("{},{},{},{},{}\n", k * dt.count(), X.Value(0, k),
+      states << std::format("{},{},{},{},{}\n", k * dt.count(), X.Value(0, k),
                             X.Value(1, k), X.Value(2, k), X.Value(3, k));
     }
   }
@@ -135,9 +135,9 @@ TEST_CASE("OptimizationProblem - Cart-pole", "[OptimizationProblem]") {
 
     for (int k = 0; k < N + 1; ++k) {
       if (k < N) {
-        inputs << fmt::format("{},{}\n", k * dt.count(), U.Value(0, k));
+        inputs << std::format("{},{}\n", k * dt.count(), U.Value(0, k));
       } else {
-        inputs << fmt::format("{},{}\n", k * dt.count(), 0.0);
+        inputs << std::format("{},{}\n", k * dt.count(), 0.0);
       }
     }
   }
