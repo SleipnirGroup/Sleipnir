@@ -190,7 +190,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
     for (int row = 0; row < values.rows(); ++row) {
       for (int col = 0; col < values.cols(); ++col) {
         if (row == col) {
-          m_storage.emplace_back(values.diagonal()(row));
+          m_storage.emplace_back(values.diagonal()[row]);
         } else {
           m_storage.emplace_back(0.0);
         }
@@ -350,7 +350,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param row The block row.
    * @return A block pointing to the given row.
    */
-  Variable& operator()(int row) {
+  Variable& operator[](int row) {
     slp_assert(row >= 0 && row < rows() * cols());
     return m_storage[row];
   }
@@ -361,7 +361,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param row The block row.
    * @return A block pointing to the given row.
    */
-  const Variable& operator()(int row) const {
+  const Variable& operator[](int row) const {
     slp_assert(row >= 0 && row < rows() * cols());
     return m_storage[row];
   }

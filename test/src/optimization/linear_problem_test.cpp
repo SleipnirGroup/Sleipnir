@@ -38,10 +38,10 @@ TEST_CASE("linear_problem - Free variable", "[linear_problem]") {
   sleipnir::OptimizationProblem problem;
 
   auto x = problem.decision_variable(2);
-  x(0).set_value(1.0);
-  x(1).set_value(2.0);
+  x[0].set_value(1.0);
+  x[1].set_value(2.0);
 
-  problem.subject_to(x(0) == 0);
+  problem.subject_to(x[0] == 0);
 
   auto status = problem.solve({.diagnostics = true});
 
@@ -50,6 +50,6 @@ TEST_CASE("linear_problem - Free variable", "[linear_problem]") {
   CHECK(status.inequality_constraint_type == sleipnir::ExpressionType::NONE);
   CHECK(status.exit_condition == sleipnir::SolverExitCondition::SUCCESS);
 
-  CHECK(x(0).value() == Catch::Approx(0.0).margin(1e-6));
-  CHECK(x(1).value() == Catch::Approx(2.0).margin(1e-6));
+  CHECK(x[0].value() == Catch::Approx(0.0).margin(1e-6));
+  CHECK(x[1].value() == Catch::Approx(2.0).margin(1e-6));
 }

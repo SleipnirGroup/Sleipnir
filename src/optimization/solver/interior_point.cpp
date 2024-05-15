@@ -98,7 +98,7 @@ void interior_point(
   // Lagrangian L
   //
   // L(xₖ, sₖ, yₖ, zₖ) = f(xₖ) − yₖᵀcₑ(xₖ) − zₖᵀ(cᵢ(xₖ) − sₖ)
-  auto L = f - (y_ad.T() * c_e_ad)(0) - (z_ad.T() * (c_i_ad - s_ad))(0);
+  auto L = f - (y_ad.T() * c_e_ad)[0] - (z_ad.T() * (c_i_ad - s_ad))[0];
 
   setup_profilers.back().stop();
   setup_profilers.emplace_back("  ↳ ∂cₑ/∂x setup").start();
@@ -173,8 +173,8 @@ void interior_point(
       sleipnir::println(
           "Violated constraints (cₑ(x) = 0) in order of declaration:");
       for (int row = 0; row < c_e.rows(); ++row) {
-        if (c_e(row) < 0.0) {
-          sleipnir::println("  {}/{}: {} = 0", row + 1, c_e.rows(), c_e(row));
+        if (c_e[row] < 0.0) {
+          sleipnir::println("  {}/{}: {} = 0", row + 1, c_e.rows(), c_e[row]);
         }
       }
     }
@@ -364,8 +364,8 @@ void interior_point(
         sleipnir::println(
             "Violated constraints (cₑ(x) = 0) in order of declaration:");
         for (int row = 0; row < c_e.rows(); ++row) {
-          if (c_e(row) < 0.0) {
-            sleipnir::println("  {}/{}: {} = 0", row + 1, c_e.rows(), c_e(row));
+          if (c_e[row] < 0.0) {
+            sleipnir::println("  {}/{}: {} = 0", row + 1, c_e.rows(), c_e[row]);
           }
         }
       }
@@ -385,8 +385,8 @@ void interior_point(
         sleipnir::println(
             "Violated constraints (cᵢ(x) ≥ 0) in order of declaration:");
         for (int row = 0; row < c_i.rows(); ++row) {
-          if (c_i(row) < 0.0) {
-            sleipnir::println("  {}/{}: {} ≥ 0", row + 1, c_i.rows(), c_i(row));
+          if (c_i[row] < 0.0) {
+            sleipnir::println("  {}/{}: {} ≥ 0", row + 1, c_i.rows(), c_i[row]);
           }
         }
       }
@@ -728,7 +728,7 @@ void interior_point(
     double max_step_scaled = 0.0;
     for (int row = 0; row < x.rows(); ++row) {
       max_step_scaled = std::max(
-          max_step_scaled, std::abs(step.p_x(row)) / (1.0 + std::abs(x(row))));
+          max_step_scaled, std::abs(step.p_x[row]) / (1.0 + std::abs(x[row])));
     }
     if (max_step_scaled < 10.0 * std::numeric_limits<double>::epsilon()) {
       α = α_max;
@@ -758,7 +758,7 @@ void interior_point(
       // multiplier safeguard
       constexpr double κ_Σ = 1e10;
 
-      z(row) = std::max(std::min(z(row), κ_Σ * μ / s(row)), μ / (κ_Σ * s(row)));
+      z[row] = std::max(std::min(z[row], κ_Σ * μ / s[row]), μ / (κ_Σ * s[row]));
     }
 
     // Update autodiff for Jacobians and Hessian

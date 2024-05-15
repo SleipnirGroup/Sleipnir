@@ -101,7 +101,7 @@ TEST_CASE("VariableMatrix - Slicing", "[VariableMatrix]") {
 
   // Single-arg index operator on full matrix
   for (int i = 0; i < mat.rows() * mat.cols(); ++i) {
-    CHECK(mat(i) == i + 1);
+    CHECK(mat[i] == i + 1);
   }
 
   // Slice from start
@@ -110,12 +110,12 @@ TEST_CASE("VariableMatrix - Slicing", "[VariableMatrix]") {
     CHECK(s.rows() == 3);
     CHECK(s.cols() == 2);
     // Single-arg index operator on forward slice
-    CHECK(s(0) == 7.0);
-    CHECK(s(1) == 8.0);
-    CHECK(s(2) == 11.0);
-    CHECK(s(3) == 12.0);
-    CHECK(s(4) == 15.0);
-    CHECK(s(5) == 16.0);
+    CHECK(s[0] == 7.0);
+    CHECK(s[1] == 8.0);
+    CHECK(s[2] == 11.0);
+    CHECK(s[3] == 12.0);
+    CHECK(s[4] == 15.0);
+    CHECK(s[5] == 16.0);
     // Double-arg index operator on forward slice
     CHECK(s(0, 0) == 7.0);
     CHECK(s(0, 1) == 8.0);
@@ -131,8 +131,8 @@ TEST_CASE("VariableMatrix - Slicing", "[VariableMatrix]") {
     CHECK(s.rows() == 1);
     CHECK(s.cols() == 2);
     // Single-arg index operator on reverse slice
-    CHECK(s(0) == 15.0);
-    CHECK(s(1) == 16.0);
+    CHECK(s[0] == 15.0);
+    CHECK(s[1] == 16.0);
     // Double-arg index operator on reverse slice
     CHECK(s(0, 0) == 15.0);
     CHECK(s(0, 1) == 16.0);

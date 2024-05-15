@@ -282,7 +282,7 @@ class VariableBlock {
    * @param row The scalar subblock's row.
    * @return A scalar subblock at the given row.
    */
-  Variable& operator()(int row)
+  Variable& operator[](int row)
     requires(!std::is_const_v<Mat>)
   {
     slp_assert(row >= 0 && row < rows() * cols());
@@ -295,7 +295,7 @@ class VariableBlock {
    * @param row The scalar subblock's row.
    * @return A scalar subblock at the given row.
    */
-  const Variable& operator()(int row) const {
+  const Variable& operator[](int row) const {
     slp_assert(row >= 0 && row < rows() * cols());
     return (*this)(row / cols(), row % cols());
   }
@@ -727,7 +727,7 @@ class VariableBlock {
 
     constexpr bool operator==(const iterator&) const noexcept = default;
 
-    constexpr reference operator*() const noexcept { return (*m_mat)(m_index); }
+    constexpr reference operator*() const noexcept { return (*m_mat)[m_index]; }
 
    private:
     VariableBlock<Mat>* m_mat = nullptr;
@@ -761,7 +761,7 @@ class VariableBlock {
     constexpr bool operator==(const const_iterator&) const noexcept = default;
 
     constexpr const_reference operator*() const noexcept {
-      return (*m_mat)(m_index);
+      return (*m_mat)[m_index];
     }
 
    private:

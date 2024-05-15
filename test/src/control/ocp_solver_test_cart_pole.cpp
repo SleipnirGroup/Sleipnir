@@ -61,8 +61,8 @@ TEST_CASE("OCPSolver - Cart-pole", "[OCPSolver]") {
   problem.for_each_step([&](const sleipnir::VariableMatrix& x,
                             [[maybe_unused]]
                             const sleipnir::VariableMatrix& u) {
-    problem.subject_to(x(0) >= 0.0);
-    problem.subject_to(x(0) <= d_max);
+    problem.subject_to(x[0] >= 0.0);
+    problem.subject_to(x[0] <= d_max);
   });
 
   // Input constraints

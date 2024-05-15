@@ -80,7 +80,7 @@ void sqp(
   // Lagrangian L
   //
   // L(xₖ, yₖ) = f(xₖ) − yₖᵀcₑ(xₖ)
-  auto L = f - (y_ad.T() * c_e_ad)(0);
+  auto L = f - (y_ad.T() * c_e_ad)[0];
 
   setup_profilers.back().stop();
   setup_profilers.emplace_back("  ↳ ∂cₑ/∂x setup").start();

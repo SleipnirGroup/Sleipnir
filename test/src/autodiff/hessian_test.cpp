@@ -20,11 +20,11 @@ TEST_CASE("Hessian - Linear", "[Hessian]") {
 
   // y = x
   sleipnir::VariableMatrix x{1};
-  x(0).set_value(3);
-  sleipnir::Variable y = x(0);
+  x[0].set_value(3);
+  sleipnir::Variable y = x[0];
 
   // dy/dx = 1
-  double g = sleipnir::Gradient(y, x(0)).value().coeff(0);
+  double g = sleipnir::Gradient(y, x[0]).value().coeff(0);
   CHECK(g == 1.0);
 
   // d²y/dx² = 0
@@ -40,13 +40,13 @@ TEST_CASE("Hessian - Quadratic", "[Hessian]") {
   // y = x²
   // y = x * x
   sleipnir::VariableMatrix x{1};
-  x(0).set_value(3);
-  sleipnir::Variable y = x(0) * x(0);
+  x[0].set_value(3);
+  sleipnir::Variable y = x[0] * x[0];
 
   // dy/dx = x (rhs) + x (lhs)
   //       = (3) + (3)
   //       = 6
-  double g = sleipnir::Gradient(y, x(0)).value().coeff(0);
+  double g = sleipnir::Gradient(y, x[0]).value().coeff(0);
   CHECK(g == 6.0);
 
   // d²y/dx² = d/dx(x (rhs) + x (lhs))
@@ -62,11 +62,11 @@ TEST_CASE("Hessian - Sum", "[Hessian]") {
       [] { CHECK(sleipnir::global_pool_resource().blocks_in_use() == 0u); }};
 
   sleipnir::VariableMatrix x{5};
-  x(0).set_value(1);
-  x(1).set_value(2);
-  x(2).set_value(3);
-  x(3).set_value(4);
-  x(4).set_value(5);
+  x[0].set_value(1);
+  x[1].set_value(2);
+  x[2].set_value(3);
+  x[3].set_value(4);
+  x[4].set_value(5);
 
   // y = sum(x)
   auto y = std::accumulate(x.begin(), x.end(), sleipnir::Variable{0.0});
@@ -86,11 +86,11 @@ TEST_CASE("Hessian - Sum of products", "[Hessian]") {
       [] { CHECK(sleipnir::global_pool_resource().blocks_in_use() == 0u); }};
 
   sleipnir::VariableMatrix x{5};
-  x(0).set_value(1);
-  x(1).set_value(2);
-  x(2).set_value(3);
-  x(3).set_value(4);
-  x(4).set_value(5);
+  x[0].set_value(1);
+  x[1].set_value(2);
+  x[2].set_value(3);
+  x[3].set_value(4);
+  x[4].set_value(5);
 
   // y = ||x||²
   sleipnir::Variable y = x.T() * x;
@@ -113,11 +113,11 @@ TEST_CASE("Hessian - Product of sines", "[Hessian]") {
       [] { CHECK(sleipnir::global_pool_resource().blocks_in_use() == 0u); }};
 
   sleipnir::VariableMatrix x{5};
-  x(0).set_value(1);
-  x(1).set_value(2);
-  x(2).set_value(3);
-  x(3).set_value(4);
-  x(4).set_value(5);
+  x[0].set_value(1);
+  x[1].set_value(2);
+  x[2].set_value(3);
+  x[3].set_value(4);
+  x[4].set_value(5);
 
   // y = prod(sin(x))
   auto temp = x.cwise_transform(sleipnir::sin);
@@ -130,9 +130,9 @@ TEST_CASE("Hessian - Product of sines", "[Hessian]") {
   auto g = sleipnir::Gradient(y, x);
   for (int i = 0; i < x.rows(); ++i) {
     CHECK(g.get().value(i) ==
-          Catch::Approx((y / sleipnir::tan(x(i))).value()).margin(1e-15));
+          Catch::Approx((y / sleipnir::tan(x[i])).value()).margin(1e-15));
     CHECK(g.value().coeff(i) ==
-          Catch::Approx((y / sleipnir::tan(x(i))).value()).margin(1e-15));
+          Catch::Approx((y / sleipnir::tan(x[i])).value()).margin(1e-15));
   }
 
   auto H = sleipnir::Hessian(y, x);
@@ -142,10 +142,10 @@ TEST_CASE("Hessian - Product of sines", "[Hessian]") {
     for (int j = 0; j < x.rows(); ++j) {
       if (i == j) {
         expected_H(i, j) =
-            (g.value().coeff(i) / sleipnir::tan(x(i))).value() *
-            (1.0 - 1.0 / (sleipnir::cos(x(i)) * sleipnir::cos(x(i)))).value();
+            (g.value().coeff(i) / sleipnir::tan(x[i])).value() *
+            (1.0 - 1.0 / (sleipnir::cos(x[i]) * sleipnir::cos(x[i]))).value();
       } else {
-        expected_H(i, j) = (g.value().coeff(j) / sleipnir::tan(x(i))).value();
+        expected_H(i, j) = (g.value().coeff(j) / sleipnir::tan(x[i])).value();
       }
     }
   }
@@ -173,11 +173,11 @@ TEST_CASE("Hessian - Sum of squared residuals", "[Hessian]") {
   Eigen::VectorXd g;
   Eigen::MatrixXd H;
   sleipnir::VariableMatrix x{5};
-  x(0).set_value(1);
-  x(1).set_value(1);
-  x(2).set_value(1);
-  x(3).set_value(1);
-  x(4).set_value(1);
+  x[0].set_value(1);
+  x[1].set_value(1);
+  x[2].set_value(1);
+  x[3].set_value(1);
+  x[4].set_value(1);
 
   // y = sum(diff(x).^2)
   auto temp = (x.block(0, 0, 4, 1) - x.block(1, 0, 4, 1))
@@ -188,11 +188,11 @@ TEST_CASE("Hessian - Sum of squared residuals", "[Hessian]") {
   g = sleipnir::Gradient(y, x).value();
 
   CHECK(y.value() == 0.0);
-  CHECK(g(0) == (2 * x(0) - 2 * x(1)).value());
-  CHECK(g(1) == (-2 * x(0) + 4 * x(1) - 2 * x(2)).value());
-  CHECK(g(2) == (-2 * x(1) + 4 * x(2) - 2 * x(3)).value());
-  CHECK(g(3) == (-2 * x(2) + 4 * x(3) - 2 * x(4)).value());
-  CHECK(g(4) == (-2 * x(3) + 2 * x(4)).value());
+  CHECK(g[0] == (2 * x[0] - 2 * x[1]).value());
+  CHECK(g[1] == (-2 * x[0] + 4 * x[1] - 2 * x[2]).value());
+  CHECK(g[2] == (-2 * x[1] + 4 * x[2] - 2 * x[3]).value());
+  CHECK(g[3] == (-2 * x[2] + 4 * x[3] - 2 * x[4]).value());
+  CHECK(g[4] == (-2 * x[3] + 2 * x[4]).value());
 
   H = sleipnir::Hessian(y, x).value();
 
@@ -213,19 +213,19 @@ TEST_CASE("Hessian - Sum of squares", "[Hessian]") {
       [] { CHECK(sleipnir::global_pool_resource().blocks_in_use() == 0u); }};
 
   sleipnir::VariableMatrix r{4};
-  r(0).set_value(25.0);
-  r(1).set_value(10.0);
-  r(2).set_value(5.0);
-  r(3).set_value(0.0);
+  r[0].set_value(25.0);
+  r[1].set_value(10.0);
+  r[2].set_value(5.0);
+  r[3].set_value(0.0);
   sleipnir::VariableMatrix x{4};
-  x(0).set_value(0.0);
-  x(1).set_value(0.0);
-  x(2).set_value(0.0);
-  x(3).set_value(0.0);
+  x[0].set_value(0.0);
+  x[1].set_value(0.0);
+  x[2].set_value(0.0);
+  x[3].set_value(0.0);
 
   sleipnir::Variable J = 0.0;
   for (int i = 0; i < 4; ++i) {
-    J += (r(i) - x(i)) * (r(i) - x(i));
+    J += (r[i] - x[i]) * (r[i] - x[i]);
   }
 
   auto H = sleipnir::Hessian(J, x);
@@ -241,8 +241,8 @@ TEST_CASE("Hessian - Rosenbrock", "[Hessian]") {
       [] { CHECK(sleipnir::global_pool_resource().blocks_in_use() == 0u); }};
 
   sleipnir::VariableMatrix input{2};
-  auto& x = input(0);
-  auto& y = input(1);
+  auto& x = input[0];
+  auto& y = input[1];
 
   for (auto x0 : range(-2.5, 2.5, 0.1)) {
     for (auto y0 : range(-2.5, 2.5, 0.1)) {
@@ -269,8 +269,8 @@ TEST_CASE("Hessian - Variable reuse", "[Hessian]") {
   sleipnir::VariableMatrix x{1};
 
   // y = x³
-  x(0).set_value(1);
-  y = x(0) * x(0) * x(0);
+  x[0].set_value(1);
+  y = x[0] * x[0] * x[0];
 
   sleipnir::Hessian hessian{y, x};
 
@@ -282,7 +282,7 @@ TEST_CASE("Hessian - Variable reuse", "[Hessian]") {
   CHECK(H.cols() == 1);
   CHECK(H(0, 0) == 6.0);
 
-  x(0).set_value(2);
+  x[0].set_value(2);
   // d²y/dx² = 6x
   // H = 12
   H = hessian.value();

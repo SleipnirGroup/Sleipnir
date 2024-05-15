@@ -1077,6 +1077,24 @@ static const char *__doc_sleipnir_VariableBlock_m_row_slice = R"doc()doc";
 
 static const char *__doc_sleipnir_VariableBlock_m_row_slice_length = R"doc()doc";
 
+static const char *__doc_sleipnir_VariableBlock_operator_array =
+R"doc(Returns a scalar subblock at the given row.
+
+Parameter ``row``:
+    The scalar subblock's row.
+
+Returns:
+    A scalar subblock at the given row.)doc";
+
+static const char *__doc_sleipnir_VariableBlock_operator_array_2 =
+R"doc(Returns a scalar subblock at the given row.
+
+Parameter ``row``:
+    The scalar subblock's row.
+
+Returns:
+    A scalar subblock at the given row.)doc";
+
 static const char *__doc_sleipnir_VariableBlock_operator_assign =
 R"doc(Assigns a VariableBlock to the block.
 
@@ -1158,48 +1176,30 @@ Returns:
     A scalar subblock at the given row and column.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_operator_call_3 =
-R"doc(Returns a scalar subblock at the given row.
+R"doc(Returns a slice of the variable matrix.
 
-Parameter ``row``:
-    The scalar subblock's row.
+Parameter ``row_slice``:
+    The row slice.
+
+Parameter ``col_slice``:
+    The column slice.
 
 Returns:
-    A scalar subblock at the given row.)doc";
+    A slice of the variable matrix.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_operator_call_4 =
-R"doc(Returns a scalar subblock at the given row.
+R"doc(Returns a slice of the variable matrix.
 
-Parameter ``row``:
-    The scalar subblock's row.
+Parameter ``row_slice``:
+    The row slice.
+
+Parameter ``col_slice``:
+    The column slice.
 
 Returns:
-    A scalar subblock at the given row.)doc";
+    A slice of the variable matrix.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_operator_call_5 =
-R"doc(Returns a slice of the variable matrix.
-
-Parameter ``row_slice``:
-    The row slice.
-
-Parameter ``col_slice``:
-    The column slice.
-
-Returns:
-    A slice of the variable matrix.)doc";
-
-static const char *__doc_sleipnir_VariableBlock_operator_call_6 =
-R"doc(Returns a slice of the variable matrix.
-
-Parameter ``row_slice``:
-    The row slice.
-
-Parameter ``col_slice``:
-    The column slice.
-
-Returns:
-    A slice of the variable matrix.)doc";
-
-static const char *__doc_sleipnir_VariableBlock_operator_call_7 =
 R"doc(Returns a slice of the variable matrix.
 
 The given slices aren't adjusted. This overload is for Python bindings
@@ -1220,7 +1220,7 @@ Parameter ``col_slice_length``:
 Returns:
     A slice of the variable matrix.)doc";
 
-static const char *__doc_sleipnir_VariableBlock_operator_call_8 =
+static const char *__doc_sleipnir_VariableBlock_operator_call_6 =
 R"doc(Returns a slice of the variable matrix.
 
 The given slices aren't adjusted. This overload is for Python bindings
@@ -1663,6 +1663,24 @@ Returns:
 
 static const char *__doc_sleipnir_VariableMatrix_operator_Variable = R"doc(Implicit conversion operator from 1x1 VariableMatrix to Variable.)doc";
 
+static const char *__doc_sleipnir_VariableMatrix_operator_array =
+R"doc(Returns a block pointing to the given row.
+
+Parameter ``row``:
+    The block row.
+
+Returns:
+    A block pointing to the given row.)doc";
+
+static const char *__doc_sleipnir_VariableMatrix_operator_array_2 =
+R"doc(Returns a block pointing to the given row.
+
+Parameter ``row``:
+    The block row.
+
+Returns:
+    A block pointing to the given row.)doc";
+
 static const char *__doc_sleipnir_VariableMatrix_operator_assign =
 R"doc(Assigns an Eigen matrix to a VariableMatrix.
 
@@ -1697,48 +1715,30 @@ Returns:
     A block pointing to the given row and column.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_operator_call_3 =
-R"doc(Returns a block pointing to the given row.
+R"doc(Returns a slice of the variable matrix.
 
-Parameter ``row``:
-    The block row.
+Parameter ``row_slice``:
+    The row slice.
+
+Parameter ``col_slice``:
+    The column slice.
 
 Returns:
-    A block pointing to the given row.)doc";
+    A slice of the variable matrix.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_operator_call_4 =
-R"doc(Returns a block pointing to the given row.
+R"doc(Returns a slice of the variable matrix.
 
-Parameter ``row``:
-    The block row.
+Parameter ``row_slice``:
+    The row slice.
+
+Parameter ``col_slice``:
+    The column slice.
 
 Returns:
-    A block pointing to the given row.)doc";
+    A slice of the variable matrix.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_operator_call_5 =
-R"doc(Returns a slice of the variable matrix.
-
-Parameter ``row_slice``:
-    The row slice.
-
-Parameter ``col_slice``:
-    The column slice.
-
-Returns:
-    A slice of the variable matrix.)doc";
-
-static const char *__doc_sleipnir_VariableMatrix_operator_call_6 =
-R"doc(Returns a slice of the variable matrix.
-
-Parameter ``row_slice``:
-    The row slice.
-
-Parameter ``col_slice``:
-    The column slice.
-
-Returns:
-    A slice of the variable matrix.)doc";
-
-static const char *__doc_sleipnir_VariableMatrix_operator_call_7 =
 R"doc(Returns a slice of the variable matrix.
 
 The given slices aren't adjusted. This overload is for Python bindings
@@ -1759,7 +1759,7 @@ Parameter ``col_slice_length``:
 Returns:
     A slice of the variable matrix.)doc";
 
-static const char *__doc_sleipnir_VariableMatrix_operator_call_8 =
+static const char *__doc_sleipnir_VariableMatrix_operator_call_6 =
 R"doc(Returns a slice of the variable matrix.
 
 The given slices aren't adjusted. This overload is for Python bindings

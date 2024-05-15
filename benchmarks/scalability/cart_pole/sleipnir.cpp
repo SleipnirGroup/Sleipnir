@@ -41,8 +41,8 @@ sleipnir::VariableMatrix cart_pole_dynamics(const sleipnir::VariableMatrix& x,
 
   auto q = x.segment(0, 2);
   auto qdot = x.segment(2, 2);
-  auto theta = q(1);
-  auto thetadot = qdot(1);
+  auto theta = q[1];
+  auto thetadot = qdot[1];
 
   //        [ m_c + m_p  m_p l cosθ]
   // M(q) = [m_p l cosθ    m_p l²  ]
@@ -63,8 +63,8 @@ sleipnir::VariableMatrix cart_pole_dynamics(const sleipnir::VariableMatrix& x,
   //          [     0      ]
   // τ_g(q) = [-m_p gl sinθ]
   sleipnir::VariableMatrix tau_g{2, 1};
-  tau_g(0) = 0;
-  tau_g(1) = -m_p * g * l * sin(theta);  // NOLINT
+  tau_g[0] = 0;
+  tau_g[1] = -m_p * g * l * sin(theta);  // NOLINT
 
   //     [1]
   // B = [0]

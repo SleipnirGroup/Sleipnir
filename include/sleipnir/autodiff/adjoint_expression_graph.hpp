@@ -79,7 +79,7 @@ class AdjointExpressionGraph {
     // Move gradient tree to return value
     VariableMatrix grad{VariableMatrix::empty, wrt.rows(), 1};
     for (int row = 0; row < grad.rows(); ++row) {
-      grad(row) = Variable{std::move(wrt(row).expr->adjoint_expr)};
+      grad[row] = Variable{std::move(wrt[row].expr->adjoint_expr)};
     }
 
     // Unlink adjoints to avoid circular references between them and their
@@ -146,7 +146,7 @@ class AdjointExpressionGraph {
     // If wrt has fewer nodes than graph, iterate over wrt
     if (static_cast<size_t>(wrt.rows()) < m_top_list.size()) {
       for (int col = 0; col < wrt.rows(); ++col) {
-        const auto& node = wrt(col).expr;
+        const auto& node = wrt[col].expr;
 
         // Append adjoints of wrt to sparse matrix triplets
         if (node->adjoint != 0.0) {

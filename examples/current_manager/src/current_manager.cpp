@@ -15,7 +15,7 @@ CurrentManager::CurrentManager(std::span<const double> current_tolerances,
   // Ensure m_desired_currents contains initialized Variables
   for (int row = 0; row < m_desired_currents.rows(); ++row) {
     // Don't initialize to 0 or 1, because those will get folded by Sleipnir
-    m_desired_currents(row) = std::numeric_limits<double>::infinity();
+    m_desired_currents[row] = std::numeric_limits<double>::infinity();
   }
 
   sleipnir::Variable J = 0.0;
@@ -23,13 +23,13 @@ CurrentManager::CurrentManager(std::span<const double> current_tolerances,
   for (size_t i = 0; i < current_tolerances.size(); ++i) {
     // The weight is 1/tolᵢ² where tolᵢ is the tolerance between the desired
     // and allocated current for subsystem i
-    auto error = m_desired_currents(i) - m_allocated_currents(i);
+    auto error = m_desired_currents[i] - m_allocated_currents[i];
     J += error * error / (current_tolerances[i] * current_tolerances[i]);
 
-    current_sum += m_allocated_currents(i);
+    current_sum += m_allocated_currents[i];
 
     // Currents must be nonnegative
-    m_problem.subject_to(m_allocated_currents(i) >= 0.0);
+    m_problem.subject_to(m_allocated_currents[i] >= 0.0);
   }
   m_problem.minimize(J);
 
@@ -46,7 +46,7 @@ std::vector<double> CurrentManager::calculate(
   }
 
   for (size_t i = 0; i < desired_currents.size(); ++i) {
-    m_desired_currents(i).set_value(desired_currents[i]);
+    m_desired_currents[i].set_value(desired_currents[i]);
   }
 
   m_problem.solve();

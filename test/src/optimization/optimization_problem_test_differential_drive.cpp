@@ -99,11 +99,11 @@ TEST_CASE("OptimizationProblem - Differential drive", "[OptimizationProblem]") {
     CHECK(U(1, k).value() <= u_max);
 
     // Verify state
-    CHECK(X.value(0, k) == Catch::Approx(x(0)).margin(1e-8));
-    CHECK(X.value(1, k) == Catch::Approx(x(1)).margin(1e-8));
-    CHECK(X.value(2, k) == Catch::Approx(x(2)).margin(1e-8));
-    CHECK(X.value(3, k) == Catch::Approx(x(3)).margin(1e-8));
-    CHECK(X.value(4, k) == Catch::Approx(x(4)).margin(1e-8));
+    CHECK(X.value(0, k) == Catch::Approx(x[0]).margin(1e-8));
+    CHECK(X.value(1, k) == Catch::Approx(x[1]).margin(1e-8));
+    CHECK(X.value(2, k) == Catch::Approx(x[2]).margin(1e-8));
+    CHECK(X.value(3, k) == Catch::Approx(x[3]).margin(1e-8));
+    CHECK(X.value(4, k) == Catch::Approx(x[4]).margin(1e-8));
     INFO(std::format("  k = {}", k));
 
     // Project state forward
@@ -111,11 +111,11 @@ TEST_CASE("OptimizationProblem - Differential drive", "[OptimizationProblem]") {
   }
 
   // Verify final state
-  CHECK(X.value(0, N) == Catch::Approx(x_final(0)).margin(1e-8));
-  CHECK(X.value(1, N) == Catch::Approx(x_final(1)).margin(1e-8));
-  CHECK(X.value(2, N) == Catch::Approx(x_final(2)).margin(1e-8));
-  CHECK(X.value(3, N) == Catch::Approx(x_final(3)).margin(1e-8));
-  CHECK(X.value(4, N) == Catch::Approx(x_final(4)).margin(1e-8));
+  CHECK(X.value(0, N) == Catch::Approx(x_final[0]).margin(1e-8));
+  CHECK(X.value(1, N) == Catch::Approx(x_final[1]).margin(1e-8));
+  CHECK(X.value(2, N) == Catch::Approx(x_final[2]).margin(1e-8));
+  CHECK(X.value(3, N) == Catch::Approx(x_final[3]).margin(1e-8));
+  CHECK(X.value(4, N) == Catch::Approx(x_final[4]).margin(1e-8));
 
   // Log states for offline viewing
   std::ofstream states{"Differential drive states.csv"};

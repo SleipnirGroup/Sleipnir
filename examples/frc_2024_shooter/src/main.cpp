@@ -109,9 +109,9 @@ int main() {
   //
   //   √{v_x² + v_y² + v_z²) ≤ vₘₐₓ
   //   v_x² + v_y² + v_z² ≤ vₘₐₓ²
-  problem.subject_to(slp::pow(x(3) - robot_wrt_field(3), 2) +
-                         slp::pow(x(4) - robot_wrt_field(4), 2) +
-                         slp::pow(x(5) - robot_wrt_field(5), 2) <=
+  problem.subject_to(slp::pow(x[3] - robot_wrt_field[3], 2) +
+                         slp::pow(x[4] - robot_wrt_field[4], 2) +
+                         slp::pow(x[5] - robot_wrt_field[5], 2) <=
                      max_initial_velocity * max_initial_velocity);
 
   // Dynamics constraints - RK4 integration
@@ -129,10 +129,10 @@ int main() {
   problem.subject_to(x_k.segment(0, 3) == target_wrt_field.block(0, 0, 3, 1));
 
   // Require the final velocity is up
-  problem.subject_to(x_k(5) > 0.0);
+  problem.subject_to(x_k[5] > 0.0);
 
   // Minimize sensitivity of vertical position to velocity
-  auto sensitivity = slp::Gradient(x_k(3), x.segment(3, 3)).get();
+  auto sensitivity = slp::Gradient(x_k[3], x.segment(3, 3)).get();
   problem.minimize(sensitivity.T() * sensitivity);
 
   problem.solve({.diagnostics = true});
@@ -143,10 +143,10 @@ int main() {
   double velocity = v0.norm();
   std::println("Velocity = {:.03} ms", velocity);
 
-  double pitch = std::atan2(v0(2), std::hypot(v0(0), v0(1)));
+  double pitch = std::atan2(v0[2], std::hypot(v0[0], v0[1]));
   std::println("Pitch = {:.03}°", pitch * 180.0 / std::numbers::pi);
 
-  double yaw = std::atan2(v0(1), v0(0));
+  double yaw = std::atan2(v0[1], v0[0]);
   std::println("Yaw = {:.03}°", yaw * 180.0 / std::numbers::pi);
 
   std::println("Total time = {:.03} s", T.value());
