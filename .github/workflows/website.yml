@@ -31,13 +31,37 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+
       - run: mkdir build
+
+      - name: Make GCC 14 the default toolchain (Linux)
+        run: |
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 200
+          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14 200
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip3 install \
+          build \
+          py-build-cmake \
+          pybind11 \
+          pybind11-stubgen \
+          pybind11-mkdoc \
+          clang
+
+      - run: ./tools/pydoc.sh
+
       - uses: mattnotmitt/doxygen-action@edge
         with:
           doxyfile-path: 'docs/Doxyfile'
+
       - uses: actions/configure-pages@v2
+
       - uses: actions/upload-pages-artifact@v1
         with:
           path: build/docs/html
+
       - uses: actions/deploy-pages@v1
         id: deployment
