@@ -112,8 +112,8 @@ See the [examples](https://github.com/SleipnirGroup/Sleipnir/tree/main/examples)
 
 * C++20 compiler
   * On Windows, install [Visual Studio Community 2022](https://visualstudio.microsoft.com/vs/community/) and select the C++ programming language during installation
-  * On Linux, install GCC 11 or greater via `sudo apt install gcc`
-  * On macOS, install the Xcode command-line build tools via `xcode-select --install`. Xcode 15.0.1 or later is required.
+  * On Linux, install GCC 11 or greater via `sudo apt install g++`
+  * On macOS 13 or greater, install the Xcode command-line build tools via `xcode-select --install`. Xcode 15.0.1 or greater is required.
 * [CMake](https://cmake.org/download/) 3.21 or greater
   * On Windows, install from the link above
   * On Linux, install via `sudo apt install cmake`
