@@ -26,6 +26,7 @@ include = [
   "SleipnirConfig.cmake.in",
   "cmake/modules/*.cmake",
   "cmake/*.patch",
+  "cmake/*.py",
   "jormungandr/*",
   "include/*",
   "src/*"

@@ -10,6 +10,15 @@ import sys
 def main():
     # Clear workspace
     shutil.rmtree(".py-build-cmake_cache", ignore_errors=True)
+    subprocess.run(
+        [
+            "git",
+            "restore",
+            "jormungandr/autodiff/__init__.py",
+            "jormungandr/optimization/__init__.py",
+        ],
+        check=True,
+    )
 
     # Generate .pyi files
     subprocess.run(
@@ -28,40 +37,27 @@ def main():
     for package in ["autodiff", "optimization"]:
         # Read .pyi
         with open(os.path.join(PYI_PATH, package + ".pyi")) as f:
-            pyi_content = f.read()
+            package_content = f.read()
 
-        # Fix up contents
+        # Remove redundant prefixes for documentation
         if package == "autodiff":
-            pyi_content = pyi_content.replace("sleipnir::", "").replace(
-                "VariableBlock<VariableMatrix>", "VariableBlock"
-            )
+            package_content = package_content.replace(
+                "import _jormungandr.optimization\n", ""
+            ).replace("_jormungandr.optimization.", "")
         elif package == "optimization":
-            pyi_content = (
-                pyi_content.replace("_jormungandr.autodiff.", "")
-                .replace("import _jormungandr.autodiff\n", "")
-                .replace("<ExpressionType.NONE: 0>", "ExpressionType.NONE")
-                .replace(
-                    "<SolverExitCondition.SUCCESS: 0>", "SolverExitCondition.SUCCESS"
-                )
-            )
+            package_content = package_content.replace(
+                "import _jormungandr.autodiff\n", ""
+            ).replace("_jormungandr.autodiff.", "")
 
         # Replace _jormungandr.package import with contents
-        with (
-            open(os.path.join("jormungandr", package, "__init__.py")) as input,
-            open(
-                os.path.join("jormungandr", package, "__init__.py.new"), mode="w"
-            ) as output,
-        ):
-            package_content = input.read()
-            output.write(
-                package_content.replace(
-                    f"from .._jormungandr.{package} import *", pyi_content
+        with open(os.path.join("jormungandr", package, "__init__.py")) as f:
+            init_content = f.read()
+        with open(os.path.join("jormungandr", package, "__init__.py"), mode="w") as f:
+            f.write(
+                init_content.replace(
+                    f"from .._jormungandr.{package} import *", package_content
                 )
             )
-        shutil.move(
-            os.path.join("jormungandr", package, "__init__.py.new"),
-            os.path.join("jormungandr", package, "__init__.py"),
-        )
 
 
 if __name__ == "__main__":

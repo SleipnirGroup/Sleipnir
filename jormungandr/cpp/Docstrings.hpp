@@ -1085,9 +1085,16 @@ static const char *__doc_sleipnir_VariableBlock_Rows = R"doc(Returns number of r
 static const char *__doc_sleipnir_VariableBlock_SetValue =
 R"doc(Assigns a double to the block.
 
-This only works for blocks with one row and one column.)doc";
+This only works for blocks with one row and one column.
 
-static const char *__doc_sleipnir_VariableBlock_SetValue_2 = R"doc(Sets block's internal values.)doc";
+Parameter ``value``:
+    Value to assign.)doc";
+
+static const char *__doc_sleipnir_VariableBlock_SetValue_2 =
+R"doc(Sets block's internal values.
+
+Parameter ``values``:
+    Eigen matrix of values.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_T = R"doc(Returns the transpose of the variable matrix.)doc";
 
@@ -1194,20 +1201,40 @@ static const char *__doc_sleipnir_VariableBlock_m_mat = R"doc()doc";
 
 static const char *__doc_sleipnir_VariableBlock_m_rowOffset = R"doc()doc";
 
-static const char *__doc_sleipnir_VariableBlock_operator_assign = R"doc(Assigns a VariableBlock to the block.)doc";
+static const char *__doc_sleipnir_VariableBlock_operator_assign =
+R"doc(Assigns a VariableBlock to the block.
 
-static const char *__doc_sleipnir_VariableBlock_operator_assign_2 = R"doc(Assigns a VariableBlock to the block.)doc";
+Parameter ``values``:
+    VariableBlock of values.)doc";
+
+static const char *__doc_sleipnir_VariableBlock_operator_assign_2 =
+R"doc(Assigns a VariableBlock to the block.
+
+Parameter ``values``:
+    VariableBlock of values.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_operator_assign_3 =
 R"doc(Assigns a double to the block.
 
 This only works for blocks with one row and one column.)doc";
 
-static const char *__doc_sleipnir_VariableBlock_operator_assign_4 = R"doc(Assigns an Eigen matrix to the block.)doc";
+static const char *__doc_sleipnir_VariableBlock_operator_assign_4 =
+R"doc(Assigns an Eigen matrix to the block.
 
-static const char *__doc_sleipnir_VariableBlock_operator_assign_5 = R"doc(Assigns a VariableMatrix to the block.)doc";
+Parameter ``values``:
+    Eigen matrix of values to assign.)doc";
 
-static const char *__doc_sleipnir_VariableBlock_operator_assign_6 = R"doc(Assigns a VariableMatrix to the block.)doc";
+static const char *__doc_sleipnir_VariableBlock_operator_assign_5 =
+R"doc(Assigns a VariableMatrix to the block.
+
+Parameter ``values``:
+    VariableMatrix of values.)doc";
+
+static const char *__doc_sleipnir_VariableBlock_operator_assign_6 =
+R"doc(Assigns a VariableMatrix to the block.
+
+Parameter ``values``:
+    VariableMatrix of values.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_operator_call =
 R"doc(Returns a scalar subblock at the given row and column.
@@ -1373,7 +1400,11 @@ Parameter ``offset``:
 Parameter ``length``:
     The length of the segment.)doc";
 
-static const char *__doc_sleipnir_VariableMatrix_SetValue = R"doc(Sets the VariableMatrix's internal values.)doc";
+static const char *__doc_sleipnir_VariableMatrix_SetValue =
+R"doc(Sets the VariableMatrix's internal values.
+
+Parameter ``values``:
+    Eigen matrix of values.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_T = R"doc(Returns the transpose of the variable matrix.)doc";
 
@@ -1433,17 +1464,41 @@ This overload is for Python bindings only.
 Parameter ``list``:
     The nested list of Variables.)doc";
 
-static const char *__doc_sleipnir_VariableMatrix_VariableMatrix_7 = R"doc(Constructs a VariableMatrix from an Eigen matrix.)doc";
+static const char *__doc_sleipnir_VariableMatrix_VariableMatrix_7 =
+R"doc(Constructs a VariableMatrix from an Eigen matrix.
 
-static const char *__doc_sleipnir_VariableMatrix_VariableMatrix_8 = R"doc(Constructs a VariableMatrix from an Eigen diagonal matrix.)doc";
+Parameter ``values``:
+    Eigen matrix of values.)doc";
 
-static const char *__doc_sleipnir_VariableMatrix_VariableMatrix_9 = R"doc(Constructs a scalar VariableMatrix from a Variable.)doc";
+static const char *__doc_sleipnir_VariableMatrix_VariableMatrix_8 =
+R"doc(Constructs a VariableMatrix from an Eigen diagonal matrix.
 
-static const char *__doc_sleipnir_VariableMatrix_VariableMatrix_10 = R"doc(Constructs a scalar VariableMatrix from a Variable.)doc";
+Parameter ``values``:
+    Diagonal matrix of values.)doc";
 
-static const char *__doc_sleipnir_VariableMatrix_VariableMatrix_11 = R"doc(Constructs a VariableMatrix from a VariableBlock.)doc";
+static const char *__doc_sleipnir_VariableMatrix_VariableMatrix_9 =
+R"doc(Constructs a scalar VariableMatrix from a Variable.
 
-static const char *__doc_sleipnir_VariableMatrix_VariableMatrix_12 = R"doc(Constructs a VariableMatrix from a VariableBlock.)doc";
+Parameter ``variable``:
+    Variable.)doc";
+
+static const char *__doc_sleipnir_VariableMatrix_VariableMatrix_10 =
+R"doc(Constructs a scalar VariableMatrix from a Variable.
+
+Parameter ``variable``:
+    Variable.)doc";
+
+static const char *__doc_sleipnir_VariableMatrix_VariableMatrix_11 =
+R"doc(Constructs a VariableMatrix from a VariableBlock.
+
+Parameter ``values``:
+    VariableBlock of values.)doc";
+
+static const char *__doc_sleipnir_VariableMatrix_VariableMatrix_12 =
+R"doc(Constructs a VariableMatrix from a VariableBlock.
+
+Parameter ``values``:
+    VariableBlock of values.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_VariableMatrix_13 =
 R"doc(Constructs a column vector wrapper around a Variable array.
@@ -1528,7 +1583,11 @@ static const char *__doc_sleipnir_VariableMatrix_m_storage = R"doc()doc";
 
 static const char *__doc_sleipnir_VariableMatrix_operator_Variable = R"doc(Implicit conversion operator from 1x1 VariableMatrix to Variable.)doc";
 
-static const char *__doc_sleipnir_VariableMatrix_operator_assign = R"doc(Assigns an Eigen matrix to a VariableMatrix.)doc";
+static const char *__doc_sleipnir_VariableMatrix_operator_assign =
+R"doc(Assigns an Eigen matrix to a VariableMatrix.
+
+Parameter ``values``:
+    Eigen matrix of values.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_operator_call =
 R"doc(Returns a block pointing to the given row and column.

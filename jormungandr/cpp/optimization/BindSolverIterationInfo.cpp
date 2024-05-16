@@ -10,9 +10,7 @@ namespace py = pybind11;
 
 namespace sleipnir {
 
-void BindSolverIterationInfo(py::module_& optimization) {
-  py::class_<SolverIterationInfo> cls{optimization, "SolverIterationInfo",
-                                      DOC(sleipnir, SolverIterationInfo)};
+void BindSolverIterationInfo(py::class_<SolverIterationInfo>& cls) {
   cls.def_readonly("iteration", &SolverIterationInfo::iteration,
                    DOC(sleipnir, SolverIterationInfo, iteration));
   cls.def_property_readonly(

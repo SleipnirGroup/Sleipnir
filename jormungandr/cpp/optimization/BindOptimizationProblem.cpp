@@ -14,11 +14,9 @@ namespace py = pybind11;
 
 namespace sleipnir {
 
-void BindOptimizationProblem(py::module_& optimization) {
+void BindOptimizationProblem(py::class_<OptimizationProblem>& cls) {
   using namespace pybind11::literals;
 
-  py::class_<OptimizationProblem> cls{optimization, "OptimizationProblem",
-                                      DOC(sleipnir, OptimizationProblem)};
   cls.def(py::init<>(),
           DOC(sleipnir, OptimizationProblem, OptimizationProblem));
   cls.def("decision_variable",
@@ -33,40 +31,40 @@ void BindOptimizationProblem(py::module_& optimization) {
           DOC(sleipnir, OptimizationProblem, SymmetricDecisionVariable));
   cls.def("minimize",
           py::overload_cast<const Variable&>(&OptimizationProblem::Minimize),
-          DOC(sleipnir, OptimizationProblem, Minimize));
+          "cost"_a, DOC(sleipnir, OptimizationProblem, Minimize));
   cls.def(
       "minimize",
       [](OptimizationProblem& self, const VariableMatrix& cost) {
         self.Minimize(cost);
       },
-      DOC(sleipnir, OptimizationProblem, Minimize));
+      "cost"_a, DOC(sleipnir, OptimizationProblem, Minimize));
   cls.def(
       "minimize",
       [](OptimizationProblem& self, double cost) { self.Minimize(cost); },
-      DOC(sleipnir, OptimizationProblem, Minimize));
+      "cost"_a, DOC(sleipnir, OptimizationProblem, Minimize));
   cls.def("maximize",
           py::overload_cast<const Variable&>(&OptimizationProblem::Maximize),
-          DOC(sleipnir, OptimizationProblem, Maximize));
+          "objective"_a, DOC(sleipnir, OptimizationProblem, Maximize));
   cls.def(
       "maximize",
       [](OptimizationProblem& self, const VariableMatrix& objective) {
         self.Maximize(objective);
       },
-      DOC(sleipnir, OptimizationProblem, Maximize));
+      "objective"_a, DOC(sleipnir, OptimizationProblem, Maximize));
   cls.def(
       "maximize",
       [](OptimizationProblem& self, double objective) {
         self.Maximize(objective);
       },
-      DOC(sleipnir, OptimizationProblem, Maximize));
+      "objective"_a, DOC(sleipnir, OptimizationProblem, Maximize));
   cls.def("subject_to",
           py::overload_cast<const EqualityConstraints&>(
               &OptimizationProblem::SubjectTo),
-          DOC(sleipnir, OptimizationProblem, SubjectTo));
+          "constraint"_a, DOC(sleipnir, OptimizationProblem, SubjectTo));
   cls.def("subject_to",
           py::overload_cast<const InequalityConstraints&>(
               &OptimizationProblem::SubjectTo),
-          DOC(sleipnir, OptimizationProblem, SubjectTo, 3));
+          "constraint"_a, DOC(sleipnir, OptimizationProblem, SubjectTo, 3));
   cls.def(
       "solve",
       [](OptimizationProblem& self, const py::kwargs& kwargs) {
@@ -99,7 +97,7 @@ void BindOptimizationProblem(py::module_& optimization) {
          std::function<bool(const SolverIterationInfo&)> callback) {
         self.Callback(std::move(callback));
       },
-      DOC(sleipnir, OptimizationProblem, Callback, 2));
+      "callback"_a, DOC(sleipnir, OptimizationProblem, Callback, 2));
 }
 
 }  // namespace sleipnir
