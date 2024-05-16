@@ -9,11 +9,9 @@ namespace py = pybind11;
 
 namespace sleipnir {
 
-void BindSolverStatus(py::module_& optimization) {
+void BindSolverStatus(py::class_<SolverStatus>& cls) {
   using namespace pybind11::literals;
 
-  py::class_<SolverStatus> cls{optimization, "SolverStatus",
-                               DOC(sleipnir, SolverStatus)};
   cls.def(py::init<>());
   cls.def(py::init<ExpressionType, ExpressionType, ExpressionType,
                    SolverExitCondition, double>(),

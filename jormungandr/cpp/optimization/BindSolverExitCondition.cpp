@@ -9,9 +9,7 @@ namespace py = pybind11;
 
 namespace sleipnir {
 
-void BindSolverExitCondition(py::module_& optimization) {
-  py::enum_<SolverExitCondition> e{optimization, "SolverExitCondition",
-                                   DOC(sleipnir, SolverExitCondition)};
+void BindSolverExitCondition(py::enum_<SolverExitCondition>& e) {
   e.value("SUCCESS", SolverExitCondition::kSuccess,
           DOC(sleipnir, SolverExitCondition, kSuccess));
   e.value("SOLVED_TO_ACCEPTABLE_TOLERANCE",

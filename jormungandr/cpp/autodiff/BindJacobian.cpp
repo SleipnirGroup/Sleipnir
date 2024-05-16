@@ -10,13 +10,14 @@ namespace py = pybind11;
 
 namespace sleipnir {
 
-void BindJacobian(py::module_& autodiff) {
-  py::class_<Jacobian> cls{autodiff, "Jacobian", DOC(sleipnir, Jacobian)};
-  cls.def(py::init<VariableMatrix, VariableMatrix>(),
-          DOC(sleipnir, Jacobian, Jacobian))
-      .def("get", &Jacobian::Get, DOC(sleipnir, Jacobian, Get))
-      .def("value", &Jacobian::Value, DOC(sleipnir, Jacobian, Value))
-      .def("update", &Jacobian::Update, DOC(sleipnir, Jacobian, Update));
+void BindJacobian(py::class_<Jacobian>& cls) {
+  using namespace pybind11::literals;
+
+  cls.def(py::init<VariableMatrix, VariableMatrix>(), "variables"_a, "wrt"_a,
+          DOC(sleipnir, Jacobian, Jacobian));
+  cls.def("get", &Jacobian::Get, DOC(sleipnir, Jacobian, Get));
+  cls.def("value", &Jacobian::Value, DOC(sleipnir, Jacobian, Value));
+  cls.def("update", &Jacobian::Update, DOC(sleipnir, Jacobian, Update));
 }
 
 }  // namespace sleipnir
