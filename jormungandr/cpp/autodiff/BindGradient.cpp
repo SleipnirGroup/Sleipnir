@@ -11,7 +11,7 @@ namespace py = pybind11;
 namespace sleipnir {
 
 void BindGradient(py::class_<Gradient>& cls) {
-  using namespace pybind11::literals;
+  using namespace py::literals;
 
   cls.def(py::init<Variable, Variable>(), "variable"_a, "wrt"_a,
           DOC(sleipnir, Gradient, Gradient));

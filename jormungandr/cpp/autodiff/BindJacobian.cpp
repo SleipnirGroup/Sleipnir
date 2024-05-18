@@ -11,7 +11,7 @@ namespace py = pybind11;
 namespace sleipnir {
 
 void BindJacobian(py::class_<Jacobian>& cls) {
-  using namespace pybind11::literals;
+  using namespace py::literals;
 
   cls.def(py::init<VariableMatrix, VariableMatrix>(), "variables"_a, "wrt"_a,
           DOC(sleipnir, Jacobian, Jacobian));

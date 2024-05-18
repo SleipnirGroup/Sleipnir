@@ -19,7 +19,7 @@ namespace sleipnir {
 
 void BindVariableBlock(py::module_& autodiff,
                        py::class_<VariableBlock<VariableMatrix>>& cls) {
-  using namespace pybind11::literals;
+  using namespace py::literals;
 
   // VariableBlock-VariableMatrix overloads
   cls.def(py::self * VariableMatrix(), "rhs"_a);
