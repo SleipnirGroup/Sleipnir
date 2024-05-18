@@ -4,8 +4,9 @@ function(pybind11_stubgen target)
         TARGET ${target}
         POST_BUILD
         COMMAND
-            ${Python3_EXECUTABLE} -m pybind11_stubgen --ignore-all-errors
-            --print-invalid-expressions-as-is --exit-code
+            ${Python3_EXECUTABLE} -m pybind11_stubgen --numpy-array-use-type-var
+            --ignore-unresolved-names
+            'numpy.float64|numpy.ndarray|scipy.sparse.csc_matrix' --exit-code
             $<TARGET_FILE_BASE_NAME:${target}> -o
             $<TARGET_FILE_DIR:${target}>-stubs
         COMMAND

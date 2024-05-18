@@ -19,7 +19,7 @@ namespace sleipnir {
 
 void BindVariableMatrix(py::module_& autodiff,
                         py::class_<VariableMatrix>& cls) {
-  using namespace pybind11::literals;
+  using namespace py::literals;
 
   cls.def(py::init<>(), DOC(sleipnir, VariableMatrix, VariableMatrix));
   cls.def(py::init<int>(), "rows"_a,

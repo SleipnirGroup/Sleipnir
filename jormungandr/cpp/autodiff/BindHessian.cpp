@@ -11,7 +11,7 @@ namespace py = pybind11;
 namespace sleipnir {
 
 void BindHessian(py::class_<Hessian>& cls) {
-  using namespace pybind11::literals;
+  using namespace py::literals;
 
   cls.def(py::init<Variable, VariableMatrix>(), "variable"_a, "wrt"_a,
           DOC(sleipnir, Hessian, Hessian));

@@ -23,7 +23,7 @@ PYBIND11_WARNING_DISABLE_CLANG("-Wself-assign-overloaded")
 namespace sleipnir {
 
 void BindVariable(py::module_& autodiff, py::class_<Variable>& cls) {
-  using namespace pybind11::literals;
+  using namespace py::literals;
 
   cls.def(py::init<>(), DOC(sleipnir, Variable, Variable));
   cls.def(py::init<double>(), "value"_a, DOC(sleipnir, Variable, Variable, 2));

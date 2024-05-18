@@ -21,11 +21,6 @@ def main():
         with open(filename) as f:
             content = f.read()
 
-        # Fix errors
-        content = content.replace(
-            "<ExpressionType.NONE: 0>", "ExpressionType.NONE"
-        ).replace("<SolverExitCondition.SUCCESS: 0>", "SolverExitCondition.SUCCESS")
-
         # Convert parameter names from camel case to snake case
         new_content = ""
         extract_location = 0
