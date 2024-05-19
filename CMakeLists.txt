@@ -104,11 +104,10 @@ if(NOT USE_SYSTEM_EIGEN)
     fetchcontent_declare(
         Eigen3
         GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
-        # master on 2024-05-08
-        GIT_TAG ff174f79264d3f8dc0115dea7a288f98208b694f
+        # master on 2024-05-19
+        GIT_TAG b9b1c8661ea77e3ab23699aafae1b593926a2c4e
         PATCH_COMMAND
             git apply
-            ${CMAKE_CURRENT_SOURCE_DIR}/cmake/0001-Suppress-C-23-deprecation-warnings-for-std-has_denor.patch
             ${CMAKE_CURRENT_SOURCE_DIR}/cmake/0002-Fix-compilation-failures-on-constexpr-matrices-with-.patch
         UPDATE_DISCONNECTED 1
     )
