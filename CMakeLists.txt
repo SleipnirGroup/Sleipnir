@@ -104,12 +104,8 @@ if(NOT USE_SYSTEM_EIGEN)
     fetchcontent_declare(
         Eigen3
         GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
-        # master on 2024-05-19
-        GIT_TAG b9b1c8661ea77e3ab23699aafae1b593926a2c4e
-        PATCH_COMMAND
-            git apply
-            ${CMAKE_CURRENT_SOURCE_DIR}/cmake/0002-Fix-compilation-failures-on-constexpr-matrices-with-.patch
-        UPDATE_DISCONNECTED 1
+        # master on 2024-05-22
+        GIT_TAG c4d84dfddc9f9edef0fdbe7cf9966d2f4a303198
     )
     fetchcontent_makeavailable(Eigen3)
 else()
