@@ -215,9 +215,10 @@ if(BUILD_TESTING)
             ${CMAKE_CURRENT_SOURCE_DIR}/src
             ${CMAKE_CURRENT_SOURCE_DIR}/test/include
     )
-    target_link_libraries(SleipnirTest PRIVATE Sleipnir Catch2::Catch2)
+    target_link_libraries(SleipnirTest PRIVATE Sleipnir Catch2::Catch2WithMain)
     if(NOT CMAKE_TOOLCHAIN_FILE)
-        catch_discover_tests(SleipnirTest)
+        # https://github.com/catchorg/Catch2/issues/2873
+        catch_discover_tests(SleipnirTest PROPERTIES SKIP_RETURN_CODE 4)
     endif()
 endif()
 
@@ -260,7 +261,8 @@ if(BUILD_EXAMPLES)
                 PRIVATE Sleipnir Catch2::Catch2WithMain
             )
             if(NOT CMAKE_TOOLCHAIN_FILE)
-                catch_discover_tests(${example}Test)
+                # https://github.com/catchorg/Catch2/issues/2873
+                catch_discover_tests(${example}Test PROPERTIES SKIP_RETURN_CODE 4)
             endif()
         endif()
     endforeach()
