@@ -79,8 +79,8 @@ void RunBenchmark(std::ofstream& results,
  *   problem.
  * @param maxPower The maximum power of 10 for the number of samples in the
  *   problem.
- * @param sleipnirSetup A function that takes a time horizon and number of
- *   samples and returns an optimization problem instance.
+ * @param setup A function that takes a time horizon and number of samples and
+ *   returns an optimization problem instance.
  */
 template <typename Problem>
 int RunBenchmarksAndLog(
