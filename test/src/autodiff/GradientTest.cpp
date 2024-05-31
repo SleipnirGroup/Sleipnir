@@ -152,18 +152,21 @@ TEST_CASE("Gradient - Trigonometry", "[Gradient]") {
 
   // std::sin(x)
   CHECK(sleipnir::sin(x).Value() == std::sin(x.Value()));
+
   auto g = sleipnir::Gradient(sleipnir::sin(x), x);
   CHECK(g.Get().Value().coeff(0) == std::cos(x.Value()));
   CHECK(g.Value().coeff(0) == std::cos(x.Value()));
 
   // std::cos(x)
   CHECK(sleipnir::cos(x).Value() == std::cos(x.Value()));
+
   g = sleipnir::Gradient(sleipnir::cos(x), x);
   CHECK(g.Get().Value().coeff(0) == -std::sin(x.Value()));
   CHECK(g.Value().coeff(0) == -std::sin(x.Value()));
 
   // std::tan(x)
   CHECK(sleipnir::tan(x).Value() == std::tan(x.Value()));
+
   g = sleipnir::Gradient(sleipnir::tan(x), x);
   CHECK(g.Get().Value().coeff(0) ==
         1.0 / (std::cos(x.Value()) * std::cos(x.Value())));
@@ -172,12 +175,14 @@ TEST_CASE("Gradient - Trigonometry", "[Gradient]") {
 
   // std::asin(x)
   CHECK(sleipnir::asin(x).Value() == std::asin(x.Value()));
+
   g = sleipnir::Gradient(sleipnir::asin(x), x);
   CHECK(g.Get().Value().coeff(0) == 1.0 / std::sqrt(1 - x.Value() * x.Value()));
   CHECK(g.Value().coeff(0) == 1.0 / std::sqrt(1 - x.Value() * x.Value()));
 
   // std::acos(x)
   CHECK(sleipnir::acos(x).Value() == std::acos(x.Value()));
+
   g = sleipnir::Gradient(sleipnir::acos(x), x);
   CHECK(g.Get().Value().coeff(0) ==
         -1.0 / std::sqrt(1 - x.Value() * x.Value()));
@@ -185,6 +190,7 @@ TEST_CASE("Gradient - Trigonometry", "[Gradient]") {
 
   // std::atan(x)
   CHECK(sleipnir::atan(x).Value() == std::atan(x.Value()));
+
   g = sleipnir::Gradient(sleipnir::atan(x), x);
   CHECK(g.Get().Value().coeff(0) == 1.0 / (1 + x.Value() * x.Value()));
   CHECK(g.Value().coeff(0) == 1.0 / (1 + x.Value() * x.Value()));
@@ -196,18 +202,21 @@ TEST_CASE("Gradient - Hyperbolic", "[Gradient]") {
 
   // sinh(x)
   CHECK(sleipnir::sinh(x).Value() == std::sinh(x.Value()));
+
   auto g = sleipnir::Gradient(sleipnir::sinh(x), x);
   CHECK(g.Get().Value().coeff(0) == std::cosh(x.Value()));
   CHECK(g.Value().coeff(0) == std::cosh(x.Value()));
 
   // std::cosh(x)
   CHECK(sleipnir::cosh(x).Value() == std::cosh(x.Value()));
+
   g = sleipnir::Gradient(sleipnir::cosh(x), x);
   CHECK(g.Get().Value().coeff(0) == std::sinh(x.Value()));
   CHECK(g.Value().coeff(0) == std::sinh(x.Value()));
 
   // tanh(x)
   CHECK(sleipnir::tanh(x).Value() == std::tanh(x.Value()));
+
   g = sleipnir::Gradient(sleipnir::tanh(x), x);
   CHECK(g.Get().Value().coeff(0) ==
         1.0 / (std::cosh(x.Value()) * std::cosh(x.Value())));
@@ -221,18 +230,21 @@ TEST_CASE("Gradient - Exponential", "[Gradient]") {
 
   // std::log(x)
   CHECK(sleipnir::log(x).Value() == std::log(x.Value()));
+
   auto g = sleipnir::Gradient(sleipnir::log(x), x);
   CHECK(g.Get().Value().coeff(0) == 1.0 / x.Value());
   CHECK(g.Value().coeff(0) == 1.0 / x.Value());
 
   // std::log10(x)
   CHECK(sleipnir::log10(x).Value() == std::log10(x.Value()));
+
   g = sleipnir::Gradient(sleipnir::log10(x), x);
   CHECK(g.Get().Value().coeff(0) == 1.0 / (std::log(10.0) * x.Value()));
   CHECK(g.Value().coeff(0) == 1.0 / (std::log(10.0) * x.Value()));
 
   // std::exp(x)
   CHECK(sleipnir::exp(x).Value() == std::exp(x.Value()));
+
   g = sleipnir::Gradient(sleipnir::exp(x), x);
   CHECK(g.Get().Value().coeff(0) == std::exp(x.Value()));
   CHECK(g.Value().coeff(0) == std::exp(x.Value()));
@@ -247,24 +259,28 @@ TEST_CASE("Gradient - Power", "[Gradient]") {
 
   // std::sqrt(x)
   CHECK(sleipnir::sqrt(x).Value() == std::sqrt(x.Value()));
+
   auto g = sleipnir::Gradient(sleipnir::sqrt(x), x);
   CHECK(g.Get().Value().coeff(0) == 0.5 / std::sqrt(x.Value()));
   CHECK(g.Value().coeff(0) == 0.5 / std::sqrt(x.Value()));
 
   // x²
   CHECK(sleipnir::pow(x, 2.0).Value() == std::pow(x.Value(), 2.0));
+
   g = sleipnir::Gradient(sleipnir::pow(x, 2.0), x);
   CHECK(g.Get().Value().coeff(0) == 2.0 * x.Value());
   CHECK(g.Value().coeff(0) == 2.0 * x.Value());
 
   // 2ˣ
   CHECK(sleipnir::pow(2.0, x).Value() == std::pow(2.0, x.Value()));
+
   g = sleipnir::Gradient(sleipnir::pow(2.0, x), x);
   CHECK(g.Get().Value().coeff(0) == std::log(2.0) * std::pow(2.0, x.Value()));
   CHECK(g.Value().coeff(0) == std::log(2.0) * std::pow(2.0, x.Value()));
 
   // xˣ
   CHECK(sleipnir::pow(x, x).Value() == std::pow(x.Value(), x.Value()));
+
   g = sleipnir::Gradient(sleipnir::pow(x, x), x);
   CHECK(g.Get().Value().coeff(0) ==
         ((sleipnir::log(x) + 1) * sleipnir::pow(x, x)).Value());
@@ -273,12 +289,14 @@ TEST_CASE("Gradient - Power", "[Gradient]") {
 
   // y(a)
   CHECK(y.Value() == 2 * a.Value());
+
   g = sleipnir::Gradient(y, a);
   CHECK(g.Get().Value().coeff(0) == 2.0);
   CHECK(g.Value().coeff(0) == 2.0);
 
   // xʸ(x)
   CHECK(sleipnir::pow(x, y).Value() == std::pow(x.Value(), y.Value()));
+
   g = sleipnir::Gradient(sleipnir::pow(x, y), x);
   CHECK(g.Get().Value().coeff(0) ==
         y.Value() / x.Value() * std::pow(x.Value(), y.Value()));
@@ -287,6 +305,7 @@ TEST_CASE("Gradient - Power", "[Gradient]") {
 
   // xʸ(a)
   CHECK(sleipnir::pow(x, y).Value() == std::pow(x.Value(), y.Value()));
+
   g = sleipnir::Gradient(sleipnir::pow(x, y), a);
   CHECK(g.Get().Value().coeff(0) ==
         std::pow(x.Value(), y.Value()) *
@@ -299,6 +318,7 @@ TEST_CASE("Gradient - Power", "[Gradient]") {
 
   // xʸ(y)
   CHECK(sleipnir::pow(x, y).Value() == std::pow(x.Value(), y.Value()));
+
   g = sleipnir::Gradient(sleipnir::pow(x, y), y);
   CHECK(g.Get().Value().coeff(0) ==
         std::log(x.Value()) * std::pow(x.Value(), y.Value()));
@@ -327,98 +347,158 @@ TEST_CASE("Gradient - std::abs()", "[Gradient]") {
 }
 
 TEST_CASE("Gradient - std::atan2()", "[Gradient]") {
-  // Testing atan2 function on (double, var)
   sleipnir::Variable x;
-  x.SetValue(1.0);
   sleipnir::Variable y;
+
+  // Testing atan2 function on (double, var)
+  x.SetValue(1.0);
   y.SetValue(0.9);
   CHECK(sleipnir::atan2(2.0, x).Value() == std::atan2(2.0, x.Value()));
-  CHECK(sleipnir::Gradient(sleipnir::atan2(2.0, x), x).Value().coeff(0) ==
+
+  auto g = sleipnir::Gradient(sleipnir::atan2(2.0, x), x);
+  CHECK(g.Get().Value().coeff(0) ==
+        Catch::Approx((-2.0 / (2 * 2 + x * x)).Value()).margin(1e-15));
+  CHECK(g.Value().coeff(0) ==
         Catch::Approx((-2.0 / (2 * 2 + x * x)).Value()).margin(1e-15));
 
   // Testing atan2 function on (var, double)
   x.SetValue(1.0);
+  y.SetValue(0.9);
   CHECK(sleipnir::atan2(x, 2.0).Value() == std::atan2(x.Value(), 2.0));
-  CHECK(sleipnir::Gradient(sleipnir::atan2(x, 2.0), x).Value().coeff(0) ==
+
+  g = sleipnir::Gradient(sleipnir::atan2(x, 2.0), x);
+  CHECK(g.Get().Value().coeff(0) ==
+        Catch::Approx((2.0 / (2 * 2 + x * x)).Value()).margin(1e-15));
+  CHECK(g.Value().coeff(0) ==
         Catch::Approx((2.0 / (2 * 2 + x * x)).Value()).margin(1e-15));
 
   // Testing atan2 function on (var, var)
   x.SetValue(1.1);
+  y.SetValue(0.9);
   CHECK(sleipnir::atan2(y, x).Value() == std::atan2(y.Value(), x.Value()));
-  CHECK(sleipnir::Gradient(sleipnir::atan2(y, x), y).Value().coeff(0) ==
+
+  g = sleipnir::Gradient(sleipnir::atan2(y, x), y);
+  CHECK(g.Get().Value().coeff(0) ==
         Catch::Approx((x / (x * x + y * y)).Value()).margin(1e-15));
-  CHECK(sleipnir::Gradient(sleipnir::atan2(y, x), x).Value().coeff(0) ==
+  CHECK(g.Value().coeff(0) ==
+        Catch::Approx((x / (x * x + y * y)).Value()).margin(1e-15));
+
+  g = sleipnir::Gradient(sleipnir::atan2(y, x), x);
+  CHECK(g.Get().Value().coeff(0) ==
+        Catch::Approx((-y / (x * x + y * y)).Value()).margin(1e-15));
+  CHECK(g.Value().coeff(0) ==
         Catch::Approx((-y / (x * x + y * y)).Value()).margin(1e-15));
 
   // Testing atan2 function on (expr, expr)
   CHECK(3 * sleipnir::atan2(sleipnir::sin(y), 2 * x + 1).Value() ==
         3 * std::atan2(sleipnir::sin(y).Value(), 2 * x.Value() + 1));
-  CHECK(sleipnir::Gradient(3 * sleipnir::atan2(sleipnir::sin(y), 2 * x + 1), y)
-            .Value()
-            .coeff(0) == Catch::Approx((3 * (2 * x + 1) * sleipnir::cos(y) /
-                                        ((2 * x + 1) * (2 * x + 1) +
-                                         sleipnir::sin(y) * sleipnir::sin(y)))
-                                           .Value())
-                             .margin(1e-15));
-  CHECK(sleipnir::Gradient(3 * sleipnir::atan2(sleipnir::sin(y), 2 * x + 1), x)
-            .Value()
-            .coeff(0) == Catch::Approx((3 * -2 * sleipnir::sin(y) /
-                                        ((2 * x + 1) * (2 * x + 1) +
-                                         sleipnir::sin(y) * sleipnir::sin(y)))
-                                           .Value())
-                             .margin(1e-15));
+
+  g = sleipnir::Gradient(3 * sleipnir::atan2(sleipnir::sin(y), 2 * x + 1), y);
+  CHECK(g.Get().Value().coeff(0) ==
+        Catch::Approx(
+            (3 * (2 * x + 1) * sleipnir::cos(y) /
+             ((2 * x + 1) * (2 * x + 1) + sleipnir::sin(y) * sleipnir::sin(y)))
+                .Value())
+            .margin(1e-15));
+  CHECK(g.Value().coeff(0) ==
+        Catch::Approx(
+            (3 * (2 * x + 1) * sleipnir::cos(y) /
+             ((2 * x + 1) * (2 * x + 1) + sleipnir::sin(y) * sleipnir::sin(y)))
+                .Value())
+            .margin(1e-15));
+
+  g = sleipnir::Gradient(3 * sleipnir::atan2(sleipnir::sin(y), 2 * x + 1), x);
+  CHECK(g.Get().Value().coeff(0) ==
+        Catch::Approx(
+            (3 * -2 * sleipnir::sin(y) /
+             ((2 * x + 1) * (2 * x + 1) + sleipnir::sin(y) * sleipnir::sin(y)))
+                .Value())
+            .margin(1e-15));
+  CHECK(g.Value().coeff(0) ==
+        Catch::Approx(
+            (3 * -2 * sleipnir::sin(y) /
+             ((2 * x + 1) * (2 * x + 1) + sleipnir::sin(y) * sleipnir::sin(y)))
+                .Value())
+            .margin(1e-15));
 }
 
 TEST_CASE("Gradient - std::hypot()", "[Gradient]") {
-  // Testing hypot function on (var, double)
   sleipnir::Variable x;
-  x.SetValue(1.8);
   sleipnir::Variable y;
+
+  // Testing hypot function on (var, double)
+  x.SetValue(1.8);
   y.SetValue(1.5);
   CHECK(sleipnir::hypot(x, 2.0).Value() == std::hypot(x.Value(), 2.0));
-  CHECK(sleipnir::Gradient(sleipnir::hypot(x, 2.0), x).Value().coeff(0) ==
-        (x / std::hypot(x.Value(), 2.0)).Value());
+
+  auto g = sleipnir::Gradient(sleipnir::hypot(x, 2.0), x);
+  CHECK(g.Get().Value().coeff(0) == (x / std::hypot(x.Value(), 2.0)).Value());
+  CHECK(g.Value().coeff(0) == (x / std::hypot(x.Value(), 2.0)).Value());
 
   // Testing hypot function on (double, var)
   CHECK(sleipnir::hypot(2.0, y).Value() == std::hypot(2.0, y.Value()));
-  CHECK(sleipnir::Gradient(sleipnir::hypot(2.0, y), y).Value().coeff(0) ==
-        (y / std::hypot(2.0, y.Value())).Value());
+
+  g = sleipnir::Gradient(sleipnir::hypot(2.0, y), y);
+  CHECK(g.Get().Value().coeff(0) == (y / std::hypot(2.0, y.Value())).Value());
+  CHECK(g.Value().coeff(0) == (y / std::hypot(2.0, y.Value())).Value());
 
   // Testing hypot function on (var, var)
   x.SetValue(1.3);
   y.SetValue(2.3);
   CHECK(sleipnir::hypot(x, y).Value() == std::hypot(x.Value(), y.Value()));
-  CHECK(sleipnir::Gradient(sleipnir::hypot(x, y), x).Value().coeff(0) ==
+
+  g = sleipnir::Gradient(sleipnir::hypot(x, y), x);
+  CHECK(g.Get().Value().coeff(0) ==
         (x / std::hypot(x.Value(), y.Value())).Value());
-  CHECK(sleipnir::Gradient(sleipnir::hypot(x, y), y).Value().coeff(0) ==
+  CHECK(g.Value().coeff(0) == (x / std::hypot(x.Value(), y.Value())).Value());
+
+  g = sleipnir::Gradient(sleipnir::hypot(x, y), y);
+  CHECK(g.Get().Value().coeff(0) ==
         (y / std::hypot(x.Value(), y.Value())).Value());
+  CHECK(g.Value().coeff(0) == (y / std::hypot(x.Value(), y.Value())).Value());
 
   // Testing hypot function on (expr, expr)
   x.SetValue(1.3);
   y.SetValue(2.3);
   CHECK(sleipnir::hypot(2.0 * x, 3.0 * y).Value() ==
         std::hypot(2.0 * x.Value(), 3.0 * y.Value()));
-  CHECK(sleipnir::Gradient(sleipnir::hypot(2.0 * x, 3.0 * y), x)
-            .Value()
-            .coeff(0) ==
+
+  g = sleipnir::Gradient(sleipnir::hypot(2.0 * x, 3.0 * y), x);
+  CHECK(g.Get().Value().coeff(0) ==
         (4.0 * x / std::hypot(2.0 * x.Value(), 3.0 * y.Value())).Value());
-  CHECK(sleipnir::Gradient(sleipnir::hypot(2.0 * x, 3.0 * y), y)
-            .Value()
-            .coeff(0) ==
+  CHECK(g.Value().coeff(0) ==
+        (4.0 * x / std::hypot(2.0 * x.Value(), 3.0 * y.Value())).Value());
+
+  g = sleipnir::Gradient(sleipnir::hypot(2.0 * x, 3.0 * y), y);
+  CHECK(g.Get().Value().coeff(0) ==
+        (9.0 * y / std::hypot(2.0 * x.Value(), 3.0 * y.Value())).Value());
+  CHECK(g.Value().coeff(0) ==
         (9.0 * y / std::hypot(2.0 * x.Value(), 3.0 * y.Value())).Value());
 
   // Testing hypot function on (var, var, var)
+  sleipnir::Variable z;
   x.SetValue(1.3);
   y.SetValue(2.3);
-  sleipnir::Variable z;
   z.SetValue(3.3);
   CHECK(sleipnir::hypot(x, y, z).Value() ==
         std::hypot(x.Value(), y.Value(), z.Value()));
-  CHECK(sleipnir::Gradient(sleipnir::hypot(x, y, z), x).Value().coeff(0) ==
+
+  g = sleipnir::Gradient(sleipnir::hypot(x, y, z), x);
+  CHECK(g.Get().Value().coeff(0) ==
         (x / std::hypot(x.Value(), y.Value(), z.Value())).Value());
-  CHECK(sleipnir::Gradient(sleipnir::hypot(x, y, z), y).Value().coeff(0) ==
+  CHECK(g.Value().coeff(0) ==
+        (x / std::hypot(x.Value(), y.Value(), z.Value())).Value());
+
+  g = sleipnir::Gradient(sleipnir::hypot(x, y, z), y);
+  CHECK(g.Get().Value().coeff(0) ==
         (y / std::hypot(x.Value(), y.Value(), z.Value())).Value());
-  CHECK(sleipnir::Gradient(sleipnir::hypot(x, y, z), z).Value().coeff(0) ==
+  CHECK(g.Value().coeff(0) ==
+        (y / std::hypot(x.Value(), y.Value(), z.Value())).Value());
+
+  g = sleipnir::Gradient(sleipnir::hypot(x, y, z), z);
+  CHECK(g.Get().Value().coeff(0) ==
+        (z / std::hypot(x.Value(), y.Value(), z.Value())).Value());
+  CHECK(g.Value().coeff(0) ==
         (z / std::hypot(x.Value(), y.Value(), z.Value())).Value());
 }
 
@@ -427,15 +507,17 @@ TEST_CASE("Gradient - Miscellaneous", "[Gradient]") {
 
   // dx/dx
   x.SetValue(3.0);
-  auto g = sleipnir::Gradient(x, x);
   CHECK(sleipnir::abs(x).Value() == std::abs(x.Value()));
+
+  auto g = sleipnir::Gradient(x, x);
   CHECK(g.Get().Value().coeff(0) == 1.0);
   CHECK(g.Value().coeff(0) == 1.0);
 
   // std::erf(x)
   x.SetValue(0.5);
-  g = sleipnir::Gradient(sleipnir::erf(x), x);
   CHECK(sleipnir::erf(x).Value() == std::erf(x.Value()));
+
+  g = sleipnir::Gradient(sleipnir::erf(x), x);
   CHECK(g.Get().Value().coeff(0) ==
         2.0 * std::numbers::inv_sqrtpi * std::exp(-x.Value() * x.Value()));
   CHECK(g.Value().coeff(0) ==
@@ -474,20 +556,26 @@ TEST_CASE("Gradient - sign()", "[Gradient]") {
 
   sleipnir::Variable x;
 
+  // sgn(1.0)
   x.SetValue(1.0);
   CHECK(sleipnir::sign(x).Value() == sign(x.Value()));
+
   auto g = sleipnir::Gradient(sleipnir::sign(x), x);
   CHECK(g.Get().Value().coeff(0) == 0.0);
   CHECK(g.Value().coeff(0) == 0.0);
 
+  // sgn(-1.0)
   x.SetValue(-1.0);
   CHECK(sleipnir::sign(x).Value() == sign(x.Value()));
+
   g = sleipnir::Gradient(sleipnir::sign(x), x);
   CHECK(g.Get().Value().coeff(0) == 0.0);
   CHECK(g.Value().coeff(0) == 0.0);
 
+  // sgn(0.0)
   x.SetValue(0.0);
   CHECK(sleipnir::sign(x).Value() == sign(x.Value()));
+
   g = sleipnir::Gradient(sleipnir::sign(x), x);
   CHECK(g.Get().Value().coeff(0) == 0.0);
   CHECK(g.Value().coeff(0) == 0.0);
