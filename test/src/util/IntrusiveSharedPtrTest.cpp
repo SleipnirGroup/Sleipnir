@@ -18,22 +18,11 @@ inline void IntrusiveSharedPtrIncRefCount(Mock* obj) {
   ++obj->refCount;
 }
 
-// GCC 12 warns about a use-after-free, but the address sanitizer doesn't see
-// one. The latter is more trustworthy.
-#if __GNUC__ == 12 && !defined(__clang__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wuse-after-free"
-#endif  // __GNUC__ == 12 && !defined(__clang__)
-
 inline void IntrusiveSharedPtrDecRefCount(Mock* obj) {
   if (--obj->refCount == 0) {
     delete obj;
   }
 }
-
-#if __GNUC__ == 12 && !defined(__clang__)
-#pragma GCC diagnostic pop
-#endif  // __GNUC__ == 12 && !defined(__clang__)
 
 TEST_CASE("IntrusiveSharedPtr - Traits", "[IntrusiveSharedPtr]") {
   using Ptr = sleipnir::IntrusiveSharedPtr<Mock>;
