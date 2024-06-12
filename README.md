@@ -2,8 +2,8 @@
 
 ![Build](https://github.com/SleipnirGroup/Sleipnir/actions/workflows/build.yml/badge.svg)
 [![PyPI Downloads](https://img.shields.io/pypi/dm/sleipnirgroup-jormungandr.svg?label=PyPI%20Downloads)](https://pypi.org/project/sleipnirgroup-jormungandr/)
-[![C++ Documentation](https://img.shields.io/badge/documentation-C%2B%2B-blue?label=Documentation)](https://sleipnirgroup.github.io/Sleipnir/)
-[![Python Documentation](https://img.shields.io/badge/documentation-Python-blue?label=Documentation)](https://sleipnirgroup.github.io/Sleipnir/namespacejormungandr.html)
+[![C++ API](https://img.shields.io/badge/documentation-C%2B%2B-blue?label=API Docs)](https://sleipnirgroup.github.io/Sleipnir/docs/cpp)
+[![Python API](https://img.shields.io/badge/documentation-Python-blue?label=API Docs)](https://sleipnirgroup.github.io/Sleipnir/docs/py)
 [![Discord](https://img.shields.io/discord/975739302933856277?color=%23738ADB&label=Join%20our%20Discord&logo=discord&logoColor=white)](https://discord.gg/ad2EEZZwsS)
 
 > Sparsity and Linearity-Exploiting Interior-Point solver - Now Internally Readable
@@ -34,12 +34,12 @@ int main() {
 ```python
 #!/usr/bin/env python3
 
-import jormungandr as jmg
+from jormungandr.optimization import OptimizationProblem
 
 
 def main():
     # Find the x, y pair with the largest product for which x + 3y = 36
-    problem = jmg.optimization.OptimizationProblem()
+    problem = OptimizationProblem()
 
     x = problem.decision_variable()
     y = problem.decision_variable()
@@ -244,23 +244,3 @@ For quadratic problems, we compute the Lagrangian Hessian and constraint Jacobia
 This promotes fast allocation/deallocation and good memory locality.
 
 We could mitigate the solver's high last-level-cache miss rate (~42% on the machine above) further by breaking apart the expression nodes into fields that are commonly iterated together. We used to use a tape, which gave computational graph updates linear access patterns, but tapes are monotonic buffers with no way to reclaim storage.
-
-## Branding
-
-### Logo
-
-[SVG](https://github.com/SleipnirGroup/Sleipnir/tree/main/logo/sleipnir.svg), [PNG (1000px)](https://github.com/SleipnirGroup/Sleipnir/tree/main/logo/sleipnir_THcolors_1000px.png)<br>
-Font: [Centaur](https://en.wikipedia.org/wiki/Centaur_(typeface))
-
-### Color palette
-
-<table>
-  <tr>
-    <th>Purple</th>
-    <th>Yellow</th>
-  </tr>
-  <tr>
-    <td style="background-color: #6d3d94; color: white;">6D3D94</td>
-    <td style="background-color: #fdb813; color: white;">FDB813</td>
-  </tr>
-</table>
