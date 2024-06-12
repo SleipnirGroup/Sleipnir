@@ -1,4 +1,6 @@
-# Resources
+# Contributor resources
+
+This document contains educational resources for potential contributors.
 
 ## Autodiff
 

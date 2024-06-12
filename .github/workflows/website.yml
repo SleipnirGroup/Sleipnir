@@ -51,17 +51,15 @@ jobs:
           pybind11-mkdoc \
           clang
 
-      - run: ./tools/pydoc.py
+      - run: sudo apt-get install -y doxygen
 
-      - uses: mattnotmitt/doxygen-action@edge
-        with:
-          doxyfile-path: 'docs/Doxyfile'
+      - run: ./tools/generate_website.py
 
       - uses: actions/configure-pages@v2
 
       - uses: actions/upload-pages-artifact@v1
         with:
-          path: build/docs/html
+          path: build/html
 
       - uses: actions/deploy-pages@v1
         id: deployment

@@ -7,8 +7,7 @@ import subprocess
 import sys
 
 
-def main():
-    # Clear workspace
+def clear_python_workspace():
     shutil.rmtree(".py-build-cmake_cache", ignore_errors=True)
     subprocess.run(
         [
@@ -20,6 +19,8 @@ def main():
         check=True,
     )
 
+
+def prep_python_api_docs():
     # Generate .pyi files
     subprocess.run(
         [sys.executable, "-m", "build", "--wheel", "--no-isolation"], check=True
@@ -58,6 +59,40 @@ def main():
                     f"from .._jormungandr.{package} import *", package_content
                 )
             )
+
+
+def main():
+    shutil.rmtree("build/html", ignore_errors=True)
+    os.makedirs("build/html/docs", exist_ok=True)
+
+    if "--doxygen-only" not in sys.argv:
+        clear_python_workspace()
+        prep_python_api_docs()
+
+    subprocess.run(
+        [
+            "doxygen",
+            "docs/Doxyfile-cpp",
+        ],
+        check=True,
+    )
+    subprocess.run(
+        [
+            "doxygen",
+            "docs/Doxyfile-py",
+        ],
+        check=True,
+    )
+    subprocess.run(
+        [
+            "doxygen",
+            "docs/Doxyfile",
+        ],
+        check=True,
+    )
+
+    if "--doxygen-only" not in sys.argv:
+        clear_python_workspace()
 
 
 if __name__ == "__main__":

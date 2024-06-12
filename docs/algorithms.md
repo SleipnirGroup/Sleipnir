@@ -1,4 +1,6 @@
-# Algorithms
+# Internal algorithms
+
+This document contains internal algorithm documentation for Sleipnir.
 
 ## Reverse accumulation automatic differentiation
 
