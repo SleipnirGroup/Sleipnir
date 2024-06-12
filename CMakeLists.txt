@@ -55,7 +55,7 @@ if(NOT CMAKE_EXPORT_COMPILE_COMMANDS)
     set(CMAKE_EXPORT_COMPILE_COMMANDS "YES" CACHE STRING "" FORCE)
 endif()
 
-include(SleipnirBuildTypes)
+include(BuildTypes)
 
 # Control where the static and shared libraries are built so that on Windows,
 # we don't need to tinker with the path to run the executable
@@ -71,12 +71,12 @@ option(BUILD_BENCHMARKING "Build CasADi and Sleipnir benchmarks" OFF)
 option(BUILD_EXAMPLES "Build examples" OFF)
 option(BUILD_PYTHON "Build Python module" OFF)
 
-include(SleipnirCompilerFlags)
+include(CompilerFlags)
 
 file(GLOB_RECURSE Sleipnir_src src/*.cpp)
 add_library(Sleipnir ${Sleipnir_src})
 add_library(Sleipnir::Sleipnir ALIAS Sleipnir)
-sleipnir_compiler_flags(Sleipnir)
+compiler_flags(Sleipnir)
 target_include_directories(Sleipnir PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
@@ -185,7 +185,7 @@ if(BUILD_BENCHMARKING)
                 ${benchmark}ScalabilityBenchmark
                 ${${benchmark}ScalabilityBenchmark_src}
             )
-            sleipnir_compiler_flags(${benchmark}ScalabilityBenchmark)
+            compiler_flags(${benchmark}ScalabilityBenchmark)
             target_include_directories(
                 ${benchmark}ScalabilityBenchmark
                 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/scalability
@@ -208,7 +208,7 @@ endif()
 if(BUILD_TESTING)
     file(GLOB_RECURSE Sleipnir_test_src test/src/*.cpp)
     add_executable(SleipnirTest ${Sleipnir_test_src})
-    sleipnir_compiler_flags(SleipnirTest)
+    compiler_flags(SleipnirTest)
     target_include_directories(
         SleipnirTest
         PRIVATE
@@ -224,13 +224,13 @@ endif()
 
 # Build examples and example tests
 if(BUILD_EXAMPLES)
-    include(SleipnirSubdirList)
-    sleipnir_subdir_list(EXAMPLES ${CMAKE_CURRENT_SOURCE_DIR}/examples)
+    include(SubdirList)
+    subdir_list(EXAMPLES ${CMAKE_CURRENT_SOURCE_DIR}/examples)
     foreach(example ${EXAMPLES})
         # Build example
         file(GLOB_RECURSE sources examples/${example}/src/*.cpp)
         add_executable(${example} ${sources})
-        sleipnir_compiler_flags(${example})
+        compiler_flags(${example})
         target_include_directories(
             ${example}
             PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/examples/${example}/include
@@ -250,7 +250,7 @@ if(BUILD_EXAMPLES)
                     ${CMAKE_CURRENT_SOURCE_DIR}/examples/${example}/src
                     ${CMAKE_CURRENT_SOURCE_DIR}/examples/${example}/test
             )
-            sleipnir_compiler_flags(${example}Test)
+            compiler_flags(${example}Test)
             target_compile_definitions(${example}Test PUBLIC RUNNING_TESTS)
             target_include_directories(
                 ${example}Test
@@ -293,7 +293,7 @@ if(BUILD_PYTHON)
     # Build Sleipnir dependency directly into the wheel to avoid having to
     # configure RPATHs
     pybind11_add_module(_jormungandr ${jormungandr_src} ${Sleipnir_src})
-    sleipnir_compiler_flags(_jormungandr)
+    compiler_flags(_jormungandr)
     target_compile_definitions(_jormungandr PRIVATE JORMUNGANDR=1)
     target_include_directories(
         _jormungandr
