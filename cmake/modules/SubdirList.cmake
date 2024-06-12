@@ -1,4 +1,4 @@
-macro(sleipnir_subdir_list result curdir)
+macro(subdir_list result curdir)
     file(GLOB children RELATIVE ${curdir} ${curdir}/*)
     set(dirlist "")
     foreach(child ${children})

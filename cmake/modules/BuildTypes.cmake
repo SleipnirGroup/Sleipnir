@@ -1,5 +1,5 @@
 macro(
-    sleipnir_add_build_type
+    add_build_type
     allowedBuildTypes
     buildTypeName
     cFlags
@@ -45,7 +45,7 @@ macro(
     )
 endmacro()
 
-macro(sleipnir_check_build_type allowedBuildTypes)
+macro(check_build_type allowedBuildTypes)
     get_property(isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
 
     if(NOT isMultiConfig)
@@ -63,7 +63,7 @@ endmacro()
 set(allowedBuildTypes Debug Release RelWithDebInfo MinSizeRel)
 
 if(NOT MSVC)
-    sleipnir_add_build_type(
+    add_build_type(
       allowedBuildTypes
       "Asan"
       "${CMAKE_C_FLAGS_RELWITHDEBINFO} -fsanitize=address -fno-omit-frame-pointer"
@@ -72,7 +72,7 @@ if(NOT MSVC)
       "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO} -fsanitize=address"
     )
 
-    sleipnir_add_build_type(
+    add_build_type(
       allowedBuildTypes
       "Tsan"
       "${CMAKE_C_FLAGS_RELWITHDEBINFO} -fsanitize=thread -fno-omit-frame-pointer"
@@ -81,7 +81,7 @@ if(NOT MSVC)
       "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO} -fsanitize=thread"
     )
 
-    sleipnir_add_build_type(
+    add_build_type(
       allowedBuildTypes
       "Ubsan"
       "${CMAKE_C_FLAGS_RELWITHDEBINFO} -fsanitize=undefined -fno-sanitize-recover=all -fno-omit-frame-pointer"
@@ -90,7 +90,7 @@ if(NOT MSVC)
       "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO} -fsanitize=undefined"
     )
 
-    sleipnir_add_build_type(
+    add_build_type(
       allowedBuildTypes
       "Perf"
       "${CMAKE_C_FLAGS_RELWITHDEBINFO} -fno-omit-frame-pointer"
@@ -99,7 +99,7 @@ if(NOT MSVC)
       "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO}"
     )
 
-    sleipnir_add_build_type(
+    add_build_type(
       allowedBuildTypes
       "Coverage"
       "${CMAKE_C_FLAGS_RELWITHDEBINFO} -fprofile-instr-generate -fcoverage-mapping"
@@ -108,5 +108,5 @@ if(NOT MSVC)
       "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO}"
     )
 
-    sleipnir_check_build_type(allowedBuildTypes)
+    check_build_type(allowedBuildTypes)
 endif()

@@ -1,4 +1,4 @@
-macro(sleipnir_compiler_flags target)
+macro(compiler_flags target)
     if(NOT MSVC)
         target_compile_options(
             ${target}
