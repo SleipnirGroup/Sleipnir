@@ -97,7 +97,14 @@ void TestFlywheel(std::string testName, double A, double B,
       CHECK(solver.U().Value(0, k) >= u_ss);
       CHECK(solver.U().Value(0, k) <= 12.0);
     } else {
-      CHECK(solver.U().Value(0, k) == Catch::Approx(u).margin(1.0));
+      if (method == sleipnir::TranscriptionMethod::kDirectCollocation) {
+        // The tolerance is large because the trajectory is represented by a
+        // spline, and splines chatter when transitioning quickly between
+        // steady-states.
+        CHECK(solver.U().Value(0, k) == Catch::Approx(u).margin(2.0));
+      } else {
+        CHECK(solver.U().Value(0, k) == Catch::Approx(u).margin(1e-4));
+      }
     }
 
     INFO(std::format("  k = {}", k));
