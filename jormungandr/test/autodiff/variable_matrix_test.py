@@ -177,3 +177,23 @@ def test_block_free_function():
     )
     assert mat2.shape == (3, 4)
     assert (mat2.value() == expected2).all()
+
+
+def test_solve_free_function():
+    A1 = VariableMatrix([[1.0, 2.0], [3.0, 4.0]])
+    B1 = VariableMatrix([[5.0], [6.0]])
+    X1 = autodiff.solve(A1, B1)
+
+    expected1 = np.array([[-4.0], [4.5]])
+    assert X1.shape == (2, 1)
+    assert (A1.value() @ X1.value() == B1.value()).all()
+    assert (X1.value() == expected1).all()
+
+    A2 = VariableMatrix([[1.0, 2.0, 3.0], [-4.0, -5.0, 6.0], [7.0, 8.0, 9.0]])
+    B2 = VariableMatrix([[10.0], [11.0], [12.0]])
+    X2 = autodiff.solve(A2, B2)
+
+    expected2 = np.array([[-7.5], [6.0], [11.0 / 6.0]])
+    assert X2.shape == (3, 1)
+    assert np.linalg.norm(A2.value() @ X2.value() - B2.value()) < 1e-12
+    assert np.linalg.norm(X2.value() - expected2) < 1e-12

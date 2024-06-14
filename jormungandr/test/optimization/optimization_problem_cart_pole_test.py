@@ -102,11 +102,6 @@ def cart_pole_dynamics(x, u):
         ]
     )
 
-    detM = M[0, 0] * M[1, 1] - M[0, 1] * M[1, 0]
-    Minv = VariableMatrix(
-        [[M[1, 1] / detM, -M[0, 1] / detM], [-M[1, 0] / detM, M[0, 0] / detM]]
-    )
-
     #           [0  −m_p lθ̇ sinθ]
     # C(q, q̇) = [0       0      ]
     C = VariableMatrix(
@@ -127,7 +122,7 @@ def cart_pole_dynamics(x, u):
     # q̈ = M⁻¹(q)(τ_g(q) − C(q, q̇)q̇ + Bu)
     qddot = VariableMatrix(4, 1)
     qddot[:2, :] = qdot
-    qddot[2:, :] = Minv @ (tau_g - C @ qdot + B @ u)
+    qddot[2:, :] = autodiff.solve(M, tau_g - C @ qdot + B @ u)
     return qddot
 
 

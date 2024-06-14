@@ -1020,4 +1020,14 @@ SLEIPNIR_DLLEXPORT inline VariableMatrix Block(
   return result;
 }
 
+/**
+ * Solves the VariableMatrix equation AX = B for X.
+ *
+ * @param A The left-hand side.
+ * @param B The right-hand side.
+ * @return The solution X.
+ */
+SLEIPNIR_DLLEXPORT VariableMatrix Solve(const VariableMatrix& A,
+                                        const VariableMatrix& B);
+
 }  // namespace sleipnir

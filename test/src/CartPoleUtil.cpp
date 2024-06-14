@@ -82,10 +82,6 @@ sleipnir::VariableMatrix CartPoleDynamics(const sleipnir::VariableMatrix& x,
       {m_c + m_p, m_p * l * cos(theta)},              // NOLINT
       {m_p * l * cos(theta), m_p * std::pow(l, 2)}};  // NOLINT
 
-  auto detM = M(0, 0) * M(1, 1) - M(0, 1) * M(1, 0);
-  sleipnir::VariableMatrix Minv{{M(1, 1) / detM, -M(0, 1) / detM},
-                                {-M(1, 0) / detM, M(0, 0) / detM}};
-
   //           [0  −m_p lθ̇ sinθ]
   // C(q, q̇) = [0       0      ]
   sleipnir::VariableMatrix C{{0, -m_p * l * thetadot * sin(theta)},  // NOLINT
@@ -102,6 +98,6 @@ sleipnir::VariableMatrix CartPoleDynamics(const sleipnir::VariableMatrix& x,
   // q̈ = M⁻¹(q)(τ_g(q) − C(q, q̇)q̇ + Bu)
   sleipnir::VariableMatrix qddot{4};
   qddot.Segment(0, 2) = qdot;
-  qddot.Segment(2, 2) = Minv * (tau_g - C * qdot + B * u);
+  qddot.Segment(2, 2) = sleipnir::Solve(M, tau_g - C * qdot + B * u);
   return qddot;
 }

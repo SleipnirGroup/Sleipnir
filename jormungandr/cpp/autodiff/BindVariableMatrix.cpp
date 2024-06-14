@@ -570,6 +570,11 @@ void BindVariableMatrix(py::module_& autodiff,
       static_cast<VariableMatrix (*)(std::vector<std::vector<VariableMatrix>>)>(
           &Block),
       "list"_a, DOC(sleipnir, Block));
+
+  autodiff.def("solve",
+               static_cast<VariableMatrix (*)(const VariableMatrix&,
+                                              const VariableMatrix&)>(&Solve),
+               "A"_a, "B"_a, DOC(sleipnir, Solve));
 }  // NOLINT(readability/fn_size)
 
 }  // namespace sleipnir
