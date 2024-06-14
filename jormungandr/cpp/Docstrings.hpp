@@ -690,6 +690,18 @@ Parameter ``t0``:
 Parameter ``dt``:
     The time over which to integrate.)doc";
 
+static const char *__doc_sleipnir_Solve =
+R"doc(Solves the VariableMatrix equation AX = B for X.
+
+Parameter ``A``:
+    The left-hand side.
+
+Parameter ``B``:
+    The right-hand side.
+
+Returns:
+    The solution X.)doc";
+
 static const char *__doc_sleipnir_SolverConfig = R"doc(Solver configuration.)doc";
 
 static const char *__doc_sleipnir_SolverConfig_acceptableTolerance =
