@@ -17,6 +17,7 @@
 #include "sleipnir/util/Assert.hpp"
 #include "sleipnir/util/FunctionRef.hpp"
 #include "sleipnir/util/SymbolExports.hpp"
+#include "sleipnir/util/small_vector.hpp"
 
 namespace sleipnir {
 
@@ -883,7 +884,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
   }
 
  private:
-  std::vector<Variable> m_storage;
+  small_vector<Variable> m_storage;
   int m_rows = 0;
   int m_cols = 0;
 };
