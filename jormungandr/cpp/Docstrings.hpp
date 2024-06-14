@@ -582,8 +582,6 @@ in the feasible set.
 Parameter ``cost``:
     The cost function to minimize.)doc";
 
-static const char *__doc_sleipnir_OptimizationProblem_OptimizationProblem = R"doc(Construct the optimization problem.)doc";
-
 static const char *__doc_sleipnir_OptimizationProblem_Solve =
 R"doc(Solve the optimization problem. The solution will be stored in the
 original variables used to construct the problem.
