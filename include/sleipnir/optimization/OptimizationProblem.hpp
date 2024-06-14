@@ -51,15 +51,6 @@ subject to cₑ(x) = 0
 class SLEIPNIR_DLLEXPORT OptimizationProblem {
  public:
   /**
-   * Construct the optimization problem.
-   */
-  OptimizationProblem() noexcept {
-    m_decisionVariables.reserve(1024);
-    m_equalityConstraints.reserve(1024);
-    m_inequalityConstraints.reserve(1024);
-  }
-
-  /**
    * Create a decision variable in the optimization problem.
    */
   [[nodiscard]]
