@@ -22,8 +22,8 @@
 #include "sleipnir/optimization/SolverStatus.hpp"
 #include "sleipnir/optimization/solver/InteriorPoint.hpp"
 #include "sleipnir/util/Print.hpp"
-#include "sleipnir/util/SmallVector.hpp"
 #include "sleipnir/util/SymbolExports.hpp"
+#include "sleipnir/util/small_vector.hpp"
 
 namespace sleipnir {
 

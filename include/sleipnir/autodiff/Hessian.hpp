@@ -12,8 +12,8 @@
 #include "sleipnir/autodiff/Profiler.hpp"
 #include "sleipnir/autodiff/Variable.hpp"
 #include "sleipnir/autodiff/VariableMatrix.hpp"
-#include "sleipnir/util/SmallVector.hpp"
 #include "sleipnir/util/SymbolExports.hpp"
+#include "sleipnir/util/small_vector.hpp"
 
 namespace sleipnir {
 

@@ -8,8 +8,8 @@
 #include "sleipnir/autodiff/Variable.hpp"
 #include "sleipnir/util/Assert.hpp"
 #include "sleipnir/util/Concepts.hpp"
-#include "sleipnir/util/SmallVector.hpp"
 #include "sleipnir/util/SymbolExports.hpp"
+#include "sleipnir/util/small_vector.hpp"
 
 namespace sleipnir {
 

@@ -14,8 +14,8 @@
 #include "sleipnir/autodiff/ExpressionType.hpp"
 #include "sleipnir/util/IntrusiveSharedPtr.hpp"
 #include "sleipnir/util/Pool.hpp"
-#include "sleipnir/util/SmallVector.hpp"
 #include "sleipnir/util/SymbolExports.hpp"
+#include "sleipnir/util/small_vector.hpp"
 
 namespace sleipnir::detail {
 

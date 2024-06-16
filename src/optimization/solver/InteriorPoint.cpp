@@ -7,7 +7,6 @@
 #include <cmath>
 #include <fstream>
 #include <limits>
-#include <vector>
 
 #include <Eigen/SparseCholesky>
 
@@ -24,6 +23,7 @@
 #include "sleipnir/optimization/SolverExitCondition.hpp"
 #include "sleipnir/util/Print.hpp"
 #include "sleipnir/util/Spy.hpp"
+#include "sleipnir/util/small_vector.hpp"
 #include "util/ScopeExit.hpp"
 #include "util/ToMilliseconds.hpp"
 
@@ -226,7 +226,7 @@ void InteriorPoint(std::span<Variable> decisionVariables,
   };
 
   // Kept outside the loop so its storage can be reused
-  std::vector<Eigen::Triplet<double>> triplets;
+  small_vector<Eigen::Triplet<double>> triplets;
 
   RegularizedLDLT solver;
 
