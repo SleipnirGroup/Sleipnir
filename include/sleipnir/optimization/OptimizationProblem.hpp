@@ -51,6 +51,11 @@ subject to cₑ(x) = 0
 class SLEIPNIR_DLLEXPORT OptimizationProblem {
  public:
   /**
+   * Construct the optimization problem.
+   */
+  OptimizationProblem() noexcept = default;
+
+  /**
    * Create a decision variable in the optimization problem.
    */
   [[nodiscard]]
