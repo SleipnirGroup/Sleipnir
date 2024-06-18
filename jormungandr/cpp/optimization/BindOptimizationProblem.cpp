@@ -17,7 +17,8 @@ namespace sleipnir {
 void BindOptimizationProblem(py::class_<OptimizationProblem>& cls) {
   using namespace py::literals;
 
-  cls.def(py::init<>(), R"doc(Construct the optimization problem.)doc");
+  cls.def(py::init<>(),
+          DOC(sleipnir, OptimizationProblem, OptimizationProblem));
   cls.def("decision_variable",
           py::overload_cast<>(&OptimizationProblem::DecisionVariable),
           DOC(sleipnir, OptimizationProblem, DecisionVariable));
