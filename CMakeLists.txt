@@ -18,7 +18,7 @@ set(CMAKE_MODULE_PATH
 # Make `GIT_SUBMODULES ""` initialize no submodules
 cmake_policy(SET CMP0097 NEW)
 
-project(Sleipnir)
+project(Sleipnir LANGUAGES CXX)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
