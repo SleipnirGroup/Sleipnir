@@ -236,11 +236,7 @@ class SLEIPNIR_DLLEXPORT Variable {
    * Updates the value of this variable based on the values of its dependent
    * variables.
    */
-  void Update() {
-    if (!expr->IsConstant(0.0)) {
-      detail::ExpressionGraph{expr}.Update();
-    }
-  }
+  void Update() { detail::ExpressionGraph{expr}.Update(); }
 
  private:
   /// The expression node.
