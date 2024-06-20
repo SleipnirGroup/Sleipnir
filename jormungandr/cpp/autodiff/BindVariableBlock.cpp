@@ -360,20 +360,18 @@ void BindVariableBlock(py::module_& autodiff,
                             [](const VariableBlock<VariableMatrix>& self) {
                               return py::make_tuple(self.Rows(), self.Cols());
                             });
-  cls.def(
-      "value",
-      static_cast<double (VariableBlock<VariableMatrix>::*)(int, int) const>(
-          &VariableBlock<VariableMatrix>::Value),
-      "row"_a, "col"_a, DOC(sleipnir, VariableBlock, Value));
   cls.def("value",
-          static_cast<double (VariableBlock<VariableMatrix>::*)(int) const>(
+          static_cast<double (VariableBlock<VariableMatrix>::*)(int, int)>(
+              &VariableBlock<VariableMatrix>::Value),
+          "row"_a, "col"_a, DOC(sleipnir, VariableBlock, Value));
+  cls.def("value",
+          static_cast<double (VariableBlock<VariableMatrix>::*)(int)>(
               &VariableBlock<VariableMatrix>::Value),
           "index"_a, DOC(sleipnir, VariableBlock, Value, 2));
-  cls.def(
-      "value",
-      static_cast<Eigen::MatrixXd (VariableBlock<VariableMatrix>::*)() const>(
-          &VariableBlock<VariableMatrix>::Value),
-      DOC(sleipnir, VariableBlock, Value, 3));
+  cls.def("value",
+          static_cast<Eigen::MatrixXd (VariableBlock<VariableMatrix>::*)()>(
+              &VariableBlock<VariableMatrix>::Value),
+          DOC(sleipnir, VariableBlock, Value, 3));
   cls.def(
       "cwise_transform",
       [](const VariableBlock<VariableMatrix>& self,

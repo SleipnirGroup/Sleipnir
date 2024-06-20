@@ -68,11 +68,6 @@ class SLEIPNIR_DLLEXPORT Hessian {
   const Eigen::SparseMatrix<double>& Value() { return m_jacobian.Value(); }
 
   /**
-   * Updates the values of the gradient tree.
-   */
-  void Update() { m_jacobian.Update(); }
-
-  /**
    * Returns the profiler.
    */
   Profiler& GetProfiler() { return m_jacobian.GetProfiler(); }

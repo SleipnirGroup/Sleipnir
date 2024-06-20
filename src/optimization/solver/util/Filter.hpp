@@ -44,7 +44,7 @@ struct FilterEntry {
    * @param c_e The equality constraint values (nonzero means violation).
    * @param c_i The inequality constraint values (negative means violation).
    */
-  FilterEntry(const Variable& f, double μ, const Eigen::VectorXd& s,
+  FilterEntry(Variable& f, double μ, const Eigen::VectorXd& s,
               const Eigen::VectorXd& c_e, const Eigen::VectorXd& c_i)
       : cost{f.Value() - μ * s.array().log().sum()},
         constraintViolation{c_e.lpNorm<1>() + (c_i - s).lpNorm<1>()} {}

@@ -12,8 +12,7 @@ namespace sleipnir {
 
 void BindInequalityConstraints(py::class_<InequalityConstraints>& cls) {
   cls.def(
-      "__bool__",
-      [](const InequalityConstraints& self) -> bool { return self; },
+      "__bool__", [](InequalityConstraints& self) -> bool { return self; },
       py::is_operator(), DOC(sleipnir, InequalityConstraints, operator, bool));
 }
 

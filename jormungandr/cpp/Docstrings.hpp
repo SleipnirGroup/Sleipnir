@@ -132,8 +132,6 @@ Parameter ``variable``:
 Parameter ``wrt``:
     Vector of variables with respect to which to compute the gradient.)doc";
 
-static const char *__doc_sleipnir_Gradient_Update = R"doc(Updates the value of the variable.)doc";
-
 static const char *__doc_sleipnir_Gradient_Value = R"doc(Evaluates the gradient at wrt's value.)doc";
 
 static const char *__doc_sleipnir_Gradient_m_g = R"doc()doc";
@@ -166,8 +164,6 @@ Parameter ``variable``:
 
 Parameter ``wrt``:
     Vector of variables with respect to which to compute the Hessian.)doc";
-
-static const char *__doc_sleipnir_Hessian_Update = R"doc(Updates the values of the gradient tree.)doc";
 
 static const char *__doc_sleipnir_Hessian_Value = R"doc(Evaluates the Hessian at wrt's value.)doc";
 
@@ -260,8 +256,6 @@ Parameter ``variables``:
 
 Parameter ``wrt``:
     Vector of variables with respect to which to compute the Jacobian.)doc";
-
-static const char *__doc_sleipnir_Jacobian_Update = R"doc(Updates the values of the variables.)doc";
 
 static const char *__doc_sleipnir_Jacobian_Value = R"doc(Evaluates the Jacobian at wrt's value.)doc";
 
@@ -1485,10 +1479,6 @@ Parameter ``value``:
 static const char *__doc_sleipnir_Variable_Type =
 R"doc(Returns the type of this expression (constant, linear, quadratic, or
 nonlinear).)doc";
-
-static const char *__doc_sleipnir_Variable_Update =
-R"doc(Updates the value of this variable based on the values of its
-dependent variables.)doc";
 
 static const char *__doc_sleipnir_Variable_Value = R"doc(Returns the value of this variable.)doc";
 
