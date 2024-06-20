@@ -701,7 +701,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param row The row of the element to return.
    * @param col The column of the element to return.
    */
-  double Value(int row, int col) const {
+  double Value(int row, int col) {
     Assert(row >= 0 && row < Rows());
     Assert(col >= 0 && col < Cols());
     return m_storage[row * Cols() + col].Value();
@@ -712,7 +712,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    *
    * @param index The index of the element to return.
    */
-  double Value(int index) const {
+  double Value(int index) {
     Assert(index >= 0 && index < Rows() * Cols());
     return m_storage[index].Value();
   }
@@ -720,7 +720,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
   /**
    * Returns the contents of the variable matrix.
    */
-  Eigen::MatrixXd Value() const {
+  Eigen::MatrixXd Value() {
     Eigen::MatrixXd result{Rows(), Cols()};
 
     for (int row = 0; row < Rows(); ++row) {

@@ -17,7 +17,6 @@ void BindJacobian(py::class_<Jacobian>& cls) {
           DOC(sleipnir, Jacobian, Jacobian));
   cls.def("get", &Jacobian::Get, DOC(sleipnir, Jacobian, Get));
   cls.def("value", &Jacobian::Value, DOC(sleipnir, Jacobian, Value));
-  cls.def("update", &Jacobian::Update, DOC(sleipnir, Jacobian, Update));
 }
 
 }  // namespace sleipnir

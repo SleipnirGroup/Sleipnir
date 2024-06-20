@@ -70,7 +70,6 @@ void BindVariable(py::module_& autodiff, py::class_<Variable>& cls) {
   cls.def(+py::self);
   cls.def("value", &Variable::Value, DOC(sleipnir, Variable, Value));
   cls.def("type", &Variable::Type, DOC(sleipnir, Variable, Type));
-  cls.def("update", &Variable::Update, DOC(sleipnir, Variable, Update));
   cls.def(py::self == py::self, "rhs"_a, DOC(sleipnir, operator, eq));
   cls.def(py::self < py::self, "rhs"_a, DOC(sleipnir, operator, lt));
   cls.def(py::self <= py::self, "rhs"_a, DOC(sleipnir, operator, le));

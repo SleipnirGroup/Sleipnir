@@ -406,16 +406,7 @@ void InteriorPoint(std::span<Variable> decisionVariables,
 
       xAD.SetValue(trial_x);
 
-      f.Update();
-
-      for (int row = 0; row < c_e.rows(); ++row) {
-        c_eAD(row).Update();
-      }
       Eigen::VectorXd trial_c_e = c_eAD.Value();
-
-      for (int row = 0; row < c_i.rows(); ++row) {
-        c_iAD(row).Update();
-      }
       Eigen::VectorXd trial_c_i = c_iAD.Value();
 
       // If f(xₖ + αpₖˣ), cₑ(xₖ + αpₖˣ), or cᵢ(xₖ + αpₖˣ) aren't finite, reduce
@@ -499,16 +490,7 @@ void InteriorPoint(std::span<Variable> decisionVariables,
 
           xAD.SetValue(trial_x);
 
-          f.Update();
-
-          for (int row = 0; row < c_e.rows(); ++row) {
-            c_eAD(row).Update();
-          }
           trial_c_e = c_eAD.Value();
-
-          for (int row = 0; row < c_i.rows(); ++row) {
-            c_iAD(row).Update();
-          }
           trial_c_i = c_iAD.Value();
 
           // Check whether filter accepts trial iterate
@@ -571,14 +553,7 @@ void InteriorPoint(std::span<Variable> decisionVariables,
         yAD.SetValue(trial_y);
         zAD.SetValue(trial_z);
 
-        for (int row = 0; row < c_e.rows(); ++row) {
-          c_eAD(row).Update();
-        }
         Eigen::VectorXd trial_c_e = c_eAD.Value();
-
-        for (int row = 0; row < c_i.rows(); ++row) {
-          c_iAD(row).Update();
-        }
         Eigen::VectorXd trial_c_i = c_iAD.Value();
 
         double nextKKTError = KKTError(gradientF.Value(), jacobianCe.Value(),
@@ -617,21 +592,8 @@ void InteriorPoint(std::span<Variable> decisionVariables,
                   info.s.segment(0, inequalityConstraints.size());
               sAD.SetValue(trial_s);
 
-              for (int row = 0; row < c_e.rows(); ++row) {
-                c_eAD(row).Update();
-              }
               Eigen::VectorXd trial_c_e = c_eAD.Value();
-
-              for (int row = 0; row < c_i.rows(); ++row) {
-                c_iAD(row).Update();
-              }
               Eigen::VectorXd trial_c_i = c_iAD.Value();
-
-              for (int row = 0; row < c_i.rows(); ++row) {
-                c_iAD(row).Update();
-              }
-
-              f.Update();
 
               // If current iterate is acceptable to normal filter and
               // constraint violation has sufficiently reduced, stop
@@ -789,16 +751,7 @@ void InteriorPoint(std::span<Variable> decisionVariables,
     g = gradientF.Value();
     H = hessianL.Value();
 
-    // Update cₑ
-    for (int row = 0; row < c_e.rows(); ++row) {
-      c_eAD(row).Update();
-    }
     c_e = c_eAD.Value();
-
-    // Update cᵢ
-    for (int row = 0; row < c_i.rows(); ++row) {
-      c_iAD(row).Update();
-    }
     c_i = c_iAD.Value();
 
     // Update the error estimate

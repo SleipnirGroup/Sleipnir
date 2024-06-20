@@ -22,7 +22,6 @@ void BindGradient(py::class_<Gradient>& cls) {
       "value",
       [](Gradient& self) { return Eigen::SparseMatrix<double>{self.Value()}; },
       DOC(sleipnir, Gradient, Value));
-  cls.def("update", &Gradient::Update, DOC(sleipnir, Gradient, Update));
 }
 
 }  // namespace sleipnir

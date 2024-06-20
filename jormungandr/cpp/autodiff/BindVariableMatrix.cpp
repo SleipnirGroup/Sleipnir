@@ -395,16 +395,15 @@ void BindVariableMatrix(py::module_& autodiff,
   cls.def_property_readonly("shape", [](const VariableMatrix& self) {
     return py::make_tuple(self.Rows(), self.Cols());
   });
+  cls.def(
+      "value",
+      static_cast<double (VariableMatrix::*)(int, int)>(&VariableMatrix::Value),
+      "row"_a, "col"_a, DOC(sleipnir, VariableMatrix, Value));
   cls.def("value",
-          static_cast<double (VariableMatrix::*)(int, int) const>(
-              &VariableMatrix::Value),
-          "row"_a, "col"_a, DOC(sleipnir, VariableMatrix, Value));
-  cls.def("value",
-          static_cast<double (VariableMatrix::*)(int) const>(
-              &VariableMatrix::Value),
+          static_cast<double (VariableMatrix::*)(int)>(&VariableMatrix::Value),
           "index"_a, DOC(sleipnir, VariableMatrix, Value, 2));
   cls.def("value",
-          static_cast<Eigen::MatrixXd (VariableMatrix::*)() const>(
+          static_cast<Eigen::MatrixXd (VariableMatrix::*)()>(
               &VariableMatrix::Value),
           DOC(sleipnir, VariableMatrix, Value, 3));
   cls.def(

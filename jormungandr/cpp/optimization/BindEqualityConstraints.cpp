@@ -12,7 +12,7 @@ namespace sleipnir {
 
 void BindEqualityConstraints(py::class_<EqualityConstraints>& cls) {
   cls.def(
-      "__bool__", [](const EqualityConstraints& self) -> bool { return self; },
+      "__bool__", [](EqualityConstraints& self) -> bool { return self; },
       py::is_operator(), DOC(sleipnir, EqualityConstraints, operator, bool));
 }
 

@@ -17,7 +17,6 @@ void BindHessian(py::class_<Hessian>& cls) {
           DOC(sleipnir, Hessian, Hessian));
   cls.def("get", &Hessian::Get, DOC(sleipnir, Hessian, Get));
   cls.def("value", &Hessian::Value, DOC(sleipnir, Hessian, Value));
-  cls.def("update", &Hessian::Update, DOC(sleipnir, Hessian, Update));
 }
 
 }  // namespace sleipnir

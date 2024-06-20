@@ -107,7 +107,9 @@ class SLEIPNIR_DLLEXPORT Jacobian {
 
     m_profiler.StartSolve();
 
-    Update();
+    for (auto& graph : m_graphs) {
+      graph.Update();
+    }
 
     // Copy the cached triplets so triplets added for the nonlinear rows are
     // thrown away at the end of the function
@@ -125,15 +127,6 @@ class SLEIPNIR_DLLEXPORT Jacobian {
     m_profiler.StopSolve();
 
     return m_J;
-  }
-
-  /**
-   * Updates the values of the variables.
-   */
-  void Update() {
-    for (auto& graph : m_graphs) {
-      graph.Update();
-    }
   }
 
   /**
