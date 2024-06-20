@@ -38,7 +38,7 @@ jobs:
         if: startsWith(matrix.os, 'macOS')
 
       - run: cmake -B build -S . -DBUILD_EXAMPLES=ON ${{ matrix.cmake-args }}
-      - run: cmake --build build --config RelWithDebInfo --parallel $(nproc)
+      - run: cmake --build build --config RelWithDebInfo --parallel 4
       - run: ctest --test-dir build -C RelWithDebInfo --output-on-failure
       - run: cmake --install build --config RelWithDebInfo --prefix pkg
 
