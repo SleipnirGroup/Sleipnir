@@ -1,4 +1,4 @@
-name: Build
+name: Build Python
 
 on: [pull_request, push]
 
@@ -7,47 +7,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-native:
-    timeout-minutes: 10
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - name: Windows x86_64
-            os: windows-2022
-            cmake-args:
-          - name: Linux x86_64
-            os: ubuntu-24.04
-            cmake-args:
-          - name: macOS universal
-            os: macOS-14
-            cmake-args: -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
-
-    name: ${{ matrix.name }} - native
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Make GCC 14 the default toolchain (Linux)
-        if: startsWith(matrix.os, 'ubuntu')
-        run: |
-          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 200
-          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14 200
-
-      - run: sudo xcode-select -switch /Applications/Xcode_15.3.app
-        if: startsWith(matrix.os, 'macOS')
-
-      - run: cmake -B build -S . -DBUILD_EXAMPLES=ON ${{ matrix.cmake-args }}
-      - run: cmake --build build --config RelWithDebInfo --parallel 4
-      - run: ctest --test-dir build -C RelWithDebInfo --output-on-failure
-      - run: cmake --install build --config RelWithDebInfo --prefix pkg
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.name }} - native
-          path: pkg
-
-  build-python-wheel:
+  build-wheel:
     timeout-minutes: 10
     strategy:
       fail-fast: false
@@ -98,7 +58,7 @@ jobs:
             version: "3.12"
             cmake-env: CMAKE_OSX_ARCHITECTURES="x86_64;arm64"
 
-    name: ${{ matrix.name }} - Python ${{ matrix.version }} wheel
+    name: ${{ matrix.version }} ${{ matrix.name }} wheel
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -128,13 +88,13 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.name }} - Python ${{ matrix.version }} wheel
+          name: ${{ matrix.version }} ${{ matrix.name }} wheel
           path: dist
 
-  build-python-sdist:
+  build-sdist:
     timeout-minutes: 10
 
-    name: Python sdist
+    name: sdist
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -151,13 +111,13 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: Python sdist
+          name: sdist
           path: dist
 
   pypi-publish:
     name: Upload release to PyPI
     runs-on: ubuntu-24.04
-    needs: [build-python-wheel, build-python-sdist]
+    needs: [build-wheel, build-sdist]
     if: github.repository_owner == 'SleipnirGroup' && github.ref == 'refs/heads/main'
     environment:
       name: pypi
@@ -168,29 +128,12 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: dist
-          pattern: '* - Python * wheel'
+          pattern: '* wheel'
           merge-multiple: true
       - uses: actions/download-artifact@v4
         with:
           path: dist
-          pattern: 'Python sdist'
+          pattern: 'sdist'
           merge-multiple: true
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-
-  build-wasm:
-    name: Wasm
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: numworks/setup-emscripten@latest
-
-      - run: emcmake cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTING=OFF
-      - run: cmake --build build --config Release --parallel $(nproc)
-      - run: cmake --install build --config Release --prefix pkg
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: Wasm
-          path: pkg
