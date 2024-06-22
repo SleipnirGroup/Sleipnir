@@ -241,7 +241,7 @@ void BindVariableBlock(py::module_& autodiff,
   cls.def(
       "__array_ufunc__",
       [](VariableBlock<VariableMatrix>& self, py::object ufunc, py::str method,
-         py::args inputs, const py::kwargs& kwargs) -> py::object {
+         py::args inputs, const py::kwargs&) -> py::object {
         std::string method_name = method;
         std::string ufunc_name = ufunc.attr("__repr__")().cast<py::str>();
 
