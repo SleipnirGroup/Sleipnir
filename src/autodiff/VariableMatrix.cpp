@@ -46,23 +46,23 @@ VariableMatrix Solve(const VariableMatrix& A, const VariableMatrix& B) {
 
     return Ainv * B;
   } else {
-    using MatrixXvar = Eigen::Matrix<Variable, Eigen::Dynamic, Eigen::Dynamic>;
+    using MatrixXv = Eigen::Matrix<Variable, Eigen::Dynamic, Eigen::Dynamic>;
 
-    MatrixXvar eigenA{A.Rows(), A.Cols()};
+    MatrixXv eigenA{A.Rows(), A.Cols()};
     for (int row = 0; row < A.Rows(); ++row) {
       for (int col = 0; col < A.Cols(); ++col) {
         eigenA(row, col) = A(row, col);
       }
     }
 
-    MatrixXvar eigenB{B.Rows(), B.Cols()};
+    MatrixXv eigenB{B.Rows(), B.Cols()};
     for (int row = 0; row < B.Rows(); ++row) {
       for (int col = 0; col < B.Cols(); ++col) {
         eigenB(row, col) = B(row, col);
       }
     }
 
-    MatrixXvar eigenX = eigenA.householderQr().solve(eigenB);
+    MatrixXv eigenX = eigenA.householderQr().solve(eigenB);
 
     VariableMatrix X{A.Cols(), B.Cols()};
     for (int row = 0; row < X.Rows(); ++row) {
