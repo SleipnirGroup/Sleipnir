@@ -383,6 +383,15 @@ R"doc(Set the constraint evaluation function. This function is called
 VariableMatrices.
 
 Parameter ``callback``:
+    The callback f(x, u) where x is the state and u is the input
+    vector.)doc";
+
+static const char *__doc_sleipnir_OCPSolver_ForEachStep_2 =
+R"doc(Set the constraint evaluation function. This function is called
+`numSteps+1` times, with the corresponding state and input
+VariableMatrices.
+
+Parameter ``callback``:
     The callback f(t, x, u, dt) where t is time, x is the state
     vector, u is the input vector, and dt is the timestep duration.)doc";
 
@@ -409,8 +418,41 @@ Parameter ``numSteps``:
     The number of control points.
 
 Parameter ``dynamics``:
-    The system evolution function, either an explicit ODE or a
-    discrete state transition function.
+    Function representing an explicit or implicit ODE, or a discrete
+    state transition function. - Explicit: dx/dt = f(x, u, *) -
+    Implicit: f([x dx/dt]', u, *) = 0 - State transition: xₖ₊₁ = f(xₖ,
+    uₖ)
+
+Parameter ``dynamicsType``:
+    The type of system evolution function.
+
+Parameter ``timestepMethod``:
+    The timestep method.
+
+Parameter ``method``:
+    The transcription method.)doc";
+
+static const char *__doc_sleipnir_OCPSolver_OCPSolver_2 =
+R"doc(Build an optimization problem using a system evolution function
+(explicit ODE or discrete state transition function).
+
+Parameter ``numStates``:
+    The number of system states.
+
+Parameter ``numInputs``:
+    The number of system inputs.
+
+Parameter ``dt``:
+    The timestep for fixed-step integration.
+
+Parameter ``numSteps``:
+    The number of control points.
+
+Parameter ``dynamics``:
+    Function representing an explicit or implicit ODE, or a discrete
+    state transition function. - Explicit: dx/dt = f(t, x, u, *) -
+    Implicit: f(t, [x dx/dt]', u, *) = 0 - State transition: xₖ₊₁ =
+    f(t, xₖ, uₖ, dt)
 
 Parameter ``dynamicsType``:
     The type of system evolution function.

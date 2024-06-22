@@ -32,10 +32,10 @@ TEST_CASE("OCPSolver - Cart-pole", "[OCPSolver]") {
   constexpr Eigen::Vector<double, 4> x_initial{{0.0, 0.0, 0.0, 0.0}};
   constexpr Eigen::Vector<double, 4> x_final{{1.0, std::numbers::pi, 0.0, 0.0}};
 
-  auto dynamicsFunction =
-      [=](const sleipnir::Variable& t, const sleipnir::VariableMatrix& x,
-          const sleipnir::VariableMatrix& u,
-          const sleipnir::Variable& dt) { return CartPoleDynamics(x, u); };
+  auto dynamicsFunction = [=](const sleipnir::VariableMatrix& x,
+                              const sleipnir::VariableMatrix& u) {
+    return CartPoleDynamics(x, u);
+  };
 
   sleipnir::OCPSolver problem(
       4, 1, dt, N, dynamicsFunction, sleipnir::DynamicsType::kExplicitODE,
@@ -63,12 +63,12 @@ TEST_CASE("OCPSolver - Cart-pole", "[OCPSolver]") {
   problem.ConstrainFinalState(x_final);
 
   // Cart position constraints
-  problem.ForEachStep(
-      [&](const sleipnir::Variable& t, const sleipnir::VariableMatrix& x,
-          const sleipnir::VariableMatrix& u, const sleipnir::Variable& dt) {
-        problem.SubjectTo(x(0) >= 0.0);
-        problem.SubjectTo(x(0) <= d_max);
-      });
+  problem.ForEachStep([&](const sleipnir::VariableMatrix& x,
+                          [[maybe_unused]]
+                          const sleipnir::VariableMatrix& u) {
+    problem.SubjectTo(x(0) >= 0.0);
+    problem.SubjectTo(x(0) <= d_max);
+  });
 
   // Input constraints
   problem.SetLowerInputBound(-u_max);

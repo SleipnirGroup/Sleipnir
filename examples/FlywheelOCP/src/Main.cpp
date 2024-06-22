@@ -25,8 +25,8 @@ int main() {
   Eigen::Matrix<double, 1, 1> A_discrete{std::exp(A(0) * dt.count())};
   Eigen::Matrix<double, 1, 1> B_discrete{(1.0 - A_discrete(0)) * B(0)};
 
-  auto f_discrete = [=](sleipnir::Variable t, sleipnir::VariableMatrix x,
-                        sleipnir::VariableMatrix u, sleipnir::Variable dt) {
+  auto f_discrete = [=](sleipnir::VariableMatrix x,
+                        sleipnir::VariableMatrix u) {
     return A_discrete * x + B_discrete * u;
   };
 

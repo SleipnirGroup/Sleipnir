@@ -372,7 +372,7 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
   small_vector<Variable> m_inequalityConstraints;
 
   // The user callback
-  std::function<bool(const SolverIterationInfo&)> m_callback =
+  std::function<bool(const SolverIterationInfo& info)> m_callback =
       [](const SolverIterationInfo&) { return false; };
 
   // The solver status

@@ -23,7 +23,9 @@ bool Near(double expected, double actual, double tolerance) {
 }  // namespace
 
 void TestFlywheel(std::string testName, double A, double B,
-                  const sleipnir::DynamicsFunction& F,
+                  const sleipnir::function_ref<sleipnir::VariableMatrix(
+                      const sleipnir::VariableMatrix& x,
+                      const sleipnir::VariableMatrix& u)>& F,
                   sleipnir::DynamicsType dynamicsType,
                   sleipnir::TranscriptionMethod method) {
   sleipnir::scope_exit exit{
@@ -146,9 +148,9 @@ TEST_CASE("OCPSolver - Flywheel (explicit)", "[OCPSolver]") {
   constexpr double A = -1.0;
   constexpr double B = 1.0;
 
-  auto f_ode = [=](sleipnir::Variable t, sleipnir::VariableMatrix x,
-                   sleipnir::VariableMatrix u,
-                   sleipnir::Variable dt) { return A * x + B * u; };
+  auto f_ode = [=](sleipnir::VariableMatrix x, sleipnir::VariableMatrix u) {
+    return A * x + B * u;
+  };
 
   TestFlywheel("OCPSolver Flywheel Explicit Collocation", A, B, f_ode,
                sleipnir::DynamicsType::kExplicitODE,
@@ -169,8 +171,8 @@ TEST_CASE("OCPSolver - Flywheel (discrete)", "[OCPSolver]") {
   double A_discrete = std::exp(A * dt.count());
   double B_discrete = (1.0 - A_discrete) * B;
 
-  auto f_discrete = [=](sleipnir::Variable t, sleipnir::VariableMatrix x,
-                        sleipnir::VariableMatrix u, sleipnir::Variable dt) {
+  auto f_discrete = [=](sleipnir::VariableMatrix x,
+                        sleipnir::VariableMatrix u) {
     return A_discrete * x + B_discrete * u;
   };
 

@@ -40,7 +40,7 @@ constexpr double ToMilliseconds(
 template <typename Problem>
 void RunBenchmark(std::ofstream& results,
                   sleipnir::function_ref<Problem()> setup,
-                  sleipnir::function_ref<void(Problem&)> solve) {
+                  sleipnir::function_ref<void(Problem& problem)> solve) {
   // Record setup time
   auto setupStartTime = std::chrono::system_clock::now();
   auto problem = setup();
@@ -86,7 +86,8 @@ template <typename Problem>
 int RunBenchmarksAndLog(
     std::string_view filename, bool diagnostics,
     std::chrono::duration<double> T, std::span<int> sampleSizesToTest,
-    sleipnir::function_ref<Problem(std::chrono::duration<double>, int)> setup) {
+    sleipnir::function_ref<Problem(std::chrono::duration<double> dt, int N)>
+        setup) {
   std::ofstream results{std::string{filename}};
   if (!results.is_open()) {
     return 1;
