@@ -68,6 +68,20 @@ static const char *__doc_sleipnir_DynamicsType_kExplicitODE = R"doc(The dynamics
 static const char *__doc_sleipnir_EqualityConstraints = R"doc(A vector of equality constraints of the form cₑ(x) = 0.)doc";
 
 static const char *__doc_sleipnir_EqualityConstraints_EqualityConstraints =
+R"doc(Concatenates multiple equality constraints.
+
+Parameter ``equalityConstraints``:
+    The list of EqualityConstraints to concatenate.)doc";
+
+static const char *__doc_sleipnir_EqualityConstraints_EqualityConstraints_2 =
+R"doc(Concatenates multiple equality constraints.
+
+This overload is for Python bindings only.
+
+Parameter ``equalityConstraints``:
+    The list of EqualityConstraints to concatenate.)doc";
+
+static const char *__doc_sleipnir_EqualityConstraints_EqualityConstraints_3 =
 R"doc(Constructs an equality constraint from a left and right side.
 
 The standard form for equality constraints is c(x) = 0. This function
@@ -172,6 +186,20 @@ static const char *__doc_sleipnir_Hessian_m_jacobian = R"doc()doc";
 static const char *__doc_sleipnir_InequalityConstraints = R"doc(A vector of inequality constraints of the form cᵢ(x) ≥ 0.)doc";
 
 static const char *__doc_sleipnir_InequalityConstraints_InequalityConstraints =
+R"doc(Concatenates multiple inequality constraints.
+
+Parameter ``inequalityConstraints``:
+    The list of InequalityConstraints to concatenate.)doc";
+
+static const char *__doc_sleipnir_InequalityConstraints_InequalityConstraints_2 =
+R"doc(Concatenates multiple inequality constraints.
+
+This overload is for Python bindings only.
+
+Parameter ``inequalityConstraints``:
+    The list of InequalityConstraints to concatenate.)doc";
+
+static const char *__doc_sleipnir_InequalityConstraints_InequalityConstraints_3 =
 R"doc(Constructs an inequality constraint from a left and right side.
 
 The standard form for inequality constraints is c(x) ≥ 0. This

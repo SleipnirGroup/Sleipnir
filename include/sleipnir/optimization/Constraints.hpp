@@ -4,7 +4,9 @@
 
 #include <algorithm>
 #include <concepts>
+#include <initializer_list>
 #include <type_traits>
+#include <vector>
 
 #include "sleipnir/autodiff/Variable.hpp"
 #include "sleipnir/util/Assert.hpp"
@@ -122,6 +124,34 @@ struct SLEIPNIR_DLLEXPORT EqualityConstraints {
   small_vector<Variable> constraints;
 
   /**
+   * Concatenates multiple equality constraints.
+   *
+   * @param equalityConstraints The list of EqualityConstraints to concatenate.
+   */
+  EqualityConstraints(
+      std::initializer_list<EqualityConstraints> equalityConstraints) {
+    for (const auto& elem : equalityConstraints) {
+      constraints.insert(constraints.end(), elem.constraints.begin(),
+                         elem.constraints.end());
+    }
+  }
+
+  /**
+   * Concatenates multiple equality constraints.
+   *
+   * This overload is for Python bindings only.
+   *
+   * @param equalityConstraints The list of EqualityConstraints to concatenate.
+   */
+  explicit EqualityConstraints(
+      const std::vector<EqualityConstraints>& equalityConstraints) {
+    for (const auto& elem : equalityConstraints) {
+      constraints.insert(constraints.end(), elem.constraints.begin(),
+                         elem.constraints.end());
+    }
+  }
+
+  /**
    * Constructs an equality constraint from a left and right side.
    *
    * The standard form for equality constraints is c(x) = 0. This function takes
@@ -154,6 +184,36 @@ struct SLEIPNIR_DLLEXPORT EqualityConstraints {
 struct SLEIPNIR_DLLEXPORT InequalityConstraints {
   /// A vector of scalar inequality constraints.
   small_vector<Variable> constraints;
+
+  /**
+   * Concatenates multiple inequality constraints.
+   *
+   * @param inequalityConstraints The list of InequalityConstraints to
+   * concatenate.
+   */
+  InequalityConstraints(
+      std::initializer_list<InequalityConstraints> inequalityConstraints) {
+    for (const auto& elem : inequalityConstraints) {
+      constraints.insert(constraints.end(), elem.constraints.begin(),
+                         elem.constraints.end());
+    }
+  }
+
+  /**
+   * Concatenates multiple inequality constraints.
+   *
+   * This overload is for Python bindings only.
+   *
+   * @param inequalityConstraints The list of InequalityConstraints to
+   * concatenate.
+   */
+  explicit InequalityConstraints(
+      const std::vector<InequalityConstraints>& inequalityConstraints) {
+    for (const auto& elem : inequalityConstraints) {
+      constraints.insert(constraints.end(), elem.constraints.begin(),
+                         elem.constraints.end());
+    }
+  }
 
   /**
    * Constructs an inequality constraint from a left and right side.

@@ -227,3 +227,44 @@ TEST_CASE("Constraints - Inequality constraint boolean comparisons",
                Eigen::MatrixXd{{rhs}}} == (lhs >= rhs));
   }
 }
+
+TEST_CASE("Constraints - Equality constraint concatenation", "[Constraints]") {
+  using sleipnir::EqualityConstraints;
+  using sleipnir::Variable;
+
+  EqualityConstraints eq1 = Variable{1.0} == Variable{1.0};
+  EqualityConstraints eq2 = Variable{1.0} == Variable{2.0};
+  EqualityConstraints eqs{eq1, eq2};
+
+  CHECK(eq1.constraints.size() == 1);
+  CHECK(eq2.constraints.size() == 1);
+  CHECK(eqs.constraints.size() == 2);
+
+  CHECK(eqs.constraints[0].Value() == eq1.constraints[0].Value());
+  CHECK(eqs.constraints[1].Value() == eq2.constraints[0].Value());
+
+  CHECK(eq1);
+  CHECK_FALSE(eq2);
+  CHECK_FALSE(eqs);
+}
+
+TEST_CASE("Constraints - Inequality constraint concatenation",
+          "[Constraints]") {
+  using sleipnir::InequalityConstraints;
+  using sleipnir::Variable;
+
+  InequalityConstraints ineq1 = Variable{2.0} < Variable{1.0};
+  InequalityConstraints ineq2 = Variable{1.0} < Variable{2.0};
+  InequalityConstraints ineqs{ineq1, ineq2};
+
+  CHECK(ineq1.constraints.size() == 1);
+  CHECK(ineq2.constraints.size() == 1);
+  CHECK(ineqs.constraints.size() == 2);
+
+  CHECK(ineqs.constraints[0].Value() == ineq1.constraints[0].Value());
+  CHECK(ineqs.constraints[1].Value() == ineq2.constraints[0].Value());
+
+  CHECK_FALSE(ineq1);
+  CHECK(ineq2);
+  CHECK_FALSE(ineqs);
+}
