@@ -89,7 +89,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    *
    * @param list The nested list of Variables.
    */
-  VariableMatrix(std::vector<std::vector<double>> list) {  // NOLINT
+  VariableMatrix(const std::vector<std::vector<double>>& list) {  // NOLINT
     // Get row and column counts for destination matrix
     m_rows = list.size();
     m_cols = 0;
@@ -116,7 +116,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    *
    * @param list The nested list of Variables.
    */
-  VariableMatrix(std::vector<std::vector<Variable>> list) {  // NOLINT
+  VariableMatrix(const std::vector<std::vector<Variable>>& list) {  // NOLINT
     // Get row and column counts for destination matrix
     m_rows = list.size();
     m_cols = 0;
@@ -979,7 +979,7 @@ SLEIPNIR_DLLEXPORT inline VariableMatrix Block(
  * @param list The nested list of blocks.
  */
 SLEIPNIR_DLLEXPORT inline VariableMatrix Block(
-    std::vector<std::vector<VariableMatrix>> list) {
+    const std::vector<std::vector<VariableMatrix>>& list) {
   // Get row and column counts for destination matrix
   int rows = 0;
   int cols = -1;

@@ -1,4 +1,5 @@
 from jormungandr.autodiff import Variable, VariableMatrix
+from jormungandr.optimization import EqualityConstraints, InequalityConstraints
 
 import numpy as np
 
@@ -136,3 +137,23 @@ def test_inequality_constraint_boolean_comparisons():
         assert bool(VariableMatrix([[lhs]])[:, :] <= np.array([[rhs]])) == (lhs <= rhs)
         assert bool(VariableMatrix([[lhs]])[:, :] > np.array([[rhs]])) == (lhs >= rhs)
         assert bool(VariableMatrix([[lhs]])[:, :] >= np.array([[rhs]])) == (lhs >= rhs)
+
+
+def test_equality_constraint_concatenation():
+    eq1 = Variable(1.0) == Variable(1.0)
+    eq2 = Variable(1.0) == Variable(2.0)
+    eqs = EqualityConstraints([eq1, eq2])
+
+    assert bool(eq1)
+    assert not bool(eq2)
+    assert not bool(eqs)
+
+
+def test_inequality_constraint_concatenation():
+    ineq1 = Variable(2.0) < Variable(1.0)
+    ineq2 = Variable(1.0) < Variable(2.0)
+    ineqs = InequalityConstraints([ineq1, ineq2])
+
+    assert not bool(ineq1)
+    assert bool(ineq2)
+    assert not bool(ineqs)

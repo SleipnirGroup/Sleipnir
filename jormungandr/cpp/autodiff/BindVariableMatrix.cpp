@@ -26,9 +26,9 @@ void BindVariableMatrix(py::module_& autodiff,
           DOC(sleipnir, VariableMatrix, VariableMatrix, 2));
   cls.def(py::init<int, int>(), "rows"_a, "cols"_a,
           DOC(sleipnir, VariableMatrix, VariableMatrix, 3));
-  cls.def(py::init<std::vector<std::vector<double>>>(), "list"_a,
+  cls.def(py::init<const std::vector<std::vector<double>>&>(), "list"_a,
           DOC(sleipnir, VariableMatrix, VariableMatrix, 5));
-  cls.def(py::init<std::vector<std::vector<Variable>>>(), "list"_a,
+  cls.def(py::init<const std::vector<std::vector<Variable>>&>(), "list"_a,
           DOC(sleipnir, VariableMatrix, VariableMatrix, 6));
   cls.def(py::init<const Variable&>(), "values"_a,
           DOC(sleipnir, VariableMatrix, VariableMatrix, 9));
@@ -564,11 +564,10 @@ void BindVariableMatrix(py::module_& autodiff,
       },
       "lhs"_a, "rhs"_a, "func"_a, DOC(sleipnir, CwiseReduce));
 
-  autodiff.def(
-      "block",
-      static_cast<VariableMatrix (*)(std::vector<std::vector<VariableMatrix>>)>(
-          &Block),
-      "list"_a, DOC(sleipnir, Block));
+  autodiff.def("block",
+               static_cast<VariableMatrix (*)(
+                   const std::vector<std::vector<VariableMatrix>>&)>(&Block),
+               "list"_a, DOC(sleipnir, Block));
 
   autodiff.def("solve",
                static_cast<VariableMatrix (*)(const VariableMatrix&,
