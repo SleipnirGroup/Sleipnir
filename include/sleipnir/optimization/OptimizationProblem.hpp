@@ -8,7 +8,6 @@
 #include <functional>
 #include <iterator>
 #include <optional>
-#include <type_traits>
 #include <utility>
 
 #include <Eigen/Core>
@@ -330,9 +329,9 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
    * @param callback The callback.
    */
   template <typename F>
-    requires std::invocable<F, const SolverIterationInfo&> &&
-             std::same_as<std::invoke_result_t<F, const SolverIterationInfo&>,
-                          void>
+    requires requires(F callback, const SolverIterationInfo& info) {
+      { callback(info) } -> std::same_as<void>;
+    }
   void Callback(F&& callback) {
     m_callback = [=, callback = std::forward<F>(callback)](
                      const SolverIterationInfo& info) {
@@ -350,9 +349,9 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
    *   solver to exit early with the solution it has so far.
    */
   template <typename F>
-    requires std::invocable<F, const SolverIterationInfo&> &&
-             std::same_as<std::invoke_result_t<F, const SolverIterationInfo&>,
-                          bool>
+    requires requires(F callback, const SolverIterationInfo& info) {
+      { callback(info) } -> std::same_as<bool>;
+    }
   void Callback(F&& callback) {
     m_callback = std::forward<F>(callback);
   }
