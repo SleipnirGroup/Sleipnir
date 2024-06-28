@@ -84,8 +84,8 @@ int main() {
 
   // Require initial launch velocity is below max
   //
-  //   √{v_x² + v_y² + v_z²) <= vₘₐₓ
-  //   v_x² + v_y² + v_z² <= vₘₐₓ²
+  //   √{v_x² + v_y² + v_z²) ≤ vₘₐₓ
+  //   v_x² + v_y² + v_z² ≤ vₘₐₓ²
   problem.SubjectTo(v_x(0) * v_x(0) + v_y(0) * v_y(0) + v_z(0) * v_z(0) <=
                     max_launch_velocity * max_launch_velocity);
 
