@@ -36,7 +36,7 @@ VariableMatrix Solve(const VariableMatrix& A, const VariableMatrix& B) {
 
   if (A.Rows() == 1 && A.Cols() == 1) {
     // Compute optimal inverse instead of using Eigen's general solver
-    return 1.0 / A(0, 0) * B;
+    return B(0, 0) / A(0, 0);
   } else if (A.Rows() == 2 && A.Cols() == 2) {
     // Compute optimal inverse instead of using Eigen's general solver
     //
