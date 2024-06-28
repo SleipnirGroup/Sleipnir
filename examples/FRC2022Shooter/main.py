@@ -86,8 +86,8 @@ def main():
 
     # Require initial launch velocity is below max
     #
-    #   √{v_x² + v_y² + v_z²) <= vₘₐₓ
-    #   v_x² + v_y² + v_z² <= vₘₐₓ²
+    #   √{v_x² + v_y² + v_z²) ≤ vₘₐₓ
+    #   v_x² + v_y² + v_z² ≤ vₘₐₓ²
     problem.subject_to(
         v_x[0] ** 2 + v_y[0] ** 2 + v_z[0] ** 2 <= max_launch_velocity**2
     )
