@@ -112,6 +112,10 @@ See the [build instructions](https://github.com/SleipnirGroup/Sleipnir/?tab=read
 pip install sleipnirgroup-jormungandr
 ```
 
+## API docs
+
+See the [C++ API docs](https://sleipnirgroup.github.io/Sleipnir/docs/cpp) and [Python API docs](https://sleipnirgroup.github.io/Sleipnir/docs/py).
+
 ## Examples
 
 See the [examples](https://github.com/SleipnirGroup/Sleipnir/tree/main/examples), [C++ optimization unit tests](https://github.com/SleipnirGroup/Sleipnir/tree/main/test/optimization), and [Python optimization unit tests](https://github.com/SleipnirGroup/Sleipnir/tree/main/jormungandr/test/optimization).
