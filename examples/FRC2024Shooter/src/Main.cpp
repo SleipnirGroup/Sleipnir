@@ -5,12 +5,14 @@
 #include <print>
 
 #include <Eigen/Core>
+#include <sleipnir/autodiff/Gradient.hpp>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 
-// FRC 2022 shooter trajectory optimization.
+// FRC 2024 shooter trajectory optimization.
 //
 // This program finds the initial velocity, pitch, and yaw for a game piece to
-// hit the 2022 FRC game's target that minimizes time-to-target.
+// hit the 2024 FRC game's target that minimizes z sensitivity to initial
+// velocity.
 
 namespace slp = sleipnir;
 
@@ -19,11 +21,19 @@ using Vector6d = Eigen::Vector<double, 6>;
 
 constexpr double field_width = 8.2296;    // 27 ft -> m
 constexpr double field_length = 16.4592;  // 54 ft -> m
-constexpr Vector6d target_wrt_field{
-    {field_length / 2.0}, {field_width / 2.0}, {2.64}, {0.0}, {0.0}, {0.0}};
 [[maybe_unused]]
-constexpr double target_radius = 0.61;  // m
-constexpr double g = 9.806;             // m/s²
+constexpr double target_width = 1.05;       // m
+constexpr double target_lower_edge = 1.98;  // m
+constexpr double target_upper_edge = 2.11;  // m
+constexpr double target_depth = 0.46;       // m
+constexpr Vector6d target_wrt_field{
+    {field_length - target_depth / 2.0},
+    {field_width - 2.6575},
+    {(target_upper_edge + target_lower_edge) / 2.0},
+    {0.0},
+    {0.0},
+    {0.0}};
+constexpr double g = 9.806;  // m/s²
 
 slp::VariableMatrix f(const slp::VariableMatrix& x) {
   // x' = x'
@@ -50,16 +60,16 @@ slp::VariableMatrix f(const slp::VariableMatrix& x) {
 #ifndef RUNNING_TESTS
 int main() {
   // Robot initial state
-  constexpr Vector6d robot_wrt_field{{field_length / 4.0},
-                                     {field_width / 4.0},
+  constexpr Vector6d robot_wrt_field{{0.75 * field_length},
+                                     {field_width / 3.0},
                                      {0.0},
                                      {1.524},
                                      {-1.524},
                                      {0.0}};
 
-  constexpr double max_initial_velocity = 10.0;  // m/s
+  constexpr double max_initial_velocity = 15.0;  // m/s
 
-  Vector6d shooter_wrt_robot{{0.0}, {0.0}, {1.2}, {0.0}, {0.0}, {0.0}};
+  Vector6d shooter_wrt_robot{{0.0}, {0.0}, {0.6096}, {0.0}, {0.0}, {0.0}};
   Vector6d shooter_wrt_field = robot_wrt_field + shooter_wrt_robot;
 
   slp::OptimizationProblem problem;
@@ -71,7 +81,7 @@ int main() {
   T.SetValue(1);
   auto dt = T / N;
 
-  // Ball state in field frame
+  // Disc state in field frame
   //
   //     [x position]
   //     [y position]
@@ -79,77 +89,55 @@ int main() {
   // x = [x velocity]
   //     [y velocity]
   //     [z velocity]
-  auto X = problem.DecisionVariable(6, N);
+  auto x = problem.DecisionVariable(6);
 
-  auto p = X.Block(0, 0, 3, N);
-  auto p_x = X.Row(0);
-  auto p_y = X.Row(1);
-  auto p_z = X.Row(2);
-
-  auto v = X.Block(3, 0, 3, N);
-  auto v_x = X.Row(3);
-  auto v_y = X.Row(4);
-  auto v_z = X.Row(5);
-
-  // Position initial guess is linear interpolation between start and end
-  // position
-  for (int k = 0; k < N; ++k) {
-    p_x(k).SetValue(std::lerp(shooter_wrt_field(0), target_wrt_field(0),
-                              static_cast<double>(k) / N));
-    p_y(k).SetValue(std::lerp(shooter_wrt_field(1), target_wrt_field(1),
-                              static_cast<double>(k) / N));
-    p_z(k).SetValue(std::lerp(shooter_wrt_field(2), target_wrt_field(2),
-                              static_cast<double>(k) / N));
-  }
+  // Position initial guess is start position
+  x.Segment(0, 3).SetValue(shooter_wrt_field.segment(0, 3));
 
   // Velocity initial guess is max initial velocity toward target
   Vector3d uvec_shooter_to_target =
       (target_wrt_field.segment(0, 3) - shooter_wrt_field.segment(0, 3))
           .normalized();
-  for (int k = 0; k < N; ++k) {
-    v.Col(k).SetValue(robot_wrt_field.segment(3, 3) +
-                      max_initial_velocity * uvec_shooter_to_target);
-  }
+  x.Segment(3, 3).SetValue(robot_wrt_field.segment(3, 3) +
+                           max_initial_velocity * uvec_shooter_to_target);
 
   // Shooter initial position
-  problem.SubjectTo(p.Col(0) == shooter_wrt_field.block(0, 0, 3, 1));
+  problem.SubjectTo(x.Segment(0, 3) == shooter_wrt_field.block(0, 0, 3, 1));
 
   // Require initial velocity is below max
   //
   //   √{v_x² + v_y² + v_z²) ≤ vₘₐₓ
   //   v_x² + v_y² + v_z² ≤ vₘₐₓ²
-  problem.SubjectTo(slp::pow(v_x(0) - robot_wrt_field(3), 2) +
-                        slp::pow(v_y(0) - robot_wrt_field(4), 2) +
-                        slp::pow(v_z(0) - robot_wrt_field(5), 2) <=
+  problem.SubjectTo(slp::pow(x(3) - robot_wrt_field(3), 2) +
+                        slp::pow(x(4) - robot_wrt_field(4), 2) +
+                        slp::pow(x(5) - robot_wrt_field(5), 2) <=
                     max_initial_velocity * max_initial_velocity);
 
   // Dynamics constraints - RK4 integration
   auto h = dt;
+  auto x_k = x;
   for (int k = 0; k < N - 1; ++k) {
-    auto x_k = X.Col(k);
-    auto x_k1 = X.Col(k + 1);
-
     auto k1 = f(x_k);
     auto k2 = f(x_k + h / 2 * k1);
     auto k3 = f(x_k + h / 2 * k2);
     auto k4 = f(x_k + h * k3);
-    problem.SubjectTo(x_k1 == x_k + h / 6 * (k1 + 2 * k2 + 2 * k3 + k4));
+    x_k += h / 6 * (k1 + 2 * k2 + 2 * k3 + k4);
   }
 
   // Require final position is in center of target circle
-  problem.SubjectTo(p.Col(N - 1) == target_wrt_field.block(0, 0, 3, 1));
+  problem.SubjectTo(x_k.Segment(0, 3) == target_wrt_field.block(0, 0, 3, 1));
 
-  // Require the final velocity is down
-  problem.SubjectTo(v_z(N - 1) < 0.0);
+  // Require the final velocity is up
+  problem.SubjectTo(x_k(5) > 0.0);
 
-  // Minimize time-to-target
-  problem.Minimize(T);
+  // Minimize sensitivity of vertical position to velocity
+  auto sensitivity = slp::Gradient(x_k(3), x.Segment(3, 3)).Get();
+  problem.Minimize(sensitivity.T() * sensitivity);
 
   problem.Solve({.diagnostics = true});
 
   // Initial velocity vector
-  Eigen::Vector3d v0 =
-      X.Block(3, 0, 3, 1).Value() - robot_wrt_field.segment(3, 3);
+  Eigen::Vector3d v0 = x.Segment(3, 3).Value() - robot_wrt_field.segment(3, 3);
 
   double velocity = v0.norm();
   std::println("Velocity = {:.03} ms", velocity);
