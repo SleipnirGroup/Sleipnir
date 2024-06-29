@@ -12,31 +12,33 @@
 // This program finds the optimal initial launch velocity and launch angle for
 // the 2022 FRC game's target.
 
-constexpr double field_width = 8.2296;    // 27 ft
-constexpr double field_length = 16.4592;  // 54 ft
-constexpr double g = 9.806;               // m/s²
+namespace slp = sleipnir;
+
+using Eigen::Vector3d;
+using Vector6d = Eigen::Vector<double, 6>;
+
+constexpr double field_width = 8.2296;    // 27 ft -> m
+constexpr double field_length = 16.4592;  // 54 ft -> m
+constexpr Vector6d target_wrt_field{
+    {field_length / 2.0}, {field_width / 2.0}, {2.64}, {0.0}, {0.0}, {0.0}};
+constexpr double g = 9.806;  // m/s²
 
 #ifndef RUNNING_TESTS
 int main() {
-  // Robot initial velocity
-  double robot_initial_v_x = 0.2;   // ft/s
-  double robot_initial_v_y = -0.2;  // ft/s
-  double robot_initial_v_z = 0.0;   // ft/s
+  // Robot initial state
+  constexpr Vector6d robot_wrt_field{{field_length / 4.0},
+                                     {field_width / 4.0},
+                                     {0.0},
+                                     {1.524},
+                                     {-1.524},
+                                     {0.0}};
 
   constexpr double max_launch_velocity = 10.0;
 
-  Eigen::Vector3d shooter{{field_length / 4.0}, {field_width / 4.0}, {1.2}};
-  const auto& shooter_x = shooter(0, 0);
-  const auto& shooter_y = shooter(1, 0);
-  const auto& shooter_z = shooter(2, 0);
+  Vector6d shooter_wrt_robot{{0.0}, {0.0}, {1.2}, {0.0}, {0.0}, {0.0}};
+  Vector6d shooter_wrt_field = robot_wrt_field + shooter_wrt_robot;
 
-  constexpr Eigen::Vector3d target{
-      {field_length / 2.0}, {field_width / 2.0}, {2.64}};
-  const auto& target_x = target(0, 0);
-  const auto& target_y = target(1, 0);
-  const auto& target_z = target(2, 0);
-
-  sleipnir::OptimizationProblem problem;
+  slp::OptimizationProblem problem;
 
   // Set up duration decision variables
   constexpr int N = 10;
@@ -45,6 +47,8 @@ int main() {
   T.SetValue(1);
   auto dt = T / N;
 
+  // Ball state in field frame
+  //
   //     [x position]
   //     [y position]
   //     [z position]
@@ -53,9 +57,12 @@ int main() {
   //     [z velocity]
   auto X = problem.DecisionVariable(6, N);
 
+  auto p = X.Block(0, 0, 3, N);
   auto p_x = X.Row(0);
   auto p_y = X.Row(1);
   auto p_z = X.Row(2);
+
+  auto v = X.Block(3, 0, 3, N);
   auto v_x = X.Row(3);
   auto v_y = X.Row(4);
   auto v_z = X.Row(5);
@@ -63,38 +70,42 @@ int main() {
   // Position initial guess is linear interpolation between start and end
   // position
   for (int k = 0; k < N; ++k) {
-    p_x(k).SetValue(std::lerp(shooter_x, target_x, static_cast<double>(k) / N));
-    p_y(k).SetValue(std::lerp(shooter_y, target_y, static_cast<double>(k) / N));
-    p_z(k).SetValue(std::lerp(shooter_z, target_z, static_cast<double>(k) / N));
+    p_x(k).SetValue(std::lerp(shooter_wrt_field(0), target_wrt_field(0),
+                              static_cast<double>(k) / N));
+    p_y(k).SetValue(std::lerp(shooter_wrt_field(1), target_wrt_field(1),
+                              static_cast<double>(k) / N));
+    p_z(k).SetValue(std::lerp(shooter_wrt_field(2), target_wrt_field(2),
+                              static_cast<double>(k) / N));
   }
 
   // Velocity initial guess is max launch velocity toward goal
-  Eigen::Vector3d uvec_shooter_to_target = (target - shooter).normalized();
+  Vector3d uvec_shooter_to_target =
+      (target_wrt_field.block(0, 0, 3, 1) - shooter_wrt_field.block(0, 0, 3, 1))
+          .normalized();
   for (int k = 0; k < N; ++k) {
-    v_x(k).SetValue(max_launch_velocity * uvec_shooter_to_target(0, 0));
-    v_y(k).SetValue(max_launch_velocity * uvec_shooter_to_target(1, 0));
-    v_z(k).SetValue(max_launch_velocity * uvec_shooter_to_target(2, 0));
+    v.Col(k).SetValue(robot_wrt_field.block(3, 0, 3, 1) +
+                      max_launch_velocity * uvec_shooter_to_target);
   }
 
   // Shooter initial position
-  problem.SubjectTo(X.Block(0, 0, 3, 1) == shooter);
+  problem.SubjectTo(p.Col(0) == shooter_wrt_field.block(0, 0, 3, 1));
 
   // Require initial launch velocity is below max
   //
   //   √{v_x² + v_y² + v_z²) ≤ vₘₐₓ
   //   v_x² + v_y² + v_z² ≤ vₘₐₓ²
-  problem.SubjectTo(v_x(0) * v_x(0) + v_y(0) * v_y(0) + v_z(0) * v_z(0) <=
+  problem.SubjectTo(slp::pow(v_x(0) - robot_wrt_field(3), 2) +
+                        slp::pow(v_y(0) - robot_wrt_field(4), 2) +
+                        slp::pow(v_z(0) - robot_wrt_field(5), 2) <=
                     max_launch_velocity * max_launch_velocity);
 
   // Require final position is in center of target circle
-  problem.SubjectTo(p_x(N - 1) == target_x);
-  problem.SubjectTo(p_y(N - 1) == target_y);
-  problem.SubjectTo(p_z(N - 1) == target_z);
+  problem.SubjectTo(p.Col(N - 1) == target_wrt_field.block(0, 0, 3, 1));
 
   // Require the final velocity is down
   problem.SubjectTo(v_z(N - 1) < 0.0);
 
-  auto f = [&](sleipnir::VariableMatrix x) {
+  auto f = [](slp::VariableMatrix x) {
     // x' = x'
     // y' = y'
     // z' = z'
@@ -109,11 +120,11 @@ int main() {
     constexpr double m = 2.0;  // kg
     auto a_D = [](auto v) { return 0.5 * rho * v * v * C_D * A / m; };
 
-    auto v_x = x(3, 0) + robot_initial_v_x;
-    auto v_y = x(4, 0) + robot_initial_v_y;
-    auto v_z = x(5, 0) + robot_initial_v_z;
-    return sleipnir::VariableMatrix{{v_x},       {v_y},       {v_z},
-                                    {-a_D(v_x)}, {-a_D(v_y)}, {-g - a_D(v_z)}};
+    auto v_x = x(3, 0);
+    auto v_y = x(4, 0);
+    auto v_z = x(5, 0);
+    return slp::VariableMatrix{{v_x},       {v_y},       {v_z},
+                               {-a_D(v_x)}, {-a_D(v_y)}, {-g - a_D(v_z)}};
   };
 
   // Dynamics constraints - RK4 integration
@@ -135,15 +146,16 @@ int main() {
   problem.Solve({.diagnostics = true});
 
   // Initial velocity vector
-  Eigen::Vector3d v = X.Block(3, 0, 3, 1).Value();
+  Eigen::Vector3d v0 =
+      X.Block(3, 0, 3, 1).Value() - robot_wrt_field.block(3, 0, 3, 1);
 
-  double launch_velocity = v.norm();
+  double launch_velocity = v0.norm();
   std::println("Launch velocity = {:.03} ms", launch_velocity);
 
-  double pitch = std::atan2(v(2), std::hypot(v(0), v(1)));
+  double pitch = std::atan2(v0(2), std::hypot(v0(0), v0(1)));
   std::println("Pitch = {:.03}°", pitch * 180.0 / std::numbers::pi);
 
-  double yaw = std::atan2(v(1), v(0));
+  double yaw = std::atan2(v0(1), v0(0));
   std::println("Yaw = {:.03}°", yaw * 180.0 / std::numbers::pi);
 
   std::println("Total time = {:.03} s", T.Value());

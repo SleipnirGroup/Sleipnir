@@ -16,32 +16,29 @@ from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 from numpy.linalg import norm
 
-field_width = 8.2296  # 27 ft
-field_length = 16.4592  # 54 ft
+field_width = 8.2296  # 27 ft -> m
+field_length = 16.4592  # 54 ft -> m
+target_wrt_field = np.array(
+    [[field_length / 2.0], [field_width / 2.0], [2.64], [0.0], [0.0], [0.0]]
+)
+target_radius = 0.61
 g = 9.806  # m/s²
 
 
+def lerp(a, b, t):
+    return a + t * (b - a)
+
+
 def main():
-    # Robot initial velocity
-    robot_initial_v_x = 0.2  # ft/s
-    robot_initial_v_y = -0.2  # ft/s
-    robot_initial_v_z = 0.0  # ft/s
+    # Robot initial state
+    robot_wrt_field = np.array(
+        [[field_length / 4.0], [field_width / 4.0], [0.0], [1.524], [-1.524], [0.0]]
+    )
 
-    max_launch_velocity = 10.0
+    max_launch_velocity = 10.0  # m/s
 
-    shooter = np.array([[field_length / 4.0], [field_width / 4.0], [1.2]])
-    shooter_x = shooter[0, 0]
-    shooter_y = shooter[1, 0]
-    shooter_z = shooter[2, 0]
-
-    target = np.array([[field_length / 2.0], [field_width / 2.0], [2.64]])
-    target_x = target[0, 0]
-    target_y = target[1, 0]
-    target_z = target[2, 0]
-    target_radius = 0.61
-
-    def lerp(a, b, t):
-        return a + t * (b - a)
+    shooter_wrt_robot = np.array([[0.0], [0.0], [1.2], [0.0], [0.0], [0.0]])
+    shooter_wrt_field = robot_wrt_field + shooter_wrt_robot
 
     problem = OptimizationProblem()
 
@@ -52,6 +49,8 @@ def main():
     T.set_value(1)
     dt = T / N
 
+    # Ball state in field frame
+    #
     #     [x position]
     #     [y position]
     #     [z position]
@@ -60,42 +59,46 @@ def main():
     #     [z velocity]
     X = problem.decision_variable(6, N)
 
+    p = X[:3, :]
     p_x = X[0, :]
     p_y = X[1, :]
     p_z = X[2, :]
+
+    v = X[3:, :]
     v_x = X[3, :]
     v_y = X[4, :]
     v_z = X[5, :]
 
     # Position initial guess is linear interpolation between start and end position
     for k in range(N):
-        p_x[k].set_value(lerp(shooter_x, target_x, k / N))
-        p_y[k].set_value(lerp(shooter_y, target_y, k / N))
-        p_z[k].set_value(lerp(shooter_z, target_z, k / N))
+        p_x[k].set_value(lerp(shooter_wrt_field[0, 0], target_wrt_field[0, 0], k / N))
+        p_y[k].set_value(lerp(shooter_wrt_field[1, 0], target_wrt_field[1, 0], k / N))
+        p_z[k].set_value(lerp(shooter_wrt_field[2, 0], target_wrt_field[2, 0], k / N))
 
     # Velocity initial guess is max launch velocity toward goal
-    uvec_shooter_to_target = target - shooter
+    uvec_shooter_to_target = target_wrt_field[:3, :] - shooter_wrt_field[:3, :]
     uvec_shooter_to_target /= norm(uvec_shooter_to_target)
     for k in range(N):
-        v_x[k].set_value(max_launch_velocity * uvec_shooter_to_target[0, 0])
-        v_y[k].set_value(max_launch_velocity * uvec_shooter_to_target[1, 0])
-        v_z[k].set_value(max_launch_velocity * uvec_shooter_to_target[2, 0])
+        v[:, k].set_value(
+            robot_wrt_field[3:, :] + max_launch_velocity * uvec_shooter_to_target
+        )
 
     # Shooter initial position
-    problem.subject_to(X[:3, 0] == shooter)
+    problem.subject_to(p[:, 0] == shooter_wrt_field[:3, 0])
 
     # Require initial launch velocity is below max
     #
     #   √{v_x² + v_y² + v_z²) ≤ vₘₐₓ
     #   v_x² + v_y² + v_z² ≤ vₘₐₓ²
     problem.subject_to(
-        v_x[0] ** 2 + v_y[0] ** 2 + v_z[0] ** 2 <= max_launch_velocity**2
+        (v_x[0] - robot_wrt_field[3, 0]) ** 2
+        + (v_y[0] - robot_wrt_field[4, 0]) ** 2
+        + (v_z[0] - robot_wrt_field[5, 0]) ** 2
+        <= max_launch_velocity**2
     )
 
     # Require final position is in center of target circle
-    problem.subject_to(p_x[-1] == target_x)
-    problem.subject_to(p_y[-1] == target_y)
-    problem.subject_to(p_z[-1] == target_z)
+    problem.subject_to(p[:, -1] == target_wrt_field[:3, :])
 
     # Require the final velocity is down
     problem.subject_to(v_z[-1] < 0.0)
@@ -115,9 +118,9 @@ def main():
         m = 2.0  # kg
         a_D = lambda v: 0.5 * rho * v**2 * C_D * A / m
 
-        v_x = x[3, 0] + robot_initial_v_x
-        v_y = x[4, 0] + robot_initial_v_y
-        v_z = x[5, 0] + robot_initial_v_z
+        v_x = x[3, 0]
+        v_y = x[4, 0]
+        v_z = x[5, 0]
         return VariableMatrix(
             [[v_x], [v_y], [v_z], [-a_D(v_x)], [-a_D(v_y)], [-g - a_D(v_z)]]
         )
@@ -140,16 +143,16 @@ def main():
     problem.solve(diagnostics=True)
 
     # Initial velocity vector
-    v = X[3:, 0].value()
+    v0 = X[3:, 0].value() - robot_wrt_field[3:, :]
 
-    launch_velocity = norm(v)
+    launch_velocity = norm(v0)
     print(f"Launch velocity = {launch_velocity:.03f} m/s")
 
-    pitch = math.atan2(v[2, 0], math.hypot(v[0, 0], v[1, 0]))
-    print(f"Pitch = {pitch * 180.0 / math.pi:.03f}°")
+    pitch = math.atan2(v0[2, 0], math.hypot(v0[0, 0], v0[1, 0]))
+    print(f"Pitch = {np.rad2deg(pitch):.03f}°")
 
-    yaw = math.atan2(v[1, 0], v[0, 0])
-    print(f"Yaw = {yaw * 180.0 / math.pi:.03f}°")
+    yaw = math.atan2(v0[1, 0], v0[0, 0])
+    print(f"Yaw = {np.rad2deg(yaw):.03f}°")
 
     print(f"Total time = {T.value():.03f} s")
     print(f"dt = {dt.value() * 1e3:.03f} ms")
@@ -175,9 +178,9 @@ def main():
 
     # Target
     ax.plot(
-        target_x,
-        target_y,
-        target_z,
+        target_wrt_field[0, 0],
+        target_wrt_field[1, 0],
+        target_wrt_field[2, 0],
         color="black",
         marker="x",
     )
@@ -185,9 +188,9 @@ def main():
     ys = []
     zs = []
     for angle in np.arange(0.0, 2.0 * math.pi, 0.1):
-        xs.append(target_x + target_radius * math.cos(angle))
-        ys.append(target_y + target_radius * math.sin(angle))
-        zs.append(target_z)
+        xs.append(target_wrt_field[0, 0] + target_radius * math.cos(angle))
+        ys.append(target_wrt_field[1, 0] + target_radius * math.sin(angle))
+        zs.append(target_wrt_field[2, 0])
     ax.plot(xs, ys, zs, color="black")
 
     # Trajectory
