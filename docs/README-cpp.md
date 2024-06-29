@@ -1,5 +1,12 @@
 # Tutorial
 
+## Setup
+
+See the
+[C++ installation instructions](https://sleipnirgroup.github.io/Sleipnir/index.html#autotoc_md2).
+
+## Introduction
+
 A system with position and velocity states and an acceleration input is an
 example of a double integrator. We want to go from 0 m at rest to 10 m at rest
 in the minimum time while obeying the velocity limit (-1, 1) and the
