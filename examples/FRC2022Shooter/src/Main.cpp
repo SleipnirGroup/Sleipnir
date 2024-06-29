@@ -138,32 +138,13 @@ int main() {
   Eigen::Vector3d v = X.Block(3, 0, 3, 1).Value();
 
   double launch_velocity = v.norm();
-  std::println("Launch velocity = {:.3} ms", launch_velocity);
+  std::println("Launch velocity = {:.03} ms", launch_velocity);
 
-  // The launch angle is the angle between the initial velocity vector and the
-  // x-y plane. First, we'll find the angle between the z-axis and the initial
-  // velocity vector.
-  //
-  //   sinθ = |a x b| / (|a| |b|)
-  //
-  // Let v be the initial velocity vector and u be a unit vector along the
-  // z-axis.
-  //
-  //   sinθ = |v x u| / (|v| |u|)
-  //   sinθ = |v x [0, 0, 1]| / |v|
-  //   sinθ = |[v_y, -v_x, 0]|/ |v|
-  //   sinθ = √(v_x² + v_y²) / |v|
-  //
-  // The square root part is just the norm of the first two components of v.
-  //
-  //   sinθ = |v[:2]| / |v|
-  //   θ = asin(|v[:2]| / |v|)                                            NOLINT
-  //
-  // The angle between the initial velocity vector and the X-Y plane is 90° − θ.
-  double launch_angle =
-      std::numbers::pi / 2.0 - std::asin(v.segment(0, 2).norm() / v.norm());
-  std::println("Launch angle = {:.3}°",
-               launch_angle * 180.0 / std::numbers::pi);
+  double pitch = std::atan2(v(2), std::hypot(v(0), v(1)));
+  std::println("Pitch = {:.03}°", pitch * 180.0 / std::numbers::pi);
+
+  double yaw = std::atan2(v(1), v(0));
+  std::println("Yaw = {:.03}°", yaw * 180.0 / std::numbers::pi);
 
   std::println("Total time = {:.03} s", T.Value());
   std::println("dt = {:.03} ms", dt.Value() * 1e3);
