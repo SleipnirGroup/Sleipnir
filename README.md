@@ -1,6 +1,7 @@
 # Sleipnir
 
-![Build](https://github.com/SleipnirGroup/Sleipnir/actions/workflows/build.yml/badge.svg)
+![C++ Build](https://github.com/SleipnirGroup/Sleipnir/actions/workflows/build-cpp.yml/badge.svg)
+![Python Build](https://github.com/SleipnirGroup/Sleipnir/actions/workflows/build-python.yml/badge.svg)
 [![PyPI Downloads](https://img.shields.io/pypi/dm/sleipnirgroup-jormungandr.svg?label=PyPI%20Downloads)](https://pypi.org/project/sleipnirgroup-jormungandr/)
 [![Website](https://img.shields.io/website?url=https%3A%2F%2Fsleipnirgroup.github.io%2FSleipnir%2F&label=Website)](https://sleipnirgroup.github.io/Sleipnir/)
 [![C++ API](https://img.shields.io/badge/documentation-C%2B%2B-blue?label=API%20Docs)](https://sleipnirgroup.github.io/Sleipnir/docs/cpp)
