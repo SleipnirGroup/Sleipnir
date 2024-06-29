@@ -145,29 +145,11 @@ def main():
     launch_velocity = norm(v)
     print(f"Launch velocity = {launch_velocity:.03f} m/s")
 
-    # The launch angle is the angle between the initial velocity vector and the
-    # x-y plane. First, we'll find the angle between the z-axis and the initial
-    # velocity vector.
-    #
-    #   sinθ = |a x b| / (|a| |b|)
-    #
-    # Let v be the initial velocity vector and u be a unit vector along the
-    # z-axis.
-    #
-    #   sinθ = |v x u| / (|v| |u|)
-    #   sinθ = |v x [0, 0, 1]| / |v|
-    #   sinθ = |[v_y, -v_x, 0]|/ |v|
-    #   sinθ = √(v_x² + v_y²) / |v|
-    #
-    # The square root part is just the norm of the first two components of v.
-    #
-    #   sinθ = |v[:2]| / |v|
-    #   θ = asin(|v[:2]| / |v|)
-    #
-    # The angle between the initial velocity vector and the X-Y plane is
-    # 90° − θ.
-    launch_angle = math.pi / 2.0 - math.asin(norm(v[:2]) / norm(v))
-    print(f"Launch angle = {launch_angle * 180.0 / math.pi:.03f}°")
+    pitch = math.atan2(v[2, 0], math.hypot(v[0, 0], v[1, 0]))
+    print(f"Pitch = {pitch * 180.0 / math.pi:.03f}°")
+
+    yaw = math.atan2(v[1, 0], v[0, 0])
+    print(f"Yaw = {yaw * 180.0 / math.pi:.03f}°")
 
     print(f"Total time = {T.value():.03f} s")
     print(f"dt = {dt.value() * 1e3:.03f} ms")
