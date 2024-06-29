@@ -3,8 +3,8 @@
 """
 FRC 2022 shooter trajectory optimization.
 
-This program finds the optimal initial launch velocity and launch angle for the
-2022 FRC game's target.
+This program finds the initial velocity, pitch, and yaw for a game piece to hit
+the 2022 FRC game's target that minimizes time-to-target.
 """
 
 import math
@@ -21,12 +21,35 @@ field_length = 16.4592  # 54 ft -> m
 target_wrt_field = np.array(
     [[field_length / 2.0], [field_width / 2.0], [2.64], [0.0], [0.0], [0.0]]
 )
-target_radius = 0.61
+target_radius = 0.61  # m
 g = 9.806  # m/s²
 
 
 def lerp(a, b, t):
     return a + t * (b - a)
+
+
+def f(x):
+    # x' = x'
+    # y' = y'
+    # z' = z'
+    # x" = −a_D(v_x)
+    # y" = −a_D(v_y)
+    # z" = −g − a_D(v_z)
+    #
+    # where a_D(v) = ½ρv² C_D A / m
+    rho = 1.204  # kg/m³
+    C_D = 0.5
+    A = math.pi * 0.3
+    m = 2.0  # kg
+    a_D = lambda v: 0.5 * rho * v**2 * C_D * A / m
+
+    v_x = x[3, 0]
+    v_y = x[4, 0]
+    v_z = x[5, 0]
+    return VariableMatrix(
+        [[v_x], [v_y], [v_z], [-a_D(v_x)], [-a_D(v_y)], [-g - a_D(v_z)]]
+    )
 
 
 def main():
@@ -35,7 +58,7 @@ def main():
         [[field_length / 4.0], [field_width / 4.0], [0.0], [1.524], [-1.524], [0.0]]
     )
 
-    max_launch_velocity = 10.0  # m/s
+    max_initial_velocity = 10.0  # m/s
 
     shooter_wrt_robot = np.array([[0.0], [0.0], [1.2], [0.0], [0.0], [0.0]])
     shooter_wrt_field = robot_wrt_field + shooter_wrt_robot
@@ -75,18 +98,18 @@ def main():
         p_y[k].set_value(lerp(shooter_wrt_field[1, 0], target_wrt_field[1, 0], k / N))
         p_z[k].set_value(lerp(shooter_wrt_field[2, 0], target_wrt_field[2, 0], k / N))
 
-    # Velocity initial guess is max launch velocity toward goal
+    # Velocity initial guess is max initial velocity toward target
     uvec_shooter_to_target = target_wrt_field[:3, :] - shooter_wrt_field[:3, :]
     uvec_shooter_to_target /= norm(uvec_shooter_to_target)
     for k in range(N):
         v[:, k].set_value(
-            robot_wrt_field[3:, :] + max_launch_velocity * uvec_shooter_to_target
+            robot_wrt_field[3:, :] + max_initial_velocity * uvec_shooter_to_target
         )
 
     # Shooter initial position
     problem.subject_to(p[:, 0] == shooter_wrt_field[:3, 0])
 
-    # Require initial launch velocity is below max
+    # Require initial velocity is below max
     #
     #   √{v_x² + v_y² + v_z²) ≤ vₘₐₓ
     #   v_x² + v_y² + v_z² ≤ vₘₐₓ²
@@ -94,40 +117,12 @@ def main():
         (v_x[0] - robot_wrt_field[3, 0]) ** 2
         + (v_y[0] - robot_wrt_field[4, 0]) ** 2
         + (v_z[0] - robot_wrt_field[5, 0]) ** 2
-        <= max_launch_velocity**2
+        <= max_initial_velocity**2
     )
 
-    # Require final position is in center of target circle
-    problem.subject_to(p[:, -1] == target_wrt_field[:3, :])
-
-    # Require the final velocity is down
-    problem.subject_to(v_z[-1] < 0.0)
-
-    def f(x):
-        # x' = x'
-        # y' = y'
-        # z' = z'
-        # x" = −a_D(v_x)
-        # y" = −a_D(v_y)
-        # z" = −g − a_D(v_z)
-        #
-        # where a_D(v) = ½ρv² C_D A / m
-        rho = 1.204  # kg/m³
-        C_D = 0.5
-        A = math.pi * 0.3
-        m = 2.0  # kg
-        a_D = lambda v: 0.5 * rho * v**2 * C_D * A / m
-
-        v_x = x[3, 0]
-        v_y = x[4, 0]
-        v_z = x[5, 0]
-        return VariableMatrix(
-            [[v_x], [v_y], [v_z], [-a_D(v_x)], [-a_D(v_y)], [-g - a_D(v_z)]]
-        )
-
     # Dynamics constraints - RK4 integration
+    h = dt
     for k in range(N - 1):
-        h = dt
         x_k = X[:, k]
         x_k1 = X[:, k + 1]
 
@@ -137,7 +132,13 @@ def main():
         k4 = f(x_k + h * k3)
         problem.subject_to(x_k1 == x_k + h / 6 * (k1 + 2 * k2 + 2 * k3 + k4))
 
-    # Minimize time to goal
+    # Require final position is in center of target circle
+    problem.subject_to(p[:, -1] == target_wrt_field[:3, :])
+
+    # Require the final velocity is down
+    problem.subject_to(v_z[-1] < 0.0)
+
+    # Minimize time-to-target
     problem.minimize(T)
 
     problem.solve(diagnostics=True)
@@ -145,8 +146,8 @@ def main():
     # Initial velocity vector
     v0 = X[3:, 0].value() - robot_wrt_field[3:, :]
 
-    launch_velocity = norm(v0)
-    print(f"Launch velocity = {launch_velocity:.03f} m/s")
+    velocity = norm(v0)
+    print(f"Velocity = {velocity:.03f} m/s")
 
     pitch = math.atan2(v0[2, 0], math.hypot(v0[0, 0], v0[1, 0]))
     print(f"Pitch = {np.rad2deg(pitch):.03f}°")
