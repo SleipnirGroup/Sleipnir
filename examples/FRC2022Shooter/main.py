@@ -63,9 +63,9 @@ def main():
     p_x = X[0, :]
     p_y = X[1, :]
     p_z = X[2, :]
-    v_x = X[3, :] + np.full((1, N), robot_initial_v_x)
-    v_y = X[4, :] + np.full((1, N), robot_initial_v_y)
-    v_z = X[5, :] + np.full((1, N), robot_initial_v_z)
+    v_x = X[3, :]
+    v_y = X[4, :]
+    v_z = X[5, :]
 
     # Position initial guess is linear interpolation between start and end position
     for k in range(N):
@@ -77,9 +77,9 @@ def main():
     uvec_shooter_to_target = target - shooter
     uvec_shooter_to_target /= norm(uvec_shooter_to_target)
     for k in range(N):
-        X[3, k].set_value(max_launch_velocity * uvec_shooter_to_target[0, 0])
-        X[4, k].set_value(max_launch_velocity * uvec_shooter_to_target[1, 0])
-        X[5, k].set_value(max_launch_velocity * uvec_shooter_to_target[2, 0])
+        v_x[k].set_value(max_launch_velocity * uvec_shooter_to_target[0, 0])
+        v_y[k].set_value(max_launch_velocity * uvec_shooter_to_target[1, 0])
+        v_z[k].set_value(max_launch_velocity * uvec_shooter_to_target[2, 0])
 
     # Shooter initial position
     problem.subject_to(X[:3, 0] == shooter)
@@ -115,9 +115,9 @@ def main():
         m = 2.0  # kg
         a_D = lambda v: 0.5 * rho * v**2 * C_D * A / m
 
-        v_x = x[3, 0]
-        v_y = x[4, 0]
-        v_z = x[5, 0]
+        v_x = x[3, 0] + robot_initial_v_x
+        v_y = x[4, 0] + robot_initial_v_y
+        v_z = x[5, 0] + robot_initial_v_z
         return VariableMatrix(
             [[v_x], [v_y], [v_z], [-a_D(v_x)], [-a_D(v_y)], [-g - a_D(v_z)]]
         )

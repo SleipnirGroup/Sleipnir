@@ -56,12 +56,9 @@ int main() {
   auto p_x = X.Row(0);
   auto p_y = X.Row(1);
   auto p_z = X.Row(2);
-  auto v_x =
-      X.Row(3) + Eigen::RowVector<double, N>::Constant(robot_initial_v_x);
-  auto v_y =
-      X.Row(4) + Eigen::RowVector<double, N>::Constant(robot_initial_v_y);
-  auto v_z =
-      X.Row(5) + Eigen::RowVector<double, N>::Constant(robot_initial_v_z);
+  auto v_x = X.Row(3);
+  auto v_y = X.Row(4);
+  auto v_z = X.Row(5);
 
   // Position initial guess is linear interpolation between start and end
   // position
@@ -74,9 +71,9 @@ int main() {
   // Velocity initial guess is max launch velocity toward goal
   Eigen::Vector3d uvec_shooter_to_target = (target - shooter).normalized();
   for (int k = 0; k < N; ++k) {
-    X(3, k).SetValue(max_launch_velocity * uvec_shooter_to_target(0, 0));
-    X(4, k).SetValue(max_launch_velocity * uvec_shooter_to_target(1, 0));
-    X(5, k).SetValue(max_launch_velocity * uvec_shooter_to_target(2, 0));
+    v_x(k).SetValue(max_launch_velocity * uvec_shooter_to_target(0, 0));
+    v_y(k).SetValue(max_launch_velocity * uvec_shooter_to_target(1, 0));
+    v_z(k).SetValue(max_launch_velocity * uvec_shooter_to_target(2, 0));
   }
 
   // Shooter initial position
@@ -97,7 +94,7 @@ int main() {
   // Require the final velocity is down
   problem.SubjectTo(v_z(N - 1) < 0.0);
 
-  auto f = [](sleipnir::VariableMatrix x) {
+  auto f = [&](sleipnir::VariableMatrix x) {
     // x' = x'
     // y' = y'
     // z' = z'
@@ -112,9 +109,9 @@ int main() {
     constexpr double m = 2.0;  // kg
     auto a_D = [](auto v) { return 0.5 * rho * v * v * C_D * A / m; };
 
-    auto v_x = x(3, 0);
-    auto v_y = x(4, 0);
-    auto v_z = x(5, 0);
+    auto v_x = x(3, 0) + robot_initial_v_x;
+    auto v_y = x(4, 0) + robot_initial_v_y;
+    auto v_z = x(5, 0) + robot_initial_v_z;
     return sleipnir::VariableMatrix{{v_x},       {v_y},       {v_z},
                                     {-a_D(v_x)}, {-a_D(v_y)}, {-g - a_D(v_z)}};
   };
