@@ -151,7 +151,7 @@ def main():
 
     # Minimize sensitivity of vertical position to velocity
     sensitivity = Gradient(x_k[3, 0], x[3:, 0]).get()
-    problem.minimize(sensitivity.T * sensitivity)
+    problem.minimize(sensitivity.T @ sensitivity)
 
     problem.solve(diagnostics=True)
 
