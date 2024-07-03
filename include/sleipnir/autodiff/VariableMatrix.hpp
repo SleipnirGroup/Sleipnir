@@ -200,7 +200,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    */
   template <typename Derived>
     requires std::same_as<typename Derived::Scalar, double>
-  VariableMatrix& SetValue(const Eigen::MatrixBase<Derived>& values) {
+  void SetValue(const Eigen::MatrixBase<Derived>& values) {
     Assert(Rows() == values.rows());
     Assert(Cols() == values.cols());
 
@@ -209,8 +209,6 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
         (*this)(row, col).SetValue(values(row, col));
       }
     }
-
-    return *this;
   }
 
   /**

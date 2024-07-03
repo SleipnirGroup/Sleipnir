@@ -62,7 +62,7 @@ class SLEIPNIR_DLLEXPORT Variable {
    *
    * @param value The value of the Variable.
    */
-  Variable& SetValue(double value) {
+  void SetValue(double value) {
     if (expr->IsConstant(0.0)) {
       expr = detail::MakeExpressionPtr(value);
     } else {
@@ -76,7 +76,6 @@ class SLEIPNIR_DLLEXPORT Variable {
       }
       expr->value = value;
     }
-    return *this;
   }
 
   /**
