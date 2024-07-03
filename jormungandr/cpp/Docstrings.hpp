@@ -1540,12 +1540,6 @@ R"doc(Sets Variable's internal value.
 Parameter ``value``:
     The value of the Variable.)doc";
 
-static const char *__doc_sleipnir_Variable_SetValue_2 =
-R"doc(Sets Variable's internal value.
-
-Parameter ``value``:
-    The value of the Variable.)doc";
-
 static const char *__doc_sleipnir_Variable_Type =
 R"doc(Returns the type of this expression (constant, linear, quadratic, or
 nonlinear).)doc";
@@ -1561,18 +1555,12 @@ Parameter ``value``:
     The value of the Variable.)doc";
 
 static const char *__doc_sleipnir_Variable_Variable_3 =
-R"doc(Constructs a Variable from an int.
-
-Parameter ``value``:
-    The value of the Variable.)doc";
-
-static const char *__doc_sleipnir_Variable_Variable_4 =
 R"doc(Constructs a Variable pointing to the specified expression.
 
 Parameter ``expr``:
     The autodiff variable.)doc";
 
-static const char *__doc_sleipnir_Variable_Variable_5 =
+static const char *__doc_sleipnir_Variable_Variable_4 =
 R"doc(Constructs a Variable pointing to the specified expression.
 
 Parameter ``expr``:
@@ -1582,12 +1570,6 @@ static const char *__doc_sleipnir_Variable_expr = R"doc(The expression node.)doc
 
 static const char *__doc_sleipnir_Variable_operator_assign =
 R"doc(Assignment operator for double.
-
-Parameter ``value``:
-    The value of the Variable.)doc";
-
-static const char *__doc_sleipnir_Variable_operator_assign_2 =
-R"doc(Assignment operator for int.
 
 Parameter ``value``:
     The value of the Variable.)doc";

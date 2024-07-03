@@ -27,11 +27,11 @@ void BindVariable(py::module_& autodiff, py::class_<Variable>& cls) {
 
   cls.def(py::init<>(), DOC(sleipnir, Variable, Variable));
   cls.def(py::init<double>(), "value"_a, DOC(sleipnir, Variable, Variable, 2));
-  cls.def(py::init<int>(), "value"_a, DOC(sleipnir, Variable, Variable, 3));
+  cls.def(py::init<int>(), "value"_a, DOC(sleipnir, Variable, Variable, 2));
   cls.def("set_value", py::overload_cast<double>(&Variable::SetValue),
           "value"_a, DOC(sleipnir, Variable, SetValue));
-  cls.def("set_value", py::overload_cast<int>(&Variable::SetValue), "value"_a,
-          DOC(sleipnir, Variable, SetValue, 2));
+  cls.def("set_value", py::overload_cast<double>(&Variable::SetValue),
+          "value"_a, DOC(sleipnir, Variable, SetValue));
   cls.def(double() * py::self, "lhs"_a);
   cls.def(py::self * double(), "rhs"_a);
   cls.def(py::self * py::self, "rhs"_a);
