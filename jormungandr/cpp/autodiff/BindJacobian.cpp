@@ -1,19 +1,19 @@
 // Copyright (c) Sleipnir contributors
 
-#include <pybind11/eigen.h>
-#include <pybind11/pybind11.h>
+#include <nanobind/eigen/sparse.h>
+#include <nanobind/nanobind.h>
 #include <sleipnir/autodiff/Jacobian.hpp>
 
 #include "Docstrings.hpp"
 
-namespace py = pybind11;
+namespace nb = nanobind;
 
 namespace sleipnir {
 
-void BindJacobian(py::class_<Jacobian>& cls) {
-  using namespace py::literals;
+void BindJacobian(nb::class_<Jacobian>& cls) {
+  using namespace nb::literals;
 
-  cls.def(py::init<VariableMatrix, VariableMatrix>(), "variables"_a, "wrt"_a,
+  cls.def(nb::init<VariableMatrix, VariableMatrix>(), "variables"_a, "wrt"_a,
           DOC(sleipnir, Jacobian, Jacobian));
   cls.def("get", &Jacobian::Get, DOC(sleipnir, Jacobian, Get));
   cls.def("value", &Jacobian::Value, DOC(sleipnir, Jacobian, Value));

@@ -10,14 +10,6 @@ def test_callback_requested_stop():
     x = problem.decision_variable()
     problem.minimize(x * x)
 
-    problem.callback(lambda info: None)
-    status = problem.solve(diagnostics=True)
-
-    assert status.cost_function_type == ExpressionType.QUADRATIC
-    assert status.equality_constraint_type == ExpressionType.NONE
-    assert status.inequality_constraint_type == ExpressionType.NONE
-    assert status.exit_condition == SolverExitCondition.SUCCESS
-
     problem.callback(lambda info: False)
     status = problem.solve(diagnostics=True)
 

@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 
 import os
-import platform
 import shutil
 import subprocess
 import sys
 
 
 def clear_python_workspace():
-    shutil.rmtree(".py-build-cmake_cache", ignore_errors=True)
+    shutil.rmtree("build-stubs", ignore_errors=True)
     subprocess.run(
         [
             "git",
@@ -23,21 +22,29 @@ def clear_python_workspace():
 def prep_python_api_docs():
     # Generate .pyi files
     subprocess.run(
-        [sys.executable, "-m", "build", "--wheel", "--no-isolation"], check=True
+        ["cmake", "-B", "build-stubs", "-S", ".", "-DBUILD_PYTHON=ON"], check=True
     )
-
-    version_tuple = platform.python_version_tuple()
-    version_num = f"{version_tuple[0]}{version_tuple[1]}"
-    PYI_PATH = os.path.join(
-        ".py-build-cmake_cache",
-        # e.g., "cp312-cp312-linux_x86_64-stubs"
-        f"cp{version_num}-cp{version_num}-{platform.system().lower()}_{platform.machine()}-stubs",
-        "_jormungandr",
+    subprocess.run(
+        ["cmake", "--build", "build-stubs", "--target", "_jormungandr"], check=True
+    )
+    subprocess.run(
+        [
+            "cmake",
+            "--install",
+            "build-stubs",
+            "--component",
+            "python_modules",
+            "--prefix",
+            "build-stubs/install",
+        ],
+        check=True,
     )
 
     for package in ["autodiff", "optimization"]:
         # Read .pyi
-        with open(os.path.join(PYI_PATH, package + ".pyi")) as f:
+        with open(
+            os.path.join("build-stubs", "install", "jormungandr", package + ".pyi")
+        ) as f:
             package_content = f.read()
 
         # Remove redundant prefixes for documentation

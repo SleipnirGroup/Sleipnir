@@ -137,7 +137,7 @@ See the [examples](https://github.com/SleipnirGroup/Sleipnir/tree/main/examples)
   * On Linux, install via `sudo apt install python`
   * On macOS, install via `brew install python`
 * [Eigen](https://gitlab.com/libeigen/eigen)
-* [pybind11](https://github.com/pybind/pybind11) (build only)
+* [nanobind](https://github.com/wjakob/nanobind) (build only)
 * [Catch2](https://github.com/catchorg/Catch2) (tests only)
 
 Library dependencies which aren't installed locally will be automatically downloaded and built by CMake.

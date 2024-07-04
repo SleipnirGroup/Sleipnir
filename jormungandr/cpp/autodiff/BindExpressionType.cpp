@@ -1,15 +1,15 @@
 // Copyright (c) Sleipnir contributors
 
-#include <pybind11/pybind11.h>
+#include <nanobind/nanobind.h>
 #include <sleipnir/autodiff/ExpressionType.hpp>
 
 #include "Docstrings.hpp"
 
-namespace py = pybind11;
+namespace nb = nanobind;
 
 namespace sleipnir {
 
-void BindExpressionType(py::enum_<ExpressionType>& e) {
+void BindExpressionType(nb::enum_<ExpressionType>& e) {
   e.value("NONE", ExpressionType::kNone, DOC(sleipnir, ExpressionType, kNone));
   e.value("CONSTANT", ExpressionType::kConstant,
           DOC(sleipnir, ExpressionType, kConstant));

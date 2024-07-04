@@ -2,20 +2,35 @@
 
 #pragma once
 
-#include <pybind11/eigen.h>
+#include <optional>
 
-namespace py = pybind11;
+#include <Eigen/Core>
+#include <nanobind/ndarray.h>
+#include <sleipnir/util/Assert.hpp>
+
+namespace nb = nanobind;
 
 namespace sleipnir {
 
 /**
- * Returns true if the given function input is a NumPy array containing an
- * arithmetic type.
+ * Converts the given nb::ndarray to an Eigen matrix.
  */
-inline bool IsNumPyArithmeticArray(const auto& input) {
-  return py::isinstance<py::array_t<double>>(input) ||
-         py::isinstance<py::array_t<int64_t>>(input) ||
-         py::isinstance<py::array_t<int32_t>>(input);
+template <typename T>
+inline std::optional<Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>>
+TryCastToEigen(const nb::object& obj) {
+  if (nb::isinstance<nb::ndarray<T>>(obj)) {
+    auto input = nb::cast<nb::ndarray<T>>(obj);
+    Assert(input.ndim() == 2);
+
+    return Eigen::Map<const Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic,
+                                          Eigen::RowMajor>>{
+        input.data(),
+        static_cast<Eigen::Index>(input.shape(0)),
+        static_cast<Eigen::Index>(input.shape(1)),
+        {input.stride(0), input.stride(1)}};
+  } else {
+    return std::nullopt;
+  }
 }
 
 }  // namespace sleipnir

@@ -18,6 +18,14 @@ set(CMAKE_MODULE_PATH
 # Make `GIT_SUBMODULES ""` initialize no submodules
 cmake_policy(SET CMP0097 NEW)
 
+# https://github.com/wjakob/nanobind/issues/613
+#
+# Visual Studio 17.10.4's MSVC compiler gives an ICE in nanobind's nb_func.h,
+# but clang-cl does not.
+if(WIN32)
+    set(CMAKE_GENERATOR_TOOLSET "ClangCl")
+endif()
+
 project(Sleipnir LANGUAGES CXX)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -91,7 +99,7 @@ include(FetchContent)
 
 # Options for using a package manager (e.g., vcpkg) for certain dependencies
 option(USE_SYSTEM_EIGEN "Use system eigen" OFF)
-option(USE_SYSTEM_PYBIND "Use system pybind" OFF)
+option(USE_SYSTEM_NANOBIND "Use system nanobind" OFF)
 
 # Required for std::async()
 find_package(Threads REQUIRED)
@@ -276,23 +284,29 @@ if(BUILD_PYTHON)
         set(PY_DEST lib/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR})
     endif()
 
-    # pybind11 dependency
+    # nanobind dependency
     if(NOT USE_SYSTEM_PYBIND)
         fetchcontent_declare(
-            pybind11
-            GIT_REPOSITORY https://github.com/pybind/pybind11.git
-            GIT_TAG v2.13.1
+            nanobind
+            GIT_REPOSITORY https://github.com/wjakob/nanobind.git
+            # master on 2024-07-06
+            GIT_TAG b0136fe6ac1967cb2399456adc346a1af06a3b88
+            PATCH_COMMAND
+                git apply
+                ${CMAKE_CURRENT_SOURCE_DIR}/cmake/0001-Replace-zero-size-array.patch
+                ${CMAKE_CURRENT_SOURCE_DIR}/cmake/0002-Give-anonymous-union-a-name.patch
+            UPDATE_DISCONNECTED 1
         )
-        fetchcontent_makeavailable(pybind11)
+        fetchcontent_makeavailable(nanobind)
     else()
-        find_package(pybind11 CONFIG REQUIRED)
+        find_package(nanobind CONFIG REQUIRED)
     endif()
 
     file(GLOB_RECURSE jormungandr_src jormungandr/cpp/*.cpp)
 
     # Build Sleipnir dependency directly into the wheel to avoid having to
     # configure RPATHs
-    pybind11_add_module(_jormungandr ${jormungandr_src} ${Sleipnir_src})
+    nanobind_add_module(_jormungandr ${jormungandr_src} ${Sleipnir_src})
     compiler_flags(_jormungandr)
     target_compile_definitions(_jormungandr PRIVATE JORMUNGANDR=1)
     target_include_directories(
@@ -302,10 +316,12 @@ if(BUILD_PYTHON)
             ${CMAKE_CURRENT_SOURCE_DIR}/include
             ${CMAKE_CURRENT_SOURCE_DIR}/jormungandr/cpp
     )
-    target_link_libraries(
-        _jormungandr
-        PUBLIC pybind11::module Threads::Threads Eigen3::Eigen
-    )
+    target_link_libraries(_jormungandr PUBLIC Threads::Threads Eigen3::Eigen)
+
+    # Suppress compiler warnings in nanobind
+    if(${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang")
+        target_compile_options(nanobind-static PRIVATE "-Wno-array-bounds")
+    endif()
 
     install(
         TARGETS _jormungandr
@@ -314,22 +330,37 @@ if(BUILD_PYTHON)
         DESTINATION ${PY_DEST}
     )
 
-    # pybind11-stubgen and pybind11_mkdoc don't support Windows
+    nanobind_add_stub(
+        _jormungandr_stub
+        INSTALL_TIME
+        MARKER_FILE jormungandr/py.typed
+        MODULE _jormungandr
+        OUTPUT jormungandr/__init__.pyi
+        PYTHON_PATH $<TARGET_FILE_DIR:_jormungandr>
+        DEPENDS _jormungandr
+        COMPONENT python_modules
+    )
+    nanobind_add_stub(
+        _jormungandr_autodiff_stub
+        INSTALL_TIME
+        MODULE _jormungandr.autodiff
+        OUTPUT jormungandr/autodiff.pyi
+        PYTHON_PATH $<TARGET_FILE_DIR:_jormungandr>
+        DEPENDS _jormungandr
+        COMPONENT python_modules
+    )
+    nanobind_add_stub(
+        _jormungandr_optimization_stub
+        INSTALL_TIME
+        MODULE _jormungandr.optimization
+        OUTPUT jormungandr/optimization.pyi
+        PYTHON_PATH $<TARGET_FILE_DIR:_jormungandr>
+        DEPENDS _jormungandr
+        COMPONENT python_modules
+    )
+
+    # pybind11_mkdoc doesn't support Windows
     if(NOT WIN32 AND NOT CMAKE_CROSSCOMPILING)
-        # pybind11-stubgen dependency
-        fetchcontent_declare(
-            pybind11-stubgen
-            GIT_REPOSITORY https://github.com/sizmailov/pybind11-stubgen.git
-            GIT_TAG v2.5.1
-            GIT_SUBMODULES ""
-        )
-        fetchcontent_makeavailable(pybind11-stubgen)
-
-        # Generate stubs for the Python module
-        include(cmake/modules/Pybind11Stubgen.cmake)
-        pybind11_stubgen(_jormungandr)
-        pybind11_stubgen_install(_jormungandr ${PY_DEST})
-
         # pybind11_mkdoc dependency
         fetchcontent_declare(
             pybind11_mkdoc

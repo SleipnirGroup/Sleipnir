@@ -32,8 +32,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - run: mkdir build
-
       - name: Make GCC 14 the default toolchain (Linux)
         run: |
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 200
@@ -43,16 +41,8 @@ jobs:
         with:
           python-version: "3.12"
 
-      - run: pip3 install \
-          build \
-          py-build-cmake \
-          pybind11 \
-          pybind11-stubgen \
-          pybind11-mkdoc \
-          clang
-
+      - run: pip3 install pybind11-mkdoc
       - run: sudo apt-get install -y doxygen
-
       - run: ./tools/generate_website.py
 
       - uses: actions/configure-pages@v2
