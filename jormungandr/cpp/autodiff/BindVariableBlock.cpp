@@ -305,7 +305,7 @@ void BindVariableBlock(py::module_& autodiff,
                         method_name, ufunc_name, input1_name, input2_name));
         return py::cast(VariableMatrix{self});
       },
-      "ufunc"_a, "method"_a);
+      "ufunc"_a, "method"_a, "inputs"_a, "kwargs"_a);
 
   cls.def(py::self * Variable(), "rhs"_a);
   cls.def(py::self * double(), "rhs"_a);
