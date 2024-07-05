@@ -56,7 +56,7 @@ Parameter ``lhs``:
 Parameter ``rhs``:
     The right-hand side of the binary operator.
 
-Parameter ``binaryOp``:
+Parameter ``binary_op``:
     The binary operator to use for the reduce operation.)doc";
 
 static const char *__doc_sleipnir_DynamicsType = R"doc(Enum describing a type of system dynamics constraints.)doc";
@@ -70,7 +70,7 @@ static const char *__doc_sleipnir_EqualityConstraints = R"doc(A vector of equali
 static const char *__doc_sleipnir_EqualityConstraints_EqualityConstraints =
 R"doc(Concatenates multiple equality constraints.
 
-Parameter ``equalityConstraints``:
+Parameter ``equality_constraints``:
     The list of EqualityConstraints to concatenate.)doc";
 
 static const char *__doc_sleipnir_EqualityConstraints_EqualityConstraints_2 =
@@ -78,7 +78,7 @@ R"doc(Concatenates multiple equality constraints.
 
 This overload is for Python bindings only.
 
-Parameter ``equalityConstraints``:
+Parameter ``equality_constraints``:
     The list of EqualityConstraints to concatenate.)doc";
 
 static const char *__doc_sleipnir_EqualityConstraints_EqualityConstraints_3 =
@@ -188,7 +188,7 @@ static const char *__doc_sleipnir_InequalityConstraints = R"doc(A vector of ineq
 static const char *__doc_sleipnir_InequalityConstraints_InequalityConstraints =
 R"doc(Concatenates multiple inequality constraints.
 
-Parameter ``inequalityConstraints``:
+Parameter ``inequality_constraints``:
     The list of InequalityConstraints to concatenate.)doc";
 
 static const char *__doc_sleipnir_InequalityConstraints_InequalityConstraints_2 =
@@ -196,7 +196,7 @@ R"doc(Concatenates multiple inequality constraints.
 
 This overload is for Python bindings only.
 
-Parameter ``inequalityConstraints``:
+Parameter ``inequality_constraints``:
     The list of InequalityConstraints to concatenate.)doc";
 
 static const char *__doc_sleipnir_InequalityConstraints_InequalityConstraints_3 =
@@ -227,13 +227,13 @@ A nonlinear program has the form:
 where f(x) is the cost function, cₑ(x) are the equality constraints,
 and cᵢ(x) are the inequality constraints.
 
-Parameter ``decisionVariables``:
+Parameter ``decision_variables``:
     The list of decision variables.
 
-Parameter ``equalityConstraints``:
+Parameter ``equality_constraints``:
     The list of equality constraints.
 
-Parameter ``inequalityConstraints``:
+Parameter ``inequality_constraints``:
     The list of inequality constraints.
 
 Parameter ``f``:
@@ -245,7 +245,7 @@ Parameter ``callback``:
 Parameter ``config``:
     Configuration options for the solver.
 
-Parameter ``feasibilityRestoration``:
+Parameter ``feasibility_restoration``:
     Whether to use feasibility restoration instead of the normal
     algorithm.
 
@@ -331,7 +331,7 @@ Parameter ``solve``:
     A user-provided function that takes a decision variable initial
     guess and returns a MultistartResult.
 
-Parameter ``initialGuesses``:
+Parameter ``initial_guesses``:
     A list of decision variable initial guesses to try.)doc";
 
 static const char *__doc_sleipnir_MultistartResult =
@@ -378,13 +378,13 @@ static const char *__doc_sleipnir_OCPSolver_ConstrainDirectTranscription = R"doc
 static const char *__doc_sleipnir_OCPSolver_ConstrainFinalState =
 R"doc(Utility function to constrain the final state.
 
-Parameter ``finalState``:
+Parameter ``final_state``:
     the final state to constrain to.)doc";
 
 static const char *__doc_sleipnir_OCPSolver_ConstrainInitialState =
 R"doc(Utility function to constrain the initial state.
 
-Parameter ``initialState``:
+Parameter ``initial_state``:
     the initial state to constrain to.)doc";
 
 static const char *__doc_sleipnir_OCPSolver_ConstrainSingleShooting = R"doc()doc";
@@ -433,16 +433,16 @@ static const char *__doc_sleipnir_OCPSolver_OCPSolver =
 R"doc(Build an optimization problem using a system evolution function
 (explicit ODE or discrete state transition function).
 
-Parameter ``numStates``:
+Parameter ``num_states``:
     The number of system states.
 
-Parameter ``numInputs``:
+Parameter ``num_inputs``:
     The number of system inputs.
 
 Parameter ``dt``:
     The timestep for fixed-step integration.
 
-Parameter ``numSteps``:
+Parameter ``num_steps``:
     The number of control points.
 
 Parameter ``dynamics``:
@@ -451,10 +451,10 @@ Parameter ``dynamics``:
     Implicit: f([x dx/dt]', u, *) = 0 - State transition: xₖ₊₁ = f(xₖ,
     uₖ)
 
-Parameter ``dynamicsType``:
+Parameter ``dynamics_type``:
     The type of system evolution function.
 
-Parameter ``timestepMethod``:
+Parameter ``timestep_method``:
     The timestep method.
 
 Parameter ``method``:
@@ -464,16 +464,16 @@ static const char *__doc_sleipnir_OCPSolver_OCPSolver_2 =
 R"doc(Build an optimization problem using a system evolution function
 (explicit ODE or discrete state transition function).
 
-Parameter ``numStates``:
+Parameter ``num_states``:
     The number of system states.
 
-Parameter ``numInputs``:
+Parameter ``num_inputs``:
     The number of system inputs.
 
 Parameter ``dt``:
     The timestep for fixed-step integration.
 
-Parameter ``numSteps``:
+Parameter ``num_steps``:
     The number of control points.
 
 Parameter ``dynamics``:
@@ -482,10 +482,10 @@ Parameter ``dynamics``:
     Implicit: f(t, [x dx/dt]', u, *) = 0 - State transition: xₖ₊₁ =
     f(t, xₖ, uₖ, dt)
 
-Parameter ``dynamicsType``:
+Parameter ``dynamics_type``:
     The type of system evolution function.
 
-Parameter ``timestepMethod``:
+Parameter ``timestep_method``:
     The timestep method.
 
 Parameter ``method``:
@@ -494,26 +494,26 @@ Parameter ``method``:
 static const char *__doc_sleipnir_OCPSolver_SetLowerInputBound =
 R"doc(Convenience function to set a lower bound on the input.
 
-Parameter ``lowerBound``:
+Parameter ``lower_bound``:
     The lower bound that inputs must always be above. Must be shaped
     (numInputs)x1.)doc";
 
 static const char *__doc_sleipnir_OCPSolver_SetMaxTimestep =
 R"doc(Convenience function to set an upper bound on the timestep.
 
-Parameter ``maxTimestep``:
+Parameter ``max_timestep``:
     The maximum timestep.)doc";
 
 static const char *__doc_sleipnir_OCPSolver_SetMinTimestep =
 R"doc(Convenience function to set a lower bound on the timestep.
 
-Parameter ``minTimestep``:
+Parameter ``min_timestep``:
     The minimum timestep.)doc";
 
 static const char *__doc_sleipnir_OCPSolver_SetUpperInputBound =
 R"doc(Convenience function to set an upper bound on the input.
 
-Parameter ``upperBound``:
+Parameter ``upper_bound``:
     The upper bound that inputs must always be below. Must be shaped
     (numInputs)x1.)doc";
 
@@ -881,7 +881,7 @@ decision variable.)doc";
 static const char *__doc_sleipnir_ToMessage =
 R"doc(Returns user-readable message corresponding to the exit condition.
 
-Parameter ``exitCondition``:
+Parameter ``exit_condition``:
     Solver exit condition.)doc";
 
 static const char *__doc_sleipnir_TranscriptionMethod = R"doc(Enum describing an OCP transcription method.)doc";
@@ -909,31 +909,31 @@ Template parameter ``Mat``:
 static const char *__doc_sleipnir_VariableBlock_Block =
 R"doc(Returns a block slice of the variable matrix.
 
-Parameter ``rowOffset``:
+Parameter ``row_offset``:
     The row offset of the block selection.
 
-Parameter ``colOffset``:
+Parameter ``col_offset``:
     The column offset of the block selection.
 
-Parameter ``blockRows``:
+Parameter ``block_rows``:
     The number of rows in the block selection.
 
-Parameter ``blockCols``:
+Parameter ``block_cols``:
     The number of columns in the block selection.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_Block_2 =
 R"doc(Returns a block slice of the variable matrix.
 
-Parameter ``rowOffset``:
+Parameter ``row_offset``:
     The row offset of the block selection.
 
-Parameter ``colOffset``:
+Parameter ``col_offset``:
     The column offset of the block selection.
 
-Parameter ``blockRows``:
+Parameter ``block_rows``:
     The number of rows in the block selection.
 
-Parameter ``blockCols``:
+Parameter ``block_cols``:
     The number of columns in the block selection.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_Col =
@@ -953,7 +953,7 @@ static const char *__doc_sleipnir_VariableBlock_Cols = R"doc(Returns number of c
 static const char *__doc_sleipnir_VariableBlock_CwiseTransform =
 R"doc(Transforms the matrix coefficient-wise with an unary operator.
 
-Parameter ``unaryOp``:
+Parameter ``unary_op``:
     The unary operator to use for the transform operation.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_Row =
@@ -1019,16 +1019,16 @@ R"doc(Constructs a Variable block pointing to a subset of the given matrix.
 Parameter ``mat``:
     The matrix to which to point.
 
-Parameter ``rowOffset``:
+Parameter ``row_offset``:
     The block's row offset.
 
-Parameter ``colOffset``:
+Parameter ``col_offset``:
     The block's column offset.
 
-Parameter ``blockRows``:
+Parameter ``block_rows``:
     The number of rows in the block.
 
-Parameter ``blockCols``:
+Parameter ``block_cols``:
     The number of columns in the block.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_begin = R"doc(Returns begin iterator.)doc";
@@ -1200,31 +1200,31 @@ static const char *__doc_sleipnir_VariableMatrix = R"doc(A matrix of autodiff va
 static const char *__doc_sleipnir_VariableMatrix_Block =
 R"doc(Returns a block slice of the variable matrix.
 
-Parameter ``rowOffset``:
+Parameter ``row_offset``:
     The row offset of the block selection.
 
-Parameter ``colOffset``:
+Parameter ``col_offset``:
     The column offset of the block selection.
 
-Parameter ``blockRows``:
+Parameter ``block_rows``:
     The number of rows in the block selection.
 
-Parameter ``blockCols``:
+Parameter ``block_cols``:
     The number of columns in the block selection.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_Block_2 =
 R"doc(Returns a block slice of the variable matrix.
 
-Parameter ``rowOffset``:
+Parameter ``row_offset``:
     The row offset of the block selection.
 
-Parameter ``colOffset``:
+Parameter ``col_offset``:
     The column offset of the block selection.
 
-Parameter ``blockRows``:
+Parameter ``block_rows``:
     The number of rows in the block selection.
 
-Parameter ``blockCols``:
+Parameter ``block_cols``:
     The number of columns in the block selection.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_Col =
@@ -1244,7 +1244,7 @@ static const char *__doc_sleipnir_VariableMatrix_Cols = R"doc(Returns number of 
 static const char *__doc_sleipnir_VariableMatrix_CwiseTransform =
 R"doc(Transforms the matrix coefficient-wise with an unary operator.
 
-Parameter ``unaryOp``:
+Parameter ``unary_op``:
     The unary operator to use for the transform operation.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_Ones =
@@ -1700,13 +1700,13 @@ R"doc(Constructs an unary expression (an operator with one argument).
 Parameter ``type``:
     The expression's type.
 
-Parameter ``valueFunc``:
+Parameter ``value_func``:
     Unary operator that produces this expression's value.
 
-Parameter ``lhsGradientValueFunc``:
+Parameter ``lhs_gradient_value_func``:
     Gradient with respect to the operand.
 
-Parameter ``lhsGradientFunc``:
+Parameter ``lhs_gradient_func``:
     Gradient with respect to the operand.
 
 Parameter ``lhs``:
@@ -1718,19 +1718,19 @@ R"doc(Constructs a binary expression (an operator with two arguments).
 Parameter ``type``:
     The expression's type.
 
-Parameter ``valueFunc``:
+Parameter ``value_func``:
     Unary operator that produces this expression's value.
 
-Parameter ``lhsGradientValueFunc``:
+Parameter ``lhs_gradient_value_func``:
     Gradient with respect to the left operand.
 
-Parameter ``rhsGradientValueFunc``:
+Parameter ``rhs_gradient_value_func``:
     Gradient with respect to the right operand.
 
-Parameter ``lhsGradientFunc``:
+Parameter ``lhs_gradient_func``:
     Gradient with respect to the left operand.
 
-Parameter ``rhsGradientFunc``:
+Parameter ``rhs_gradient_func``:
     Gradient with respect to the right operand.
 
 Parameter ``lhs``:
