@@ -9,10 +9,6 @@ function(pybind11_stubgen target)
             'numpy.float64|numpy.ndarray|scipy.sparse.csc_matrix' --exit-code
             $<TARGET_FILE_BASE_NAME:${target}> -o
             $<TARGET_FILE_DIR:${target}>-stubs
-        COMMAND
-            ${Python3_EXECUTABLE}
-            ${CMAKE_CURRENT_SOURCE_DIR}/cmake/fix_stubgen.py
-            $<TARGET_FILE_DIR:${target}>-stubs
         WORKING_DIRECTORY $<TARGET_FILE_DIR:${target}>
         USES_TERMINAL
     )
