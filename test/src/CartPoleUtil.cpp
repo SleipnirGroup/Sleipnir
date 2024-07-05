@@ -2,6 +2,8 @@
 
 #include "CartPoleUtil.hpp"
 
+#include <Eigen/QR>
+
 // https://underactuated.mit.edu/acrobot.html#cart_pole
 //
 // θ is CCW+ measured from negative y-axis.
@@ -44,10 +46,6 @@ Eigen::Vector<double, 4> CartPoleDynamicsDouble(
       {m_c + m_p, m_p * l * cos(theta)},              // NOLINT
       {m_p * l * cos(theta), m_p * std::pow(l, 2)}};  // NOLINT
 
-  double detM = M(0, 0) * M(1, 1) - M(0, 1) * M(1, 0);
-  Eigen::Matrix<double, 2, 2> Minv{{M(1, 1) / detM, -M(0, 1) / detM},
-                                   {-M(1, 0) / detM, M(0, 0) / detM}};
-
   //           [0  −m_p lθ̇ sinθ]
   // C(q, q̇) = [0       0      ]
   Eigen::Matrix<double, 2, 2> C{
@@ -65,7 +63,7 @@ Eigen::Vector<double, 4> CartPoleDynamicsDouble(
   // q̈ = M⁻¹(q)(τ_g(q) − C(q, q̇)q̇ + Bu)
   Eigen::Vector<double, 4> qddot;
   qddot.segment(0, 2) = qdot;
-  qddot.segment(2, 2) = Minv * (tau_g - C * qdot + B * u);
+  qddot.segment(2, 2) = M.householderQr().solve(tau_g - C * qdot + B * u);
   return qddot;
 }
 

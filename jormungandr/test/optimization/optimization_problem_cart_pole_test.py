@@ -63,11 +63,6 @@ def cart_pole_dynamics_double(x, u):
         ]
     )
 
-    detM = M[0, 0] * M[1, 1] - M[0, 1] * M[1, 0]
-    Minv = np.array(
-        [[M[1, 1] / detM, -M[0, 1] / detM], [-M[1, 0] / detM, M[0, 0] / detM]]
-    )
-
     #           [0  −m_p lθ̇ sinθ]
     # C(q, q̇) = [0       0      ]
     C = np.array([[0.0, -m_p * l * thetadot * math.sin(theta)], [0.0, 0.0]])
@@ -83,7 +78,7 @@ def cart_pole_dynamics_double(x, u):
     # q̈ = M⁻¹(q)(τ_g(q) − C(q, q̇)q̇ + Bu)
     qddot = np.empty((4, 1))
     qddot[:2, :] = qdot
-    qddot[2:, :] = Minv @ (tau_g - C @ qdot + B @ u)
+    qddot[2:, :] = np.linalg.solve(M, tau_g - C @ qdot + B @ u)
     return qddot
 
 
