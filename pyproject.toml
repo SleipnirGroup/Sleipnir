@@ -37,7 +37,7 @@ build_type = "Release"
 source_path = "."
 build_args = [ "--target", "_jormungandr" ]
 install_components = [ "python_modules" ]
-install_args = [ "--strip" ]
+install_args = [ ]
 
   [tool.py-build-cmake.cmake.options]
   BUILD_TESTING = "OFF"
