@@ -79,12 +79,15 @@ jobs:
           python-version: ${{ matrix.version }}
 
       - run: python3 ./tools/update_version.py
-      - run: pip3 install build tox
+      - run: pip3 install build pytest
       - run: ${{ matrix.cmake-env }} python3 -m build --wheel
       - run: python3 ../.github/workflows/repair_wheel.py sleipnirgroup_jormungandr-*.whl
         if: startsWith(matrix.os, 'ubuntu') || startsWith(matrix.os, 'macOS')
         working-directory: dist
-      - run: python3 -m tox -e ${{ matrix.version }}
+      - run: pip3 install dist/sleipnirgroup_jormungandr-*.whl
+        shell: bash
+      - run: pytest
+        shell: bash
 
       - uses: actions/upload-artifact@v4
         with:
@@ -106,7 +109,7 @@ jobs:
           python-version: 3.12
 
       - run: python3 ./tools/update_version.py
-      - run: pip3 install build tox
+      - run: pip3 install build
       - run: python3 -m build --sdist
 
       - uses: actions/upload-artifact@v4
