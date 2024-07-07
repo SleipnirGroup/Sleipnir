@@ -60,15 +60,15 @@ void BindVariableMatrix(py::module_& autodiff,
         int blockRows = self.Rows();
         int blockCols = self.Cols();
 
-        size_t start;
-        size_t stop;
-        size_t step;
-        size_t sliceLength;
-
         // Row slice
         const auto& rowElem = slices[0];
         if (py::isinstance<py::slice>(rowElem)) {
-          const auto& rowSlice = rowElem.cast<py::slice>();
+          auto rowSlice = rowElem.cast<py::slice>();
+
+          size_t start;
+          size_t stop;
+          size_t step;
+          size_t sliceLength;
           if (!rowSlice.compute(self.Rows(), &start, &stop, &step,
                                 &sliceLength)) {
             throw py::error_already_set();
@@ -83,7 +83,12 @@ void BindVariableMatrix(py::module_& autodiff,
         // Column slice
         const auto& colElem = slices[1];
         if (py::isinstance<py::slice>(colElem)) {
-          const auto& colSlice = colElem.cast<py::slice>();
+          auto colSlice = colElem.cast<py::slice>();
+
+          size_t start;
+          size_t stop;
+          size_t step;
+          size_t sliceLength;
           if (!colSlice.compute(self.Cols(), &start, &stop, &step,
                                 &sliceLength)) {
             throw py::error_already_set();
@@ -163,15 +168,15 @@ void BindVariableMatrix(py::module_& autodiff,
         int blockRows = self.Rows();
         int blockCols = self.Cols();
 
-        size_t start;
-        size_t stop;
-        size_t step;
-        size_t sliceLength;
-
         // Row slice
         const auto& rowElem = slices[0];
         if (py::isinstance<py::slice>(rowElem)) {
-          const auto& rowSlice = rowElem.cast<py::slice>();
+          auto rowSlice = rowElem.cast<py::slice>();
+
+          size_t start;
+          size_t stop;
+          size_t step;
+          size_t sliceLength;
           if (!rowSlice.compute(self.Rows(), &start, &stop, &step,
                                 &sliceLength)) {
             throw py::error_already_set();
@@ -189,7 +194,12 @@ void BindVariableMatrix(py::module_& autodiff,
         // Column slice
         const auto& colElem = slices[1];
         if (py::isinstance<py::slice>(colElem)) {
-          const auto& colSlice = colElem.cast<py::slice>();
+          auto colSlice = colElem.cast<py::slice>();
+
+          size_t start;
+          size_t stop;
+          size_t step;
+          size_t sliceLength;
           if (!colSlice.compute(self.Cols(), &start, &stop, &step,
                                 &sliceLength)) {
             throw py::error_already_set();
