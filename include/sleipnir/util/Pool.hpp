@@ -5,7 +5,6 @@
 #include <cstddef>
 #include <memory>
 
-#include "sleipnir/util/SymbolExports.hpp"
 #include "sleipnir/util/small_vector.hpp"
 
 namespace sleipnir {
@@ -17,7 +16,7 @@ namespace sleipnir {
  * free list. Allocations return pointers from the free list, and deallocations
  * return pointers to the free list.
  */
-class SLEIPNIR_DLLEXPORT PoolResource {
+class PoolResource {
  public:
   /**
    * Constructs a default PoolResource.
@@ -146,7 +145,7 @@ class PoolAllocator {
 /**
  * Returns a global pool memory resource.
  */
-SLEIPNIR_DLLEXPORT PoolResource& GlobalPoolResource();
+PoolResource& GlobalPoolResource();
 
 /**
  * Returns an allocator for a global pool memory resource.
