@@ -44,6 +44,13 @@ install_args = [ ]
   BUILD_TESTING = "OFF"
   BUILD_PYTHON = "ON"
 
+  # https://github.com/wjakob/nanobind/issues/613
+  #
+  # Visual Studio 17.10.4's MSVC compiler gives an ICE in nanobind's nb_func.h,
+  # but clang-cl does not.
+  [tool.py-build-cmake.windows.cmake.options]
+  CMAKE_GENERATOR_TOOLSET = "ClangCl"
+
 [tool.pytest.ini_options]
 minversion = "6.0"
 testpaths = [ "jormungandr/test", "examples/CurrentManager/test" ]

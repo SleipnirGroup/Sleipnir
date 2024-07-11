@@ -18,14 +18,6 @@ set(CMAKE_MODULE_PATH
 # Make `GIT_SUBMODULES ""` initialize no submodules
 cmake_policy(SET CMP0097 NEW)
 
-# https://github.com/wjakob/nanobind/issues/613
-#
-# Visual Studio 17.10.4's MSVC compiler gives an ICE in nanobind's nb_func.h,
-# but clang-cl does not.
-if(WIN32)
-    set(CMAKE_GENERATOR_TOOLSET "ClangCl")
-endif()
-
 project(Sleipnir LANGUAGES CXX)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
