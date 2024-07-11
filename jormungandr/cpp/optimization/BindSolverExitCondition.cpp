@@ -1,15 +1,15 @@
 // Copyright (c) Sleipnir contributors
 
-#include <pybind11/pybind11.h>
+#include <nanobind/nanobind.h>
 #include <sleipnir/optimization/SolverExitCondition.hpp>
 
 #include "Docstrings.hpp"
 
-namespace py = pybind11;
+namespace nb = nanobind;
 
 namespace sleipnir {
 
-void BindSolverExitCondition(py::enum_<SolverExitCondition>& e) {
+void BindSolverExitCondition(nb::enum_<SolverExitCondition>& e) {
   e.value("SUCCESS", SolverExitCondition::kSuccess,
           DOC(sleipnir, SolverExitCondition, kSuccess));
   e.value("SOLVED_TO_ACCEPTABLE_TOLERANCE",

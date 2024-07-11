@@ -1,90 +1,88 @@
 // Copyright (c) Sleipnir contributors
 
-#include <pybind11/eigen.h>
-#include <pybind11/operators.h>
-#include <pybind11/pybind11.h>
+#include <nanobind/eigen/dense.h>
+#include <nanobind/nanobind.h>
+#include <nanobind/operators.h>
 #include <sleipnir/autodiff/Variable.hpp>
 #include <sleipnir/optimization/Constraints.hpp>
 
 #include "Docstrings.hpp"
 
-namespace py = pybind11;
+namespace nb = nanobind;
 
-#if defined(__APPLE__) && defined(__clang__)
-#if (__clang_major__ >= 10)
-PYBIND11_WARNING_DISABLE_CLANG("-Wself-assign-overloaded")
-#endif
-#elif defined(__clang__)
-#if (__clang_major__ >= 7)
-PYBIND11_WARNING_DISABLE_CLANG("-Wself-assign-overloaded")
-#endif
+#if defined(__APPLE__) && defined(__clang__) && __clang_major__ >= 10
+#pragma clang diagnostic ignored "-Wself-assign-overloaded"
+#elif defined(__clang__) && __clang_major__ >= 7
+#pragma clang diagnostic ignored "-Wself-assign-overloaded"
 #endif
 
 namespace sleipnir {
 
-void BindVariable(py::module_& autodiff, py::class_<Variable>& cls) {
-  using namespace py::literals;
+void BindVariable(nb::module_& autodiff, nb::class_<Variable>& cls) {
+  using namespace nb::literals;
 
-  cls.def(py::init<>(), DOC(sleipnir, Variable, Variable));
-  cls.def(py::init<double>(), "value"_a, DOC(sleipnir, Variable, Variable, 2));
-  cls.def(py::init<int>(), "value"_a, DOC(sleipnir, Variable, Variable, 2));
-  cls.def("set_value", py::overload_cast<double>(&Variable::SetValue),
+  cls.def(nb::init<>(), DOC(sleipnir, Variable, Variable));
+  cls.def(nb::init<double>(), "value"_a, DOC(sleipnir, Variable, Variable, 2));
+  cls.def(
+      "__init__", [](Variable* self, int value) { new (self) Variable(value); },
+      "value"_a, DOC(sleipnir, Variable, Variable, 2));
+  cls.def("set_value", nb::overload_cast<double>(&Variable::SetValue),
           "value"_a, DOC(sleipnir, Variable, SetValue));
-  cls.def("set_value", py::overload_cast<double>(&Variable::SetValue),
+  cls.def("set_value", nb::overload_cast<double>(&Variable::SetValue),
           "value"_a, DOC(sleipnir, Variable, SetValue));
-  cls.def(double() * py::self, "lhs"_a);
-  cls.def(py::self * double(), "rhs"_a);
-  cls.def(py::self * py::self, "rhs"_a);
-  cls.def(py::self *= double(), "rhs"_a,
+  cls.def(double() * nb::self, "lhs"_a);
+  cls.def(nb::self * double(), "rhs"_a);
+  cls.def(nb::self * nb::self, "rhs"_a);
+  cls.def(nb::self *= double(), "rhs"_a,
           DOC(sleipnir, Variable, operator, imul));
-  cls.def(py::self *= py::self, "rhs"_a,
+  cls.def(nb::self *= nb::self, "rhs"_a,
           DOC(sleipnir, Variable, operator, imul));
-  cls.def(double() / py::self, "lhs"_a);
-  cls.def(py::self / double(), "rhs"_a);
-  cls.def(py::self / py::self, "rhs"_a);
-  cls.def(py::self /= double(), "rhs"_a,
+  cls.def(double() / nb::self, "lhs"_a);
+  cls.def(nb::self / double(), "rhs"_a);
+  cls.def(nb::self / nb::self, "rhs"_a);
+  cls.def(nb::self /= double(), "rhs"_a,
           DOC(sleipnir, Variable, operator, idiv));
-  cls.def(py::self /= py::self, "rhs"_a,
+  cls.def(nb::self /= nb::self, "rhs"_a,
           DOC(sleipnir, Variable, operator, idiv));
-  cls.def(double() + py::self, "lhs"_a);
-  cls.def(py::self + double(), "rhs"_a);
-  cls.def(py::self + py::self, "rhs"_a);
-  cls.def(py::self += double(), "rhs"_a,
+  cls.def(double() + nb::self, "lhs"_a);
+  cls.def(nb::self + double(), "rhs"_a);
+  cls.def(nb::self + nb::self, "rhs"_a);
+  cls.def(nb::self += double(), "rhs"_a,
           DOC(sleipnir, Variable, operator, iadd));
-  cls.def(py::self += py::self, "rhs"_a,
+  cls.def(nb::self += nb::self, "rhs"_a,
           DOC(sleipnir, Variable, operator, iadd));
-  cls.def(double() - py::self, "lhs"_a);
-  cls.def(py::self - double(), "rhs"_a);
-  cls.def(py::self - py::self, "rhs"_a);
-  cls.def(py::self -= double(), "rhs"_a,
+  cls.def(double() - nb::self, "lhs"_a);
+  cls.def(nb::self - double(), "rhs"_a);
+  cls.def(nb::self - nb::self, "rhs"_a);
+  cls.def(nb::self -= double(), "rhs"_a,
           DOC(sleipnir, Variable, operator, isub));
-  cls.def(py::self -= py::self, "rhs"_a,
+  cls.def(nb::self -= nb::self, "rhs"_a,
           DOC(sleipnir, Variable, operator, isub));
   cls.def(
       "__pow__",
       [](const Variable& self, int power) {
         return sleipnir::pow(self, power);
       },
-      py::is_operator(), "power"_a);
-  cls.def(-py::self);
-  cls.def(+py::self);
+      nb::is_operator(), "power"_a);
+  cls.def(-nb::self);
+  cls.def(+nb::self);
   cls.def("value", &Variable::Value, DOC(sleipnir, Variable, Value));
   cls.def("type", &Variable::Type, DOC(sleipnir, Variable, Type));
-  cls.def(py::self == py::self, "rhs"_a, DOC(sleipnir, operator, eq));
-  cls.def(py::self < py::self, "rhs"_a, DOC(sleipnir, operator, lt));
-  cls.def(py::self <= py::self, "rhs"_a, DOC(sleipnir, operator, le));
-  cls.def(py::self > py::self, "rhs"_a, DOC(sleipnir, operator, gt));
-  cls.def(py::self >= py::self, "rhs"_a, DOC(sleipnir, operator, ge));
-  cls.def(py::self == double(), "rhs"_a, DOC(sleipnir, operator, eq));
-  cls.def(py::self < double(), "rhs"_a, DOC(sleipnir, operator, lt));
-  cls.def(py::self <= double(), "rhs"_a, DOC(sleipnir, operator, le));
-  cls.def(py::self > double(), "rhs"_a, DOC(sleipnir, operator, gt));
-  cls.def(py::self >= double(), "rhs"_a, DOC(sleipnir, operator, ge));
-  cls.def(double() == py::self, "lhs"_a, DOC(sleipnir, operator, eq));
-  cls.def(double() < py::self, "lhs"_a, DOC(sleipnir, operator, lt));
-  cls.def(double() <= py::self, "lhs"_a, DOC(sleipnir, operator, le));
-  cls.def(double() > py::self, "lhs"_a, DOC(sleipnir, operator, gt));
-  cls.def(double() >= py::self, "lhs"_a, DOC(sleipnir, operator, ge));
+  cls.def(nb::self == nb::self, "rhs"_a, DOC(sleipnir, operator, eq));
+  cls.def(nb::self < nb::self, "rhs"_a, DOC(sleipnir, operator, lt));
+  cls.def(nb::self <= nb::self, "rhs"_a, DOC(sleipnir, operator, le));
+  cls.def(nb::self > nb::self, "rhs"_a, DOC(sleipnir, operator, gt));
+  cls.def(nb::self >= nb::self, "rhs"_a, DOC(sleipnir, operator, ge));
+  cls.def(nb::self == double(), "rhs"_a, DOC(sleipnir, operator, eq));
+  cls.def(nb::self < double(), "rhs"_a, DOC(sleipnir, operator, lt));
+  cls.def(nb::self <= double(), "rhs"_a, DOC(sleipnir, operator, le));
+  cls.def(nb::self > double(), "rhs"_a, DOC(sleipnir, operator, gt));
+  cls.def(nb::self >= double(), "rhs"_a, DOC(sleipnir, operator, ge));
+  cls.def(double() == nb::self, "lhs"_a, DOC(sleipnir, operator, eq));
+  cls.def(double() < nb::self, "lhs"_a, DOC(sleipnir, operator, lt));
+  cls.def(double() <= nb::self, "lhs"_a, DOC(sleipnir, operator, le));
+  cls.def(double() > nb::self, "lhs"_a, DOC(sleipnir, operator, gt));
+  cls.def(double() >= nb::self, "lhs"_a, DOC(sleipnir, operator, ge));
 
   autodiff.def(
       "abs", [](double x) { return sleipnir::abs(Variable{x}); }, "x"_a,

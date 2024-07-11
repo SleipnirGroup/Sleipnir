@@ -1,25 +1,25 @@
 // Copyright (c) Sleipnir contributors
 
-#include <pybind11/operators.h>
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
+#include <nanobind/nanobind.h>
+#include <nanobind/operators.h>
+#include <nanobind/stl/vector.h>
 #include <sleipnir/optimization/Constraints.hpp>
 
 #include "Docstrings.hpp"
 
-namespace py = pybind11;
+namespace nb = nanobind;
 
 namespace sleipnir {
 
-void BindInequalityConstraints(py::class_<InequalityConstraints>& cls) {
-  using namespace py::literals;
+void BindInequalityConstraints(nb::class_<InequalityConstraints>& cls) {
+  using namespace nb::literals;
 
-  cls.def(py::init<const std::vector<InequalityConstraints>&>(),
+  cls.def(nb::init<const std::vector<InequalityConstraints>&>(),
           "inequality_constraints"_a,
           DOC(sleipnir, InequalityConstraints, InequalityConstraints, 2));
   cls.def(
       "__bool__", [](InequalityConstraints& self) -> bool { return self; },
-      py::is_operator(), DOC(sleipnir, InequalityConstraints, operator, bool));
+      nb::is_operator(), DOC(sleipnir, InequalityConstraints, operator, bool));
 }
 
 }  // namespace sleipnir

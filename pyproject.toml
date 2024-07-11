@@ -13,7 +13,7 @@ dependencies = [ "matplotlib", "numpy", "scipy" ]
   Documentation = "https://sleipnirgroup.github.io/Sleipnir/"
 
 [build-system]
-requires = [ "py-build-cmake~=0.1.8", "pybind11", "pybind11-mkdoc", "clang", "pybind11-stubgen" ]
+requires = [ "py-build-cmake~=0.1.8", "nanobind", "pybind11-mkdoc" ]
 build-backend = "py_build_cmake.build"
 
 [tool.py-build-cmake.module]
@@ -25,6 +25,7 @@ include = [
   "CMakeLists.txt",
   "SleipnirConfig.cmake.in",
   "cmake/modules/*.cmake",
+  "cmake/*.patch",
   "cmake/*.py",
   "jormungandr/*",
   "include/*",

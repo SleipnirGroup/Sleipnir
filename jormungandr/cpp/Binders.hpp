@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include <pybind11/pybind11.h>
+#include <nanobind/nanobind.h>
 #include <sleipnir/autodiff/ExpressionType.hpp>
 #include <sleipnir/autodiff/Gradient.hpp>
 #include <sleipnir/autodiff/Hessian.hpp>
@@ -16,28 +16,28 @@
 #include <sleipnir/optimization/SolverIterationInfo.hpp>
 #include <sleipnir/optimization/SolverStatus.hpp>
 
-namespace py = pybind11;
+namespace nb = nanobind;
 
 namespace sleipnir {
 
-void BindExpressionType(py::enum_<ExpressionType>& e);
+void BindExpressionType(nb::enum_<ExpressionType>& e);
 
-void BindVariable(py::module_& autodiff, py::class_<Variable>& cls);
-void BindVariableMatrix(py::module_& autodiff, py::class_<VariableMatrix>& cls);
-void BindVariableBlock(py::module_& autodiff,
-                       py::class_<VariableBlock<VariableMatrix>>& cls);
+void BindVariable(nb::module_& autodiff, nb::class_<Variable>& cls);
+void BindVariableMatrix(nb::module_& autodiff, nb::class_<VariableMatrix>& cls);
+void BindVariableBlock(nb::module_& autodiff,
+                       nb::class_<VariableBlock<VariableMatrix>>& cls);
 
-void BindGradient(py::class_<Gradient>& cls);
-void BindHessian(py::class_<Hessian>& cls);
-void BindJacobian(py::class_<Jacobian>& cls);
+void BindGradient(nb::class_<Gradient>& cls);
+void BindHessian(nb::class_<Hessian>& cls);
+void BindJacobian(nb::class_<Jacobian>& cls);
 
-void BindEqualityConstraints(py::class_<EqualityConstraints>& cls);
-void BindInequalityConstraints(py::class_<InequalityConstraints>& cls);
+void BindEqualityConstraints(nb::class_<EqualityConstraints>& cls);
+void BindInequalityConstraints(nb::class_<InequalityConstraints>& cls);
 
-void BindSolverExitCondition(py::enum_<SolverExitCondition>& e);
-void BindSolverIterationInfo(py::class_<SolverIterationInfo>& cls);
-void BindSolverStatus(py::class_<SolverStatus>& cls);
+void BindSolverExitCondition(nb::enum_<SolverExitCondition>& e);
+void BindSolverIterationInfo(nb::class_<SolverIterationInfo>& cls);
+void BindSolverStatus(nb::class_<SolverStatus>& cls);
 
-void BindOptimizationProblem(py::class_<OptimizationProblem>& cls);
+void BindOptimizationProblem(nb::class_<OptimizationProblem>& cls);
 
 }  // namespace sleipnir

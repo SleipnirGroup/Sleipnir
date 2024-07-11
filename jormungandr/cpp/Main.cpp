@@ -1,6 +1,6 @@
 // Copyright (c) Sleipnir contributors
 
-#include <pybind11/pybind11.h>
+#include <nanobind/nanobind.h>
 #include <sleipnir/autodiff/Variable.hpp>
 #include <sleipnir/autodiff/VariableBlock.hpp>
 #include <sleipnir/autodiff/VariableMatrix.hpp>
@@ -13,45 +13,45 @@
 #include "Binders.hpp"
 #include "Docstrings.hpp"
 
-namespace py = pybind11;
+namespace nb = nanobind;
 
 namespace sleipnir {
 
-PYBIND11_MODULE(_jormungandr, m) {
+NB_MODULE(_jormungandr, m) {
   m.doc() =
       "A linearity-exploiting sparse nonlinear constrained optimization "
       "problem solver that uses the interior-point method.";
 
-  py::module_ autodiff = m.def_submodule("autodiff");
-  py::module_ optimization = m.def_submodule("optimization");
+  nb::module_ autodiff = m.def_submodule("autodiff");
+  nb::module_ optimization = m.def_submodule("optimization");
 
-  py::enum_<ExpressionType> expression_type{autodiff, "ExpressionType",
+  nb::enum_<ExpressionType> expression_type{autodiff, "ExpressionType",
                                             DOC(sleipnir, ExpressionType)};
 
-  py::class_<Variable> variable{autodiff, "Variable", DOC(sleipnir, Variable)};
-  py::class_<VariableMatrix> variable_matrix{autodiff, "VariableMatrix",
+  nb::class_<Variable> variable{autodiff, "Variable", DOC(sleipnir, Variable)};
+  nb::class_<VariableMatrix> variable_matrix{autodiff, "VariableMatrix",
                                              DOC(sleipnir, VariableMatrix)};
-  py::class_<VariableBlock<VariableMatrix>> variable_block{
+  nb::class_<VariableBlock<VariableMatrix>> variable_block{
       autodiff, "VariableBlock", DOC(sleipnir, VariableBlock)};
 
-  py::class_<Gradient> gradient{autodiff, "Gradient", DOC(sleipnir, Gradient)};
-  py::class_<Hessian> hessian{autodiff, "Hessian", DOC(sleipnir, Hessian)};
-  py::class_<Jacobian> jacobian{autodiff, "Jacobian", DOC(sleipnir, Jacobian)};
+  nb::class_<Gradient> gradient{autodiff, "Gradient", DOC(sleipnir, Gradient)};
+  nb::class_<Hessian> hessian{autodiff, "Hessian", DOC(sleipnir, Hessian)};
+  nb::class_<Jacobian> jacobian{autodiff, "Jacobian", DOC(sleipnir, Jacobian)};
 
-  py::class_<EqualityConstraints> equality_constraints{
+  nb::class_<EqualityConstraints> equality_constraints{
       optimization, "EqualityConstraints", DOC(sleipnir, EqualityConstraints)};
-  py::class_<InequalityConstraints> inequality_constraints{
+  nb::class_<InequalityConstraints> inequality_constraints{
       optimization, "InequalityConstraints",
       DOC(sleipnir_InequalityConstraints)};
 
-  py::enum_<SolverExitCondition> solver_exit_condition{
+  nb::enum_<SolverExitCondition> solver_exit_condition{
       optimization, "SolverExitCondition", DOC(sleipnir, SolverExitCondition)};
-  py::class_<SolverIterationInfo> solver_iteration_info{
+  nb::class_<SolverIterationInfo> solver_iteration_info{
       optimization, "SolverIterationInfo", DOC(sleipnir, SolverIterationInfo)};
-  py::class_<SolverStatus> solver_status{optimization, "SolverStatus",
+  nb::class_<SolverStatus> solver_status{optimization, "SolverStatus",
                                          DOC(sleipnir, SolverStatus)};
 
-  py::class_<OptimizationProblem> optimization_problem{
+  nb::class_<OptimizationProblem> optimization_problem{
       optimization, "OptimizationProblem", DOC(sleipnir, OptimizationProblem)};
 
   BindExpressionType(expression_type);
@@ -59,6 +59,10 @@ PYBIND11_MODULE(_jormungandr, m) {
   BindVariable(autodiff, variable);
   BindVariableMatrix(autodiff, variable_matrix);
   BindVariableBlock(autodiff, variable_block);
+
+  // Implicit conversions
+  variable.def(nb::init_implicit<VariableMatrix>());
+  variable_matrix.def(nb::init_implicit<VariableBlock<VariableMatrix>>());
 
   BindGradient(gradient);
   BindHessian(hessian);

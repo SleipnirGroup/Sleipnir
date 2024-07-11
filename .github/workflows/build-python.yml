@@ -78,6 +78,9 @@ jobs:
         with:
           python-version: ${{ matrix.version }}
 
+      - run: pip install typing_extensions
+        if: matrix.version == '3.9' || matrix.version == '3.10'
+
       - run: python3 ./tools/update_version.py
       - run: pip3 install build pytest
       - run: ${{ matrix.cmake-env }} python3 -m build --wheel
