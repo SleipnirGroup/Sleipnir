@@ -287,6 +287,8 @@ if(BUILD_PYTHON)
                 git apply
                 ${CMAKE_CURRENT_SOURCE_DIR}/cmake/0001-Replace-zero-size-array.patch
                 ${CMAKE_CURRENT_SOURCE_DIR}/cmake/0002-Give-anonymous-union-a-name.patch
+                # https://github.com/wjakob/nanobind/issues/613
+                ${CMAKE_CURRENT_SOURCE_DIR}/cmake/0003-Avoid-MSVC-ICE-in-nb_func.h.patch
             UPDATE_DISCONNECTED 1
         )
         fetchcontent_makeavailable(nanobind)
