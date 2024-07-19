@@ -1,0 +1,38 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Tyler Veness <calcmogul@gmail.com>
+Date: Fri, 19 Jul 2024 12:08:44 -0700
+Subject: [PATCH 3/3] Avoid MSVC ICE in nb_func.h
+
+---
+ include/nanobind/nb_func.h | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/include/nanobind/nb_func.h b/include/nanobind/nb_func.h
+index e53e1a42cc94e73ad882af05ff269d4b92d11433..58aef31ad9f6aedf63a9f5751cf695f6d9c28927 100644
+--- a/include/nanobind/nb_func.h
++++ b/include/nanobind/nb_func.h
+@@ -199,14 +199,24 @@ NB_INLINE PyObject *func_create(Func &&func, Return (*)(Args...),
+ 
+         PyObject *result;
+         if constexpr (std::is_void_v<Return>) {
++#ifdef _MSC_VER
++            cap->func(static_cast<cast_t<Args>>(in.template get<Is>())...);
++#else
+             cap->func(in.template get<Is>().operator cast_t<Args>()...);
++#endif
+             result = Py_None;
+             Py_INCREF(result);
+         } else {
++#ifdef _MSC_VER
++            result = cast_out::from_cpp(
++                       cap->func(static_cast<cast_t<Args>>(in.template get<Is>())...),
++                       policy, cleanup).ptr();
++#else
+             result = cast_out::from_cpp(
+                        cap->func((in.template get<Is>())
+                                      .operator cast_t<Args>()...),
+                        policy, cleanup).ptr();
++#endif
+         }
+ 
+         if constexpr (Info::keep_alive)
