@@ -32,13 +32,8 @@ TEST_CASE("OCPSolver - Cart-pole", "[OCPSolver]") {
   constexpr Eigen::Vector<double, 4> x_initial{{0.0, 0.0, 0.0, 0.0}};
   constexpr Eigen::Vector<double, 4> x_final{{1.0, std::numbers::pi, 0.0, 0.0}};
 
-  auto dynamicsFunction = [=](const sleipnir::VariableMatrix& x,
-                              const sleipnir::VariableMatrix& u) {
-    return CartPoleDynamics(x, u);
-  };
-
   sleipnir::OCPSolver problem(
-      4, 1, dt, N, dynamicsFunction, sleipnir::DynamicsType::kExplicitODE,
+      4, 1, dt, N, CartPoleDynamics, sleipnir::DynamicsType::kExplicitODE,
       sleipnir::TimestepMethod::kVariableSingle,
       sleipnir::TranscriptionMethod::kDirectCollocation);
 
