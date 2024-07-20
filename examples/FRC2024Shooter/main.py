@@ -109,17 +109,17 @@ def main():
     x = problem.decision_variable(6)
 
     # Position initial guess is start position
-    x[:3, 0].set_value(shooter_wrt_field[:3, 0])
+    x[:3, :].set_value(shooter_wrt_field[:3, :])
 
     # Velocity initial guess is max initial velocity toward target
     uvec_shooter_to_target = target_wrt_field[:3, :] - shooter_wrt_field[:3, :]
     uvec_shooter_to_target /= norm(uvec_shooter_to_target)
-    x[3:, 0].set_value(
+    x[3:, :].set_value(
         robot_wrt_field[3:, :] + max_initial_velocity * uvec_shooter_to_target
     )
 
     # Shooter initial position
-    problem.subject_to(x[:3, 0] == shooter_wrt_field[:3, 0])
+    problem.subject_to(x[:3, :] == shooter_wrt_field[:3, :])
 
     # Require initial velocity is below max
     #
@@ -143,19 +143,19 @@ def main():
         x_k += h / 6 * (k1 + 2 * k2 + 2 * k3 + k4)
 
     # Require final position is in center of target circle
-    problem.subject_to(x_k[:3, 0] == target_wrt_field[:3, :])
+    problem.subject_to(x_k[:3, :] == target_wrt_field[:3, :])
 
     # Require the final velocity is up
     problem.subject_to(x_k[5, 0] > 0.0)
 
     # Minimize sensitivity of vertical position to velocity
-    sensitivity = Gradient(x_k[3, 0], x[3:, 0]).get()
+    sensitivity = Gradient(x_k[3, 0], x[3:, :]).get()
     problem.minimize(sensitivity.T @ sensitivity)
 
     problem.solve(diagnostics=True)
 
     # Initial velocity vector
-    v0 = x[3:, 0].value() - robot_wrt_field[3:, :]
+    v0 = x[3:, :].value() - robot_wrt_field[3:, :]
 
     velocity = norm(v0)
     print(f"Velocity = {velocity:.03f} m/s")

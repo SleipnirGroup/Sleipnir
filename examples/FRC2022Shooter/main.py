@@ -106,7 +106,7 @@ def main():
         )
 
     # Shooter initial position
-    problem.subject_to(p[:, 0] == shooter_wrt_field[:3, 0])
+    problem.subject_to(p[:, :1] == shooter_wrt_field[:3, :])
 
     # Require initial velocity is below max
     #
@@ -143,7 +143,7 @@ def main():
     problem.solve(diagnostics=True)
 
     # Initial velocity vector
-    v0 = X[3:, 0].value() - robot_wrt_field[3:, :]
+    v0 = X[3:, :1].value() - robot_wrt_field[3:, :]
 
     velocity = norm(v0)
     print(f"Velocity = {velocity:.03f} m/s")
