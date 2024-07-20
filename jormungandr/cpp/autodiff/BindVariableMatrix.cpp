@@ -43,6 +43,24 @@ void BindVariableMatrix(nb::module_& autodiff,
       },
       "values"_a, DOC(sleipnir, VariableMatrix, SetValue));
   cls.def(
+      "set_value",
+      [](VariableMatrix& self, nb::DRef<Eigen::MatrixXf> values) {
+        self.SetValue(values.cast<double>());
+      },
+      "values"_a, DOC(sleipnir, VariableMatrix, SetValue));
+  cls.def(
+      "set_value",
+      [](VariableMatrix& self,
+         nb::DRef<Eigen::Matrix<int64_t, Eigen::Dynamic, Eigen::Dynamic>>
+             values) { self.SetValue(values.cast<double>()); },
+      "values"_a, DOC(sleipnir, VariableMatrix, SetValue));
+  cls.def(
+      "set_value",
+      [](VariableMatrix& self,
+         nb::DRef<Eigen::Matrix<int32_t, Eigen::Dynamic, Eigen::Dynamic>>
+             values) { self.SetValue(values.cast<double>()); },
+      "values"_a, DOC(sleipnir, VariableMatrix, SetValue));
+  cls.def(
       "__setitem__",
       [](VariableMatrix& self, int row, const Variable& value) {
         return self(row) = value;
@@ -93,6 +111,8 @@ void BindVariableMatrix(nb::module_& autodiff,
           self.Block(rowOffset, colOffset, blockRows, blockCols) =
               nb::cast<VariableMatrix>(value);
         } else if (auto rhs = TryCastToEigen<double>(value)) {
+          self.Block(rowOffset, colOffset, blockRows, blockCols) = rhs.value();
+        } else if (auto rhs = TryCastToEigen<float>(value)) {
           self.Block(rowOffset, colOffset, blockRows, blockCols) = rhs.value();
         } else if (auto rhs = TryCastToEigen<int64_t>(value)) {
           self.Block(rowOffset, colOffset, blockRows, blockCols) = rhs.value();
@@ -227,11 +247,15 @@ void BindVariableMatrix(nb::module_& autodiff,
           if (ufunc_name == "<ufunc 'matmul'>") {
             if (auto lhs = TryCastToEigen<double>(inputs[0])) {
               return nb::cast(lhs.value() * self);
+            } else if (auto lhs = TryCastToEigen<float>(inputs[0])) {
+              return nb::cast(lhs.value() * self);
             } else if (auto lhs = TryCastToEigen<int64_t>(inputs[0])) {
               return nb::cast(lhs.value() * self);
             } else if (auto lhs = TryCastToEigen<int32_t>(inputs[0])) {
               return nb::cast(lhs.value() * self);
             } else if (auto rhs = TryCastToEigen<double>(inputs[1])) {
+              return nb::cast(self * rhs.value());
+            } else if (auto rhs = TryCastToEigen<float>(inputs[1])) {
               return nb::cast(self * rhs.value());
             } else if (auto rhs = TryCastToEigen<int64_t>(inputs[1])) {
               return nb::cast(self * rhs.value());
@@ -241,11 +265,15 @@ void BindVariableMatrix(nb::module_& autodiff,
           } else if (ufunc_name == "<ufunc 'add'>") {
             if (auto lhs = TryCastToEigen<double>(inputs[0])) {
               return nb::cast(lhs.value() + self);
+            } else if (auto lhs = TryCastToEigen<float>(inputs[0])) {
+              return nb::cast(lhs.value() + self);
             } else if (auto lhs = TryCastToEigen<int64_t>(inputs[0])) {
               return nb::cast(lhs.value() + self);
             } else if (auto lhs = TryCastToEigen<int32_t>(inputs[0])) {
               return nb::cast(lhs.value() + self);
             } else if (auto rhs = TryCastToEigen<double>(inputs[1])) {
+              return nb::cast(self + rhs.value());
+            } else if (auto rhs = TryCastToEigen<float>(inputs[1])) {
               return nb::cast(self + rhs.value());
             } else if (auto rhs = TryCastToEigen<int64_t>(inputs[1])) {
               return nb::cast(self + rhs.value());
@@ -255,11 +283,15 @@ void BindVariableMatrix(nb::module_& autodiff,
           } else if (ufunc_name == "<ufunc 'subtract'>") {
             if (auto lhs = TryCastToEigen<double>(inputs[0])) {
               return nb::cast(lhs.value() - self);
+            } else if (auto lhs = TryCastToEigen<float>(inputs[0])) {
+              return nb::cast(lhs.value() - self);
             } else if (auto lhs = TryCastToEigen<int64_t>(inputs[0])) {
               return nb::cast(lhs.value() - self);
             } else if (auto lhs = TryCastToEigen<int32_t>(inputs[0])) {
               return nb::cast(lhs.value() - self);
             } else if (auto rhs = TryCastToEigen<double>(inputs[1])) {
+              return nb::cast(self - rhs.value());
+            } else if (auto rhs = TryCastToEigen<float>(inputs[1])) {
               return nb::cast(self - rhs.value());
             } else if (auto rhs = TryCastToEigen<int64_t>(inputs[1])) {
               return nb::cast(self - rhs.value());
@@ -269,11 +301,15 @@ void BindVariableMatrix(nb::module_& autodiff,
           } else if (ufunc_name == "<ufunc 'equal'>") {
             if (auto lhs = TryCastToEigen<double>(inputs[0])) {
               return nb::cast(lhs.value() == self);
+            } else if (auto lhs = TryCastToEigen<float>(inputs[0])) {
+              return nb::cast(lhs.value() == self);
             } else if (auto lhs = TryCastToEigen<int64_t>(inputs[0])) {
               return nb::cast(lhs.value() == self);
             } else if (auto lhs = TryCastToEigen<int32_t>(inputs[0])) {
               return nb::cast(lhs.value() == self);
             } else if (auto rhs = TryCastToEigen<double>(inputs[1])) {
+              return nb::cast(self == rhs.value());
+            } else if (auto rhs = TryCastToEigen<float>(inputs[1])) {
               return nb::cast(self == rhs.value());
             } else if (auto rhs = TryCastToEigen<int64_t>(inputs[1])) {
               return nb::cast(self == rhs.value());
@@ -283,11 +319,15 @@ void BindVariableMatrix(nb::module_& autodiff,
           } else if (ufunc_name == "<ufunc 'less'>") {
             if (auto lhs = TryCastToEigen<double>(inputs[0])) {
               return nb::cast(lhs.value() < self);
+            } else if (auto lhs = TryCastToEigen<float>(inputs[0])) {
+              return nb::cast(lhs.value() < self);
             } else if (auto lhs = TryCastToEigen<int64_t>(inputs[0])) {
               return nb::cast(lhs.value() < self);
             } else if (auto lhs = TryCastToEigen<int32_t>(inputs[0])) {
               return nb::cast(lhs.value() < self);
             } else if (auto rhs = TryCastToEigen<double>(inputs[1])) {
+              return nb::cast(self < rhs.value());
+            } else if (auto rhs = TryCastToEigen<float>(inputs[1])) {
               return nb::cast(self < rhs.value());
             } else if (auto rhs = TryCastToEigen<int64_t>(inputs[1])) {
               return nb::cast(self < rhs.value());
@@ -297,11 +337,15 @@ void BindVariableMatrix(nb::module_& autodiff,
           } else if (ufunc_name == "<ufunc 'less_equal'>") {
             if (auto lhs = TryCastToEigen<double>(inputs[0])) {
               return nb::cast(lhs.value() <= self);
+            } else if (auto lhs = TryCastToEigen<float>(inputs[0])) {
+              return nb::cast(lhs.value() <= self);
             } else if (auto lhs = TryCastToEigen<int64_t>(inputs[0])) {
               return nb::cast(lhs.value() <= self);
             } else if (auto lhs = TryCastToEigen<int32_t>(inputs[0])) {
               return nb::cast(lhs.value() <= self);
             } else if (auto rhs = TryCastToEigen<double>(inputs[1])) {
+              return nb::cast(self <= rhs.value());
+            } else if (auto rhs = TryCastToEigen<float>(inputs[1])) {
               return nb::cast(self <= rhs.value());
             } else if (auto rhs = TryCastToEigen<int64_t>(inputs[1])) {
               return nb::cast(self <= rhs.value());
@@ -311,11 +355,15 @@ void BindVariableMatrix(nb::module_& autodiff,
           } else if (ufunc_name == "<ufunc 'greater'>") {
             if (auto lhs = TryCastToEigen<double>(inputs[0])) {
               return nb::cast(lhs.value() > self);
+            } else if (auto lhs = TryCastToEigen<float>(inputs[0])) {
+              return nb::cast(lhs.value() > self);
             } else if (auto lhs = TryCastToEigen<int64_t>(inputs[0])) {
               return nb::cast(lhs.value() > self);
             } else if (auto lhs = TryCastToEigen<int32_t>(inputs[0])) {
               return nb::cast(lhs.value() > self);
             } else if (auto rhs = TryCastToEigen<double>(inputs[1])) {
+              return nb::cast(self > rhs.value());
+            } else if (auto rhs = TryCastToEigen<float>(inputs[1])) {
               return nb::cast(self > rhs.value());
             } else if (auto rhs = TryCastToEigen<int64_t>(inputs[1])) {
               return nb::cast(self > rhs.value());
@@ -325,11 +373,15 @@ void BindVariableMatrix(nb::module_& autodiff,
           } else if (ufunc_name == "<ufunc 'greater_equal'>") {
             if (auto lhs = TryCastToEigen<double>(inputs[0])) {
               return nb::cast(lhs.value() >= self);
+            } else if (auto lhs = TryCastToEigen<float>(inputs[0])) {
+              return nb::cast(lhs.value() >= self);
             } else if (auto lhs = TryCastToEigen<int64_t>(inputs[0])) {
               return nb::cast(lhs.value() >= self);
             } else if (auto lhs = TryCastToEigen<int32_t>(inputs[0])) {
               return nb::cast(lhs.value() >= self);
             } else if (auto rhs = TryCastToEigen<double>(inputs[1])) {
+              return nb::cast(self >= rhs.value());
+            } else if (auto rhs = TryCastToEigen<float>(inputs[1])) {
               return nb::cast(self >= rhs.value());
             } else if (auto rhs = TryCastToEigen<int64_t>(inputs[1])) {
               return nb::cast(self >= rhs.value());
