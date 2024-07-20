@@ -503,8 +503,8 @@ void BindVariableMatrix(nb::module_& autodiff,
   cls.def(
       "cwise_transform",
       [](const VariableMatrix& self,
-         const std::function<Variable(const Variable&)>& func) {
-        return self.CwiseTransform(func);
+         const std::function<Variable(const Variable& x)>& unaryOp) {
+        return self.CwiseTransform(unaryOp);
       },
       "func"_a, DOC(sleipnir, VariableMatrix, CwiseTransform));
   cls.def_static("zero", &VariableMatrix::Zero, "rows"_a, "cols"_a,
@@ -653,9 +653,8 @@ void BindVariableMatrix(nb::module_& autodiff,
   autodiff.def(
       "cwise_reduce",
       [](const VariableMatrix& lhs, const VariableMatrix& rhs,
-         const std::function<Variable(const Variable&, const Variable&)> func) {
-        return CwiseReduce(lhs, rhs, func);
-      },
+         const std::function<Variable(const Variable& x, const Variable& y)>&
+             binaryOp) { return CwiseReduce(lhs, rhs, binaryOp); },
       "lhs"_a, "rhs"_a, "func"_a, DOC(sleipnir, CwiseReduce));
 
   autodiff.def("block",

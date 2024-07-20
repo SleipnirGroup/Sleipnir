@@ -503,7 +503,7 @@ class VariableBlock {
    * @param unaryOp The unary operator to use for the transform operation.
    */
   std::remove_cv_t<Mat> CwiseTransform(
-      function_ref<Variable(const Variable&)> unaryOp) const {
+      function_ref<Variable(const Variable& x)> unaryOp) const {
     std::remove_cv_t<Mat> result{Rows(), Cols()};
 
     for (int row = 0; row < Rows(); ++row) {

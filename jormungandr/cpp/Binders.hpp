@@ -24,8 +24,7 @@ void BindExpressionType(nb::enum_<ExpressionType>& e);
 
 void BindVariable(nb::module_& autodiff, nb::class_<Variable>& cls);
 void BindVariableMatrix(nb::module_& autodiff, nb::class_<VariableMatrix>& cls);
-void BindVariableBlock(nb::module_& autodiff,
-                       nb::class_<VariableBlock<VariableMatrix>>& cls);
+void BindVariableBlock(nb::class_<VariableBlock<VariableMatrix>>& cls);
 
 void BindGradient(nb::class_<Gradient>& cls);
 void BindHessian(nb::class_<Hessian>& cls);
