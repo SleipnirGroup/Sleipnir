@@ -2,7 +2,6 @@ import math
 
 from jormungandr.autodiff import Gradient, Variable
 import jormungandr.autodiff as autodiff
-import numpy as np
 import pytest
 
 

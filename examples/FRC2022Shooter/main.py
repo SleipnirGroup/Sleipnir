@@ -12,7 +12,6 @@ import math
 from jormungandr.autodiff import VariableMatrix
 from jormungandr.optimization import OptimizationProblem
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 from numpy.linalg import norm
 

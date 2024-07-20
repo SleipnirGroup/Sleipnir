@@ -1,5 +1,4 @@
-from jormungandr.autodiff import Jacobian, Variable, VariableMatrix
-import jormungandr.autodiff as autodiff
+from jormungandr.autodiff import Jacobian, VariableMatrix
 import numpy as np
 import pytest
 
