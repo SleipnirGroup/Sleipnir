@@ -156,7 +156,7 @@ Parameter ``spy``:
   cls.def(
       "callback",
       [](OptimizationProblem& self,
-         std::function<bool(const SolverIterationInfo&)> callback) {
+         std::function<bool(const SolverIterationInfo& info)> callback) {
         self.Callback(std::move(callback));
       },
       "callback"_a, DOC(sleipnir, OptimizationProblem, Callback, 2));

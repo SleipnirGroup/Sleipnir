@@ -20,8 +20,7 @@ namespace nb = nanobind;
 
 namespace sleipnir {
 
-void BindVariableBlock(nb::module_& autodiff,
-                       nb::class_<VariableBlock<VariableMatrix>>& cls) {
+void BindVariableBlock(nb::class_<VariableBlock<VariableMatrix>>& cls) {
   using namespace nb::literals;
 
   // VariableBlock-VariableMatrix overloads
@@ -472,8 +471,8 @@ void BindVariableBlock(nb::module_& autodiff,
   cls.def(
       "cwise_transform",
       [](const VariableBlock<VariableMatrix>& self,
-         const std::function<Variable(const Variable&)>& func) {
-        return self.CwiseTransform(func);
+         const std::function<Variable(const Variable& x)>& unaryOp) {
+        return self.CwiseTransform(unaryOp);
       },
       "func"_a, DOC(sleipnir, VariableBlock, CwiseTransform));
   cls.def(nb::self == nb::self, "rhs"_a, DOC(sleipnir, operator, eq));
@@ -547,15 +546,6 @@ void BindVariableBlock(nb::module_& autodiff,
                                  "value_iterator", self.begin(), self.end());
       },
       nb::keep_alive<0, 1>());
-
-  autodiff.def(
-      "cwise_reduce",
-      [](const VariableBlock<VariableMatrix>& lhs,
-         const VariableBlock<VariableMatrix>& rhs,
-         const std::function<Variable(const Variable&, const Variable&)> func) {
-        return CwiseReduce(lhs, rhs, func);
-      },
-      "lhs"_a, "rhs"_a, "func"_a, DOC(sleipnir, CwiseReduce));
 }  // NOLINT(readability/fn_size)
 
 }  // namespace sleipnir

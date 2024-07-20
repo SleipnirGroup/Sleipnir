@@ -736,7 +736,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param unaryOp The unary operator to use for the transform operation.
    */
   VariableMatrix CwiseTransform(
-      function_ref<Variable(const Variable&)> unaryOp) const {
+      function_ref<Variable(const Variable& x)> unaryOp) const {
     VariableMatrix result{Rows(), Cols()};
 
     for (int row = 0; row < Rows(); ++row) {
@@ -896,7 +896,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
  */
 SLEIPNIR_DLLEXPORT inline VariableMatrix CwiseReduce(
     const VariableMatrix& lhs, const VariableMatrix& rhs,
-    function_ref<Variable(const Variable&, const Variable&)> binaryOp) {
+    function_ref<Variable(const Variable& x, const Variable& y)> binaryOp) {
   Assert(lhs.Rows() == rhs.Rows());
   Assert(lhs.Rows() == rhs.Rows());
 

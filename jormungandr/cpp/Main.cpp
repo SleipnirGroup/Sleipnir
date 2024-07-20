@@ -58,7 +58,7 @@ NB_MODULE(_jormungandr, m) {
 
   BindVariable(autodiff, variable);
   BindVariableMatrix(autodiff, variable_matrix);
-  BindVariableBlock(autodiff, variable_block);
+  BindVariableBlock(variable_block);
 
   // Implicit conversions
   variable.def(nb::init_implicit<VariableMatrix>());
