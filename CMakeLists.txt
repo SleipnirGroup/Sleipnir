@@ -277,7 +277,7 @@ if(BUILD_PYTHON)
     endif()
 
     # nanobind dependency
-    if(NOT USE_SYSTEM_PYBIND)
+    if(NOT USE_SYSTEM_NANOBIND)
         fetchcontent_declare(
             nanobind
             GIT_REPOSITORY https://github.com/wjakob/nanobind.git
