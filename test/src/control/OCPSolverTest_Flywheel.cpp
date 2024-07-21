@@ -40,6 +40,7 @@ void TestFlywheel(std::string testName, double A, double B,
   // Inputs: [voltage]
   double A_discrete = std::exp(A * dt.count());
   double B_discrete = (1.0 - A_discrete) * B;
+
   constexpr double r = 10.0;
 
   sleipnir::OCPSolver solver(1, 1, dt, N, F, dynamicsType,
@@ -48,13 +49,10 @@ void TestFlywheel(std::string testName, double A, double B,
   solver.SetUpperInputBound(12);
   solver.SetLowerInputBound(-12);
 
-  // Set up objective
+  // Set up cost
   Eigen::Matrix<double, 1, N + 1> r_mat =
-      r * Eigen::Matrix<double, 1, N + 1>::Ones();
-  sleipnir::VariableMatrix r_mat_vmat{r_mat};
-  sleipnir::VariableMatrix objective =
-      (r_mat_vmat - solver.X()) * (r_mat_vmat - solver.X()).T();
-  solver.Minimize(objective);
+      Eigen::Matrix<double, 1, N + 1>::Constant(r);
+  solver.Minimize((r_mat - solver.X()) * (r_mat - solver.X()).T());
 
   auto status = solver.Solve({.diagnostics = true});
 
