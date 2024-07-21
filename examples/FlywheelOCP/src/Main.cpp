@@ -30,7 +30,7 @@ int main() {
     return A_discrete * x + B_discrete * u;
   };
 
-  Eigen::Matrix<double, 1, 1> r{10.0};
+  constexpr double r = 10.0;
 
   sleipnir::OCPSolver solver(
       1, 1, dt, N, f_discrete, sleipnir::DynamicsType::kDiscrete,
@@ -40,13 +40,10 @@ int main() {
   solver.SetUpperInputBound(12);
   solver.SetLowerInputBound(-12);
 
-  // Set up objective
+  // Set up cost
   Eigen::Matrix<double, 1, N + 1> r_mat =
-      r * Eigen::Matrix<double, 1, N + 1>::Ones();
-  sleipnir::VariableMatrix r_mat_vmat{r_mat};
-  sleipnir::VariableMatrix objective =
-      (r_mat_vmat - solver.X()) * (r_mat_vmat - solver.X()).T();
-  solver.Minimize(objective);
+      Eigen::Matrix<double, 1, N + 1>::Constant(r);
+  solver.Minimize((r_mat - solver.X()) * (r_mat - solver.X()).T());
 
   solver.Solve();
 

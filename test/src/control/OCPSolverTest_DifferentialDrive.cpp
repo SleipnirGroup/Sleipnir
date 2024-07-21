@@ -79,7 +79,7 @@ TEST_CASE("OCPSolver - Differential drive", "[OCPSolver]") {
   problem.SetMinTimestep(minTimestep);
   problem.SetMaxTimestep(3s);
 
-  // Set up objective
+  // Set up cost
   problem.Minimize(problem.DT() * Eigen::Matrix<double, N + 1, 1>::Ones());
 
   auto status = problem.Solve({.maxIterations = 1000, .diagnostics = true});
