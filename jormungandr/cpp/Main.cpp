@@ -4,6 +4,7 @@
 #include <sleipnir/autodiff/Variable.hpp>
 #include <sleipnir/autodiff/VariableBlock.hpp>
 #include <sleipnir/autodiff/VariableMatrix.hpp>
+#include <sleipnir/control/OCPSolver.hpp>
 #include <sleipnir/optimization/Constraints.hpp>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 #include <sleipnir/optimization/SolverExitCondition.hpp>
@@ -24,6 +25,7 @@ NB_MODULE(_jormungandr, m) {
 
   nb::module_ autodiff = m.def_submodule("autodiff");
   nb::module_ optimization = m.def_submodule("optimization");
+  nb::module_ control = m.def_submodule("control");
 
   nb::enum_<ExpressionType> expression_type{autodiff, "ExpressionType",
                                             DOC(sleipnir, ExpressionType)};
@@ -54,6 +56,15 @@ NB_MODULE(_jormungandr, m) {
   nb::class_<OptimizationProblem> optimization_problem{
       optimization, "OptimizationProblem", DOC(sleipnir, OptimizationProblem)};
 
+  nb::enum_<TranscriptionMethod> transcription_method{
+      control, "TranscriptionMethod", DOC(sleipnir, TranscriptionMethod)};
+  nb::enum_<DynamicsType> dynamics_type{control, "DynamicsType",
+                                        DOC(sleipnir, DynamicsType)};
+  nb::enum_<TimestepMethod> timestep_method{control, "TimestepMethod",
+                                            DOC(sleipnir, TimestepMethod)};
+  nb::class_<OCPSolver, OptimizationProblem> ocp_solver{
+      control, "OCPSolver", DOC(sleipnir, OCPSolver)};
+
   BindExpressionType(expression_type);
 
   BindVariable(autodiff, variable);
@@ -76,6 +87,9 @@ NB_MODULE(_jormungandr, m) {
   BindSolverStatus(solver_status);
 
   BindOptimizationProblem(optimization_problem);
+
+  BindOCPSolver(transcription_method, dynamics_type, timestep_method,
+                ocp_solver);
 }
 
 }  // namespace sleipnir

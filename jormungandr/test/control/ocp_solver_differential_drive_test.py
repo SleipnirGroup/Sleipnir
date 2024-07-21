@@ -1,5 +1,6 @@
 from jormungandr.autodiff import ExpressionType
-from jormungandr.optimization import OptimizationProblem, SolverExitCondition
+from jormungandr.control import *
+from jormungandr.optimization import SolverExitCondition
 import numpy as np
 import pytest
 
@@ -10,62 +11,54 @@ from jormungandr.test.differential_drive_util import (
 from jormungandr.test.rk4 import rk4
 
 
-def lerp(a, b, t):
-    return a + t * (b - a)
+def test_ocp_solver_differential_drive():
+    N = 50
 
-
-def test_optimization_problem_differential_drive():
-    T = 5.0  # s
-    dt = 0.05  # s
-    N = int(T / dt)
-
-    u_max = 12.0  # V
-
+    min_timestep = 0.05  # s
     x_initial = np.zeros((5, 1))
     x_final = np.array([[1.0], [1.0], [0.0], [0.0], [0.0]])
+    u_min = np.array([[-12.0], [-12.0]])
+    u_max = np.array([[12.0], [12.0]])
 
-    problem = OptimizationProblem()
+    problem = OCPSolver(
+        5,
+        2,
+        min_timestep,
+        N,
+        differential_drive_dynamics,
+        DynamicsType.EXPLICIT_ODE,
+        TimestepMethod.VARIABLE_SINGLE,
+        TranscriptionMethod.DIRECT_TRANSCRIPTION,
+    )
 
-    # x = [x, y, heading, left velocity, right velocity]ᵀ
-    X = problem.decision_variable(5, N + 1)
+    # Seed the min time formulation with lerp between waypoints
+    for i in range(N + 1):
+        problem.X()[0, i].set_value(i / (N + 1))
+        problem.X()[1, i].set_value(i / (N + 1))
 
-    # Initial guess
-    for k in range(N + 1):
-        X[0, k].set_value(lerp(x_initial[0, 0], x_final[0, 0], k / N))
-        X[1, k].set_value(lerp(x_initial[1, 0], x_final[1, 0], k / N))
+    problem.constrain_initial_state(x_initial)
+    problem.constrain_final_state(x_final)
 
-    # u = [left voltage, right voltage]ᵀ
-    U = problem.decision_variable(2, N)
+    problem.set_lower_input_bound(u_min)
+    problem.set_upper_input_bound(u_max)
 
-    # Initial conditions
-    problem.subject_to(X[:, :1] == x_initial)
+    # TODO: Solver is unhappy when more than one minimum timestep is constrained.
+    # Detect this in either OptimizationProblem or OCPSolver.
+    problem.set_min_timestep(min_timestep)
+    problem.set_max_timestep(3.0)
 
-    # Final conditions
-    problem.subject_to(X[:, N : N + 1] == x_final)
+    # Set up cost
+    problem.minimize(problem.DT() @ np.ones((N + 1, 1)))
 
-    # Input constraints
-    problem.subject_to(U >= -u_max)
-    problem.subject_to(U <= u_max)
+    status = problem.solve(max_iterations=1000, diagnostics=True)
 
-    # Dynamics constraints - RK4 integration
-    for k in range(N):
-        problem.subject_to(
-            X[:, k + 1 : k + 2]
-            == rk4(differential_drive_dynamics, X[:, k : k + 1], U[:, k : k + 1], dt)
-        )
-
-    # Minimize sum squared states and inputs
-    J = 0.0
-    for k in range(N):
-        J += X[:, k : k + 1].T @ X[:, k : k + 1] + U[:, k : k + 1].T @ U[:, k : k + 1]
-    problem.minimize(J)
-
-    status = problem.solve(diagnostics=True)
-
-    assert status.cost_function_type == ExpressionType.QUADRATIC
+    assert status.cost_function_type == ExpressionType.LINEAR
     assert status.equality_constraint_type == ExpressionType.NONLINEAR
     assert status.inequality_constraint_type == ExpressionType.LINEAR
     assert status.exit_condition == SolverExitCondition.SUCCESS
+
+    X = problem.X()
+    U = problem.U()
 
     # Verify initial state
     assert X.value(0, 0) == pytest.approx(x_initial[0, 0], abs=1e-8)
@@ -76,14 +69,15 @@ def test_optimization_problem_differential_drive():
 
     # Verify solution
     x = np.zeros((5, 1))
+    u = np.zeros((2, 1))
     for k in range(N):
         u = U[:, k : k + 1].value()
 
         # Input constraints
-        assert U[0, k].value() >= -u_max
-        assert U[0, k].value() <= u_max
-        assert U[1, k].value() >= -u_max
-        assert U[1, k].value() <= u_max
+        assert U[0, k].value() >= -u_max[0]
+        assert U[0, k].value() <= u_max[0]
+        assert U[1, k].value() >= -u_max[1]
+        assert U[1, k].value() <= u_max[1]
 
         # Verify state
         assert X.value(0, k) == pytest.approx(x[0, 0], abs=1e-8)
@@ -93,7 +87,7 @@ def test_optimization_problem_differential_drive():
         assert X.value(4, k) == pytest.approx(x[4, 0], abs=1e-8)
 
         # Project state forward
-        x = rk4(differential_drive_dynamics_double, x, u, dt)
+        x = rk4(differential_drive_dynamics_double, x, u, problem.DT().value(0, k))
 
     # Verify final state
     assert X.value(0, N) == pytest.approx(x_final[0, 0], abs=1e-8)
@@ -108,17 +102,23 @@ def test_optimization_problem_differential_drive():
             "Time (s),X position (m),Y position (m),Heading (rad),Left velocity (m/s),Right velocity (m/s)\n"
         )
 
+        time = 0.0
         for k in range(N + 1):
             f.write(
-                f"{k * dt},{X.value(0, k)},{X.value(1, k)},{X.value(2, k)},{X.value(3, k)},{X.value(4, k)}\n"
+                f"{time},{X.value(0, k)},{X.value(1, k)},{X.value(2, k)},{X.value(3, k)},{X.value(4, k)}\n"
             )
+
+            time += problem.DT().value(0, k)
 
     # Log inputs for offline viewing
     with open("Differential drive inputs.csv", "w") as f:
         f.write("Time (s),Left voltage (V),Right voltage (V)\n")
 
+        time = 0.0
         for k in range(N + 1):
             if k < N:
-                f.write(f"{k * dt},{U.value(0, k)},{U.value(1, k)}\n")
+                f.write(f"{time},{U.value(0, k)},{U.value(1, k)}\n")
             else:
-                f.write(f"{k * dt},0.0,0.0\n")
+                f.write(f"{time},0.0,0.0\n")
+
+            time += problem.DT().value(0, k)

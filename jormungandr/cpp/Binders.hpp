@@ -10,6 +10,7 @@
 #include <sleipnir/autodiff/Variable.hpp>
 #include <sleipnir/autodiff/VariableBlock.hpp>
 #include <sleipnir/autodiff/VariableMatrix.hpp>
+#include <sleipnir/control/OCPSolver.hpp>
 #include <sleipnir/optimization/Constraints.hpp>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 #include <sleipnir/optimization/SolverExitCondition.hpp>
@@ -38,5 +39,10 @@ void BindSolverIterationInfo(nb::class_<SolverIterationInfo>& cls);
 void BindSolverStatus(nb::class_<SolverStatus>& cls);
 
 void BindOptimizationProblem(nb::class_<OptimizationProblem>& cls);
+
+void BindOCPSolver(nb::enum_<TranscriptionMethod>& transcription_method,
+                   nb::enum_<DynamicsType>& dynamics_type,
+                   nb::enum_<TimestepMethod>& timestep_method,
+                   nb::class_<OCPSolver, OptimizationProblem>& cls);
 
 }  // namespace sleipnir
