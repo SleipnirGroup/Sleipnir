@@ -32,7 +32,7 @@ void BindVariableMatrix(nb::module_& autodiff,
           DOC(sleipnir, VariableMatrix, VariableMatrix, 5));
   cls.def(nb::init<const std::vector<std::vector<Variable>>&>(), "list"_a,
           DOC(sleipnir, VariableMatrix, VariableMatrix, 6));
-  cls.def(nb::init<const Variable&>(), "values"_a,
+  cls.def(nb::init<const Variable&>(), "variable"_a,
           DOC(sleipnir, VariableMatrix, VariableMatrix, 9));
   cls.def(nb::init<const VariableBlock<VariableMatrix>&>(), "values"_a,
           DOC(sleipnir, VariableMatrix, VariableMatrix, 11));
