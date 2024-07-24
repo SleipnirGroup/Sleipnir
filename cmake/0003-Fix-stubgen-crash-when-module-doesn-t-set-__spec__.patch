@@ -1,0 +1,24 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Tyler Veness <calcmogul@gmail.com>
+Date: Wed, 24 Jul 2024 09:24:48 -0700
+Subject: [PATCH 3/3] Fix stubgen crash when module doesn't set __spec__
+
+Per https://docs.python.org/3/library/importlib.html#importlib.util.find_spec,
+find_spec() can throw ValueError if __spec__ isn't set.
+---
+ src/stubgen.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/stubgen.py b/src/stubgen.py
+index 35675285c10cfa7489c670c74c4a7cdfb063cd9b..392f48e593b17b91c369ecd2df5cdc1628231210 100755
+--- a/src/stubgen.py
++++ b/src/stubgen.py
+@@ -641,7 +641,7 @@ class StubGen:
+             def is_valid_module(module_name: str) -> bool:
+                 try:
+                     return importlib.util.find_spec(module_name) is not None
+-                except ModuleNotFoundError:
++                except (ModuleNotFoundError, ValueError):
+                     return False
+ 
+             full_name, mod_name, cls_name = m.group(0), m.group(1)[:-1], m.group(2)

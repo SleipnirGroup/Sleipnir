@@ -281,14 +281,13 @@ if(BUILD_PYTHON)
         fetchcontent_declare(
             nanobind
             GIT_REPOSITORY https://github.com/wjakob/nanobind.git
-            # master on 2024-07-06
-            GIT_TAG b0136fe6ac1967cb2399456adc346a1af06a3b88
+            # master on 2024-07-24
+            GIT_TAG f2438bb73a1673e4ad9d0c84d353a88cf54e55bf
             PATCH_COMMAND
                 git apply
                 ${CMAKE_CURRENT_SOURCE_DIR}/cmake/0001-Replace-zero-size-array.patch
                 ${CMAKE_CURRENT_SOURCE_DIR}/cmake/0002-Give-anonymous-union-a-name.patch
-                # https://github.com/wjakob/nanobind/issues/613
-                ${CMAKE_CURRENT_SOURCE_DIR}/cmake/0003-Avoid-MSVC-ICE-in-nb_func.h.patch
+                ${CMAKE_CURRENT_SOURCE_DIR}/cmake/0003-Fix-stubgen-crash-when-module-doesn-t-set-__spec__.patch
             UPDATE_DISCONNECTED 1
         )
         fetchcontent_makeavailable(nanobind)
@@ -359,7 +358,8 @@ if(BUILD_PYTHON)
         fetchcontent_declare(
             pybind11_mkdoc
             GIT_REPOSITORY https://github.com/pybind/pybind11_mkdoc.git
-            GIT_TAG master
+            # master on 2023-02-08
+            GIT_TAG 42fbf377824185e255b06d68fa70f4efcd569e2d
             GIT_SUBMODULES ""
         )
         fetchcontent_makeavailable(pybind11_mkdoc)
