@@ -286,7 +286,6 @@ if(BUILD_PYTHON)
             PATCH_COMMAND
                 git apply
                 ${CMAKE_CURRENT_SOURCE_DIR}/cmake/0001-Replace-zero-size-array.patch
-                ${CMAKE_CURRENT_SOURCE_DIR}/cmake/0002-Give-anonymous-union-a-name.patch
             UPDATE_DISCONNECTED 1
         )
         fetchcontent_makeavailable(nanobind)
@@ -312,7 +311,8 @@ if(BUILD_PYTHON)
 
     # Suppress compiler warnings in nanobind
     if(${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang")
-        target_compile_options(nanobind-static PRIVATE "-Wno-array-bounds")
+        target_compile_options(nanobind-static PRIVATE -Wno-array-bounds)
+        target_compile_options(_jormungandr PRIVATE -Wno-nested-anon-types)
     endif()
 
     install(
