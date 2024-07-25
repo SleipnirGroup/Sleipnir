@@ -282,12 +282,11 @@ if(BUILD_PYTHON)
             nanobind
             GIT_REPOSITORY https://github.com/wjakob/nanobind.git
             # master on 2024-07-24
-            GIT_TAG f2438bb73a1673e4ad9d0c84d353a88cf54e55bf
+            GIT_TAG 68265d36f89a825f0db930fbc77bb57bdd8d6dfe
             PATCH_COMMAND
                 git apply
                 ${CMAKE_CURRENT_SOURCE_DIR}/cmake/0001-Replace-zero-size-array.patch
                 ${CMAKE_CURRENT_SOURCE_DIR}/cmake/0002-Give-anonymous-union-a-name.patch
-                ${CMAKE_CURRENT_SOURCE_DIR}/cmake/0003-Fix-stubgen-crash-when-module-doesn-t-set-__spec__.patch
             UPDATE_DISCONNECTED 1
         )
         fetchcontent_makeavailable(nanobind)
