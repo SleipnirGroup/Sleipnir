@@ -283,10 +283,6 @@ if(BUILD_PYTHON)
             GIT_REPOSITORY https://github.com/wjakob/nanobind.git
             # master on 2024-07-24
             GIT_TAG 68265d36f89a825f0db930fbc77bb57bdd8d6dfe
-            PATCH_COMMAND
-                git apply
-                ${CMAKE_CURRENT_SOURCE_DIR}/cmake/0001-Replace-zero-size-array.patch
-            UPDATE_DISCONNECTED 1
         )
         fetchcontent_makeavailable(nanobind)
     else()
@@ -310,9 +306,18 @@ if(BUILD_PYTHON)
     target_link_libraries(_jormungandr PUBLIC Threads::Threads Eigen3::Eigen)
 
     # Suppress compiler warnings in nanobind
+    if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+        # nanobind/include/nanobind/nb_attr.h:212:14: warning: ISO C++ forbids zero-size array
+        #  212 |     arg_data args[Size];
+        #      |              ^~~~
+        target_compile_options(_jormungandr PRIVATE -Wno-pedantic)
+    endif()
     if(${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang")
         target_compile_options(nanobind-static PRIVATE -Wno-array-bounds)
-        target_compile_options(_jormungandr PRIVATE -Wno-nested-anon-types)
+        target_compile_options(
+            _jormungandr
+            PRIVATE -Wno-nested-anon-types -Wno-zero-length-array
+        )
     endif()
 
     install(
