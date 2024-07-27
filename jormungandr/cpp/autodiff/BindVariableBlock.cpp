@@ -14,7 +14,7 @@
 #include <sleipnir/optimization/Constraints.hpp>
 
 #include "Docstrings.hpp"
-#include "NumPy.hpp"
+#include "TryCast.hpp"
 
 namespace nb = nanobind;
 
@@ -91,9 +91,9 @@ void BindVariableBlock(nb::class_<VariableBlock<VariableMatrix>>& cls) {
 
         // Row slice
         const auto& rowElem = slices[0];
-        if (nb::isinstance<nb::slice>(rowElem)) {
-          auto rowSlice = nb::cast<nb::slice>(rowElem);
-          auto [start, stop, step, sliceLength] = rowSlice.compute(self.Rows());
+        if (auto rowSlice = TryCast<nb::slice>(rowElem)) {
+          auto [start, stop, step, sliceLength] =
+              rowSlice.value().compute(self.Rows());
           rowOffset = start;
           blockRows = stop - start;
         } else {
@@ -103,9 +103,9 @@ void BindVariableBlock(nb::class_<VariableBlock<VariableMatrix>>& cls) {
 
         // Column slice
         const auto& colElem = slices[1];
-        if (nb::isinstance<nb::slice>(colElem)) {
-          auto colSlice = nb::cast<nb::slice>(colElem);
-          auto [start, stop, step, sliceLength] = colSlice.compute(self.Cols());
+        if (auto colSlice = TryCast<nb::slice>(colElem)) {
+          auto [start, stop, step, sliceLength] =
+              colSlice.value().compute(self.Cols());
           colOffset = start;
           blockCols = stop - start;
         } else {
@@ -113,12 +113,10 @@ void BindVariableBlock(nb::class_<VariableBlock<VariableMatrix>>& cls) {
           blockCols = 1;
         }
 
-        if (nb::isinstance<VariableMatrix>(value)) {
-          self.Block(rowOffset, colOffset, blockRows, blockCols) =
-              nb::cast<VariableMatrix>(value);
-        } else if (nb::isinstance<VariableBlock<VariableMatrix>>(value)) {
-          self.Block(rowOffset, colOffset, blockRows, blockCols) =
-              nb::cast<VariableBlock<VariableMatrix>>(value);
+        if (auto rhs = TryCast<VariableMatrix>(value)) {
+          self.Block(rowOffset, colOffset, blockRows, blockCols) = rhs.value();
+        } else if (auto rhs = TryCast<VariableBlock<VariableMatrix>>(value)) {
+          self.Block(rowOffset, colOffset, blockRows, blockCols) = rhs.value();
         } else if (auto rhs = TryCastToEigen<double>(value)) {
           self.Block(rowOffset, colOffset, blockRows, blockCols) = rhs.value();
         } else if (auto rhs = TryCastToEigen<float>(value)) {
@@ -127,15 +125,12 @@ void BindVariableBlock(nb::class_<VariableBlock<VariableMatrix>>& cls) {
           self.Block(rowOffset, colOffset, blockRows, blockCols) = rhs.value();
         } else if (auto rhs = TryCastToEigen<int32_t>(value)) {
           self.Block(rowOffset, colOffset, blockRows, blockCols) = rhs.value();
-        } else if (nb::isinstance<Variable>(value)) {
-          self.Block(rowOffset, colOffset, blockRows, blockCols) =
-              nb::cast<Variable>(value);
-        } else if (nb::isinstance<nb::float_>(value)) {
-          self.Block(rowOffset, colOffset, blockRows, blockCols) =
-              nb::cast<double>(value);
-        } else if (nb::isinstance<nb::int_>(value)) {
-          self.Block(rowOffset, colOffset, blockRows, blockCols) =
-              nb::cast<int>(value);
+        } else if (auto rhs = TryCast<Variable>(value)) {
+          self.Block(rowOffset, colOffset, blockRows, blockCols) = rhs.value();
+        } else if (auto rhs = TryCast<double>(value)) {
+          self.Block(rowOffset, colOffset, blockRows, blockCols) = rhs.value();
+        } else if (auto rhs = TryCast<int>(value)) {
+          self.Block(rowOffset, colOffset, blockRows, blockCols) = rhs.value();
         } else {
           throw nb::value_error(
               "VariableBlock.__setitem__ not implemented for value");
@@ -163,8 +158,7 @@ void BindVariableBlock(nb::class_<VariableBlock<VariableMatrix>>& cls) {
 
         // If both indices are integers instead of slices, return Variable
         // instead of VariableBlock
-        if (nb::isinstance<nb::int_>(slices[0]) &&
-            nb::isinstance<nb::int_>(slices[1])) {
+        if (nb::isinstance<int>(slices[0]) && nb::isinstance<int>(slices[1])) {
           int row = nb::cast<int>(slices[0]);
           int col = nb::cast<int>(slices[1]);
 
@@ -188,9 +182,9 @@ void BindVariableBlock(nb::class_<VariableBlock<VariableMatrix>>& cls) {
 
         // Row slice
         const auto& rowElem = slices[0];
-        if (nb::isinstance<nb::slice>(rowElem)) {
-          auto rowSlice = nb::cast<nb::slice>(rowElem);
-          auto [start, stop, step, sliceLength] = rowSlice.compute(self.Rows());
+        if (auto rowSlice = TryCast<nb::slice>(rowElem)) {
+          auto [start, stop, step, sliceLength] =
+              rowSlice.value().compute(self.Rows());
           rowOffset = start;
           blockRows = stop - start;
         } else {
@@ -203,9 +197,9 @@ void BindVariableBlock(nb::class_<VariableBlock<VariableMatrix>>& cls) {
 
         // Column slice
         const auto& colElem = slices[1];
-        if (nb::isinstance<nb::slice>(colElem)) {
-          auto colSlice = nb::cast<nb::slice>(colElem);
-          auto [start, stop, step, sliceLength] = colSlice.compute(self.Cols());
+        if (auto colSlice = TryCast<nb::slice>(colElem)) {
+          auto [start, stop, step, sliceLength] =
+              colSlice.value().compute(self.Cols());
           colOffset = start;
           blockCols = stop - start;
         } else {

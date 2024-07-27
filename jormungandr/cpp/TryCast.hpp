@@ -13,6 +13,18 @@ namespace nb = nanobind;
 namespace sleipnir {
 
 /**
+ * Converts the given nb::object to a C++ type.
+ */
+template <typename T>
+inline std::optional<T> TryCast(const nb::object& obj) {
+  if (nb::isinstance<T>(obj)) {
+    return nb::cast<T>(obj);
+  } else {
+    return std::nullopt;
+  }
+}
+
+/**
  * Converts the given nb::ndarray to an Eigen matrix.
  */
 template <typename T>
