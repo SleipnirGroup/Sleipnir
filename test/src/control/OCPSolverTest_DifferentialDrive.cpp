@@ -46,8 +46,6 @@ TEST_CASE("OCPSolver - Differential drive", "[OCPSolver]") {
   problem.SetLowerInputBound(u_min);
   problem.SetUpperInputBound(u_max);
 
-  // TODO: Solver is unhappy when more than one minimum timestep is constrained.
-  // Detect this in either OptimizationProblem or OCPSolver.
   problem.SetMinTimestep(minTimestep);
   problem.SetMaxTimestep(3s);
 

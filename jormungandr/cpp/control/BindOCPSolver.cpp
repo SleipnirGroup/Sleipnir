@@ -125,10 +125,10 @@ void BindOCPSolver(nb::enum_<TranscriptionMethod>& transcription_method,
           &OCPSolver::SetUpperInputBound<VariableMatrix>, "upper_bound"_a,
           DOC(sleipnir, OCPSolver, SetUpperInputBound));
 
-  cls.def("set_max_timestep", &OCPSolver::SetMaxTimestep, "max_timestep"_a,
-          DOC(sleipnir, OCPSolver, SetMaxTimestep));
   cls.def("set_min_timestep", &OCPSolver::SetMinTimestep, "min_timestep"_a,
           DOC(sleipnir, OCPSolver, SetMinTimestep));
+  cls.def("set_max_timestep", &OCPSolver::SetMaxTimestep, "max_timestep"_a,
+          DOC(sleipnir, OCPSolver, SetMaxTimestep));
 
   cls.def("X", &OCPSolver::X, DOC(sleipnir, OCPSolver, X));
   cls.def("U", &OCPSolver::U, DOC(sleipnir, OCPSolver, U));

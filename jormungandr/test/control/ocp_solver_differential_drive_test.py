@@ -42,8 +42,6 @@ def test_ocp_solver_differential_drive():
     problem.set_lower_input_bound(u_min)
     problem.set_upper_input_bound(u_max)
 
-    # TODO: Solver is unhappy when more than one minimum timestep is constrained.
-    # Detect this in either OptimizationProblem or OCPSolver.
     problem.set_min_timestep(min_timestep)
     problem.set_max_timestep(3.0)
 
