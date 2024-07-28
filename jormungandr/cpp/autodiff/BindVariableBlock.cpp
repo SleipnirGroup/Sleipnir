@@ -33,11 +33,6 @@ void BindVariableBlock(nb::class_<VariableBlock<VariableMatrix>>& cls) {
   cls.def(nb::self > VariableMatrix(), "rhs"_a, DOC(sleipnir, operator, gt));
   cls.def(nb::self >= VariableMatrix(), "rhs"_a, DOC(sleipnir, operator, ge));
 
-  cls.def(nb::init<VariableMatrix&>(), "mat"_a,
-          DOC(sleipnir, VariableBlock, VariableBlock, 3));
-  cls.def(nb::init<VariableMatrix&, int, int, int, int>(), "mat"_a,
-          "row_offset"_a, "col_offset"_a, "block_rows"_a, "block_cols"_a,
-          DOC(sleipnir, VariableBlock, VariableBlock, 4));
   cls.def(
       "set_value",
       [](VariableBlock<VariableMatrix>& self, double value) {
@@ -74,7 +69,6 @@ void BindVariableBlock(nb::class_<VariableBlock<VariableMatrix>>& cls) {
         return self(row) = value;
       },
       "row"_a, "value"_a);
-  // TODO: Support slice stride other than 1
   cls.def(
       "__setitem__",
       [](VariableBlock<VariableMatrix>& self, nb::tuple slices,
@@ -84,53 +78,62 @@ void BindVariableBlock(nb::class_<VariableBlock<VariableMatrix>>& cls) {
               std::format("Expected 2 slices, got {}.", slices.size()).c_str());
         }
 
-        int rowOffset = 0;
-        int colOffset = 0;
-        int blockRows = self.Rows();
-        int blockCols = self.Cols();
+        Slice rowSlice;
+        int rowSliceLength;
+        Slice colSlice;
+        int colSliceLength;
 
         // Row slice
         const auto& rowElem = slices[0];
-        if (auto rowSlice = TryCast<nb::slice>(rowElem)) {
-          auto [start, stop, step, sliceLength] =
-              rowSlice.value().compute(self.Rows());
-          rowOffset = start;
-          blockRows = stop - start;
+        if (auto pyRowSlice = TryCast<nb::slice>(rowElem)) {
+          auto t = pyRowSlice.value().compute(self.Rows());
+          rowSlice = Slice{t.get<0>(), t.get<1>(), t.get<2>()};
+          rowSliceLength = t.get<3>();
         } else {
-          rowOffset = nb::cast<int>(rowElem);
-          blockRows = 1;
+          int start = nb::cast<int>(rowElem);
+          rowSlice = Slice{start, start + 1};
+          rowSliceLength = 1;
         }
 
         // Column slice
         const auto& colElem = slices[1];
-        if (auto colSlice = TryCast<nb::slice>(colElem)) {
-          auto [start, stop, step, sliceLength] =
-              colSlice.value().compute(self.Cols());
-          colOffset = start;
-          blockCols = stop - start;
+        if (auto pyColSlice = TryCast<nb::slice>(colElem)) {
+          auto t = pyColSlice.value().compute(self.Cols());
+          colSlice = Slice{t.get<0>(), t.get<1>(), t.get<2>()};
+          colSliceLength = t.get<3>();
         } else {
-          colOffset = nb::cast<int>(colElem);
-          blockCols = 1;
+          int start = nb::cast<int>(colElem);
+          colSlice = Slice{start, start + 1};
+          colSliceLength = 1;
         }
 
         if (auto rhs = TryCast<VariableMatrix>(value)) {
-          self.Block(rowOffset, colOffset, blockRows, blockCols) = rhs.value();
+          self(rowSlice, rowSliceLength, colSlice, colSliceLength) =
+              rhs.value();
         } else if (auto rhs = TryCast<VariableBlock<VariableMatrix>>(value)) {
-          self.Block(rowOffset, colOffset, blockRows, blockCols) = rhs.value();
+          self(rowSlice, rowSliceLength, colSlice, colSliceLength) =
+              rhs.value();
         } else if (auto rhs = TryCastToEigen<double>(value)) {
-          self.Block(rowOffset, colOffset, blockRows, blockCols) = rhs.value();
+          self(rowSlice, rowSliceLength, colSlice, colSliceLength) =
+              rhs.value();
         } else if (auto rhs = TryCastToEigen<float>(value)) {
-          self.Block(rowOffset, colOffset, blockRows, blockCols) = rhs.value();
+          self(rowSlice, rowSliceLength, colSlice, colSliceLength) =
+              rhs.value();
         } else if (auto rhs = TryCastToEigen<int64_t>(value)) {
-          self.Block(rowOffset, colOffset, blockRows, blockCols) = rhs.value();
+          self(rowSlice, rowSliceLength, colSlice, colSliceLength) =
+              rhs.value();
         } else if (auto rhs = TryCastToEigen<int32_t>(value)) {
-          self.Block(rowOffset, colOffset, blockRows, blockCols) = rhs.value();
+          self(rowSlice, rowSliceLength, colSlice, colSliceLength) =
+              rhs.value();
         } else if (auto rhs = TryCast<Variable>(value)) {
-          self.Block(rowOffset, colOffset, blockRows, blockCols) = rhs.value();
+          self(rowSlice, rowSliceLength, colSlice, colSliceLength) =
+              rhs.value();
         } else if (auto rhs = TryCast<double>(value)) {
-          self.Block(rowOffset, colOffset, blockRows, blockCols) = rhs.value();
+          self(rowSlice, rowSliceLength, colSlice, colSliceLength) =
+              rhs.value();
         } else if (auto rhs = TryCast<int>(value)) {
-          self.Block(rowOffset, colOffset, blockRows, blockCols) = rhs.value();
+          self(rowSlice, rowSliceLength, colSlice, colSliceLength) =
+              rhs.value();
         } else {
           throw nb::value_error(
               "VariableBlock.__setitem__ not implemented for value");
@@ -147,7 +150,6 @@ void BindVariableBlock(nb::class_<VariableBlock<VariableMatrix>>& cls) {
       },
       nb::keep_alive<0, 1>(), "row"_a,
       DOC(sleipnir, VariableBlock, operator, call, 3));
-  // TODO: Support slice stride other than 1
   cls.def(
       "__getitem__",
       [](VariableBlock<VariableMatrix>& self, nb::tuple slices) -> nb::object {
@@ -175,42 +177,37 @@ void BindVariableBlock(nb::class_<VariableBlock<VariableMatrix>>& cls) {
           return nb::cast(self(row, col));
         }
 
-        int rowOffset = 0;
-        int colOffset = 0;
-        int blockRows = self.Rows();
-        int blockCols = self.Cols();
+        Slice rowSlice;
+        int rowSliceLength;
+        Slice colSlice;
+        int colSliceLength;
 
         // Row slice
         const auto& rowElem = slices[0];
-        if (auto rowSlice = TryCast<nb::slice>(rowElem)) {
-          auto [start, stop, step, sliceLength] =
-              rowSlice.value().compute(self.Rows());
-          rowOffset = start;
-          blockRows = stop - start;
+        if (auto pyRowSlice = TryCast<nb::slice>(rowElem)) {
+          auto t = pyRowSlice.value().compute(self.Rows());
+          rowSlice = Slice{t.get<0>(), t.get<1>(), t.get<2>()};
+          rowSliceLength = t.get<3>();
         } else {
-          rowOffset = nb::cast<int>(rowElem);
-          if (rowOffset < 0) {
-            rowOffset = self.Rows() + rowOffset;
-          }
-          blockRows = 1;
+          int start = nb::cast<int>(rowElem);
+          rowSlice = Slice{start, start + 1};
+          rowSliceLength = 1;
         }
 
         // Column slice
         const auto& colElem = slices[1];
-        if (auto colSlice = TryCast<nb::slice>(colElem)) {
-          auto [start, stop, step, sliceLength] =
-              colSlice.value().compute(self.Cols());
-          colOffset = start;
-          blockCols = stop - start;
+        if (auto pyColSlice = TryCast<nb::slice>(colElem)) {
+          auto t = pyColSlice.value().compute(self.Cols());
+          colSlice = Slice{t.get<0>(), t.get<1>(), t.get<2>()};
+          colSliceLength = t.get<3>();
         } else {
-          colOffset = nb::cast<int>(colElem);
-          if (colOffset < 0) {
-            colOffset = self.Cols() + colOffset;
-          }
-          blockCols = 1;
+          int start = nb::cast<int>(colElem);
+          colSlice = Slice{start, start + 1};
+          colSliceLength = 1;
         }
 
-        return nb::cast(self.Block(rowOffset, colOffset, blockRows, blockCols));
+        return nb::cast(
+            self(rowSlice, rowSliceLength, colSlice, colSliceLength));
       },
       nb::keep_alive<0, 1>(), DOC(sleipnir, VariableBlock, operator, call),
       "slices"_a);
