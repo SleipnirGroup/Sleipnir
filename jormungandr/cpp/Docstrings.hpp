@@ -754,6 +754,53 @@ Parameter ``t0``:
 Parameter ``dt``:
     The time over which to integrate.)doc";
 
+static const char *__doc_sleipnir_Slice = R"doc()doc";
+
+static const char *__doc_sleipnir_Slice_Adjust =
+R"doc(Adjusts start and end slice indices assuming a sequence of the
+specified length.
+
+Parameter ``length``:
+    The sequence length.
+
+Returns:
+    The slice length.)doc";
+
+static const char *__doc_sleipnir_Slice_Slice = R"doc(Constructs a Slice.)doc";
+
+static const char *__doc_sleipnir_Slice_Slice_2 =
+R"doc(Constructs a slice.
+
+Parameter ``stop``:
+    Slice stop index (exclusive).)doc";
+
+static const char *__doc_sleipnir_Slice_Slice_3 =
+R"doc(Constructs a slice.
+
+Parameter ``start``:
+    Slice start index (inclusive).
+
+Parameter ``stop``:
+    Slice stop index (exclusive).)doc";
+
+static const char *__doc_sleipnir_Slice_Slice_4 =
+R"doc(Constructs a slice.
+
+Parameter ``start``:
+    Slice start index (inclusive).
+
+Parameter ``stop``:
+    Slice stop index (exclusive).
+
+Parameter ``step``:
+    Slice step.)doc";
+
+static const char *__doc_sleipnir_Slice_start = R"doc(Start index (inclusive).)doc";
+
+static const char *__doc_sleipnir_Slice_step = R"doc(Step.)doc";
+
+static const char *__doc_sleipnir_Slice_stop = R"doc(Stop index (exclusive).)doc";
+
 static const char *__doc_sleipnir_Solve =
 R"doc(Solves the VariableMatrix equation AX = B for X.
 
@@ -907,7 +954,7 @@ Template parameter ``Mat``:
     The type of the matrix whose storage this class points to.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_Block =
-R"doc(Returns a block slice of the variable matrix.
+R"doc(Returns a block of the variable matrix.
 
 Parameter ``row_offset``:
     The row offset of the block selection.
@@ -970,6 +1017,24 @@ Parameter ``row``:
 
 static const char *__doc_sleipnir_VariableBlock_Rows = R"doc(Returns number of rows in the matrix.)doc";
 
+static const char *__doc_sleipnir_VariableBlock_Segment =
+R"doc(Returns a segment of the variable vector.
+
+Parameter ``offset``:
+    The offset of the segment.
+
+Parameter ``length``:
+    The length of the segment.)doc";
+
+static const char *__doc_sleipnir_VariableBlock_Segment_2 =
+R"doc(Returns a segment of the variable vector.
+
+Parameter ``offset``:
+    The offset of the segment.
+
+Parameter ``length``:
+    The length of the segment.)doc";
+
 static const char *__doc_sleipnir_VariableBlock_SetValue =
 R"doc(Assigns a double to the block.
 
@@ -1031,6 +1096,26 @@ Parameter ``block_rows``:
 Parameter ``block_cols``:
     The number of columns in the block.)doc";
 
+static const char *__doc_sleipnir_VariableBlock_VariableBlock_5 =
+R"doc(Constructs a Variable block pointing to a subset of the given matrix.
+
+Note that the slices are taken as is rather than adjusted.
+
+Parameter ``mat``:
+    The matrix to which to point.
+
+Parameter ``row_slice``:
+    The block's row slice.
+
+Parameter ``row_slice_length``:
+    The block's row length.
+
+Parameter ``col_slice``:
+    The block's column slice.
+
+Parameter ``col_slice_length``:
+    The block's column length.)doc";
+
 static const char *__doc_sleipnir_VariableBlock_begin = R"doc(Returns begin iterator.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_begin_2 = R"doc(Returns begin iterator.)doc";
@@ -1079,15 +1164,15 @@ static const char *__doc_sleipnir_VariableBlock_iterator_operator_inc_2 = R"doc(
 
 static const char *__doc_sleipnir_VariableBlock_iterator_operator_mul = R"doc()doc";
 
-static const char *__doc_sleipnir_VariableBlock_m_blockCols = R"doc()doc";
+static const char *__doc_sleipnir_VariableBlock_m_colSlice = R"doc()doc";
 
-static const char *__doc_sleipnir_VariableBlock_m_blockRows = R"doc()doc";
-
-static const char *__doc_sleipnir_VariableBlock_m_colOffset = R"doc()doc";
+static const char *__doc_sleipnir_VariableBlock_m_colSliceLength = R"doc()doc";
 
 static const char *__doc_sleipnir_VariableBlock_m_mat = R"doc()doc";
 
-static const char *__doc_sleipnir_VariableBlock_m_rowOffset = R"doc()doc";
+static const char *__doc_sleipnir_VariableBlock_m_rowSlice = R"doc()doc";
+
+static const char *__doc_sleipnir_VariableBlock_m_rowSliceLength = R"doc()doc";
 
 static const char *__doc_sleipnir_VariableBlock_operator_assign =
 R"doc(Assigns a VariableBlock to the block.
@@ -1154,6 +1239,60 @@ R"doc(Returns a scalar subblock at the given row.
 Parameter ``row``:
     The scalar subblock's row.)doc";
 
+static const char *__doc_sleipnir_VariableBlock_operator_call_5 =
+R"doc(Returns a slice of the variable matrix.
+
+Parameter ``row_slice``:
+    The row slice.
+
+Parameter ``col_slice``:
+    The column slice.)doc";
+
+static const char *__doc_sleipnir_VariableBlock_operator_call_6 =
+R"doc(Returns a slice of the variable matrix.
+
+Parameter ``row_slice``:
+    The row slice.
+
+Parameter ``col_slice``:
+    The column slice.)doc";
+
+static const char *__doc_sleipnir_VariableBlock_operator_call_7 =
+R"doc(Returns a slice of the variable matrix.
+
+The given slices aren't adjusted. This overload is for Python bindings
+only.
+
+Parameter ``row_slice``:
+    The row slice.
+
+Parameter ``row_slice_length``:
+    The row slice length.
+
+Parameter ``col_slice``:
+    The column slice.
+
+Parameter ``col_slice_length``:
+    The column slice length.)doc";
+
+static const char *__doc_sleipnir_VariableBlock_operator_call_8 =
+R"doc(Returns a slice of the variable matrix.
+
+The given slices aren't adjusted. This overload is for Python bindings
+only.
+
+Parameter ``row_slice``:
+    The row slice.
+
+Parameter ``row_slice_length``:
+    The row slice length.
+
+Parameter ``col_slice``:
+    The column slice.
+
+Parameter ``col_slice_length``:
+    The column slice length.)doc";
+
 static const char *__doc_sleipnir_VariableBlock_operator_iadd =
 R"doc(Compound addition-assignment operator.
 
@@ -1198,7 +1337,7 @@ static const char *__doc_sleipnir_VariableBlock_size = R"doc(Returns number of e
 static const char *__doc_sleipnir_VariableMatrix = R"doc(A matrix of autodiff variables.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_Block =
-R"doc(Returns a block slice of the variable matrix.
+R"doc(Returns a block of the variable matrix.
 
 Parameter ``row_offset``:
     The row offset of the block selection.
@@ -1213,7 +1352,7 @@ Parameter ``block_cols``:
     The number of columns in the block selection.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_Block_2 =
-R"doc(Returns a block slice of the variable matrix.
+R"doc(Returns a block of the variable matrix.
 
 Parameter ``row_offset``:
     The row offset of the block selection.
@@ -1506,6 +1645,60 @@ R"doc(Returns a block pointing to the given row.
 
 Parameter ``row``:
     The block row.)doc";
+
+static const char *__doc_sleipnir_VariableMatrix_operator_call_5 =
+R"doc(Returns a slice of the variable matrix.
+
+Parameter ``row_slice``:
+    The row slice.
+
+Parameter ``col_slice``:
+    The column slice.)doc";
+
+static const char *__doc_sleipnir_VariableMatrix_operator_call_6 =
+R"doc(Returns a slice of the variable matrix.
+
+Parameter ``row_slice``:
+    The row slice.
+
+Parameter ``col_slice``:
+    The column slice.)doc";
+
+static const char *__doc_sleipnir_VariableMatrix_operator_call_7 =
+R"doc(Returns a slice of the variable matrix.
+
+The given slices aren't adjusted. This overload is for Python bindings
+only.
+
+Parameter ``row_slice``:
+    The row slice.
+
+Parameter ``row_slice_length``:
+    The row slice length.
+
+Parameter ``col_slice``:
+    The column slice.
+
+Parameter ``col_slice_length``:
+    The column slice length.)doc";
+
+static const char *__doc_sleipnir_VariableMatrix_operator_call_8 =
+R"doc(Returns a slice of the variable matrix.
+
+The given slices aren't adjusted. This overload is for Python bindings
+only.
+
+Parameter ``row_slice``:
+    The row slice.
+
+Parameter ``row_slice_length``:
+    The row slice length.
+
+Parameter ``col_slice``:
+    The column slice.
+
+Parameter ``col_slice_length``:
+    The column slice length.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_operator_iadd =
 R"doc(Compound addition-assignment operator.
@@ -2093,6 +2286,8 @@ R"doc(std::sinh() for Variables.
 
 Parameter ``x``:
     The argument.)doc";
+
+static const char *__doc_sleipnir_slicing_none_t = R"doc()doc";
 
 static const char *__doc_sleipnir_sqrt =
 R"doc(std::sqrt() for Variables.

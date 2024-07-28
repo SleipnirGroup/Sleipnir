@@ -42,7 +42,7 @@ def test_slicing():
     for i in range(mat.shape[0] * mat.shape[1]):
         assert mat[i] == i + 1
 
-    # Slice from beginning
+    # Slice from start
     s = mat[1:, 2:]
     assert s.shape == (3, 2)
     # Single-arg index operator on forward slice
@@ -69,6 +69,28 @@ def test_slicing():
     # Double-arg index operator on reverse slice
     assert s[0, 0] == 15.0
     assert s[0, 1] == 16.0
+
+    # Slice from start with step of 2
+    s = mat[:, ::2]
+    assert s.shape == (4, 2)
+    assert (
+        s.value() == np.array([[1.0, 3.0], [5.0, 7.0], [9.0, 11.0], [13.0, 15.0]])
+    ).all()
+
+    # Slice from end with negative step for row and column
+    s = mat[::-1, ::-2]
+    assert s.shape == (4, 2)
+    assert (
+        s.value()
+        == np.array(
+            [
+                [16.0, 14.0],
+                [12.0, 10.0],
+                [8.0, 6.0],
+                [4.0, 2.0],
+            ]
+        )
+    ).all()
 
 
 def test_subslicing():
@@ -109,6 +131,26 @@ def test_iterators():
     for elem in Asub:
         assert elem.value() == i
         i += 1
+
+
+def test_value():
+    A = VariableMatrix([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]])
+    expected = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]])
+
+    # Full matrix
+    assert (A.value() == expected).all()
+    assert A.value(3) == 4.0
+    assert A.T.value(3) == 2.0
+
+    # Slice
+    assert (A[1:3, 1:3].value() == expected[1:3, 1:3]).all()
+    assert A[1:3, 1:3].value(2) == 8.0
+    assert A[1:3, 1:3].T.value(2) == 6.0
+
+    # Slice-of-slice
+    assert (A[1:3, 1:3][:, 1:].value() == expected[1:3, 1:3][:, 1:]).all()
+    assert A[1:3, 1:3][:, 1:].value(1) == 9.0
+    assert A[1:3, 1:3].T[:, 1:].value(1) == 9.0
 
 
 def test_cwise_transform():
