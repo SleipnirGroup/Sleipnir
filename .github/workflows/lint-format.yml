@@ -24,7 +24,7 @@ jobs:
         with:
           python-version: 3.12
 
-      - run: pip3 install wpiformat==2024.38
+      - run: pip3 install wpiformat==2024.39
 
       - run: wpiformat
 

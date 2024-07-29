@@ -1,1 +1,1 @@
-from .._jormungandr.control import *  # noqa
+from .._jormungandr.control import *
