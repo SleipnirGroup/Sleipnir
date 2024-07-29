@@ -1,4 +1,4 @@
-from .._jormungandr.autodiff import *  # noqa
+from .._jormungandr.autodiff import *
 
 import scipy.sparse
 
