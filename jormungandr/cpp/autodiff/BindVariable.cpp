@@ -4,7 +4,6 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/operators.h>
 #include <sleipnir/autodiff/Variable.hpp>
-#include <sleipnir/optimization/Constraints.hpp>
 
 #include "Docstrings.hpp"
 

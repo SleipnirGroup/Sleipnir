@@ -6,7 +6,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include <sleipnir/autodiff/Variable.hpp>
 #include <sleipnir/autodiff/VariableMatrix.hpp>
-#include <sleipnir/optimization/Constraints.hpp>
 
 #include "CatchStringConverters.hpp"
 

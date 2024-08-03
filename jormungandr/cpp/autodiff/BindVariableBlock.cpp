@@ -11,7 +11,6 @@
 #include <nanobind/stl/vector.h>
 #include <sleipnir/autodiff/VariableBlock.hpp>
 #include <sleipnir/autodiff/VariableMatrix.hpp>
-#include <sleipnir/optimization/Constraints.hpp>
 
 #include "Docstrings.hpp"
 #include "TryCast.hpp"

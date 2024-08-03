@@ -6,7 +6,6 @@
 #include <Eigen/Core>
 #include <catch2/catch_test_macros.hpp>
 #include <sleipnir/autodiff/VariableMatrix.hpp>
-#include <sleipnir/optimization/Constraints.hpp>
 
 TEST_CASE("VariableMatrix - Construct from Eigen::MatrixBase",
           "[VariableMatrix]") {
