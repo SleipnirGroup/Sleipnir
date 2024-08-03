@@ -102,6 +102,20 @@ See [benchmark details](https://github.com/SleipnirGroup/Sleipnir/?tab=readme-ov
 
 ## Install
 
+### Minimum system requirements
+
+Sleipnir requires somewhat newer operating systems and C++ runtimes for std::print().
+
+* Windows
+  * OS: Windows 10
+  * Runtime: [Microsoft Visual C++ 2022 redistributable](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170)
+* Linux
+  * OS: Ubuntu 24.04
+  * Runtime: GCC 14 libstdc++ (run `sudo apt install g++-14`)
+* macOS
+  * OS: macOS 14
+  * Runtime: Apple Clang 15.0.0 libc++ from Xcode 15.3 (run `xcode-select --install`)
+
 ### C++ library
 
 See the [build instructions](https://github.com/SleipnirGroup/Sleipnir/?tab=readme-ov-file#c-library-1).
@@ -125,9 +139,9 @@ See the [examples](https://github.com/SleipnirGroup/Sleipnir/tree/main/examples)
 ### Dependencies
 
 * C++23 compiler
-  * On Windows, install [Visual Studio Community 2022](https://visualstudio.microsoft.com/vs/community/) and select the C++ programming language during installation
-  * On Linux, install GCC 14 or greater via `sudo apt install g++`
-  * On macOS 14 or greater, install the Xcode command-line build tools via `xcode-select --install`. Xcode 15.3 or greater is required.
+  * On Windows 10 or greater, install [Visual Studio Community 2022](https://visualstudio.microsoft.com/vs/community/) and select the C++ programming language during installation
+  * On Ubuntu 24.04 or greater, install GCC 14 via `sudo apt install g++-14`
+  * On macOS 14 or greater, install the Xcode 15.3 command-line build tools via `xcode-select --install`
 * [CMake](https://cmake.org/download/) 3.21 or greater
   * On Windows, install from the link above
   * On Linux, install via `sudo apt install cmake`
