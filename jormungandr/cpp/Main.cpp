@@ -5,7 +5,6 @@
 #include <sleipnir/autodiff/VariableBlock.hpp>
 #include <sleipnir/autodiff/VariableMatrix.hpp>
 #include <sleipnir/control/OCPSolver.hpp>
-#include <sleipnir/optimization/Constraints.hpp>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 #include <sleipnir/optimization/SolverExitCondition.hpp>
 #include <sleipnir/optimization/SolverIterationInfo.hpp>

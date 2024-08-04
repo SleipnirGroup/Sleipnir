@@ -10,7 +10,6 @@
 #include <nanobind/stl/string.h>
 #include <nanobind/stl/vector.h>
 #include <sleipnir/autodiff/VariableMatrix.hpp>
-#include <sleipnir/optimization/Constraints.hpp>
 
 #include "Docstrings.hpp"
 #include "TryCast.hpp"

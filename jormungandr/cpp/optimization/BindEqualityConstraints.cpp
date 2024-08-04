@@ -3,7 +3,7 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/operators.h>
 #include <nanobind/stl/vector.h>
-#include <sleipnir/optimization/Constraints.hpp>
+#include <sleipnir/autodiff/Variable.hpp>
 
 #include "Docstrings.hpp"
 
