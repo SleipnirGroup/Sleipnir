@@ -281,8 +281,8 @@ if(BUILD_PYTHON)
         fetchcontent_declare(
             nanobind
             GIT_REPOSITORY https://github.com/wjakob/nanobind.git
-            # master on 2024-07-24
-            GIT_TAG 68265d36f89a825f0db930fbc77bb57bdd8d6dfe
+            # master on 2024-08-01
+            GIT_TAG ee371065e0d8e5445b7e6c42bf3046045d87d532
         )
         fetchcontent_makeavailable(nanobind)
     else()
