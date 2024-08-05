@@ -45,12 +45,15 @@ TEST_CASE("OptimizationProblem - Arm on elevator", "[OptimizationProblem]") {
   for (int k = 0; k < N; ++k) {
     // Elevator dynamics constraints
     problem.SubjectTo(elevator(0, k + 1) ==
-                      elevator(0, k) + elevator(1, k) * dt.count());
+                      elevator(0, k) + elevator(1, k) * dt.count() +
+                          0.5 * elevatorAccel(0, k) * dt.count() * dt.count());
     problem.SubjectTo(elevator(1, k + 1) ==
                       elevator(1, k) + elevatorAccel(0, k) * dt.count());
 
     // Arm dynamics constraints
-    problem.SubjectTo(arm(0, k + 1) == arm(0, k) + arm(1, k) * dt.count());
+    problem.SubjectTo(arm(0, k + 1) ==
+                      arm(0, k) + arm(1, k) * dt.count() +
+                          0.5 * armAccel(0, k) * dt.count() * dt.count());
     problem.SubjectTo(arm(1, k + 1) == arm(1, k) + armAccel(0, k) * dt.count());
   }
 
