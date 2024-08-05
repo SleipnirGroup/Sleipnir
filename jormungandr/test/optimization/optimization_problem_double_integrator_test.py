@@ -28,8 +28,8 @@ def test_optimization_problem_double_integrator():
         v_k = X[1, k]
         a_k = U[0, k]
 
-        # pₖ₊₁ = pₖ + vₖt
-        problem.subject_to(p_k1 == p_k + v_k * t)
+        # pₖ₊₁ = pₖ + vₖt + 1/2aₖt²
+        problem.subject_to(p_k1 == p_k + v_k * t + 0.5 * a_k * t**2)
 
         # vₖ₊₁ = vₖ + aₖt
         problem.subject_to(v_k1 == v_k + a_k * t)

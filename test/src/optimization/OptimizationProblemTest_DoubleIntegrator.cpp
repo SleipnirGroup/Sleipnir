@@ -42,8 +42,8 @@ TEST_CASE("OptimizationProblem - Double integrator", "[OptimizationProblem]") {
     auto v_k = X(1, k);
     auto a_k = U(0, k);
 
-    // pₖ₊₁ = pₖ + vₖt
-    problem.SubjectTo(p_k1 == p_k + v_k * t);
+    // pₖ₊₁ = pₖ + vₖt + 1/2aₖt²
+    problem.SubjectTo(p_k1 == p_k + v_k * t + 0.5 * a_k * t * t);
 
     // vₖ₊₁ = vₖ + aₖt
     problem.SubjectTo(v_k1 == v_k + a_k * t);

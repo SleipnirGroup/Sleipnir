@@ -68,10 +68,10 @@ for k in range(N):
     v_k = X[1, k]
     a_k = U[0, k]
 
-    // pₖ₊₁ = pₖ + vₖt
-    problem.subject_to(p_k1 == p_k + v_k * dt)
+    # pₖ₊₁ = pₖ + vₖt + 1/2aₖt²
+    problem.subject_to(p_k1 == p_k + v_k * dt + 0.5 * a_k * dt**2)
 
-    // vₖ₊₁ = vₖ + aₖt
+    # vₖ₊₁ = vₖ + aₖt
     problem.subject_to(v_k1 == v_k + a_k * dt)
 ```
 
