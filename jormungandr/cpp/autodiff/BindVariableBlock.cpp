@@ -90,6 +90,9 @@ void BindVariableBlock(nb::class_<VariableBlock<VariableMatrix>>& cls) {
           rowSliceLength = t.get<3>();
         } else {
           int start = nb::cast<int>(rowElem);
+          if (start < 0) {
+            start += self.Rows();
+          }
           rowSlice = Slice{start, start + 1};
           rowSliceLength = 1;
         }
@@ -102,6 +105,9 @@ void BindVariableBlock(nb::class_<VariableBlock<VariableMatrix>>& cls) {
           colSliceLength = t.get<3>();
         } else {
           int start = nb::cast<int>(colElem);
+          if (start < 0) {
+            start += self.Cols();
+          }
           colSlice = Slice{start, start + 1};
           colSliceLength = 1;
         }
@@ -143,7 +149,7 @@ void BindVariableBlock(nb::class_<VariableBlock<VariableMatrix>>& cls) {
       "__getitem__",
       [](VariableBlock<VariableMatrix>& self, int row) -> Variable& {
         if (row < 0) {
-          row = self.size() + row;
+          row += self.size();
         }
         return self(row);
       },
@@ -168,10 +174,10 @@ void BindVariableBlock(nb::class_<VariableBlock<VariableMatrix>>& cls) {
           }
 
           if (row < 0) {
-            row = self.Rows() + row;
+            row += self.Rows();
           }
           if (col < 0) {
-            col = self.Cols() + col;
+            col += self.Cols();
           }
           return nb::cast(self(row, col));
         }
@@ -189,6 +195,9 @@ void BindVariableBlock(nb::class_<VariableBlock<VariableMatrix>>& cls) {
           rowSliceLength = t.get<3>();
         } else {
           int start = nb::cast<int>(rowElem);
+          if (start < 0) {
+            start += self.Rows();
+          }
           rowSlice = Slice{start, start + 1};
           rowSliceLength = 1;
         }
@@ -201,6 +210,9 @@ void BindVariableBlock(nb::class_<VariableBlock<VariableMatrix>>& cls) {
           colSliceLength = t.get<3>();
         } else {
           int start = nb::cast<int>(colElem);
+          if (start < 0) {
+            start += self.Cols();
+          }
           colSlice = Slice{start, start + 1};
           colSliceLength = 1;
         }
