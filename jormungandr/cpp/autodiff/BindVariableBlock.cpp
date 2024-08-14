@@ -65,6 +65,9 @@ void BindVariableBlock(nb::class_<VariableBlock<VariableMatrix>>& cls) {
   cls.def(
       "__setitem__",
       [](VariableBlock<VariableMatrix>& self, int row, const Variable& value) {
+        if (row < 0) {
+          row += self.size();
+        }
         return self(row) = value;
       },
       "row"_a, "value"_a);
