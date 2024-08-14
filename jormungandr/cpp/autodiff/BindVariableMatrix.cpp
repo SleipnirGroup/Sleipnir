@@ -62,6 +62,9 @@ void BindVariableMatrix(nb::module_& autodiff,
   cls.def(
       "__setitem__",
       [](VariableMatrix& self, int row, const Variable& value) {
+        if (row < 0) {
+          row += self.size();
+        }
         return self(row) = value;
       },
       "row"_a, "value"_a);
@@ -86,6 +89,9 @@ void BindVariableMatrix(nb::module_& autodiff,
           rowSliceLength = t.get<3>();
         } else {
           int start = nb::cast<int>(rowElem);
+          if (start < 0) {
+            start += self.Rows();
+          }
           rowSlice = Slice{start, start + 1};
           rowSliceLength = 1;
         }
@@ -98,6 +104,9 @@ void BindVariableMatrix(nb::module_& autodiff,
           colSliceLength = t.get<3>();
         } else {
           int start = nb::cast<int>(colElem);
+          if (start < 0) {
+            start += self.Cols();
+          }
           colSlice = Slice{start, start + 1};
           colSliceLength = 1;
         }
@@ -139,7 +148,7 @@ void BindVariableMatrix(nb::module_& autodiff,
       "__getitem__",
       [](VariableMatrix& self, int row) -> Variable& {
         if (row < 0) {
-          row = self.size() + row;
+          row += self.size();
         }
         return self(row);
       },
@@ -164,10 +173,10 @@ void BindVariableMatrix(nb::module_& autodiff,
           }
 
           if (row < 0) {
-            row = self.Rows() + row;
+            row += self.Rows();
           }
           if (col < 0) {
-            col = self.Cols() + col;
+            col += self.Cols();
           }
           return nb::cast(self(row, col));
         }
@@ -197,6 +206,9 @@ void BindVariableMatrix(nb::module_& autodiff,
           colSliceLength = t.get<3>();
         } else {
           int start = nb::cast<int>(colElem);
+          if (start < 0) {
+            start += self.Cols();
+          }
           colSlice = Slice{start, start + 1};
           colSliceLength = 1;
         }
