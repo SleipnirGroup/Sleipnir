@@ -18,6 +18,12 @@ set(CMAKE_MODULE_PATH
 # Make `GIT_SUBMODULES ""` initialize no submodules
 cmake_policy(SET CMP0097 NEW)
 
+# Set default build type to release with debug info (i.e. release mode
+# optimizations are performed, but debug info still exists).
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "" FORCE)
+endif()
+
 project(Sleipnir LANGUAGES CXX)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -42,12 +48,6 @@ list(
 )
 if("${isSystemDir}" STREQUAL "-1")
     list(APPEND CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-endif()
-
-# Set default build type to release with debug info (i.e. release mode
-# optimizations are performed, but debug info still exists).
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "" FORCE)
 endif()
 
 # Generate compile_commands.json by default
