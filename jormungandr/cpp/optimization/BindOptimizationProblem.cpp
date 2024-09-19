@@ -1,6 +1,8 @@
 // Copyright (c) Sleipnir contributors
 
 #include <format>
+#include <string>
+#include <utility>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/function.h>
