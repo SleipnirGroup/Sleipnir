@@ -1,5 +1,7 @@
 // Copyright (c) Sleipnir contributors
 
+#include <vector>
+
 #include <nanobind/nanobind.h>
 #include <nanobind/operators.h>
 #include <nanobind/stl/vector.h>

@@ -1,6 +1,7 @@
 // Copyright (c) Sleipnir contributors
 
 #include <format>
+#include <string>
 
 #include <nanobind/eigen/dense.h>
 #include <nanobind/make_iterator.h>

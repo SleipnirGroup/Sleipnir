@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <limits>
 #include <stdexcept>
+#include <vector>
 
 CurrentManager::CurrentManager(std::span<const double> currentTolerances,
                                double maxCurrent)
