@@ -4,7 +4,6 @@
 #include <cmath>
 #include <format>
 #include <fstream>
-#include <numbers>
 
 #include <Eigen/Core>
 #include <catch2/catch_approx.hpp>
