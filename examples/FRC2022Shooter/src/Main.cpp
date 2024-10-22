@@ -34,6 +34,7 @@ slp::VariableMatrix f(const slp::VariableMatrix& x) {
   // z" = −g − a_D(v_z)
   //
   // where a_D(v) = ½ρv² C_D A / m
+  // (see https://en.wikipedia.org/wiki/Drag_(physics)#The_drag_equation)
   constexpr double rho = 1.204;  // kg/m³
   constexpr double C_D = 0.5;
   constexpr double A = std::numbers::pi * 0.3;

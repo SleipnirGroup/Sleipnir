@@ -43,6 +43,7 @@ def f_variable(x):
     # z" = −g − a_D(v_z)
     #
     # where a_D(v) = ½ρv² C_D A / m
+    # (see https://en.wikipedia.org/wiki/Drag_(physics)#The_drag_equation)
     rho = 1.204  # kg/m³
     C_D = 0.5
     A = math.pi * 0.3
