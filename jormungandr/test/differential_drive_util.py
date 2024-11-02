@@ -1,8 +1,9 @@
 import math
 
+import numpy as np
+
 import jormungandr.autodiff as autodiff
 from jormungandr.autodiff import VariableMatrix
-import numpy as np
 
 # x = [x, y, heading, left velocity, right velocity]ᵀ
 # u = [left voltage, right voltage]ᵀ

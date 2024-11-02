@@ -1,7 +1,7 @@
-from jormungandr.autodiff import VariableMatrix
-import jormungandr.autodiff as autodiff
-
 import numpy as np
+
+import jormungandr.autodiff as autodiff
+from jormungandr.autodiff import VariableMatrix
 
 
 def test_assignment_to_default():

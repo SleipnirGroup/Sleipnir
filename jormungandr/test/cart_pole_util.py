@@ -1,8 +1,9 @@
 import math
 
-import jormungandr.autodiff as autodiff
-from jormungandr.autodiff import VariableMatrix, Variable
 import numpy as np
+
+import jormungandr.autodiff as autodiff
+from jormungandr.autodiff import Variable, VariableMatrix
 
 # https://underactuated.mit.edu/acrobot.html#cart_pole
 #

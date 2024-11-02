@@ -5,11 +5,11 @@
 import re
 import sys
 
-from matplotlib import animation
-from matplotlib.colors import ListedColormap
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import numpy as np
+from matplotlib import animation
+from matplotlib.colors import ListedColormap
 
 
 def plot_csv(filename, title, xlabel, ylabel):

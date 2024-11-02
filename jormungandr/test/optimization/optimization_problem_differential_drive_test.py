@@ -1,8 +1,8 @@
-from jormungandr.autodiff import ExpressionType
-from jormungandr.optimization import OptimizationProblem, SolverExitCondition
 import numpy as np
 import pytest
 
+from jormungandr.autodiff import ExpressionType
+from jormungandr.optimization import OptimizationProblem, SolverExitCondition
 from jormungandr.test.differential_drive_util import (
     differential_drive_dynamics,
     differential_drive_dynamics_double,

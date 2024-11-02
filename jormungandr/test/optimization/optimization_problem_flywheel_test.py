@@ -1,9 +1,10 @@
 import math
 
-from jormungandr.autodiff import ExpressionType
-from jormungandr.optimization import OptimizationProblem, SolverExitCondition
 import numpy as np
 import pytest
+
+from jormungandr.autodiff import ExpressionType
+from jormungandr.optimization import OptimizationProblem, SolverExitCondition
 
 
 def near(expected, actual, tolerance):

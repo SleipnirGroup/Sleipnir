@@ -1,7 +1,7 @@
+import pytest
+
 from jormungandr.autodiff import ExpressionType
 from jormungandr.optimization import OptimizationProblem, SolverExitCondition
-
-import pytest
 
 
 def test_maximize():

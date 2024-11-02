@@ -1,7 +1,8 @@
-from jormungandr.autodiff import ExpressionType
-from jormungandr.optimization import OptimizationProblem, SolverExitCondition
 import numpy as np
 import pytest
+
+from jormungandr.autodiff import ExpressionType
+from jormungandr.optimization import OptimizationProblem, SolverExitCondition
 
 
 def test_optimization_problem_double_integrator():

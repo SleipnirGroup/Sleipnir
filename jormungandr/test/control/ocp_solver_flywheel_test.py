@@ -1,11 +1,12 @@
 import math
 from typing import Callable
 
+import numpy as np
+import pytest
+
 from jormungandr.autodiff import ExpressionType, VariableMatrix
 from jormungandr.control import *
 from jormungandr.optimization import SolverExitCondition
-import numpy as np
-import pytest
 
 
 def near(expected, actual, tolerance):

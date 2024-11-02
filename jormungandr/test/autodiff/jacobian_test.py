@@ -1,5 +1,6 @@
-from jormungandr.autodiff import Jacobian, VariableMatrix
 import numpy as np
+
+from jormungandr.autodiff import Jacobian, VariableMatrix
 
 
 def test_y_eq_x():

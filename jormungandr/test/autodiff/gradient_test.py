@@ -1,8 +1,9 @@
 import math
 
-from jormungandr.autodiff import Gradient, Variable
-import jormungandr.autodiff as autodiff
 import pytest
+
+import jormungandr.autodiff as autodiff
+from jormungandr.autodiff import Gradient, Variable
 
 
 def test_trivial_case():
