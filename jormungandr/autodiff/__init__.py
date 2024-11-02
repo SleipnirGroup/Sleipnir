@@ -1,6 +1,6 @@
-from .._jormungandr.autodiff import *
-
 import scipy.sparse
+
+from .._jormungandr.autodiff import *
 
 
 def spy(mat: scipy.sparse.csc_matrix):
@@ -13,9 +13,9 @@ def spy(mat: scipy.sparse.csc_matrix):
     Parameter ``mat``:
         The sparse matrix.
     """
-    from matplotlib.colors import ListedColormap
     import matplotlib.pyplot as plt
     import matplotlib.ticker as mticker
+    from matplotlib.colors import ListedColormap
 
     xs = []
     ys = []

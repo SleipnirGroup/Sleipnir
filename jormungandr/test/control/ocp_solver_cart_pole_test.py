@@ -1,12 +1,12 @@
 import math
 import platform
 
-from jormungandr.autodiff import ExpressionType, VariableMatrix
-from jormungandr.control import *
-from jormungandr.optimization import SolverExitCondition
 import numpy as np
 import pytest
 
+from jormungandr.autodiff import ExpressionType, VariableMatrix
+from jormungandr.control import *
+from jormungandr.optimization import SolverExitCondition
 from jormungandr.test.cart_pole_util import cart_pole_dynamics
 from jormungandr.test.rk4 import rk4
 

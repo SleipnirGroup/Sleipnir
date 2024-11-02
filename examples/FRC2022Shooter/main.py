@@ -9,11 +9,12 @@ the 2022 FRC game's target that minimizes time-to-target.
 
 import math
 
-from jormungandr.autodiff import VariableMatrix
-from jormungandr.optimization import OptimizationProblem
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy.linalg import norm
+
+from jormungandr.autodiff import VariableMatrix
+from jormungandr.optimization import OptimizationProblem
 
 field_width = 8.2296  # 27 ft -> m
 field_length = 16.4592  # 54 ft -> m

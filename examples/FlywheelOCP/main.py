@@ -2,9 +2,10 @@
 
 import math
 
+import numpy as np
+
 from jormungandr.autodiff import VariableMatrix
 from jormungandr.control import *
-import numpy as np
 
 
 def main():

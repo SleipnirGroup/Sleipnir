@@ -2,8 +2,9 @@
 
 import math
 
-from jormungandr.optimization import OptimizationProblem
 import numpy as np
+
+from jormungandr.optimization import OptimizationProblem
 
 
 def main():

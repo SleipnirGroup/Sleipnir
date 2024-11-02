@@ -1,6 +1,7 @@
+import numpy as np
+
 from jormungandr.autodiff import ExpressionType
 from jormungandr.optimization import OptimizationProblem, SolverExitCondition
-import numpy as np
 
 
 def test_empty():

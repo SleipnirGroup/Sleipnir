@@ -1,3 +1,5 @@
+import pytest
+
 import jormungandr.autodiff as autodiff
 from jormungandr.autodiff import ExpressionType
 from jormungandr.optimization import (
@@ -5,8 +7,6 @@ from jormungandr.optimization import (
     SolverExitCondition,
     multistart,
 )
-
-import pytest
 
 
 class DecisionVariables:

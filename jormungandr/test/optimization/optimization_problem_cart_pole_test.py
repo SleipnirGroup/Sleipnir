@@ -1,10 +1,10 @@
 import math
 
-from jormungandr.autodiff import ExpressionType
-from jormungandr.optimization import OptimizationProblem, SolverExitCondition
 import numpy as np
 import pytest
 
+from jormungandr.autodiff import ExpressionType
+from jormungandr.optimization import OptimizationProblem, SolverExitCondition
 from jormungandr.test.cart_pole_util import (
     cart_pole_dynamics,
     cart_pole_dynamics_double,

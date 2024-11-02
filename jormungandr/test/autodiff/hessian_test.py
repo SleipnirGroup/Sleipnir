@@ -1,11 +1,12 @@
-from functools import reduce
 import math
 import operator
+from functools import reduce
 
-from jormungandr.autodiff import Gradient, Hessian, Variable, VariableMatrix
-import jormungandr.autodiff as autodiff
 import numpy as np
 import pytest
+
+import jormungandr.autodiff as autodiff
+from jormungandr.autodiff import Gradient, Hessian, Variable, VariableMatrix
 
 
 def prod(iterable):

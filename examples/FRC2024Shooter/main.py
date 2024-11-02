@@ -9,11 +9,12 @@ the 2024 FRC game's target that minimizes z sensitivity to initial velocity.
 
 import math
 
-from jormungandr.autodiff import Gradient, VariableMatrix
-from jormungandr.optimization import OptimizationProblem
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy.linalg import norm
+
+from jormungandr.autodiff import Gradient, VariableMatrix
+from jormungandr.optimization import OptimizationProblem
 
 field_width = 8.2296  # 27 ft -> m
 field_length = 16.4592  # 54 ft -> m

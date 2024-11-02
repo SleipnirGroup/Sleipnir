@@ -2,10 +2,11 @@
 
 import math
 
+import numpy as np
+
 import jormungandr.autodiff as autodiff
 from jormungandr.autodiff import ExpressionType
 from jormungandr.optimization import OptimizationProblem, SolverExitCondition
-import numpy as np
 
 
 def test_optimization_problem_arm_on_elevator():
