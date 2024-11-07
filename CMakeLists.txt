@@ -202,10 +202,8 @@ if(BUILD_TESTING)
     enable_testing()
     list(APPEND CMAKE_MODULE_PATH ${Catch2_SOURCE_DIR}/extras)
     include(Catch)
-endif()
 
-# Build Sleipnir tests
-if(BUILD_TESTING)
+    # Build Sleipnir tests
     file(GLOB_RECURSE Sleipnir_test_src test/src/*.cpp)
     add_executable(SleipnirTest ${Sleipnir_test_src})
     compiler_flags(SleipnirTest)
