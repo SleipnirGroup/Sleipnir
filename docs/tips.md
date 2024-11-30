@@ -46,3 +46,9 @@ The distance calculation's square root is nonlinear and has a limited domain,
 whereas sum-of-squares has the same minimum, is quadratic, and has no domain
 restriction. In other words, use `minimize(x ** 2 + y ** 2 + z ** 2)` instead of
 `minimize(hypot(x, y, z))`.
+
+## Deduplicating autodiff work
+
+Store common subexpressions in intermediate variables and reuse them instead of
+writing out the subexpressions each time. This ensures common subexpressions in
+the expression tree are only traversed and updated once.
