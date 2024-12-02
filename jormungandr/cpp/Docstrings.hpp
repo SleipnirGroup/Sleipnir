@@ -774,6 +774,38 @@ Parameter ``t0``:
 Parameter ``dt``:
     The time over which to integrate.)doc";
 
+static const char *__doc_sleipnir_SQP =
+R"doc(Finds the optimal solution to a nonlinear program using Sequential
+Quadratic Programming (SQP).
+
+A nonlinear program has the form:
+
+@verbatim min_x f(x) subject to cₑ(x) = 0 @endverbatim
+
+where f(x) is the cost function and cₑ(x) are the equality
+constraints.
+
+Parameter ``decision_variables``:
+    The list of decision variables.
+
+Parameter ``equality_constraints``:
+    The list of equality constraints.
+
+Parameter ``f``:
+    The cost function.
+
+Parameter ``callback``:
+    The user callback.
+
+Parameter ``config``:
+    Configuration options for the solver.
+
+Parameter ``x``:
+    The initial guess and output location for the decision variables.
+
+Parameter ``status``:
+    The solver status.)doc";
+
 static const char *__doc_sleipnir_Slice = R"doc()doc";
 
 static const char *__doc_sleipnir_Slice_Adjust =
