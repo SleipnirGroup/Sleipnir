@@ -372,6 +372,9 @@ void InteriorPoint(std::span<Variable> decisionVariables,
     rhs.segment(x.rows(), y.rows()) = -c_e;
 
     // Solve the Newton-KKT system
+    //
+    // [H + AᵢᵀΣAᵢ  Aₑᵀ][ pₖˣ] = −[∇f − Aₑᵀy + Aᵢᵀ(S⁻¹(Zcᵢ − μe) − z)]
+    // [    Aₑ       0 ][−pₖʸ]    [                cₑ                ]
     solver.Compute(lhs, equalityConstraints.size(), μ);
     Eigen::VectorXd step{x.rows() + y.rows()};
     if (solver.Info() == Eigen::Success) {
