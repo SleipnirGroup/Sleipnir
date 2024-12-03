@@ -242,17 +242,14 @@ if(BUILD_EXAMPLES)
         )
             file(GLOB_RECURSE test_sources examples/${example}/test/*.cpp)
             add_executable(${example}Test ${sources} ${test_sources})
-            target_include_directories(
-                ${example}Test
-                PRIVATE
-                    ${CMAKE_CURRENT_SOURCE_DIR}/examples/${example}/src
-                    ${CMAKE_CURRENT_SOURCE_DIR}/examples/${example}/test
-            )
             compiler_flags(${example}Test)
             target_compile_definitions(${example}Test PUBLIC RUNNING_TESTS)
             target_include_directories(
                 ${example}Test
-                PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/examples/${example}/include
+                PRIVATE
+                    ${CMAKE_CURRENT_SOURCE_DIR}/examples/${example}/include
+                    ${CMAKE_CURRENT_SOURCE_DIR}/examples/${example}/src
+                    ${CMAKE_CURRENT_SOURCE_DIR}/examples/${example}/test/include
             )
             target_link_libraries(
                 ${example}Test
