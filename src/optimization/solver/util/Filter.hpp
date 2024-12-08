@@ -75,6 +75,15 @@ class Filter {
   }
 
   /**
+   * Creates a new Sequential Quadratic Programming filter entry.
+   *
+   * @param c_e The equality constraint values (nonzero means violation).
+   */
+  FilterEntry MakeEntry(const Eigen::VectorXd& c_e) {
+    return FilterEntry{m_f->Value(), c_e.lpNorm<1>()};
+  }
+
+  /**
    * Creates a new interior-point method filter entry.
    *
    * @param s The inequality constraint slack variables.
