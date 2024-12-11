@@ -28,9 +28,6 @@ import numpy as np
 First, we need to make a problem instance.
 
 ```py
-from jormungandr.optimization import OptimizationProblem
-import numpy as np
-
 T = 5.0  # s
 dt = 0.005  # 5 ms
 N = int(T / dt)
@@ -80,7 +77,7 @@ Next, we'll apply the state and input constraints.
 ```py
 # Start and end at rest
 problem.subject_to(X[:, 0] == np.array([[0.0], [0.0]]))
-problem.subject_to(X[:, N + 1] == np.array([[r], [0.0]]))
+problem.subject_to(X[:, N] == np.array([[r], [0.0]]))
 
 # Limit velocity
 problem.subject_to(-1 <= X[1, :])
