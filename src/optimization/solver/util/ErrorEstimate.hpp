@@ -12,6 +12,20 @@
 namespace sleipnir {
 
 /**
+ * Returns the error estimate using the KKT conditions for Newton's method.
+ *
+ * @param g Gradient of the cost function ∇f.
+ */
+inline double ErrorEstimate(const Eigen::VectorXd& g) {
+  // Update the error estimate using the KKT conditions from equations (19.5a)
+  // through (19.5d) of [1].
+  //
+  //   ∇f = 0
+
+  return g.lpNorm<Eigen::Infinity>();
+}
+
+/**
  * Returns the error estimate using the KKT conditions for SQP.
  *
  * @param g Gradient of the cost function ∇f.

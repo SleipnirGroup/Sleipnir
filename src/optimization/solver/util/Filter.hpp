@@ -75,6 +75,11 @@ class Filter {
   }
 
   /**
+   * Creates a new Newton's method filter entry.
+   */
+  FilterEntry MakeEntry() { return FilterEntry{m_f->Value(), 0.0}; }
+
+  /**
    * Creates a new Sequential Quadratic Programming filter entry.
    *
    * @param c_e The equality constraint values (nonzero means violation).
