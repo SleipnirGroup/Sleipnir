@@ -10,6 +10,20 @@
 namespace sleipnir {
 
 /**
+ * Returns the KKT error for Newton's method.
+ *
+ * @param g Gradient of the cost function ∇f.
+ */
+inline double KKTError(const Eigen::VectorXd& g) {
+  // Compute the KKT error as the 1-norm of the KKT conditions from equations
+  // (19.5a) through (19.5d) of [1].
+  //
+  //   ∇f = 0
+
+  return g.lpNorm<1>();
+}
+
+/**
  * Returns the KKT error for Sequential Quadratic Programming.
  *
  * @param g Gradient of the cost function ∇f.

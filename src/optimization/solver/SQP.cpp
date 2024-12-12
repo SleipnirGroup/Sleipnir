@@ -383,7 +383,7 @@ void SQP(std::span<Variable> decisionVariables,
       constexpr double α_min_frac = 0.05;
 
       // If step size hit a minimum, check if the KKT error was reduced. If it
-      // wasn't, report infeasible.
+      // wasn't, invoke feasibility restoration.
       if (α < α_min_frac * Filter::γConstraint) {
         double currentKKTError = KKTError(g, A_e, c_e, y);
 
