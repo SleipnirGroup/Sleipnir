@@ -335,7 +335,7 @@ if(BUILD_PYTHON)
         _jormungandr_autodiff_stub
         INSTALL_TIME
         MODULE _jormungandr.autodiff
-        OUTPUT jormungandr/autodiff.pyi
+        OUTPUT jormungandr/autodiff/__init__.pyi
         PYTHON_PATH $<TARGET_FILE_DIR:_jormungandr>
         DEPENDS _jormungandr
         COMPONENT python_modules
@@ -344,7 +344,7 @@ if(BUILD_PYTHON)
         _jormungandr_optimization_stub
         INSTALL_TIME
         MODULE _jormungandr.optimization
-        OUTPUT jormungandr/optimization.pyi
+        OUTPUT jormungandr/optimization/__init__.pyi
         PYTHON_PATH $<TARGET_FILE_DIR:_jormungandr>
         DEPENDS _jormungandr
         COMPONENT python_modules
