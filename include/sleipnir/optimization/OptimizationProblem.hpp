@@ -19,6 +19,7 @@
 #include "sleipnir/optimization/SolverIterationInfo.hpp"
 #include "sleipnir/optimization/SolverStatus.hpp"
 #include "sleipnir/optimization/solver/InteriorPoint.hpp"
+#include "sleipnir/optimization/solver/Newton.hpp"
 #include "sleipnir/optimization/solver/SQP.hpp"
 #include "sleipnir/util/Print.hpp"
 #include "sleipnir/util/SymbolExports.hpp"
@@ -306,7 +307,9 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
     }
 
     // Solve the optimization problem
-    if (m_inequalityConstraints.empty()) {
+    if (m_equalityConstraints.empty() && m_inequalityConstraints.empty()) {
+      Newton(m_decisionVariables, m_f.value(), m_callback, config, x, &status);
+    } else if (m_inequalityConstraints.empty()) {
       SQP(m_decisionVariables, m_equalityConstraints, m_f.value(), m_callback,
           config, x, &status);
     } else {

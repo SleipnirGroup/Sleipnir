@@ -364,6 +364,34 @@ static const char *__doc_sleipnir_MultistartResult_status = R"doc()doc";
 
 static const char *__doc_sleipnir_MultistartResult_variables = R"doc()doc";
 
+static const char *__doc_sleipnir_Newton =
+R"doc(Finds the optimal solution to a nonlinear program using Newton's
+method.
+
+A nonlinear program has the form:
+
+@verbatim min_x f(x) @endverbatim
+
+where f(x) is the cost function.
+
+Parameter ``decision_variables``:
+    The list of decision variables.
+
+Parameter ``f``:
+    The cost function.
+
+Parameter ``callback``:
+    The user callback.
+
+Parameter ``config``:
+    Configuration options for the solver.
+
+Parameter ``x``:
+    The initial guess and output location for the decision variables.
+
+Parameter ``status``:
+    The solver status.)doc";
+
 static const char *__doc_sleipnir_OCPSolver =
 R"doc(This class allows the user to pose and solve a constrained optimal
 control problem (OCP) in a variety of ways.
