@@ -43,7 +43,9 @@ def prep_python_api_docs():
     for package in ["autodiff", "optimization"]:
         # Read .pyi
         with open(
-            os.path.join("build-stubs", "install", "jormungandr", package + ".pyi")
+            os.path.join(
+                "build-stubs", "install", "jormungandr", package, "__init__.pyi"
+            )
         ) as f:
             package_content = f.read()
 
