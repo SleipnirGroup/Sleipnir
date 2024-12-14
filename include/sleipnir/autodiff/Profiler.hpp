@@ -17,26 +17,26 @@ class SLEIPNIR_DLLEXPORT Profiler {
   /**
    * Tell the profiler to start measuring setup time.
    */
-  void StartSetup() { m_setupStartTime = std::chrono::system_clock::now(); }
+  void StartSetup() { m_setupStartTime = std::chrono::steady_clock::now(); }
 
   /**
    * Tell the profiler to stop measuring setup time.
    */
   void StopSetup() {
-    m_setupDuration = std::chrono::system_clock::now() - m_setupStartTime;
+    m_setupDuration = std::chrono::steady_clock::now() - m_setupStartTime;
   }
 
   /**
    * Tell the profiler to start measuring solve time.
    */
-  void StartSolve() { m_solveStartTime = std::chrono::system_clock::now(); }
+  void StartSolve() { m_solveStartTime = std::chrono::steady_clock::now(); }
 
   /**
    * Tell the profiler to stop measuring solve time, increment the number of
    * averages, and incorporate the latest measurement into the average.
    */
   void StopSolve() {
-    auto now = std::chrono::system_clock::now();
+    auto now = std::chrono::steady_clock::now();
     ++m_solveMeasurements;
     m_averageSolveDuration =
         (m_solveMeasurements - 1.0) / m_solveMeasurements *
@@ -68,12 +68,12 @@ class SLEIPNIR_DLLEXPORT Profiler {
   }
 
  private:
-  std::chrono::system_clock::time_point m_setupStartTime;
+  std::chrono::steady_clock::time_point m_setupStartTime;
   std::chrono::duration<double> m_setupDuration{0.0};
 
   int m_solveMeasurements = 0;
   std::chrono::duration<double> m_averageSolveDuration{0.0};
-  std::chrono::system_clock::time_point m_solveStartTime;
+  std::chrono::steady_clock::time_point m_solveStartTime;
 };
 
 }  // namespace sleipnir

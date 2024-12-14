@@ -42,9 +42,9 @@ void RunBenchmark(std::ofstream& results,
                   sleipnir::function_ref<Problem()> setup,
                   sleipnir::function_ref<void(Problem& problem)> solve) {
   // Record setup time
-  auto setupStartTime = std::chrono::system_clock::now();
+  auto setupStartTime = std::chrono::steady_clock::now();
   auto problem = setup();
-  auto setupEndTime = std::chrono::system_clock::now();
+  auto setupEndTime = std::chrono::steady_clock::now();
 
   results << ToMilliseconds(setupEndTime - setupStartTime);
   std::flush(results);
@@ -53,9 +53,9 @@ void RunBenchmark(std::ofstream& results,
   std::flush(results);
 
   // Record solve time
-  auto solveStartTime = std::chrono::system_clock::now();
+  auto solveStartTime = std::chrono::steady_clock::now();
   solve(problem);
-  auto solveEndTime = std::chrono::system_clock::now();
+  auto solveEndTime = std::chrono::steady_clock::now();
 
   results << ToMilliseconds(solveEndTime - solveStartTime);
   std::flush(results);
