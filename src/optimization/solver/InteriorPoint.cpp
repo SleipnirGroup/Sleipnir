@@ -41,7 +41,7 @@ void InteriorPoint(std::span<Variable> decisionVariables,
                    const SolverConfig& config, bool feasibilityRestoration,
                    Eigen::VectorXd& x, Eigen::VectorXd& s,
                    SolverStatus* status) {
-  const auto solveStartTime = std::chrono::system_clock::now();
+  const auto solveStartTime = std::chrono::steady_clock::now();
 
   // Map decision variables and constraints to VariableMatrices for Lagrangian
   VariableMatrix xAD{decisionVariables};
@@ -137,7 +137,7 @@ void InteriorPoint(std::span<Variable> decisionVariables,
     sleipnir::println("Error tolerance: {}\n", config.tolerance);
   }
 
-  std::chrono::system_clock::time_point iterationsStartTime;
+  std::chrono::steady_clock::time_point iterationsStartTime;
 
   int iterations = 0;
 
@@ -146,7 +146,7 @@ void InteriorPoint(std::span<Variable> decisionVariables,
     status->cost = f.Value();
 
     if (config.diagnostics && !feasibilityRestoration) {
-      auto solveEndTime = std::chrono::system_clock::now();
+      auto solveEndTime = std::chrono::steady_clock::now();
 
       sleipnir::println("\nSolve time: {:.3f} ms",
                         ToMilliseconds(solveEndTime - solveStartTime));
@@ -241,14 +241,14 @@ void InteriorPoint(std::span<Variable> decisionVariables,
   double E_0 = std::numeric_limits<double>::infinity();
 
   if (config.diagnostics) {
-    iterationsStartTime = std::chrono::system_clock::now();
+    iterationsStartTime = std::chrono::steady_clock::now();
   }
 
   while (E_0 > config.tolerance &&
          acceptableIterCounter < config.maxAcceptableIterations) {
-    std::chrono::system_clock::time_point innerIterStartTime;
+    std::chrono::steady_clock::time_point innerIterStartTime;
     if (config.diagnostics) {
-      innerIterStartTime = std::chrono::system_clock::now();
+      innerIterStartTime = std::chrono::steady_clock::now();
     }
 
     // Check for local equality constraint infeasibility
@@ -784,7 +784,7 @@ void InteriorPoint(std::span<Variable> decisionVariables,
       }
     }
 
-    const auto innerIterEndTime = std::chrono::system_clock::now();
+    const auto innerIterEndTime = std::chrono::steady_clock::now();
 
     // Diagnostics for current iteration
     if (config.diagnostics) {
