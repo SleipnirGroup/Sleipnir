@@ -119,7 +119,7 @@ if(BUILD_TESTING)
     fetchcontent_declare(
         Catch2
         GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-        GIT_TAG v3.7.0
+        GIT_TAG v3.7.1
         CMAKE_ARGS
     )
     fetchcontent_makeavailable(Catch2)
@@ -214,10 +214,6 @@ if(BUILD_TESTING)
             ${CMAKE_CURRENT_SOURCE_DIR}/test/include
     )
     target_link_libraries(SleipnirTest PRIVATE Sleipnir Catch2::Catch2WithMain)
-    if(NOT CMAKE_TOOLCHAIN_FILE)
-        # https://github.com/catchorg/Catch2/issues/2873
-        catch_discover_tests(SleipnirTest PROPERTIES SKIP_RETURN_CODE 4)
-    endif()
 endif()
 
 # Build examples and example tests
@@ -255,10 +251,6 @@ if(BUILD_EXAMPLES)
                 ${example}Test
                 PRIVATE Sleipnir Catch2::Catch2WithMain
             )
-            if(NOT CMAKE_TOOLCHAIN_FILE)
-                # https://github.com/catchorg/Catch2/issues/2873
-                catch_discover_tests(${example}Test PROPERTIES SKIP_RETURN_CODE 4)
-            endif()
         endif()
     endforeach()
 endif()
