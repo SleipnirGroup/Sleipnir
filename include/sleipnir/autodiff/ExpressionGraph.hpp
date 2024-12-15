@@ -6,7 +6,6 @@
 
 #include "sleipnir/autodiff/Expression.hpp"
 #include "sleipnir/util/FunctionRef.hpp"
-#include "sleipnir/util/SymbolExports.hpp"
 #include "sleipnir/util/small_vector.hpp"
 
 namespace sleipnir::detail {
@@ -15,7 +14,7 @@ namespace sleipnir::detail {
  * This class is an adaptor type that performs value updates of an expression's
  * computational graph in a way that skips duplicates.
  */
-class SLEIPNIR_DLLEXPORT ExpressionGraph {
+class ExpressionGraph {
  public:
   /**
    * Generates the deduplicated computational graph for the given expression.

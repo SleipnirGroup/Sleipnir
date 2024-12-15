@@ -14,7 +14,6 @@
 #include "sleipnir/autodiff/ExpressionType.hpp"
 #include "sleipnir/util/IntrusiveSharedPtr.hpp"
 #include "sleipnir/util/Pool.hpp"
-#include "sleipnir/util/SymbolExports.hpp"
 #include "sleipnir/util/small_vector.hpp"
 
 namespace sleipnir::detail {
@@ -27,7 +26,7 @@ inline constexpr bool kUsePoolAllocator = false;
 inline constexpr bool kUsePoolAllocator = true;
 #endif
 
-struct SLEIPNIR_DLLEXPORT Expression;
+struct Expression;
 
 inline constexpr void IntrusiveSharedPtrIncRefCount(Expression* expr);
 inline constexpr void IntrusiveSharedPtrDecRefCount(Expression* expr);
@@ -56,7 +55,7 @@ static ExpressionPtr MakeExpressionPtr(Args&&... args) {
 /**
  * An autodiff expression node.
  */
-struct SLEIPNIR_DLLEXPORT Expression {
+struct Expression {
   /**
    * Binary function taking two doubles and returning a double.
    */
@@ -201,8 +200,8 @@ struct SLEIPNIR_DLLEXPORT Expression {
    * @param lhs Operator left-hand side.
    * @param rhs Operator right-hand side.
    */
-  friend SLEIPNIR_DLLEXPORT ExpressionPtr operator*(const ExpressionPtr& lhs,
-                                                    const ExpressionPtr& rhs) {
+  friend ExpressionPtr operator*(const ExpressionPtr& lhs,
+                                 const ExpressionPtr& rhs) {
     using enum ExpressionType;
 
     // Prune expression
@@ -256,8 +255,8 @@ struct SLEIPNIR_DLLEXPORT Expression {
    * @param lhs Operator left-hand side.
    * @param rhs Operator right-hand side.
    */
-  friend SLEIPNIR_DLLEXPORT ExpressionPtr operator/(const ExpressionPtr& lhs,
-                                                    const ExpressionPtr& rhs) {
+  friend ExpressionPtr operator/(const ExpressionPtr& lhs,
+                                 const ExpressionPtr& rhs) {
     using enum ExpressionType;
 
     // Prune expression
@@ -304,8 +303,8 @@ struct SLEIPNIR_DLLEXPORT Expression {
    * @param lhs Operator left-hand side.
    * @param rhs Operator right-hand side.
    */
-  friend SLEIPNIR_DLLEXPORT ExpressionPtr operator+(const ExpressionPtr& lhs,
-                                                    const ExpressionPtr& rhs) {
+  friend ExpressionPtr operator+(const ExpressionPtr& lhs,
+                                 const ExpressionPtr& rhs) {
     using enum ExpressionType;
 
     // Prune expression
@@ -338,8 +337,8 @@ struct SLEIPNIR_DLLEXPORT Expression {
    * @param lhs Operator left-hand side.
    * @param rhs Operator right-hand side.
    */
-  friend SLEIPNIR_DLLEXPORT ExpressionPtr operator-(const ExpressionPtr& lhs,
-                                                    const ExpressionPtr& rhs) {
+  friend ExpressionPtr operator-(const ExpressionPtr& lhs,
+                                 const ExpressionPtr& rhs) {
     using enum ExpressionType;
 
     // Prune expression
@@ -376,7 +375,7 @@ struct SLEIPNIR_DLLEXPORT Expression {
    *
    * @param lhs Operand of unary minus.
    */
-  friend SLEIPNIR_DLLEXPORT ExpressionPtr operator-(const ExpressionPtr& lhs) {
+  friend ExpressionPtr operator-(const ExpressionPtr& lhs) {
     using enum ExpressionType;
 
     // Prune expression
@@ -403,15 +402,13 @@ struct SLEIPNIR_DLLEXPORT Expression {
    *
    * @param lhs Operand of unary plus.
    */
-  friend SLEIPNIR_DLLEXPORT ExpressionPtr operator+(const ExpressionPtr& lhs) {
-    return lhs;
-  }
+  friend ExpressionPtr operator+(const ExpressionPtr& lhs) { return lhs; }
 };
 
-SLEIPNIR_DLLEXPORT inline ExpressionPtr exp(const ExpressionPtr& x);
-SLEIPNIR_DLLEXPORT inline ExpressionPtr sin(const ExpressionPtr& x);
-SLEIPNIR_DLLEXPORT inline ExpressionPtr sinh(const ExpressionPtr& x);
-SLEIPNIR_DLLEXPORT inline ExpressionPtr sqrt(const ExpressionPtr& x);
+inline ExpressionPtr exp(const ExpressionPtr& x);
+inline ExpressionPtr sin(const ExpressionPtr& x);
+inline ExpressionPtr sinh(const ExpressionPtr& x);
+inline ExpressionPtr sqrt(const ExpressionPtr& x);
 
 /**
  * Refcount increment for intrusive shared pointer.
@@ -467,8 +464,7 @@ inline constexpr void IntrusiveSharedPtrDecRefCount(Expression* expr) {
  *
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT inline ExpressionPtr abs(  // NOLINT
-    const ExpressionPtr& x) {
+inline ExpressionPtr abs(const ExpressionPtr& x) {  // NOLINT
   using enum ExpressionType;
 
   // Prune expression
@@ -512,8 +508,7 @@ SLEIPNIR_DLLEXPORT inline ExpressionPtr abs(  // NOLINT
  *
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT inline ExpressionPtr acos(  // NOLINT
-    const ExpressionPtr& x) {
+inline ExpressionPtr acos(const ExpressionPtr& x) {  // NOLINT
   using enum ExpressionType;
 
   // Prune expression
@@ -544,8 +539,7 @@ SLEIPNIR_DLLEXPORT inline ExpressionPtr acos(  // NOLINT
  *
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT inline ExpressionPtr asin(  // NOLINT
-    const ExpressionPtr& x) {
+inline ExpressionPtr asin(const ExpressionPtr& x) {  // NOLINT
   using enum ExpressionType;
 
   // Prune expression
@@ -577,8 +571,7 @@ SLEIPNIR_DLLEXPORT inline ExpressionPtr asin(  // NOLINT
  *
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT inline ExpressionPtr atan(  // NOLINT
-    const ExpressionPtr& x) {
+inline ExpressionPtr atan(const ExpressionPtr& x) {  // NOLINT
   using enum ExpressionType;
 
   // Prune expression
@@ -610,8 +603,8 @@ SLEIPNIR_DLLEXPORT inline ExpressionPtr atan(  // NOLINT
  * @param y The y argument.
  * @param x The x argument.
  */
-SLEIPNIR_DLLEXPORT inline ExpressionPtr atan2(  // NOLINT
-    const ExpressionPtr& y, const ExpressionPtr& x) {
+inline ExpressionPtr atan2(const ExpressionPtr& y,
+                           const ExpressionPtr& x) {  // NOLINT
   using enum ExpressionType;
 
   // Prune expression
@@ -651,8 +644,7 @@ SLEIPNIR_DLLEXPORT inline ExpressionPtr atan2(  // NOLINT
  *
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT inline ExpressionPtr cos(  // NOLINT
-    const ExpressionPtr& x) {
+inline ExpressionPtr cos(const ExpressionPtr& x) {  // NOLINT
   using enum ExpressionType;
 
   // Prune expression
@@ -682,8 +674,7 @@ SLEIPNIR_DLLEXPORT inline ExpressionPtr cos(  // NOLINT
  *
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT inline ExpressionPtr cosh(  // NOLINT
-    const ExpressionPtr& x) {
+inline ExpressionPtr cosh(const ExpressionPtr& x) {  // NOLINT
   using enum ExpressionType;
 
   // Prune expression
@@ -713,8 +704,7 @@ SLEIPNIR_DLLEXPORT inline ExpressionPtr cosh(  // NOLINT
  *
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT inline ExpressionPtr erf(  // NOLINT
-    const ExpressionPtr& x) {
+inline ExpressionPtr erf(const ExpressionPtr& x) {  // NOLINT
   using enum ExpressionType;
 
   // Prune expression
@@ -748,8 +738,7 @@ SLEIPNIR_DLLEXPORT inline ExpressionPtr erf(  // NOLINT
  *
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT inline ExpressionPtr exp(  // NOLINT
-    const ExpressionPtr& x) {
+inline ExpressionPtr exp(const ExpressionPtr& x) {  // NOLINT
   using enum ExpressionType;
 
   // Prune expression
@@ -780,8 +769,8 @@ SLEIPNIR_DLLEXPORT inline ExpressionPtr exp(  // NOLINT
  * @param x The x argument.
  * @param y The y argument.
  */
-SLEIPNIR_DLLEXPORT inline ExpressionPtr hypot(  // NOLINT
-    const ExpressionPtr& x, const ExpressionPtr& y) {
+inline ExpressionPtr hypot(const ExpressionPtr& x,
+                           const ExpressionPtr& y) {  // NOLINT
   using enum ExpressionType;
 
   // Prune expression
@@ -820,8 +809,7 @@ SLEIPNIR_DLLEXPORT inline ExpressionPtr hypot(  // NOLINT
  *
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT inline ExpressionPtr log(  // NOLINT
-    const ExpressionPtr& x) {
+inline ExpressionPtr log(const ExpressionPtr& x) {  // NOLINT
   using enum ExpressionType;
 
   // Prune expression
@@ -848,8 +836,7 @@ SLEIPNIR_DLLEXPORT inline ExpressionPtr log(  // NOLINT
  *
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT inline ExpressionPtr log10(  // NOLINT
-    const ExpressionPtr& x) {
+inline ExpressionPtr log10(const ExpressionPtr& x) {  // NOLINT
   using enum ExpressionType;
 
   // Prune expression
@@ -881,8 +868,8 @@ SLEIPNIR_DLLEXPORT inline ExpressionPtr log10(  // NOLINT
  * @param base The base.
  * @param power The power.
  */
-SLEIPNIR_DLLEXPORT inline ExpressionPtr pow(  // NOLINT
-    const ExpressionPtr& base, const ExpressionPtr& power) {
+inline ExpressionPtr pow(const ExpressionPtr& base,
+                         const ExpressionPtr& power) {  // NOLINT
   using enum ExpressionType;
 
   // Prune expression
@@ -944,7 +931,7 @@ SLEIPNIR_DLLEXPORT inline ExpressionPtr pow(  // NOLINT
  *
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT inline ExpressionPtr sign(const ExpressionPtr& x) {
+inline ExpressionPtr sign(const ExpressionPtr& x) {
   using enum ExpressionType;
 
   // Evaluate constant
@@ -983,8 +970,7 @@ SLEIPNIR_DLLEXPORT inline ExpressionPtr sign(const ExpressionPtr& x) {
  *
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT inline ExpressionPtr sin(  // NOLINT
-    const ExpressionPtr& x) {
+inline ExpressionPtr sin(const ExpressionPtr& x) {  // NOLINT
   using enum ExpressionType;
 
   // Prune expression
@@ -1015,7 +1001,7 @@ SLEIPNIR_DLLEXPORT inline ExpressionPtr sin(  // NOLINT
  *
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT inline ExpressionPtr sinh(const ExpressionPtr& x) {
+inline ExpressionPtr sinh(const ExpressionPtr& x) {
   using enum ExpressionType;
 
   // Prune expression
@@ -1046,8 +1032,7 @@ SLEIPNIR_DLLEXPORT inline ExpressionPtr sinh(const ExpressionPtr& x) {
  *
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT inline ExpressionPtr sqrt(  // NOLINT
-    const ExpressionPtr& x) {
+inline ExpressionPtr sqrt(const ExpressionPtr& x) {  // NOLINT
   using enum ExpressionType;
 
   // Evaluate constant
@@ -1080,8 +1065,7 @@ SLEIPNIR_DLLEXPORT inline ExpressionPtr sqrt(  // NOLINT
  *
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT inline ExpressionPtr tan(  // NOLINT
-    const ExpressionPtr& x) {
+inline ExpressionPtr tan(const ExpressionPtr& x) {  // NOLINT
   using enum ExpressionType;
 
   // Prune expression
@@ -1113,7 +1097,7 @@ SLEIPNIR_DLLEXPORT inline ExpressionPtr tan(  // NOLINT
  *
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT inline ExpressionPtr tanh(const ExpressionPtr& x) {
+inline ExpressionPtr tanh(const ExpressionPtr& x) {
   using enum ExpressionType;
 
   // Prune expression
