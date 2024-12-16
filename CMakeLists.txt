@@ -214,6 +214,9 @@ if(BUILD_TESTING)
             ${CMAKE_CURRENT_SOURCE_DIR}/test/include
     )
     target_link_libraries(SleipnirTest PRIVATE Sleipnir Catch2::Catch2WithMain)
+    if(NOT CMAKE_TOOLCHAIN_FILE)
+        catch_discover_tests(SleipnirTest)
+    endif()
 endif()
 
 # Build examples and example tests
@@ -251,6 +254,9 @@ if(BUILD_EXAMPLES)
                 ${example}Test
                 PRIVATE Sleipnir Catch2::Catch2WithMain
             )
+            if(NOT CMAKE_TOOLCHAIN_FILE)
+                catch_discover_tests(${example}Test)
+            endif()
         endif()
     endforeach()
 endif()
