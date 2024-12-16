@@ -16,7 +16,10 @@ macro(compiler_flags target)
         ${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU"
         AND ${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER_EQUAL "12"
     )
-        target_compile_options(${target} PRIVATE -Wno-array-bounds)
+        target_compile_options(
+            ${target}
+            PRIVATE -Wno-array-bounds -Wno-stringop-overflow
+        )
     endif()
 
     target_compile_features(${target} PUBLIC cxx_std_23)
