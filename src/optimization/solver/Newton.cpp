@@ -194,7 +194,7 @@ void Newton(
 
       // Check whether filter accepts trial iterate
       auto entry = filter.MakeEntry();
-      if (filter.TryAdd(entry)) {
+      if (filter.TryAdd(entry, α)) {
         // Accept step
         break;
       }
