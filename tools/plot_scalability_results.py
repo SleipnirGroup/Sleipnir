@@ -9,72 +9,65 @@ import numpy as np
 from scipy.optimize import curve_fit
 
 
-def plot_poly2_fit(ax, x, y, color):
-    def poly2(x, a, b, c):
-        return a * x**2 + b * x + c
+def plot_poly_fit(ax, x, y, func, bases, color):
+    """
+    Plots a polynomial curve fit for the given x-y function.
 
-    # Fit 2nd degree polynomial y = ax² + bx + c to x-y data
-    a, b, c = curve_fit(poly2, x, y, p0=(1, 1, 1), bounds=([0, 0, 0], np.inf))[0]
+    Parameter ``ax``:
+        The axis on which to plot.
 
-    label = f"Fit: y = {a:.4g}x²"
-    if b > 0:
-        label += f" + {b:.4g}x"
-    else:
-        label += f" - {abs(b):.4g}x"
-    if c > 0:
-        label += f" + {c:.4g}"
-    else:
-        label += f" - {abs(c):.4g}"
+    Parameter ``x``:
+        The list of x values.
+
+    Parameter ``y``:
+        The list of y values.
+
+    Parameter ``func``:
+        The function to fit.
+
+    Parameter ``bases``:
+        A list of strings to print for the basis terms.
+
+    Parameter ``color``:
+        The color to use for the plot.
+    """
+    coeffs = curve_fit(
+        func, x, y, p0=(1,) * len(bases), bounds=([0] * len(bases), np.inf)
+    )[0]
+
+    label = ""
+    for i in range(len(coeffs)):
+        if abs(coeffs[i]) > 1e-10:
+            if label:
+                label += " + " if coeffs[i] > 0 else " - "
+            label += f"{coeffs[i]:.4g}{bases[i]}"
+    label = "Fit: y = " + label
 
     resampled_x = np.arange(x[0], x[-1] + 100, 100)
     ax.plot(
         resampled_x,
-        poly2(resampled_x, a, b, c),
+        func(resampled_x, *coeffs),
         color=color,
         label=label,
         linestyle="--",
     )
 
 
-def plot_exp2_fit(ax, x, y, color, force_intercept=False):
-    if not force_intercept:
+def plot_exp2_fit(ax, x, y, color):
+    def exp2(x, a, b):
+        return a * (np.exp2(b * x) - 1)
 
-        def exp2(x, a, b, c):
-            return a * np.exp2(b * x) + c
+    # Fit exponential y = c(2ᵇˣ − 1) to x-y data
+    coeffs = curve_fit(exp2, x, y, p0=(1, 1e-6))[0]
 
-        # Fit exponential y = a2ᵇˣ + c to x-y data
-        a, b, c = curve_fit(exp2, x, y, p0=(1, 1e-6, 1))[0]
-
-        label = f"Fit: y = {a:.4g} 2^({b:.4g}x)"
-        if c > 0:
-            label += f" + {c:.4g}"
-        else:
-            label += f" - {abs(c):.4g}"
-
-        resampled_x = np.arange(x[0], x[-1] + 100, 100)
-        ax.plot(
-            resampled_x,
-            exp2(resampled_x, a, b, c),
-            color=color,
-            label=label,
-            linestyle="--",
-        )
-    else:
-
-        def exp2(x, a, b):
-            return a * (np.exp2(b * x) - 1)
-
-        # Fit exponential y = c(2ᵇˣ − 1) to x-y data
-        a, b = curve_fit(exp2, x, y, p0=(1, 1e-6))[0]
-
-        resampled_x = np.arange(x[0], x[-1] + 100, 100)
-        ax.plot(
-            resampled_x,
-            exp2(resampled_x, a, b),
-            color=color,
-            label=f"Fit: y = {a:.4g} (2^({b:.4g}x) - 1)",
-            linestyle="--",
-        )
+    resampled_x = np.arange(x[0], x[-1] + 100, 100)
+    ax.plot(
+        resampled_x,
+        exp2(resampled_x, *coeffs),
+        color=color,
+        label=f"Fit: y = {coeffs[0]:.4g} (2^({coeffs[1]:.4g}x) - 1)",
+        linestyle="--",
+    )
 
 
 def main():
@@ -152,7 +145,14 @@ def main():
 
     for i in range(len(samples)):
         ax1.plot(samples[i], setup_times[i], label=args.labels[i])
-        plot_poly2_fit(ax1, samples[i], setup_times[i], color=colors[i])
+        plot_poly_fit(
+            ax1,
+            samples[i],
+            setup_times[i],
+            lambda x, a, b, c: a * x**2 + b * x + c,
+            ["x²", "x", ""],
+            color=colors[i],
+        )
 
     ax1.legend()
 
@@ -164,7 +164,10 @@ def main():
     for i in range(len(samples)):
         ax2.plot(samples[i], solve_times[i], label=args.labels[i])
         plot_exp2_fit(
-            ax2, samples[i], solve_times[i], color=colors[i], force_intercept=True
+            ax2,
+            samples[i],
+            solve_times[i],
+            color=colors[i],
         )
 
     ax2.legend()
