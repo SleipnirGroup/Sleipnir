@@ -438,7 +438,7 @@ void SQP(std::span<Variable> decisionVariables,
             SolverExitCondition::kCallbackRequestedStop) {
           p_x = fr_x - x;
 
-          // Lagrange mutliplier estimates
+          // Lagrange multiplier estimates
           //
           //   y = (AₑAₑᵀ)⁻¹Aₑ∇f
           //

@@ -622,7 +622,7 @@ void InteriorPoint(std::span<Variable> decisionVariables,
           p_x = fr_x - x;
           p_s = fr_s - s;
 
-          // Lagrange mutliplier estimates
+          // Lagrange multiplier estimates
           //
           //   [y] = (ÂÂᵀ)⁻¹Â[ ∇f]
           //   [z]           [−μe]
