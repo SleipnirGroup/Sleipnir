@@ -32,10 +32,10 @@ void PrintIterationDiagnostics(int iterations, bool feasibilityRestoration,
                                double error, double cost, double infeasibility,
                                double δ, double α) {
   if (iterations % 20 == 0) {
-    sleipnir::println("{:^4}   {:^9}  {:^13}  {:^13}  {:^13}  {:^4}  {:^10}",
+    sleipnir::println("{:^4}   {:^9}  {:^13}  {:^13}  {:^13}  {:^5}  {:^10}",
                       "iter", "time (ms)", "error", "cost", "infeasibility",
                       "reg", "backtracks");
-    sleipnir::println("{:=^79}", "");
+    sleipnir::println("{:=^80}", "");
   }
 
   sleipnir::print("{:4}{}  {:9.3f}  {:13e}  {:13e}  {:13e}  ", iterations,
@@ -44,14 +44,14 @@ void PrintIterationDiagnostics(int iterations, bool feasibilityRestoration,
 
   // Print regularization
   if (δ == 0.0) {
-    sleipnir::print(" 0  ");
+    sleipnir::print(" 0   ");
   } else {
     int exponent = std::log10(δ);
 
     if (exponent == 0) {
-      sleipnir::print(" 1  ");
+      sleipnir::print(" 1   ");
     } else if (exponent == 1) {
-      sleipnir::print("10  ");
+      sleipnir::print("10   ");
     } else {
       // Gather regularization exponent digits
       int n = std::abs(exponent);
@@ -73,7 +73,7 @@ void PrintIterationDiagnostics(int iterations, bool feasibilityRestoration,
         reg += strs[digit];
       }
 
-      sleipnir::print("{:<4}", reg);
+      sleipnir::print("{:<5}", reg);
     }
   }
 
