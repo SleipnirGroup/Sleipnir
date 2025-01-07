@@ -115,7 +115,7 @@ class RegularizedLDLT {
   }
 
   /**
-   * Solve the system of equations using a regularized LDLT factorization.
+   * Solves the system of equations using a regularized LDLT factorization.
    *
    * @param rhs Right-hand side of the system.
    */
@@ -123,6 +123,11 @@ class RegularizedLDLT {
   auto Solve(const Eigen::MatrixBase<Rhs>& rhs) {
     return m_solver.solve(rhs);
   }
+
+  /**
+   * Returns the Hessian regularization factor.
+   */
+  double HessianRegularization() const { return m_δOld; }
 
  private:
   Solver m_solver;
