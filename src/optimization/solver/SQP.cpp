@@ -23,6 +23,7 @@
 #include "sleipnir/util/Print.hpp"
 #include "sleipnir/util/Spy.hpp"
 #include "sleipnir/util/small_vector.hpp"
+#include "util/PrintIterationDiagnostics.hpp"
 #include "util/ScopeExit.hpp"
 #include "util/ToMilliseconds.hpp"
 
@@ -520,17 +521,10 @@ void SQP(std::span<Variable> decisionVariables,
 
     const auto innerIterEndTime = std::chrono::steady_clock::now();
 
-    // Diagnostics for current iteration
     if (config.diagnostics) {
-      if (iterations % 20 == 0) {
-        sleipnir::println("{:^4}   {:^9}  {:^13}  {:^13}  {:^13}", "iter",
-                          "time (ms)", "error", "cost", "infeasibility");
-        sleipnir::println("{:=^61}", "");
-      }
-
-      sleipnir::println("{:4}   {:9.3f}  {:13e}  {:13e}  {:13e}", iterations,
-                        ToMilliseconds(innerIterEndTime - innerIterStartTime),
-                        E_0, f.Value(), c_e.lpNorm<1>());
+      PrintIterationDiagnostics(
+          iterations, false, innerIterEndTime - innerIterStartTime, E_0,
+          f.Value(), c_e.lpNorm<1>(), solver.HessianRegularization(), α);
     }
 
     ++iterations;
