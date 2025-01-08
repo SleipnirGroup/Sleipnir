@@ -43,9 +43,6 @@ class SLEIPNIR_DLLEXPORT Jacobian {
       m_graphs.emplace_back(variable.expr);
     }
 
-    // Reserve triplet space for 99% sparsity
-    m_cachedTriplets.reserve(m_variables.Rows() * m_wrt.Rows() * 0.01);
-
     for (int row = 0; row < m_variables.Rows(); ++row) {
       if (m_variables(row).Type() == ExpressionType::kLinear) {
         // If the row is linear, compute its gradient once here and cache its
