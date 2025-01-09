@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-"""Loads and displays the sparsity patterns from A_e.spy, A_e.spy, and H.spy."""
+"""Loads and displays the sparsity patterns from A_e.spy, A_i.spy, and H.spy."""
 
 import re
 import sys
