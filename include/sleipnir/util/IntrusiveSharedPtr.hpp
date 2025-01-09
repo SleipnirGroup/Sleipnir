@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <concepts>
 #include <cstddef>
 #include <memory>
 #include <utility>
@@ -27,6 +28,9 @@ namespace sleipnir {
 template <typename T>
 class IntrusiveSharedPtr {
  public:
+  template <typename>
+  friend class IntrusiveSharedPtr;
+
   /**
    * Constructs an empty intrusive shared pointer.
    */
@@ -64,10 +68,47 @@ class IntrusiveSharedPtr {
   }
 
   /**
+   * Copy constructs from the given intrusive shared pointer.
+   */
+  template <typename U>
+    requires(!std::same_as<T, U> && std::convertible_to<U*, T*>)
+  constexpr IntrusiveSharedPtr(  // NOLINT
+      const IntrusiveSharedPtr<U>& rhs) noexcept
+      : m_ptr{rhs.m_ptr} {
+    if (m_ptr != nullptr) {
+      IntrusiveSharedPtrIncRefCount(m_ptr);
+    }
+  }
+
+  /**
    * Makes a copy of the given intrusive shared pointer.
    */
   constexpr IntrusiveSharedPtr<T>& operator=(  // NOLINT
       const IntrusiveSharedPtr<T>& rhs) noexcept {
+    if (m_ptr == rhs.m_ptr) {
+      return *this;
+    }
+
+    if (m_ptr != nullptr) {
+      IntrusiveSharedPtrDecRefCount(m_ptr);
+    }
+
+    m_ptr = rhs.m_ptr;
+
+    if (m_ptr != nullptr) {
+      IntrusiveSharedPtrIncRefCount(m_ptr);
+    }
+
+    return *this;
+  }
+
+  /**
+   * Makes a copy of the given intrusive shared pointer.
+   */
+  template <typename U>
+    requires(!std::same_as<T, U> && std::convertible_to<U*, T*>)
+  constexpr IntrusiveSharedPtr<T>& operator=(  // NOLINT
+      const IntrusiveSharedPtr<U>& rhs) noexcept {
     if (m_ptr == rhs.m_ptr) {
       return *this;
     }
@@ -92,10 +133,35 @@ class IntrusiveSharedPtr {
       : m_ptr{std::exchange(rhs.m_ptr, nullptr)} {}
 
   /**
+   * Move constructs from the given intrusive shared pointer.
+   */
+  template <typename U>
+    requires(!std::same_as<T, U> && std::convertible_to<U*, T*>)
+  constexpr IntrusiveSharedPtr(  // NOLINT
+      IntrusiveSharedPtr<U>&& rhs) noexcept
+      : m_ptr{std::exchange(rhs.m_ptr, nullptr)} {}
+
+  /**
    * Move assigns from the given intrusive shared pointer.
    */
   constexpr IntrusiveSharedPtr<T>& operator=(
       IntrusiveSharedPtr<T>&& rhs) noexcept {
+    if (m_ptr == rhs.m_ptr) {
+      return *this;
+    }
+
+    std::swap(m_ptr, rhs.m_ptr);
+
+    return *this;
+  }
+
+  /**
+   * Move assigns from the given intrusive shared pointer.
+   */
+  template <typename U>
+    requires(!std::same_as<T, U> && std::convertible_to<U*, T*>)
+  constexpr IntrusiveSharedPtr<T>& operator=(
+      IntrusiveSharedPtr<U>&& rhs) noexcept {
     if (m_ptr == rhs.m_ptr) {
       return *this;
     }

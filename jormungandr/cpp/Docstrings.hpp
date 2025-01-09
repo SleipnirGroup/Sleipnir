@@ -27,21 +27,21 @@ static const char *__doc_Eigen_NumTraits =
 R"doc(NumTraits specialization that allows instantiating Eigen types with
 Variable.)doc";
 
-static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_750_3 = R"doc()doc";
+static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_752_3 = R"doc()doc";
 
-static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_750_3_AddCost = R"doc()doc";
+static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_752_3_AddCost = R"doc()doc";
 
-static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_750_3_IsComplex = R"doc()doc";
+static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_752_3_IsComplex = R"doc()doc";
 
-static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_750_3_IsInteger = R"doc()doc";
+static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_752_3_IsInteger = R"doc()doc";
 
-static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_750_3_IsSigned = R"doc()doc";
+static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_752_3_IsSigned = R"doc()doc";
 
-static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_750_3_MulCost = R"doc()doc";
+static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_752_3_MulCost = R"doc()doc";
 
-static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_750_3_ReadCost = R"doc()doc";
+static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_752_3_ReadCost = R"doc()doc";
 
-static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_750_3_RequireInitialization = R"doc()doc";
+static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_752_3_RequireInitialization = R"doc()doc";
 
 static const char *__doc_sleipnir_Block =
 R"doc(Assemble a VariableMatrix from a nested list of blocks.
@@ -1916,6 +1916,270 @@ R"doc(std::cosh() for Variables.
 Parameter ``x``:
     The argument.)doc";
 
+static const char *__doc_sleipnir_detail_AbsExpression = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_AbsExpression_AbsExpression =
+R"doc(Constructs an unary expression (an operator with one argument).
+
+Parameter ``type``:
+    The expression's type.
+
+Parameter ``lhs``:
+    Unary operator's operand.)doc";
+
+static const char *__doc_sleipnir_detail_AbsExpression_GradientLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_AbsExpression_GradientValueLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_AbsExpression_Value = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_AcosExpression = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_AcosExpression_AcosExpression =
+R"doc(Constructs an unary expression (an operator with one argument).
+
+Parameter ``type``:
+    The expression's type.
+
+Parameter ``lhs``:
+    Unary operator's operand.)doc";
+
+static const char *__doc_sleipnir_detail_AcosExpression_GradientLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_AcosExpression_GradientValueLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_AcosExpression_Value = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_AsinExpression = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_AsinExpression_AsinExpression =
+R"doc(Constructs an unary expression (an operator with one argument).
+
+Parameter ``type``:
+    The expression's type.
+
+Parameter ``lhs``:
+    Unary operator's operand.)doc";
+
+static const char *__doc_sleipnir_detail_AsinExpression_GradientLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_AsinExpression_GradientValueLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_AsinExpression_Value = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_Atan2Expression = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_Atan2Expression_Atan2Expression =
+R"doc(Constructs a binary expression (an operator with two arguments).
+
+Parameter ``type``:
+    The expression's type.
+
+Parameter ``lhs``:
+    Binary operator's left operand.
+
+Parameter ``rhs``:
+    Binary operator's right operand.)doc";
+
+static const char *__doc_sleipnir_detail_Atan2Expression_GradientLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_Atan2Expression_GradientRhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_Atan2Expression_GradientValueLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_Atan2Expression_GradientValueRhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_Atan2Expression_Value = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_AtanExpression = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_AtanExpression_AtanExpression =
+R"doc(Constructs an unary expression (an operator with one argument).
+
+Parameter ``type``:
+    The expression's type.
+
+Parameter ``lhs``:
+    Unary operator's operand.)doc";
+
+static const char *__doc_sleipnir_detail_AtanExpression_GradientLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_AtanExpression_GradientValueLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_AtanExpression_Value = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_BinaryMinusExpression = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_BinaryMinusExpression_2 = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_BinaryMinusExpression_BinaryMinusExpression =
+R"doc(Constructs a binary expression (an operator with two arguments).
+
+Parameter ``type``:
+    The expression's type.
+
+Parameter ``lhs``:
+    Binary operator's left operand.
+
+Parameter ``rhs``:
+    Binary operator's right operand.)doc";
+
+static const char *__doc_sleipnir_detail_BinaryMinusExpression_GradientLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_BinaryMinusExpression_GradientRhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_BinaryMinusExpression_GradientValueLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_BinaryMinusExpression_GradientValueRhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_BinaryMinusExpression_Value = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_BinaryPlusExpression = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_BinaryPlusExpression_2 = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_BinaryPlusExpression_BinaryPlusExpression =
+R"doc(Constructs a binary expression (an operator with two arguments).
+
+Parameter ``type``:
+    The expression's type.
+
+Parameter ``lhs``:
+    Binary operator's left operand.
+
+Parameter ``rhs``:
+    Binary operator's right operand.)doc";
+
+static const char *__doc_sleipnir_detail_BinaryPlusExpression_GradientLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_BinaryPlusExpression_GradientRhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_BinaryPlusExpression_GradientValueLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_BinaryPlusExpression_GradientValueRhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_BinaryPlusExpression_Value = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_ConstExpression = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_ConstExpression_2 = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_ConstExpression_ConstExpression = R"doc(Constructs a constant expression with a value of zero.)doc";
+
+static const char *__doc_sleipnir_detail_ConstExpression_ConstExpression_2 =
+R"doc(Constructs a nullary expression (an operator with no arguments).
+
+Parameter ``value``:
+    The expression value.
+
+Parameter ``type``:
+    The expression type. It should be either constant (the default) or
+    linear.)doc";
+
+static const char *__doc_sleipnir_detail_ConstExpression_GradientLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_ConstExpression_GradientRhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_ConstExpression_GradientValueLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_ConstExpression_GradientValueRhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_ConstExpression_Value = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_CosExpression = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_CosExpression_CosExpression =
+R"doc(Constructs an unary expression (an operator with one argument).
+
+Parameter ``type``:
+    The expression's type.
+
+Parameter ``lhs``:
+    Unary operator's operand.)doc";
+
+static const char *__doc_sleipnir_detail_CosExpression_GradientLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_CosExpression_GradientValueLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_CosExpression_Value = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_CoshExpression = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_CoshExpression_CoshExpression =
+R"doc(Constructs an unary expression (an operator with one argument).
+
+Parameter ``type``:
+    The expression's type.
+
+Parameter ``lhs``:
+    Unary operator's operand.)doc";
+
+static const char *__doc_sleipnir_detail_CoshExpression_GradientLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_CoshExpression_GradientValueLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_CoshExpression_Value = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_DivExpression = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_DivExpression_2 = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_DivExpression_DivExpression =
+R"doc(Constructs a binary expression (an operator with two arguments).
+
+Parameter ``type``:
+    The expression's type.
+
+Parameter ``lhs``:
+    Binary operator's left operand.
+
+Parameter ``rhs``:
+    Binary operator's right operand.)doc";
+
+static const char *__doc_sleipnir_detail_DivExpression_GradientLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_DivExpression_GradientRhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_DivExpression_GradientValueLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_DivExpression_GradientValueRhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_DivExpression_Value = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_ErfExpression = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_ErfExpression_ErfExpression =
+R"doc(Constructs an unary expression (an operator with one argument).
+
+Parameter ``type``:
+    The expression's type.
+
+Parameter ``lhs``:
+    Unary operator's operand.)doc";
+
+static const char *__doc_sleipnir_detail_ErfExpression_GradientLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_ErfExpression_GradientValueLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_ErfExpression_Value = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_ExpExpression = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_ExpExpression_ExpExpression =
+R"doc(Constructs an unary expression (an operator with one argument).
+
+Parameter ``type``:
+    The expression's type.
+
+Parameter ``lhs``:
+    Unary operator's operand.)doc";
+
+static const char *__doc_sleipnir_detail_ExpExpression_GradientLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_ExpExpression_GradientValueLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_ExpExpression_Value = R"doc()doc";
+
 static const char *__doc_sleipnir_detail_Expression = R"doc(An autodiff expression node.)doc";
 
 static const char *__doc_sleipnir_detail_Expression_2 = R"doc(An autodiff expression node.)doc";
@@ -1973,15 +2237,6 @@ R"doc(Constructs an unary expression (an operator with one argument).
 Parameter ``type``:
     The expression's type.
 
-Parameter ``value_func``:
-    Unary operator that produces this expression's value.
-
-Parameter ``lhs_gradient_value_func``:
-    Gradient with respect to the operand.
-
-Parameter ``lhs_gradient_func``:
-    Gradient with respect to the operand.
-
 Parameter ``lhs``:
     Unary operator's operand.)doc";
 
@@ -1991,32 +2246,76 @@ R"doc(Constructs a binary expression (an operator with two arguments).
 Parameter ``type``:
     The expression's type.
 
-Parameter ``value_func``:
-    Unary operator that produces this expression's value.
-
-Parameter ``lhs_gradient_value_func``:
-    Gradient with respect to the left operand.
-
-Parameter ``rhs_gradient_value_func``:
-    Gradient with respect to the right operand.
-
-Parameter ``lhs_gradient_func``:
-    Gradient with respect to the left operand.
-
-Parameter ``rhs_gradient_func``:
-    Gradient with respect to the right operand.
-
 Parameter ``lhs``:
     Binary operator's left operand.
 
 Parameter ``rhs``:
     Binary operator's right operand.)doc";
 
+static const char *__doc_sleipnir_detail_Expression_GradientLhs =
+R"doc(Returns Variable adjoint of the left child expression.
+
+Parameter ``lhs``:
+    Left argument to binary operator.
+
+Parameter ``rhs``:
+    Right argument to binary operator.
+
+Parameter ``parent_adjoint``:
+    Adjoint of parent expression.)doc";
+
+static const char *__doc_sleipnir_detail_Expression_GradientRhs =
+R"doc(Returns Variable adjoint of the right child expression.
+
+Parameter ``lhs``:
+    Left argument to binary operator.
+
+Parameter ``rhs``:
+    Right argument to binary operator.
+
+Parameter ``parent_adjoint``:
+    Adjoint of parent expression.)doc";
+
+static const char *__doc_sleipnir_detail_Expression_GradientValueLhs =
+R"doc(Returns double adjoint of the left child expression.
+
+Parameter ``lhs``:
+    Left argument to binary operator.
+
+Parameter ``rhs``:
+    Right argument to binary operator.
+
+Parameter ``parent_adjoint``:
+    Adjoint of parent expression.)doc";
+
+static const char *__doc_sleipnir_detail_Expression_GradientValueRhs =
+R"doc(Returns double adjoint of the right child expression.
+
+Parameter ``lhs``:
+    Left argument to binary operator.
+
+Parameter ``rhs``:
+    Right argument to binary operator.
+
+Parameter ``parent_adjoint``:
+    Adjoint of parent expression.)doc";
+
 static const char *__doc_sleipnir_detail_Expression_IsConstant =
 R"doc(Returns true if the expression is the given constant.
 
 Parameter ``constant``:
     The constant.)doc";
+
+static const char *__doc_sleipnir_detail_Expression_Value =
+R"doc(Either nullary operator with no arguments, unary operator with one
+argument, or binary operator with two arguments. This operator is used
+to update the node's value.
+
+Parameter ``lhs``:
+    Left argument to binary operator.
+
+Parameter ``rhs``:
+    Right argument to binary operator.)doc";
 
 static const char *__doc_sleipnir_detail_Expression_adjoint = R"doc(The adjoint of the expression node used during autodiff.)doc";
 
@@ -2030,28 +2329,6 @@ static const char *__doc_sleipnir_detail_Expression_duplications =
 R"doc(Tracks the number of instances of this expression yet to be
 encountered in an expression tree.)doc";
 
-static const char *__doc_sleipnir_detail_Expression_gradientFuncs =
-R"doc(Functions returning Variable adjoints of the children expressions.
-
-Parameters:
-
-* lhs: Left argument to binary operator.
-
-* rhs: Right argument to binary operator.
-
-* parentAdjoint: Adjoint of parent expression.)doc";
-
-static const char *__doc_sleipnir_detail_Expression_gradientValueFuncs =
-R"doc(Functions returning double adjoints of the children expressions.
-
-Parameters:
-
-* lhs: Left argument to binary operator.
-
-* rhs: Right argument to binary operator.
-
-* parentAdjoint: Adjoint of parent expression.)doc";
-
 static const char *__doc_sleipnir_detail_Expression_refCount = R"doc(Reference count for intrusive shared pointer.)doc";
 
 static const char *__doc_sleipnir_detail_Expression_row =
@@ -2062,10 +2339,29 @@ static const char *__doc_sleipnir_detail_Expression_type = R"doc(Expression argu
 
 static const char *__doc_sleipnir_detail_Expression_value = R"doc(The value of the expression node.)doc";
 
-static const char *__doc_sleipnir_detail_Expression_valueFunc =
-R"doc(Either nullary operator with no arguments, unary operator with one
-argument, or binary operator with two arguments. This operator is used
-to update the node's value.)doc";
+static const char *__doc_sleipnir_detail_HypotExpression = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_HypotExpression_GradientLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_HypotExpression_GradientRhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_HypotExpression_GradientValueLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_HypotExpression_GradientValueRhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_HypotExpression_HypotExpression =
+R"doc(Constructs a binary expression (an operator with two arguments).
+
+Parameter ``type``:
+    The expression's type.
+
+Parameter ``lhs``:
+    Binary operator's left operand.
+
+Parameter ``rhs``:
+    Binary operator's right operand.)doc";
+
+static const char *__doc_sleipnir_detail_HypotExpression_Value = R"doc()doc";
 
 static const char *__doc_sleipnir_detail_IntrusiveSharedPtrDecRefCount =
 R"doc(Refcount decrement for intrusive shared pointer.
@@ -2091,12 +2387,220 @@ R"doc(Refcount increment for intrusive shared pointer.
 Parameter ``expr``:
     The shared pointer's managed object.)doc";
 
+static const char *__doc_sleipnir_detail_Log10Expression = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_Log10Expression_GradientLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_Log10Expression_GradientValueLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_Log10Expression_Log10Expression =
+R"doc(Constructs an unary expression (an operator with one argument).
+
+Parameter ``type``:
+    The expression's type.
+
+Parameter ``lhs``:
+    Unary operator's operand.)doc";
+
+static const char *__doc_sleipnir_detail_Log10Expression_Value = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_LogExpression = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_LogExpression_GradientLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_LogExpression_GradientValueLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_LogExpression_LogExpression =
+R"doc(Constructs an unary expression (an operator with one argument).
+
+Parameter ``type``:
+    The expression's type.
+
+Parameter ``lhs``:
+    Unary operator's operand.)doc";
+
+static const char *__doc_sleipnir_detail_LogExpression_Value = R"doc()doc";
+
 static const char *__doc_sleipnir_detail_MakeExpressionPtr =
 R"doc(Creates an intrusive shared pointer to an expression from the global
 pool allocator.
 
+Template parameter ``T``:
+    The derived expression type.
+
 Parameter ``args``:
     Constructor arguments for Expression.)doc";
+
+static const char *__doc_sleipnir_detail_MultExpression = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_MultExpression_2 = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_MultExpression_GradientLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_MultExpression_GradientRhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_MultExpression_GradientValueLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_MultExpression_GradientValueRhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_MultExpression_MultExpression =
+R"doc(Constructs a binary expression (an operator with two arguments).
+
+Parameter ``type``:
+    The expression's type.
+
+Parameter ``lhs``:
+    Binary operator's left operand.
+
+Parameter ``rhs``:
+    Binary operator's right operand.)doc";
+
+static const char *__doc_sleipnir_detail_MultExpression_Value = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_PowExpression = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_PowExpression_GradientLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_PowExpression_GradientRhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_PowExpression_GradientValueLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_PowExpression_GradientValueRhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_PowExpression_PowExpression =
+R"doc(Constructs a binary expression (an operator with two arguments).
+
+Parameter ``type``:
+    The expression's type.
+
+Parameter ``lhs``:
+    Binary operator's left operand.
+
+Parameter ``rhs``:
+    Binary operator's right operand.)doc";
+
+static const char *__doc_sleipnir_detail_PowExpression_Value = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_SignExpression = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_SignExpression_GradientLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_SignExpression_GradientValueLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_SignExpression_SignExpression =
+R"doc(Constructs an unary expression (an operator with one argument).
+
+Parameter ``type``:
+    The expression's type.
+
+Parameter ``lhs``:
+    Unary operator's operand.)doc";
+
+static const char *__doc_sleipnir_detail_SignExpression_Value = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_SinExpression = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_SinExpression_GradientLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_SinExpression_GradientValueLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_SinExpression_SinExpression =
+R"doc(Constructs an unary expression (an operator with one argument).
+
+Parameter ``type``:
+    The expression's type.
+
+Parameter ``lhs``:
+    Unary operator's operand.)doc";
+
+static const char *__doc_sleipnir_detail_SinExpression_Value = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_SinhExpression = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_SinhExpression_GradientLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_SinhExpression_GradientValueLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_SinhExpression_SinhExpression =
+R"doc(Constructs an unary expression (an operator with one argument).
+
+Parameter ``type``:
+    The expression's type.
+
+Parameter ``lhs``:
+    Unary operator's operand.)doc";
+
+static const char *__doc_sleipnir_detail_SinhExpression_Value = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_SqrtExpression = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_SqrtExpression_GradientLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_SqrtExpression_GradientValueLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_SqrtExpression_SqrtExpression =
+R"doc(Constructs an unary expression (an operator with one argument).
+
+Parameter ``type``:
+    The expression's type.
+
+Parameter ``lhs``:
+    Unary operator's operand.)doc";
+
+static const char *__doc_sleipnir_detail_SqrtExpression_Value = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_TanExpression = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_TanExpression_GradientLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_TanExpression_GradientValueLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_TanExpression_TanExpression =
+R"doc(Constructs an unary expression (an operator with one argument).
+
+Parameter ``type``:
+    The expression's type.
+
+Parameter ``lhs``:
+    Unary operator's operand.)doc";
+
+static const char *__doc_sleipnir_detail_TanExpression_Value = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_TanhExpression = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_TanhExpression_GradientLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_TanhExpression_GradientValueLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_TanhExpression_TanhExpression =
+R"doc(Constructs an unary expression (an operator with one argument).
+
+Parameter ``type``:
+    The expression's type.
+
+Parameter ``lhs``:
+    Unary operator's operand.)doc";
+
+static const char *__doc_sleipnir_detail_TanhExpression_Value = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_UnaryMinusExpression = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_UnaryMinusExpression_2 = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_UnaryMinusExpression_GradientLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_UnaryMinusExpression_GradientValueLhs = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_UnaryMinusExpression_UnaryMinusExpression =
+R"doc(Constructs an unary expression (an operator with one argument).
+
+Parameter ``type``:
+    The expression's type.
+
+Parameter ``lhs``:
+    Unary operator's operand.)doc";
+
+static const char *__doc_sleipnir_detail_UnaryMinusExpression_Value = R"doc()doc";
 
 static const char *__doc_sleipnir_detail_abs =
 R"doc(std::abs() for Expressions.
@@ -2170,6 +2674,15 @@ Parameter ``x``:
 Parameter ``y``:
     The y argument.)doc";
 
+static const char *__doc_sleipnir_detail_hypot_2 =
+R"doc(std::hypot() for Expressions.
+
+Parameter ``x``:
+    The x argument.
+
+Parameter ``y``:
+    The y argument.)doc";
+
 static const char *__doc_sleipnir_detail_log =
 R"doc(std::log() for Expressions.
 
@@ -2183,6 +2696,15 @@ Parameter ``x``:
     The argument.)doc";
 
 static const char *__doc_sleipnir_detail_pow =
+R"doc(std::pow() for Expressions.
+
+Parameter ``base``:
+    The base.
+
+Parameter ``power``:
+    The power.)doc";
+
+static const char *__doc_sleipnir_detail_pow_2 =
 R"doc(std::pow() for Expressions.
 
 Parameter ``base``:

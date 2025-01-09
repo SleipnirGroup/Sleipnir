@@ -68,9 +68,9 @@ class ExpressionGraph {
       // BFS lists sorted from parent to child.
       m_rowList.emplace_back(currentNode->row);
       m_adjointList.emplace_back(currentNode);
-      if (currentNode->valueFunc != nullptr) {
-        // Constants are skipped because they have no valueFunc and don't need
-        // to be updated
+      if (currentNode->args[0] != nullptr) {
+        // Constants (expressions with no arguments) are skipped because they
+        // don't need to be updated
         m_valueList.emplace_back(currentNode);
       }
 
@@ -105,9 +105,9 @@ class ExpressionGraph {
 
       if (lhs != nullptr) {
         if (rhs != nullptr) {
-          node->value = node->valueFunc(lhs->value, rhs->value);
+          node->value = node->Value(lhs->value, rhs->value);
         } else {
-          node->value = node->valueFunc(lhs->value, 0.0);
+          node->value = node->Value(lhs->value, 0.0);
         }
       }
     }
@@ -130,16 +130,16 @@ class ExpressionGraph {
     small_vector<ExpressionPtr> grad;
     grad.reserve(wrt.size());
     for (size_t row = 0; row < wrt.size(); ++row) {
-      grad.emplace_back(MakeExpressionPtr());
+      grad.emplace_back(MakeExpressionPtr<ConstExpression>());
     }
 
     // Zero adjoints. The root node's adjoint is 1.0 as df/df is always 1.
     if (m_adjointList.size() > 0) {
-      m_adjointList[0]->adjointExpr = MakeExpressionPtr(1.0);
+      m_adjointList[0]->adjointExpr = MakeExpressionPtr<ConstExpression>(1.0);
       for (auto it = m_adjointList.begin() + 1; it != m_adjointList.end();
            ++it) {
         auto& node = *it;
-        node->adjointExpr = MakeExpressionPtr();
+        node->adjointExpr = MakeExpressionPtr<ConstExpression>();
       }
     }
 
@@ -152,12 +152,12 @@ class ExpressionGraph {
       auto& rhs = node->args[1];
 
       if (lhs != nullptr && !lhs->IsConstant(0.0)) {
-        lhs->adjointExpr = lhs->adjointExpr +
-                           node->gradientFuncs[0](lhs, rhs, node->adjointExpr);
+        lhs->adjointExpr =
+            lhs->adjointExpr + node->GradientLhs(lhs, rhs, node->adjointExpr);
       }
       if (rhs != nullptr && !rhs->IsConstant(0.0)) {
-        rhs->adjointExpr = rhs->adjointExpr +
-                           node->gradientFuncs[1](lhs, rhs, node->adjointExpr);
+        rhs->adjointExpr =
+            rhs->adjointExpr + node->GradientRhs(lhs, rhs, node->adjointExpr);
       }
 
       // If variable is a leaf node, assign its adjoint to the gradient.
@@ -210,13 +210,13 @@ class ExpressionGraph {
 
       if (lhs != nullptr) {
         if (rhs != nullptr) {
-          lhs->adjoint += node->gradientValueFuncs[0](lhs->value, rhs->value,
-                                                      node->adjoint);
-          rhs->adjoint += node->gradientValueFuncs[1](lhs->value, rhs->value,
-                                                      node->adjoint);
+          lhs->adjoint +=
+              node->GradientValueLhs(lhs->value, rhs->value, node->adjoint);
+          rhs->adjoint +=
+              node->GradientValueRhs(lhs->value, rhs->value, node->adjoint);
         } else {
           lhs->adjoint +=
-              node->gradientValueFuncs[0](lhs->value, 0.0, node->adjoint);
+              node->GradientValueLhs(lhs->value, 0.0, node->adjoint);
         }
       }
 
