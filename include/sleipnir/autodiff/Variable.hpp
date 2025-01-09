@@ -40,7 +40,8 @@ class SLEIPNIR_DLLEXPORT Variable {
    *
    * @param value The value of the Variable.
    */
-  Variable(double value) : expr{detail::MakeExpressionPtr(value)} {}  // NOLINT
+  Variable(double value)  // NOLINT
+      : expr{detail::MakeExpressionPtr<detail::ConstExpression>(value)} {}
 
   /**
    * Constructs a Variable pointing to the specified expression.
@@ -62,7 +63,7 @@ class SLEIPNIR_DLLEXPORT Variable {
    * @param value The value of the Variable.
    */
   Variable& operator=(double value) {
-    expr = detail::MakeExpressionPtr(value);
+    expr = detail::MakeExpressionPtr<detail::ConstExpression>(value);
 
     return *this;
   }
@@ -74,7 +75,7 @@ class SLEIPNIR_DLLEXPORT Variable {
    */
   void SetValue(double value) {
     if (expr->IsConstant(0.0)) {
-      expr = detail::MakeExpressionPtr(value);
+      expr = detail::MakeExpressionPtr<detail::ConstExpression>(value);
     } else {
       // We only need to check the first argument since unary and binary
       // operators both use it
@@ -210,7 +211,8 @@ class SLEIPNIR_DLLEXPORT Variable {
  private:
   /// The expression node.
   detail::ExpressionPtr expr =
-      detail::MakeExpressionPtr(0.0, ExpressionType::kLinear);
+      detail::MakeExpressionPtr<detail::ConstExpression>(
+          0.0, ExpressionType::kLinear);
 
   friend SLEIPNIR_DLLEXPORT Variable abs(const Variable& x);
   friend SLEIPNIR_DLLEXPORT Variable acos(const Variable& x);
