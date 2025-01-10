@@ -5,8 +5,8 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
-#include <fstream>
 #include <limits>
+#include <memory>
 
 #include <Eigen/SparseCholesky>
 
@@ -125,13 +125,18 @@ void InteriorPoint(std::span<Variable> decisionVariables,
   }
 
   // Sparsity pattern files written when spy flag is set in SolverConfig
-  std::ofstream H_spy;
-  std::ofstream A_e_spy;
-  std::ofstream A_i_spy;
+  std::unique_ptr<Spy> H_spy;
+  std::unique_ptr<Spy> A_e_spy;
+  std::unique_ptr<Spy> A_i_spy;
   if (config.spy) {
-    A_e_spy.open("A_e.spy");
-    A_i_spy.open("A_i.spy");
-    H_spy.open("H.spy");
+    H_spy = std::make_unique<Spy>("H.spy", "Hessian", "Decision variables",
+                                  "Decision variables", H.rows(), H.cols());
+    A_e_spy = std::make_unique<Spy>("A_e.spy", "Equality constraint Jacobian",
+                                    "Constraints", "Decision variables",
+                                    A_e.rows(), A_e.cols());
+    A_i_spy = std::make_unique<Spy>("A_i.spy", "Inequality constraint Jacobian",
+                                    "Constraints", "Decision variables",
+                                    A_i.rows(), A_i.cols());
   }
 
   if (config.diagnostics && !feasibilityRestoration) {
@@ -299,16 +304,9 @@ void InteriorPoint(std::span<Variable> decisionVariables,
 
     // Write out spy file contents if that's enabled
     if (config.spy) {
-      // Gap between sparsity patterns
-      if (iterations > 0) {
-        A_e_spy << "\n";
-        A_i_spy << "\n";
-        H_spy << "\n";
-      }
-
-      Spy(H_spy, H);
-      Spy(A_e_spy, A_e);
-      Spy(A_i_spy, A_i);
+      H_spy->Add(H);
+      A_e_spy->Add(A_e);
+      A_i_spy->Add(A_i);
     }
 
     // Call user callback
