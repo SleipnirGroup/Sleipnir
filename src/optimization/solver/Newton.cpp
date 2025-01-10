@@ -5,8 +5,8 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
-#include <fstream>
 #include <limits>
+#include <memory>
 
 #include <Eigen/SparseCholesky>
 
@@ -60,9 +60,10 @@ void Newton(std::span<Variable> decisionVariables, Variable& f,
   }
 
   // Sparsity pattern files written when spy flag is set in SolverConfig
-  std::ofstream H_spy;
+  std::unique_ptr<Spy> H_spy;
   if (config.spy) {
-    H_spy.open("H.spy");
+    H_spy = std::make_unique<Spy>("H.spy", "Hessian", "Decision variables",
+                                  "Decision variables", H.rows(), H.cols());
   }
 
   if (config.diagnostics) {
@@ -137,12 +138,7 @@ void Newton(std::span<Variable> decisionVariables, Variable& f,
 
     // Write out spy file contents if that's enabled
     if (config.spy) {
-      // Gap between sparsity patterns
-      if (iterations > 0) {
-        H_spy << "\n";
-      }
-
-      Spy(H_spy, H);
+      H_spy->Add(H);
     }
 
     // Call user callback

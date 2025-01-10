@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 
-"""Loads and displays the sparsity patterns from A_e.spy, A_i.spy, and H.spy."""
-
-import re
+import argparse
+import struct
 import sys
 
 import matplotlib.pyplot as plt
@@ -12,17 +11,9 @@ from matplotlib import animation
 from matplotlib.colors import ListedColormap
 
 
-def plot_csv(filename, title, xlabel, ylabel):
-    print(f"Loading sparsity pattern for {title}...", end="")
+def plot_csv(filename: str) -> animation.FuncAnimation:
+    print(f"Loading sparsity pattern {filename}...", end="")
     sys.stdout.flush()
-
-    with open(filename) as f:
-        contents = f.read()
-
-    max_row_idx = 0
-    max_col_idx = 0
-    row = 0
-    col = 0
 
     xs = []
     ys = []
@@ -32,51 +23,40 @@ def plot_csv(filename, title, xlabel, ylabel):
     y = []
     v = []
 
-    for m in re.finditer(r"\.|\+|\-|\n\n|\n", contents):
-        token = m.group()
+    with open(filename, mode="rb") as f:
+        size = struct.unpack("<i", f.read(4))[0]
+        title = struct.unpack(f"{size}s", f.read(size))[0].decode("utf-8")
 
-        if token == ".":
-            # Do nothing since zero entries aren't logged
-            col += 1
-        elif token == "+":
-            # Log positive entry
-            x.append(col)
-            y.append(row)
-            v.append(1.0)
-            col += 1
-        elif token == "-":
-            # Log negative entry
-            x.append(col)
-            y.append(row)
-            v.append(-1.0)
-            col += 1
-        elif token == "\n\n":
-            # Prep for new matrix. Log old one if it's not truncated.
-            if row >= max_row_idx and col >= max_col_idx:
-                max_row_idx = row
-                max_col_idx = col
+        size = struct.unpack("<i", f.read(4))[0]
+        row_label = struct.unpack(f"{size}s", f.read(size))[0].decode("utf-8")
 
+        size = struct.unpack("<i", f.read(4))[0]
+        col_label = struct.unpack(f"{size}s", f.read(size))[0].decode("utf-8")
+
+        rows = struct.unpack("<i", f.read(4))[0]
+        cols = struct.unpack("<i", f.read(4))[0]
+
+        try:
+            while True:
+                num_coords = struct.unpack("<i", f.read(4))[0]
+                for _ in range(num_coords):
+                    y.append(struct.unpack("<i", f.read(4))[0])
+                    x.append(struct.unpack("<i", f.read(4))[0])
+                    sign = struct.unpack("c", f.read(1))[0]
+                    if sign == b"+":
+                        v.append(1.0)
+                    elif sign == b"-":
+                        v.append(-1.0)
+                    else:
+                        v.append(0.0)
                 xs.append(x)
                 ys.append(y)
                 vs.append(v)
-            x = []
-            y = []
-            v = []
-            row = 0
-            col = 0
-        elif token == "\n" and m.span()[0] < len(contents) - 1:
-            # Prep for new row if it isn't the last
-            row += 1
-            col = 0
-
-    # Log leftover matrix if it's not truncated
-    if row >= max_row_idx and col >= max_col_idx:
-        max_row_idx = row
-        max_col_idx = col
-
-        xs.append(x)
-        ys.append(y)
-        vs.append(v)
+                x = []
+                y = []
+                v = []
+        except:
+            pass
 
     print(" done.")
     sys.stdout.flush()
@@ -85,7 +65,7 @@ def plot_csv(filename, title, xlabel, ylabel):
     ax = fig.add_subplot()
 
     # Display scatter plot
-    cmap = ListedColormap(["red", "green"])
+    cmap = ListedColormap(["red", "black", "green"])
     sc = ax.scatter(xs[0], ys[0], s=1, c=vs[0], marker=".", cmap=cmap, vmin=-1, vmax=1)
     iteration = ax.text(0.02, 0.95, "", transform=ax.transAxes)
 
@@ -97,15 +77,15 @@ def plot_csv(filename, title, xlabel, ylabel):
     colorbar.ax.set_yticklabels(ticklabels)
 
     ax.set_title(title)
-    ax.set_xlabel(xlabel)
-    ax.set_ylabel(ylabel)
+    ax.set_xlabel(col_label)
+    ax.set_ylabel(row_label)
 
-    ax.set_xlim([0, max_col_idx])
-    ax.set_ylim([0, max_row_idx])
+    ax.set_xlim([0, cols])
+    ax.set_ylim([0, rows])
     ax.invert_yaxis()
     ax.set_aspect(1.0)
 
-    def animate(i):
+    def animate(i: int):
         sc.set_offsets(np.c_[xs[i], ys[i]])
         sc.set_array(vs[i])
         iteration.set_text(f"iter {i}/{max(0, len(vs) - 1)}")
@@ -123,27 +103,14 @@ def plot_csv(filename, title, xlabel, ylabel):
 
 
 def main():
-    # pragma pylint: disable=unused-variable
-    anim1 = plot_csv(
-        "A_e.spy",
-        title="Equality constraint Jacobian",
-        xlabel="Decision variables",
-        ylabel="Constraints",
+    parser = argparse.ArgumentParser(
+        description="Displays sparsity pattern (.spy) files."
     )
+    parser.add_argument("filename", nargs="+")
+    args = parser.parse_args()
+
     # pragma pylint: disable=unused-variable
-    anim2 = plot_csv(
-        "A_i.spy",
-        title="Inequality constraint Jacobian",
-        xlabel="Decision variables",
-        ylabel="Constraints",
-    )
-    # pragma pylint: disable=unused-variable
-    anim3 = plot_csv(
-        "H.spy",
-        title="Hessian",
-        xlabel="Decision variables",
-        ylabel="Decision variables",
-    )
+    animations = [plot_csv(filename) for filename in args.filename]  # noqa
     plt.show()
 
 
