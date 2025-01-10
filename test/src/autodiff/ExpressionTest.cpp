@@ -14,7 +14,7 @@ TEST_CASE("Expression - Default constructor", "[Expression]") {
   auto expr = MakeExpressionPtr<ConstExpression>();
 
   CHECK(expr->value == 0.0);
-  CHECK(expr->type == sleipnir::ExpressionType::kConstant);
+  CHECK(expr->Type() == sleipnir::ExpressionType::kConstant);
 }
 
 TEST_CASE("Expression - Zero", "[Expression]") {

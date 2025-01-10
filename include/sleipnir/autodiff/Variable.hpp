@@ -206,13 +206,12 @@ class SLEIPNIR_DLLEXPORT Variable {
    * Returns the type of this expression (constant, linear, quadratic, or
    * nonlinear).
    */
-  ExpressionType Type() const { return expr->type; }
+  ExpressionType Type() const { return expr->Type(); }
 
  private:
   /// The expression node.
   detail::ExpressionPtr expr =
-      detail::MakeExpressionPtr<detail::ConstExpression>(
-          0.0, ExpressionType::kLinear);
+      detail::MakeExpressionPtr<detail::DecisionVariableExpression>();
 
   friend SLEIPNIR_DLLEXPORT Variable abs(const Variable& x);
   friend SLEIPNIR_DLLEXPORT Variable acos(const Variable& x);

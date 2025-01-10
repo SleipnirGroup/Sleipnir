@@ -24,7 +24,7 @@ class ExpressionGraph {
   explicit ExpressionGraph(ExpressionPtr& root) {
     // If the root type is a constant, Update() is a no-op, so there's no work
     // to do
-    if (root == nullptr || root->type == ExpressionType::kConstant) {
+    if (root == nullptr || root->Type() == ExpressionType::kConstant) {
       return;
     }
 
@@ -48,7 +48,7 @@ class ExpressionGraph {
       for (auto&& arg : currentNode->args) {
         // Only continue if the node is not a constant and hasn't already been
         // explored.
-        if (arg != nullptr && arg->type != ExpressionType::kConstant) {
+        if (arg != nullptr && arg->Type() != ExpressionType::kConstant) {
           // If this is the first instance of the node encountered (it hasn't
           // been explored yet), add it to stack so it's recursed upon
           if (arg->duplications == 0) {
@@ -77,7 +77,7 @@ class ExpressionGraph {
       for (auto&& arg : currentNode->args) {
         // Only add node if it's not a constant and doesn't already exist in the
         // tape.
-        if (arg != nullptr && arg->type != ExpressionType::kConstant) {
+        if (arg != nullptr && arg->Type() != ExpressionType::kConstant) {
           // Once the number of node visitations equals the number of
           // duplications (the counter hits zero), add it to the stack. Note
           // that this means the node is only enqueued once.

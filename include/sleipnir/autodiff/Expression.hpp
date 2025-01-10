@@ -4,7 +4,6 @@
 
 #include <stdint.h>
 
-#include <algorithm>
 #include <array>
 #include <cmath>
 #include <memory>
@@ -53,11 +52,21 @@ static ExpressionPtr MakeExpressionPtr(Args&&... args) {
   }
 }
 
+template <ExpressionType Type>
 struct BinaryMinusExpression;
+
+template <ExpressionType Type>
 struct BinaryPlusExpression;
+
 struct ConstExpression;
+
+template <ExpressionType Type>
 struct DivExpression;
+
+template <ExpressionType Type>
 struct MultExpression;
+
+template <ExpressionType Type>
 struct UnaryMinusExpression;
 
 /**
@@ -82,9 +91,6 @@ struct Expression {
   /// generation.
   ExpressionPtr adjointExpr;
 
-  /// Expression argument type.
-  ExpressionType type = ExpressionType::kConstant;
-
   /// Reference count for intrusive shared pointer.
   uint32_t refCount = 0;
 
@@ -100,32 +106,25 @@ struct Expression {
    * Constructs a nullary expression (an operator with no arguments).
    *
    * @param value The expression value.
-   * @param type The expression type. It should be either constant (the default)
-   *             or linear.
    */
-  explicit constexpr Expression(double value,
-                                ExpressionType type = ExpressionType::kConstant)
-      : value{value}, type{type} {}
+  explicit constexpr Expression(double value) : value{value} {}
 
   /**
    * Constructs an unary expression (an operator with one argument).
    *
-   * @param type The expression's type.
    * @param lhs Unary operator's operand.
    */
-  constexpr Expression(ExpressionType type, ExpressionPtr lhs)
-      : type{type}, args{std::move(lhs), nullptr} {}
+  explicit constexpr Expression(ExpressionPtr lhs)
+      : args{std::move(lhs), nullptr} {}
 
   /**
    * Constructs a binary expression (an operator with two arguments).
    *
-   * @param type The expression's type.
    * @param lhs Binary operator's left operand.
    * @param rhs Binary operator's right operand.
    */
-  constexpr Expression(ExpressionType type, ExpressionPtr lhs,
-                       ExpressionPtr rhs)
-      : type{type}, args{std::move(lhs), std::move(rhs)} {}
+  constexpr Expression(ExpressionPtr lhs, ExpressionPtr rhs)
+      : args{std::move(lhs), std::move(rhs)} {}
 
   virtual ~Expression() = default;
 
@@ -135,7 +134,7 @@ struct Expression {
    * @param constant The constant.
    */
   constexpr bool IsConstant(double constant) const {
-    return type == ExpressionType::kConstant && value == constant;
+    return Type() == ExpressionType::kConstant && value == constant;
   }
 
   /**
@@ -162,23 +161,32 @@ struct Expression {
     }
 
     // Evaluate constant
-    if (lhs->type == kConstant && rhs->type == kConstant) {
+    if (lhs->Type() == kConstant && rhs->Type() == kConstant) {
       return MakeExpressionPtr<ConstExpression>(lhs->value * rhs->value);
     }
 
     // Evaluate expression type
-    ExpressionType type;
-    if (lhs->type == kConstant) {
-      type = rhs->type;
-    } else if (rhs->type == kConstant) {
-      type = lhs->type;
-    } else if (lhs->type == kLinear && rhs->type == kLinear) {
-      type = kQuadratic;
+    if (lhs->Type() == kConstant) {
+      if (rhs->Type() == kLinear) {
+        return MakeExpressionPtr<MultExpression<kLinear>>(lhs, rhs);
+      } else if (rhs->Type() == kQuadratic) {
+        return MakeExpressionPtr<MultExpression<kQuadratic>>(lhs, rhs);
+      } else {
+        return MakeExpressionPtr<MultExpression<kNonlinear>>(lhs, rhs);
+      }
+    } else if (rhs->Type() == kConstant) {
+      if (lhs->Type() == kLinear) {
+        return MakeExpressionPtr<MultExpression<kLinear>>(lhs, rhs);
+      } else if (lhs->Type() == kQuadratic) {
+        return MakeExpressionPtr<MultExpression<kQuadratic>>(lhs, rhs);
+      } else {
+        return MakeExpressionPtr<MultExpression<kNonlinear>>(lhs, rhs);
+      }
+    } else if (lhs->Type() == kLinear && rhs->Type() == kLinear) {
+      return MakeExpressionPtr<MultExpression<kQuadratic>>(lhs, rhs);
     } else {
-      type = kNonlinear;
+      return MakeExpressionPtr<MultExpression<kNonlinear>>(lhs, rhs);
     }
-
-    return MakeExpressionPtr<MultExpression>(type, lhs, rhs);
   }
 
   /**
@@ -200,19 +208,22 @@ struct Expression {
     }
 
     // Evaluate constant
-    if (lhs->type == kConstant && rhs->type == kConstant) {
+    if (lhs->Type() == kConstant && rhs->Type() == kConstant) {
       return MakeExpressionPtr<ConstExpression>(lhs->value / rhs->value);
     }
 
     // Evaluate expression type
-    ExpressionType type;
-    if (rhs->type == kConstant) {
-      type = lhs->type;
+    if (rhs->Type() == kConstant) {
+      if (lhs->Type() == kLinear) {
+        return MakeExpressionPtr<DivExpression<kLinear>>(lhs, rhs);
+      } else if (lhs->Type() == kQuadratic) {
+        return MakeExpressionPtr<DivExpression<kQuadratic>>(lhs, rhs);
+      } else {
+        return MakeExpressionPtr<DivExpression<kNonlinear>>(lhs, rhs);
+      }
     } else {
-      type = kNonlinear;
+      return MakeExpressionPtr<DivExpression<kNonlinear>>(lhs, rhs);
     }
-
-    return MakeExpressionPtr<DivExpression>(type, lhs, rhs);
   }
 
   /**
@@ -233,12 +244,28 @@ struct Expression {
     }
 
     // Evaluate constant
-    if (lhs->type == kConstant && rhs->type == kConstant) {
+    if (lhs->Type() == kConstant && rhs->Type() == kConstant) {
       return MakeExpressionPtr<ConstExpression>(lhs->value + rhs->value);
     }
 
-    return MakeExpressionPtr<BinaryPlusExpression>(
-        std::max(lhs->type, rhs->type), lhs, rhs);
+    // Use max of lhs and rhs expression types
+    if (lhs->Type() < rhs->Type()) {
+      if (rhs->Type() == kLinear) {
+        return MakeExpressionPtr<BinaryPlusExpression<kLinear>>(lhs, rhs);
+      } else if (rhs->Type() == kQuadratic) {
+        return MakeExpressionPtr<BinaryPlusExpression<kQuadratic>>(lhs, rhs);
+      } else {
+        return MakeExpressionPtr<BinaryPlusExpression<kNonlinear>>(lhs, rhs);
+      }
+    } else {
+      if (lhs->Type() == kLinear) {
+        return MakeExpressionPtr<BinaryPlusExpression<kLinear>>(lhs, rhs);
+      } else if (lhs->Type() == kQuadratic) {
+        return MakeExpressionPtr<BinaryPlusExpression<kQuadratic>>(lhs, rhs);
+      } else {
+        return MakeExpressionPtr<BinaryPlusExpression<kNonlinear>>(lhs, rhs);
+      }
+    }
   }
 
   /**
@@ -264,12 +291,28 @@ struct Expression {
     }
 
     // Evaluate constant
-    if (lhs->type == kConstant && rhs->type == kConstant) {
+    if (lhs->Type() == kConstant && rhs->Type() == kConstant) {
       return MakeExpressionPtr<ConstExpression>(lhs->value - rhs->value);
     }
 
-    return MakeExpressionPtr<BinaryMinusExpression>(
-        std::max(lhs->type, rhs->type), lhs, rhs);
+    // Use max of lhs and rhs expression types
+    if (lhs->Type() < rhs->Type()) {
+      if (rhs->Type() == kLinear) {
+        return MakeExpressionPtr<BinaryMinusExpression<kLinear>>(lhs, rhs);
+      } else if (rhs->Type() == kQuadratic) {
+        return MakeExpressionPtr<BinaryMinusExpression<kQuadratic>>(lhs, rhs);
+      } else {
+        return MakeExpressionPtr<BinaryMinusExpression<kNonlinear>>(lhs, rhs);
+      }
+    } else {
+      if (lhs->Type() == kLinear) {
+        return MakeExpressionPtr<BinaryMinusExpression<kLinear>>(lhs, rhs);
+      } else if (lhs->Type() == kQuadratic) {
+        return MakeExpressionPtr<BinaryMinusExpression<kQuadratic>>(lhs, rhs);
+      } else {
+        return MakeExpressionPtr<BinaryMinusExpression<kNonlinear>>(lhs, rhs);
+      }
+    }
   }
 
   /**
@@ -287,11 +330,17 @@ struct Expression {
     }
 
     // Evaluate constant
-    if (lhs->type == kConstant) {
+    if (lhs->Type() == kConstant) {
       return MakeExpressionPtr<ConstExpression>(-lhs->value);
     }
 
-    return MakeExpressionPtr<UnaryMinusExpression>(lhs->type, lhs);
+    if (lhs->Type() == kLinear) {
+      return MakeExpressionPtr<UnaryMinusExpression<kLinear>>(lhs);
+    } else if (lhs->Type() == kQuadratic) {
+      return MakeExpressionPtr<UnaryMinusExpression<kQuadratic>>(lhs);
+    } else {
+      return MakeExpressionPtr<UnaryMinusExpression<kNonlinear>>(lhs);
+    }
   }
 
   /**
@@ -313,6 +362,12 @@ struct Expression {
                        [[maybe_unused]] double rhs) const = 0;
 
   /**
+   * Returns the type of this expression (constant, linear, quadratic, or
+   * nonlinear).
+   */
+  virtual ExpressionType Type() const = 0;
+
+  /**
    * Returns double adjoint of the left child expression.
    *
    * @param lhs Left argument to binary operator.
@@ -321,7 +376,9 @@ struct Expression {
    */
   virtual double GradientValueLhs([[maybe_unused]] double lhs,
                                   [[maybe_unused]] double rhs,
-                                  double parentAdjoint) const = 0;
+                                  [[maybe_unused]] double parentAdjoint) const {
+    return 0.0;
+  }
 
   /**
    * Returns double adjoint of the right child expression.
@@ -346,7 +403,9 @@ struct Expression {
   virtual ExpressionPtr GradientLhs(
       [[maybe_unused]] const ExpressionPtr& lhs,
       [[maybe_unused]] const ExpressionPtr& rhs,
-      const ExpressionPtr& parentAdjoint) const = 0;
+      [[maybe_unused]] const ExpressionPtr& parentAdjoint) const {
+    return MakeExpressionPtr<ConstExpression>();
+  }
 
   /**
    * Returns Variable adjoint of the right child expression.
@@ -359,25 +418,26 @@ struct Expression {
       [[maybe_unused]] const ExpressionPtr& lhs,
       [[maybe_unused]] const ExpressionPtr& rhs,
       [[maybe_unused]] const ExpressionPtr& parentAdjoint) const {
-    return ExpressionPtr{nullptr};
+    return MakeExpressionPtr<ConstExpression>();
   }
 };
 
+template <ExpressionType T>
 struct BinaryMinusExpression final : Expression {
   /**
    * Constructs a binary expression (an operator with two arguments).
    *
-   * @param type The expression's type.
    * @param lhs Binary operator's left operand.
    * @param rhs Binary operator's right operand.
    */
-  constexpr BinaryMinusExpression(ExpressionType type, ExpressionPtr lhs,
-                                  ExpressionPtr rhs)
-      : Expression{type, std::move(lhs), std::move(rhs)} {
+  constexpr BinaryMinusExpression(ExpressionPtr lhs, ExpressionPtr rhs)
+      : Expression{std::move(lhs), std::move(rhs)} {
     value = BinaryMinusExpression::Value(args[0]->value, args[1]->value);
   }
 
   double Value(double lhs, double rhs) const override { return lhs - rhs; }
+
+  ExpressionType Type() const override { return T; }
 
   double GradientValueLhs(double, double, double parentAdjoint) const override {
     return parentAdjoint;
@@ -398,21 +458,22 @@ struct BinaryMinusExpression final : Expression {
   }
 };
 
+template <ExpressionType T>
 struct BinaryPlusExpression final : Expression {
   /**
    * Constructs a binary expression (an operator with two arguments).
    *
-   * @param type The expression's type.
    * @param lhs Binary operator's left operand.
    * @param rhs Binary operator's right operand.
    */
-  constexpr BinaryPlusExpression(ExpressionType type, ExpressionPtr lhs,
-                                 ExpressionPtr rhs)
-      : Expression{type, std::move(lhs), std::move(rhs)} {
+  constexpr BinaryPlusExpression(ExpressionPtr lhs, ExpressionPtr rhs)
+      : Expression{std::move(lhs), std::move(rhs)} {
     value = BinaryPlusExpression::Value(args[0]->value, args[1]->value);
   }
 
   double Value(double lhs, double rhs) const override { return lhs + rhs; }
+
+  ExpressionType Type() const override { return T; }
 
   double GradientValueLhs(double, double, double parentAdjoint) const override {
     return parentAdjoint;
@@ -443,45 +504,49 @@ struct ConstExpression final : Expression {
    * Constructs a nullary expression (an operator with no arguments).
    *
    * @param value The expression value.
-   * @param type The expression type. It should be either constant (the default)
-   *             or linear.
    */
-  explicit constexpr ConstExpression(
-      double value, ExpressionType type = ExpressionType::kConstant)
-      : Expression{value, type} {}
+  explicit constexpr ConstExpression(double value) : Expression{value} {}
 
   double Value(double, double) const override { return value; }
 
-  double GradientValueLhs(double, double, double) const override { return 0.0; }
-
-  double GradientValueRhs(double, double, double) const override { return 0.0; }
-
-  ExpressionPtr GradientLhs(const ExpressionPtr&, const ExpressionPtr&,
-                            const ExpressionPtr&) const override {
-    return ExpressionPtr{nullptr};
-  }
-
-  ExpressionPtr GradientRhs(const ExpressionPtr&, const ExpressionPtr&,
-                            const ExpressionPtr&) const override {
-    return ExpressionPtr{nullptr};
-  }
+  ExpressionType Type() const override { return ExpressionType::kConstant; }
 };
 
+struct DecisionVariableExpression final : Expression {
+  /**
+   * Constructs a decision variable expression with a value of zero.
+   */
+  constexpr DecisionVariableExpression() = default;
+
+  /**
+   * Constructs a nullary expression (an operator with no arguments).
+   *
+   * @param value The expression value.
+   */
+  explicit constexpr DecisionVariableExpression(double value)
+      : Expression{value} {}
+
+  double Value(double, double) const override { return value; }
+
+  ExpressionType Type() const override { return ExpressionType::kLinear; }
+};
+
+template <ExpressionType T>
 struct DivExpression final : Expression {
   /**
    * Constructs a binary expression (an operator with two arguments).
    *
-   * @param type The expression's type.
    * @param lhs Binary operator's left operand.
    * @param rhs Binary operator's right operand.
    */
-  constexpr DivExpression(ExpressionType type, ExpressionPtr lhs,
-                          ExpressionPtr rhs)
-      : Expression{type, std::move(lhs), std::move(rhs)} {
+  constexpr DivExpression(ExpressionPtr lhs, ExpressionPtr rhs)
+      : Expression{std::move(lhs), std::move(rhs)} {
     value = DivExpression::Value(args[0]->value, args[1]->value);
   }
 
   double Value(double lhs, double rhs) const override { return lhs / rhs; }
+
+  ExpressionType Type() const override { return T; }
 
   double GradientValueLhs(double, double rhs,
                           double parentAdjoint) const override {
@@ -504,21 +569,22 @@ struct DivExpression final : Expression {
   }
 };
 
+template <ExpressionType T>
 struct MultExpression final : Expression {
   /**
    * Constructs a binary expression (an operator with two arguments).
    *
-   * @param type The expression's type.
    * @param lhs Binary operator's left operand.
    * @param rhs Binary operator's right operand.
    */
-  constexpr MultExpression(ExpressionType type, ExpressionPtr lhs,
-                           ExpressionPtr rhs)
-      : Expression{type, std::move(lhs), std::move(rhs)} {
+  constexpr MultExpression(ExpressionPtr lhs, ExpressionPtr rhs)
+      : Expression{std::move(lhs), std::move(rhs)} {
     value = MultExpression::Value(args[0]->value, args[1]->value);
   }
 
   double Value(double lhs, double rhs) const override { return lhs * rhs; }
+
+  ExpressionType Type() const override { return T; }
 
   double GradientValueLhs([[maybe_unused]] double lhs, double rhs,
                           double parentAdjoint) const override {
@@ -543,19 +609,21 @@ struct MultExpression final : Expression {
   }
 };
 
+template <ExpressionType T>
 struct UnaryMinusExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
    *
-   * @param type The expression's type.
    * @param lhs Unary operator's operand.
    */
-  constexpr UnaryMinusExpression(ExpressionType type, ExpressionPtr lhs)
-      : Expression{type, std::move(lhs)} {
+  explicit constexpr UnaryMinusExpression(ExpressionPtr lhs)
+      : Expression{std::move(lhs)} {
     value = UnaryMinusExpression::Value(args[0]->value, 0.0);
   }
 
   double Value(double lhs, double) const override { return -lhs; }
+
+  ExpressionType Type() const override { return T; }
 
   double GradientValueLhs(double, double, double parentAdjoint) const override {
     return -parentAdjoint;
@@ -625,15 +693,16 @@ struct AbsExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
    *
-   * @param type The expression's type.
    * @param lhs Unary operator's operand.
    */
-  constexpr AbsExpression(ExpressionType type, ExpressionPtr lhs)
-      : Expression{type, std::move(lhs)} {
+  explicit constexpr AbsExpression(ExpressionPtr lhs)
+      : Expression{std::move(lhs)} {
     value = AbsExpression::Value(args[0]->value, 0.0);
   }
 
   double Value(double x, double) const override { return std::abs(x); }
+
+  ExpressionType Type() const override { return ExpressionType::kNonlinear; }
 
   double GradientValueLhs(double x, double,
                           double parentAdjoint) const override {
@@ -674,26 +743,27 @@ inline ExpressionPtr abs(const ExpressionPtr& x) {
   }
 
   // Evaluate constant
-  if (x->type == kConstant) {
+  if (x->Type() == kConstant) {
     return MakeExpressionPtr<ConstExpression>(std::abs(x->value));
   }
 
-  return MakeExpressionPtr<AbsExpression>(kNonlinear, x);
+  return MakeExpressionPtr<AbsExpression>(x);
 }
 
 struct AcosExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
    *
-   * @param type The expression's type.
    * @param lhs Unary operator's operand.
    */
-  constexpr AcosExpression(ExpressionType type, ExpressionPtr lhs)
-      : Expression{type, std::move(lhs)} {
+  explicit constexpr AcosExpression(ExpressionPtr lhs)
+      : Expression{std::move(lhs)} {
     value = AcosExpression::Value(args[0]->value, 0.0);
   }
 
   double Value(double x, double) const override { return std::acos(x); }
+
+  ExpressionType Type() const override { return ExpressionType::kNonlinear; }
 
   double GradientValueLhs(double x, double,
                           double parentAdjoint) const override {
@@ -722,26 +792,27 @@ inline ExpressionPtr acos(const ExpressionPtr& x) {
   }
 
   // Evaluate constant
-  if (x->type == kConstant) {
+  if (x->Type() == kConstant) {
     return MakeExpressionPtr<ConstExpression>(std::acos(x->value));
   }
 
-  return MakeExpressionPtr<AcosExpression>(kNonlinear, x);
+  return MakeExpressionPtr<AcosExpression>(x);
 }
 
 struct AsinExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
    *
-   * @param type The expression's type.
    * @param lhs Unary operator's operand.
    */
-  constexpr AsinExpression(ExpressionType type, ExpressionPtr lhs)
-      : Expression{type, std::move(lhs)} {
+  explicit constexpr AsinExpression(ExpressionPtr lhs)
+      : Expression{std::move(lhs)} {
     value = AsinExpression::Value(args[0]->value, 0.0);
   }
 
   double Value(double x, double) const override { return std::asin(x); }
+
+  ExpressionType Type() const override { return ExpressionType::kNonlinear; }
 
   double GradientValueLhs(double x, double,
                           double parentAdjoint) const override {
@@ -770,26 +841,27 @@ inline ExpressionPtr asin(const ExpressionPtr& x) {
   }
 
   // Evaluate constant
-  if (x->type == kConstant) {
+  if (x->Type() == kConstant) {
     return MakeExpressionPtr<ConstExpression>(std::asin(x->value));
   }
 
-  return MakeExpressionPtr<AsinExpression>(kNonlinear, x);
+  return MakeExpressionPtr<AsinExpression>(x);
 }
 
 struct AtanExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
    *
-   * @param type The expression's type.
    * @param lhs Unary operator's operand.
    */
-  constexpr AtanExpression(ExpressionType type, ExpressionPtr lhs)
-      : Expression{type, std::move(lhs)} {
+  explicit constexpr AtanExpression(ExpressionPtr lhs)
+      : Expression{std::move(lhs)} {
     value = AtanExpression::Value(args[0]->value, 0.0);
   }
 
   double Value(double x, double) const override { return std::atan(x); }
+
+  ExpressionType Type() const override { return ExpressionType::kNonlinear; }
 
   double GradientValueLhs(double x, double,
                           double parentAdjoint) const override {
@@ -817,28 +889,28 @@ inline ExpressionPtr atan(const ExpressionPtr& x) {
   }
 
   // Evaluate constant
-  if (x->type == kConstant) {
+  if (x->Type() == kConstant) {
     return MakeExpressionPtr<ConstExpression>(std::atan(x->value));
   }
 
-  return MakeExpressionPtr<AtanExpression>(kNonlinear, x);
+  return MakeExpressionPtr<AtanExpression>(x);
 }
 
 struct Atan2Expression final : Expression {
   /**
    * Constructs a binary expression (an operator with two arguments).
    *
-   * @param type The expression's type.
    * @param lhs Binary operator's left operand.
    * @param rhs Binary operator's right operand.
    */
-  constexpr Atan2Expression(ExpressionType type, ExpressionPtr lhs,
-                            ExpressionPtr rhs)
-      : Expression{type, std::move(lhs), std::move(rhs)} {
+  constexpr Atan2Expression(ExpressionPtr lhs, ExpressionPtr rhs)
+      : Expression{std::move(lhs), std::move(rhs)} {
     value = Atan2Expression::Value(args[0]->value, args[1]->value);
   }
 
   double Value(double y, double x) const override { return std::atan2(y, x); }
+
+  ExpressionType Type() const override { return ExpressionType::kNonlinear; }
 
   double GradientValueLhs(double y, double x,
                           double parentAdjoint) const override {
@@ -879,26 +951,27 @@ inline ExpressionPtr atan2(const ExpressionPtr& y, const ExpressionPtr& x) {
   }
 
   // Evaluate constant
-  if (y->type == kConstant && x->type == kConstant) {
+  if (y->Type() == kConstant && x->Type() == kConstant) {
     return MakeExpressionPtr<ConstExpression>(std::atan2(y->value, x->value));
   }
 
-  return MakeExpressionPtr<Atan2Expression>(kNonlinear, y, x);
+  return MakeExpressionPtr<Atan2Expression>(y, x);
 }
 
 struct CosExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
    *
-   * @param type The expression's type.
    * @param lhs Unary operator's operand.
    */
-  constexpr CosExpression(ExpressionType type, ExpressionPtr lhs)
-      : Expression{type, std::move(lhs)} {
+  explicit constexpr CosExpression(ExpressionPtr lhs)
+      : Expression{std::move(lhs)} {
     value = CosExpression::Value(args[0]->value, 0.0);
   }
 
   double Value(double x, double) const override { return std::cos(x); }
+
+  ExpressionType Type() const override { return ExpressionType::kNonlinear; }
 
   double GradientValueLhs(double x, double,
                           double parentAdjoint) const override {
@@ -925,26 +998,27 @@ inline ExpressionPtr cos(const ExpressionPtr& x) {
   }
 
   // Evaluate constant
-  if (x->type == kConstant) {
+  if (x->Type() == kConstant) {
     return MakeExpressionPtr<ConstExpression>(std::cos(x->value));
   }
 
-  return MakeExpressionPtr<CosExpression>(kNonlinear, x);
+  return MakeExpressionPtr<CosExpression>(x);
 }
 
 struct CoshExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
    *
-   * @param type The expression's type.
    * @param lhs Unary operator's operand.
    */
-  constexpr CoshExpression(ExpressionType type, ExpressionPtr lhs)
-      : Expression{type, std::move(lhs)} {
+  explicit constexpr CoshExpression(ExpressionPtr lhs)
+      : Expression{std::move(lhs)} {
     value = CoshExpression::Value(args[0]->value, 0.0);
   }
 
   double Value(double x, double) const override { return std::cosh(x); }
+
+  ExpressionType Type() const override { return ExpressionType::kNonlinear; }
 
   double GradientValueLhs(double x, double,
                           double parentAdjoint) const override {
@@ -971,26 +1045,27 @@ inline ExpressionPtr cosh(const ExpressionPtr& x) {
   }
 
   // Evaluate constant
-  if (x->type == kConstant) {
+  if (x->Type() == kConstant) {
     return MakeExpressionPtr<ConstExpression>(std::cosh(x->value));
   }
 
-  return MakeExpressionPtr<CoshExpression>(kNonlinear, x);
+  return MakeExpressionPtr<CoshExpression>(x);
 }
 
 struct ErfExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
    *
-   * @param type The expression's type.
    * @param lhs Unary operator's operand.
    */
-  constexpr ErfExpression(ExpressionType type, ExpressionPtr lhs)
-      : Expression{type, std::move(lhs)} {
+  explicit constexpr ErfExpression(ExpressionPtr lhs)
+      : Expression{std::move(lhs)} {
     value = ErfExpression::Value(args[0]->value, 0.0);
   }
 
   double Value(double x, double) const override { return std::erf(x); }
+
+  ExpressionType Type() const override { return ExpressionType::kNonlinear; }
 
   double GradientValueLhs(double x, double,
                           double parentAdjoint) const override {
@@ -1020,26 +1095,27 @@ inline ExpressionPtr erf(const ExpressionPtr& x) {
   }
 
   // Evaluate constant
-  if (x->type == kConstant) {
+  if (x->Type() == kConstant) {
     return MakeExpressionPtr<ConstExpression>(std::erf(x->value));
   }
 
-  return MakeExpressionPtr<ErfExpression>(kNonlinear, x);
+  return MakeExpressionPtr<ErfExpression>(x);
 }
 
 struct ExpExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
    *
-   * @param type The expression's type.
    * @param lhs Unary operator's operand.
    */
-  constexpr ExpExpression(ExpressionType type, ExpressionPtr lhs)
-      : Expression{type, std::move(lhs)} {
+  explicit constexpr ExpExpression(ExpressionPtr lhs)
+      : Expression{std::move(lhs)} {
     value = ExpExpression::Value(args[0]->value, 0.0);
   }
 
   double Value(double x, double) const override { return std::exp(x); }
+
+  ExpressionType Type() const override { return ExpressionType::kNonlinear; }
 
   double GradientValueLhs(double x, double,
                           double parentAdjoint) const override {
@@ -1066,11 +1142,11 @@ inline ExpressionPtr exp(const ExpressionPtr& x) {
   }
 
   // Evaluate constant
-  if (x->type == kConstant) {
+  if (x->Type() == kConstant) {
     return MakeExpressionPtr<ConstExpression>(std::exp(x->value));
   }
 
-  return MakeExpressionPtr<ExpExpression>(kNonlinear, x);
+  return MakeExpressionPtr<ExpExpression>(x);
 }
 
 inline ExpressionPtr hypot(const ExpressionPtr& x, const ExpressionPtr& y);
@@ -1079,17 +1155,17 @@ struct HypotExpression final : Expression {
   /**
    * Constructs a binary expression (an operator with two arguments).
    *
-   * @param type The expression's type.
    * @param lhs Binary operator's left operand.
    * @param rhs Binary operator's right operand.
    */
-  constexpr HypotExpression(ExpressionType type, ExpressionPtr lhs,
-                            ExpressionPtr rhs)
-      : Expression{type, std::move(lhs), std::move(rhs)} {
+  constexpr HypotExpression(ExpressionPtr lhs, ExpressionPtr rhs)
+      : Expression{std::move(lhs), std::move(rhs)} {
     value = HypotExpression::Value(args[0]->value, args[1]->value);
   }
 
   double Value(double x, double y) const override { return std::hypot(x, y); }
+
+  ExpressionType Type() const override { return ExpressionType::kNonlinear; }
 
   double GradientValueLhs(double x, double y,
                           double parentAdjoint) const override {
@@ -1129,26 +1205,27 @@ inline ExpressionPtr hypot(const ExpressionPtr& x, const ExpressionPtr& y) {
   }
 
   // Evaluate constant
-  if (x->type == kConstant && y->type == kConstant) {
+  if (x->Type() == kConstant && y->Type() == kConstant) {
     return MakeExpressionPtr<ConstExpression>(std::hypot(x->value, y->value));
   }
 
-  return MakeExpressionPtr<HypotExpression>(kNonlinear, x, y);
+  return MakeExpressionPtr<HypotExpression>(x, y);
 }
 
 struct LogExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
    *
-   * @param type The expression's type.
    * @param lhs Unary operator's operand.
    */
-  constexpr LogExpression(ExpressionType type, ExpressionPtr lhs)
-      : Expression{type, std::move(lhs)} {
+  explicit constexpr LogExpression(ExpressionPtr lhs)
+      : Expression{std::move(lhs)} {
     value = LogExpression::Value(args[0]->value, 0.0);
   }
 
   double Value(double x, double) const override { return std::log(x); }
+
+  ExpressionType Type() const override { return ExpressionType::kNonlinear; }
 
   double GradientValueLhs(double x, double,
                           double parentAdjoint) const override {
@@ -1176,26 +1253,27 @@ inline ExpressionPtr log(const ExpressionPtr& x) {
   }
 
   // Evaluate constant
-  if (x->type == kConstant) {
+  if (x->Type() == kConstant) {
     return MakeExpressionPtr<ConstExpression>(std::log(x->value));
   }
 
-  return MakeExpressionPtr<LogExpression>(kNonlinear, x);
+  return MakeExpressionPtr<LogExpression>(x);
 }
 
 struct Log10Expression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
    *
-   * @param type The expression's type.
    * @param lhs Unary operator's operand.
    */
-  constexpr Log10Expression(ExpressionType type, ExpressionPtr lhs)
-      : Expression{type, std::move(lhs)} {
+  explicit constexpr Log10Expression(ExpressionPtr lhs)
+      : Expression{std::move(lhs)} {
     value = Log10Expression::Value(args[0]->value, 0.0);
   }
 
   double Value(double x, double) const override { return std::log10(x); }
+
+  ExpressionType Type() const override { return ExpressionType::kNonlinear; }
 
   double GradientValueLhs(double x, double,
                           double parentAdjoint) const override {
@@ -1224,32 +1302,33 @@ inline ExpressionPtr log10(const ExpressionPtr& x) {
   }
 
   // Evaluate constant
-  if (x->type == kConstant) {
+  if (x->Type() == kConstant) {
     return MakeExpressionPtr<ConstExpression>(std::log10(x->value));
   }
 
-  return MakeExpressionPtr<Log10Expression>(kNonlinear, x);
+  return MakeExpressionPtr<Log10Expression>(x);
 }
 
 inline ExpressionPtr pow(const ExpressionPtr& base, const ExpressionPtr& power);
 
+template <ExpressionType T>
 struct PowExpression final : Expression {
   /**
    * Constructs a binary expression (an operator with two arguments).
    *
-   * @param type The expression's type.
    * @param lhs Binary operator's left operand.
    * @param rhs Binary operator's right operand.
    */
-  constexpr PowExpression(ExpressionType type, ExpressionPtr lhs,
-                          ExpressionPtr rhs)
-      : Expression{type, std::move(lhs), std::move(rhs)} {
+  constexpr PowExpression(ExpressionPtr lhs, ExpressionPtr rhs)
+      : Expression{std::move(lhs), std::move(rhs)} {
     value = PowExpression::Value(args[0]->value, args[1]->value);
   }
 
   double Value(double base, double power) const override {
     return std::pow(base, power);
   }
+
+  ExpressionType Type() const override { return T; }
 
   double GradientValueLhs(double base, double power,
                           double parentAdjoint) const override {
@@ -1315,25 +1394,26 @@ inline ExpressionPtr pow(const ExpressionPtr& base,
   }
 
   // Evaluate constant
-  if (base->type == kConstant && power->type == kConstant) {
+  if (base->Type() == kConstant && power->Type() == kConstant) {
     return MakeExpressionPtr<ConstExpression>(
         std::pow(base->value, power->value));
   }
 
-  return MakeExpressionPtr<PowExpression>(
-      base->type == kLinear && power->IsConstant(2.0) ? kQuadratic : kNonlinear,
-      base, power);
+  if (base->Type() == kLinear && power->IsConstant(2.0)) {
+    return MakeExpressionPtr<PowExpression<kQuadratic>>(base, power);
+  } else {
+    return MakeExpressionPtr<PowExpression<kNonlinear>>(base, power);
+  }
 }
 
 struct SignExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
    *
-   * @param type The expression's type.
    * @param lhs Unary operator's operand.
    */
-  constexpr SignExpression(ExpressionType type, ExpressionPtr lhs)
-      : Expression{type, std::move(lhs)} {
+  explicit constexpr SignExpression(ExpressionPtr lhs)
+      : Expression{std::move(lhs)} {
     value = SignExpression::Value(args[0]->value, 0.0);
   }
 
@@ -1346,6 +1426,8 @@ struct SignExpression final : Expression {
       return 1.0;
     }
   }
+
+  ExpressionType Type() const override { return ExpressionType::kNonlinear; }
 
   double GradientValueLhs(double, double, double) const override { return 0.0; }
 
@@ -1365,7 +1447,7 @@ inline ExpressionPtr sign(const ExpressionPtr& x) {
   using enum ExpressionType;
 
   // Evaluate constant
-  if (x->type == kConstant) {
+  if (x->Type() == kConstant) {
     if (x->value < 0.0) {
       return MakeExpressionPtr<ConstExpression>(-1.0);
     } else if (x->value == 0.0) {
@@ -1376,22 +1458,23 @@ inline ExpressionPtr sign(const ExpressionPtr& x) {
     }
   }
 
-  return MakeExpressionPtr<SignExpression>(kNonlinear, x);
+  return MakeExpressionPtr<SignExpression>(x);
 }
 
 struct SinExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
    *
-   * @param type The expression's type.
    * @param lhs Unary operator's operand.
    */
-  constexpr SinExpression(ExpressionType type, ExpressionPtr lhs)
-      : Expression{type, std::move(lhs)} {
+  explicit constexpr SinExpression(ExpressionPtr lhs)
+      : Expression{std::move(lhs)} {
     value = SinExpression::Value(args[0]->value, 0.0);
   }
 
   double Value(double x, double) const override { return std::sin(x); }
+
+  ExpressionType Type() const override { return ExpressionType::kNonlinear; }
 
   double GradientValueLhs(double x, double,
                           double parentAdjoint) const override {
@@ -1419,26 +1502,27 @@ inline ExpressionPtr sin(const ExpressionPtr& x) {
   }
 
   // Evaluate constant
-  if (x->type == kConstant) {
+  if (x->Type() == kConstant) {
     return MakeExpressionPtr<ConstExpression>(std::sin(x->value));
   }
 
-  return MakeExpressionPtr<SinExpression>(kNonlinear, x);
+  return MakeExpressionPtr<SinExpression>(x);
 }
 
 struct SinhExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
    *
-   * @param type The expression's type.
    * @param lhs Unary operator's operand.
    */
-  constexpr SinhExpression(ExpressionType type, ExpressionPtr lhs)
-      : Expression{type, std::move(lhs)} {
+  explicit constexpr SinhExpression(ExpressionPtr lhs)
+      : Expression{std::move(lhs)} {
     value = SinhExpression::Value(args[0]->value, 0.0);
   }
 
   double Value(double x, double) const override { return std::sinh(x); }
+
+  ExpressionType Type() const override { return ExpressionType::kNonlinear; }
 
   double GradientValueLhs(double x, double,
                           double parentAdjoint) const override {
@@ -1466,26 +1550,27 @@ inline ExpressionPtr sinh(const ExpressionPtr& x) {
   }
 
   // Evaluate constant
-  if (x->type == kConstant) {
+  if (x->Type() == kConstant) {
     return MakeExpressionPtr<ConstExpression>(std::sinh(x->value));
   }
 
-  return MakeExpressionPtr<SinhExpression>(kNonlinear, x);
+  return MakeExpressionPtr<SinhExpression>(x);
 }
 
 struct SqrtExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
    *
-   * @param type The expression's type.
    * @param lhs Unary operator's operand.
    */
-  constexpr SqrtExpression(ExpressionType type, ExpressionPtr lhs)
-      : Expression{type, std::move(lhs)} {
+  explicit constexpr SqrtExpression(ExpressionPtr lhs)
+      : Expression{std::move(lhs)} {
     value = SqrtExpression::Value(args[0]->value, 0.0);
   }
 
   double Value(double x, double) const override { return std::sqrt(x); }
+
+  ExpressionType Type() const override { return ExpressionType::kNonlinear; }
 
   double GradientValueLhs(double x, double,
                           double parentAdjoint) const override {
@@ -1508,7 +1593,7 @@ inline ExpressionPtr sqrt(const ExpressionPtr& x) {
   using enum ExpressionType;
 
   // Evaluate constant
-  if (x->type == kConstant) {
+  if (x->Type() == kConstant) {
     if (x->value == 0.0) {
       // Return zero
       return x;
@@ -1519,22 +1604,23 @@ inline ExpressionPtr sqrt(const ExpressionPtr& x) {
     }
   }
 
-  return MakeExpressionPtr<SqrtExpression>(kNonlinear, x);
+  return MakeExpressionPtr<SqrtExpression>(x);
 }
 
 struct TanExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
    *
-   * @param type The expression's type.
    * @param lhs Unary operator's operand.
    */
-  constexpr TanExpression(ExpressionType type, ExpressionPtr lhs)
-      : Expression{type, std::move(lhs)} {
+  explicit constexpr TanExpression(ExpressionPtr lhs)
+      : Expression{std::move(lhs)} {
     value = TanExpression::Value(args[0]->value, 0.0);
   }
 
   double Value(double x, double) const override { return std::tan(x); }
+
+  ExpressionType Type() const override { return ExpressionType::kNonlinear; }
 
   double GradientValueLhs(double x, double,
                           double parentAdjoint) const override {
@@ -1563,26 +1649,27 @@ inline ExpressionPtr tan(const ExpressionPtr& x) {
   }
 
   // Evaluate constant
-  if (x->type == kConstant) {
+  if (x->Type() == kConstant) {
     return MakeExpressionPtr<ConstExpression>(std::tan(x->value));
   }
 
-  return MakeExpressionPtr<TanExpression>(kNonlinear, x);
+  return MakeExpressionPtr<TanExpression>(x);
 }
 
 struct TanhExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
    *
-   * @param type The expression's type.
    * @param lhs Unary operator's operand.
    */
-  constexpr TanhExpression(ExpressionType type, ExpressionPtr lhs)
-      : Expression{type, std::move(lhs)} {
+  explicit constexpr TanhExpression(ExpressionPtr lhs)
+      : Expression{std::move(lhs)} {
     value = TanhExpression::Value(args[0]->value, 0.0);
   }
 
   double Value(double x, double) const override { return std::tanh(x); }
+
+  ExpressionType Type() const override { return ExpressionType::kNonlinear; }
 
   double GradientValueLhs(double x, double,
                           double parentAdjoint) const override {
@@ -1611,11 +1698,11 @@ inline ExpressionPtr tanh(const ExpressionPtr& x) {
   }
 
   // Evaluate constant
-  if (x->type == kConstant) {
+  if (x->Type() == kConstant) {
     return MakeExpressionPtr<ConstExpression>(std::tanh(x->value));
   }
 
-  return MakeExpressionPtr<TanhExpression>(kNonlinear, x);
+  return MakeExpressionPtr<TanhExpression>(x);
 }
 
 }  // namespace sleipnir::detail
