@@ -69,7 +69,7 @@ void PrintIterationDiagnostics(int iterations, bool feasibilityRestoration,
       }
       constexpr const char* strs[] = {"⁰", "¹", "²", "³", "⁴",
                                       "⁵", "⁶", "⁷", "⁸", "⁹"};
-      for (const auto& digit : std::ranges::views::reverse(digits)) {
+      for (const auto& digit : digits | std::views::reverse) {
         reg += strs[digit];
       }
 
