@@ -363,7 +363,7 @@ struct Expression {
   }
 };
 
-struct BinaryMinusExpression : Expression {
+struct BinaryMinusExpression final : Expression {
   /**
    * Constructs a binary expression (an operator with two arguments).
    *
@@ -398,7 +398,7 @@ struct BinaryMinusExpression : Expression {
   }
 };
 
-struct BinaryPlusExpression : Expression {
+struct BinaryPlusExpression final : Expression {
   /**
    * Constructs a binary expression (an operator with two arguments).
    *
@@ -433,7 +433,7 @@ struct BinaryPlusExpression : Expression {
   }
 };
 
-struct ConstExpression : Expression {
+struct ConstExpression final : Expression {
   /**
    * Constructs a constant expression with a value of zero.
    */
@@ -467,7 +467,7 @@ struct ConstExpression : Expression {
   }
 };
 
-struct DivExpression : Expression {
+struct DivExpression final : Expression {
   /**
    * Constructs a binary expression (an operator with two arguments).
    *
@@ -504,7 +504,7 @@ struct DivExpression : Expression {
   }
 };
 
-struct MultExpression : Expression {
+struct MultExpression final : Expression {
   /**
    * Constructs a binary expression (an operator with two arguments).
    *
@@ -543,7 +543,7 @@ struct MultExpression : Expression {
   }
 };
 
-struct UnaryMinusExpression : Expression {
+struct UnaryMinusExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
    *
@@ -621,7 +621,7 @@ inline constexpr void IntrusiveSharedPtrDecRefCount(Expression* expr) {
   }
 }
 
-struct AbsExpression : Expression {
+struct AbsExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
    *
@@ -681,7 +681,7 @@ inline ExpressionPtr abs(const ExpressionPtr& x) {
   return MakeExpressionPtr<AbsExpression>(kNonlinear, x);
 }
 
-struct AcosExpression : Expression {
+struct AcosExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
    *
@@ -729,7 +729,7 @@ inline ExpressionPtr acos(const ExpressionPtr& x) {
   return MakeExpressionPtr<AcosExpression>(kNonlinear, x);
 }
 
-struct AsinExpression : Expression {
+struct AsinExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
    *
@@ -777,7 +777,7 @@ inline ExpressionPtr asin(const ExpressionPtr& x) {
   return MakeExpressionPtr<AsinExpression>(kNonlinear, x);
 }
 
-struct AtanExpression : Expression {
+struct AtanExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
    *
@@ -824,7 +824,7 @@ inline ExpressionPtr atan(const ExpressionPtr& x) {
   return MakeExpressionPtr<AtanExpression>(kNonlinear, x);
 }
 
-struct Atan2Expression : Expression {
+struct Atan2Expression final : Expression {
   /**
    * Constructs a binary expression (an operator with two arguments).
    *
@@ -886,7 +886,7 @@ inline ExpressionPtr atan2(const ExpressionPtr& y, const ExpressionPtr& x) {
   return MakeExpressionPtr<Atan2Expression>(kNonlinear, y, x);
 }
 
-struct CosExpression : Expression {
+struct CosExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
    *
@@ -932,7 +932,7 @@ inline ExpressionPtr cos(const ExpressionPtr& x) {
   return MakeExpressionPtr<CosExpression>(kNonlinear, x);
 }
 
-struct CoshExpression : Expression {
+struct CoshExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
    *
@@ -978,7 +978,7 @@ inline ExpressionPtr cosh(const ExpressionPtr& x) {
   return MakeExpressionPtr<CoshExpression>(kNonlinear, x);
 }
 
-struct ErfExpression : Expression {
+struct ErfExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
    *
@@ -1027,7 +1027,7 @@ inline ExpressionPtr erf(const ExpressionPtr& x) {
   return MakeExpressionPtr<ErfExpression>(kNonlinear, x);
 }
 
-struct ExpExpression : Expression {
+struct ExpExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
    *
@@ -1075,7 +1075,7 @@ inline ExpressionPtr exp(const ExpressionPtr& x) {
 
 inline ExpressionPtr hypot(const ExpressionPtr& x, const ExpressionPtr& y);
 
-struct HypotExpression : Expression {
+struct HypotExpression final : Expression {
   /**
    * Constructs a binary expression (an operator with two arguments).
    *
@@ -1136,7 +1136,7 @@ inline ExpressionPtr hypot(const ExpressionPtr& x, const ExpressionPtr& y) {
   return MakeExpressionPtr<HypotExpression>(kNonlinear, x, y);
 }
 
-struct LogExpression : Expression {
+struct LogExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
    *
@@ -1183,7 +1183,7 @@ inline ExpressionPtr log(const ExpressionPtr& x) {
   return MakeExpressionPtr<LogExpression>(kNonlinear, x);
 }
 
-struct Log10Expression : Expression {
+struct Log10Expression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
    *
@@ -1233,7 +1233,7 @@ inline ExpressionPtr log10(const ExpressionPtr& x) {
 
 inline ExpressionPtr pow(const ExpressionPtr& base, const ExpressionPtr& power);
 
-struct PowExpression : Expression {
+struct PowExpression final : Expression {
   /**
    * Constructs a binary expression (an operator with two arguments).
    *
@@ -1325,7 +1325,7 @@ inline ExpressionPtr pow(const ExpressionPtr& base,
       base, power);
 }
 
-struct SignExpression : Expression {
+struct SignExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
    *
@@ -1379,7 +1379,7 @@ inline ExpressionPtr sign(const ExpressionPtr& x) {
   return MakeExpressionPtr<SignExpression>(kNonlinear, x);
 }
 
-struct SinExpression : Expression {
+struct SinExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
    *
@@ -1426,7 +1426,7 @@ inline ExpressionPtr sin(const ExpressionPtr& x) {
   return MakeExpressionPtr<SinExpression>(kNonlinear, x);
 }
 
-struct SinhExpression : Expression {
+struct SinhExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
    *
@@ -1473,7 +1473,7 @@ inline ExpressionPtr sinh(const ExpressionPtr& x) {
   return MakeExpressionPtr<SinhExpression>(kNonlinear, x);
 }
 
-struct SqrtExpression : Expression {
+struct SqrtExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
    *
@@ -1522,7 +1522,7 @@ inline ExpressionPtr sqrt(const ExpressionPtr& x) {
   return MakeExpressionPtr<SqrtExpression>(kNonlinear, x);
 }
 
-struct TanExpression : Expression {
+struct TanExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
    *
@@ -1570,7 +1570,7 @@ inline ExpressionPtr tan(const ExpressionPtr& x) {
   return MakeExpressionPtr<TanExpression>(kNonlinear, x);
 }
 
-struct TanhExpression : Expression {
+struct TanhExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
    *
