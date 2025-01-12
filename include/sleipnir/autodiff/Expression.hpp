@@ -432,7 +432,7 @@ struct BinaryMinusExpression final : Expression {
    */
   constexpr BinaryMinusExpression(ExpressionPtr lhs, ExpressionPtr rhs)
       : Expression{std::move(lhs), std::move(rhs)} {
-    value = BinaryMinusExpression::Value(args[0]->value, args[1]->value);
+    value = args[0]->value - args[1]->value;
   }
 
   double Value(double lhs, double rhs) const override { return lhs - rhs; }
@@ -468,7 +468,7 @@ struct BinaryPlusExpression final : Expression {
    */
   constexpr BinaryPlusExpression(ExpressionPtr lhs, ExpressionPtr rhs)
       : Expression{std::move(lhs), std::move(rhs)} {
-    value = BinaryPlusExpression::Value(args[0]->value, args[1]->value);
+    value = args[0]->value + args[1]->value;
   }
 
   double Value(double lhs, double rhs) const override { return lhs + rhs; }
@@ -541,7 +541,7 @@ struct DivExpression final : Expression {
    */
   constexpr DivExpression(ExpressionPtr lhs, ExpressionPtr rhs)
       : Expression{std::move(lhs), std::move(rhs)} {
-    value = DivExpression::Value(args[0]->value, args[1]->value);
+    value = args[0]->value / args[1]->value;
   }
 
   double Value(double lhs, double rhs) const override { return lhs / rhs; }
@@ -579,7 +579,7 @@ struct MultExpression final : Expression {
    */
   constexpr MultExpression(ExpressionPtr lhs, ExpressionPtr rhs)
       : Expression{std::move(lhs), std::move(rhs)} {
-    value = MultExpression::Value(args[0]->value, args[1]->value);
+    value = args[0]->value * args[1]->value;
   }
 
   double Value(double lhs, double rhs) const override { return lhs * rhs; }
@@ -618,7 +618,7 @@ struct UnaryMinusExpression final : Expression {
    */
   explicit constexpr UnaryMinusExpression(ExpressionPtr lhs)
       : Expression{std::move(lhs)} {
-    value = UnaryMinusExpression::Value(args[0]->value, 0.0);
+    value = -args[0]->value;
   }
 
   double Value(double lhs, double) const override { return -lhs; }
@@ -697,7 +697,7 @@ struct AbsExpression final : Expression {
    */
   explicit constexpr AbsExpression(ExpressionPtr lhs)
       : Expression{std::move(lhs)} {
-    value = AbsExpression::Value(args[0]->value, 0.0);
+    value = args[0]->value < 0 ? -args[0]->value : args[0]->value;
   }
 
   double Value(double x, double) const override { return std::abs(x); }
@@ -756,9 +756,8 @@ struct AcosExpression final : Expression {
    *
    * @param lhs Unary operator's operand.
    */
-  explicit constexpr AcosExpression(ExpressionPtr lhs)
-      : Expression{std::move(lhs)} {
-    value = AcosExpression::Value(args[0]->value, 0.0);
+  explicit AcosExpression(ExpressionPtr lhs) : Expression{std::move(lhs)} {
+    value = std::acos(args[0]->value);
   }
 
   double Value(double x, double) const override { return std::acos(x); }
@@ -805,9 +804,8 @@ struct AsinExpression final : Expression {
    *
    * @param lhs Unary operator's operand.
    */
-  explicit constexpr AsinExpression(ExpressionPtr lhs)
-      : Expression{std::move(lhs)} {
-    value = AsinExpression::Value(args[0]->value, 0.0);
+  explicit AsinExpression(ExpressionPtr lhs) : Expression{std::move(lhs)} {
+    value = std::asin(args[0]->value);
   }
 
   double Value(double x, double) const override { return std::asin(x); }
@@ -854,9 +852,8 @@ struct AtanExpression final : Expression {
    *
    * @param lhs Unary operator's operand.
    */
-  explicit constexpr AtanExpression(ExpressionPtr lhs)
-      : Expression{std::move(lhs)} {
-    value = AtanExpression::Value(args[0]->value, 0.0);
+  explicit AtanExpression(ExpressionPtr lhs) : Expression{std::move(lhs)} {
+    value = std::atan(args[0]->value);
   }
 
   double Value(double x, double) const override { return std::atan(x); }
@@ -903,9 +900,9 @@ struct Atan2Expression final : Expression {
    * @param lhs Binary operator's left operand.
    * @param rhs Binary operator's right operand.
    */
-  constexpr Atan2Expression(ExpressionPtr lhs, ExpressionPtr rhs)
+  Atan2Expression(ExpressionPtr lhs, ExpressionPtr rhs)
       : Expression{std::move(lhs), std::move(rhs)} {
-    value = Atan2Expression::Value(args[0]->value, args[1]->value);
+    value = std::atan2(args[0]->value, args[1]->value);
   }
 
   double Value(double y, double x) const override { return std::atan2(y, x); }
@@ -964,9 +961,8 @@ struct CosExpression final : Expression {
    *
    * @param lhs Unary operator's operand.
    */
-  explicit constexpr CosExpression(ExpressionPtr lhs)
-      : Expression{std::move(lhs)} {
-    value = CosExpression::Value(args[0]->value, 0.0);
+  explicit CosExpression(ExpressionPtr lhs) : Expression{std::move(lhs)} {
+    value = std::cos(args[0]->value);
   }
 
   double Value(double x, double) const override { return std::cos(x); }
@@ -1011,9 +1007,8 @@ struct CoshExpression final : Expression {
    *
    * @param lhs Unary operator's operand.
    */
-  explicit constexpr CoshExpression(ExpressionPtr lhs)
-      : Expression{std::move(lhs)} {
-    value = CoshExpression::Value(args[0]->value, 0.0);
+  explicit CoshExpression(ExpressionPtr lhs) : Expression{std::move(lhs)} {
+    value = std::cosh(args[0]->value);
   }
 
   double Value(double x, double) const override { return std::cosh(x); }
@@ -1058,9 +1053,8 @@ struct ErfExpression final : Expression {
    *
    * @param lhs Unary operator's operand.
    */
-  explicit constexpr ErfExpression(ExpressionPtr lhs)
-      : Expression{std::move(lhs)} {
-    value = ErfExpression::Value(args[0]->value, 0.0);
+  explicit ErfExpression(ExpressionPtr lhs) : Expression{std::move(lhs)} {
+    value = std::erf(args[0]->value);
   }
 
   double Value(double x, double) const override { return std::erf(x); }
@@ -1108,9 +1102,8 @@ struct ExpExpression final : Expression {
    *
    * @param lhs Unary operator's operand.
    */
-  explicit constexpr ExpExpression(ExpressionPtr lhs)
-      : Expression{std::move(lhs)} {
-    value = ExpExpression::Value(args[0]->value, 0.0);
+  explicit ExpExpression(ExpressionPtr lhs) : Expression{std::move(lhs)} {
+    value = std::exp(args[0]->value);
   }
 
   double Value(double x, double) const override { return std::exp(x); }
@@ -1158,9 +1151,9 @@ struct HypotExpression final : Expression {
    * @param lhs Binary operator's left operand.
    * @param rhs Binary operator's right operand.
    */
-  constexpr HypotExpression(ExpressionPtr lhs, ExpressionPtr rhs)
+  HypotExpression(ExpressionPtr lhs, ExpressionPtr rhs)
       : Expression{std::move(lhs), std::move(rhs)} {
-    value = HypotExpression::Value(args[0]->value, args[1]->value);
+    value = std::hypot(args[0]->value, args[1]->value);
   }
 
   double Value(double x, double y) const override { return std::hypot(x, y); }
@@ -1218,9 +1211,8 @@ struct LogExpression final : Expression {
    *
    * @param lhs Unary operator's operand.
    */
-  explicit constexpr LogExpression(ExpressionPtr lhs)
-      : Expression{std::move(lhs)} {
-    value = LogExpression::Value(args[0]->value, 0.0);
+  explicit LogExpression(ExpressionPtr lhs) : Expression{std::move(lhs)} {
+    value = std::log(args[0]->value);
   }
 
   double Value(double x, double) const override { return std::log(x); }
@@ -1266,9 +1258,8 @@ struct Log10Expression final : Expression {
    *
    * @param lhs Unary operator's operand.
    */
-  explicit constexpr Log10Expression(ExpressionPtr lhs)
-      : Expression{std::move(lhs)} {
-    value = Log10Expression::Value(args[0]->value, 0.0);
+  explicit Log10Expression(ExpressionPtr lhs) : Expression{std::move(lhs)} {
+    value = std::log10(args[0]->value);
   }
 
   double Value(double x, double) const override { return std::log10(x); }
@@ -1319,9 +1310,9 @@ struct PowExpression final : Expression {
    * @param lhs Binary operator's left operand.
    * @param rhs Binary operator's right operand.
    */
-  constexpr PowExpression(ExpressionPtr lhs, ExpressionPtr rhs)
+  PowExpression(ExpressionPtr lhs, ExpressionPtr rhs)
       : Expression{std::move(lhs), std::move(rhs)} {
-    value = PowExpression::Value(args[0]->value, args[1]->value);
+    value = std::pow(args[0]->value, args[1]->value);
   }
 
   double Value(double base, double power) const override {
@@ -1414,7 +1405,13 @@ struct SignExpression final : Expression {
    */
   explicit constexpr SignExpression(ExpressionPtr lhs)
       : Expression{std::move(lhs)} {
-    value = SignExpression::Value(args[0]->value, 0.0);
+    if (args[0]->value < 0.0) {
+      value = -1.0;
+    } else if (args[0]->value == 0.0) {
+      value = 0.0;
+    } else {
+      value = 1.0;
+    }
   }
 
   double Value(double x, double) const override {
@@ -1467,9 +1464,8 @@ struct SinExpression final : Expression {
    *
    * @param lhs Unary operator's operand.
    */
-  explicit constexpr SinExpression(ExpressionPtr lhs)
-      : Expression{std::move(lhs)} {
-    value = SinExpression::Value(args[0]->value, 0.0);
+  explicit SinExpression(ExpressionPtr lhs) : Expression{std::move(lhs)} {
+    value = std::sin(args[0]->value);
   }
 
   double Value(double x, double) const override { return std::sin(x); }
@@ -1515,9 +1511,8 @@ struct SinhExpression final : Expression {
    *
    * @param lhs Unary operator's operand.
    */
-  explicit constexpr SinhExpression(ExpressionPtr lhs)
-      : Expression{std::move(lhs)} {
-    value = SinhExpression::Value(args[0]->value, 0.0);
+  explicit SinhExpression(ExpressionPtr lhs) : Expression{std::move(lhs)} {
+    value = std::sinh(args[0]->value);
   }
 
   double Value(double x, double) const override { return std::sinh(x); }
@@ -1563,9 +1558,8 @@ struct SqrtExpression final : Expression {
    *
    * @param lhs Unary operator's operand.
    */
-  explicit constexpr SqrtExpression(ExpressionPtr lhs)
-      : Expression{std::move(lhs)} {
-    value = SqrtExpression::Value(args[0]->value, 0.0);
+  explicit SqrtExpression(ExpressionPtr lhs) : Expression{std::move(lhs)} {
+    value = std::sqrt(args[0]->value);
   }
 
   double Value(double x, double) const override { return std::sqrt(x); }
@@ -1613,9 +1607,8 @@ struct TanExpression final : Expression {
    *
    * @param lhs Unary operator's operand.
    */
-  explicit constexpr TanExpression(ExpressionPtr lhs)
-      : Expression{std::move(lhs)} {
-    value = TanExpression::Value(args[0]->value, 0.0);
+  explicit TanExpression(ExpressionPtr lhs) : Expression{std::move(lhs)} {
+    value = std::tan(args[0]->value);
   }
 
   double Value(double x, double) const override { return std::tan(x); }
@@ -1662,9 +1655,8 @@ struct TanhExpression final : Expression {
    *
    * @param lhs Unary operator's operand.
    */
-  explicit constexpr TanhExpression(ExpressionPtr lhs)
-      : Expression{std::move(lhs)} {
-    value = TanhExpression::Value(args[0]->value, 0.0);
+  explicit TanhExpression(ExpressionPtr lhs) : Expression{std::move(lhs)} {
+    value = std::tanh(args[0]->value);
   }
 
   double Value(double x, double) const override { return std::tanh(x); }
