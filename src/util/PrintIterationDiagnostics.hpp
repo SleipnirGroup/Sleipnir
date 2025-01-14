@@ -2,10 +2,13 @@
 
 #pragma once
 
+#include <stdint.h>
+
 #include <chrono>
 #include <cmath>
 #include <ranges>
 #include <string>
+#include <utility>
 
 #include "sleipnir/util/Print.hpp"
 #include "sleipnir/util/small_vector.hpp"
@@ -14,11 +17,22 @@
 namespace sleipnir {
 
 /**
+ * Iteration mode.
+ */
+enum class IterationMode : uint8_t {
+  /// Normal iteration.
+  kNormal,
+  /// Second-order correction iteration.
+  kSecondOrderCorrection,
+  /// Feasibility restoration iteration.
+  kFeasibilityRestoration
+};
+
+/**
  * Prints diagnostics for the current iteration.
  *
  * @param iterations Number of iterations.
- * @param feasibilityRestoration Whether solver is in feasibility restoration
- *     mode.
+ * @param mode Which mode the iteration was in.
  * @param time The iteration duration.
  * @param error The error.
  * @param cost The cost.
@@ -27,7 +41,7 @@ namespace sleipnir {
  * @param α The step size.
  */
 template <typename Rep, typename Period = std::ratio<1>>
-void PrintIterationDiagnostics(int iterations, bool feasibilityRestoration,
+void PrintIterationDiagnostics(int iterations, IterationMode mode,
                                const std::chrono::duration<Rep, Period>& time,
                                double error, double cost, double infeasibility,
                                double δ, double α) {
@@ -38,9 +52,10 @@ void PrintIterationDiagnostics(int iterations, bool feasibilityRestoration,
     sleipnir::println("{:=^80}", "");
   }
 
+  constexpr const char* kIterationModes[] = {" ", "s", "r"};
   sleipnir::print("{:4}{}  {:9.3f}  {:13e}  {:13e}  {:13e}  ", iterations,
-                  feasibilityRestoration ? "r" : " ", ToMilliseconds(time),
-                  error, cost, infeasibility);
+                  kIterationModes[std::to_underlying(mode)],
+                  ToMilliseconds(time), error, cost, infeasibility);
 
   // Print regularization
   if (δ == 0.0) {

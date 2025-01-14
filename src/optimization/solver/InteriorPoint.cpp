@@ -464,6 +464,11 @@ void InteriorPoint(std::span<Variable> decisionVariables,
         bool stepAcceptable = false;
         for (int soc_iteration = 0; soc_iteration < 5 && !stepAcceptable;
              ++soc_iteration) {
+          std::chrono::steady_clock::time_point socIterStartTime;
+          if (config.diagnostics) {
+            socIterStartTime = std::chrono::steady_clock::now();
+          }
+
           // Rebuild Newton-KKT rhs with updated constraint values.
           //
           // rhs = −[∇f − Aₑᵀy + Aᵢᵀ(S⁻¹(Zcᵢ − μe) − z)]
@@ -510,6 +515,17 @@ void InteriorPoint(std::span<Variable> decisionVariables,
             α = α_soc;
             α_z = α_z_soc;
             stepAcceptable = true;
+          }
+
+          if (config.diagnostics) {
+            const auto socIterEndTime = std::chrono::steady_clock::now();
+
+            double E = ErrorEstimate(g, A_e, trial_c_e, trial_y);
+            PrintIterationDiagnostics(
+                iterations, IterationMode::kSecondOrderCorrection,
+                socIterEndTime - socIterStartTime, E, f.Value(),
+                trial_c_e.lpNorm<1>() + (trial_c_i - trial_s).lpNorm<1>(),
+                solver.HessianRegularization(), 1.0);
           }
         }
 
@@ -786,11 +802,13 @@ void InteriorPoint(std::span<Variable> decisionVariables,
     const auto innerIterEndTime = std::chrono::steady_clock::now();
 
     if (config.diagnostics) {
-      PrintIterationDiagnostics(iterations, feasibilityRestoration,
-                                innerIterEndTime - innerIterStartTime, E_0,
-                                f.Value(),
-                                c_e.lpNorm<1>() + (c_i - s).lpNorm<1>(),
-                                solver.HessianRegularization(), α);
+      PrintIterationDiagnostics(
+          iterations,
+          feasibilityRestoration ? IterationMode::kFeasibilityRestoration
+                                 : IterationMode::kNormal,
+          innerIterEndTime - innerIterStartTime, E_0, f.Value(),
+          c_e.lpNorm<1>() + (c_i - s).lpNorm<1>(),
+          solver.HessianRegularization(), α);
     }
 
     ++iterations;

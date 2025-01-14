@@ -318,6 +318,11 @@ void SQP(std::span<Variable> decisionVariables,
         bool stepAcceptable = false;
         for (int soc_iteration = 0; soc_iteration < 5 && !stepAcceptable;
              ++soc_iteration) {
+          std::chrono::steady_clock::time_point socIterStartTime;
+          if (config.diagnostics) {
+            socIterStartTime = std::chrono::steady_clock::now();
+          }
+
           // Rebuild Newton-KKT rhs with updated constraint values.
           //
           // rhs = −[∇f − Aₑᵀy]
@@ -347,6 +352,16 @@ void SQP(std::span<Variable> decisionVariables,
             p_y = p_y_soc;
             α = α_soc;
             stepAcceptable = true;
+          }
+
+          if (config.diagnostics) {
+            const auto socIterEndTime = std::chrono::steady_clock::now();
+
+            double E = ErrorEstimate(g, A_e, trial_c_e, trial_y);
+            PrintIterationDiagnostics(
+                iterations, IterationMode::kSecondOrderCorrection,
+                socIterEndTime - socIterStartTime, E, f.Value(),
+                trial_c_e.lpNorm<1>(), solver.HessianRegularization(), 1.0);
           }
         }
 
@@ -519,9 +534,10 @@ void SQP(std::span<Variable> decisionVariables,
     const auto innerIterEndTime = std::chrono::steady_clock::now();
 
     if (config.diagnostics) {
-      PrintIterationDiagnostics(
-          iterations, false, innerIterEndTime - innerIterStartTime, E_0,
-          f.Value(), c_e.lpNorm<1>(), solver.HessianRegularization(), α);
+      PrintIterationDiagnostics(iterations, IterationMode::kNormal,
+                                innerIterEndTime - innerIterStartTime, E_0,
+                                f.Value(), c_e.lpNorm<1>(),
+                                solver.HessianRegularization(), α);
     }
 
     ++iterations;

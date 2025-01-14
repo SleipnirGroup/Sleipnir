@@ -248,9 +248,10 @@ void Newton(std::span<Variable> decisionVariables, Variable& f,
     const auto innerIterEndTime = std::chrono::steady_clock::now();
 
     if (config.diagnostics) {
-      PrintIterationDiagnostics(
-          iterations, false, innerIterEndTime - innerIterStartTime, E_0,
-          f.Value(), 0.0, solver.HessianRegularization(), α);
+      PrintIterationDiagnostics(iterations, IterationMode::kNormal,
+                                innerIterEndTime - innerIterStartTime, E_0,
+                                f.Value(), 0.0, solver.HessianRegularization(),
+                                α);
     }
 
     ++iterations;
