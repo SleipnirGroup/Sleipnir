@@ -35,8 +35,9 @@ class SLEIPNIR_DLLEXPORT Jacobian {
       : m_variables{std::move(variables)}, m_wrt{std::move(wrt)} {
     m_profiler.StartSetup();
 
-    for (int row = 0; row < m_wrt.Rows(); ++row) {
-      m_wrt(row).expr->row = row;
+    // Initialize column each expression's adjoint occupies in the Jacobian
+    for (size_t col = 0; col < m_wrt.size(); ++col) {
+      m_wrt(col).expr->col = col;
     }
 
     for (auto& variable : m_variables) {
@@ -48,9 +49,7 @@ class SLEIPNIR_DLLEXPORT Jacobian {
         // If the row is linear, compute its gradient once here and cache its
         // triplets. Constant rows are ignored because their gradients have no
         // nonzero triplets.
-        m_graphs[row].AppendAdjointTriplets([&](int col, double adjoint) {
-          m_cachedTriplets.emplace_back(row, col, adjoint);
-        });
+        m_graphs[row].AppendAdjointTriplets(m_cachedTriplets, row);
       } else if (m_variables(row).Type() > ExpressionType::kLinear) {
         // If the row is quadratic or nonlinear, add it to the list of nonlinear
         // rows to be recomputed in Value().
@@ -58,8 +57,9 @@ class SLEIPNIR_DLLEXPORT Jacobian {
       }
     }
 
-    for (int row = 0; row < m_wrt.Rows(); ++row) {
-      m_wrt(row).expr->row = -1;
+    // Reset col to -1
+    for (auto& node : m_wrt) {
+      node.expr->col = -1;
     }
 
     if (m_nonlinearRows.empty()) {
@@ -114,9 +114,7 @@ class SLEIPNIR_DLLEXPORT Jacobian {
 
     // Compute each nonlinear row of the Jacobian
     for (int row : m_nonlinearRows) {
-      m_graphs[row].AppendAdjointTriplets([&](int col, double adjoint) {
-        triplets.emplace_back(row, col, adjoint);
-      });
+      m_graphs[row].AppendAdjointTriplets(triplets, row);
     }
 
     if (triplets.size() > 0) {

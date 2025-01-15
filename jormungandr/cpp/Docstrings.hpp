@@ -2186,12 +2186,13 @@ static const char *__doc_sleipnir_detail_ExpressionGraph_2 = R"doc()doc";
 
 static const char *__doc_sleipnir_detail_ExpressionGraph_AppendAdjointTriplets =
 R"doc(Updates the adjoints in the expression graph (computes the gradient)
-then appends the adjoints of wrt to the sparse matrix triplets via a
-callback.
+then appends the adjoints of wrt to the sparse matrix triplets.
 
-Parameter ``func``:
-    A function that takes two arguments: an int for the gradient row,
-    and a double for the adjoint (gradient value).)doc";
+Parameter ``triplets``:
+    The sparse matrix triplets.
+
+Parameter ``row``:
+    The row of wrt.)doc";
 
 static const char *__doc_sleipnir_detail_ExpressionGraph_ExpressionGraph =
 R"doc(Generates the deduplicated computational graph for the given
@@ -2212,7 +2213,7 @@ values of their dependent nodes.)doc";
 
 static const char *__doc_sleipnir_detail_ExpressionGraph_m_adjointList = R"doc()doc";
 
-static const char *__doc_sleipnir_detail_ExpressionGraph_m_rowList = R"doc()doc";
+static const char *__doc_sleipnir_detail_ExpressionGraph_m_colList = R"doc()doc";
 
 static const char *__doc_sleipnir_detail_ExpressionGraph_m_valueList = R"doc()doc";
 
@@ -2316,15 +2317,13 @@ tree generation.)doc";
 
 static const char *__doc_sleipnir_detail_Expression_args = R"doc(Expression arguments.)doc";
 
+static const char *__doc_sleipnir_detail_Expression_col = R"doc(This expression's column in a Jacobian, or -1 otherwise.)doc";
+
 static const char *__doc_sleipnir_detail_Expression_duplications =
 R"doc(Tracks the number of instances of this expression yet to be
 encountered in an expression tree.)doc";
 
 static const char *__doc_sleipnir_detail_Expression_refCount = R"doc(Reference count for intrusive shared pointer.)doc";
-
-static const char *__doc_sleipnir_detail_Expression_row =
-R"doc(This expression's row in wrt for autodiff gradient, Jacobian, or
-Hessian. This is -1 if the expression isn't in wrt.)doc";
 
 static const char *__doc_sleipnir_detail_Expression_value = R"doc(The value of the expression node.)doc";
 
