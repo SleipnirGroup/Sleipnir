@@ -659,15 +659,10 @@ class VariableBlock {
     using pointer = Variable*;
     using reference = Variable&;
 
-    iterator(VariableBlock<Mat>* mat, int row, int col)
-        : m_mat{mat}, m_row{row}, m_col{col} {}
+    iterator(VariableBlock<Mat>* mat, int index) : m_mat{mat}, m_index{index} {}
 
     iterator& operator++() {
-      ++m_col;
-      if (m_col == m_mat->Cols()) {
-        m_col = 0;
-        ++m_row;
-      }
+      ++m_index;
       return *this;
     }
     iterator operator++(int) {
@@ -676,12 +671,11 @@ class VariableBlock {
       return retval;
     }
     bool operator==(const iterator&) const = default;
-    reference operator*() { return (*m_mat)(m_row, m_col); }
+    reference operator*() { return (*m_mat)(m_index); }
 
    private:
     VariableBlock<Mat>* m_mat;
-    int m_row;
-    int m_col;
+    int m_index;
   };
 
   class const_iterator {
@@ -692,15 +686,11 @@ class VariableBlock {
     using pointer = Variable*;
     using const_reference = const Variable&;
 
-    const_iterator(const VariableBlock<Mat>* mat, int row, int col)
-        : m_mat{mat}, m_row{row}, m_col{col} {}
+    const_iterator(const VariableBlock<Mat>* mat, int index)
+        : m_mat{mat}, m_index{index} {}
 
     const_iterator& operator++() {
-      ++m_col;
-      if (m_col == m_mat->Cols()) {
-        m_col = 0;
-        ++m_row;
-      }
+      ++m_index;
       return *this;
     }
     const_iterator operator++(int) {
@@ -709,43 +699,42 @@ class VariableBlock {
       return retval;
     }
     bool operator==(const const_iterator&) const = default;
-    const_reference operator*() const { return (*m_mat)(m_row, m_col); }
+    const_reference operator*() const { return (*m_mat)(m_index); }
 
    private:
     const VariableBlock<Mat>* m_mat;
-    int m_row;
-    int m_col;
+    int m_index;
   };
 
   /**
    * Returns begin iterator.
    */
-  iterator begin() { return iterator(this, 0, 0); }
+  iterator begin() { return iterator(this, 0); }
 
   /**
    * Returns end iterator.
    */
-  iterator end() { return iterator(this, Rows(), 0); }
+  iterator end() { return iterator(this, Rows() * Cols()); }
 
   /**
    * Returns begin iterator.
    */
-  const_iterator begin() const { return const_iterator(this, 0, 0); }
+  const_iterator begin() const { return const_iterator(this, 0); }
 
   /**
    * Returns end iterator.
    */
-  const_iterator end() const { return const_iterator(this, Rows(), 0); }
+  const_iterator end() const { return const_iterator(this, Rows() * Cols()); }
 
   /**
    * Returns begin iterator.
    */
-  const_iterator cbegin() const { return const_iterator(this, 0, 0); }
+  const_iterator cbegin() const { return const_iterator(this, 0); }
 
   /**
    * Returns end iterator.
    */
-  const_iterator cend() const { return const_iterator(this, Rows(), 0); }
+  const_iterator cend() const { return const_iterator(this, Rows() * Cols()); }
 
   /**
    * Returns number of elements in matrix.
