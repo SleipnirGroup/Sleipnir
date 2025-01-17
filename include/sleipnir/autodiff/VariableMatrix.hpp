@@ -820,15 +820,10 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
     using pointer = Variable*;
     using reference = Variable&;
 
-    iterator(VariableMatrix* mat, int row, int col)
-        : m_mat{mat}, m_row{row}, m_col{col} {}
+    explicit iterator(small_vector<Variable>::iterator it) : m_it{it} {}
 
     iterator& operator++() {
-      ++m_col;
-      if (m_col == m_mat->Cols()) {
-        m_col = 0;
-        ++m_row;
-      }
+      ++m_it;
       return *this;
     }
     iterator operator++(int) {
@@ -837,12 +832,10 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
       return retval;
     }
     bool operator==(const iterator&) const = default;
-    reference operator*() { return (*m_mat)(m_row, m_col); }
+    reference operator*() { return *m_it; }
 
    private:
-    VariableMatrix* m_mat;
-    int m_row;
-    int m_col;
+    small_vector<Variable>::iterator m_it;
   };
 
   class const_iterator {
@@ -853,15 +846,11 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
     using pointer = Variable*;
     using const_reference = const Variable&;
 
-    const_iterator(const VariableMatrix* mat, int row, int col)
-        : m_mat{mat}, m_row{row}, m_col{col} {}
+    explicit const_iterator(small_vector<Variable>::const_iterator it)
+        : m_it{it} {}
 
     const_iterator& operator++() {
-      ++m_col;
-      if (m_col == m_mat->Cols()) {
-        m_col = 0;
-        ++m_row;
-      }
+      ++m_it;
       return *this;
     }
     const_iterator operator++(int) {
@@ -870,48 +859,46 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
       return retval;
     }
     bool operator==(const const_iterator&) const = default;
-    const_reference operator*() const { return (*m_mat)(m_row, m_col); }
+    const_reference operator*() const { return *m_it; }
 
    private:
-    const VariableMatrix* m_mat;
-    int m_row;
-    int m_col;
+    small_vector<Variable>::const_iterator m_it;
   };
 
   /**
    * Returns begin iterator.
    */
-  iterator begin() { return iterator(this, 0, 0); }
+  iterator begin() { return iterator{m_storage.begin()}; }
 
   /**
    * Returns end iterator.
    */
-  iterator end() { return iterator(this, Rows(), 0); }
+  iterator end() { return iterator{m_storage.end()}; }
 
   /**
    * Returns begin iterator.
    */
-  const_iterator begin() const { return const_iterator(this, 0, 0); }
+  const_iterator begin() const { return const_iterator{m_storage.begin()}; }
 
   /**
    * Returns end iterator.
    */
-  const_iterator end() const { return const_iterator(this, Rows(), 0); }
+  const_iterator end() const { return const_iterator{m_storage.end()}; }
 
   /**
    * Returns begin iterator.
    */
-  const_iterator cbegin() const { return const_iterator(this, 0, 0); }
+  const_iterator cbegin() const { return const_iterator{m_storage.cbegin()}; }
 
   /**
    * Returns end iterator.
    */
-  const_iterator cend() const { return const_iterator(this, Rows(), 0); }
+  const_iterator cend() const { return const_iterator{m_storage.cend()}; }
 
   /**
    * Returns number of elements in matrix.
    */
-  size_t size() const { return m_rows * m_cols; }
+  size_t size() const { return m_storage.size(); }
 
   /**
    * Returns a variable matrix filled with zeroes.
