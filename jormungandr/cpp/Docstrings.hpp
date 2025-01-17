@@ -27,21 +27,21 @@ static const char *__doc_Eigen_NumTraits =
 R"doc(NumTraits specialization that allows instantiating Eigen types with
 Variable.)doc";
 
-static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_751_3 = R"doc()doc";
+static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_765_3 = R"doc()doc";
 
-static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_751_3_AddCost = R"doc()doc";
+static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_765_3_AddCost = R"doc()doc";
 
-static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_751_3_IsComplex = R"doc()doc";
+static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_765_3_IsComplex = R"doc()doc";
 
-static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_751_3_IsInteger = R"doc()doc";
+static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_765_3_IsInteger = R"doc()doc";
 
-static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_751_3_IsSigned = R"doc()doc";
+static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_765_3_IsSigned = R"doc()doc";
 
-static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_751_3_MulCost = R"doc()doc";
+static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_765_3_MulCost = R"doc()doc";
 
-static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_751_3_ReadCost = R"doc()doc";
+static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_765_3_ReadCost = R"doc()doc";
 
-static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_751_3_RequireInitialization = R"doc()doc";
+static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_765_3_RequireInitialization = R"doc()doc";
 
 static const char *__doc_sleipnir_Block =
 R"doc(Assemble a VariableMatrix from a nested list of blocks.
@@ -1811,19 +1811,19 @@ static const char *__doc_sleipnir_Variable_Value = R"doc(Returns the value of th
 
 static const char *__doc_sleipnir_Variable_Variable = R"doc(Constructs a linear Variable with a value of zero.)doc";
 
-static const char *__doc_sleipnir_Variable_Variable_2 =
-R"doc(Constructs a Variable from a double.
+static const char *__doc_sleipnir_Variable_Variable_2 = R"doc(Constructs an empty Variable.)doc";
 
-Parameter ``value``:
-    The value of the Variable.)doc";
+static const char *__doc_sleipnir_Variable_Variable_3 = R"doc()doc";
 
-static const char *__doc_sleipnir_Variable_Variable_3 =
+static const char *__doc_sleipnir_Variable_Variable_4 = R"doc()doc";
+
+static const char *__doc_sleipnir_Variable_Variable_5 =
 R"doc(Constructs a Variable pointing to the specified expression.
 
 Parameter ``expr``:
     The autodiff variable.)doc";
 
-static const char *__doc_sleipnir_Variable_Variable_4 =
+static const char *__doc_sleipnir_Variable_Variable_6 =
 R"doc(Constructs a Variable pointing to the specified expression.
 
 Parameter ``expr``:
