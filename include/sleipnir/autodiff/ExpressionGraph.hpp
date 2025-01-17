@@ -46,7 +46,7 @@ class ExpressionGraph {
       auto node = stack.back();
       stack.pop_back();
 
-      for (auto&& arg : node->args) {
+      for (auto& arg : node->args) {
         // Only continue if the node is not a constant and hasn't already been
         // explored.
         if (arg != nullptr && arg->Type() != ExpressionType::kConstant) {
@@ -75,7 +75,7 @@ class ExpressionGraph {
         m_valueList.emplace_back(node);
       }
 
-      for (auto&& arg : node->args) {
+      for (auto& arg : node->args) {
         // Only add node if it's not a constant and doesn't already exist in the
         // tape.
         if (arg != nullptr && arg->Type() != ExpressionType::kConstant) {
@@ -144,7 +144,7 @@ class ExpressionGraph {
     // multiplied by dy/dx. If there are multiple "paths" from the root node to
     // variable; the variable's adjoint is the sum of each path's adjoint
     // contribution.
-    for (auto node : m_adjointList) {
+    for (auto& node : m_adjointList) {
       auto& lhs = node->args[0];
       auto& rhs = node->args[1];
 
@@ -166,7 +166,7 @@ class ExpressionGraph {
     // Unlink adjoints to avoid circular references between them and their
     // parent expressions. This ensures all expressions are returned to the free
     // list.
-    for (auto node : m_adjointList) {
+    for (auto& node : m_adjointList) {
       for (auto& arg : node->args) {
         if (arg != nullptr) {
           arg->adjointExpr = nullptr;

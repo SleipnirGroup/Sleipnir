@@ -672,7 +672,7 @@ inline constexpr void IntrusiveSharedPtrDecRefCount(Expression* expr) {
       if (elem->adjointExpr != nullptr) {
         stack.emplace_back(elem->adjointExpr.Get());
       }
-      for (auto&& arg : elem->args) {
+      for (auto& arg : elem->args) {
         if (arg != nullptr) {
           stack.emplace_back(arg.Get());
         }
