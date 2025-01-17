@@ -36,6 +36,8 @@ class SLEIPNIR_DLLEXPORT Hessian {
   Hessian(Variable variable, const VariableMatrix& wrt) noexcept
       : m_jacobian{
             [&] {
+              m_profiler.StartSetup();
+
               small_vector<detail::ExpressionPtr> wrtVec;
               wrtVec.reserve(wrt.size());
               for (auto& elem : wrt) {
@@ -52,7 +54,9 @@ class SLEIPNIR_DLLEXPORT Hessian {
               }
               return ret;
             }(),
-            wrt} {}
+            wrt} {
+    m_profiler.StopSetup();
+  }
 
   /**
    * Returns the Hessian as a VariableMatrix.
@@ -65,14 +69,20 @@ class SLEIPNIR_DLLEXPORT Hessian {
   /**
    * Evaluates the Hessian at wrt's value.
    */
-  const Eigen::SparseMatrix<double>& Value() { return m_jacobian.Value(); }
+  const Eigen::SparseMatrix<double>& Value() {
+    m_profiler.StartSolve();
+    const auto& H = m_jacobian.Value();
+    m_profiler.StopSolve();
+    return H;
+  }
 
   /**
    * Returns the profiler.
    */
-  Profiler& GetProfiler() { return m_jacobian.GetProfiler(); }
+  Profiler& GetProfiler() { return m_profiler; }
 
  private:
+  Profiler m_profiler;
   Jacobian m_jacobian;
 };
 

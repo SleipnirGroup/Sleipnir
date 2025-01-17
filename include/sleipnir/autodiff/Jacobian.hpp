@@ -98,11 +98,12 @@ class SLEIPNIR_DLLEXPORT Jacobian {
    * Evaluates the Jacobian at wrt's value.
    */
   const Eigen::SparseMatrix<double>& Value() {
+    m_profiler.StartSolve();
+
     if (m_nonlinearRows.empty()) {
+      m_profiler.StopSolve();
       return m_J;
     }
-
-    m_profiler.StartSolve();
 
     for (auto& graph : m_graphs) {
       graph.Update();

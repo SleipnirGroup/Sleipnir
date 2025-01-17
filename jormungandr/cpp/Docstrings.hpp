@@ -203,6 +203,8 @@ static const char *__doc_sleipnir_Hessian_Value = R"doc(Evaluates the Hessian at
 
 static const char *__doc_sleipnir_Hessian_m_jacobian = R"doc()doc";
 
+static const char *__doc_sleipnir_Hessian_m_profiler = R"doc()doc";
+
 static const char *__doc_sleipnir_InequalityConstraints = R"doc(A vector of inequality constraints of the form cᵢ(x) ≥ 0.)doc";
 
 static const char *__doc_sleipnir_InequalityConstraints_InequalityConstraints =
