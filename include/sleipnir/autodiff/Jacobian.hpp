@@ -39,7 +39,7 @@ class SLEIPNIR_DLLEXPORT Jacobian {
       m_wrt(row).expr->row = row;
     }
 
-    for (Variable variable : m_variables) {
+    for (auto& variable : m_variables) {
       m_graphs.emplace_back(variable.expr);
     }
 
