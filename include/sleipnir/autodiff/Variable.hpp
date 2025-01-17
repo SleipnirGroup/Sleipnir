@@ -36,11 +36,24 @@ class SLEIPNIR_DLLEXPORT Variable {
   Variable() = default;
 
   /**
-   * Constructs a Variable from a double.
+   * Constructs an empty Variable.
+   */
+  explicit constexpr Variable(std::nullptr_t) : expr{nullptr} {}
+
+  /**
+   * Constructs a Variable from a floating point type.
    *
    * @param value The value of the Variable.
    */
-  Variable(double value)  // NOLINT
+  Variable(std::floating_point auto value)  // NOLINT
+      : expr{detail::MakeExpressionPtr<detail::ConstExpression>(value)} {}
+
+  /**
+   * Constructs a Variable from an integral type.
+   *
+   * @param value The value of the Variable.
+   */
+  Variable(std::integral auto value)  // NOLINT
       : expr{detail::MakeExpressionPtr<detail::ConstExpression>(value)} {}
 
   /**
@@ -55,7 +68,8 @@ class SLEIPNIR_DLLEXPORT Variable {
    *
    * @param expr The autodiff variable.
    */
-  explicit Variable(detail::ExpressionPtr&& expr) : expr{std::move(expr)} {}
+  explicit constexpr Variable(detail::ExpressionPtr&& expr)
+      : expr{std::move(expr)} {}
 
   /**
    * Assignment operator for double.
