@@ -52,10 +52,8 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    */
   VariableMatrix(int rows, int cols) : m_rows{rows}, m_cols{cols} {
     m_storage.reserve(Rows() * Cols());
-    for (int row = 0; row < Rows(); ++row) {
-      for (int col = 0; col < Cols(); ++col) {
-        m_storage.emplace_back();
-      }
+    for (int index = 0; index < Rows() * Cols(); ++index) {
+      m_storage.emplace_back();
     }
   }
 
