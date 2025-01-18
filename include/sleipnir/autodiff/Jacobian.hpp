@@ -86,7 +86,7 @@ class SLEIPNIR_DLLEXPORT Jacobian {
       auto grad = m_graphs[row].GenerateGradientTree(m_wrt);
       for (int col = 0; col < m_wrt.Rows(); ++col) {
         if (grad(col).expr != nullptr) {
-          result(row, col) = Variable{std::move(grad(col))};
+          result(row, col) = std::move(grad(col));
         }
       }
     }
