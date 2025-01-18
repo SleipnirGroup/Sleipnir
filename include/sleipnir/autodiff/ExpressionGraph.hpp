@@ -3,9 +3,10 @@
 #pragma once
 
 #include <ranges>
-#include <span>
+#include <utility>
 
-#include "sleipnir/autodiff/Expression.hpp"
+#include "sleipnir/autodiff/Variable.hpp"
+#include "sleipnir/autodiff/VariableMatrix.hpp"
 #include "sleipnir/util/FunctionRef.hpp"
 #include "sleipnir/util/small_vector.hpp"
 
@@ -22,10 +23,10 @@ class ExpressionGraph {
    *
    * @param root The root node of the expression.
    */
-  explicit ExpressionGraph(ExpressionPtr& root) {
+  explicit ExpressionGraph(Variable& root) {
     // If the root type is a constant, Update() is a no-op, so there's no work
     // to do
-    if (root == nullptr || root->Type() == ExpressionType::kConstant) {
+    if (root.expr == nullptr || root.Type() == ExpressionType::kConstant) {
       return;
     }
 
@@ -38,7 +39,7 @@ class ExpressionGraph {
     // BFS list sorted from parent to child.
     small_vector<Expression*> stack;
 
-    stack.emplace_back(root.Get());
+    stack.emplace_back(root.expr.Get());
 
     // Initialize the number of instances of each node in the tree
     // (Expression::duplications)
@@ -60,7 +61,7 @@ class ExpressionGraph {
       }
     }
 
-    stack.emplace_back(root.Get());
+    stack.emplace_back(root.expr.Get());
 
     while (!stack.empty()) {
       auto node = stack.back();
@@ -117,27 +118,13 @@ class ExpressionGraph {
    *
    * @param wrt Variables with respect to which to compute the gradient.
    */
-  small_vector<ExpressionPtr> GenerateGradientTree(
-      std::span<const ExpressionPtr> wrt) const {
+  VariableMatrix GenerateGradientTree(const VariableMatrix& wrt) const {
     // Read docs/algorithms.md#Reverse_accumulation_automatic_differentiation
     // for background on reverse accumulation automatic differentiation.
-
-    for (size_t row = 0; row < wrt.size(); ++row) {
-      wrt[row]->row = row;
-    }
-
-    small_vector<ExpressionPtr> grad;
-    grad.reserve(wrt.size());
-    for (size_t row = 0; row < wrt.size(); ++row) {
-      grad.emplace_back(MakeExpressionPtr<ConstExpression>());
-    }
 
     // Zero adjoints. The root node's adjoint is 1.0 as df/df is always 1.
     if (m_adjointList.size() > 0) {
       m_adjointList[0]->adjointExpr = MakeExpressionPtr<ConstExpression>(1.0);
-      for (auto& node : m_adjointList | std::views::drop(1)) {
-        node->adjointExpr = MakeExpressionPtr<ConstExpression>();
-      }
     }
 
     // df/dx = (df/dy)(dy/dx). The adjoint of x is equal to the adjoint of y
@@ -148,19 +135,19 @@ class ExpressionGraph {
       auto& lhs = node->args[0];
       auto& rhs = node->args[1];
 
-      if (lhs != nullptr && !lhs->IsConstant(0.0)) {
+      if (lhs != nullptr) {
         lhs->adjointExpr =
             lhs->adjointExpr + node->GradientLhs(lhs, rhs, node->adjointExpr);
+        if (rhs != nullptr) {
+          rhs->adjointExpr =
+              rhs->adjointExpr + node->GradientRhs(lhs, rhs, node->adjointExpr);
+        }
       }
-      if (rhs != nullptr && !rhs->IsConstant(0.0)) {
-        rhs->adjointExpr =
-            rhs->adjointExpr + node->GradientRhs(lhs, rhs, node->adjointExpr);
-      }
+    }
 
-      // If variable is a leaf node, assign its adjoint to the gradient.
-      if (node->row != -1) {
-        grad[node->row] = node->adjointExpr;
-      }
+    VariableMatrix grad(VariableMatrix::empty, wrt.size(), 1);
+    for (int row = 0; row < grad.Rows(); ++row) {
+      grad(row) = Variable{std::move(wrt(row).expr->adjointExpr)};
     }
 
     // Unlink adjoints to avoid circular references between them and their
@@ -172,10 +159,7 @@ class ExpressionGraph {
           arg->adjointExpr = nullptr;
         }
       }
-    }
-
-    for (size_t row = 0; row < wrt.size(); ++row) {
-      wrt[row]->row = -1;
+      node->adjointExpr = nullptr;
     }
 
     return grad;

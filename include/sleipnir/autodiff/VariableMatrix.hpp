@@ -27,6 +27,9 @@ namespace sleipnir {
  */
 class SLEIPNIR_DLLEXPORT VariableMatrix {
  public:
+  struct empty_t {};
+  static constexpr empty_t empty{};
+
   /**
    * Constructs an empty VariableMatrix.
    */
@@ -45,7 +48,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
   }
 
   /**
-   * Constructs a VariableMatrix with the given dimensions.
+   * Constructs a zero-initialized VariableMatrix with the given dimensions.
    *
    * @param rows The number of matrix rows.
    * @param cols The number of matrix columns.
@@ -54,6 +57,19 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
     m_storage.reserve(Rows() * Cols());
     for (int index = 0; index < Rows() * Cols(); ++index) {
       m_storage.emplace_back();
+    }
+  }
+
+  /**
+   * Constructs an empty VariableMatrix with the given dimensions.
+   *
+   * @param rows The number of matrix rows.
+   * @param cols The number of matrix columns.
+   */
+  VariableMatrix(empty_t, int rows, int cols) : m_rows{rows}, m_cols{cols} {
+    m_storage.reserve(Rows() * Cols());
+    for (int index = 0; index < Rows() * Cols(); ++index) {
+      m_storage.emplace_back(nullptr);
     }
   }
 
