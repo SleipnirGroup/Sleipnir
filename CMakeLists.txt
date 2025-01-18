@@ -171,8 +171,30 @@ install(
     DESTINATION lib/cmake/Sleipnir
 )
 
-# Add benchmark executables if CasADi exists
+# Add benchmark executables
 if(BUILD_BENCHMARKING)
+    # Perf benchmark
+    foreach(benchmark "CartPole" "Flywheel")
+        file(
+            GLOB ${benchmark}PerfBenchmark_src
+            benchmarks/perf/*.cpp
+            benchmarks/perf/${benchmark}/*.cpp
+        )
+        add_executable(
+            ${benchmark}PerfBenchmark
+            ${${benchmark}PerfBenchmark_src}
+        )
+        compiler_flags(${benchmark}PerfBenchmark)
+        target_include_directories(
+            ${benchmark}PerfBenchmark
+            PRIVATE
+                ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks
+                ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/perf
+        )
+        target_link_libraries(${benchmark}PerfBenchmark PRIVATE Sleipnir)
+    endforeach()
+
+    # Scalability benchmark (if CasADi exists)
     find_package(casadi QUIET)
     if(casadi_FOUND)
         foreach(benchmark "CartPole" "Flywheel")
@@ -188,7 +210,9 @@ if(BUILD_BENCHMARKING)
             compiler_flags(${benchmark}ScalabilityBenchmark)
             target_include_directories(
                 ${benchmark}ScalabilityBenchmark
-                PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/scalability
+                PRIVATE
+                    ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks
+                    ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/scalability
             )
             target_link_libraries(
                 ${benchmark}ScalabilityBenchmark
