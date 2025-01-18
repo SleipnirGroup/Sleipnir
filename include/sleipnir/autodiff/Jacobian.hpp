@@ -40,7 +40,7 @@ class SLEIPNIR_DLLEXPORT Jacobian {
     }
 
     for (auto& variable : m_variables) {
-      m_graphs.emplace_back(variable.expr);
+      m_graphs.emplace_back(variable);
     }
 
     for (int row = 0; row < m_variables.Rows(); ++row) {
@@ -78,16 +78,16 @@ class SLEIPNIR_DLLEXPORT Jacobian {
   VariableMatrix Get() const {
     VariableMatrix result{m_variables.Rows(), m_wrt.Rows()};
 
-    small_vector<detail::ExpressionPtr> wrtVec;
-    wrtVec.reserve(m_wrt.size());
-    for (auto& elem : m_wrt) {
-      wrtVec.emplace_back(elem.expr);
-    }
-
     for (int row = 0; row < m_variables.Rows(); ++row) {
-      auto grad = m_graphs[row].GenerateGradientTree(wrtVec);
+      for (auto& node : m_wrt) {
+        node.expr->adjointExpr = nullptr;
+      }
+
+      auto grad = m_graphs[row].GenerateGradientTree(m_wrt);
       for (int col = 0; col < m_wrt.Rows(); ++col) {
-        result(row, col) = Variable{std::move(grad[col])};
+        if (grad(col).expr != nullptr) {
+          result(row, col) = Variable{std::move(grad(col))};
+        }
       }
     }
 

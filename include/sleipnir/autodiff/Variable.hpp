@@ -12,7 +12,6 @@
 #include <Eigen/Core>
 
 #include "sleipnir/autodiff/Expression.hpp"
-#include "sleipnir/autodiff/ExpressionGraph.hpp"
 #include "sleipnir/util/Assert.hpp"
 #include "sleipnir/util/Concepts.hpp"
 #include "sleipnir/util/Print.hpp"
@@ -22,6 +21,9 @@
 namespace sleipnir {
 
 // Forward declarations for friend declarations in Variable
+namespace detail {
+class ExpressionGraph;
+}  // namespace detail
 class SLEIPNIR_DLLEXPORT Hessian;
 class SLEIPNIR_DLLEXPORT Jacobian;
 
@@ -208,13 +210,7 @@ class SLEIPNIR_DLLEXPORT Variable {
   /**
    * Returns the value of this variable.
    */
-  double Value() {
-    // Updates the value of this variable based on the values of its dependent
-    // variables
-    detail::ExpressionGraph{expr}.Update();
-
-    return expr->value;
-  }
+  double Value();
 
   /**
    * Returns the type of this expression (constant, linear, quadratic, or
@@ -252,6 +248,7 @@ class SLEIPNIR_DLLEXPORT Variable {
   friend SLEIPNIR_DLLEXPORT Variable hypot(const Variable& x, const Variable& y,
                                            const Variable& z);
 
+  friend class detail::ExpressionGraph;
   friend class SLEIPNIR_DLLEXPORT Hessian;
   friend class SLEIPNIR_DLLEXPORT Jacobian;
 };

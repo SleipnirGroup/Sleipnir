@@ -2,8 +2,6 @@
 
 #pragma once
 
-#include <utility>
-
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
 
@@ -13,7 +11,6 @@
 #include "sleipnir/autodiff/Variable.hpp"
 #include "sleipnir/autodiff/VariableMatrix.hpp"
 #include "sleipnir/util/SymbolExports.hpp"
-#include "sleipnir/util/small_vector.hpp"
 
 namespace sleipnir {
 
@@ -37,22 +34,8 @@ class SLEIPNIR_DLLEXPORT Hessian {
       : m_jacobian{
             [&] {
               m_profiler.StartSetup();
-
-              small_vector<detail::ExpressionPtr> wrtVec;
-              wrtVec.reserve(wrt.size());
-              for (auto& elem : wrt) {
-                wrtVec.emplace_back(elem.expr);
-              }
-
-              auto grad =
-                  detail::ExpressionGraph{variable.expr}.GenerateGradientTree(
-                      wrtVec);
-
-              VariableMatrix ret{wrt.Rows()};
-              for (int row = 0; row < ret.Rows(); ++row) {
-                ret(row) = Variable{std::move(grad[row])};
-              }
-              return ret;
+              return detail::ExpressionGraph{variable}.GenerateGradientTree(
+                  wrt);
             }(),
             wrt} {
     m_profiler.StopSetup();

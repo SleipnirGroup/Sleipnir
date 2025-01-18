@@ -27,21 +27,21 @@ static const char *__doc_Eigen_NumTraits =
 R"doc(NumTraits specialization that allows instantiating Eigen types with
 Variable.)doc";
 
-static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_765_3 = R"doc()doc";
+static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_762_3 = R"doc()doc";
 
-static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_765_3_AddCost = R"doc()doc";
+static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_762_3_AddCost = R"doc()doc";
 
-static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_765_3_IsComplex = R"doc()doc";
+static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_762_3_IsComplex = R"doc()doc";
 
-static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_765_3_IsInteger = R"doc()doc";
+static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_762_3_IsInteger = R"doc()doc";
 
-static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_765_3_IsSigned = R"doc()doc";
+static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_762_3_IsSigned = R"doc()doc";
 
-static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_765_3_MulCost = R"doc()doc";
+static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_762_3_MulCost = R"doc()doc";
 
-static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_765_3_ReadCost = R"doc()doc";
+static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_762_3_ReadCost = R"doc()doc";
 
-static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_765_3_RequireInitialization = R"doc()doc";
+static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_762_3_RequireInitialization = R"doc()doc";
 
 static const char *__doc_sleipnir_Block =
 R"doc(Assemble a VariableMatrix from a nested list of blocks.
@@ -1539,7 +1539,8 @@ Parameter ``rows``:
     The number of matrix rows.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_VariableMatrix_3 =
-R"doc(Constructs a VariableMatrix with the given dimensions.
+R"doc(Constructs a zero-initialized VariableMatrix with the given
+dimensions.
 
 Parameter ``rows``:
     The number of matrix rows.
@@ -1548,12 +1549,21 @@ Parameter ``cols``:
     The number of matrix columns.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_VariableMatrix_4 =
+R"doc(Constructs an empty VariableMatrix with the given dimensions.
+
+Parameter ``rows``:
+    The number of matrix rows.
+
+Parameter ``cols``:
+    The number of matrix columns.)doc";
+
+static const char *__doc_sleipnir_VariableMatrix_VariableMatrix_5 =
 R"doc(Constructs a scalar VariableMatrix from a nested list of Variables.
 
 Parameter ``list``:
     The nested list of Variables.)doc";
 
-static const char *__doc_sleipnir_VariableMatrix_VariableMatrix_5 =
+static const char *__doc_sleipnir_VariableMatrix_VariableMatrix_6 =
 R"doc(Constructs a scalar VariableMatrix from a nested list of doubles.
 
 This overload is for Python bindings only.
@@ -1561,7 +1571,7 @@ This overload is for Python bindings only.
 Parameter ``list``:
     The nested list of Variables.)doc";
 
-static const char *__doc_sleipnir_VariableMatrix_VariableMatrix_6 =
+static const char *__doc_sleipnir_VariableMatrix_VariableMatrix_7 =
 R"doc(Constructs a scalar VariableMatrix from a nested list of Variables.
 
 This overload is for Python bindings only.
@@ -1569,23 +1579,17 @@ This overload is for Python bindings only.
 Parameter ``list``:
     The nested list of Variables.)doc";
 
-static const char *__doc_sleipnir_VariableMatrix_VariableMatrix_7 =
+static const char *__doc_sleipnir_VariableMatrix_VariableMatrix_8 =
 R"doc(Constructs a VariableMatrix from an Eigen matrix.
 
 Parameter ``values``:
     Eigen matrix of values.)doc";
 
-static const char *__doc_sleipnir_VariableMatrix_VariableMatrix_8 =
+static const char *__doc_sleipnir_VariableMatrix_VariableMatrix_9 =
 R"doc(Constructs a VariableMatrix from an Eigen diagonal matrix.
 
 Parameter ``values``:
     Diagonal matrix of values.)doc";
-
-static const char *__doc_sleipnir_VariableMatrix_VariableMatrix_9 =
-R"doc(Constructs a scalar VariableMatrix from a Variable.
-
-Parameter ``variable``:
-    Variable.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_VariableMatrix_10 =
 R"doc(Constructs a scalar VariableMatrix from a Variable.
@@ -1594,10 +1598,10 @@ Parameter ``variable``:
     Variable.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_VariableMatrix_11 =
-R"doc(Constructs a VariableMatrix from a VariableBlock.
+R"doc(Constructs a scalar VariableMatrix from a Variable.
 
-Parameter ``values``:
-    VariableBlock of values.)doc";
+Parameter ``variable``:
+    Variable.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_VariableMatrix_12 =
 R"doc(Constructs a VariableMatrix from a VariableBlock.
@@ -1606,12 +1610,18 @@ Parameter ``values``:
     VariableBlock of values.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_VariableMatrix_13 =
+R"doc(Constructs a VariableMatrix from a VariableBlock.
+
+Parameter ``values``:
+    VariableBlock of values.)doc";
+
+static const char *__doc_sleipnir_VariableMatrix_VariableMatrix_14 =
 R"doc(Constructs a column vector wrapper around a Variable array.
 
 Parameter ``values``:
     Variable array to wrap.)doc";
 
-static const char *__doc_sleipnir_VariableMatrix_VariableMatrix_14 =
+static const char *__doc_sleipnir_VariableMatrix_VariableMatrix_15 =
 R"doc(Constructs a matrix wrapper around a Variable array.
 
 Parameter ``values``:
@@ -1653,6 +1663,8 @@ static const char *__doc_sleipnir_VariableMatrix_const_iterator_operator_inc = R
 static const char *__doc_sleipnir_VariableMatrix_const_iterator_operator_inc_2 = R"doc()doc";
 
 static const char *__doc_sleipnir_VariableMatrix_const_iterator_operator_mul = R"doc()doc";
+
+static const char *__doc_sleipnir_VariableMatrix_empty_t = R"doc()doc";
 
 static const char *__doc_sleipnir_VariableMatrix_end = R"doc(Returns end iterator.)doc";
 
@@ -2169,6 +2181,8 @@ static const char *__doc_sleipnir_detail_Expression_2 = R"doc(An autodiff expres
 static const char *__doc_sleipnir_detail_ExpressionGraph =
 R"doc(This class is an adaptor type that performs value updates of an
 expression's computational graph in a way that skips duplicates.)doc";
+
+static const char *__doc_sleipnir_detail_ExpressionGraph_2 = R"doc()doc";
 
 static const char *__doc_sleipnir_detail_ExpressionGraph_ComputeAdjoints =
 R"doc(Updates the adjoints in the expression graph, effectively computing
