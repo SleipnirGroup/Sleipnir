@@ -75,7 +75,11 @@ option(DISABLE_DIAGNOSTICS "Disable diagnostics support at compile-time" OFF)
 include(CompilerFlags)
 
 file(GLOB_RECURSE Sleipnir_src src/*.cpp)
-add_library(Sleipnir ${Sleipnir_src})
+if(TARGET_SUPPORTS_SHARED_LIBS)
+    add_library(Sleipnir ${Sleipnir_src})
+else()
+    add_library(Sleipnir STATIC ${Sleipnir_src})
+endif()
 add_library(Sleipnir::Sleipnir ALIAS Sleipnir)
 compiler_flags(Sleipnir)
 target_include_directories(Sleipnir PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -95,9 +99,10 @@ option(USE_SYSTEM_EIGEN "Use system eigen" OFF)
 option(USE_SYSTEM_NANOBIND "Use system nanobind" OFF)
 
 # Required for std::async()
-find_package(Threads REQUIRED)
-
-target_link_libraries(Sleipnir PUBLIC Threads::Threads)
+find_package(Threads)
+if(Threads_FOUND)
+    target_link_libraries(Sleipnir PUBLIC Threads::Threads)
+endif()
 
 if(DISABLE_DIAGNOSTICS)
     target_compile_definitions(Sleipnir PUBLIC SLEIPNIR_DISABLE_DIAGNOSTICS)
@@ -119,7 +124,7 @@ endif()
 
 target_link_libraries(Sleipnir PUBLIC Eigen3::Eigen)
 
-if(BUILD_TESTING)
+if(BUILD_TESTING AND NOT CMAKE_CROSSCOMPILING)
     # Catch2 dependency
     fetchcontent_declare(
         Catch2
@@ -227,7 +232,7 @@ if(BUILD_BENCHMARKS)
     endif()
 endif()
 
-if(BUILD_TESTING)
+if(BUILD_TESTING AND NOT CMAKE_CROSSCOMPILING)
     enable_testing()
     list(APPEND CMAKE_MODULE_PATH ${Catch2_SOURCE_DIR}/extras)
     include(Catch)
