@@ -21,12 +21,15 @@
 #include "sleipnir/autodiff/Hessian.hpp"
 #include "sleipnir/autodiff/Jacobian.hpp"
 #include "sleipnir/optimization/SolverExitCondition.hpp"
-#include "sleipnir/util/Print.hpp"
 #include "sleipnir/util/Spy.hpp"
 #include "sleipnir/util/small_vector.hpp"
-#include "util/PrintIterationDiagnostics.hpp"
 #include "util/ScopeExit.hpp"
+
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
+#include "sleipnir/util/Print.hpp"
+#include "util/PrintIterationDiagnostics.hpp"
 #include "util/ToMilliseconds.hpp"
+#endif
 
 // See docs/algorithms.md#Works_cited for citation definitions.
 //
@@ -102,6 +105,7 @@ void InteriorPoint(std::span<Variable> decisionVariables,
 
   // Check for overconstrained problem
   if (equalityConstraints.size() > decisionVariables.size()) {
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     if (config.diagnostics) {
       sleipnir::println("The problem has too few degrees of freedom.");
       sleipnir::println(
@@ -112,6 +116,7 @@ void InteriorPoint(std::span<Variable> decisionVariables,
         }
       }
     }
+#endif
 
     status->exitCondition = SolverExitCondition::kTooFewDOFs;
     return;
@@ -139,9 +144,11 @@ void InteriorPoint(std::span<Variable> decisionVariables,
                                     A_i.rows(), A_i.cols());
   }
 
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
   if (config.diagnostics && !feasibilityRestoration) {
     sleipnir::println("Error tolerance: {}\n", config.tolerance);
   }
+#endif
 
   std::chrono::steady_clock::time_point iterationsStartTime;
 
@@ -151,6 +158,7 @@ void InteriorPoint(std::span<Variable> decisionVariables,
   scope_exit exit{[&] {
     status->cost = f.Value();
 
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     if (config.diagnostics && !feasibilityRestoration) {
       auto solveEndTime = std::chrono::steady_clock::now();
 
@@ -187,6 +195,7 @@ void InteriorPoint(std::span<Variable> decisionVariables,
                         jacobianCi.GetProfiler().SolveMeasurements());
       sleipnir::println("");
     }
+#endif
   }};
 
   // Barrier parameter minimum
@@ -246,19 +255,24 @@ void InteriorPoint(std::span<Variable> decisionVariables,
   // Error estimate
   double E_0 = std::numeric_limits<double>::infinity();
 
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
   if (config.diagnostics) {
     iterationsStartTime = std::chrono::steady_clock::now();
   }
+#endif
 
   while (E_0 > config.tolerance &&
          acceptableIterCounter < config.maxAcceptableIterations) {
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     std::chrono::steady_clock::time_point innerIterStartTime;
     if (config.diagnostics) {
       innerIterStartTime = std::chrono::steady_clock::now();
     }
+#endif
 
     // Check for local equality constraint infeasibility
     if (IsEqualityLocallyInfeasible(A_e, c_e)) {
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
       if (config.diagnostics) {
         sleipnir::println(
             "The problem is locally infeasible due to violated equality "
@@ -271,6 +285,7 @@ void InteriorPoint(std::span<Variable> decisionVariables,
           }
         }
       }
+#endif
 
       status->exitCondition = SolverExitCondition::kLocallyInfeasible;
       return;
@@ -278,6 +293,7 @@ void InteriorPoint(std::span<Variable> decisionVariables,
 
     // Check for local inequality constraint infeasibility
     if (IsInequalityLocallyInfeasible(A_i, c_i)) {
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
       if (config.diagnostics) {
         sleipnir::println(
             "The problem is infeasible due to violated inequality "
@@ -290,6 +306,7 @@ void InteriorPoint(std::span<Variable> decisionVariables,
           }
         }
       }
+#endif
 
       status->exitCondition = SolverExitCondition::kLocallyInfeasible;
       return;
@@ -464,10 +481,12 @@ void InteriorPoint(std::span<Variable> decisionVariables,
         bool stepAcceptable = false;
         for (int soc_iteration = 0; soc_iteration < 5 && !stepAcceptable;
              ++soc_iteration) {
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
           std::chrono::steady_clock::time_point socIterStartTime;
           if (config.diagnostics) {
             socIterStartTime = std::chrono::steady_clock::now();
           }
+#endif
 
           // Rebuild Newton-KKT rhs with updated constraint values.
           //
@@ -517,6 +536,7 @@ void InteriorPoint(std::span<Variable> decisionVariables,
             stepAcceptable = true;
           }
 
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
           if (config.diagnostics) {
             const auto socIterEndTime = std::chrono::steady_clock::now();
 
@@ -527,6 +547,7 @@ void InteriorPoint(std::span<Variable> decisionVariables,
                 trial_c_e.lpNorm<1>() + (trial_c_i - trial_s).lpNorm<1>(),
                 solver.HessianRegularization(), 1.0);
           }
+#endif
         }
 
         if (stepAcceptable) {
@@ -801,6 +822,7 @@ void InteriorPoint(std::span<Variable> decisionVariables,
 
     const auto innerIterEndTime = std::chrono::steady_clock::now();
 
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     if (config.diagnostics) {
       PrintIterationDiagnostics(
           iterations,
@@ -810,6 +832,7 @@ void InteriorPoint(std::span<Variable> decisionVariables,
           c_e.lpNorm<1>() + (c_i - s).lpNorm<1>(),
           solver.HessianRegularization(), α);
     }
+#endif
 
     ++iterations;
 

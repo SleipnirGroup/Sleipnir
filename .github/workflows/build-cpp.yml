@@ -22,6 +22,9 @@ jobs:
           - name: macOS universal
             os: macOS-14
             cmake-args: -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
+          - name: Linux x86_64 (disable diagnostics)
+            os: ubuntu-24.04
+            cmake-args: -DDISABLE_DIAGNOSTICS=ON
 
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
