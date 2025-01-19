@@ -236,7 +236,7 @@ Some test problems generate CSV files containing their solutions. These can be p
 Benchmark projects are in the [benchmarks folder](https://github.com/SleipnirGroup/Sleipnir/tree/main/benchmarks). To compile and run them, run the following in the repository root:
 ```bash
 # Install CasADi and [matplotlib, numpy, scipy] pip packages first
-cmake -B build -S . -DBUILD_BENCHMARKING=ON
+cmake -B build -S . -DBUILD_BENCHMARKS=ON
 cmake --build build
 ./tools/generate-scalability-results.sh
 ```
