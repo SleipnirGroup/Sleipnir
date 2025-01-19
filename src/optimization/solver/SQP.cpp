@@ -20,12 +20,15 @@
 #include "sleipnir/autodiff/Hessian.hpp"
 #include "sleipnir/autodiff/Jacobian.hpp"
 #include "sleipnir/optimization/SolverExitCondition.hpp"
-#include "sleipnir/util/Print.hpp"
 #include "sleipnir/util/Spy.hpp"
 #include "sleipnir/util/small_vector.hpp"
-#include "util/PrintIterationDiagnostics.hpp"
 #include "util/ScopeExit.hpp"
+
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
+#include "sleipnir/util/Print.hpp"
+#include "util/PrintIterationDiagnostics.hpp"
 #include "util/ToMilliseconds.hpp"
+#endif
 
 // See docs/algorithms.md#Works_cited for citation definitions.
 
@@ -77,6 +80,7 @@ void SQP(std::span<Variable> decisionVariables,
 
   // Check for overconstrained problem
   if (equalityConstraints.size() > decisionVariables.size()) {
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     if (config.diagnostics) {
       sleipnir::println("The problem has too few degrees of freedom.");
       sleipnir::println(
@@ -87,6 +91,7 @@ void SQP(std::span<Variable> decisionVariables,
         }
       }
     }
+#endif
 
     status->exitCondition = SolverExitCondition::kTooFewDOFs;
     return;
@@ -110,9 +115,11 @@ void SQP(std::span<Variable> decisionVariables,
                                     A_e.rows(), A_e.cols());
   }
 
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
   if (config.diagnostics) {
     sleipnir::println("Error tolerance: {}\n", config.tolerance);
   }
+#endif
 
   std::chrono::steady_clock::time_point iterationsStartTime;
 
@@ -122,6 +129,7 @@ void SQP(std::span<Variable> decisionVariables,
   scope_exit exit{[&] {
     status->cost = f.Value();
 
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     if (config.diagnostics) {
       auto solveEndTime = std::chrono::steady_clock::now();
 
@@ -154,6 +162,7 @@ void SQP(std::span<Variable> decisionVariables,
                         jacobianCe.GetProfiler().SolveMeasurements());
       sleipnir::println("");
     }
+#endif
   }};
 
   Filter filter{f};
@@ -172,19 +181,24 @@ void SQP(std::span<Variable> decisionVariables,
   // Error estimate
   double E_0 = std::numeric_limits<double>::infinity();
 
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
   if (config.diagnostics) {
     iterationsStartTime = std::chrono::steady_clock::now();
   }
+#endif
 
   while (E_0 > config.tolerance &&
          acceptableIterCounter < config.maxAcceptableIterations) {
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     std::chrono::steady_clock::time_point innerIterStartTime;
     if (config.diagnostics) {
       innerIterStartTime = std::chrono::steady_clock::now();
     }
+#endif
 
     // Check for local equality constraint infeasibility
     if (IsEqualityLocallyInfeasible(A_e, c_e)) {
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
       if (config.diagnostics) {
         sleipnir::println(
             "The problem is locally infeasible due to violated equality "
@@ -197,6 +211,7 @@ void SQP(std::span<Variable> decisionVariables,
           }
         }
       }
+#endif
 
       status->exitCondition = SolverExitCondition::kLocallyInfeasible;
       return;
@@ -318,10 +333,12 @@ void SQP(std::span<Variable> decisionVariables,
         bool stepAcceptable = false;
         for (int soc_iteration = 0; soc_iteration < 5 && !stepAcceptable;
              ++soc_iteration) {
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
           std::chrono::steady_clock::time_point socIterStartTime;
           if (config.diagnostics) {
             socIterStartTime = std::chrono::steady_clock::now();
           }
+#endif
 
           // Rebuild Newton-KKT rhs with updated constraint values.
           //
@@ -354,6 +371,7 @@ void SQP(std::span<Variable> decisionVariables,
             stepAcceptable = true;
           }
 
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
           if (config.diagnostics) {
             const auto socIterEndTime = std::chrono::steady_clock::now();
 
@@ -363,6 +381,7 @@ void SQP(std::span<Variable> decisionVariables,
                 socIterEndTime - socIterStartTime, E, f.Value(),
                 trial_c_e.lpNorm<1>(), solver.HessianRegularization(), 1.0);
           }
+#endif
         }
 
         if (stepAcceptable) {
@@ -533,12 +552,14 @@ void SQP(std::span<Variable> decisionVariables,
 
     const auto innerIterEndTime = std::chrono::steady_clock::now();
 
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     if (config.diagnostics) {
       PrintIterationDiagnostics(iterations, IterationMode::kNormal,
                                 innerIterEndTime - innerIterStartTime, E_0,
                                 f.Value(), c_e.lpNorm<1>(),
                                 solver.HessianRegularization(), α);
     }
+#endif
 
     ++iterations;
 

@@ -17,11 +17,14 @@
 #include "sleipnir/autodiff/Gradient.hpp"
 #include "sleipnir/autodiff/Hessian.hpp"
 #include "sleipnir/optimization/SolverExitCondition.hpp"
-#include "sleipnir/util/Print.hpp"
 #include "sleipnir/util/Spy.hpp"
-#include "util/PrintIterationDiagnostics.hpp"
 #include "util/ScopeExit.hpp"
+
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
+#include "sleipnir/util/Print.hpp"
+#include "util/PrintIterationDiagnostics.hpp"
 #include "util/ToMilliseconds.hpp"
+#endif
 
 // See docs/algorithms.md#Works_cited for citation definitions.
 
@@ -66,9 +69,11 @@ void Newton(std::span<Variable> decisionVariables, Variable& f,
                                   "Decision variables", H.rows(), H.cols());
   }
 
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
   if (config.diagnostics) {
     sleipnir::println("Error tolerance: {}\n", config.tolerance);
   }
+#endif
 
   std::chrono::steady_clock::time_point iterationsStartTime;
 
@@ -78,6 +83,7 @@ void Newton(std::span<Variable> decisionVariables, Variable& f,
   scope_exit exit{[&] {
     status->cost = f.Value();
 
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     if (config.diagnostics) {
       auto solveEndTime = std::chrono::steady_clock::now();
 
@@ -106,6 +112,7 @@ void Newton(std::span<Variable> decisionVariables, Variable& f,
                         hessianL.GetProfiler().SolveMeasurements());
       sleipnir::println("");
     }
+#endif
   }};
 
   Filter filter{f};
@@ -119,16 +126,20 @@ void Newton(std::span<Variable> decisionVariables, Variable& f,
   // Error estimate
   double E_0 = std::numeric_limits<double>::infinity();
 
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
   if (config.diagnostics) {
     iterationsStartTime = std::chrono::steady_clock::now();
   }
+#endif
 
   while (E_0 > config.tolerance &&
          acceptableIterCounter < config.maxAcceptableIterations) {
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     std::chrono::steady_clock::time_point innerIterStartTime;
     if (config.diagnostics) {
       innerIterStartTime = std::chrono::steady_clock::now();
     }
+#endif
 
     // Check for diverging iterates
     if (x.lpNorm<Eigen::Infinity>() > 1e20 || !x.allFinite()) {
@@ -247,12 +258,14 @@ void Newton(std::span<Variable> decisionVariables, Variable& f,
 
     const auto innerIterEndTime = std::chrono::steady_clock::now();
 
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     if (config.diagnostics) {
       PrintIterationDiagnostics(iterations, IterationMode::kNormal,
                                 innerIterEndTime - innerIterStartTime, E_0,
                                 f.Value(), 0.0, solver.HessianRegularization(),
                                 α);
     }
+#endif
 
     ++iterations;
 

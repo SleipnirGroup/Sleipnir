@@ -70,6 +70,7 @@ set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS FALSE)
 option(BUILD_BENCHMARKING "Build CasADi and Sleipnir benchmarks" OFF)
 option(BUILD_EXAMPLES "Build examples" OFF)
 option(BUILD_PYTHON "Build Python module" OFF)
+option(DISABLE_DIAGNOSTICS "Disable diagnostics support at compile-time" OFF)
 
 include(CompilerFlags)
 
@@ -97,6 +98,10 @@ option(USE_SYSTEM_NANOBIND "Use system nanobind" OFF)
 find_package(Threads REQUIRED)
 
 target_link_libraries(Sleipnir PUBLIC Threads::Threads)
+
+if(DISABLE_DIAGNOSTICS)
+    target_compile_definitions(Sleipnir PUBLIC SLEIPNIR_DISABLE_DIAGNOSTICS)
+endif()
 
 # Eigen dependency
 if(NOT USE_SYSTEM_EIGEN)

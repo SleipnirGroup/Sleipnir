@@ -3,7 +3,6 @@
 #pragma once
 
 #include <algorithm>
-#include <array>
 #include <concepts>
 #include <functional>
 #include <iterator>
@@ -21,9 +20,13 @@
 #include "sleipnir/optimization/solver/InteriorPoint.hpp"
 #include "sleipnir/optimization/solver/Newton.hpp"
 #include "sleipnir/optimization/solver/SQP.hpp"
-#include "sleipnir/util/Print.hpp"
 #include "sleipnir/util/SymbolExports.hpp"
 #include "sleipnir/util/small_vector.hpp"
+
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
+#include <array>
+#include "sleipnir/util/Print.hpp"
+#endif
 
 namespace sleipnir {
 
@@ -274,6 +277,7 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
       m_f = Variable();
     }
 
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     if (config.diagnostics) {
       constexpr std::array kExprTypeToName{"empty", "constant", "linear",
                                            "quadratic", "nonlinear"};
@@ -298,6 +302,7 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
       sleipnir::println("Number of inequality constraints: {}\n",
                         m_inequalityConstraints.size());
     }
+#endif
 
     // If the problem is empty or constant, there's nothing to do
     if (status.costFunctionType <= ExpressionType::kConstant &&
@@ -319,9 +324,11 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
                     false, x, s, &status);
     }
 
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     if (config.diagnostics) {
       sleipnir::println("Exit condition: {}", ToMessage(status.exitCondition));
     }
+#endif
 
     // Assign the solution to the original Variable instances
     VariableMatrix{m_decisionVariables}.SetValue(x);
