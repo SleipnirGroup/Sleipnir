@@ -4,17 +4,19 @@
 
 #ifdef JORMUNGANDR
 #include <format>
+#include <source_location>
 #include <stdexcept>
 /**
  * Throw an exception in Python.
  */
-#define Assert(condition)                                                      \
-  do {                                                                         \
-    if (!(condition)) {                                                        \
-      throw std::invalid_argument(                                             \
-          std::format("{}:{}: {}: Assertion `{}' failed.", __FILE__, __LINE__, \
-                      __func__, #condition));                                  \
-    }                                                                          \
+#define Assert(condition)                                            \
+  do {                                                               \
+    if (!(condition)) {                                              \
+      auto location = std::source_location::current();               \
+      throw std::invalid_argument(std::format(                       \
+          "{}:{}: {}: Assertion `{}' failed.", location.file_name(), \
+          location.line(), location.function_name(), #condition));   \
+    }                                                                \
   } while (0);
 #else
 #include <cassert>
