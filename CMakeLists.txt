@@ -67,7 +67,7 @@ option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS FALSE)
 
-option(BUILD_BENCHMARKING "Build CasADi and Sleipnir benchmarks" OFF)
+option(BUILD_BENCHMARKS "Build CasADi and Sleipnir benchmarks" OFF)
 option(BUILD_EXAMPLES "Build examples" OFF)
 option(BUILD_PYTHON "Build Python module" OFF)
 option(DISABLE_DIAGNOSTICS "Disable diagnostics support at compile-time" OFF)
@@ -177,7 +177,7 @@ install(
 )
 
 # Add benchmark executables
-if(BUILD_BENCHMARKING)
+if(BUILD_BENCHMARKS)
     # Perf benchmark
     foreach(benchmark "CartPole" "Flywheel")
         file(
