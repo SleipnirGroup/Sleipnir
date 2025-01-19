@@ -53,23 +53,6 @@ def plot_poly_fit(ax, x, y, func, bases, color):
     )
 
 
-def plot_exp2_fit(ax, x, y, color):
-    def exp2(x, a, b):
-        return a * (np.exp2(b * x) - 1)
-
-    # Fit exponential y = c(2ᵇˣ − 1) to x-y data
-    coeffs = curve_fit(exp2, x, y, p0=(1, 1e-6))[0]
-
-    resampled_x = np.arange(x[0], x[-1] + 100, 100)
-    ax.plot(
-        resampled_x,
-        exp2(resampled_x, *coeffs),
-        color=color,
-        label=f"Fit: y = {coeffs[0]:.4g} (2^({coeffs[1]:.4g}x) - 1)",
-        linestyle="--",
-    )
-
-
 def main():
     parser = argparse.ArgumentParser(
         description="Runs all formatting tasks on the code base. This should be invoked from a directory within the project."
@@ -163,10 +146,12 @@ def main():
 
     for i in range(len(samples)):
         ax2.plot(samples[i], solve_times[i], label=args.labels[i])
-        plot_exp2_fit(
+        plot_poly_fit(
             ax2,
             samples[i],
             solve_times[i],
+            lambda x, a, b, c: a * x**2 + b * x + c,
+            ["x²", "x", ""],
             color=colors[i],
         )
 
