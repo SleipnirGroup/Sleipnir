@@ -48,7 +48,7 @@ class SLEIPNIR_DLLEXPORT Jacobian {
         // If the row is linear, compute its gradient once here and cache its
         // triplets. Constant rows are ignored because their gradients have no
         // nonzero triplets.
-        m_graphs[row].ComputeAdjoints([&](int col, double adjoint) {
+        m_graphs[row].AppendAdjointTriplets([&](int col, double adjoint) {
           m_cachedTriplets.emplace_back(row, col, adjoint);
         });
       } else if (m_variables(row).Type() > ExpressionType::kLinear) {
@@ -76,17 +76,16 @@ class SLEIPNIR_DLLEXPORT Jacobian {
    * them.
    */
   VariableMatrix Get() const {
-    VariableMatrix result{m_variables.Rows(), m_wrt.Rows()};
+    VariableMatrix result{VariableMatrix::empty, m_variables.Rows(),
+                          m_wrt.Rows()};
 
     for (int row = 0; row < m_variables.Rows(); ++row) {
-      for (auto& node : m_wrt) {
-        node.expr->adjointExpr = nullptr;
-      }
-
       auto grad = m_graphs[row].GenerateGradientTree(m_wrt);
       for (int col = 0; col < m_wrt.Rows(); ++col) {
         if (grad(col).expr != nullptr) {
           result(row, col) = std::move(grad(col));
+        } else {
+          result(row, col) = Variable{0.0};
         }
       }
     }
@@ -115,12 +114,18 @@ class SLEIPNIR_DLLEXPORT Jacobian {
 
     // Compute each nonlinear row of the Jacobian
     for (int row : m_nonlinearRows) {
-      m_graphs[row].ComputeAdjoints([&](int col, double adjoint) {
+      m_graphs[row].AppendAdjointTriplets([&](int col, double adjoint) {
         triplets.emplace_back(row, col, adjoint);
       });
     }
 
-    m_J.setFromTriplets(triplets.begin(), triplets.end());
+    if (triplets.size() > 0) {
+      m_J.setFromTriplets(triplets.begin(), triplets.end());
+    } else {
+      // setFromTriplets() is a no-op on empty triplets, so explicitly zero out
+      // the storage
+      m_J.setZero();
+    }
 
     m_profiler.StopSolve();
 

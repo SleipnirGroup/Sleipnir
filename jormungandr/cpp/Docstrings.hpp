@@ -2184,9 +2184,10 @@ expression's computational graph in a way that skips duplicates.)doc";
 
 static const char *__doc_sleipnir_detail_ExpressionGraph_2 = R"doc()doc";
 
-static const char *__doc_sleipnir_detail_ExpressionGraph_ComputeAdjoints =
-R"doc(Updates the adjoints in the expression graph, effectively computing
-the gradient.
+static const char *__doc_sleipnir_detail_ExpressionGraph_AppendAdjointTriplets =
+R"doc(Updates the adjoints in the expression graph (computes the gradient)
+then appends the adjoints of wrt to the sparse matrix triplets via a
+callback.
 
 Parameter ``func``:
     A function that takes two arguments: an int for the gradient row,
