@@ -5,9 +5,10 @@
 #include <ranges>
 #include <utility>
 
+#include <Eigen/SparseCore>
+
 #include "sleipnir/autodiff/Variable.hpp"
 #include "sleipnir/autodiff/VariableMatrix.hpp"
-#include "sleipnir/util/FunctionRef.hpp"
 #include "sleipnir/util/small_vector.hpp"
 
 namespace sleipnir::detail {
@@ -38,8 +39,8 @@ class ExpressionGraph {
 
     small_vector<Expression*> stack;
 
-    // Initialize the number of instances of each node in the tree
-    // (Expression::duplications)
+    // Assign each node's number of instances in the tree to
+    // Expression::duplications
     stack.emplace_back(root.expr.Get());
     while (!stack.empty()) {
       auto node = stack.back();
@@ -63,7 +64,7 @@ class ExpressionGraph {
       auto node = stack.back();
       stack.pop_back();
 
-      m_rowList.emplace_back(node->row);
+      m_colList.emplace_back(node->col);
       m_adjointList.emplace_back(node);
       if (node->args[0] != nullptr) {
         // Constants (expressions with no arguments) are skipped because they
@@ -158,12 +159,13 @@ class ExpressionGraph {
 
   /**
    * Updates the adjoints in the expression graph (computes the gradient) then
-   * appends the adjoints of wrt to the sparse matrix triplets via a callback.
+   * appends the adjoints of wrt to the sparse matrix triplets.
    *
-   * @param func A function that takes two arguments: an int for the gradient
-   *   row, and a double for the adjoint (gradient value).
+   * @param triplets The sparse matrix triplets.
+   * @param row The row of wrt.
    */
-  void AppendAdjointTriplets(function_ref<void(int row, double adjoint)> func) {
+  void AppendAdjointTriplets(small_vector<Eigen::Triplet<double>>& triplets,
+                             int row) const {
     // Read docs/algorithms.md#Reverse_accumulation_automatic_differentiation
     // for background on reverse accumulation automatic differentiation.
 
@@ -178,8 +180,8 @@ class ExpressionGraph {
     // multiplied by dy/dx. If there are multiple "paths" from the root node to
     // variable; the variable's adjoint is the sum of each path's adjoint
     // contribution.
-    for (size_t col = 0; col < m_adjointList.size(); ++col) {
-      auto& node = m_adjointList[col];
+    for (size_t i = 0; i < m_adjointList.size(); ++i) {
+      auto& node = m_adjointList[i];
       auto& lhs = node->args[0];
       auto& rhs = node->args[1];
 
@@ -196,9 +198,8 @@ class ExpressionGraph {
       }
 
       // Append adjoints of wrt to sparse matrix triplets
-      int row = m_rowList[col];
-      if (row != -1) {
-        func(row, node->adjoint);
+      if (const int& col = m_colList[i]; col != -1 && node->adjoint != 0.0) {
+        triplets.emplace_back(row, col, node->adjoint);
       }
     }
 
@@ -209,8 +210,8 @@ class ExpressionGraph {
   }
 
  private:
-  // List that maps nodes to their respective row.
-  small_vector<int> m_rowList;
+  // List that maps nodes to their respective column
+  small_vector<int> m_colList;
 
   // List for updating adjoints
   small_vector<Expression*> m_adjointList;

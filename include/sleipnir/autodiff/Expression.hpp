@@ -83,9 +83,8 @@ struct Expression {
   /// an expression tree.
   uint32_t duplications = 0;
 
-  /// This expression's row in wrt for autodiff gradient, Jacobian, or Hessian.
-  /// This is -1 if the expression isn't in wrt.
-  int32_t row = -1;
+  /// This expression's column in a Jacobian, or -1 otherwise.
+  int32_t col = -1;
 
   /// The adjoint of the expression node used during gradient expression tree
   /// generation.
