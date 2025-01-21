@@ -79,9 +79,8 @@ struct Expression {
   /// The adjoint of the expression node used during autodiff.
   double adjoint = 0.0;
 
-  /// Tracks the number of instances of this expression yet to be encountered in
-  /// an expression tree.
-  uint32_t duplications = 0;
+  /// Counts incoming edges for this node.
+  uint32_t incomingEdges = 0;
 
   /// This expression's column in a Jacobian, or -1 otherwise.
   int32_t col = -1;

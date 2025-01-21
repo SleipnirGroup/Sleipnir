@@ -1952,12 +1952,12 @@ static const char *__doc_sleipnir_detail_AcosExpression_Value = R"doc()doc";
 
 static const char *__doc_sleipnir_detail_AdjointExpressionGraph =
 R"doc(This class is an adaptor type that performs value updates of an
-expression's adjoint graph in a way that skips duplicates.)doc";
+expression's adjoint graph.)doc";
 
 static const char *__doc_sleipnir_detail_AdjointExpressionGraph_2 = R"doc()doc";
 
 static const char *__doc_sleipnir_detail_AdjointExpressionGraph_AdjointExpressionGraph =
-R"doc(Generates the deduplicated adjoint graph for the given expression.
+R"doc(Generates the adjoint graph for the given expression.
 
 Parameter ``root``:
     The root node of the expression.)doc";
@@ -2318,9 +2318,7 @@ static const char *__doc_sleipnir_detail_Expression_args = R"doc(Expression argu
 
 static const char *__doc_sleipnir_detail_Expression_col = R"doc(This expression's column in a Jacobian, or -1 otherwise.)doc";
 
-static const char *__doc_sleipnir_detail_Expression_duplications =
-R"doc(Tracks the number of instances of this expression yet to be
-encountered in an expression tree.)doc";
+static const char *__doc_sleipnir_detail_Expression_incomingEdges = R"doc(Counts incoming edges for this node.)doc";
 
 static const char *__doc_sleipnir_detail_Expression_refCount = R"doc(Reference count for intrusive shared pointer.)doc";
 
@@ -2579,18 +2577,18 @@ static const char *__doc_sleipnir_detail_UnaryMinusExpression_Value = R"doc()doc
 
 static const char *__doc_sleipnir_detail_ValueExpressionGraph =
 R"doc(This class is an adaptor type that performs value updates of an
-expression's value graph in a way that skips duplicates.)doc";
+expression's value graph.)doc";
 
 static const char *__doc_sleipnir_detail_ValueExpressionGraph_2 =
 R"doc(This class is an adaptor type that performs value updates of an
-expression's value graph in a way that skips duplicates.)doc";
+expression's value graph.)doc";
 
 static const char *__doc_sleipnir_detail_ValueExpressionGraph_Update =
 R"doc(Update the values of all nodes in this value graph based on the values
 of their dependent nodes.)doc";
 
 static const char *__doc_sleipnir_detail_ValueExpressionGraph_ValueExpressionGraph =
-R"doc(Generates the deduplicated value graph for the given expression.
+R"doc(Generates the value graph for the given expression.
 
 Parameter ``root``:
     The root node of the expression.)doc";

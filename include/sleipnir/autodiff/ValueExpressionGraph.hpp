@@ -11,12 +11,12 @@ namespace sleipnir::detail {
 
 /**
  * This class is an adaptor type that performs value updates of an expression's
- * value graph in a way that skips duplicates.
+ * value graph.
  */
 class ValueExpressionGraph {
  public:
   /**
-   * Generates the deduplicated value graph for the given expression.
+   * Generates the value graph for the given expression.
    *
    * @param root The root node of the expression.
    */
@@ -27,16 +27,10 @@ class ValueExpressionGraph {
       return;
     }
 
-    // Breadth-first search (BFS) is used as opposed to a depth-first search
-    // (DFS) to avoid counting duplicate nodes multiple times. A list of nodes
-    // ordered from parent to child with no duplicates is generated.
-    //
-    // https://en.wikipedia.org/wiki/Breadth-first_search
-
+    // Stack of nodes to explore
     small_vector<Expression*> stack;
 
-    // Assign each node's number of instances in the tree to
-    // Expression::duplications
+    // Enumerate incoming edges for each node via depth-first search
     stack.emplace_back(root.Get());
     while (!stack.empty()) {
       auto node = stack.back();
@@ -44,17 +38,22 @@ class ValueExpressionGraph {
 
       for (auto& arg : node->args) {
         if (arg != nullptr) {
-          // If this is the first instance of the node encountered (it hasn't
-          // been explored yet), add it to stack so it's recursed upon
-          if (arg->duplications == 0) {
+          // If the node hasn't been explored yet, add it to the stack
+          if (arg->incomingEdges == 0) {
             stack.push_back(arg.Get());
           }
-          ++arg->duplications;
+          ++arg->incomingEdges;
         }
       }
     }
 
-    // Generate BFS lists sorted from parent to child
+    // Generate topological sort of graph from parent to child.
+    //
+    // A node is only added to the stack after all its incoming edges have been
+    // traversed. Expression::incomingEdges is a decrementing counter for
+    // tracking this.
+    //
+    // https://en.wikipedia.org/wiki/Topological_sorting
     stack.emplace_back(root.Get());
     while (!stack.empty()) {
       auto node = stack.back();
@@ -68,11 +67,9 @@ class ValueExpressionGraph {
 
       for (auto& arg : node->args) {
         if (arg != nullptr) {
-          // Once the number of node visitations equals the number of
-          // duplications (the counter hits zero), add it to the stack. Note
-          // that this means the node is only enqueued once.
-          --arg->duplications;
-          if (arg->duplications == 0) {
+          // If we traversed all this node's incoming edges, add it to the stack
+          --arg->incomingEdges;
+          if (arg->incomingEdges == 0) {
             stack.push_back(arg.Get());
           }
         }
