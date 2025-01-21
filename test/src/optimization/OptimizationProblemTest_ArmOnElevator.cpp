@@ -84,9 +84,9 @@ TEST_CASE("OptimizationProblem - Arm on elevator", "[OptimizationProblem]") {
   problem.SubjectTo(armAccel <= kArmMaxAcceleration);
 
   // Height limit
-  problem.SubjectTo(elevator.Row(0) +
-                        kArmLength * arm.Row(0).CwiseTransform(sleipnir::sin) <=
-                    kEndEffectorMaxHeight);
+  auto heights =
+      elevator.Row(0) + kArmLength * arm.Row(0).CwiseTransform(sleipnir::sin);
+  problem.SubjectTo(heights <= kEndEffectorMaxHeight);
 
   // Cost function
   sleipnir::Variable J = 0.0;

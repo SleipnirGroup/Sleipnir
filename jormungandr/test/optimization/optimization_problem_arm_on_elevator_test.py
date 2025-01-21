@@ -79,10 +79,8 @@ def test_optimization_problem_arm_on_elevator():
     problem.subject_to(arm_accel <= ARM_MAX_ACCELERATION)
 
     # Height limit
-    problem.subject_to(
-        elevator[:1, :] + ARM_LENGTH * arm[:1, :].cwise_transform(autodiff.sin)
-        <= END_EFFECTOR_MAX_HEIGHT
-    )
+    heights = elevator[:1, :] + ARM_LENGTH * arm[:1, :].cwise_transform(autodiff.sin)
+    problem.subject_to(heights <= END_EFFECTOR_MAX_HEIGHT)
 
     # Cost function
     J = 0.0
