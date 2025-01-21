@@ -15,16 +15,16 @@ namespace sleipnir::detail {
 
 /**
  * This class is an adaptor type that performs value updates of an expression's
- * computational graph in a way that skips duplicates.
+ * adjoint graph in a way that skips duplicates.
  */
-class ExpressionGraph {
+class AdjointExpressionGraph {
  public:
   /**
-   * Generates the deduplicated computational graph for the given expression.
+   * Generates the deduplicated adjoint graph for the given expression.
    *
    * @param root The root node of the expression.
    */
-  explicit ExpressionGraph(Variable& root) {
+  explicit AdjointExpressionGraph(Variable& root) {
     // If the root type is a constant, Update() is a no-op, so there's no work
     // to do
     if (root.expr == nullptr || root.Type() == ExpressionType::kConstant) {
@@ -87,8 +87,8 @@ class ExpressionGraph {
   }
 
   /**
-   * Update the values of all nodes in this computational tree based on the
-   * values of their dependent nodes.
+   * Update the values of all nodes in this adjoint graph based on the values of
+   * their dependent nodes.
    */
   void Update() {
     // Traverse the BFS list backward from child to parent and update the value
