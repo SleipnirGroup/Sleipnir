@@ -118,7 +118,21 @@ Sleipnir requires somewhat newer operating systems and C++ runtimes for std::pri
 
 ### C++ library
 
-See the [build instructions](https://github.com/SleipnirGroup/Sleipnir/?tab=readme-ov-file#c-library-1).
+To install Sleipnir system-wide, see the [build instructions](https://github.com/SleipnirGroup/Sleipnir/?tab=readme-ov-file#c-library-1).
+
+To use Sleipnir within a CMake project, add the following to your CMakeLists.txt:
+```cmake
+include(FetchContent)
+
+fetchcontent_declare(
+    Sleipnir
+    GIT_REPOSITORY https://github.com/SleipnirGroup/Sleipnir
+    GIT_TAG main
+)
+fetchcontent_makeavailable(Sleipnir)
+
+target_link_libraries(MyApp PUBLIC Sleipnir)
+```
 
 ### Python library
 
