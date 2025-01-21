@@ -27,21 +27,21 @@ static const char *__doc_Eigen_NumTraits =
 R"doc(NumTraits specialization that allows instantiating Eigen types with
 Variable.)doc";
 
-static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_764_3 = R"doc()doc";
+static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_773_3 = R"doc()doc";
 
-static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_764_3_AddCost = R"doc()doc";
+static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_773_3_AddCost = R"doc()doc";
 
-static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_764_3_IsComplex = R"doc()doc";
+static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_773_3_IsComplex = R"doc()doc";
 
-static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_764_3_IsInteger = R"doc()doc";
+static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_773_3_IsInteger = R"doc()doc";
 
-static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_764_3_IsSigned = R"doc()doc";
+static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_773_3_IsSigned = R"doc()doc";
 
-static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_764_3_MulCost = R"doc()doc";
+static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_773_3_MulCost = R"doc()doc";
 
-static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_764_3_ReadCost = R"doc()doc";
+static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_773_3_ReadCost = R"doc()doc";
 
-static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_764_3_RequireInitialization = R"doc()doc";
+static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_773_3_RequireInitialization = R"doc()doc";
 
 static const char *__doc_sleipnir_Block =
 R"doc(Assemble a VariableMatrix from a nested list of blocks.
@@ -1950,6 +1950,44 @@ static const char *__doc_sleipnir_detail_AcosExpression_Type = R"doc()doc";
 
 static const char *__doc_sleipnir_detail_AcosExpression_Value = R"doc()doc";
 
+static const char *__doc_sleipnir_detail_AdjointExpressionGraph =
+R"doc(This class is an adaptor type that performs value updates of an
+expression's adjoint graph in a way that skips duplicates.)doc";
+
+static const char *__doc_sleipnir_detail_AdjointExpressionGraph_2 = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_AdjointExpressionGraph_AdjointExpressionGraph =
+R"doc(Generates the deduplicated adjoint graph for the given expression.
+
+Parameter ``root``:
+    The root node of the expression.)doc";
+
+static const char *__doc_sleipnir_detail_AdjointExpressionGraph_AppendAdjointTriplets =
+R"doc(Updates the adjoints in the expression graph (computes the gradient)
+then appends the adjoints of wrt to the sparse matrix triplets.
+
+Parameter ``triplets``:
+    The sparse matrix triplets.
+
+Parameter ``row``:
+    The row of wrt.)doc";
+
+static const char *__doc_sleipnir_detail_AdjointExpressionGraph_GenerateGradientTree =
+R"doc(Returns the variable's gradient tree.
+
+Parameter ``wrt``:
+    Variables with respect to which to compute the gradient.)doc";
+
+static const char *__doc_sleipnir_detail_AdjointExpressionGraph_Update =
+R"doc(Update the values of all nodes in this adjoint graph based on the
+values of their dependent nodes.)doc";
+
+static const char *__doc_sleipnir_detail_AdjointExpressionGraph_m_adjointList = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_AdjointExpressionGraph_m_colList = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_AdjointExpressionGraph_m_valueList = R"doc()doc";
+
 static const char *__doc_sleipnir_detail_AsinExpression = R"doc()doc";
 
 static const char *__doc_sleipnir_detail_AsinExpression_AsinExpression =
@@ -2177,45 +2215,6 @@ static const char *__doc_sleipnir_detail_ExpExpression_Value = R"doc()doc";
 static const char *__doc_sleipnir_detail_Expression = R"doc(An autodiff expression node.)doc";
 
 static const char *__doc_sleipnir_detail_Expression_2 = R"doc(An autodiff expression node.)doc";
-
-static const char *__doc_sleipnir_detail_ExpressionGraph =
-R"doc(This class is an adaptor type that performs value updates of an
-expression's computational graph in a way that skips duplicates.)doc";
-
-static const char *__doc_sleipnir_detail_ExpressionGraph_2 = R"doc()doc";
-
-static const char *__doc_sleipnir_detail_ExpressionGraph_AppendAdjointTriplets =
-R"doc(Updates the adjoints in the expression graph (computes the gradient)
-then appends the adjoints of wrt to the sparse matrix triplets.
-
-Parameter ``triplets``:
-    The sparse matrix triplets.
-
-Parameter ``row``:
-    The row of wrt.)doc";
-
-static const char *__doc_sleipnir_detail_ExpressionGraph_ExpressionGraph =
-R"doc(Generates the deduplicated computational graph for the given
-expression.
-
-Parameter ``root``:
-    The root node of the expression.)doc";
-
-static const char *__doc_sleipnir_detail_ExpressionGraph_GenerateGradientTree =
-R"doc(Returns the variable's gradient tree.
-
-Parameter ``wrt``:
-    Variables with respect to which to compute the gradient.)doc";
-
-static const char *__doc_sleipnir_detail_ExpressionGraph_Update =
-R"doc(Update the values of all nodes in this computational tree based on the
-values of their dependent nodes.)doc";
-
-static const char *__doc_sleipnir_detail_ExpressionGraph_m_adjointList = R"doc()doc";
-
-static const char *__doc_sleipnir_detail_ExpressionGraph_m_colList = R"doc()doc";
-
-static const char *__doc_sleipnir_detail_ExpressionGraph_m_valueList = R"doc()doc";
 
 static const char *__doc_sleipnir_detail_Expression_Expression = R"doc(Constructs a constant expression with a value of zero.)doc";
 
@@ -2577,6 +2576,26 @@ Parameter ``lhs``:
     Unary operator's operand.)doc";
 
 static const char *__doc_sleipnir_detail_UnaryMinusExpression_Value = R"doc()doc";
+
+static const char *__doc_sleipnir_detail_ValueExpressionGraph =
+R"doc(This class is an adaptor type that performs value updates of an
+expression's value graph in a way that skips duplicates.)doc";
+
+static const char *__doc_sleipnir_detail_ValueExpressionGraph_2 =
+R"doc(This class is an adaptor type that performs value updates of an
+expression's value graph in a way that skips duplicates.)doc";
+
+static const char *__doc_sleipnir_detail_ValueExpressionGraph_Update =
+R"doc(Update the values of all nodes in this value graph based on the values
+of their dependent nodes.)doc";
+
+static const char *__doc_sleipnir_detail_ValueExpressionGraph_ValueExpressionGraph =
+R"doc(Generates the deduplicated value graph for the given expression.
+
+Parameter ``root``:
+    The root node of the expression.)doc";
+
+static const char *__doc_sleipnir_detail_ValueExpressionGraph_m_valueList = R"doc()doc";
 
 static const char *__doc_sleipnir_detail_abs =
 R"doc(std::abs() for Expressions.

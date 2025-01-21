@@ -6,7 +6,7 @@
 
 #include <Eigen/SparseCore>
 
-#include "sleipnir/autodiff/ExpressionGraph.hpp"
+#include "sleipnir/autodiff/AdjointExpressionGraph.hpp"
 #include "sleipnir/autodiff/Profiler.hpp"
 #include "sleipnir/autodiff/Variable.hpp"
 #include "sleipnir/autodiff/VariableMatrix.hpp"
@@ -139,7 +139,7 @@ class SLEIPNIR_DLLEXPORT Jacobian {
   VariableMatrix m_variables;
   VariableMatrix m_wrt;
 
-  small_vector<detail::ExpressionGraph> m_graphs;
+  small_vector<detail::AdjointExpressionGraph> m_graphs;
 
   Eigen::SparseMatrix<double> m_J{m_variables.Rows(), m_wrt.Rows()};
 

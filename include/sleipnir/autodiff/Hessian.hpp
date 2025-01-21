@@ -4,7 +4,7 @@
 
 #include <Eigen/SparseCore>
 
-#include "sleipnir/autodiff/ExpressionGraph.hpp"
+#include "sleipnir/autodiff/AdjointExpressionGraph.hpp"
 #include "sleipnir/autodiff/Jacobian.hpp"
 #include "sleipnir/autodiff/Profiler.hpp"
 #include "sleipnir/autodiff/Variable.hpp"
@@ -30,13 +30,12 @@ class SLEIPNIR_DLLEXPORT Hessian {
    *   Hessian.
    */
   Hessian(Variable variable, const VariableMatrix& wrt) noexcept
-      : m_jacobian{
-            [&] {
-              m_profiler.StartSetup();
-              return detail::ExpressionGraph{variable}.GenerateGradientTree(
-                  wrt);
-            }(),
-            wrt} {
+      : m_jacobian{[&] {
+                     m_profiler.StartSetup();
+                     return detail::AdjointExpressionGraph{variable}
+                         .GenerateGradientTree(wrt);
+                   }(),
+                   wrt} {
     m_profiler.StopSetup();
   }
 
