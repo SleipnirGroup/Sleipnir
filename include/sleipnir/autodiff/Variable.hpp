@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <concepts>
 #include <initializer_list>
+#include <optional>
 #include <source_location>
 #include <type_traits>
 #include <utility>
@@ -25,7 +26,6 @@ namespace sleipnir {
 // Forward declarations for friend declarations in Variable
 namespace detail {
 class AdjointExpressionGraph;
-class ValueExpressionGraph;
 }  // namespace detail
 class SLEIPNIR_DLLEXPORT Hessian;
 class SLEIPNIR_DLLEXPORT Jacobian;
@@ -215,9 +215,10 @@ class SLEIPNIR_DLLEXPORT Variable {
    * Returns the value of this variable.
    */
   double Value() {
-    // Updates the value of this variable based on the values of its dependent
-    // variables
-    detail::ValueExpressionGraph{expr}.Update();
+    if (!m_graph) {
+      m_graph = detail::ValueExpressionGraph{expr};
+    }
+    m_graph->Update();
 
     return expr->value;
   }
@@ -232,6 +233,10 @@ class SLEIPNIR_DLLEXPORT Variable {
   /// The expression node.
   detail::ExpressionPtr expr =
       detail::MakeExpressionPtr<detail::DecisionVariableExpression>();
+
+  /// Updates the value of this variable based on the values of its dependent
+  /// variables
+  std::optional<detail::ValueExpressionGraph> m_graph;
 
   friend SLEIPNIR_DLLEXPORT Variable abs(const Variable& x);
   friend SLEIPNIR_DLLEXPORT Variable acos(const Variable& x);
@@ -259,7 +264,6 @@ class SLEIPNIR_DLLEXPORT Variable {
                                            const Variable& z);
 
   friend class detail::AdjointExpressionGraph;
-  friend class detail::ValueExpressionGraph;
   friend class SLEIPNIR_DLLEXPORT Hessian;
   friend class SLEIPNIR_DLLEXPORT Jacobian;
 };
