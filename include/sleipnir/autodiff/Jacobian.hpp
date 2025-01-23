@@ -45,6 +45,10 @@ class SLEIPNIR_DLLEXPORT Jacobian {
     }
 
     for (int row = 0; row < m_variables.Rows(); ++row) {
+      if (m_variables(row).expr == nullptr) {
+        continue;
+      }
+
       if (m_variables(row).Type() == ExpressionType::kLinear) {
         // If the row is linear, compute its gradient once here and cache its
         // triplets. Constant rows are ignored because their gradients have no

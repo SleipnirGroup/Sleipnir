@@ -33,3 +33,23 @@ TEST_CASE("LinearProblem - Maximize", "[LinearProblem]") {
   CHECK(x.Value() == Catch::Approx(375.0).margin(1e-6));
   CHECK(y.Value() == Catch::Approx(250.0).margin(1e-6));
 }
+
+TEST_CASE("LinearProblem - Free variable", "[LinearProblem]") {
+  sleipnir::OptimizationProblem problem;
+
+  auto x = problem.DecisionVariable(2);
+  x(0).SetValue(1.0);
+  x(1).SetValue(2.0);
+
+  problem.SubjectTo(x(0) == 0);
+
+  auto status = problem.Solve({.diagnostics = true});
+
+  CHECK(status.costFunctionType == sleipnir::ExpressionType::kNone);
+  CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kLinear);
+  CHECK(status.inequalityConstraintType == sleipnir::ExpressionType::kNone);
+  CHECK(status.exitCondition == sleipnir::SolverExitCondition::kSuccess);
+
+  CHECK(x(0).Value() == Catch::Approx(0.0).margin(1e-6));
+  CHECK(x(1).Value() == Catch::Approx(2.0).margin(1e-6));
+}

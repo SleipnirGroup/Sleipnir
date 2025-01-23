@@ -30,3 +30,23 @@ def test_maximize():
 
     assert x.value() == pytest.approx(375.0, abs=1e-6)
     assert y.value() == pytest.approx(250.0, abs=1e-6)
+
+
+def test_free_variable():
+    problem = OptimizationProblem()
+
+    x = problem.decision_variable(2)
+    x[0].set_value(1.0)
+    x[1].set_value(2.0)
+
+    problem.subject_to(x[0] == 0)
+
+    status = problem.solve(diagnostics=True)
+
+    assert status.cost_function_type == ExpressionType.NONE
+    assert status.equality_constraint_type == ExpressionType.LINEAR
+    assert status.inequality_constraint_type == ExpressionType.NONE
+    assert status.exit_condition == SolverExitCondition.SUCCESS
+
+    assert x[0].value() == pytest.approx(0.0, abs=1e-6)
+    assert x[1].value() == pytest.approx(2.0, abs=1e-6)
