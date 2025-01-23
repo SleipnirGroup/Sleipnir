@@ -107,6 +107,11 @@ class AdjointExpressionGraph {
   /**
    * Returns the variable's gradient tree.
    *
+   * This function lazily allocates variables, so elements of the returned
+   * VariableMatrix will be empty if the corresponding element of wrt had no
+   * adjoint. Ensure Variable::expr isn't nullptr before calling member
+   * functions.
+   *
    * @param wrt Variables with respect to which to compute the gradient.
    */
   VariableMatrix GenerateGradientTree(const VariableMatrix& wrt) const {
