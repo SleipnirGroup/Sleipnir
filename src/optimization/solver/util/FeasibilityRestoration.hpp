@@ -175,9 +175,11 @@ inline void FeasibilityRestoration(
   Eigen::VectorXd fr_s{fr_inequalityConstraints.size()};
   fr_s.setOnes();
 
+  small_vector<std::function<bool(const SolverIterationInfo& info)>> callbacks{
+      callback};
   InteriorPoint(fr_decisionVariables, fr_equalityConstraints,
-                fr_inequalityConstraints, J, callback, config, true, fr_x, fr_s,
-                status);
+                fr_inequalityConstraints, J, callbacks, config, true, fr_x,
+                fr_s, status);
 
   x = fr_x.segment(0, decisionVariables.size());
 }
@@ -389,9 +391,11 @@ inline void FeasibilityRestoration(
                fr_s.size() - inequalityConstraints.size())
       .setOnes();
 
+  small_vector<std::function<bool(const SolverIterationInfo& info)>> callbacks{
+      callback};
   InteriorPoint(fr_decisionVariables, fr_equalityConstraints,
-                fr_inequalityConstraints, J, callback, config, true, fr_x, fr_s,
-                status);
+                fr_inequalityConstraints, J, callbacks, config, true, fr_x,
+                fr_s, status);
 
   x = fr_x.segment(0, decisionVariables.size());
   s = fr_s.segment(0, inequalityConstraints.size());

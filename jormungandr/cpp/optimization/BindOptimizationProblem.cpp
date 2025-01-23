@@ -69,6 +69,14 @@ void BindOptimizationProblem(nb::class_<OptimizationProblem>& cls) {
   cls.def(
       "solve",
       [](OptimizationProblem& self, const nb::kwargs& kwargs) {
+        // Make Python signals (e.g., SIGINT from Ctrl-C) abort the solve
+        self.AddCallback([](const SolverIterationInfo&) -> bool {
+          if (PyErr_CheckSignals() != 0) {
+            throw nb::python_error();
+          }
+          return false;
+        });
+
         SolverConfig config;
 
         for (auto [key, value] : kwargs) {
@@ -156,12 +164,14 @@ Parameter ``spy``:
     Use tools/spy.py to plot them.
     (default: False))doc");
   cls.def(
-      "callback",
+      "add_callback",
       [](OptimizationProblem& self,
          std::function<bool(const SolverIterationInfo& info)> callback) {
-        self.Callback(std::move(callback));
+        self.AddCallback(std::move(callback));
       },
-      "callback"_a, DOC(sleipnir, OptimizationProblem, Callback, 2));
+      "callback"_a, DOC(sleipnir, OptimizationProblem, AddCallback, 2));
+  cls.def("clear_callbacks", &OptimizationProblem::ClearCallbacks,
+          DOC(sleipnir, OptimizationProblem, ClearCallbacks));
 }
 
 }  // namespace sleipnir

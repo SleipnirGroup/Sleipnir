@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <functional>
 #include <limits>
 #include <memory>
 
@@ -38,13 +39,13 @@
 
 namespace sleipnir {
 
-void InteriorPoint(std::span<Variable> decisionVariables,
-                   std::span<Variable> equalityConstraints,
-                   std::span<Variable> inequalityConstraints, Variable& f,
-                   function_ref<bool(const SolverIterationInfo& info)> callback,
-                   const SolverConfig& config, bool feasibilityRestoration,
-                   Eigen::VectorXd& x, Eigen::VectorXd& s,
-                   SolverStatus* status) {
+void InteriorPoint(
+    std::span<Variable> decisionVariables,
+    std::span<Variable> equalityConstraints,
+    std::span<Variable> inequalityConstraints, Variable& f,
+    std::span<std::function<bool(const SolverIterationInfo& info)>> callbacks,
+    const SolverConfig& config, bool feasibilityRestoration, Eigen::VectorXd& x,
+    Eigen::VectorXd& s, SolverStatus* status) {
   const auto solveStartTime = std::chrono::steady_clock::now();
 
   // Map decision variables and constraints to VariableMatrices for Lagrangian
@@ -326,10 +327,12 @@ void InteriorPoint(std::span<Variable> decisionVariables,
       A_i_spy->Add(A_i);
     }
 
-    // Call user callback
-    if (callback({iterations, x, s, g, H, A_e, A_i})) {
-      status->exitCondition = SolverExitCondition::kCallbackRequestedStop;
-      return;
+    // Call user callbacks
+    for (const auto& callback : callbacks) {
+      if (callback({iterations, x, s, g, H, A_e, A_i})) {
+        status->exitCondition = SolverExitCondition::kCallbackRequestedStop;
+        return;
+      }
     }
 
     //     [s₁ 0 ⋯ 0 ]

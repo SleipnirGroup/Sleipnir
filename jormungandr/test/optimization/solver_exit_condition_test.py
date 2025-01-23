@@ -10,21 +10,18 @@ def test_callback_requested_stop():
     x = problem.decision_variable()
     problem.minimize(x * x)
 
-    problem.callback(lambda info: False)
-    status = problem.solve(diagnostics=True)
+    problem.add_callback(lambda info: False)
+    assert problem.solve(diagnostics=True).exit_condition == SolverExitCondition.SUCCESS
 
-    assert status.cost_function_type == ExpressionType.QUADRATIC
-    assert status.equality_constraint_type == ExpressionType.NONE
-    assert status.inequality_constraint_type == ExpressionType.NONE
-    assert status.exit_condition == SolverExitCondition.SUCCESS
+    problem.add_callback(lambda info: True)
+    assert (
+        problem.solve(diagnostics=True).exit_condition
+        == SolverExitCondition.CALLBACK_REQUESTED_STOP
+    )
 
-    problem.callback(lambda info: True)
-    status = problem.solve(diagnostics=True)
-
-    assert status.cost_function_type == ExpressionType.QUADRATIC
-    assert status.equality_constraint_type == ExpressionType.NONE
-    assert status.inequality_constraint_type == ExpressionType.NONE
-    assert status.exit_condition == SolverExitCondition.CALLBACK_REQUESTED_STOP
+    problem.clear_callbacks()
+    problem.add_callback(lambda info: False)
+    assert problem.solve(diagnostics=True).exit_condition == SolverExitCondition.SUCCESS
 
 
 def test_too_few_dofs():

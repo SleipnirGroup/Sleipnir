@@ -261,8 +261,8 @@ Parameter ``inequality_constraints``:
 Parameter ``f``:
     The cost function.
 
-Parameter ``callback``:
-    The user callback.
+Parameter ``callbacks``:
+    The list of user callbacks.
 
 Parameter ``config``:
     Configuration options for the solver.
@@ -382,8 +382,8 @@ Parameter ``decision_variables``:
 Parameter ``f``:
     The cost function.
 
-Parameter ``callback``:
-    The user callback.
+Parameter ``callbacks``:
+    The list of user callbacks.
 
 Parameter ``config``:
     Configuration options for the solver.
@@ -626,22 +626,24 @@ The nice thing about this class is users don't have to put their
 system in the form shown above manually; they can write it in natural
 mathematical form and it'll be converted for them.)doc";
 
-static const char *__doc_sleipnir_OptimizationProblem_Callback =
-R"doc(Sets a callback to be called at each solver iteration.
+static const char *__doc_sleipnir_OptimizationProblem_AddCallback =
+R"doc(Adds a callback to be called at each solver iteration.
 
 The callback for this overload should return void.
 
 Parameter ``callback``:
     The callback.)doc";
 
-static const char *__doc_sleipnir_OptimizationProblem_Callback_2 =
-R"doc(Sets a callback to be called at each solver iteration.
+static const char *__doc_sleipnir_OptimizationProblem_AddCallback_2 =
+R"doc(Adds a callback to be called at each solver iteration.
 
 The callback for this overload should return bool.
 
 Parameter ``callback``:
     The callback. Returning true from the callback causes the solver
     to exit early with the solution it has so far.)doc";
+
+static const char *__doc_sleipnir_OptimizationProblem_ClearCallbacks = R"doc(Clears the registered callbacks.)doc";
 
 static const char *__doc_sleipnir_OptimizationProblem_DecisionVariable = R"doc(Create a decision variable in the optimization problem.)doc";
 
@@ -743,7 +745,7 @@ problem dimensionality.
 Parameter ``rows``:
     Number of matrix rows.)doc";
 
-static const char *__doc_sleipnir_OptimizationProblem_m_callback = R"doc()doc";
+static const char *__doc_sleipnir_OptimizationProblem_m_callbacks = R"doc()doc";
 
 static const char *__doc_sleipnir_OptimizationProblem_m_decisionVariables = R"doc()doc";
 
@@ -824,8 +826,8 @@ Parameter ``equality_constraints``:
 Parameter ``f``:
     The cost function.
 
-Parameter ``callback``:
-    The user callback.
+Parameter ``callbacks``:
+    The list of user callbacks.
 
 Parameter ``config``:
     Configuration options for the solver.

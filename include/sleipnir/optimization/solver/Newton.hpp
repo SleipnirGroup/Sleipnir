@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <functional>
 #include <span>
 
 #include <Eigen/Core>
@@ -10,7 +11,6 @@
 #include "sleipnir/optimization/SolverConfig.hpp"
 #include "sleipnir/optimization/SolverIterationInfo.hpp"
 #include "sleipnir/optimization/SolverStatus.hpp"
-#include "sleipnir/util/FunctionRef.hpp"
 #include "sleipnir/util/SymbolExports.hpp"
 
 namespace sleipnir {
@@ -28,7 +28,7 @@ where f(x) is the cost function.
 
 @param[in] decisionVariables The list of decision variables.
 @param[in] f The cost function.
-@param[in] callback The user callback.
+@param[in] callbacks The list of user callbacks.
 @param[in] config Configuration options for the solver.
 @param[in,out] x The initial guess and output location for the decision
   variables.
@@ -36,7 +36,7 @@ where f(x) is the cost function.
 */
 SLEIPNIR_DLLEXPORT void Newton(
     std::span<Variable> decisionVariables, Variable& f,
-    function_ref<bool(const SolverIterationInfo& info)> callback,
+    std::span<std::function<bool(const SolverIterationInfo& info)>> callbacks,
     const SolverConfig& config, Eigen::VectorXd& x, SolverStatus* status);
 
 }  // namespace sleipnir
