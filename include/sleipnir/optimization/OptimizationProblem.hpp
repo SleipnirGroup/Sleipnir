@@ -313,14 +313,14 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
 
     // Solve the optimization problem
     if (m_equalityConstraints.empty() && m_inequalityConstraints.empty()) {
-      Newton(m_decisionVariables, m_f.value(), m_callback, config, x, &status);
+      Newton(m_decisionVariables, m_f.value(), m_callbacks, config, x, &status);
     } else if (m_inequalityConstraints.empty()) {
-      SQP(m_decisionVariables, m_equalityConstraints, m_f.value(), m_callback,
+      SQP(m_decisionVariables, m_equalityConstraints, m_f.value(), m_callbacks,
           config, x, &status);
     } else {
       Eigen::VectorXd s = Eigen::VectorXd::Ones(m_inequalityConstraints.size());
       InteriorPoint(m_decisionVariables, m_equalityConstraints,
-                    m_inequalityConstraints, m_f.value(), m_callback, config,
+                    m_inequalityConstraints, m_f.value(), m_callbacks, config,
                     false, x, s, &status);
     }
 
@@ -337,7 +337,7 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
   }
 
   /**
-   * Sets a callback to be called at each solver iteration.
+   * Adds a callback to be called at each solver iteration.
    *
    * The callback for this overload should return void.
    *
@@ -347,16 +347,16 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
     requires requires(F callback, const SolverIterationInfo& info) {
       { callback(info) } -> std::same_as<void>;
     }
-  void Callback(F&& callback) {
-    m_callback = [=, callback = std::forward<F>(callback)](
-                     const SolverIterationInfo& info) {
+  void AddCallback(F&& callback) {
+    m_callbacks.emplace_back([=, callback = std::forward<F>(callback)](
+                                 const SolverIterationInfo& info) {
       callback(info);
       return false;
-    };
+    });
   }
 
   /**
-   * Sets a callback to be called at each solver iteration.
+   * Adds a callback to be called at each solver iteration.
    *
    * The callback for this overload should return bool.
    *
@@ -367,9 +367,14 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
     requires requires(F callback, const SolverIterationInfo& info) {
       { callback(info) } -> std::same_as<bool>;
     }
-  void Callback(F&& callback) {
-    m_callback = std::forward<F>(callback);
+  void AddCallback(F&& callback) {
+    m_callbacks.emplace_back(std::forward<F>(callback));
   }
+
+  /**
+   * Clears the registered callbacks.
+   */
+  void ClearCallbacks() { m_callbacks.clear(); }
 
  private:
   // The list of decision variables, which are the root of the problem's
@@ -386,8 +391,8 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
   small_vector<Variable> m_inequalityConstraints;
 
   // The user callback
-  std::function<bool(const SolverIterationInfo& info)> m_callback =
-      [](const SolverIterationInfo&) { return false; };
+  small_vector<std::function<bool(const SolverIterationInfo& info)>>
+      m_callbacks;
 
   // The solver status
   SolverStatus status;

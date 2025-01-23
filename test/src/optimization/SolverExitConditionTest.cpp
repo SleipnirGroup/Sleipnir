@@ -14,30 +14,25 @@ TEST_CASE("SolverExitCondition - Callback requested stop",
   auto x = problem.DecisionVariable();
   problem.Minimize(x * x);
 
-  problem.Callback([](const sleipnir::SolverIterationInfo&) {});
-  auto status = problem.Solve({.diagnostics = true});
+  problem.AddCallback([](const sleipnir::SolverIterationInfo&) {});
+  CHECK(problem.Solve({.diagnostics = true}).exitCondition ==
+        sleipnir::SolverExitCondition::kSuccess);
 
-  CHECK(status.costFunctionType == sleipnir::ExpressionType::kQuadratic);
-  CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kNone);
-  CHECK(status.inequalityConstraintType == sleipnir::ExpressionType::kNone);
-  CHECK(status.exitCondition == sleipnir::SolverExitCondition::kSuccess);
+  problem.AddCallback(
+      [](const sleipnir::SolverIterationInfo&) { return false; });
+  CHECK(problem.Solve({.diagnostics = true}).exitCondition ==
+        sleipnir::SolverExitCondition::kSuccess);
 
-  problem.Callback([](const sleipnir::SolverIterationInfo&) { return false; });
-  status = problem.Solve({.diagnostics = true});
-
-  CHECK(status.costFunctionType == sleipnir::ExpressionType::kQuadratic);
-  CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kNone);
-  CHECK(status.inequalityConstraintType == sleipnir::ExpressionType::kNone);
-  CHECK(status.exitCondition == sleipnir::SolverExitCondition::kSuccess);
-
-  problem.Callback([](const sleipnir::SolverIterationInfo&) { return true; });
-  status = problem.Solve({.diagnostics = true});
-
-  CHECK(status.costFunctionType == sleipnir::ExpressionType::kQuadratic);
-  CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kNone);
-  CHECK(status.inequalityConstraintType == sleipnir::ExpressionType::kNone);
-  CHECK(status.exitCondition ==
+  problem.AddCallback(
+      [](const sleipnir::SolverIterationInfo&) { return true; });
+  CHECK(problem.Solve({.diagnostics = true}).exitCondition ==
         sleipnir::SolverExitCondition::kCallbackRequestedStop);
+
+  problem.ClearCallbacks();
+  problem.AddCallback(
+      [](const sleipnir::SolverIterationInfo&) { return false; });
+  CHECK(problem.Solve({.diagnostics = true}).exitCondition ==
+        sleipnir::SolverExitCondition::kSuccess);
 }
 
 TEST_CASE("SolverExitCondition - Too few DOFs", "[SolverExitCondition]") {

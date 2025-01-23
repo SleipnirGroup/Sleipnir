@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <functional>
 #include <limits>
 #include <memory>
 
@@ -30,10 +31,10 @@
 
 namespace sleipnir {
 
-void Newton(std::span<Variable> decisionVariables, Variable& f,
-            function_ref<bool(const SolverIterationInfo& info)> callback,
-            const SolverConfig& config, Eigen::VectorXd& x,
-            SolverStatus* status) {
+void Newton(
+    std::span<Variable> decisionVariables, Variable& f,
+    std::span<std::function<bool(const SolverIterationInfo& info)>> callbacks,
+    const SolverConfig& config, Eigen::VectorXd& x, SolverStatus* status) {
   const auto solveStartTime = std::chrono::steady_clock::now();
 
   // Map decision variables and constraints to VariableMatrices for Lagrangian
@@ -152,12 +153,14 @@ void Newton(std::span<Variable> decisionVariables, Variable& f,
       H_spy->Add(H);
     }
 
-    // Call user callback
-    if (callback({iterations, x, Eigen::VectorXd::Zero(0), g, H,
-                  Eigen::SparseMatrix<double>{},
-                  Eigen::SparseMatrix<double>{}})) {
-      status->exitCondition = SolverExitCondition::kCallbackRequestedStop;
-      return;
+    // Call user callbacks
+    for (const auto& callback : callbacks) {
+      if (callback({iterations, x, Eigen::VectorXd::Zero(0), g, H,
+                    Eigen::SparseMatrix<double>{},
+                    Eigen::SparseMatrix<double>{}})) {
+        status->exitCondition = SolverExitCondition::kCallbackRequestedStop;
+        return;
+      }
     }
 
     // rhs = −[∇f]

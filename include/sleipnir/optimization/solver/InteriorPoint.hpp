@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <functional>
 #include <span>
 
 #include <Eigen/Core>
@@ -10,7 +11,6 @@
 #include "sleipnir/optimization/SolverConfig.hpp"
 #include "sleipnir/optimization/SolverIterationInfo.hpp"
 #include "sleipnir/optimization/SolverStatus.hpp"
-#include "sleipnir/util/FunctionRef.hpp"
 #include "sleipnir/util/SymbolExports.hpp"
 
 namespace sleipnir {
@@ -34,7 +34,7 @@ are the inequality constraints.
 @param[in] equalityConstraints The list of equality constraints.
 @param[in] inequalityConstraints The list of inequality constraints.
 @param[in] f The cost function.
-@param[in] callback The user callback.
+@param[in] callbacks The list of user callbacks.
 @param[in] config Configuration options for the solver.
 @param[in] feasibilityRestoration Whether to use feasibility restoration instead
   of the normal algorithm.
@@ -48,7 +48,7 @@ SLEIPNIR_DLLEXPORT void InteriorPoint(
     std::span<Variable> decisionVariables,
     std::span<Variable> equalityConstraints,
     std::span<Variable> inequalityConstraints, Variable& f,
-    function_ref<bool(const SolverIterationInfo& info)> callback,
+    std::span<std::function<bool(const SolverIterationInfo& info)>> callbacks,
     const SolverConfig& config, bool feasibilityRestoration, Eigen::VectorXd& x,
     Eigen::VectorXd& s, SolverStatus* status);
 
