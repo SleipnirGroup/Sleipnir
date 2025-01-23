@@ -173,7 +173,7 @@ class Filter {
 
     // If current filter entry is better than all prior ones in some respect,
     // accept it
-    return std::all_of(m_filter.begin(), m_filter.end(), [&](const auto& elem) {
+    return std::ranges::all_of(m_filter, [&](const auto& elem) {
       return entry.cost <= elem.cost - γCost * elem.constraintViolation ||
              entry.constraintViolation <=
                  (1.0 - γConstraint) * elem.constraintViolation;

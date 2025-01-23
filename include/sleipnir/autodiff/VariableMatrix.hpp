@@ -95,7 +95,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
 
     m_storage.reserve(Rows() * Cols());
     for (const auto& row : list) {
-      std::copy(row.begin(), row.end(), std::back_inserter(m_storage));
+      std::ranges::copy(row, std::back_inserter(m_storage));
     }
   }
 
@@ -122,7 +122,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
 
     m_storage.reserve(Rows() * Cols());
     for (const auto& row : list) {
-      std::copy(row.begin(), row.end(), std::back_inserter(m_storage));
+      std::ranges::copy(row, std::back_inserter(m_storage));
     }
   }
 
@@ -149,7 +149,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
 
     m_storage.reserve(Rows() * Cols());
     for (const auto& row : list) {
-      std::copy(row.begin(), row.end(), std::back_inserter(m_storage));
+      std::ranges::copy(row, std::back_inserter(m_storage));
     }
   }
 
@@ -840,19 +840,25 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
     using pointer = Variable*;
     using reference = Variable&;
 
-    explicit iterator(small_vector<Variable>::iterator it) : m_it{it} {}
+    constexpr iterator() noexcept = default;
 
-    iterator& operator++() {
+    explicit constexpr iterator(small_vector<Variable>::iterator it) noexcept
+        : m_it{it} {}
+
+    constexpr iterator& operator++() noexcept {
       ++m_it;
       return *this;
     }
-    iterator operator++(int) {
+
+    constexpr iterator operator++(int) noexcept {
       iterator retval = *this;
       ++(*this);
       return retval;
     }
-    bool operator==(const iterator&) const = default;
-    reference operator*() { return *m_it; }
+
+    constexpr bool operator==(const iterator&) const noexcept = default;
+
+    constexpr reference operator*() const noexcept { return *m_it; }
 
    private:
     small_vector<Variable>::iterator m_it;
@@ -866,20 +872,26 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
     using pointer = Variable*;
     using const_reference = const Variable&;
 
-    explicit const_iterator(small_vector<Variable>::const_iterator it)
+    constexpr const_iterator() noexcept = default;
+
+    explicit constexpr const_iterator(
+        small_vector<Variable>::const_iterator it) noexcept
         : m_it{it} {}
 
-    const_iterator& operator++() {
+    constexpr const_iterator& operator++() noexcept {
       ++m_it;
       return *this;
     }
-    const_iterator operator++(int) {
+
+    constexpr const_iterator operator++(int) noexcept {
       const_iterator retval = *this;
       ++(*this);
       return retval;
     }
-    bool operator==(const const_iterator&) const = default;
-    const_reference operator*() const { return *m_it; }
+
+    constexpr bool operator==(const const_iterator&) const noexcept = default;
+
+    constexpr const_reference operator*() const noexcept { return *m_it; }
 
    private:
     small_vector<Variable>::const_iterator m_it;

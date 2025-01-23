@@ -196,8 +196,8 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
 
     m_equalityConstraints.reserve(m_equalityConstraints.size() +
                                   constraint.constraints.size());
-    std::copy(constraint.constraints.begin(), constraint.constraints.end(),
-              std::back_inserter(m_equalityConstraints));
+    std::ranges::copy(constraint.constraints,
+                      std::back_inserter(m_equalityConstraints));
   }
 
   /**
@@ -215,8 +215,8 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
 
     m_equalityConstraints.reserve(m_equalityConstraints.size() +
                                   constraint.constraints.size());
-    std::copy(constraint.constraints.begin(), constraint.constraints.end(),
-              std::back_inserter(m_equalityConstraints));
+    std::ranges::copy(constraint.constraints,
+                      std::back_inserter(m_equalityConstraints));
   }
 
   /**
@@ -234,8 +234,8 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
 
     m_inequalityConstraints.reserve(m_inequalityConstraints.size() +
                                     constraint.constraints.size());
-    std::copy(constraint.constraints.begin(), constraint.constraints.end(),
-              std::back_inserter(m_inequalityConstraints));
+    std::ranges::copy(constraint.constraints,
+                      std::back_inserter(m_inequalityConstraints));
   }
 
   /**
@@ -253,8 +253,8 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
 
     m_inequalityConstraints.reserve(m_inequalityConstraints.size() +
                                     constraint.constraints.size());
-    std::copy(constraint.constraints.begin(), constraint.constraints.end(),
-              std::back_inserter(m_inequalityConstraints));
+    std::ranges::copy(constraint.constraints,
+                      std::back_inserter(m_inequalityConstraints));
   }
 
   /**
