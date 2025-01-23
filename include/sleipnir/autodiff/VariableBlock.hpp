@@ -659,23 +659,29 @@ class VariableBlock {
     using pointer = Variable*;
     using reference = Variable&;
 
-    iterator(VariableBlock<Mat>* mat, int index) : m_mat{mat}, m_index{index} {}
+    constexpr iterator() noexcept = default;
 
-    iterator& operator++() {
+    constexpr iterator(VariableBlock<Mat>* mat, int index) noexcept
+        : m_mat{mat}, m_index{index} {}
+
+    constexpr iterator& operator++() noexcept {
       ++m_index;
       return *this;
     }
-    iterator operator++(int) {
+
+    constexpr iterator operator++(int) noexcept {
       iterator retval = *this;
       ++(*this);
       return retval;
     }
-    bool operator==(const iterator&) const = default;
-    reference operator*() { return (*m_mat)(m_index); }
+
+    constexpr bool operator==(const iterator&) const noexcept = default;
+
+    constexpr reference operator*() const noexcept { return (*m_mat)(m_index); }
 
    private:
-    VariableBlock<Mat>* m_mat;
-    int m_index;
+    VariableBlock<Mat>* m_mat = nullptr;
+    int m_index = 0;
   };
 
   class const_iterator {
@@ -686,24 +692,31 @@ class VariableBlock {
     using pointer = Variable*;
     using const_reference = const Variable&;
 
-    const_iterator(const VariableBlock<Mat>* mat, int index)
+    constexpr const_iterator() noexcept = default;
+
+    constexpr const_iterator(const VariableBlock<Mat>* mat, int index) noexcept
         : m_mat{mat}, m_index{index} {}
 
-    const_iterator& operator++() {
+    constexpr const_iterator& operator++() noexcept {
       ++m_index;
       return *this;
     }
-    const_iterator operator++(int) {
+
+    constexpr const_iterator operator++(int) noexcept {
       const_iterator retval = *this;
       ++(*this);
       return retval;
     }
-    bool operator==(const const_iterator&) const = default;
-    const_reference operator*() const { return (*m_mat)(m_index); }
+
+    constexpr bool operator==(const const_iterator&) const noexcept = default;
+
+    constexpr const_reference operator*() const noexcept {
+      return (*m_mat)(m_index);
+    }
 
    private:
-    const VariableBlock<Mat>* m_mat;
-    int m_index;
+    const VariableBlock<Mat>* m_mat = nullptr;
+    int m_index = 0;
   };
 
   /**

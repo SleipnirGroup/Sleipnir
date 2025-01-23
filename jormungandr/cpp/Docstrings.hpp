@@ -1212,6 +1212,8 @@ static const char *__doc_sleipnir_VariableBlock_const_iterator = R"doc()doc";
 
 static const char *__doc_sleipnir_VariableBlock_const_iterator_const_iterator = R"doc()doc";
 
+static const char *__doc_sleipnir_VariableBlock_const_iterator_const_iterator_2 = R"doc()doc";
+
 static const char *__doc_sleipnir_VariableBlock_const_iterator_m_index = R"doc()doc";
 
 static const char *__doc_sleipnir_VariableBlock_const_iterator_m_mat = R"doc()doc";
@@ -1231,6 +1233,8 @@ static const char *__doc_sleipnir_VariableBlock_end_2 = R"doc(Returns end iterat
 static const char *__doc_sleipnir_VariableBlock_iterator = R"doc()doc";
 
 static const char *__doc_sleipnir_VariableBlock_iterator_iterator = R"doc()doc";
+
+static const char *__doc_sleipnir_VariableBlock_iterator_iterator_2 = R"doc()doc";
 
 static const char *__doc_sleipnir_VariableBlock_iterator_m_index = R"doc()doc";
 
@@ -1656,6 +1660,8 @@ static const char *__doc_sleipnir_VariableMatrix_const_iterator = R"doc()doc";
 
 static const char *__doc_sleipnir_VariableMatrix_const_iterator_const_iterator = R"doc()doc";
 
+static const char *__doc_sleipnir_VariableMatrix_const_iterator_const_iterator_2 = R"doc()doc";
+
 static const char *__doc_sleipnir_VariableMatrix_const_iterator_m_it = R"doc()doc";
 
 static const char *__doc_sleipnir_VariableMatrix_const_iterator_operator_eq = R"doc()doc";
@@ -1675,6 +1681,8 @@ static const char *__doc_sleipnir_VariableMatrix_end_2 = R"doc(Returns end itera
 static const char *__doc_sleipnir_VariableMatrix_iterator = R"doc()doc";
 
 static const char *__doc_sleipnir_VariableMatrix_iterator_iterator = R"doc()doc";
+
+static const char *__doc_sleipnir_VariableMatrix_iterator_iterator_2 = R"doc()doc";
 
 static const char *__doc_sleipnir_VariableMatrix_iterator_m_it = R"doc()doc";
 

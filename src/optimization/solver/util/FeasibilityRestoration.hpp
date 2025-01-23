@@ -140,12 +140,9 @@ inline void FeasibilityRestoration(
   small_vector<Variable> fr_inequalityConstraints;
 
   // pₑ ≥ 0
-  std::copy(p_e.begin(), p_e.end(),
-            std::back_inserter(fr_inequalityConstraints));
-
   // nₑ ≥ 0
-  std::copy(n_e.begin(), n_e.end(),
-            std::back_inserter(fr_inequalityConstraints));
+  std::ranges::copy(p_e, std::back_inserter(fr_inequalityConstraints));
+  std::ranges::copy(n_e, std::back_inserter(fr_inequalityConstraints));
 
   Variable J = 0.0;
 
@@ -339,20 +336,13 @@ inline void FeasibilityRestoration(
   }
 
   // pₑ ≥ 0
-  std::copy(p_e.begin(), p_e.end(),
-            std::back_inserter(fr_inequalityConstraints));
-
   // pᵢ ≥ 0
-  std::copy(p_i.begin(), p_i.end(),
-            std::back_inserter(fr_inequalityConstraints));
-
   // nₑ ≥ 0
-  std::copy(n_e.begin(), n_e.end(),
-            std::back_inserter(fr_inequalityConstraints));
-
   // nᵢ ≥ 0
-  std::copy(n_i.begin(), n_i.end(),
-            std::back_inserter(fr_inequalityConstraints));
+  std::ranges::copy(p_e, std::back_inserter(fr_inequalityConstraints));
+  std::ranges::copy(p_i, std::back_inserter(fr_inequalityConstraints));
+  std::ranges::copy(n_e, std::back_inserter(fr_inequalityConstraints));
+  std::ranges::copy(n_i, std::back_inserter(fr_inequalityConstraints));
 
   Variable J = 0.0;
 

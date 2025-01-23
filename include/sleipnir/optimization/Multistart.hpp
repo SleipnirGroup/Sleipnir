@@ -58,17 +58,16 @@ MultistartResult<DecisionVariables> Multistart(
     results.emplace_back(future.get());
   }
 
-  return *std::min_element(
-      results.cbegin(), results.cend(), [](const auto& a, const auto& b) {
-        // Prioritize successful solve
-        if (a.status.exitCondition == SolverExitCondition::kSuccess &&
-            b.status.exitCondition != SolverExitCondition::kSuccess) {
-          return true;
-        }
+  return *std::ranges::min_element(results, [](const auto& a, const auto& b) {
+    // Prioritize successful solve
+    if (a.status.exitCondition == SolverExitCondition::kSuccess &&
+        b.status.exitCondition != SolverExitCondition::kSuccess) {
+      return true;
+    }
 
-        // Otherwise prioritize solution with lower cost
-        return a.status.cost < b.status.cost;
-      });
+    // Otherwise prioritize solution with lower cost
+    return a.status.cost < b.status.cost;
+  });
 }
 
 }  // namespace sleipnir

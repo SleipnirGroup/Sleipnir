@@ -28,7 +28,7 @@ class CmdlineArgs {
    * commandline arguments.
    */
   bool Contains(std::string_view arg) const {
-    return std::find(args.begin(), args.end(), arg) != args.end();
+    return std::ranges::find(args, arg) != args.end();
   }
 
  private:

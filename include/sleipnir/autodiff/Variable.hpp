@@ -612,9 +612,9 @@ struct SLEIPNIR_DLLEXPORT EqualityConstraints {
    * Implicit conversion operator to bool.
    */
   operator bool() {  // NOLINT
-    return std::all_of(
-        constraints.begin(), constraints.end(),
-        [](auto& constraint) { return constraint.Value() == 0.0; });
+    return std::ranges::all_of(constraints, [](auto& constraint) {
+      return constraint.Value() == 0.0;
+    });
   }
 };
 
@@ -676,9 +676,9 @@ struct SLEIPNIR_DLLEXPORT InequalityConstraints {
    * Implicit conversion operator to bool.
    */
   operator bool() {  // NOLINT
-    return std::all_of(
-        constraints.begin(), constraints.end(),
-        [](auto& constraint) { return constraint.Value() >= 0.0; });
+    return std::ranges::all_of(constraints, [](auto& constraint) {
+      return constraint.Value() >= 0.0;
+    });
   }
 };
 
