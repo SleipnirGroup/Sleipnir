@@ -41,12 +41,9 @@ class AdjointExpressionGraph {
       stack.pop_back();
 
       for (auto& arg : node->args) {
-        if (arg != nullptr) {
-          // If the node hasn't been explored yet, add it to the stack
-          if (arg->incomingEdges == 0) {
-            stack.push_back(arg.Get());
-          }
-          ++arg->incomingEdges;
+        // If the node hasn't been explored yet, add it to the stack
+        if (arg != nullptr && ++arg->incomingEdges == 1) {
+          stack.push_back(arg.Get());
         }
       }
     }
@@ -72,12 +69,9 @@ class AdjointExpressionGraph {
       }
 
       for (auto& arg : node->args) {
-        if (arg != nullptr) {
-          // If we traversed all this node's incoming edges, add it to the stack
-          --arg->incomingEdges;
-          if (arg->incomingEdges == 0) {
-            stack.push_back(arg.Get());
-          }
+        // If we traversed all this node's incoming edges, add it to the stack
+        if (arg != nullptr && --arg->incomingEdges == 0) {
+          stack.push_back(arg.Get());
         }
       }
     }
