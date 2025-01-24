@@ -478,7 +478,7 @@ class VariableBlock {
 
     for (int i = 0; i < Rows(); ++i) {
       for (int j = 0; j < rhs.Cols(); ++j) {
-        Variable sum;
+        Variable sum{0.0};
         for (int k = 0; k < Cols(); ++k) {
           sum += (*this)(i, k) * rhs(k, j);
         }
@@ -573,7 +573,7 @@ class VariableBlock {
    * Returns the transpose of the variable matrix.
    */
   std::remove_cv_t<Mat> T() const {
-    std::remove_cv_t<Mat> result{Cols(), Rows()};
+    std::remove_cv_t<Mat> result{Mat::empty, Cols(), Rows()};
 
     for (int row = 0; row < Rows(); ++row) {
       for (int col = 0; col < Cols(); ++col) {
@@ -640,7 +640,7 @@ class VariableBlock {
    */
   std::remove_cv_t<Mat> CwiseTransform(
       function_ref<Variable(const Variable& x)> unaryOp) const {
-    std::remove_cv_t<Mat> result{Rows(), Cols()};
+    std::remove_cv_t<Mat> result{Mat::empty, Rows(), Cols()};
 
     for (int row = 0; row < Rows(); ++row) {
       for (int col = 0; col < Cols(); ++col) {
