@@ -146,7 +146,7 @@ R"doc(Returns the gradient as a VariableMatrix.
 This is useful when constructing optimization problems with
 derivatives in them.)doc";
 
-static const char *__doc_sleipnir_Gradient_GetProfiler = R"doc(Returns the profiler.)doc";
+static const char *__doc_sleipnir_Gradient_GetSolveProfiler = R"doc(Returns the solve profiler.)doc";
 
 static const char *__doc_sleipnir_Gradient_Gradient =
 R"doc(Constructs a Gradient object.
@@ -188,7 +188,7 @@ R"doc(Returns the Hessian as a VariableMatrix.
 This is useful when constructing optimization problems with
 derivatives in them.)doc";
 
-static const char *__doc_sleipnir_Hessian_GetProfiler = R"doc(Returns the profiler.)doc";
+static const char *__doc_sleipnir_Hessian_GetSolveProfiler = R"doc(Returns the solve profiler.)doc";
 
 static const char *__doc_sleipnir_Hessian_Hessian =
 R"doc(Constructs a Hessian object.
@@ -203,7 +203,7 @@ static const char *__doc_sleipnir_Hessian_Value = R"doc(Evaluates the Hessian at
 
 static const char *__doc_sleipnir_Hessian_m_jacobian = R"doc()doc";
 
-static const char *__doc_sleipnir_Hessian_m_profiler = R"doc()doc";
+static const char *__doc_sleipnir_Hessian_m_solveProfiler = R"doc()doc";
 
 static const char *__doc_sleipnir_InequalityConstraints = R"doc(A vector of inequality constraints of the form cᵢ(x) ≥ 0.)doc";
 
@@ -296,7 +296,7 @@ R"doc(Returns the Jacobian as a VariableMatrix.
 This is useful when constructing optimization problems with
 derivatives in them.)doc";
 
-static const char *__doc_sleipnir_Jacobian_GetProfiler = R"doc(Returns the profiler.)doc";
+static const char *__doc_sleipnir_Jacobian_GetSolveProfiler = R"doc(Returns the solve profiler.)doc";
 
 static const char *__doc_sleipnir_Jacobian_Jacobian =
 R"doc(Constructs a Jacobian object.
@@ -317,7 +317,7 @@ static const char *__doc_sleipnir_Jacobian_m_graphs = R"doc()doc";
 
 static const char *__doc_sleipnir_Jacobian_m_nonlinearRows = R"doc()doc";
 
-static const char *__doc_sleipnir_Jacobian_m_profiler = R"doc()doc";
+static const char *__doc_sleipnir_Jacobian_m_solveProfiler = R"doc()doc";
 
 static const char *__doc_sleipnir_Jacobian_m_variables = R"doc()doc";
 
@@ -756,36 +756,6 @@ static const char *__doc_sleipnir_OptimizationProblem_m_f = R"doc()doc";
 static const char *__doc_sleipnir_OptimizationProblem_m_inequalityConstraints = R"doc()doc";
 
 static const char *__doc_sleipnir_OptimizationProblem_status = R"doc()doc";
-
-static const char *__doc_sleipnir_Profiler =
-R"doc(Records the number of profiler measurements (start/stop pairs) and the
-average duration between each start and stop call.)doc";
-
-static const char *__doc_sleipnir_Profiler_AverageSolveDuration = R"doc(The average solve duration in milliseconds as a double.)doc";
-
-static const char *__doc_sleipnir_Profiler_SetupDuration = R"doc(The setup duration in milliseconds as a double.)doc";
-
-static const char *__doc_sleipnir_Profiler_SolveMeasurements = R"doc(The number of solve measurements taken.)doc";
-
-static const char *__doc_sleipnir_Profiler_StartSetup = R"doc(Tell the profiler to start measuring setup time.)doc";
-
-static const char *__doc_sleipnir_Profiler_StartSolve = R"doc(Tell the profiler to start measuring solve time.)doc";
-
-static const char *__doc_sleipnir_Profiler_StopSetup = R"doc(Tell the profiler to stop measuring setup time.)doc";
-
-static const char *__doc_sleipnir_Profiler_StopSolve =
-R"doc(Tell the profiler to stop measuring solve time, increment the number
-of averages, and incorporate the latest measurement into the average.)doc";
-
-static const char *__doc_sleipnir_Profiler_m_averageSolveDuration = R"doc()doc";
-
-static const char *__doc_sleipnir_Profiler_m_setupDuration = R"doc()doc";
-
-static const char *__doc_sleipnir_Profiler_m_setupStartTime = R"doc()doc";
-
-static const char *__doc_sleipnir_Profiler_m_solveMeasurements = R"doc()doc";
-
-static const char *__doc_sleipnir_Profiler_m_solveStartTime = R"doc()doc";
 
 static const char *__doc_sleipnir_RK4 =
 R"doc(Performs 4th order Runge-Kutta integration of dx/dt = f(t, x, u) for

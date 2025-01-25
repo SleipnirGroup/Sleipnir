@@ -7,9 +7,9 @@
 #include <Eigen/SparseCore>
 
 #include "sleipnir/autodiff/Jacobian.hpp"
-#include "sleipnir/autodiff/Profiler.hpp"
 #include "sleipnir/autodiff/Variable.hpp"
 #include "sleipnir/autodiff/VariableMatrix.hpp"
+#include "sleipnir/util/SolveProfiler.hpp"
 #include "sleipnir/util/SymbolExports.hpp"
 
 namespace sleipnir {
@@ -60,9 +60,11 @@ class SLEIPNIR_DLLEXPORT Gradient {
   }
 
   /**
-   * Returns the profiler.
+   * Returns the solve profiler.
    */
-  Profiler& GetProfiler() { return m_jacobian.GetProfiler(); }
+  const SolveProfiler& GetSolveProfiler() const {
+    return m_jacobian.GetSolveProfiler();
+  }
 
  private:
   Eigen::SparseVector<double> m_g;

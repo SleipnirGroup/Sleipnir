@@ -22,14 +22,16 @@
 #include "sleipnir/autodiff/Hessian.hpp"
 #include "sleipnir/autodiff/Jacobian.hpp"
 #include "sleipnir/optimization/SolverExitCondition.hpp"
+#include "sleipnir/util/ScopedProfiler.hpp"
+#include "sleipnir/util/SetupProfiler.hpp"
+#include "sleipnir/util/SolveProfiler.hpp"
 #include "sleipnir/util/Spy.hpp"
 #include "sleipnir/util/small_vector.hpp"
 #include "util/ScopeExit.hpp"
 
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
 #include "sleipnir/util/Print.hpp"
-#include "util/PrintIterationDiagnostics.hpp"
-#include "util/ToMilliseconds.hpp"
+#include "util/PrintDiagnostics.hpp"
 #endif
 
 // See docs/algorithms.md#Works_cited for citation definitions.
@@ -47,6 +49,11 @@ void InteriorPoint(
     const SolverConfig& config, bool feasibilityRestoration, Eigen::VectorXd& x,
     Eigen::VectorXd& s, SolverStatus* status) {
   const auto solveStartTime = std::chrono::steady_clock::now();
+
+  small_vector<SetupProfiler> setupProfilers;
+  setupProfilers.emplace_back("setup").Start();
+
+  setupProfilers.emplace_back("  ↳ s, y, z setup").Start();
 
   // Map decision variables and constraints to VariableMatrices for Lagrangian
   VariableMatrix xAD{decisionVariables};
@@ -66,10 +73,16 @@ void InteriorPoint(
     z.SetValue(1.0);
   }
 
+  setupProfilers.back().Stop();
+  setupProfilers.emplace_back("  ↳ L setup").Start();
+
   // Lagrangian L
   //
   // L(xₖ, sₖ, yₖ, zₖ) = f(xₖ) − yₖᵀcₑ(xₖ) − zₖᵀ(cᵢ(xₖ) − sₖ)
   auto L = f - (yAD.T() * c_eAD)(0) - (zAD.T() * (c_iAD - sAD))(0);
+
+  setupProfilers.back().Stop();
+  setupProfilers.emplace_back("  ↳ ∂cₑ/∂x setup").Start();
 
   // Equality constraint Jacobian Aₑ
   //
@@ -78,7 +91,14 @@ void InteriorPoint(
   //         [    ⋮    ]
   //         [∇ᵀcₑₘ(xₖ)]
   Jacobian jacobianCe{c_eAD, xAD};
+
+  setupProfilers.back().Stop();
+  setupProfilers.emplace_back("  ↳ ∂cₑ/∂x init solve").Start();
+
   Eigen::SparseMatrix<double> A_e = jacobianCe.Value();
+
+  setupProfilers.back().Stop();
+  setupProfilers.emplace_back("  ↳ ∂cᵢ/∂x setup").Start();
 
   // Inequality constraint Jacobian Aᵢ
   //
@@ -87,17 +107,38 @@ void InteriorPoint(
   //         [    ⋮    ]
   //         [∇ᵀcᵢₘ(xₖ)]
   Jacobian jacobianCi{c_iAD, xAD};
+
+  setupProfilers.back().Stop();
+  setupProfilers.emplace_back("  ↳ ∂cᵢ/∂x init solve").Start();
+
   Eigen::SparseMatrix<double> A_i = jacobianCi.Value();
+
+  setupProfilers.back().Stop();
+  setupProfilers.emplace_back("  ↳ ∇f(x) setup").Start();
 
   // Gradient of f ∇f
   Gradient gradientF{f, xAD};
+
+  setupProfilers.back().Stop();
+  setupProfilers.emplace_back("  ↳ ∇f(x) init solve").Start();
+
   Eigen::SparseVector<double> g = gradientF.Value();
+
+  setupProfilers.back().Stop();
+  setupProfilers.emplace_back("  ↳ ∇²ₓₓL setup").Start();
 
   // Hessian of the Lagrangian H
   //
   // Hₖ = ∇²ₓₓL(xₖ, sₖ, yₖ, zₖ)
   Hessian hessianL{L, xAD};
+
+  setupProfilers.back().Stop();
+  setupProfilers.emplace_back("  ↳ ∇²ₓₓL init solve").Start();
+
   Eigen::SparseMatrix<double> H = hessianL.Value();
+
+  setupProfilers.back().Stop();
+  setupProfilers.emplace_back("  ↳ precondition checks").Start();
 
   Eigen::VectorXd y = yAD.Value();
   Eigen::VectorXd z = zAD.Value();
@@ -130,6 +171,8 @@ void InteriorPoint(
     return;
   }
 
+  setupProfilers.back().Stop();
+
   // Sparsity pattern files written when spy flag is set in SolverConfig
   std::unique_ptr<Spy> H_spy;
   std::unique_ptr<Spy> A_e_spy;
@@ -145,59 +188,7 @@ void InteriorPoint(
                                     A_i.rows(), A_i.cols());
   }
 
-#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-  if (config.diagnostics && !feasibilityRestoration) {
-    sleipnir::println("Error tolerance: {}\n", config.tolerance);
-  }
-#endif
-
-  std::chrono::steady_clock::time_point iterationsStartTime;
-
   int iterations = 0;
-
-  // Prints final diagnostics when the solver exits
-  scope_exit exit{[&] {
-    status->cost = f.Value();
-
-#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-    if (config.diagnostics && !feasibilityRestoration) {
-      auto solveEndTime = std::chrono::steady_clock::now();
-
-      sleipnir::println("\nSolve time: {:.3f} ms",
-                        ToMilliseconds(solveEndTime - solveStartTime));
-      sleipnir::println("  ↳ {:.3f} ms (solver setup)",
-                        ToMilliseconds(iterationsStartTime - solveStartTime));
-      if (iterations > 0) {
-        sleipnir::println(
-            "  ↳ {:.3f} ms ({} solver iterations; {:.3f} ms average)",
-            ToMilliseconds(solveEndTime - iterationsStartTime), iterations,
-            ToMilliseconds((solveEndTime - iterationsStartTime) / iterations));
-      }
-      sleipnir::println("");
-
-      sleipnir::println("{:^8}   {:^10}   {:^14}   {:^6}", "autodiff",
-                        "setup (ms)", "avg solve (ms)", "solves");
-      sleipnir::println("{:=^47}", "");
-      constexpr auto format = "{:^8}   {:10.3f}   {:14.3f}   {:6}";
-      sleipnir::println(format, "∇f(x)",
-                        gradientF.GetProfiler().SetupDuration(),
-                        gradientF.GetProfiler().AverageSolveDuration(),
-                        gradientF.GetProfiler().SolveMeasurements());
-      sleipnir::println(format, "∇²ₓₓL", hessianL.GetProfiler().SetupDuration(),
-                        hessianL.GetProfiler().AverageSolveDuration(),
-                        hessianL.GetProfiler().SolveMeasurements());
-      sleipnir::println(format, "∂cₑ/∂x",
-                        jacobianCe.GetProfiler().SetupDuration(),
-                        jacobianCe.GetProfiler().AverageSolveDuration(),
-                        jacobianCe.GetProfiler().SolveMeasurements());
-      sleipnir::println(format, "∂cᵢ/∂x",
-                        jacobianCi.GetProfiler().SetupDuration(),
-                        jacobianCi.GetProfiler().AverageSolveDuration(),
-                        jacobianCi.GetProfiler().SolveMeasurements());
-      sleipnir::println("");
-    }
-#endif
-  }};
 
   // Barrier parameter minimum
   const double μ_min = config.tolerance / 10.0;
@@ -256,20 +247,64 @@ void InteriorPoint(
   // Error estimate
   double E_0 = std::numeric_limits<double>::infinity();
 
+  setupProfilers[0].Stop();
+
+  small_vector<SolveProfiler> solveProfilers;
+  solveProfilers.emplace_back("solve");
+  solveProfilers.emplace_back("  ↳ feasibility check");
+  solveProfilers.emplace_back("  ↳ spy writes");
+  solveProfilers.emplace_back("  ↳ user callbacks");
+  solveProfilers.emplace_back("  ↳ linear system build");
+  solveProfilers.emplace_back("  ↳ linear system solve");
+  solveProfilers.emplace_back("  ↳ line search");
+  solveProfilers.emplace_back("    ↳ SOC");
+  solveProfilers.emplace_back("  ↳ feasibility restoration");
+  solveProfilers.emplace_back("  ↳ next iter prep");
+
+  auto& innerIterProf = solveProfilers[0];
+  auto& feasibilityCheckProf = solveProfilers[1];
+  auto& spyWritesProf = solveProfilers[2];
+  auto& userCallbacksProf = solveProfilers[3];
+  auto& linearSystemBuildProf = solveProfilers[4];
+  auto& linearSystemSolveProf = solveProfilers[5];
+  auto& lineSearchProf = solveProfilers[6];
+  auto& socProf = solveProfilers[7];
+  auto& feasibilityRestorationProf = solveProfilers[8];
+  auto& nextIterPrepProf = solveProfilers[9];
+
+  // Prints final diagnostics when the solver exits
+  scope_exit exit{[&] {
+    status->cost = f.Value();
+
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-  if (config.diagnostics) {
-    iterationsStartTime = std::chrono::steady_clock::now();
+    if (config.diagnostics && !feasibilityRestoration) {
+      PrintTotalTime(iterations, setupProfilers[0], solveProfilers[0]);
+
+      PrintSetupDiagnostics(setupProfilers);
+
+      solveProfilers.push_back(gradientF.GetSolveProfiler());
+      solveProfilers.back().name = "  ↳ ∇f(x)";
+      solveProfilers.push_back(hessianL.GetSolveProfiler());
+      solveProfilers.back().name = "  ↳ ∇²ₓₓL";
+      solveProfilers.push_back(jacobianCe.GetSolveProfiler());
+      solveProfilers.back().name = "  ↳ ∂cₑ/∂x";
+      solveProfilers.push_back(jacobianCi.GetSolveProfiler());
+      solveProfilers.back().name = "  ↳ ∂cᵢ/∂x";
+      PrintSolveDiagnostics(solveProfilers);
+    }
+#endif
+  }};
+
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
+  if (config.diagnostics && !feasibilityRestoration) {
+    sleipnir::println("Error tolerance: {}\n", config.tolerance);
   }
 #endif
 
   while (E_0 > config.tolerance &&
          acceptableIterCounter < config.maxAcceptableIterations) {
-#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-    std::chrono::steady_clock::time_point innerIterStartTime;
-    if (config.diagnostics) {
-      innerIterStartTime = std::chrono::steady_clock::now();
-    }
-#endif
+    ScopedProfiler innerIterProfiler{innerIterProf};
+    ScopedProfiler feasibilityCheckProfiler{feasibilityCheckProf};
 
     // Check for local equality constraint infeasibility
     if (IsEqualityLocallyInfeasible(A_e, c_e)) {
@@ -320,12 +355,18 @@ void InteriorPoint(
       return;
     }
 
+    feasibilityCheckProfiler.Stop();
+    ScopedProfiler spyWritesProfiler{spyWritesProf};
+
     // Write out spy file contents if that's enabled
     if (config.spy) {
       H_spy->Add(H);
       A_e_spy->Add(A_e);
       A_i_spy->Add(A_i);
     }
+
+    spyWritesProfiler.Stop();
+    ScopedProfiler userCallbacksProfiler{userCallbacksProf};
 
     // Call user callbacks
     for (const auto& callback : callbacks) {
@@ -334,6 +375,9 @@ void InteriorPoint(
         return;
       }
     }
+
+    userCallbacksProfiler.Stop();
+    ScopedProfiler linearSystemBuildProfiler{linearSystemBuildProf};
 
     //     [s₁ 0 ⋯ 0 ]
     // S = [0  ⋱   ⋮ ]
@@ -386,6 +430,9 @@ void InteriorPoint(
           A_i.transpose() * (-Σ * c_i + μ * Sinv * e + z));
     rhs.segment(x.rows(), y.rows()) = -c_e;
 
+    linearSystemBuildProfiler.Stop();
+    ScopedProfiler linearSystemSolveProfiler{linearSystemSolveProf};
+
     Eigen::VectorXd p_x;
     Eigen::VectorXd p_s;
     Eigen::VectorXd p_y;
@@ -405,8 +452,12 @@ void InteriorPoint(
       // constraint Jacobian with linearly dependent constraints. Invoke
       // feasibility restoration.
       callFeasibilityRestoration = true;
+      linearSystemSolveProfiler.Stop();
     } else {
       Eigen::VectorXd step = solver.Solve(rhs);
+
+      linearSystemSolveProfiler.Stop();
+      ScopedProfiler lineSearchProfiler{lineSearchProf};
 
       // step = [ pₖˣ]
       //        [−pₖʸ]
@@ -486,12 +537,7 @@ void InteriorPoint(
           bool stepAcceptable = false;
           for (int soc_iteration = 0; soc_iteration < 5 && !stepAcceptable;
                ++soc_iteration) {
-#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-            std::chrono::steady_clock::time_point socIterStartTime;
-            if (config.diagnostics) {
-              socIterStartTime = std::chrono::steady_clock::now();
-            }
-#endif
+            ScopedProfiler socProfiler{socProf};
 
             // Rebuild Newton-KKT rhs with updated constraint values.
             //
@@ -541,14 +587,14 @@ void InteriorPoint(
               stepAcceptable = true;
             }
 
+            socProfiler.Stop();
+
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
             if (config.diagnostics) {
-              const auto socIterEndTime = std::chrono::steady_clock::now();
-
               double E = ErrorEstimate(g, A_e, trial_c_e, trial_y);
               PrintIterationDiagnostics(
                   iterations, IterationMode::kSecondOrderCorrection,
-                  socIterEndTime - socIterStartTime, E, f.Value(),
+                  socProfiler.CurrentDuration(), E, f.Value(),
                   trial_c_e.lpNorm<1>() + (trial_c_i - trial_s).lpNorm<1>(),
                   solver.HessianRegularization(), 1.0, 1.0);
             }
@@ -631,6 +677,8 @@ void InteriorPoint(
     }
 
     if (callFeasibilityRestoration) {
+      ScopedProfiler feasibilityRestorationProfiler{feasibilityRestorationProf};
+
       auto initialEntry = filter.MakeEntry(s, c_e, c_i, μ);
 
       // Feasibility restoration phase
@@ -798,6 +846,8 @@ void InteriorPoint(
     g = gradientF.Value();
     H = hessianL.Value();
 
+    ScopedProfiler nextIterPrepProfiler{nextIterPrepProf};
+
     c_e = c_eAD.Value();
     c_i = c_iAD.Value();
 
@@ -823,7 +873,8 @@ void InteriorPoint(
       }
     }
 
-    const auto innerIterEndTime = std::chrono::steady_clock::now();
+    nextIterPrepProfiler.Stop();
+    innerIterProfiler.Stop();
 
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     if (config.diagnostics) {
@@ -831,7 +882,7 @@ void InteriorPoint(
           iterations,
           feasibilityRestoration ? IterationMode::kFeasibilityRestoration
                                  : IterationMode::kNormal,
-          innerIterEndTime - innerIterStartTime, E_0, f.Value(),
+          innerIterProfiler.CurrentDuration(), E_0, f.Value(),
           c_e.lpNorm<1>() + (c_i - s).lpNorm<1>(),
           solver.HessianRegularization(), α, α_z);
     }
@@ -846,7 +897,7 @@ void InteriorPoint(
     }
 
     // Check for max wall clock time
-    if (innerIterEndTime - solveStartTime > config.timeout) {
+    if (std::chrono::steady_clock::now() - solveStartTime > config.timeout) {
       status->exitCondition = SolverExitCondition::kTimeout;
       return;
     }

@@ -6,9 +6,10 @@
 
 #include "sleipnir/autodiff/AdjointExpressionGraph.hpp"
 #include "sleipnir/autodiff/Jacobian.hpp"
-#include "sleipnir/autodiff/Profiler.hpp"
 #include "sleipnir/autodiff/Variable.hpp"
 #include "sleipnir/autodiff/VariableMatrix.hpp"
+#include "sleipnir/util/ScopedProfiler.hpp"
+#include "sleipnir/util/SolveProfiler.hpp"
 #include "sleipnir/util/SymbolExports.hpp"
 
 namespace sleipnir {
@@ -31,13 +32,10 @@ class SLEIPNIR_DLLEXPORT Hessian {
    */
   Hessian(Variable variable, const VariableMatrix& wrt) noexcept
       : m_jacobian{[&] {
-                     m_profiler.StartSetup();
                      return detail::AdjointExpressionGraph{variable}
                          .GenerateGradientTree(wrt);
                    }(),
-                   wrt} {
-    m_profiler.StopSetup();
-  }
+                   wrt} {}
 
   /**
    * Returns the Hessian as a VariableMatrix.
@@ -51,19 +49,17 @@ class SLEIPNIR_DLLEXPORT Hessian {
    * Evaluates the Hessian at wrt's value.
    */
   const Eigen::SparseMatrix<double>& Value() {
-    m_profiler.StartSolve();
-    const auto& H = m_jacobian.Value();
-    m_profiler.StopSolve();
-    return H;
+    ScopedProfiler profiler{m_solveProfiler};
+    return m_jacobian.Value();
   }
 
   /**
-   * Returns the profiler.
+   * Returns the solve profiler.
    */
-  Profiler& GetProfiler() { return m_profiler; }
+  const SolveProfiler& GetSolveProfiler() const { return m_solveProfiler; }
 
  private:
-  Profiler m_profiler;
+  SolveProfiler m_solveProfiler;
   Jacobian m_jacobian;
 };
 
