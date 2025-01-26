@@ -548,7 +548,7 @@ void InteriorPoint(
                 iterations, IterationMode::kSecondOrderCorrection,
                 socIterEndTime - socIterStartTime, E, f.Value(),
                 trial_c_e.lpNorm<1>() + (trial_c_i - trial_s).lpNorm<1>(),
-                solver.HessianRegularization(), 1.0);
+                solver.HessianRegularization(), 1.0, 1.0);
           }
 #endif
         }
@@ -833,7 +833,7 @@ void InteriorPoint(
                                  : IterationMode::kNormal,
           innerIterEndTime - innerIterStartTime, E_0, f.Value(),
           c_e.lpNorm<1>() + (c_i - s).lpNorm<1>(),
-          solver.HessianRegularization(), α);
+          solver.HessianRegularization(), α, α_z);
     }
 #endif
 

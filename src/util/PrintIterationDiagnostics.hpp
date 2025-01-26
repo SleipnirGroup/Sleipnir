@@ -38,18 +38,20 @@ enum class IterationMode : uint8_t {
  * @param cost The cost.
  * @param infeasibility The infeasibility.
  * @param δ The Hessian regularization factor.
- * @param α The step size.
+ * @param primal_α The primal step size.
+ * @param dual_α The dual step size.
  */
 template <typename Rep, typename Period = std::ratio<1>>
 void PrintIterationDiagnostics(int iterations, IterationMode mode,
                                const std::chrono::duration<Rep, Period>& time,
                                double error, double cost, double infeasibility,
-                               double δ, double α) {
+                               double δ, double primal_α, double dual_α) {
   if (iterations % 20 == 0) {
-    sleipnir::println("{:^4}   {:^9}  {:^13}  {:^13}  {:^13}  {:^5}  {:^10}",
-                      "iter", "time (ms)", "error", "cost", "infeasibility",
-                      "reg", "backtracks");
-    sleipnir::println("{:=^80}", "");
+    sleipnir::println(
+        "{:^4}   {:^9}  {:^13}  {:^13}  {:^13}  {:^5}  {:^8}  {:^8}  {:^6}",
+        "iter", "time (ms)", "error", "cost", "infeasibility", "reg",
+        "primal α", "dual α", "bktrks");
+    sleipnir::println("{:=^96}", "");
   }
 
   constexpr const char* kIterationModes[] = {" ", "s", "r"};
@@ -92,7 +94,9 @@ void PrintIterationDiagnostics(int iterations, IterationMode mode,
     }
   }
 
-  sleipnir::println("  {:10d}", static_cast<int>(-std::log2(α)));
+  // Print step sizes and number of backtracks
+  sleipnir::print("  {:.2e}  {:.2e}  {:6d}", primal_α, dual_α,
+                  static_cast<int>(-std::log2(primal_α)));
 }
 
 }  // namespace sleipnir
