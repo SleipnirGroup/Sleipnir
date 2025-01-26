@@ -380,10 +380,11 @@ void SQP(
             const auto socIterEndTime = std::chrono::steady_clock::now();
 
             double E = ErrorEstimate(g, A_e, trial_c_e, trial_y);
-            PrintIterationDiagnostics(
-                iterations, IterationMode::kSecondOrderCorrection,
-                socIterEndTime - socIterStartTime, E, f.Value(),
-                trial_c_e.lpNorm<1>(), solver.HessianRegularization(), 1.0);
+            PrintIterationDiagnostics(iterations,
+                                      IterationMode::kSecondOrderCorrection,
+                                      socIterEndTime - socIterStartTime, E,
+                                      f.Value(), trial_c_e.lpNorm<1>(),
+                                      solver.HessianRegularization(), 1.0, 0.0);
           }
 #endif
         }
@@ -561,7 +562,7 @@ void SQP(
       PrintIterationDiagnostics(iterations, IterationMode::kNormal,
                                 innerIterEndTime - innerIterStartTime, E_0,
                                 f.Value(), c_e.lpNorm<1>(),
-                                solver.HessianRegularization(), α);
+                                solver.HessianRegularization(), α, 0.0);
     }
 #endif
 
