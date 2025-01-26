@@ -95,8 +95,8 @@ void PrintIterationDiagnostics(int iterations, IterationMode mode,
   }
 
   // Print step sizes and number of backtracks
-  sleipnir::print("  {:.2e}  {:.2e}  {:6d}", primal_α, dual_α,
-                  static_cast<int>(-std::log2(primal_α)));
+  sleipnir::println("  {:.2e}  {:.2e}  {:6d}", primal_α, dual_α,
+                    static_cast<int>(-std::log2(primal_α)));
 }
 
 }  // namespace sleipnir
