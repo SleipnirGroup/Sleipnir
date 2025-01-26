@@ -131,32 +131,52 @@ Expand and simplify.
 ```
   Hpₖˣ − Aₑᵀpₖʸ + AᵢᵀΣcᵢ − AᵢᵀμS⁻¹e + AᵢᵀΣAᵢpₖˣ = −∇f(x) + Aₑᵀy + Aᵢᵀz
   Hpₖˣ + AᵢᵀΣAᵢpₖˣ − Aₑᵀpₖʸ  = −∇f(x) + Aₑᵀy + AᵢᵀΣcᵢ + AᵢᵀμS⁻¹e + Aᵢᵀz
-  (H + AᵢᵀΣAᵢ)pₖˣ − Aₑᵀpₖʸ = −∇f(x) + Aₑᵀy − Aᵢᵀ(Σcᵢ − μS⁻¹e − z)
-  (H + AᵢᵀΣAᵢ)pₖˣ − Aₑᵀpₖʸ = −(∇f(x) − Aₑᵀy + Aᵢᵀ(Σcᵢ − μS⁻¹e − z))
+  (H + AᵢᵀΣAᵢ)pₖˣ − Aₑᵀpₖʸ = −∇f(x) + Aₑᵀy + Aᵢᵀ(−Σcᵢ + μS⁻¹e + z)
+  (H + AᵢᵀΣAᵢ)pₖˣ − Aₑᵀpₖʸ = −(∇f(x) − Aₑᵀy − Aᵢᵀ(−Σcᵢ + μS⁻¹e + z))
 ```
 
 Substitute the new first and third rows into the system.
 
 ```
-  [H + AᵢᵀΣAᵢ   Aₑᵀ  0][ pₖˣ]    [∇f(x) − Aₑᵀy + Aᵢᵀ(Σcᵢ − μS⁻¹e − z)]
-  [    Aₑ        0   0][−pₖʸ] = −[                cₑ                 ]
-  [    0         0   I][−pₖᶻ]    [       −Σcᵢ + μS⁻¹e − ΣAᵢpₖˣ       ]
+  [H + AᵢᵀΣAᵢ   Aₑᵀ  0][ pₖˣ]    [∇f(x) − Aₑᵀy − Aᵢᵀ(−Σcᵢ + μS⁻¹e + z)]
+  [    Aₑ        0   0][−pₖʸ] = −[                 cₑ                 ]
+  [    0         0   I][−pₖᶻ]    [       −Σcᵢ + μS⁻¹e − ΣAᵢpₖˣ        ]
 ```
 
 Eliminate the third row and column.
 
 ```
-  [H + AᵢᵀΣAᵢ  Aₑᵀ][ pₖˣ] = −[∇f − Aₑᵀy + Aᵢᵀ(S⁻¹(Zcᵢ − μe) − z)]
-  [    Aₑ       0 ][−pₖʸ]    [                cₑ                ]
+  [H + AᵢᵀΣAᵢ  Aₑᵀ][ pₖˣ] = −[∇f − Aₑᵀy − Aᵢᵀ(−Σcᵢ + μS⁻¹e + z)]
+  [    Aₑ       0 ][−pₖʸ]    [               cₑ                ]
 ```
 
-This reduced 2x2 block system gives the iterates pₖˣ and pₖʸ with the iterates pₖᶻ and pₖˢ given by
+Expand and simplify pₖˢ.
 
 ```
-  pₖᶻ = −Σcᵢ + μS⁻¹e − ΣAᵢpₖˣ
   pₖˢ = μZ⁻¹e − s − Σ⁻¹pₖᶻ
-      = μZ⁻¹e − s − (S⁻¹Z)⁻¹pₖᶻ
-      = μZ⁻¹e − s − Z⁻¹Spₖᶻ
+  pₖˢ = μZ⁻¹e − s − (S⁻¹Z)⁻¹pₖᶻ
+  pₖˢ = μZ⁻¹e − s − Z⁻¹Spₖᶻ
+  pₖˢ = μZ⁻¹e − s − Z⁻¹S(−Σcᵢ + μS⁻¹e − ΣAᵢpₖˣ)
+  pₖˢ = μZ⁻¹e − s − Z⁻¹S(−S⁻¹Zcᵢ + μS⁻¹e − S⁻¹ZAᵢpₖˣ)
+  pₖˢ = μZ⁻¹e − s − Z⁻¹(−Zcᵢ + μe − ZAᵢpₖˣ)
+  pₖˢ = μZ⁻¹e − s − (−cᵢ + μZ⁻¹e − Aᵢpₖˣ)
+  pₖˢ = μZ⁻¹e − s + cᵢ − μZ⁻¹e + Aᵢpₖˣ
+  pₖˢ = −s + cᵢ + Aᵢpₖˣ
+  pₖˢ = cᵢ − s + Aᵢpₖˣ
+```
+
+In summary, the reduced 2x2 block system gives the iterates pₖˣ and pₖʸ.
+
+```
+  [H + AᵢᵀΣAᵢ  Aₑᵀ][ pₖˣ] = −[∇f − Aₑᵀy − Aᵢᵀ(−Σcᵢ + μS⁻¹e + z)]
+  [    Aₑ       0 ][−pₖʸ]    [               cₑ                ]
+```
+
+The iterates pₖˢ and pₖᶻ are given by
+
+```
+  pₖˢ = cᵢ − s + Aᵢpₖˣ
+  pₖᶻ = −Σcᵢ + μS⁻¹e − ΣAᵢpₖˣ
 ```
 
 The iterates are applied like so
