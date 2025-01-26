@@ -82,7 +82,7 @@ TEST_CASE("OCPSolver - Cart-pole", "[OCPSolver]") {
   CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kNonlinear);
   CHECK(status.inequalityConstraintType == sleipnir::ExpressionType::kLinear);
 
-  // FIXME: Fails on other platforms with "locally infeasible"
+  // FIXME: Fails with "locally infeasible"
   CHECK(status.exitCondition ==
         sleipnir::SolverExitCondition::kLocallyInfeasible);
   SKIP("Fails with \"locally infeasible\"");
