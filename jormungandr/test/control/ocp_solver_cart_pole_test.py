@@ -76,7 +76,7 @@ def test_ocp_solver_cart_pole():
     assert status.equality_constraint_type == ExpressionType.NONLINEAR
     assert status.inequality_constraint_type == ExpressionType.LINEAR
 
-    # FIXME: Fails on other platforms with "locally infeasible"
+    # FIXME: Fails with "locally infeasible"
     assert status.exit_condition == SolverExitCondition.LOCALLY_INFEASIBLE
     return
 
