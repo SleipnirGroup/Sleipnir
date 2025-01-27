@@ -339,20 +339,16 @@ void InteriorPoint(
     // S = [0  ⋱   ⋮ ]
     //     [⋮    ⋱ 0 ]
     //     [0  ⋯ 0 sₘ]
-    const auto S = s.asDiagonal();
-    Eigen::SparseMatrix<double> Sinv;
-    Sinv = s.cwiseInverse().asDiagonal();
-
+    //
     //     [z₁ 0 ⋯ 0 ]
     // Z = [0  ⋱   ⋮ ]
     //     [⋮    ⋱ 0 ]
     //     [0  ⋯ 0 zₘ]
-    const auto Z = z.asDiagonal();
-    Eigen::SparseMatrix<double> Zinv;
-    Zinv = z.cwiseInverse().asDiagonal();
-
+    //
     // Σ = S⁻¹Z
-    const Eigen::SparseMatrix<double> Σ = Sinv * Z;
+    Eigen::SparseMatrix<double> Sinv;
+    Sinv = s.cwiseInverse().asDiagonal();
+    const Eigen::SparseMatrix<double> Σ = Sinv * z.asDiagonal();
 
     // lhs = [H + AᵢᵀΣAᵢ  Aₑᵀ]
     //       [    Aₑ       0 ]
@@ -382,12 +378,12 @@ void InteriorPoint(
 
     const Eigen::VectorXd e = Eigen::VectorXd::Ones(s.rows());
 
-    // rhs = −[∇f − Aₑᵀy + Aᵢᵀ(S⁻¹(Zcᵢ − μe) − z)]
-    //        [                cₑ                ]
+    // rhs = −[∇f − Aₑᵀy − Aᵢᵀ(−Σcᵢ + μS⁻¹e + z)]
+    //        [               cₑ                ]
     Eigen::VectorXd rhs{x.rows() + y.rows()};
     rhs.segment(0, x.rows()) =
-        -(g - A_e.transpose() * y +
-          A_i.transpose() * (Sinv * (Z * c_i - μ * e) - z));
+        -(g - A_e.transpose() * y -
+          A_i.transpose() * (-Σ * c_i + μ * Sinv * e + z));
     rhs.segment(x.rows(), y.rows()) = -c_e;
 
     Eigen::VectorXd p_x;
@@ -417,11 +413,11 @@ void InteriorPoint(
       p_x = step.segment(0, x.rows());
       p_y = -step.segment(x.rows(), y.rows());
 
+      // pₖˢ = cᵢ − s + Aᵢpₖˣ
+      p_s = c_i - s + A_i * p_x;
+
       // pₖᶻ = −Σcᵢ + μS⁻¹e − ΣAᵢpₖˣ
       p_z = -Σ * c_i + μ * Sinv * e - Σ * A_i * p_x;
-
-      // pₖˢ = μZ⁻¹e − s − Z⁻¹Spₖᶻ
-      p_s = μ * Zinv * e - s - Zinv * S * p_z;
 
       // αᵐᵃˣ = max(α ∈ (0, 1] : sₖ + αpₖˢ ≥ (1−τⱼ)sₖ)
       α_max = FractionToTheBoundaryRule(s, p_s, τ);
@@ -499,8 +495,8 @@ void InteriorPoint(
 
             // Rebuild Newton-KKT rhs with updated constraint values.
             //
-            // rhs = −[∇f − Aₑᵀy + Aᵢᵀ(S⁻¹(Zcᵢ − μe) − z)]
-            //        [              cₑˢᵒᶜ               ]
+            // rhs = −[∇f − Aₑᵀy − Aᵢᵀ(−Σcᵢ + μS⁻¹e + z)]
+            //        [              cₑˢᵒᶜ              ]
             //
             // where cₑˢᵒᶜ = αc(xₖ) + c(xₖ + αpₖˣ)
             c_e_soc = α_soc * c_e_soc + trial_c_e;
@@ -512,11 +508,11 @@ void InteriorPoint(
             p_x_cor = step.segment(0, x.rows());
             p_y_soc = -step.segment(x.rows(), y.rows());
 
+            // pₖˢ = cᵢ − s + Aᵢpₖˣ
+            p_s_soc = c_i - s + A_i * p_x_cor;
+
             // pₖᶻ = −Σcᵢ + μS⁻¹e − ΣAᵢpₖˣ
             p_z_soc = -Σ * c_i + μ * Sinv * e - Σ * A_i * p_x_cor;
-
-            // pₖˢ = μZ⁻¹e − s − Z⁻¹Spₖᶻ
-            p_s_soc = μ * Zinv * e - s - Zinv * S * p_z_soc;
 
             // αˢᵒᶜ = max(α ∈ (0, 1] : sₖ + αpₖˢ ≥ (1−τⱼ)sₖ)
             α_soc = FractionToTheBoundaryRule(s, p_s_soc, τ);

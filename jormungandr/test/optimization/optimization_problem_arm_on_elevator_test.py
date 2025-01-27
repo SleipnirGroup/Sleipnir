@@ -98,6 +98,4 @@ def test_optimization_problem_arm_on_elevator():
     assert status.cost_function_type == ExpressionType.QUADRATIC
     assert status.equality_constraint_type == ExpressionType.LINEAR
     assert status.inequality_constraint_type == ExpressionType.LINEAR
-
-    # FIXME: Fails with "locally infeasible"
-    assert status.exit_condition == SolverExitCondition.LOCALLY_INFEASIBLE
+    assert status.exit_condition == SolverExitCondition.SUCCESS
