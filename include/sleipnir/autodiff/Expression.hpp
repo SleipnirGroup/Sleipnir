@@ -4,6 +4,7 @@
 
 #include <stdint.h>
 
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <memory>
@@ -246,23 +247,13 @@ struct Expression {
       return MakeExpressionPtr<ConstExpression>(lhs->value + rhs->value);
     }
 
-    // Use max of lhs and rhs expression types
-    if (lhs->Type() < rhs->Type()) {
-      if (rhs->Type() == kLinear) {
-        return MakeExpressionPtr<BinaryPlusExpression<kLinear>>(lhs, rhs);
-      } else if (rhs->Type() == kQuadratic) {
-        return MakeExpressionPtr<BinaryPlusExpression<kQuadratic>>(lhs, rhs);
-      } else {
-        return MakeExpressionPtr<BinaryPlusExpression<kNonlinear>>(lhs, rhs);
-      }
+    auto type = std::max(lhs->Type(), rhs->Type());
+    if (type == kLinear) {
+      return MakeExpressionPtr<BinaryPlusExpression<kLinear>>(lhs, rhs);
+    } else if (type == kQuadratic) {
+      return MakeExpressionPtr<BinaryPlusExpression<kQuadratic>>(lhs, rhs);
     } else {
-      if (lhs->Type() == kLinear) {
-        return MakeExpressionPtr<BinaryPlusExpression<kLinear>>(lhs, rhs);
-      } else if (lhs->Type() == kQuadratic) {
-        return MakeExpressionPtr<BinaryPlusExpression<kQuadratic>>(lhs, rhs);
-      } else {
-        return MakeExpressionPtr<BinaryPlusExpression<kNonlinear>>(lhs, rhs);
-      }
+      return MakeExpressionPtr<BinaryPlusExpression<kNonlinear>>(lhs, rhs);
     }
   }
 
@@ -293,23 +284,13 @@ struct Expression {
       return MakeExpressionPtr<ConstExpression>(lhs->value - rhs->value);
     }
 
-    // Use max of lhs and rhs expression types
-    if (lhs->Type() < rhs->Type()) {
-      if (rhs->Type() == kLinear) {
-        return MakeExpressionPtr<BinaryMinusExpression<kLinear>>(lhs, rhs);
-      } else if (rhs->Type() == kQuadratic) {
-        return MakeExpressionPtr<BinaryMinusExpression<kQuadratic>>(lhs, rhs);
-      } else {
-        return MakeExpressionPtr<BinaryMinusExpression<kNonlinear>>(lhs, rhs);
-      }
+    auto type = std::max(lhs->Type(), rhs->Type());
+    if (type == kLinear) {
+      return MakeExpressionPtr<BinaryMinusExpression<kLinear>>(lhs, rhs);
+    } else if (type == kQuadratic) {
+      return MakeExpressionPtr<BinaryMinusExpression<kQuadratic>>(lhs, rhs);
     } else {
-      if (lhs->Type() == kLinear) {
-        return MakeExpressionPtr<BinaryMinusExpression<kLinear>>(lhs, rhs);
-      } else if (lhs->Type() == kQuadratic) {
-        return MakeExpressionPtr<BinaryMinusExpression<kQuadratic>>(lhs, rhs);
-      } else {
-        return MakeExpressionPtr<BinaryMinusExpression<kNonlinear>>(lhs, rhs);
-      }
+      return MakeExpressionPtr<BinaryMinusExpression<kNonlinear>>(lhs, rhs);
     }
   }
 
