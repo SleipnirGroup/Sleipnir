@@ -113,7 +113,7 @@ class AdjointExpressionGraph {
     // for background on reverse accumulation automatic differentiation.
 
     if (m_adjointList.empty()) {
-      return VariableMatrix(wrt.size(), 1);
+      return VariableMatrix(VariableMatrix::empty, wrt.size(), 1);
     }
 
     // Set root node's adjoint to 1 since df/df is 1
