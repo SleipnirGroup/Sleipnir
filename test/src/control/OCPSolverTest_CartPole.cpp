@@ -82,10 +82,10 @@ TEST_CASE("OCPSolver - Cart-pole", "[OCPSolver]") {
   CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kNonlinear);
   CHECK(status.inequalityConstraintType == sleipnir::ExpressionType::kLinear);
 
-  // FIXME: Fails with "locally infeasible"
+  // FIXME: Fails with "factorization failed"
   CHECK(status.exitCondition ==
-        sleipnir::SolverExitCondition::kLocallyInfeasible);
-  SKIP("Fails with \"locally infeasible\"");
+        sleipnir::SolverExitCondition::kFactorizationFailed);
+  SKIP("Fails with \"factorization failed\"");
 
   // Verify initial state
   CHECK(X.Value(0, 0) == Catch::Approx(x_initial(0)).margin(1e-8));

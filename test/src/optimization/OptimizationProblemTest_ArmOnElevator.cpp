@@ -107,9 +107,9 @@ TEST_CASE("OptimizationProblem - Arm on elevator", "[OptimizationProblem]") {
   CHECK(status.inequalityConstraintType == sleipnir::ExpressionType::kLinear);
 
 #if defined(__APPLE__) && defined(__aarch64__)
-  // FIXME: Fails on macOS arm64 with "locally infeasible"
+  // FIXME: Fails on macOS arm64 with "factorization failed"
   CHECK(status.exitCondition ==
-        sleipnir::SolverExitCondition::kLocallyInfeasible);
+        sleipnir::SolverExitCondition::kFactorizationFailed);
 #else
   CHECK(status.exitCondition == sleipnir::SolverExitCondition::kSuccess);
 #endif

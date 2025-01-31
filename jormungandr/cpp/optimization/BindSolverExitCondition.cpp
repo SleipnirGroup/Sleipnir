@@ -22,9 +22,10 @@ void BindSolverExitCondition(nb::enum_<SolverExitCondition>& e) {
           DOC(sleipnir, SolverExitCondition, kTooFewDOFs));
   e.value("LOCALLY_INFEASIBLE", SolverExitCondition::kLocallyInfeasible,
           DOC(sleipnir, SolverExitCondition, kLocallyInfeasible));
-  e.value("FEASIBILITY_RESTORATION_FAILED",
-          SolverExitCondition::kFeasibilityRestorationFailed,
-          DOC(sleipnir, SolverExitCondition, kFeasibilityRestorationFailed));
+  e.value("FACTORIZATION_FAILED", SolverExitCondition::kFactorizationFailed,
+          DOC(sleipnir, SolverExitCondition, kFactorizationFailed));
+  e.value("LINE_SEARCH_FAILED", SolverExitCondition::kLineSearchFailed,
+          DOC(sleipnir, SolverExitCondition, kLineSearchFailed));
   e.value(
       "NONFINITE_INITIAL_COST_OR_CONSTRAINTS",
       SolverExitCondition::kNonfiniteInitialCostOrConstraints,

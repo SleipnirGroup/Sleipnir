@@ -45,9 +45,6 @@ struct FilterEntry {
  */
 class Filter {
  public:
-  static constexpr double γCost = 1e-8;
-  static constexpr double γConstraint = 1e-5;
-
   double maxConstraintViolation = 1e4;
 
   /**
@@ -188,6 +185,9 @@ class Filter {
   }
 
  private:
+  static constexpr double γCost = 1e-8;
+  static constexpr double γConstraint = 1e-5;
+
   Variable* m_f = nullptr;
   small_vector<FilterEntry> m_filter;
 };

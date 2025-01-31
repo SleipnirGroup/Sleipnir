@@ -267,16 +267,8 @@ Parameter ``callbacks``:
 Parameter ``config``:
     Configuration options for the solver.
 
-Parameter ``feasibility_restoration``:
-    Whether to use feasibility restoration instead of the normal
-    algorithm.
-
 Parameter ``x``:
     The initial guess and output location for the decision variables.
-
-Parameter ``s``:
-    The initial guess and output location for the inequality
-    constraint slack variables.
 
 Parameter ``status``:
     The solver status.)doc";
@@ -911,9 +903,11 @@ static const char *__doc_sleipnir_SolverExitCondition_kDivergingIterates =
 R"doc(The solver encountered diverging primal iterates xₖ and/or sₖ and gave
 up.)doc";
 
-static const char *__doc_sleipnir_SolverExitCondition_kFeasibilityRestorationFailed =
-R"doc(The solver failed to reach the desired tolerance, and feasibility
-restoration failed to converge.)doc";
+static const char *__doc_sleipnir_SolverExitCondition_kFactorizationFailed = R"doc(The linear system factorization failed.)doc";
+
+static const char *__doc_sleipnir_SolverExitCondition_kLineSearchFailed =
+R"doc(The backtracking line search failed, and the problem isn't locally
+infeasible.)doc";
 
 static const char *__doc_sleipnir_SolverExitCondition_kLocallyInfeasible =
 R"doc(The solver determined the problem to be locally infeasible and gave

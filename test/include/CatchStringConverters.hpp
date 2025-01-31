@@ -49,8 +49,10 @@ struct StringMaker<sleipnir::SolverExitCondition> {
         return "kTooFewDOFs";
       case kLocallyInfeasible:
         return "kLocallyInfeasible";
-      case kFeasibilityRestorationFailed:
-        return "kFeasibilityRestorationFailed";
+      case kFactorizationFailed:
+        return "kFactorizationFailed";
+      case kLineSearchFailed:
+        return "kLineSearchFailed";
       case kNonfiniteInitialCostOrConstraints:
         return "kNonfiniteInitialCostOrConstraints";
       case kDivergingIterates:

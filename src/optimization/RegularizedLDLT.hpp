@@ -103,9 +103,8 @@ class RegularizedLDLT {
       } else {
         δ *= 10.0;
 
-        // If the Hessian perturbation is too high, report failure. This can
-        // happen due to a rank-deficient equality constraint Jacobian with
-        // linearly dependent constraints.
+        // If the Hessian perturbation is too high, report failure. This can be
+        // caused by ill-conditioning.
         if (δ > 1e20) {
           m_info = Eigen::NumericalIssue;
           return;

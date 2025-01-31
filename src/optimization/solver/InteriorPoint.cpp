@@ -13,7 +13,6 @@
 
 #include "optimization/RegularizedLDLT.hpp"
 #include "optimization/solver/util/ErrorEstimate.hpp"
-#include "optimization/solver/util/FeasibilityRestoration.hpp"
 #include "optimization/solver/util/Filter.hpp"
 #include "optimization/solver/util/FractionToTheBoundaryRule.hpp"
 #include "optimization/solver/util/IsLocallyInfeasible.hpp"
@@ -46,8 +45,7 @@ void InteriorPoint(
     std::span<Variable> equalityConstraints,
     std::span<Variable> inequalityConstraints, Variable& f,
     std::span<std::function<bool(const SolverIterationInfo& info)>> callbacks,
-    const SolverConfig& config, bool feasibilityRestoration, Eigen::VectorXd& x,
-    Eigen::VectorXd& s, SolverStatus* status) {
+    const SolverConfig& config, Eigen::VectorXd& x, SolverStatus* status) {
   const auto solveStartTime = std::chrono::steady_clock::now();
 
   small_vector<SetupProfiler> setupProfilers;
@@ -63,7 +61,9 @@ void InteriorPoint(
 
   // Create autodiff variables for s, y, and z for Lagrangian
   VariableMatrix sAD(inequalityConstraints.size());
-  sAD.SetValue(s);
+  for (auto& s : sAD) {
+    s.SetValue(1.0);
+  }
   VariableMatrix yAD(equalityConstraints.size());
   for (auto& y : yAD) {
     y.SetValue(0.0);
@@ -140,6 +140,7 @@ void InteriorPoint(
   setupProfilers.back().Stop();
   setupProfilers.emplace_back("  ↳ precondition checks").Start();
 
+  Eigen::VectorXd s = sAD.Value();
   Eigen::VectorXd y = yAD.Value();
   Eigen::VectorXd z = zAD.Value();
   Eigen::VectorXd c_e = c_eAD.Value();
@@ -239,6 +240,7 @@ void InteriorPoint(
 
   // Variables for determining when a step is acceptable
   constexpr double α_red_factor = 0.5;
+  constexpr double α_min = 1e-20;
   int acceptableIterCounter = 0;
 
   int fullStepRejectedCounter = 0;
@@ -258,7 +260,6 @@ void InteriorPoint(
   solveProfilers.emplace_back("  ↳ linear system solve");
   solveProfilers.emplace_back("  ↳ line search");
   solveProfilers.emplace_back("    ↳ SOC");
-  solveProfilers.emplace_back("  ↳ feasibility restoration");
   solveProfilers.emplace_back("  ↳ next iter prep");
 
   auto& innerIterProf = solveProfilers[0];
@@ -269,15 +270,14 @@ void InteriorPoint(
   auto& linearSystemSolveProf = solveProfilers[5];
   auto& lineSearchProf = solveProfilers[6];
   auto& socProf = solveProfilers[7];
-  auto& feasibilityRestorationProf = solveProfilers[8];
-  auto& nextIterPrepProf = solveProfilers[9];
+  auto& nextIterPrepProf = solveProfilers[8];
 
   // Prints final diagnostics when the solver exits
   scope_exit exit{[&] {
     status->cost = f.Value();
 
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-    if (config.diagnostics && !feasibilityRestoration) {
+    if (config.diagnostics) {
       PrintTotalTime(iterations, setupProfilers[0], solveProfilers[0]);
 
       PrintSetupDiagnostics(setupProfilers);
@@ -296,7 +296,7 @@ void InteriorPoint(
   }};
 
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-  if (config.diagnostics && !feasibilityRestoration) {
+  if (config.diagnostics) {
     sleipnir::println("Error tolerance: {}\n", config.tolerance);
   }
 #endif
@@ -440,7 +440,6 @@ void InteriorPoint(
     double α_max = 1.0;
     double α = 1.0;
     double α_z = 1.0;
-    bool callFeasibilityRestoration = false;
 
     // Solve the Newton-KKT system
     //
@@ -448,390 +447,265 @@ void InteriorPoint(
     // [    Aₑ       0 ][−pₖʸ]    [                cₑ                ]
     solver.Compute(lhs, equalityConstraints.size(), μ);
     if (solver.Info() != Eigen::Success) [[unlikely]] {
-      // The regularization procedure failed due to a rank-deficient equality
-      // constraint Jacobian with linearly dependent constraints. Invoke
-      // feasibility restoration.
-      callFeasibilityRestoration = true;
-      linearSystemSolveProfiler.Stop();
-    } else {
-      Eigen::VectorXd step = solver.Solve(rhs);
+      status->exitCondition = SolverExitCondition::kFactorizationFailed;
+      return;
+    }
 
-      linearSystemSolveProfiler.Stop();
-      ScopedProfiler lineSearchProfiler{lineSearchProf};
+    Eigen::VectorXd step = solver.Solve(rhs);
 
-      // step = [ pₖˣ]
-      //        [−pₖʸ]
-      p_x = step.segment(0, x.rows());
-      p_y = -step.segment(x.rows(), y.rows());
+    linearSystemSolveProfiler.Stop();
+    ScopedProfiler lineSearchProfiler{lineSearchProf};
 
-      // pₖˢ = cᵢ − s + Aᵢpₖˣ
-      p_s = c_i - s + A_i * p_x;
+    // step = [ pₖˣ]
+    //        [−pₖʸ]
+    p_x = step.segment(0, x.rows());
+    p_y = -step.segment(x.rows(), y.rows());
 
-      // pₖᶻ = −Σcᵢ + μS⁻¹e − ΣAᵢpₖˣ
-      p_z = -Σ * c_i + μ * Sinv * e - Σ * A_i * p_x;
+    // pₖˢ = cᵢ − s + Aᵢpₖˣ
+    p_s = c_i - s + A_i * p_x;
 
-      // αᵐᵃˣ = max(α ∈ (0, 1] : sₖ + αpₖˢ ≥ (1−τⱼ)sₖ)
-      α_max = FractionToTheBoundaryRule(s, p_s, τ);
-      α = α_max;
+    // pₖᶻ = −Σcᵢ + μS⁻¹e − ΣAᵢpₖˣ
+    p_z = -Σ * c_i + μ * Sinv * e - Σ * A_i * p_x;
 
-      // αₖᶻ = max(α ∈ (0, 1] : zₖ + αpₖᶻ ≥ (1−τⱼ)zₖ)
-      α_z = FractionToTheBoundaryRule(z, p_z, τ);
+    // αᵐᵃˣ = max(α ∈ (0, 1] : sₖ + αpₖˢ ≥ (1−τⱼ)sₖ)
+    α_max = FractionToTheBoundaryRule(s, p_s, τ);
+    α = α_max;
 
-      // Loop until a step is accepted or feasibility restoration is invoked
-      while (1) {
-        Eigen::VectorXd trial_x = x + α * p_x;
-        Eigen::VectorXd trial_y = y + α_z * p_y;
-        Eigen::VectorXd trial_z = z + α_z * p_z;
+    // αₖᶻ = max(α ∈ (0, 1] : zₖ + αpₖᶻ ≥ (1−τⱼ)zₖ)
+    α_z = FractionToTheBoundaryRule(z, p_z, τ);
 
-        xAD.SetValue(trial_x);
+    // Loop until a step is accepted
+    while (1) {
+      Eigen::VectorXd trial_x = x + α * p_x;
+      Eigen::VectorXd trial_y = y + α_z * p_y;
+      Eigen::VectorXd trial_z = z + α_z * p_z;
 
-        Eigen::VectorXd trial_c_e = c_eAD.Value();
-        Eigen::VectorXd trial_c_i = c_iAD.Value();
+      xAD.SetValue(trial_x);
 
-        // If f(xₖ + αpₖˣ), cₑ(xₖ + αpₖˣ), or cᵢ(xₖ + αpₖˣ) aren't finite,
-        // reduce step size immediately
-        if (!std::isfinite(f.Value()) || !trial_c_e.allFinite() ||
-            !trial_c_i.allFinite()) {
-          // Reduce step size
-          α *= α_red_factor;
-          continue;
-        }
+      Eigen::VectorXd trial_c_e = c_eAD.Value();
+      Eigen::VectorXd trial_c_i = c_iAD.Value();
 
-        Eigen::VectorXd trial_s;
-        if (config.feasibleIPM && c_i.cwiseGreater(0.0).all()) {
-          // If the inequality constraints are all feasible, prevent them from
-          // becoming infeasible again.
-          //
-          // See equation (19.30) in [1].
-          trial_s = trial_c_i;
-        } else {
-          trial_s = s + α * p_s;
-        }
-
-        // Check whether filter accepts trial iterate
-        auto entry = filter.MakeEntry(trial_s, trial_c_e, trial_c_i, μ);
-        if (filter.TryAdd(entry, α)) {
-          // Accept step
-          break;
-        }
-
-        double prevConstraintViolation =
-            c_e.lpNorm<1>() + (c_i - s).lpNorm<1>();
-        double nextConstraintViolation =
-            trial_c_e.lpNorm<1>() + (trial_c_i - trial_s).lpNorm<1>();
-
-        // Second-order corrections
-        //
-        // If first trial point was rejected and constraint violation stayed the
-        // same or went up, apply second-order corrections
-        if (nextConstraintViolation >= prevConstraintViolation) {
-          // Apply second-order corrections. See section 2.4 of [2].
-          Eigen::VectorXd p_x_cor = p_x;
-          Eigen::VectorXd p_y_soc = p_y;
-          Eigen::VectorXd p_z_soc = p_z;
-          Eigen::VectorXd p_s_soc = p_s;
-
-          double α_soc = α;
-          Eigen::VectorXd c_e_soc = c_e;
-
-          bool stepAcceptable = false;
-          for (int soc_iteration = 0; soc_iteration < 5 && !stepAcceptable;
-               ++soc_iteration) {
-            ScopedProfiler socProfiler{socProf};
-
-            // Rebuild Newton-KKT rhs with updated constraint values.
-            //
-            // rhs = −[∇f − Aₑᵀy − Aᵢᵀ(−Σcᵢ + μS⁻¹e + z)]
-            //        [              cₑˢᵒᶜ              ]
-            //
-            // where cₑˢᵒᶜ = αc(xₖ) + c(xₖ + αpₖˣ)
-            c_e_soc = α_soc * c_e_soc + trial_c_e;
-            rhs.bottomRows(y.rows()) = -c_e_soc;
-
-            // Solve the Newton-KKT system
-            step = solver.Solve(rhs);
-
-            p_x_cor = step.segment(0, x.rows());
-            p_y_soc = -step.segment(x.rows(), y.rows());
-
-            // pₖˢ = cᵢ − s + Aᵢpₖˣ
-            p_s_soc = c_i - s + A_i * p_x_cor;
-
-            // pₖᶻ = −Σcᵢ + μS⁻¹e − ΣAᵢpₖˣ
-            p_z_soc = -Σ * c_i + μ * Sinv * e - Σ * A_i * p_x_cor;
-
-            // αˢᵒᶜ = max(α ∈ (0, 1] : sₖ + αpₖˢ ≥ (1−τⱼ)sₖ)
-            α_soc = FractionToTheBoundaryRule(s, p_s_soc, τ);
-            trial_x = x + α_soc * p_x_cor;
-            trial_s = s + α_soc * p_s_soc;
-
-            // αₖᶻ = max(α ∈ (0, 1] : zₖ + αpₖᶻ ≥ (1−τⱼ)zₖ)
-            double α_z_soc = FractionToTheBoundaryRule(z, p_z_soc, τ);
-            trial_y = y + α_z_soc * p_y_soc;
-            trial_z = z + α_z_soc * p_z_soc;
-
-            xAD.SetValue(trial_x);
-
-            trial_c_e = c_eAD.Value();
-            trial_c_i = c_iAD.Value();
-
-            // Check whether filter accepts trial iterate
-            entry = filter.MakeEntry(trial_s, trial_c_e, trial_c_i, μ);
-            if (filter.TryAdd(entry, α)) {
-              p_x = p_x_cor;
-              p_y = p_y_soc;
-              p_z = p_z_soc;
-              p_s = p_s_soc;
-              α = α_soc;
-              α_z = α_z_soc;
-              stepAcceptable = true;
-            }
-
-            socProfiler.Stop();
-
-#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-            if (config.diagnostics) {
-              double E = ErrorEstimate(g, A_e, trial_c_e, trial_y);
-              PrintIterationDiagnostics(
-                  iterations, IterationMode::kSecondOrderCorrection,
-                  socProfiler.CurrentDuration(), E, f.Value(),
-                  trial_c_e.lpNorm<1>() + (trial_c_i - trial_s).lpNorm<1>(),
-                  solver.HessianRegularization(), 1.0, 1.0);
-            }
-#endif
-          }
-
-          if (stepAcceptable) {
-            // Accept step
-            break;
-          }
-        }
-
-        // If we got here and α is the full step, the full step was rejected.
-        // Increment the full-step rejected counter to keep track of how many
-        // full steps have been rejected in a row.
-        if (α == α_max) {
-          ++fullStepRejectedCounter;
-        }
-
-        // If the full step was rejected enough times in a row, reset the filter
-        // because it may be impeding progress.
-        //
-        // See section 3.2 case I of [2].
-        if (fullStepRejectedCounter >= 4 &&
-            filter.maxConstraintViolation > entry.constraintViolation / 10.0) {
-          filter.maxConstraintViolation *= 0.1;
-          filter.Reset();
-          continue;
-        }
-
+      // If f(xₖ + αpₖˣ), cₑ(xₖ + αpₖˣ), or cᵢ(xₖ + αpₖˣ) aren't finite, reduce
+      // step size immediately
+      if (!std::isfinite(f.Value()) || !trial_c_e.allFinite() ||
+          !trial_c_i.allFinite()) {
         // Reduce step size
         α *= α_red_factor;
+        continue;
+      }
 
-        // Safety factor for the minimal step size
-        constexpr double α_min_frac = 0.05;
+      Eigen::VectorXd trial_s;
+      if (config.feasibleIPM && c_i.cwiseGreater(0.0).all()) {
+        // If the inequality constraints are all feasible, prevent them from
+        // becoming infeasible again.
+        //
+        // See equation (19.30) in [1].
+        trial_s = trial_c_i;
+      } else {
+        trial_s = s + α * p_s;
+      }
 
-        // If step size hit a minimum, check if the KKT error was reduced. If it
-        // wasn't, invoke feasibility restoration.
-        if (α < α_min_frac * Filter::γConstraint) {
-          double currentKKTError = KKTError(g, A_e, c_e, A_i, c_i, s, y, z, μ);
+      // Check whether filter accepts trial iterate
+      auto entry = filter.MakeEntry(trial_s, trial_c_e, trial_c_i, μ);
+      if (filter.TryAdd(entry, α)) {
+        // Accept step
+        break;
+      }
 
-          trial_x = x + α_max * p_x;
-          trial_s = s + α_max * p_s;
+      double prevConstraintViolation = c_e.lpNorm<1>() + (c_i - s).lpNorm<1>();
+      double nextConstraintViolation =
+          trial_c_e.lpNorm<1>() + (trial_c_i - trial_s).lpNorm<1>();
 
-          trial_y = y + α_z * p_y;
-          trial_z = z + α_z * p_z;
+      // Second-order corrections
+      //
+      // If first trial point was rejected and constraint violation stayed the
+      // same or went up, apply second-order corrections
+      if (nextConstraintViolation >= prevConstraintViolation) {
+        // Apply second-order corrections. See section 2.4 of [2].
+        Eigen::VectorXd p_x_cor = p_x;
+        Eigen::VectorXd p_y_soc = p_y;
+        Eigen::VectorXd p_z_soc = p_z;
+        Eigen::VectorXd p_s_soc = p_s;
 
-          // Upate autodiff
+        double α_soc = α;
+        Eigen::VectorXd c_e_soc = c_e;
+
+        bool stepAcceptable = false;
+        for (int soc_iteration = 0; soc_iteration < 5 && !stepAcceptable;
+             ++soc_iteration) {
+          ScopedProfiler socProfiler{socProf};
+
+          // Rebuild Newton-KKT rhs with updated constraint values.
+          //
+          // rhs = −[∇f − Aₑᵀy − Aᵢᵀ(−Σcᵢ + μS⁻¹e + z)]
+          //        [              cₑˢᵒᶜ              ]
+          //
+          // where cₑˢᵒᶜ = αc(xₖ) + c(xₖ + αpₖˣ)
+          c_e_soc = α_soc * c_e_soc + trial_c_e;
+          rhs.bottomRows(y.rows()) = -c_e_soc;
+
+          // Solve the Newton-KKT system
+          step = solver.Solve(rhs);
+
+          p_x_cor = step.segment(0, x.rows());
+          p_y_soc = -step.segment(x.rows(), y.rows());
+
+          // pₖˢ = cᵢ − s + Aᵢpₖˣ
+          p_s_soc = c_i - s + A_i * p_x_cor;
+
+          // pₖᶻ = −Σcᵢ + μS⁻¹e − ΣAᵢpₖˣ
+          p_z_soc = -Σ * c_i + μ * Sinv * e - Σ * A_i * p_x_cor;
+
+          // αˢᵒᶜ = max(α ∈ (0, 1] : sₖ + αpₖˢ ≥ (1−τⱼ)sₖ)
+          α_soc = FractionToTheBoundaryRule(s, p_s_soc, τ);
+          trial_x = x + α_soc * p_x_cor;
+          trial_s = s + α_soc * p_s_soc;
+
+          // αₖᶻ = max(α ∈ (0, 1] : zₖ + αpₖᶻ ≥ (1−τⱼ)zₖ)
+          double α_z_soc = FractionToTheBoundaryRule(z, p_z_soc, τ);
+          trial_y = y + α_z_soc * p_y_soc;
+          trial_z = z + α_z_soc * p_z_soc;
+
           xAD.SetValue(trial_x);
-          sAD.SetValue(trial_s);
-          yAD.SetValue(trial_y);
-          zAD.SetValue(trial_z);
 
           trial_c_e = c_eAD.Value();
           trial_c_i = c_iAD.Value();
 
-          double nextKKTError = KKTError(
-              gradientF.Value(), jacobianCe.Value(), trial_c_e,
-              jacobianCi.Value(), trial_c_i, trial_s, trial_y, trial_z, μ);
-
-          // If the step using αᵐᵃˣ reduced the KKT error, accept it anyway
-          if (nextKKTError <= 0.999 * currentKKTError) {
-            α = α_max;
-
-            // Accept step
-            break;
+          // Check whether filter accepts trial iterate
+          entry = filter.MakeEntry(trial_s, trial_c_e, trial_c_i, μ);
+          if (filter.TryAdd(entry, α)) {
+            p_x = p_x_cor;
+            p_y = p_y_soc;
+            p_z = p_z_soc;
+            p_s = p_s_soc;
+            α = α_soc;
+            α_z = α_z_soc;
+            stepAcceptable = true;
           }
 
-          // If the step direction was bad and feasibility restoration is
-          // already running, running it again won't help
-          if (feasibilityRestoration) {
-            status->exitCondition = SolverExitCondition::kLocallyInfeasible;
-            return;
-          }
+          socProfiler.Stop();
 
-          callFeasibilityRestoration = true;
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
+          if (config.diagnostics) {
+            double E = ErrorEstimate(g, A_e, trial_c_e, trial_y);
+            PrintIterationDiagnostics(
+                iterations, IterationMode::kSecondOrderCorrection,
+                socProfiler.CurrentDuration(), E, f.Value(),
+                trial_c_e.lpNorm<1>() + (trial_c_i - trial_s).lpNorm<1>(),
+                solver.HessianRegularization(), 1.0, 1.0);
+          }
+#endif
+        }
+
+        if (stepAcceptable) {
+          // Accept step
           break;
         }
       }
+
+      // If we got here and α is the full step, the full step was rejected.
+      // Increment the full-step rejected counter to keep track of how many full
+      // steps have been rejected in a row.
+      if (α == α_max) {
+        ++fullStepRejectedCounter;
+      }
+
+      // If the full step was rejected enough times in a row, reset the filter
+      // because it may be impeding progress.
+      //
+      // See section 3.2 case I of [2].
+      if (fullStepRejectedCounter >= 4 &&
+          filter.maxConstraintViolation > entry.constraintViolation / 10.0) {
+        filter.maxConstraintViolation *= 0.1;
+        filter.Reset();
+        continue;
+      }
+
+      // Reduce step size
+      α *= α_red_factor;
+
+      // If step size hit a minimum, check if the KKT error was reduced. If it
+      // wasn't, report bad line search.
+      if (α < α_min) {
+        double currentKKTError = KKTError(g, A_e, c_e, A_i, c_i, s, y, z, μ);
+
+        trial_x = x + α_max * p_x;
+        trial_s = s + α_max * p_s;
+
+        trial_y = y + α_z * p_y;
+        trial_z = z + α_z * p_z;
+
+        // Upate autodiff
+        xAD.SetValue(trial_x);
+        sAD.SetValue(trial_s);
+        yAD.SetValue(trial_y);
+        zAD.SetValue(trial_z);
+
+        trial_c_e = c_eAD.Value();
+        trial_c_i = c_iAD.Value();
+
+        double nextKKTError = KKTError(gradientF.Value(), jacobianCe.Value(),
+                                       trial_c_e, jacobianCi.Value(), trial_c_i,
+                                       trial_s, trial_y, trial_z, μ);
+
+        // If the step using αᵐᵃˣ reduced the KKT error, accept it anyway
+        if (nextKKTError <= 0.999 * currentKKTError) {
+          α = α_max;
+
+          // Accept step
+          break;
+        }
+
+        status->exitCondition = SolverExitCondition::kLineSearchFailed;
+        return;
+      }
     }
 
-    if (callFeasibilityRestoration) {
-      ScopedProfiler feasibilityRestorationProfiler{feasibilityRestorationProf};
+    lineSearchProfiler.Stop();
 
-      auto initialEntry = filter.MakeEntry(s, c_e, c_i, μ);
+    // If full step was accepted, reset full-step rejected counter
+    if (α == α_max) {
+      fullStepRejectedCounter = 0;
+    }
 
-      // Feasibility restoration phase
-      Eigen::VectorXd fr_x = x;
-      Eigen::VectorXd fr_s = s;
-      SolverStatus fr_status;
-      FeasibilityRestoration(
-          decisionVariables, equalityConstraints, inequalityConstraints, μ,
-          [&](const SolverIterationInfo& info) {
-            Eigen::VectorXd trial_x =
-                info.x.segment(0, decisionVariables.size());
-            xAD.SetValue(trial_x);
-
-            Eigen::VectorXd trial_s =
-                info.s.segment(0, inequalityConstraints.size());
-            sAD.SetValue(trial_s);
-
-            Eigen::VectorXd trial_c_e = c_eAD.Value();
-            Eigen::VectorXd trial_c_i = c_iAD.Value();
-
-            // If current iterate is acceptable to normal filter and
-            // constraint violation has sufficiently reduced, stop
-            // feasibility restoration
-            auto entry = filter.MakeEntry(trial_s, trial_c_e, trial_c_i, μ);
-            if (filter.IsAcceptable(entry, α) &&
-                entry.constraintViolation <
-                    0.9 * initialEntry.constraintViolation) {
-              return true;
-            }
-
-            return false;
-          },
-          config, fr_x, fr_s, &fr_status);
-
-      if (fr_status.exitCondition ==
-          SolverExitCondition::kCallbackRequestedStop) {
-        // Accept step
-        x = fr_x;
-        s = fr_s;
-
-        // Lagrange multiplier estimates
-        //
-        //   [y] = (ÂÂᵀ)⁻¹Â[ ∇f]
-        //   [z]           [−μe]
-        //
-        //   where Â = [Aₑ   0]
-        //             [Aᵢ  −S]
-        //
-        // See equation (19.37) of [1].
-        xAD.SetValue(fr_x);
-        sAD.SetValue(c_iAD.Value());
-
-        A_e = jacobianCe.Value();
-        A_i = jacobianCi.Value();
-        g = gradientF.Value();
-
-        // Â = [Aₑ   0]
-        //     [Aᵢ  −S]
-        triplets.clear();
-        triplets.reserve(A_e.nonZeros() + A_i.nonZeros() + s.rows());
-        for (int col = 0; col < A_e.cols(); ++col) {
-          // Append column of Aₑ in top-left quadrant
-          for (Eigen::SparseMatrix<double>::InnerIterator it{A_e, col}; it;
-               ++it) {
-            triplets.emplace_back(it.row(), it.col(), it.value());
-          }
-          // Append column of Aᵢ in bottom-left quadrant
-          for (Eigen::SparseMatrix<double>::InnerIterator it{A_i, col}; it;
-               ++it) {
-            triplets.emplace_back(A_e.rows() + it.row(), it.col(), it.value());
-          }
-        }
-        // Append −S in bottom-right quadrant
-        for (int i = 0; i < s.rows(); ++i) {
-          triplets.emplace_back(A_e.rows() + i, A_e.cols() + i, -s(i));
-        }
-        Eigen::SparseMatrix<double> Ahat{A_e.rows() + A_i.rows(),
-                                         A_e.cols() + s.rows()};
-        Ahat.setFromSortedTriplets(
-            triplets.begin(), triplets.end(),
-            [](const auto&, const auto& b) { return b; });
-
-        // lhs = ÂÂᵀ
-        Eigen::SparseMatrix<double> lhs = Ahat * Ahat.transpose();
-
-        // rhs = Â[ ∇f]
-        //        [−μe]
-        Eigen::VectorXd rhsTemp{g.rows() + e.rows()};
-        rhsTemp.block(0, 0, g.rows(), 1) = g;
-        rhsTemp.block(g.rows(), 0, s.rows(), 1) = -μ * e;
-        Eigen::VectorXd rhs = Ahat * rhsTemp;
-
-        Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>> yzEstimator{lhs};
-        Eigen::VectorXd sol = yzEstimator.solve(rhs);
-
-        y = sol.block(0, 0, y.rows(), 1);
-        z = sol.block(y.rows(), 0, z.rows(), 1);
-      } else if (fr_status.exitCondition == SolverExitCondition::kSuccess) {
-        status->exitCondition = SolverExitCondition::kLocallyInfeasible;
-        x = fr_x;
-        return;
-      } else {
-        status->exitCondition =
-            SolverExitCondition::kFeasibilityRestorationFailed;
-        x = fr_x;
-        return;
-      }
+    // Handle very small search directions by letting αₖ = αₖᵐᵃˣ when
+    // max(|pₖˣ(i)|/(1 + |xₖ(i)|)) < 10ε_mach.
+    //
+    // See section 3.9 of [2].
+    double maxStepScaled = 0.0;
+    for (int row = 0; row < x.rows(); ++row) {
+      maxStepScaled = std::max(maxStepScaled,
+                               std::abs(p_x(row)) / (1.0 + std::abs(x(row))));
+    }
+    if (maxStepScaled < 10.0 * std::numeric_limits<double>::epsilon()) {
+      α = α_max;
+      ++stepTooSmallCounter;
     } else {
-      // If full step was accepted, reset full-step rejected counter
-      if (α == α_max) {
-        fullStepRejectedCounter = 0;
-      }
+      stepTooSmallCounter = 0;
+    }
 
-      // Handle very small search directions by letting αₖ = αₖᵐᵃˣ when
-      // max(|pₖˣ(i)|/(1 + |xₖ(i)|)) < 10ε_mach.
-      //
-      // See section 3.9 of [2].
-      double maxStepScaled = 0.0;
-      for (int row = 0; row < x.rows(); ++row) {
-        maxStepScaled = std::max(maxStepScaled,
-                                 std::abs(p_x(row)) / (1.0 + std::abs(x(row))));
-      }
-      if (maxStepScaled < 10.0 * std::numeric_limits<double>::epsilon()) {
-        α = α_max;
-        ++stepTooSmallCounter;
-      } else {
-        stepTooSmallCounter = 0;
-      }
+    // xₖ₊₁ = xₖ + αₖpₖˣ
+    // sₖ₊₁ = sₖ + αₖpₖˢ
+    // yₖ₊₁ = yₖ + αₖᶻpₖʸ
+    // zₖ₊₁ = zₖ + αₖᶻpₖᶻ
+    x += α * p_x;
+    s += α * p_s;
+    y += α_z * p_y;
+    z += α_z * p_z;
 
-      // xₖ₊₁ = xₖ + αₖpₖˣ
-      // sₖ₊₁ = sₖ + αₖpₖˢ
-      // yₖ₊₁ = yₖ + αₖᶻpₖʸ
-      // zₖ₊₁ = zₖ + αₖᶻpₖᶻ
-      x += α * p_x;
-      s += α * p_s;
-      y += α_z * p_y;
-      z += α_z * p_z;
+    // A requirement for the convergence proof is that the "primal-dual barrier
+    // term Hessian" Σₖ does not deviate arbitrarily much from the "primal
+    // Hessian" μⱼSₖ⁻². We ensure this by resetting
+    //
+    //   zₖ₊₁⁽ⁱ⁾ = max(min(zₖ₊₁⁽ⁱ⁾, κ_Σ μⱼ/sₖ₊₁⁽ⁱ⁾), μⱼ/(κ_Σ sₖ₊₁⁽ⁱ⁾))
+    //
+    // for some fixed κ_Σ ≥ 1 after each step. See equation (16) of [2].
+    for (int row = 0; row < z.rows(); ++row) {
+      // Barrier parameter scale factor for inequality constraint Lagrange
+      // multiplier safeguard
+      constexpr double κ_Σ = 1e10;
 
-      // A requirement for the convergence proof is that the "primal-dual
-      // barrier term Hessian" Σₖ does not deviate arbitrarily much from the
-      // "primal Hessian" μⱼSₖ⁻². We ensure this by resetting
-      //
-      //   zₖ₊₁⁽ⁱ⁾ = max(min(zₖ₊₁⁽ⁱ⁾, κ_Σ μⱼ/sₖ₊₁⁽ⁱ⁾), μⱼ/(κ_Σ sₖ₊₁⁽ⁱ⁾))
-      //
-      // for some fixed κ_Σ ≥ 1 after each step. See equation (16) of [2].
-      for (int row = 0; row < z.rows(); ++row) {
-        // Barrier parameter scale factor for inequality constraint Lagrange
-        // multiplier safeguard
-        constexpr double κ_Σ = 1e10;
-
-        z(row) =
-            std::max(std::min(z(row), κ_Σ * μ / s(row)), μ / (κ_Σ * s(row)));
-      }
+      z(row) = std::max(std::min(z(row), κ_Σ * μ / s(row)), μ / (κ_Σ * s(row)));
     }
 
     // Update autodiff for Jacobians and Hessian
@@ -876,13 +750,11 @@ void InteriorPoint(
 
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     if (config.diagnostics) {
-      PrintIterationDiagnostics(
-          iterations,
-          feasibilityRestoration ? IterationMode::kFeasibilityRestoration
-                                 : IterationMode::kNormal,
-          innerIterProfiler.CurrentDuration(), E_0, f.Value(),
-          c_e.lpNorm<1>() + (c_i - s).lpNorm<1>(),
-          solver.HessianRegularization(), α, α_z);
+      PrintIterationDiagnostics(iterations, IterationMode::kNormal,
+                                innerIterProfiler.CurrentDuration(), E_0,
+                                f.Value(),
+                                c_e.lpNorm<1>() + (c_i - s).lpNorm<1>(),
+                                solver.HessianRegularization(), α, α_z);
     }
 #endif
 
@@ -917,6 +789,6 @@ void InteriorPoint(
       continue;
     }
   }
-}  // NOLINT(readability/fn_size)
+}
 
 }  // namespace sleipnir
