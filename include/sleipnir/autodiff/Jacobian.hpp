@@ -7,9 +7,10 @@
 #include <Eigen/SparseCore>
 
 #include "sleipnir/autodiff/AdjointExpressionGraph.hpp"
-#include "sleipnir/autodiff/Profiler.hpp"
 #include "sleipnir/autodiff/Variable.hpp"
 #include "sleipnir/autodiff/VariableMatrix.hpp"
+#include "sleipnir/util/ScopedProfiler.hpp"
+#include "sleipnir/util/SolveProfiler.hpp"
 #include "sleipnir/util/SymbolExports.hpp"
 #include "sleipnir/util/small_vector.hpp"
 
@@ -33,8 +34,6 @@ class SLEIPNIR_DLLEXPORT Jacobian {
    */
   Jacobian(const VariableMatrix& variables, const VariableMatrix& wrt) noexcept
       : m_variables{std::move(variables)}, m_wrt{std::move(wrt)} {
-    m_profiler.StartSetup();
-
     // Initialize column each expression's adjoint occupies in the Jacobian
     for (size_t col = 0; col < m_wrt.size(); ++col) {
       m_wrt(col).expr->col = col;
@@ -69,8 +68,6 @@ class SLEIPNIR_DLLEXPORT Jacobian {
     if (m_nonlinearRows.empty()) {
       m_J.setFromTriplets(m_cachedTriplets.begin(), m_cachedTriplets.end());
     }
-
-    m_profiler.StopSetup();
   }
 
   /**
@@ -101,10 +98,10 @@ class SLEIPNIR_DLLEXPORT Jacobian {
    * Evaluates the Jacobian at wrt's value.
    */
   const Eigen::SparseMatrix<double>& Value() {
-    m_profiler.StartSolve();
+    ScopedProfiler profiler{m_solveProfiler};
 
     if (m_nonlinearRows.empty()) {
-      m_profiler.StopSolve();
+      m_solveProfiler.Stop();
       return m_J;
     }
 
@@ -129,15 +126,13 @@ class SLEIPNIR_DLLEXPORT Jacobian {
       m_J.setZero();
     }
 
-    m_profiler.StopSolve();
-
     return m_J;
   }
 
   /**
-   * Returns the profiler.
+   * Returns the solve profiler.
    */
-  Profiler& GetProfiler() { return m_profiler; }
+  const SolveProfiler& GetSolveProfiler() const { return m_solveProfiler; }
 
  private:
   VariableMatrix m_variables;
@@ -154,7 +149,7 @@ class SLEIPNIR_DLLEXPORT Jacobian {
   // Value()
   small_vector<int> m_nonlinearRows;
 
-  Profiler m_profiler;
+  SolveProfiler m_solveProfiler;
 };
 
 }  // namespace sleipnir

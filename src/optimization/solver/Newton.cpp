@@ -18,13 +18,15 @@
 #include "sleipnir/autodiff/Gradient.hpp"
 #include "sleipnir/autodiff/Hessian.hpp"
 #include "sleipnir/optimization/SolverExitCondition.hpp"
+#include "sleipnir/util/ScopedProfiler.hpp"
+#include "sleipnir/util/SetupProfiler.hpp"
+#include "sleipnir/util/SolveProfiler.hpp"
 #include "sleipnir/util/Spy.hpp"
 #include "util/ScopeExit.hpp"
 
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
 #include "sleipnir/util/Print.hpp"
-#include "util/PrintIterationDiagnostics.hpp"
-#include "util/ToMilliseconds.hpp"
+#include "util/PrintDiagnostics.hpp"
 #endif
 
 // See docs/algorithms.md#Works_cited for citation definitions.
@@ -37,24 +39,47 @@ void Newton(
     const SolverConfig& config, Eigen::VectorXd& x, SolverStatus* status) {
   const auto solveStartTime = std::chrono::steady_clock::now();
 
+  small_vector<SetupProfiler> setupProfilers;
+  setupProfilers.emplace_back("setup").Start();
+
   // Map decision variables and constraints to VariableMatrices for Lagrangian
   VariableMatrix xAD{decisionVariables};
   xAD.SetValue(x);
+
+  setupProfilers.back().Stop();
+  setupProfilers.emplace_back("  ↳ L setup").Start();
 
   // Lagrangian L
   //
   // L(xₖ, yₖ) = f(xₖ)
   auto L = f;
 
+  setupProfilers.back().Stop();
+  setupProfilers.emplace_back("  ↳ ∇f(x) setup").Start();
+
   // Gradient of f ∇f
   Gradient gradientF{f, xAD};
+
+  setupProfilers.back().Stop();
+  setupProfilers.emplace_back("  ↳ ∇f(x) init solve").Start();
+
   Eigen::SparseVector<double> g = gradientF.Value();
+
+  setupProfilers.back().Stop();
+  setupProfilers.emplace_back("  ↳ ∇²ₓₓL setup").Start();
 
   // Hessian of the Lagrangian H
   //
   // Hₖ = ∇²ₓₓL(xₖ, yₖ)
   Hessian hessianL{L, xAD};
+
+  setupProfilers.back().Stop();
+  setupProfilers.emplace_back("  ↳ ∇²ₓₓL init solve").Start();
+
   Eigen::SparseMatrix<double> H = hessianL.Value();
+
+  setupProfilers.back().Stop();
+  setupProfilers.emplace_back("  ↳ precondition checks").Start();
 
   // Check whether initial guess has finite f(xₖ)
   if (!std::isfinite(f.Value())) {
@@ -63,6 +88,9 @@ void Newton(
     return;
   }
 
+  setupProfilers.back().Stop();
+  setupProfilers.emplace_back("  ↳ spy setup").Start();
+
   // Sparsity pattern files written when spy flag is set in SolverConfig
   std::unique_ptr<Spy> H_spy;
   if (config.spy) {
@@ -70,51 +98,9 @@ void Newton(
                                   "Decision variables", H.rows(), H.cols());
   }
 
-#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-  if (config.diagnostics) {
-    sleipnir::println("Error tolerance: {}\n", config.tolerance);
-  }
-#endif
-
-  std::chrono::steady_clock::time_point iterationsStartTime;
+  setupProfilers.back().Stop();
 
   int iterations = 0;
-
-  // Prints final diagnostics when the solver exits
-  scope_exit exit{[&] {
-    status->cost = f.Value();
-
-#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-    if (config.diagnostics) {
-      auto solveEndTime = std::chrono::steady_clock::now();
-
-      sleipnir::println("\nSolve time: {:.3f} ms",
-                        ToMilliseconds(solveEndTime - solveStartTime));
-      sleipnir::println("  ↳ {:.3f} ms (solver setup)",
-                        ToMilliseconds(iterationsStartTime - solveStartTime));
-      if (iterations > 0) {
-        sleipnir::println(
-            "  ↳ {:.3f} ms ({} solver iterations; {:.3f} ms average)",
-            ToMilliseconds(solveEndTime - iterationsStartTime), iterations,
-            ToMilliseconds((solveEndTime - iterationsStartTime) / iterations));
-      }
-      sleipnir::println("");
-
-      sleipnir::println("{:^8}   {:^10}   {:^14}   {:^6}", "autodiff",
-                        "setup (ms)", "avg solve (ms)", "solves");
-      sleipnir::println("{:=^47}", "");
-      constexpr auto format = "{:^8}   {:10.3f}   {:14.3f}   {:6}";
-      sleipnir::println(format, "∇f(x)",
-                        gradientF.GetProfiler().SetupDuration(),
-                        gradientF.GetProfiler().AverageSolveDuration(),
-                        gradientF.GetProfiler().SolveMeasurements());
-      sleipnir::println(format, "∇²ₓₓL", hessianL.GetProfiler().SetupDuration(),
-                        hessianL.GetProfiler().AverageSolveDuration(),
-                        hessianL.GetProfiler().SolveMeasurements());
-      sleipnir::println("");
-    }
-#endif
-  }};
 
   Filter filter{f};
 
@@ -127,20 +113,54 @@ void Newton(
   // Error estimate
   double E_0 = std::numeric_limits<double>::infinity();
 
+  setupProfilers[0].Stop();
+
+  small_vector<SolveProfiler> solveProfilers;
+  solveProfilers.emplace_back("solve");
+  solveProfilers.emplace_back("  ↳ feasibility check");
+  solveProfilers.emplace_back("  ↳ spy writes");
+  solveProfilers.emplace_back("  ↳ user callbacks");
+  solveProfilers.emplace_back("  ↳ linear system solve");
+  solveProfilers.emplace_back("  ↳ line search");
+  solveProfilers.emplace_back("  ↳ next iter prep");
+
+  auto& innerIterProf = solveProfilers[0];
+  auto& feasibilityCheckProf = solveProfilers[1];
+  auto& spyWritesProf = solveProfilers[2];
+  auto& userCallbacksProf = solveProfilers[3];
+  auto& linearSystemSolveProf = solveProfilers[4];
+  auto& lineSearchProf = solveProfilers[5];
+  auto& nextIterPrepProf = solveProfilers[6];
+
+  // Prints final diagnostics when the solver exits
+  scope_exit exit{[&] {
+    status->cost = f.Value();
+
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
+    if (config.diagnostics) {
+      PrintTotalTime(iterations, setupProfilers[0], solveProfilers[0]);
+
+      PrintSetupDiagnostics(setupProfilers);
+
+      solveProfilers.push_back(gradientF.GetSolveProfiler());
+      solveProfilers.back().name = "  ↳ ∇f(x)";
+      solveProfilers.push_back(hessianL.GetSolveProfiler());
+      solveProfilers.back().name = "  ↳ ∇²ₓₓL";
+      PrintSolveDiagnostics(solveProfilers);
+    }
+#endif
+  }};
+
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
   if (config.diagnostics) {
-    iterationsStartTime = std::chrono::steady_clock::now();
+    sleipnir::println("Error tolerance: {}\n", config.tolerance);
   }
 #endif
 
   while (E_0 > config.tolerance &&
          acceptableIterCounter < config.maxAcceptableIterations) {
-#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-    std::chrono::steady_clock::time_point innerIterStartTime;
-    if (config.diagnostics) {
-      innerIterStartTime = std::chrono::steady_clock::now();
-    }
-#endif
+    ScopedProfiler innerIterProfiler{innerIterProf};
+    ScopedProfiler feasibilityCheckProfiler{feasibilityCheckProf};
 
     // Check for diverging iterates
     if (x.lpNorm<Eigen::Infinity>() > 1e20 || !x.allFinite()) {
@@ -148,10 +168,16 @@ void Newton(
       return;
     }
 
+    feasibilityCheckProfiler.Stop();
+    ScopedProfiler spyWritesProfiler{spyWritesProf};
+
     // Write out spy file contents if that's enabled
     if (config.spy) {
       H_spy->Add(H);
     }
+
+    spyWritesProfiler.Stop();
+    ScopedProfiler userCallbacksProfiler{userCallbacksProf};
 
     // Call user callbacks
     for (const auto& callback : callbacks) {
@@ -163,6 +189,9 @@ void Newton(
       }
     }
 
+    userCallbacksProfiler.Stop();
+    ScopedProfiler linearSystemSolveProfiler{linearSystemSolveProf};
+
     // rhs = −[∇f]
     Eigen::VectorXd rhs = -g;
 
@@ -171,6 +200,9 @@ void Newton(
     // [H][ pₖˣ] = −[∇f]
     solver.Compute(H, 0, config.tolerance / 10.0);
     Eigen::VectorXd step = solver.Solve(rhs);
+
+    linearSystemSolveProfiler.Stop();
+    ScopedProfiler lineSearchProfiler{lineSearchProf};
 
     // step = [ pₖˣ]
     Eigen::VectorXd p_x = step.segment(0, x.rows());
@@ -243,6 +275,8 @@ void Newton(
       α = α_max;
     }
 
+    lineSearchProfiler.Stop();
+
     // xₖ₊₁ = xₖ + αₖpₖˣ
     x += α * p_x;
 
@@ -250,6 +284,8 @@ void Newton(
     xAD.SetValue(x);
     g = gradientF.Value();
     H = hessianL.Value();
+
+    ScopedProfiler nextIterPrepProfiler{nextIterPrepProf};
 
     // Update the error estimate
     E_0 = ErrorEstimate(g);
@@ -259,12 +295,13 @@ void Newton(
       acceptableIterCounter = 0;
     }
 
-    const auto innerIterEndTime = std::chrono::steady_clock::now();
+    nextIterPrepProfiler.Stop();
+    innerIterProfiler.Stop();
 
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     if (config.diagnostics) {
       PrintIterationDiagnostics(iterations, IterationMode::kNormal,
-                                innerIterEndTime - innerIterStartTime, E_0,
+                                innerIterProfiler.CurrentDuration(), E_0,
                                 f.Value(), 0.0, solver.HessianRegularization(),
                                 α, 0.0);
     }
@@ -279,7 +316,7 @@ void Newton(
     }
 
     // Check for max wall clock time
-    if (innerIterEndTime - solveStartTime > config.timeout) {
+    if (std::chrono::steady_clock::now() - solveStartTime > config.timeout) {
       status->exitCondition = SolverExitCondition::kTimeout;
       return;
     }
