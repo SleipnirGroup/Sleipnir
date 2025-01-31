@@ -303,7 +303,7 @@ void Newton(
       PrintIterationDiagnostics(iterations, IterationMode::kNormal,
                                 innerIterProfiler.CurrentDuration(), E_0,
                                 f.Value(), 0.0, solver.HessianRegularization(),
-                                α, 0.0);
+                                α, 1.0);
     }
 #endif
 
