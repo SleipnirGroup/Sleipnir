@@ -430,7 +430,7 @@ void SQP(
                   iterations, IterationMode::kSecondOrderCorrection,
                   socProfiler.CurrentDuration(), E, f.Value(),
                   trial_c_e.lpNorm<1>(), solver.HessianRegularization(), 1.0,
-                  0.0);
+                  1.0);
             }
 #endif
           }
@@ -612,7 +612,7 @@ void SQP(
       PrintIterationDiagnostics(iterations, IterationMode::kNormal,
                                 innerIterProfiler.CurrentDuration(), E_0,
                                 f.Value(), c_e.lpNorm<1>(),
-                                solver.HessianRegularization(), α, 0.0);
+                                solver.HessianRegularization(), α, α);
     }
 #endif
 
