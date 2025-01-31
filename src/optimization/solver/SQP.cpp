@@ -291,7 +291,7 @@ void SQP(
     triplets.clear();
     triplets.reserve(topLeft.nonZeros() + A_e.nonZeros());
     for (int col = 0; col < H.cols(); ++col) {
-      // Append column of H + AᵢᵀΣAᵢ lower triangle in top-left quadrant
+      // Append column of H lower triangle in top-left quadrant
       for (Eigen::SparseMatrix<double>::InnerIterator it{topLeft, col}; it;
            ++it) {
         triplets.emplace_back(it.row(), it.col(), it.value());
