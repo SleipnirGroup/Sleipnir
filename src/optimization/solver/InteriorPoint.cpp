@@ -824,15 +824,13 @@ void InteriorPoint(
       //   zₖ₊₁⁽ⁱ⁾ = max(min(zₖ₊₁⁽ⁱ⁾, κ_Σ μⱼ/sₖ₊₁⁽ⁱ⁾), μⱼ/(κ_Σ sₖ₊₁⁽ⁱ⁾))
       //
       // for some fixed κ_Σ ≥ 1 after each step. See equation (16) of [2].
-      {
+      for (int row = 0; row < z.rows(); ++row) {
         // Barrier parameter scale factor for inequality constraint Lagrange
         // multiplier safeguard
         constexpr double κ_Σ = 1e10;
 
-        for (int row = 0; row < z.rows(); ++row) {
-          z(row) =
-              std::max(std::min(z(row), κ_Σ * μ / s(row)), μ / (κ_Σ * s(row)));
-        }
+        z(row) =
+            std::max(std::min(z(row), κ_Σ * μ / s(row)), μ / (κ_Σ * s(row)));
       }
     }
 
