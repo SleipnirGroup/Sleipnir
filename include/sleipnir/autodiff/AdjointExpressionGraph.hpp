@@ -176,8 +176,7 @@ class AdjointExpressionGraph {
     // multiplied by dy/dx. If there are multiple "paths" from the root node to
     // variable; the variable's adjoint is the sum of each path's adjoint
     // contribution.
-    for (size_t i = 0; i < m_adjointList.size(); ++i) {
-      auto& node = m_adjointList[i];
+    for (const auto& [node, col] : std::views::zip(m_adjointList, m_colList)) {
       auto& lhs = node->args[0];
       auto& rhs = node->args[1];
 
@@ -194,7 +193,7 @@ class AdjointExpressionGraph {
       }
 
       // Append adjoints of wrt to sparse matrix triplets
-      if (const int& col = m_colList[i]; col != -1 && node->adjoint != 0.0) {
+      if (col != -1 && node->adjoint != 0.0) {
         triplets.emplace_back(row, col, node->adjoint);
       }
     }
