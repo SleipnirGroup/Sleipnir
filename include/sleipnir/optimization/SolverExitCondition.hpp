@@ -24,19 +24,21 @@ enum class SolverExitCondition : int8_t {
   kTooFewDOFs = -1,
   /// The solver determined the problem to be locally infeasible and gave up.
   kLocallyInfeasible = -2,
-  /// The solver failed to reach the desired tolerance, and feasibility
-  /// restoration failed to converge.
-  kFeasibilityRestorationFailed = -3,
+  /// The linear system factorization failed.
+  kFactorizationFailed = -3,
+  /// The backtracking line search failed, and the problem isn't locally
+  /// infeasible.
+  kLineSearchFailed = -4,
   /// The solver encountered nonfinite initial cost or constraints and gave up.
-  kNonfiniteInitialCostOrConstraints = -4,
+  kNonfiniteInitialCostOrConstraints = -5,
   /// The solver encountered diverging primal iterates xₖ and/or sₖ and gave up.
-  kDivergingIterates = -5,
+  kDivergingIterates = -6,
   /// The solver returned its solution so far after exceeding the maximum number
   /// of iterations.
-  kMaxIterationsExceeded = -6,
+  kMaxIterationsExceeded = -7,
   /// The solver returned its solution so far after exceeding the maximum
   /// elapsed wall clock time.
-  kTimeout = -7
+  kTimeout = -8
 };
 
 /**
@@ -59,9 +61,11 @@ SLEIPNIR_DLLEXPORT constexpr std::string_view ToMessage(
       return "problem has too few degrees of freedom";
     case kLocallyInfeasible:
       return "problem is locally infeasible";
-    case kFeasibilityRestorationFailed:
-      return "solver failed to reach the desired tolerance, and feasibility "
-             "restoration failed to converge";
+    case kFactorizationFailed:
+      return "linear system factorization failed";
+    case kLineSearchFailed:
+      return "backtracking line search failed, and the problem isn't locally "
+             "infeasible";
     case kNonfiniteInitialCostOrConstraints:
       return "solver encountered nonfinite initial cost or constraints and "
              "gave up";

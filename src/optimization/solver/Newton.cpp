@@ -108,6 +108,7 @@ void Newton(
 
   // Variables for determining when a step is acceptable
   constexpr double α_red_factor = 0.5;
+  constexpr double α_min = 1e-20;
   int acceptableIterCounter = 0;
 
   // Error estimate
@@ -234,12 +235,9 @@ void Newton(
       // Reduce step size
       α *= α_red_factor;
 
-      // Safety factor for the minimal step size
-      constexpr double α_min_frac = 0.05;
-
       // If step size hit a minimum, check if the KKT error was reduced. If it
-      // wasn't, report infeasible.
-      if (α < α_min_frac * Filter::γConstraint) {
+      // wasn't, report bad line search.
+      if (α < α_min) {
         double currentKKTError = KKTError(g);
 
         Eigen::VectorXd trial_x = x + α_max * p_x;
@@ -257,7 +255,7 @@ void Newton(
           break;
         }
 
-        status->exitCondition = SolverExitCondition::kLocallyInfeasible;
+        status->exitCondition = SolverExitCondition::kLineSearchFailed;
         return;
       }
     }

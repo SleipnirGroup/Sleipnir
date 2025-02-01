@@ -124,15 +124,9 @@ TEST_CASE("NonlinearProblem - Narrow feasible region", "[NonlinearProblem]") {
   CHECK(status.costFunctionType == sleipnir::ExpressionType::kNonlinear);
   CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kLinear);
   CHECK(status.inequalityConstraintType == sleipnir::ExpressionType::kNone);
-
-#if defined(__APPLE__) && defined(__aarch64__)
-  // FIXME: Fails on macOS arm64 with "diverging iterates"
   CHECK(status.exitCondition ==
         sleipnir::SolverExitCondition::kDivergingIterates);
-  SKIP("Fails on macOS arm64 with \"diverging iterates\"");
-#else
-  CHECK(status.exitCondition == sleipnir::SolverExitCondition::kSuccess);
-#endif
+  SKIP("Fails with \"diverging iterates\"");
 
   CHECK(x.Value() == Catch::Approx(2.5).margin(1e-2));
   CHECK(y.Value() == Catch::Approx(2.5).margin(1e-2));

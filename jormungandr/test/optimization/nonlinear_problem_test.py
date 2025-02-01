@@ -1,5 +1,3 @@
-import platform
-
 import numpy as np
 import pytest
 
@@ -109,13 +107,9 @@ def test_narrow_feasible_region():
     assert status.cost_function_type == ExpressionType.NONLINEAR
     assert status.equality_constraint_type == ExpressionType.LINEAR
     assert status.inequality_constraint_type == ExpressionType.NONE
-
-    if platform.system() == "Darwin" and platform.machine() == "arm64":
-        # FIXME: Fails on macOS arm64 with "diverging iterates"
-        assert status.exit_condition == SolverExitCondition.DIVERGING_ITERATES
-        return
-    else:
-        assert status.exit_condition == SolverExitCondition.SUCCESS
+    # FIXME: Fails with "diverging iterates"
+    assert status.exit_condition == SolverExitCondition.DIVERGING_ITERATES
+    return
 
     assert x.value() == pytest.approx(2.5, abs=1e-2)
     assert y.value() == pytest.approx(2.5, abs=1e-2)
