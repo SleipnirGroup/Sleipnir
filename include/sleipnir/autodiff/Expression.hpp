@@ -53,21 +53,21 @@ static ExpressionPtr MakeExpressionPtr(Args&&... args) {
   }
 }
 
-template <ExpressionType Type>
+template <ExpressionType T>
 struct BinaryMinusExpression;
 
-template <ExpressionType Type>
+template <ExpressionType T>
 struct BinaryPlusExpression;
 
 struct ConstExpression;
 
-template <ExpressionType Type>
+template <ExpressionType T>
 struct DivExpression;
 
-template <ExpressionType Type>
+template <ExpressionType T>
 struct MultExpression;
 
-template <ExpressionType Type>
+template <ExpressionType T>
 struct UnaryMinusExpression;
 
 /**
