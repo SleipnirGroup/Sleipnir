@@ -1,6 +1,7 @@
 // Copyright (c) Sleipnir contributors
 
 #include <chrono>
+#include <print>
 #include <vector>
 
 #include "CasADi.hpp"
