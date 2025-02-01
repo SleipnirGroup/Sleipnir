@@ -264,6 +264,13 @@ TEST_CASE("Gradient - Power", "[Gradient]") {
   CHECK(g.Get().Value().coeff(0) == 0.5 / std::sqrt(x.Value()));
   CHECK(g.Value().coeff(0) == 0.5 / std::sqrt(x.Value()));
 
+  // std::sqrt(a)
+  CHECK(sleipnir::sqrt(a).Value() == std::sqrt(a.Value()));
+
+  g = sleipnir::Gradient(sleipnir::sqrt(a), a);
+  CHECK(g.Get().Value().coeff(0) == 0.5 / std::sqrt(a.Value()));
+  CHECK(g.Value().coeff(0) == 0.5 / std::sqrt(a.Value()));
+
   // x²
   CHECK(sleipnir::pow(x, 2.0).Value() == std::pow(x.Value(), 2.0));
 

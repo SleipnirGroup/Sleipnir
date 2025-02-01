@@ -251,10 +251,20 @@ def test_power():
     y = 2 * a
 
     # sqrt(x)
+    assert autodiff.sqrt(x).value() == math.sqrt(x.value())
+
     g = Gradient(autodiff.sqrt(x), x)
     assert autodiff.sqrt(x).value() == math.sqrt(x.value())
     assert g.get().value()[0, 0] == 0.5 / math.sqrt(x.value())
     assert g.value()[0, 0] == 0.5 / math.sqrt(x.value())
+
+    # sqrt(a)
+    assert autodiff.sqrt(a).value() == math.sqrt(a.value())
+
+    g = Gradient(autodiff.sqrt(a), a)
+    assert autodiff.sqrt(a).value() == math.sqrt(a.value())
+    assert g.get().value()[0, 0] == 0.5 / math.sqrt(a.value())
+    assert g.value()[0, 0] == 0.5 / math.sqrt(a.value())
 
     # x²
     assert autodiff.pow(x, 2.0).value() == math.pow(x.value(), 2.0)
