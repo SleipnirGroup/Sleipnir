@@ -26,9 +26,7 @@ enum class IterationMode : uint8_t {
   /// Normal iteration.
   kNormal,
   /// Second-order correction iteration.
-  kSecondOrderCorrection,
-  /// Feasibility restoration iteration.
-  kFeasibilityRestoration
+  kSecondOrderCorrection
 };
 
 /**
@@ -57,7 +55,7 @@ void PrintIterationDiagnostics(int iterations, IterationMode mode,
     sleipnir::println("{:=^96}", "");
   }
 
-  constexpr const char* kIterationModes[] = {" ", "s", "r"};
+  constexpr const char* kIterationModes[] = {" ", "s"};
   sleipnir::print("{:4}{}  {:9.3f}  {:13e}  {:13e}  {:13e}  ", iterations,
                   kIterationModes[std::to_underlying(mode)], ToMs(time), error,
                   cost, infeasibility);
