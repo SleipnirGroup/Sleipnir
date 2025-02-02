@@ -101,7 +101,6 @@ class SLEIPNIR_DLLEXPORT Jacobian {
     ScopedProfiler profiler{m_solveProfiler};
 
     if (m_nonlinearRows.empty()) {
-      m_solveProfiler.Stop();
       return m_J;
     }
 
