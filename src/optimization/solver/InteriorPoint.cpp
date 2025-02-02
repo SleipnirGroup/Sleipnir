@@ -282,13 +282,13 @@ void InteriorPoint(
 
       PrintSetupDiagnostics(setupProfilers);
 
-      solveProfilers.push_back(gradientF.GetSolveProfiler());
+      solveProfilers.push_back(gradientF.GetProfiler());
       solveProfilers.back().name = "  ↳ ∇f(x)";
-      solveProfilers.push_back(hessianL.GetSolveProfiler());
+      solveProfilers.push_back(hessianL.GetProfiler());
       solveProfilers.back().name = "  ↳ ∇²ₓₓL";
-      solveProfilers.push_back(jacobianCe.GetSolveProfiler());
+      solveProfilers.push_back(jacobianCe.GetProfiler());
       solveProfilers.back().name = "  ↳ ∂cₑ/∂x";
-      solveProfilers.push_back(jacobianCi.GetSolveProfiler());
+      solveProfilers.push_back(jacobianCi.GetProfiler());
       solveProfilers.back().name = "  ↳ ∂cᵢ/∂x";
       PrintSolveDiagnostics(solveProfilers);
     }
