@@ -8,6 +8,7 @@
 #include <functional>
 #include <limits>
 #include <memory>
+#include <ranges>
 
 #include <Eigen/SparseCholesky>
 
@@ -51,7 +52,7 @@ void InteriorPoint(
   small_vector<SetupProfiler> setupProfilers;
   setupProfilers.emplace_back("setup").Start();
 
-  setupProfilers.emplace_back("  ↳ s, y, z setup").Start();
+  setupProfilers.emplace_back("  ↳ s,y,z setup").Start();
 
   // Map decision variables and constraints to VariableMatrices for Lagrangian
   VariableMatrix xAD{decisionVariables};
@@ -138,7 +139,7 @@ void InteriorPoint(
   Eigen::SparseMatrix<double> H = hessianL.Value();
 
   setupProfilers.back().Stop();
-  setupProfilers.emplace_back("  ↳ precondition checks").Start();
+  setupProfilers.emplace_back("  ↳ precondition ✓").Start();
 
   Eigen::VectorXd s = sAD.Value();
   Eigen::VectorXd y = yAD.Value();
@@ -253,11 +254,11 @@ void InteriorPoint(
 
   small_vector<SolveProfiler> solveProfilers;
   solveProfilers.emplace_back("solve");
-  solveProfilers.emplace_back("  ↳ feasibility check");
+  solveProfilers.emplace_back("  ↳ feasibility ✓");
   solveProfilers.emplace_back("  ↳ spy writes");
   solveProfilers.emplace_back("  ↳ user callbacks");
-  solveProfilers.emplace_back("  ↳ linear system build");
-  solveProfilers.emplace_back("  ↳ linear system solve");
+  solveProfilers.emplace_back("  ↳ iter matrix build");
+  solveProfilers.emplace_back("  ↳ iter matrix solve");
   solveProfilers.emplace_back("  ↳ line search");
   solveProfilers.emplace_back("    ↳ SOC");
   solveProfilers.emplace_back("  ↳ next iter prep");
@@ -278,19 +279,39 @@ void InteriorPoint(
 
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     if (config.diagnostics) {
-      PrintTotalTime(iterations, setupProfilers[0], solveProfilers[0]);
-
-      PrintSetupDiagnostics(setupProfilers);
-
-      solveProfilers.push_back(gradientF.GetProfiler());
+      // Append gradient profilers
+      solveProfilers.push_back(gradientF.GetProfilers()[0]);
       solveProfilers.back().name = "  ↳ ∇f(x)";
-      solveProfilers.push_back(hessianL.GetProfiler());
+      for (const auto& profiler :
+           gradientF.GetProfilers() | std::views::drop(1)) {
+        solveProfilers.push_back(profiler);
+      }
+
+      // Append Hessian profilers
+      solveProfilers.push_back(hessianL.GetProfilers()[0]);
       solveProfilers.back().name = "  ↳ ∇²ₓₓL";
-      solveProfilers.push_back(jacobianCe.GetProfiler());
+      for (const auto& profiler :
+           hessianL.GetProfilers() | std::views::drop(1)) {
+        solveProfilers.push_back(profiler);
+      }
+
+      // Append equality constraint Jacobian profilers
+      solveProfilers.push_back(jacobianCe.GetProfilers()[0]);
       solveProfilers.back().name = "  ↳ ∂cₑ/∂x";
-      solveProfilers.push_back(jacobianCi.GetProfiler());
+      for (const auto& profiler :
+           jacobianCe.GetProfilers() | std::views::drop(1)) {
+        solveProfilers.push_back(profiler);
+      }
+
+      // Append inequality constraint Jacobian profilers
+      solveProfilers.push_back(jacobianCi.GetProfilers()[0]);
       solveProfilers.back().name = "  ↳ ∂cᵢ/∂x";
-      PrintSolveDiagnostics(solveProfilers);
+      for (const auto& profiler :
+           jacobianCi.GetProfilers() | std::views::drop(1)) {
+        solveProfilers.push_back(profiler);
+      }
+
+      PrintFinalDiagnostics(iterations, setupProfilers, solveProfilers);
     }
 #endif
   }};

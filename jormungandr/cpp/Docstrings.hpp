@@ -146,7 +146,7 @@ R"doc(Returns the gradient as a VariableMatrix.
 This is useful when constructing optimization problems with
 derivatives in them.)doc";
 
-static const char *__doc_sleipnir_Gradient_GetProfiler = R"doc(Returns the profiler.)doc";
+static const char *__doc_sleipnir_Gradient_GetProfilers = R"doc(Returns the profiler.)doc";
 
 static const char *__doc_sleipnir_Gradient_Gradient =
 R"doc(Constructs a Gradient object.
@@ -188,7 +188,7 @@ R"doc(Returns the Hessian as a VariableMatrix.
 This is useful when constructing optimization problems with
 derivatives in them.)doc";
 
-static const char *__doc_sleipnir_Hessian_GetProfiler = R"doc(Returns the profiler.)doc";
+static const char *__doc_sleipnir_Hessian_GetProfilers = R"doc(Returns the profilers.)doc";
 
 static const char *__doc_sleipnir_Hessian_Hessian =
 R"doc(Constructs a Hessian object.
@@ -286,7 +286,7 @@ R"doc(Returns the Jacobian as a VariableMatrix.
 This is useful when constructing optimization problems with
 derivatives in them.)doc";
 
-static const char *__doc_sleipnir_Jacobian_GetProfiler = R"doc(Returns the profiler.)doc";
+static const char *__doc_sleipnir_Jacobian_GetProfilers = R"doc(Returns the profilers.)doc";
 
 static const char *__doc_sleipnir_Jacobian_Jacobian =
 R"doc(Constructs a Jacobian object.
@@ -307,7 +307,7 @@ static const char *__doc_sleipnir_Jacobian_m_graphs = R"doc()doc";
 
 static const char *__doc_sleipnir_Jacobian_m_nonlinearRows = R"doc()doc";
 
-static const char *__doc_sleipnir_Jacobian_m_profiler = R"doc()doc";
+static const char *__doc_sleipnir_Jacobian_m_profilers = R"doc()doc";
 
 static const char *__doc_sleipnir_Jacobian_m_variables = R"doc()doc";
 
