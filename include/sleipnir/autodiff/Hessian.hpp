@@ -8,7 +8,6 @@
 #include "sleipnir/autodiff/Jacobian.hpp"
 #include "sleipnir/autodiff/Variable.hpp"
 #include "sleipnir/autodiff/VariableMatrix.hpp"
-#include "sleipnir/util/ScopedProfiler.hpp"
 #include "sleipnir/util/SolveProfiler.hpp"
 #include "sleipnir/util/SymbolExports.hpp"
 
@@ -48,18 +47,14 @@ class SLEIPNIR_DLLEXPORT Hessian {
   /**
    * Evaluates the Hessian at wrt's value.
    */
-  const Eigen::SparseMatrix<double>& Value() {
-    ScopedProfiler profiler{m_solveProfiler};
-    return m_jacobian.Value();
-  }
+  const Eigen::SparseMatrix<double>& Value() { return m_jacobian.Value(); }
 
   /**
-   * Returns the solve profiler.
+   * Returns the profiler.
    */
-  const SolveProfiler& GetSolveProfiler() const { return m_solveProfiler; }
+  const SolveProfiler& GetProfiler() const { return m_jacobian.GetProfiler(); }
 
  private:
-  SolveProfiler m_solveProfiler;
   Jacobian m_jacobian;
 };
 

@@ -146,7 +146,7 @@ R"doc(Returns the gradient as a VariableMatrix.
 This is useful when constructing optimization problems with
 derivatives in them.)doc";
 
-static const char *__doc_sleipnir_Gradient_GetSolveProfiler = R"doc(Returns the solve profiler.)doc";
+static const char *__doc_sleipnir_Gradient_GetProfiler = R"doc(Returns the profiler.)doc";
 
 static const char *__doc_sleipnir_Gradient_Gradient =
 R"doc(Constructs a Gradient object.
@@ -188,7 +188,7 @@ R"doc(Returns the Hessian as a VariableMatrix.
 This is useful when constructing optimization problems with
 derivatives in them.)doc";
 
-static const char *__doc_sleipnir_Hessian_GetSolveProfiler = R"doc(Returns the solve profiler.)doc";
+static const char *__doc_sleipnir_Hessian_GetProfiler = R"doc(Returns the profiler.)doc";
 
 static const char *__doc_sleipnir_Hessian_Hessian =
 R"doc(Constructs a Hessian object.
@@ -202,8 +202,6 @@ Parameter ``wrt``:
 static const char *__doc_sleipnir_Hessian_Value = R"doc(Evaluates the Hessian at wrt's value.)doc";
 
 static const char *__doc_sleipnir_Hessian_m_jacobian = R"doc()doc";
-
-static const char *__doc_sleipnir_Hessian_m_solveProfiler = R"doc()doc";
 
 static const char *__doc_sleipnir_InequalityConstraints = R"doc(A vector of inequality constraints of the form cᵢ(x) ≥ 0.)doc";
 
@@ -288,7 +286,7 @@ R"doc(Returns the Jacobian as a VariableMatrix.
 This is useful when constructing optimization problems with
 derivatives in them.)doc";
 
-static const char *__doc_sleipnir_Jacobian_GetSolveProfiler = R"doc(Returns the solve profiler.)doc";
+static const char *__doc_sleipnir_Jacobian_GetProfiler = R"doc(Returns the profiler.)doc";
 
 static const char *__doc_sleipnir_Jacobian_Jacobian =
 R"doc(Constructs a Jacobian object.
@@ -309,7 +307,7 @@ static const char *__doc_sleipnir_Jacobian_m_graphs = R"doc()doc";
 
 static const char *__doc_sleipnir_Jacobian_m_nonlinearRows = R"doc()doc";
 
-static const char *__doc_sleipnir_Jacobian_m_solveProfiler = R"doc()doc";
+static const char *__doc_sleipnir_Jacobian_m_profiler = R"doc()doc";
 
 static const char *__doc_sleipnir_Jacobian_m_variables = R"doc()doc";
 

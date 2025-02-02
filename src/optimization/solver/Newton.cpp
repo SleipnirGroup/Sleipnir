@@ -143,9 +143,9 @@ void Newton(
 
       PrintSetupDiagnostics(setupProfilers);
 
-      solveProfilers.push_back(gradientF.GetSolveProfiler());
+      solveProfilers.push_back(gradientF.GetProfiler());
       solveProfilers.back().name = "  ↳ ∇f(x)";
-      solveProfilers.push_back(hessianL.GetSolveProfiler());
+      solveProfilers.push_back(hessianL.GetProfiler());
       solveProfilers.back().name = "  ↳ ∇²ₓₓL";
       PrintSolveDiagnostics(solveProfilers);
     }

@@ -98,7 +98,7 @@ class SLEIPNIR_DLLEXPORT Jacobian {
    * Evaluates the Jacobian at wrt's value.
    */
   const Eigen::SparseMatrix<double>& Value() {
-    ScopedProfiler profiler{m_solveProfiler};
+    ScopedProfiler profiler{m_profiler};
 
     if (m_nonlinearRows.empty()) {
       return m_J;
@@ -129,9 +129,9 @@ class SLEIPNIR_DLLEXPORT Jacobian {
   }
 
   /**
-   * Returns the solve profiler.
+   * Returns the profiler.
    */
-  const SolveProfiler& GetSolveProfiler() const { return m_solveProfiler; }
+  const SolveProfiler& GetProfiler() const { return m_profiler; }
 
  private:
   VariableMatrix m_variables;
@@ -148,7 +148,7 @@ class SLEIPNIR_DLLEXPORT Jacobian {
   // Value()
   small_vector<int> m_nonlinearRows;
 
-  SolveProfiler m_solveProfiler;
+  SolveProfiler m_profiler;
 };
 
 }  // namespace sleipnir

@@ -60,11 +60,9 @@ class SLEIPNIR_DLLEXPORT Gradient {
   }
 
   /**
-   * Returns the solve profiler.
+   * Returns the profiler.
    */
-  const SolveProfiler& GetSolveProfiler() const {
-    return m_jacobian.GetSolveProfiler();
-  }
+  const SolveProfiler& GetProfiler() const { return m_jacobian.GetProfiler(); }
 
  private:
   Eigen::SparseVector<double> m_g;
