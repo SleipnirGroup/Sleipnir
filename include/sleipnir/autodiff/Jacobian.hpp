@@ -118,7 +118,7 @@ class SLEIPNIR_DLLEXPORT Jacobian {
       m_graphs[row].AppendAdjointTriplets(triplets, row);
     }
 
-    if (triplets.size() > 0) {
+    if (!triplets.empty()) {
       m_J.setFromTriplets(triplets.begin(), triplets.end());
     } else {
       // setFromTriplets() is a no-op on empty triplets, so explicitly zero out
