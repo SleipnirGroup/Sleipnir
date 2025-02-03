@@ -94,9 +94,13 @@ void Newton(
 
   // Sparsity pattern files written when spy flag is set in SolverConfig
   std::unique_ptr<Spy> H_spy;
+  std::unique_ptr<Spy> lhs_spy;
   if (config.spy) {
     H_spy = std::make_unique<Spy>("H.spy", "Hessian", "Decision variables",
                                   "Decision variables", H.rows(), H.cols());
+    lhs_spy =
+        std::make_unique<Spy>("lhs.spy", "Newton-KKT system left-hand side",
+                              "Rows", "Columns", H.rows(), H.cols());
   }
 
   setupProfilers.back().Stop();
@@ -120,18 +124,18 @@ void Newton(
   small_vector<SolveProfiler> solveProfilers;
   solveProfilers.emplace_back("solve");
   solveProfilers.emplace_back("  ↳ feasibility ✓");
-  solveProfilers.emplace_back("  ↳ spy writes");
   solveProfilers.emplace_back("  ↳ user callbacks");
   solveProfilers.emplace_back("  ↳ iter matrix solve");
   solveProfilers.emplace_back("  ↳ line search");
+  solveProfilers.emplace_back("  ↳ spy writes");
   solveProfilers.emplace_back("  ↳ next iter prep");
 
   auto& innerIterProf = solveProfilers[0];
   auto& feasibilityCheckProf = solveProfilers[1];
-  auto& spyWritesProf = solveProfilers[2];
-  auto& userCallbacksProf = solveProfilers[3];
-  auto& linearSystemSolveProf = solveProfilers[4];
-  auto& lineSearchProf = solveProfilers[5];
+  auto& userCallbacksProf = solveProfilers[2];
+  auto& linearSystemSolveProf = solveProfilers[3];
+  auto& lineSearchProf = solveProfilers[4];
+  auto& spyWritesProf = solveProfilers[5];
   auto& nextIterPrepProf = solveProfilers[6];
 
   // Prints final diagnostics when the solver exits
@@ -179,14 +183,6 @@ void Newton(
     }
 
     feasibilityCheckProfiler.Stop();
-    ScopedProfiler spyWritesProfiler{spyWritesProf};
-
-    // Write out spy file contents if that's enabled
-    if (config.spy) {
-      H_spy->Add(H);
-    }
-
-    spyWritesProfiler.Stop();
     ScopedProfiler userCallbacksProfiler{userCallbacksProf};
 
     // Call user callbacks
@@ -283,6 +279,13 @@ void Newton(
     }
 
     lineSearchProfiler.Stop();
+
+    // Write out spy file contents if that's enabled
+    if (config.spy) {
+      ScopedProfiler spyWritesProfiler{spyWritesProf};
+      H_spy->Add(H);
+      lhs_spy->Add(H);
+    }
 
     // xₖ₊₁ = xₖ + αₖpₖˣ
     x += α * p_x;
