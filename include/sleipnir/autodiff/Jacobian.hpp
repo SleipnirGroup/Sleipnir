@@ -68,6 +68,11 @@ class SLEIPNIR_DLLEXPORT Jacobian {
     if (m_nonlinearRows.empty()) {
       m_J.setFromTriplets(m_cachedTriplets.begin(), m_cachedTriplets.end());
     }
+
+    m_profilers.emplace_back("");
+    m_profilers.emplace_back("    ↳ graph update");
+    m_profilers.emplace_back("    ↳ adjoints");
+    m_profilers.emplace_back("    ↳ matrix build");
   }
 
   /**
@@ -98,15 +103,20 @@ class SLEIPNIR_DLLEXPORT Jacobian {
    * Evaluates the Jacobian at wrt's value.
    */
   const Eigen::SparseMatrix<double>& Value() {
-    ScopedProfiler profiler{m_profiler};
+    ScopedProfiler valueProfiler{m_profilers[0]};
 
     if (m_nonlinearRows.empty()) {
       return m_J;
     }
 
+    ScopedProfiler graphUpdateProfiler{m_profilers[1]};
+
     for (auto& graph : m_graphs) {
       graph.Update();
     }
+
+    graphUpdateProfiler.Stop();
+    ScopedProfiler adjointsProfiler{m_profilers[2]};
 
     // Copy the cached triplets so triplets added for the nonlinear rows are
     // thrown away at the end of the function
@@ -116,6 +126,9 @@ class SLEIPNIR_DLLEXPORT Jacobian {
     for (int row : m_nonlinearRows) {
       m_graphs[row].AppendAdjointTriplets(triplets, row);
     }
+
+    adjointsProfiler.Stop();
+    ScopedProfiler matrixBuildProfiler{m_profilers[3]};
 
     if (!triplets.empty()) {
       m_J.setFromTriplets(triplets.begin(), triplets.end());
@@ -129,9 +142,11 @@ class SLEIPNIR_DLLEXPORT Jacobian {
   }
 
   /**
-   * Returns the profiler.
+   * Returns the profilers.
    */
-  const SolveProfiler& GetProfiler() const { return m_profiler; }
+  const small_vector<SolveProfiler>& GetProfilers() const {
+    return m_profilers;
+  }
 
  private:
   VariableMatrix m_variables;
@@ -148,7 +163,7 @@ class SLEIPNIR_DLLEXPORT Jacobian {
   // Value()
   small_vector<int> m_nonlinearRows;
 
-  SolveProfiler m_profiler;
+  small_vector<SolveProfiler> m_profilers;
 };
 
 }  // namespace sleipnir

@@ -11,6 +11,7 @@
 #include "sleipnir/autodiff/VariableMatrix.hpp"
 #include "sleipnir/util/SolveProfiler.hpp"
 #include "sleipnir/util/SymbolExports.hpp"
+#include "sleipnir/util/small_vector.hpp"
 
 namespace sleipnir {
 
@@ -62,7 +63,9 @@ class SLEIPNIR_DLLEXPORT Gradient {
   /**
    * Returns the profiler.
    */
-  const SolveProfiler& GetProfiler() const { return m_jacobian.GetProfiler(); }
+  const small_vector<SolveProfiler>& GetProfilers() const {
+    return m_jacobian.GetProfilers();
+  }
 
  private:
   Eigen::SparseVector<double> m_g;

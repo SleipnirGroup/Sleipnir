@@ -10,6 +10,7 @@
 #include "sleipnir/autodiff/VariableMatrix.hpp"
 #include "sleipnir/util/SolveProfiler.hpp"
 #include "sleipnir/util/SymbolExports.hpp"
+#include "sleipnir/util/small_vector.hpp"
 
 namespace sleipnir {
 
@@ -50,9 +51,11 @@ class SLEIPNIR_DLLEXPORT Hessian {
   const Eigen::SparseMatrix<double>& Value() { return m_jacobian.Value(); }
 
   /**
-   * Returns the profiler.
+   * Returns the profilers.
    */
-  const SolveProfiler& GetProfiler() const { return m_jacobian.GetProfiler(); }
+  const small_vector<SolveProfiler>& GetProfilers() const {
+    return m_jacobian.GetProfilers();
+  }
 
  private:
   Jacobian m_jacobian;

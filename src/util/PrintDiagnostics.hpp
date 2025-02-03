@@ -50,8 +50,8 @@ void PrintIterationDiagnostics(int iterations, IterationMode mode,
   if (iterations % 20 == 0) {
     sleipnir::println(
         "{:^4}   {:^9}  {:^13}  {:^13}  {:^13}  {:^5}  {:^8}  {:^8}  {:^6}",
-        "iter", "time (ms)", "error", "cost", "infeasibility", "reg",
-        "primal α", "dual α", "bktrks");
+        "iter", "time ms", "error", "cost", "infeasibility", "reg", "primal α",
+        "dual α", "bktrks");
     sleipnir::println("{:=^96}", "");
   }
 
@@ -135,68 +135,47 @@ inline std::string Histogram(double value) {
 }
 
 /**
- * Prints total time.
+ * Prints final diagnostics.
  *
  * @param iterations Number of iterations.
- * @param totalSetupProfiler Total setup profiler.
- * @param totalSolveProfiler Total solve profiler.
+ * @param setupProfilers Setup profilers.
+ * @param solveProfilers Solve profilers.
  */
-inline void PrintTotalTime(int iterations,
-                           const SetupProfiler& totalSetupProfiler,
-                           const SolveProfiler& totalSolveProfiler) {
-  auto setupDuration = ToMs(totalSetupProfiler.Duration());
-  auto solveDuration = ToMs(totalSolveProfiler.TotalDuration());
+inline void PrintFinalDiagnostics(
+    int iterations, const small_vector<SetupProfiler>& setupProfilers,
+    const small_vector<SolveProfiler>& solveProfilers) {
+  // Print total time
+  auto setupDuration = ToMs(setupProfilers[0].Duration());
+  auto solveDuration = ToMs(solveProfilers[0].TotalDuration());
   sleipnir::println("\nTime: {:.3f} ms", setupDuration + solveDuration);
   sleipnir::println("  ↳ setup: {:.3f} ms", setupDuration);
   sleipnir::println("  ↳ solve: {:.3f} ms ({} iterations)", solveDuration,
                     iterations);
-}
 
-/**
- * Prints setup diagnostics.
- *
- * @param setupProfilers Setup profilers.
- */
-inline void PrintSetupDiagnostics(
-    const small_vector<SetupProfiler>& setupProfilers) {
-  // Setup heading
-  sleipnir::println("\n{:^23}  {:^9}  {:^8}  {:^8}", "trace", "time (ms)",
-                    "time (%)", "histogram");
-  sleipnir::println("{:=^56}", "");
-
-  constexpr auto setupFormat = "{:<23}  {:>9.3f}  {:>8.2f}  ░{}░";
+  // Print setup diagnostics
+  sleipnir::println("\n{:^21}  {:^18}{:>9}", "trace", "", "total ms");
+  sleipnir::println("{:=^50}", "");
 
   for (auto& profiler : setupProfilers) {
     double norm =
         ToMs(profiler.Duration()) / ToMs(setupProfilers[0].Duration());
-    sleipnir::println(setupFormat, profiler.name, ToMs(profiler.Duration()),
-                      norm * 100.0, Histogram<8>(norm));
+    sleipnir::println("{:<21}  {:>6.2f}%▕{}▏{:>9.3f}", profiler.name,
+                      norm * 100.0, Histogram<9>(norm),
+                      ToMs(profiler.Duration()));
   }
-}
 
-/**
- * Prints solve diagnostics.
- *
- * @param solveProfilers Solve profilers.
- */
-inline void PrintSolveDiagnostics(
-    const small_vector<SolveProfiler>& solveProfilers) {
-  // Solve heading
-  sleipnir::println("\n{:^27}  {:^9}  {:^5}  {:^10}  {:^9}  {:^8}", "trace",
-                    "each (ms)", "calls", "total (ms)", "total (%)",
-                    "histogram");
-  sleipnir::println("{:=^80}", "");
-
-  constexpr auto solveFormat =
-      "{:<27}  {:>9.3f}  {:>5}  {:>10.3f}  {:>9.2f}  ░{}░";
+  // Print solve diagnostics
+  sleipnir::println("\n{:^21}  {:^18}{:>9}  {:>9}  {:>4}", "trace", "",
+                    "total ms", "each ms", "num");
+  sleipnir::println("{:=^67}", "");
 
   for (auto& profiler : solveProfilers) {
     double norm = ToMs(profiler.TotalDuration()) /
                   ToMs(solveProfilers[0].TotalDuration());
-    sleipnir::println(solveFormat, profiler.name,
-                      ToMs(profiler.AverageDuration()), profiler.NumSolves(),
-                      ToMs(profiler.TotalDuration()), norm * 100.0,
-                      Histogram<8>(norm));
+    sleipnir::println("{:<21}  {:>6.2f}%▕{}▏{:>9.3f}  {:>9.3f}  {:>4}",
+                      profiler.name, norm * 100.0, Histogram<9>(norm),
+                      ToMs(profiler.TotalDuration()),
+                      ToMs(profiler.AverageDuration()), profiler.NumSolves());
   }
 
   sleipnir::println("");
