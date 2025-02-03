@@ -22,11 +22,11 @@
 #include "sleipnir/util/ScopedProfiler.hpp"
 #include "sleipnir/util/SetupProfiler.hpp"
 #include "sleipnir/util/SolveProfiler.hpp"
-#include "sleipnir/util/Spy.hpp"
 #include "util/ScopeExit.hpp"
 
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
 #include "sleipnir/util/Print.hpp"
+#include "sleipnir/util/Spy.hpp"
 #include "util/PrintDiagnostics.hpp"
 #endif
 
@@ -92,6 +92,7 @@ void Newton(
   setupProfilers.back().Stop();
   setupProfilers.emplace_back("  ↳ spy setup").Start();
 
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
   // Sparsity pattern files written when spy flag is set in SolverConfig
   std::unique_ptr<Spy> H_spy;
   std::unique_ptr<Spy> lhs_spy;
@@ -102,6 +103,7 @@ void Newton(
         std::make_unique<Spy>("lhs.spy", "Newton-KKT system left-hand side",
                               "Rows", "Columns", H.rows(), H.cols());
   }
+#endif
 
   setupProfilers.back().Stop();
 
@@ -135,6 +137,7 @@ void Newton(
   auto& userCallbacksProf = solveProfilers[2];
   auto& linearSystemSolveProf = solveProfilers[3];
   auto& lineSearchProf = solveProfilers[4];
+  [[maybe_unused]]
   auto& spyWritesProf = solveProfilers[5];
   auto& nextIterPrepProf = solveProfilers[6];
 
@@ -280,12 +283,14 @@ void Newton(
 
     lineSearchProfiler.Stop();
 
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     // Write out spy file contents if that's enabled
     if (config.spy) {
       ScopedProfiler spyWritesProfiler{spyWritesProf};
       H_spy->Add(H);
       lhs_spy->Add(H);
     }
+#endif
 
     // xₖ₊₁ = xₖ + αₖpₖˣ
     x += α * p_x;

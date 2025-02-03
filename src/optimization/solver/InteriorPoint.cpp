@@ -25,12 +25,12 @@
 #include "sleipnir/util/ScopedProfiler.hpp"
 #include "sleipnir/util/SetupProfiler.hpp"
 #include "sleipnir/util/SolveProfiler.hpp"
-#include "sleipnir/util/Spy.hpp"
 #include "sleipnir/util/small_vector.hpp"
 #include "util/ScopeExit.hpp"
 
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
 #include "sleipnir/util/Print.hpp"
+#include "sleipnir/util/Spy.hpp"
 #include "util/PrintDiagnostics.hpp"
 #endif
 
@@ -175,6 +175,7 @@ void InteriorPoint(
 
   setupProfilers.back().Stop();
 
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
   // Sparsity pattern files written when spy flag is set in SolverConfig
   std::unique_ptr<Spy> H_spy;
   std::unique_ptr<Spy> A_e_spy;
@@ -193,6 +194,7 @@ void InteriorPoint(
         "lhs.spy", "Newton-KKT system left-hand side", "Rows", "Columns",
         H.rows() + A_e.rows(), H.cols() + A_e.rows());
   }
+#endif
 
   int iterations = 0;
 
@@ -274,6 +276,7 @@ void InteriorPoint(
   auto& linearSystemSolveProf = solveProfilers[4];
   auto& lineSearchProf = solveProfilers[5];
   auto& socProf = solveProfilers[6];
+  [[maybe_unused]]
   auto& spyWritesProf = solveProfilers[7];
   auto& nextIterPrepProf = solveProfilers[8];
 
@@ -678,6 +681,7 @@ void InteriorPoint(
 
     lineSearchProfiler.Stop();
 
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     // Write out spy file contents if that's enabled
     if (config.spy) {
       ScopedProfiler spyWritesProfiler{spyWritesProf};
@@ -686,6 +690,7 @@ void InteriorPoint(
       A_i_spy->Add(A_i);
       lhs_spy->Add(lhs);
     }
+#endif
 
     // If full step was accepted, reset full-step rejected counter
     if (α == α_max) {

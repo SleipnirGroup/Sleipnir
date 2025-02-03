@@ -17,9 +17,12 @@
 #include "sleipnir/autodiff/ValueExpressionGraph.hpp"
 #include "sleipnir/util/Assert.hpp"
 #include "sleipnir/util/Concepts.hpp"
-#include "sleipnir/util/Print.hpp"
 #include "sleipnir/util/SymbolExports.hpp"
 #include "sleipnir/util/small_vector.hpp"
+
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
+#include "sleipnir/util/Print.hpp"
+#endif
 
 namespace sleipnir {
 
@@ -96,6 +99,7 @@ class SLEIPNIR_DLLEXPORT Variable {
     if (expr->IsConstant(0.0)) {
       expr = detail::MakeExpressionPtr<detail::ConstExpression>(value);
     } else {
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
       // We only need to check the first argument since unary and binary
       // operators both use it
       if (expr->args[0] != nullptr) {
@@ -105,6 +109,7 @@ class SLEIPNIR_DLLEXPORT Variable {
             "WARNING: {}:{}: {}: Modified the value of a dependent variable",
             location.file_name(), location.line(), location.function_name());
       }
+#endif
       expr->value = value;
     }
   }
