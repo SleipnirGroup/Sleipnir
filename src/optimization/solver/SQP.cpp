@@ -146,12 +146,16 @@ void SQP(
   // Sparsity pattern files written when spy flag is set in SolverConfig
   std::unique_ptr<Spy> H_spy;
   std::unique_ptr<Spy> A_e_spy;
+  std::unique_ptr<Spy> lhs_spy;
   if (config.spy) {
     H_spy = std::make_unique<Spy>("H.spy", "Hessian", "Decision variables",
                                   "Decision variables", H.rows(), H.cols());
     A_e_spy = std::make_unique<Spy>("A_e.spy", "Equality constraint Jacobian",
                                     "Constraints", "Decision variables",
                                     A_e.rows(), A_e.cols());
+    lhs_spy = std::make_unique<Spy>(
+        "lhs.spy", "Newton-KKT system left-hand side", "Rows", "Columns",
+        H.rows() + A_e.rows(), H.cols() + A_e.rows());
   }
 
   setupProfilers.back().Stop();
@@ -180,22 +184,22 @@ void SQP(
   small_vector<SolveProfiler> solveProfilers;
   solveProfilers.emplace_back("solve");
   solveProfilers.emplace_back("  ↳ feasibility ✓");
-  solveProfilers.emplace_back("  ↳ spy writes");
   solveProfilers.emplace_back("  ↳ user callbacks");
   solveProfilers.emplace_back("  ↳ iter matrix build");
   solveProfilers.emplace_back("  ↳ iter matrix solve");
   solveProfilers.emplace_back("  ↳ line search");
   solveProfilers.emplace_back("    ↳ SOC");
+  solveProfilers.emplace_back("  ↳ spy writes");
   solveProfilers.emplace_back("  ↳ next iter prep");
 
   auto& innerIterProf = solveProfilers[0];
   auto& feasibilityCheckProf = solveProfilers[1];
-  auto& spyWritesProf = solveProfilers[2];
-  auto& userCallbacksProf = solveProfilers[3];
-  auto& linearSystemBuildProf = solveProfilers[4];
-  auto& linearSystemSolveProf = solveProfilers[5];
-  auto& lineSearchProf = solveProfilers[6];
-  auto& socProf = solveProfilers[7];
+  auto& userCallbacksProf = solveProfilers[2];
+  auto& linearSystemBuildProf = solveProfilers[3];
+  auto& linearSystemSolveProf = solveProfilers[4];
+  auto& lineSearchProf = solveProfilers[5];
+  auto& socProf = solveProfilers[6];
+  auto& spyWritesProf = solveProfilers[7];
   auto& nextIterPrepProf = solveProfilers[8];
 
   // Prints final diagnostics when the solver exits
@@ -272,15 +276,6 @@ void SQP(
     }
 
     feasibilityCheckProfiler.Stop();
-    ScopedProfiler spyWritesProfiler{spyWritesProf};
-
-    // Write out spy file contents if that's enabled
-    if (config.spy) {
-      H_spy->Add(H);
-      A_e_spy->Add(A_e);
-    }
-
-    spyWritesProfiler.Stop();
     ScopedProfiler userCallbacksProfiler{userCallbacksProf};
 
     // Call user callbacks
@@ -503,6 +498,14 @@ void SQP(
     }
 
     lineSearchProfiler.Stop();
+
+    // Write out spy file contents if that's enabled
+    if (config.spy) {
+      ScopedProfiler spyWritesProfiler{spyWritesProf};
+      H_spy->Add(H);
+      A_e_spy->Add(A_e);
+      lhs_spy->Add(lhs);
+    }
 
     // If full step was accepted, reset full-step rejected counter
     if (α == α_max) {
