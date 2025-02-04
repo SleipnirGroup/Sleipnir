@@ -30,12 +30,10 @@ class SLEIPNIR_DLLEXPORT Hessian {
    * @param wrt Vector of variables with respect to which to compute the
    *   Hessian.
    */
-  Hessian(Variable variable, const VariableMatrix& wrt) noexcept
-      : m_jacobian{[&] {
-                     return detail::AdjointExpressionGraph{variable}
-                         .GenerateGradientTree(wrt);
-                   }(),
-                   wrt} {}
+  Hessian(Variable variable, VariableMatrix wrt) noexcept
+      : m_jacobian{
+            detail::AdjointExpressionGraph{variable}.GenerateGradientTree(wrt),
+            wrt} {}
 
   /**
    * Returns the Hessian as a VariableMatrix.

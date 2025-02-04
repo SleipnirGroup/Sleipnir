@@ -32,7 +32,7 @@ class SLEIPNIR_DLLEXPORT Jacobian {
    * @param wrt Vector of variables with respect to which to compute the
    *   Jacobian.
    */
-  Jacobian(const VariableMatrix& variables, const VariableMatrix& wrt) noexcept
+  Jacobian(VariableMatrix variables, VariableMatrix wrt) noexcept
       : m_variables{std::move(variables)}, m_wrt{std::move(wrt)} {
     // Initialize column each expression's adjoint occupies in the Jacobian
     for (size_t col = 0; col < m_wrt.size(); ++col) {
