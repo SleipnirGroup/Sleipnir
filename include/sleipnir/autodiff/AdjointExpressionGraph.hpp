@@ -24,7 +24,7 @@ class AdjointExpressionGraph {
    *
    * @param root The root node of the expression.
    */
-  explicit AdjointExpressionGraph(Variable& root) {
+  explicit AdjointExpressionGraph(const Variable& root) {
     // If the root type is a constant, Update() is a no-op, so there's no work
     // to do
     if (root.expr == nullptr || root.Type() == ExpressionType::kConstant) {
