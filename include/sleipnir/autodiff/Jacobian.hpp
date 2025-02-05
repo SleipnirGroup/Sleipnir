@@ -43,6 +43,11 @@ class SLEIPNIR_DLLEXPORT Jacobian {
       m_graphs.emplace_back(variable);
     }
 
+    // Reset col to -1
+    for (auto& node : m_wrt) {
+      node.expr->col = -1;
+    }
+
     for (int row = 0; row < m_variables.Rows(); ++row) {
       if (m_variables(row).expr == nullptr) {
         continue;
@@ -58,11 +63,6 @@ class SLEIPNIR_DLLEXPORT Jacobian {
         // rows to be recomputed in Value().
         m_nonlinearRows.emplace_back(row);
       }
-    }
-
-    // Reset col to -1
-    for (auto& node : m_wrt) {
-      node.expr->col = -1;
     }
 
     if (m_nonlinearRows.empty()) {
