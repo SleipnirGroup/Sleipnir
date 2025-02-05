@@ -113,7 +113,7 @@ class AdjointExpressionGraph {
     // for background on reverse accumulation automatic differentiation.
 
     if (m_adjointList.empty()) {
-      return VariableMatrix(VariableMatrix::empty, wrt.size(), 1);
+      return VariableMatrix{VariableMatrix::empty, wrt.Rows(), 1};
     }
 
     // Set root node's adjoint to 1 since df/df is 1
@@ -138,7 +138,7 @@ class AdjointExpressionGraph {
     }
 
     // Move gradient tree to return value
-    VariableMatrix grad(VariableMatrix::empty, wrt.size(), 1);
+    VariableMatrix grad{VariableMatrix::empty, wrt.Rows(), 1};
     for (int row = 0; row < grad.Rows(); ++row) {
       grad(row) = Variable{std::move(wrt(row).expr->adjointExpr)};
     }
