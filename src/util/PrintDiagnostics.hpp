@@ -48,17 +48,32 @@ void PrintIterationDiagnostics(int iterations, IterationMode mode,
                                double error, double cost, double infeasibility,
                                double δ, double primal_α, double dual_α) {
   if (iterations % 20 == 0) {
+    if (iterations == 0) {
+      sleipnir::println(
+          "┏{:━^6}┯{:━^6}┯{:━^11}┯{:━^14}┯{:━^14}┯{:━^15}┯{:━^7}┯{:━^10}┯"
+          "{:━^10}┯{:━^4}┓",
+          "", "", "", "", "", "", "", "", "", "");
+    } else {
+      sleipnir::println(
+          "┢{:━^6}┯{:━^6}┯{:━^11}┯{:━^14}┯{:━^14}┯{:━^15}┯{:━^7}┯{:━^10}┯"
+          "{:━^10}┯{:━^4}┪",
+          "", "", "", "", "", "", "", "", "", "");
+    }
     sleipnir::println(
-        "{:^4}   {:^9}  {:^13}  {:^13}  {:^13}  {:^5}  {:^8}  {:^8}  {:^6}",
-        "iter", "time ms", "error", "cost", "infeasibility", "reg", "primal α",
-        "dual α", "bktrks");
-    sleipnir::println("{:=^96}", "");
+        "┃ {:^4} │ {:^4} │ {:^9} │ {:^12} │ {:^12} │ {:^13} │ {:^5} │ {:^8} │ "
+        "{:^8} │ {:^2} ┃",
+        "iter", "mode", "time (ms)", "error", "cost", "infeasibility", "reg",
+        "primal α", "dual α", "↩");
+    sleipnir::println(
+        "┡{:━^6}┷{:━^6}┷{:━^11}┷{:━^14}┷{:━^14}┷{:━^15}┷{:━^7}┷{:━^10}┷{:━^10}┷"
+        "{:━^4}┩",
+        "", "", "", "", "", "", "", "", "", "");
   }
 
-  constexpr const char* kIterationModes[] = {" ", "s"};
-  sleipnir::print("{:4}{}  {:9.3f}  {:13e}  {:13e}  {:13e}  ", iterations,
-                  kIterationModes[std::to_underlying(mode)], ToMs(time), error,
-                  cost, infeasibility);
+  constexpr const char* kIterationModes[] = {"norm", "SOC"};
+  sleipnir::print("│ {:4}   {:4}   {:9.3f}   {:12e}   {:12e}   {:13e}   ",
+                  iterations, kIterationModes[std::to_underlying(mode)],
+                  ToMs(time), error, cost, infeasibility);
 
   // Print regularization
   if (δ == 0.0) {
@@ -96,7 +111,7 @@ void PrintIterationDiagnostics(int iterations, IterationMode mode,
   }
 
   // Print step sizes and number of backtracks
-  sleipnir::println("  {:.2e}  {:.2e}  {:6d}", primal_α, dual_α,
+  sleipnir::println("   {:.2e}   {:.2e}   {:2d} │", primal_α, dual_α,
                     static_cast<int>(-std::log2(primal_α)));
 }
 
@@ -144,6 +159,9 @@ inline std::string Histogram(double value) {
 inline void PrintFinalDiagnostics(
     int iterations, const small_vector<SetupProfiler>& setupProfilers,
     const small_vector<SolveProfiler>& solveProfilers) {
+  // Print bottom of iteration diagnostics table
+  sleipnir::println("└{:─^106}┘", "");
+
   // Print total time
   auto setupDuration = ToMs(setupProfilers[0].Duration());
   auto solveDuration = ToMs(solveProfilers[0].TotalDuration());
@@ -153,32 +171,40 @@ inline void PrintFinalDiagnostics(
                     iterations);
 
   // Print setup diagnostics
-  sleipnir::println("\n{:^21}  {:^18}{:>9}", "trace", "", "total ms");
-  sleipnir::println("{:=^50}", "");
+  sleipnir::println("\n┏{:━^23}┯{:━^20}┯{:━^12}┓", "", "", "");
+  sleipnir::println("┃ {:^21} │ {:^18} │ {:^10} ┃", "trace", "percent",
+                    "total (ms)");
+  sleipnir::println("┡{:━^23}┷{:━^20}┷{:━^12}┩", "", "", "");
 
   for (auto& profiler : setupProfilers) {
     double norm =
         ToMs(profiler.Duration()) / ToMs(setupProfilers[0].Duration());
-    sleipnir::println("{:<21}  {:>6.2f}%▕{}▏{:>9.3f}", profiler.name,
+    sleipnir::println("│ {:<21}   {:>6.2f}%▕{}▏   {:>10.3f} │", profiler.name,
                       norm * 100.0, Histogram<9>(norm),
                       ToMs(profiler.Duration()));
   }
 
+  sleipnir::println("└{:─^57}┘", "");
+
   // Print solve diagnostics
-  sleipnir::println("\n{:^21}  {:^18}{:>9}  {:>9}  {:>4}", "trace", "",
-                    "total ms", "each ms", "num");
-  sleipnir::println("{:=^67}", "");
+  sleipnir::println("┏{:━^23}┯{:━^20}┯{:━^12}┯{:━^11}┯{:━^6}┓", "", "", "", "",
+                    "");
+  sleipnir::println("┃ {:^21} │ {:^18} │ {:^10} │ {:^9} │ {:^4} ┃", "trace",
+                    "percent", "total (ms)", "each (ms)", "runs");
+  sleipnir::println("┡{:━^23}┷{:━^20}┷{:━^12}┷{:━^11}┷{:━^6}┩", "", "", "", "",
+                    "");
 
   for (auto& profiler : solveProfilers) {
     double norm = ToMs(profiler.TotalDuration()) /
                   ToMs(solveProfilers[0].TotalDuration());
-    sleipnir::println("{:<21}  {:>6.2f}%▕{}▏{:>9.3f}  {:>9.3f}  {:>4}",
-                      profiler.name, norm * 100.0, Histogram<9>(norm),
-                      ToMs(profiler.TotalDuration()),
-                      ToMs(profiler.AverageDuration()), profiler.NumSolves());
+    sleipnir::println(
+        "│ {:<21}   {:>6.2f}%▕{}▏   {:>10.3f}   {:>9.3f}   {:>4} │",
+        profiler.name, norm * 100.0, Histogram<9>(norm),
+        ToMs(profiler.TotalDuration()), ToMs(profiler.AverageDuration()),
+        profiler.NumSolves());
   }
 
-  sleipnir::println("");
+  sleipnir::println("└{:─^76}┘\n", "");
 }
 
 }  // namespace sleipnir
