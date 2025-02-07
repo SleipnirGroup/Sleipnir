@@ -1977,11 +1977,9 @@ static const char *__doc_sleipnir_detail_AdjointExpressionGraph_Update =
 R"doc(Update the values of all nodes in this adjoint graph based on the
 values of their dependent nodes.)doc";
 
-static const char *__doc_sleipnir_detail_AdjointExpressionGraph_m_adjointList = R"doc()doc";
-
 static const char *__doc_sleipnir_detail_AdjointExpressionGraph_m_colList = R"doc()doc";
 
-static const char *__doc_sleipnir_detail_AdjointExpressionGraph_m_valueList = R"doc()doc";
+static const char *__doc_sleipnir_detail_AdjointExpressionGraph_m_topList = R"doc()doc";
 
 static const char *__doc_sleipnir_detail_AsinExpression = R"doc()doc";
 
@@ -2584,7 +2582,7 @@ R"doc(Generates the value graph for the given expression.
 Parameter ``root``:
     The root node of the expression.)doc";
 
-static const char *__doc_sleipnir_detail_ValueExpressionGraph_m_valueList = R"doc()doc";
+static const char *__doc_sleipnir_detail_ValueExpressionGraph_m_topList = R"doc()doc";
 
 static const char *__doc_sleipnir_detail_abs =
 R"doc(std::abs() for Expressions.

@@ -60,13 +60,8 @@ class AdjointExpressionGraph {
       auto node = stack.back();
       stack.pop_back();
 
+      m_topList.emplace_back(node);
       m_colList.emplace_back(node->col);
-      m_adjointList.emplace_back(node);
-      if (node->args[0] != nullptr) {
-        // Constants (expressions with no arguments) are skipped because they
-        // don't need to be updated
-        m_valueList.emplace_back(node);
-      }
 
       for (auto& arg : node->args) {
         // If we traversed all this node's incoming edges, add it to the stack
@@ -82,9 +77,8 @@ class AdjointExpressionGraph {
    * their dependent nodes.
    */
   void Update() {
-    // Traverse the BFS list backward from child to parent and update the value
-    // of each node.
-    for (auto& node : m_valueList | std::views::reverse) {
+    // Traverse graph from child to parent and update values
+    for (auto& node : m_topList | std::views::reverse) {
       auto& lhs = node->args[0];
       auto& rhs = node->args[1];
 
@@ -112,18 +106,18 @@ class AdjointExpressionGraph {
     // Read docs/algorithms.md#Reverse_accumulation_automatic_differentiation
     // for background on reverse accumulation automatic differentiation.
 
-    if (m_adjointList.empty()) {
+    if (m_topList.empty()) {
       return VariableMatrix{VariableMatrix::empty, wrt.Rows(), 1};
     }
 
     // Set root node's adjoint to 1 since df/df is 1
-    m_adjointList[0]->adjointExpr = MakeExpressionPtr<ConstExpression>(1.0);
+    m_topList[0]->adjointExpr = MakeExpressionPtr<ConstExpression>(1.0);
 
     // df/dx = (df/dy)(dy/dx). The adjoint of x is equal to the adjoint of y
     // multiplied by dy/dx. If there are multiple "paths" from the root node to
     // variable; the variable's adjoint is the sum of each path's adjoint
     // contribution.
-    for (auto& node : m_adjointList) {
+    for (auto& node : m_topList) {
       auto& lhs = node->args[0];
       auto& rhs = node->args[1];
 
@@ -146,7 +140,7 @@ class AdjointExpressionGraph {
     // Unlink adjoints to avoid circular references between them and their
     // parent expressions. This ensures all expressions are returned to the free
     // list.
-    for (auto& node : m_adjointList) {
+    for (auto& node : m_topList) {
       node->adjointExpr = nullptr;
     }
 
@@ -165,18 +159,18 @@ class AdjointExpressionGraph {
     // Read docs/algorithms.md#Reverse_accumulation_automatic_differentiation
     // for background on reverse accumulation automatic differentiation.
 
-    if (m_adjointList.empty()) {
+    if (m_topList.empty()) {
       return;
     }
 
     // Set root node's adjoint to 1 since df/df is 1
-    m_adjointList[0]->adjoint = 1.0;
+    m_topList[0]->adjoint = 1.0;
 
     // df/dx = (df/dy)(dy/dx). The adjoint of x is equal to the adjoint of y
     // multiplied by dy/dx. If there are multiple "paths" from the root node to
     // variable; the variable's adjoint is the sum of each path's adjoint
     // contribution.
-    for (const auto& [node, col] : std::views::zip(m_adjointList, m_colList)) {
+    for (const auto& [node, col] : std::views::zip(m_topList, m_colList)) {
       auto& lhs = node->args[0];
       auto& rhs = node->args[1];
 
@@ -199,20 +193,17 @@ class AdjointExpressionGraph {
     }
 
     // Zero adjoints for next run
-    for (auto& node : m_adjointList) {
+    for (auto& node : m_topList) {
       node->adjoint = 0.0;
     }
   }
 
  private:
+  // Topological sort of graph from parent to child
+  small_vector<Expression*> m_topList;
+
   // List that maps nodes to their respective column
   small_vector<int> m_colList;
-
-  // List for updating adjoints
-  small_vector<Expression*> m_adjointList;
-
-  // List for updating values
-  small_vector<Expression*> m_valueList;
 };
 
 }  // namespace sleipnir::detail
