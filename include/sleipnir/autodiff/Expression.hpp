@@ -1355,6 +1355,7 @@ inline ExpressionPtr pow(const ExpressionPtr& base,
     // Return zero
     return base;
   } else if (base->IsConstant(1.0)) {
+    // Return one
     return base;
   }
   if (power->IsConstant(0.0)) {
@@ -1369,11 +1370,15 @@ inline ExpressionPtr pow(const ExpressionPtr& base,
         std::pow(base->value, power->value));
   }
 
-  if (base->Type() == kLinear && power->IsConstant(2.0)) {
-    return MakeExpressionPtr<PowExpression<kQuadratic>>(base, power);
-  } else {
-    return MakeExpressionPtr<PowExpression<kNonlinear>>(base, power);
+  if (power->IsConstant(2.0)) {
+    if (base->Type() == kLinear) {
+      return MakeExpressionPtr<MultExpression<kQuadratic>>(base, base);
+    } else {
+      return MakeExpressionPtr<MultExpression<kNonlinear>>(base, base);
+    }
   }
+
+  return MakeExpressionPtr<PowExpression<kNonlinear>>(base, power);
 }
 
 struct SignExpression final : Expression {
