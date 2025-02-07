@@ -56,11 +56,7 @@ class ValueExpressionGraph {
       auto node = stack.back();
       stack.pop_back();
 
-      if (node->args[0] != nullptr) {
-        // Constants (expressions with no arguments) are skipped because they
-        // don't need to be updated
-        m_valueList.emplace_back(node);
-      }
+      m_topList.emplace_back(node);
 
       for (auto& arg : node->args) {
         // If we traversed all this node's incoming edges, add it to the stack
@@ -76,9 +72,8 @@ class ValueExpressionGraph {
    * their dependent nodes.
    */
   void Update() {
-    // Traverse the BFS list backward from child to parent and update the value
-    // of each node.
-    for (auto& node : m_valueList | std::views::reverse) {
+    // Traverse graph from child to parent and update values
+    for (auto& node : m_topList | std::views::reverse) {
       auto& lhs = node->args[0];
       auto& rhs = node->args[1];
 
@@ -93,8 +88,8 @@ class ValueExpressionGraph {
   }
 
  private:
-  // List for updating values
-  small_vector<Expression*> m_valueList;
+  // Topological sort of graph from parent to child
+  small_vector<Expression*> m_topList;
 };
 
 }  // namespace sleipnir::detail
