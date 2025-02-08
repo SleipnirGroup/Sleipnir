@@ -258,6 +258,17 @@ struct Expression {
   }
 
   /**
+   * Expression-Expression compound addition operator.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   */
+  friend ExpressionPtr operator+=(ExpressionPtr& lhs,
+                                  const ExpressionPtr& rhs) {
+    return lhs = lhs + rhs;
+  }
+
+  /**
    * Expression-Expression subtraction operator.
    *
    * @param lhs Operator left-hand side.
@@ -353,9 +364,8 @@ struct Expression {
    * @param rhs Right argument to binary operator.
    * @param parentAdjoint Adjoint of parent expression.
    */
-  virtual double GradientValueLhs([[maybe_unused]] double lhs,
-                                  [[maybe_unused]] double rhs,
-                                  [[maybe_unused]] double parentAdjoint) const {
+  virtual double GradL([[maybe_unused]] double lhs, [[maybe_unused]] double rhs,
+                       [[maybe_unused]] double parentAdjoint) const {
     return 0.0;
   }
 
@@ -366,20 +376,19 @@ struct Expression {
    * @param rhs Right argument to binary operator.
    * @param parentAdjoint Adjoint of parent expression.
    */
-  virtual double GradientValueRhs([[maybe_unused]] double lhs,
-                                  [[maybe_unused]] double rhs,
-                                  [[maybe_unused]] double parentAdjoint) const {
+  virtual double GradR([[maybe_unused]] double lhs, [[maybe_unused]] double rhs,
+                       [[maybe_unused]] double parentAdjoint) const {
     return 0.0;
   }
 
   /**
-   * Returns Variable adjoint of the left child expression.
+   * Returns Expression adjoint of the left child expression.
    *
    * @param lhs Left argument to binary operator.
    * @param rhs Right argument to binary operator.
    * @param parentAdjoint Adjoint of parent expression.
    */
-  virtual ExpressionPtr GradientLhs(
+  virtual ExpressionPtr GradExprL(
       [[maybe_unused]] const ExpressionPtr& lhs,
       [[maybe_unused]] const ExpressionPtr& rhs,
       [[maybe_unused]] const ExpressionPtr& parentAdjoint) const {
@@ -387,13 +396,13 @@ struct Expression {
   }
 
   /**
-   * Returns Variable adjoint of the right child expression.
+   * Returns Expression adjoint of the right child expression.
    *
    * @param lhs Left argument to binary operator.
    * @param rhs Right argument to binary operator.
    * @param parentAdjoint Adjoint of parent expression.
    */
-  virtual ExpressionPtr GradientRhs(
+  virtual ExpressionPtr GradExprR(
       [[maybe_unused]] const ExpressionPtr& lhs,
       [[maybe_unused]] const ExpressionPtr& rhs,
       [[maybe_unused]] const ExpressionPtr& parentAdjoint) const {
@@ -418,21 +427,21 @@ struct BinaryMinusExpression final : Expression {
 
   ExpressionType Type() const override { return T; }
 
-  double GradientValueLhs(double, double, double parentAdjoint) const override {
+  double GradL(double, double, double parentAdjoint) const override {
     return parentAdjoint;
   }
 
-  double GradientValueRhs(double, double, double parentAdjoint) const override {
+  double GradR(double, double, double parentAdjoint) const override {
     return -parentAdjoint;
   }
 
-  ExpressionPtr GradientLhs(const ExpressionPtr&, const ExpressionPtr&,
-                            const ExpressionPtr& parentAdjoint) const override {
+  ExpressionPtr GradExprL(const ExpressionPtr&, const ExpressionPtr&,
+                          const ExpressionPtr& parentAdjoint) const override {
     return parentAdjoint;
   }
 
-  ExpressionPtr GradientRhs(const ExpressionPtr&, const ExpressionPtr&,
-                            const ExpressionPtr& parentAdjoint) const override {
+  ExpressionPtr GradExprR(const ExpressionPtr&, const ExpressionPtr&,
+                          const ExpressionPtr& parentAdjoint) const override {
     return -parentAdjoint;
   }
 };
@@ -454,21 +463,21 @@ struct BinaryPlusExpression final : Expression {
 
   ExpressionType Type() const override { return T; }
 
-  double GradientValueLhs(double, double, double parentAdjoint) const override {
+  double GradL(double, double, double parentAdjoint) const override {
     return parentAdjoint;
   }
 
-  double GradientValueRhs(double, double, double parentAdjoint) const override {
+  double GradR(double, double, double parentAdjoint) const override {
     return parentAdjoint;
   }
 
-  ExpressionPtr GradientLhs(const ExpressionPtr&, const ExpressionPtr&,
-                            const ExpressionPtr& parentAdjoint) const override {
+  ExpressionPtr GradExprL(const ExpressionPtr&, const ExpressionPtr&,
+                          const ExpressionPtr& parentAdjoint) const override {
     return parentAdjoint;
   }
 
-  ExpressionPtr GradientRhs(const ExpressionPtr&, const ExpressionPtr&,
-                            const ExpressionPtr& parentAdjoint) const override {
+  ExpressionPtr GradExprR(const ExpressionPtr&, const ExpressionPtr&,
+                          const ExpressionPtr& parentAdjoint) const override {
     return parentAdjoint;
   }
 };
@@ -527,23 +536,21 @@ struct DivExpression final : Expression {
 
   ExpressionType Type() const override { return T; }
 
-  double GradientValueLhs(double, double rhs,
-                          double parentAdjoint) const override {
+  double GradL(double, double rhs, double parentAdjoint) const override {
     return parentAdjoint / rhs;
   };
 
-  double GradientValueRhs(double lhs, double rhs,
-                          double parentAdjoint) const override {
+  double GradR(double lhs, double rhs, double parentAdjoint) const override {
     return parentAdjoint * -lhs / (rhs * rhs);
   }
 
-  ExpressionPtr GradientLhs(const ExpressionPtr&, const ExpressionPtr& rhs,
-                            const ExpressionPtr& parentAdjoint) const override {
+  ExpressionPtr GradExprL(const ExpressionPtr&, const ExpressionPtr& rhs,
+                          const ExpressionPtr& parentAdjoint) const override {
     return parentAdjoint / rhs;
   }
 
-  ExpressionPtr GradientRhs(const ExpressionPtr& lhs, const ExpressionPtr& rhs,
-                            const ExpressionPtr& parentAdjoint) const override {
+  ExpressionPtr GradExprR(const ExpressionPtr& lhs, const ExpressionPtr& rhs,
+                          const ExpressionPtr& parentAdjoint) const override {
     return parentAdjoint * -lhs / (rhs * rhs);
   }
 };
@@ -565,25 +572,25 @@ struct MultExpression final : Expression {
 
   ExpressionType Type() const override { return T; }
 
-  double GradientValueLhs([[maybe_unused]] double lhs, double rhs,
-                          double parentAdjoint) const override {
+  double GradL([[maybe_unused]] double lhs, double rhs,
+               double parentAdjoint) const override {
     return parentAdjoint * rhs;
   }
 
-  double GradientValueRhs(double lhs, [[maybe_unused]] double rhs,
-                          double parentAdjoint) const override {
+  double GradR(double lhs, [[maybe_unused]] double rhs,
+               double parentAdjoint) const override {
     return parentAdjoint * lhs;
   }
 
-  ExpressionPtr GradientLhs([[maybe_unused]] const ExpressionPtr& lhs,
-                            const ExpressionPtr& rhs,
-                            const ExpressionPtr& parentAdjoint) const override {
+  ExpressionPtr GradExprL([[maybe_unused]] const ExpressionPtr& lhs,
+                          const ExpressionPtr& rhs,
+                          const ExpressionPtr& parentAdjoint) const override {
     return parentAdjoint * rhs;
   }
 
-  ExpressionPtr GradientRhs(const ExpressionPtr& lhs,
-                            [[maybe_unused]] const ExpressionPtr& rhs,
-                            const ExpressionPtr& parentAdjoint) const override {
+  ExpressionPtr GradExprR(const ExpressionPtr& lhs,
+                          [[maybe_unused]] const ExpressionPtr& rhs,
+                          const ExpressionPtr& parentAdjoint) const override {
     return parentAdjoint * lhs;
   }
 };
@@ -604,12 +611,12 @@ struct UnaryMinusExpression final : Expression {
 
   ExpressionType Type() const override { return T; }
 
-  double GradientValueLhs(double, double, double parentAdjoint) const override {
+  double GradL(double, double, double parentAdjoint) const override {
     return -parentAdjoint;
   }
 
-  ExpressionPtr GradientLhs(const ExpressionPtr&, const ExpressionPtr&,
-                            const ExpressionPtr& parentAdjoint) const override {
+  ExpressionPtr GradExprL(const ExpressionPtr&, const ExpressionPtr&,
+                          const ExpressionPtr& parentAdjoint) const override {
     return -parentAdjoint;
   }
 };
@@ -683,8 +690,7 @@ struct AbsExpression final : Expression {
 
   ExpressionType Type() const override { return ExpressionType::kNonlinear; }
 
-  double GradientValueLhs(double x, double,
-                          double parentAdjoint) const override {
+  double GradL(double x, double, double parentAdjoint) const override {
     if (x < 0.0) {
       return -parentAdjoint;
     } else if (x > 0.0) {
@@ -694,8 +700,8 @@ struct AbsExpression final : Expression {
     }
   }
 
-  ExpressionPtr GradientLhs(const ExpressionPtr& x, const ExpressionPtr&,
-                            const ExpressionPtr& parentAdjoint) const override {
+  ExpressionPtr GradExprL(const ExpressionPtr& x, const ExpressionPtr&,
+                          const ExpressionPtr& parentAdjoint) const override {
     if (x->value < 0.0) {
       return -parentAdjoint;
     } else if (x->value > 0.0) {
@@ -743,13 +749,12 @@ struct AcosExpression final : Expression {
 
   ExpressionType Type() const override { return ExpressionType::kNonlinear; }
 
-  double GradientValueLhs(double x, double,
-                          double parentAdjoint) const override {
+  double GradL(double x, double, double parentAdjoint) const override {
     return -parentAdjoint / std::sqrt(1.0 - x * x);
   }
 
-  ExpressionPtr GradientLhs(const ExpressionPtr& x, const ExpressionPtr&,
-                            const ExpressionPtr& parentAdjoint) const override {
+  ExpressionPtr GradExprL(const ExpressionPtr& x, const ExpressionPtr&,
+                          const ExpressionPtr& parentAdjoint) const override {
     return -parentAdjoint /
            sleipnir::detail::sqrt(MakeExpressionPtr<ConstExpression>(1.0) -
                                   x * x);
@@ -791,13 +796,12 @@ struct AsinExpression final : Expression {
 
   ExpressionType Type() const override { return ExpressionType::kNonlinear; }
 
-  double GradientValueLhs(double x, double,
-                          double parentAdjoint) const override {
+  double GradL(double x, double, double parentAdjoint) const override {
     return parentAdjoint / std::sqrt(1.0 - x * x);
   }
 
-  ExpressionPtr GradientLhs(const ExpressionPtr& x, const ExpressionPtr&,
-                            const ExpressionPtr& parentAdjoint) const override {
+  ExpressionPtr GradExprL(const ExpressionPtr& x, const ExpressionPtr&,
+                          const ExpressionPtr& parentAdjoint) const override {
     return parentAdjoint / sleipnir::detail::sqrt(
                                MakeExpressionPtr<ConstExpression>(1.0) - x * x);
   }
@@ -839,13 +843,12 @@ struct AtanExpression final : Expression {
 
   ExpressionType Type() const override { return ExpressionType::kNonlinear; }
 
-  double GradientValueLhs(double x, double,
-                          double parentAdjoint) const override {
+  double GradL(double x, double, double parentAdjoint) const override {
     return parentAdjoint / (1.0 + x * x);
   }
 
-  ExpressionPtr GradientLhs(const ExpressionPtr& x, const ExpressionPtr&,
-                            const ExpressionPtr& parentAdjoint) const override {
+  ExpressionPtr GradExprL(const ExpressionPtr& x, const ExpressionPtr&,
+                          const ExpressionPtr& parentAdjoint) const override {
     return parentAdjoint / (MakeExpressionPtr<ConstExpression>(1.0) + x * x);
   }
 };
@@ -888,23 +891,21 @@ struct Atan2Expression final : Expression {
 
   ExpressionType Type() const override { return ExpressionType::kNonlinear; }
 
-  double GradientValueLhs(double y, double x,
-                          double parentAdjoint) const override {
+  double GradL(double y, double x, double parentAdjoint) const override {
     return parentAdjoint * x / (y * y + x * x);
   }
 
-  double GradientValueRhs(double y, double x,
-                          double parentAdjoint) const override {
+  double GradR(double y, double x, double parentAdjoint) const override {
     return parentAdjoint * -y / (y * y + x * x);
   }
 
-  ExpressionPtr GradientLhs(const ExpressionPtr& y, const ExpressionPtr& x,
-                            const ExpressionPtr& parentAdjoint) const override {
+  ExpressionPtr GradExprL(const ExpressionPtr& y, const ExpressionPtr& x,
+                          const ExpressionPtr& parentAdjoint) const override {
     return parentAdjoint * x / (y * y + x * x);
   }
 
-  ExpressionPtr GradientRhs(const ExpressionPtr& y, const ExpressionPtr& x,
-                            const ExpressionPtr& parentAdjoint) const override {
+  ExpressionPtr GradExprR(const ExpressionPtr& y, const ExpressionPtr& x,
+                          const ExpressionPtr& parentAdjoint) const override {
     return parentAdjoint * -y / (y * y + x * x);
   }
 };
@@ -948,13 +949,12 @@ struct CosExpression final : Expression {
 
   ExpressionType Type() const override { return ExpressionType::kNonlinear; }
 
-  double GradientValueLhs(double x, double,
-                          double parentAdjoint) const override {
+  double GradL(double x, double, double parentAdjoint) const override {
     return -parentAdjoint * std::sin(x);
   }
 
-  ExpressionPtr GradientLhs(const ExpressionPtr& x, const ExpressionPtr&,
-                            const ExpressionPtr& parentAdjoint) const override {
+  ExpressionPtr GradExprL(const ExpressionPtr& x, const ExpressionPtr&,
+                          const ExpressionPtr& parentAdjoint) const override {
     return parentAdjoint * -sleipnir::detail::sin(x);
   }
 };
@@ -994,13 +994,12 @@ struct CoshExpression final : Expression {
 
   ExpressionType Type() const override { return ExpressionType::kNonlinear; }
 
-  double GradientValueLhs(double x, double,
-                          double parentAdjoint) const override {
+  double GradL(double x, double, double parentAdjoint) const override {
     return parentAdjoint * std::sinh(x);
   }
 
-  ExpressionPtr GradientLhs(const ExpressionPtr& x, const ExpressionPtr&,
-                            const ExpressionPtr& parentAdjoint) const override {
+  ExpressionPtr GradExprL(const ExpressionPtr& x, const ExpressionPtr&,
+                          const ExpressionPtr& parentAdjoint) const override {
     return parentAdjoint * sleipnir::detail::sinh(x);
   }
 };
@@ -1040,13 +1039,12 @@ struct ErfExpression final : Expression {
 
   ExpressionType Type() const override { return ExpressionType::kNonlinear; }
 
-  double GradientValueLhs(double x, double,
-                          double parentAdjoint) const override {
+  double GradL(double x, double, double parentAdjoint) const override {
     return parentAdjoint * 2.0 * std::numbers::inv_sqrtpi * std::exp(-x * x);
   }
 
-  ExpressionPtr GradientLhs(const ExpressionPtr& x, const ExpressionPtr&,
-                            const ExpressionPtr& parentAdjoint) const override {
+  ExpressionPtr GradExprL(const ExpressionPtr& x, const ExpressionPtr&,
+                          const ExpressionPtr& parentAdjoint) const override {
     return parentAdjoint *
            MakeExpressionPtr<ConstExpression>(2.0 * std::numbers::inv_sqrtpi) *
            sleipnir::detail::exp(-x * x);
@@ -1089,13 +1087,12 @@ struct ExpExpression final : Expression {
 
   ExpressionType Type() const override { return ExpressionType::kNonlinear; }
 
-  double GradientValueLhs(double x, double,
-                          double parentAdjoint) const override {
+  double GradL(double x, double, double parentAdjoint) const override {
     return parentAdjoint * std::exp(x);
   }
 
-  ExpressionPtr GradientLhs(const ExpressionPtr& x, const ExpressionPtr&,
-                            const ExpressionPtr& parentAdjoint) const override {
+  ExpressionPtr GradExprL(const ExpressionPtr& x, const ExpressionPtr&,
+                          const ExpressionPtr& parentAdjoint) const override {
     return parentAdjoint * sleipnir::detail::exp(x);
   }
 };
@@ -1139,23 +1136,21 @@ struct HypotExpression final : Expression {
 
   ExpressionType Type() const override { return ExpressionType::kNonlinear; }
 
-  double GradientValueLhs(double x, double y,
-                          double parentAdjoint) const override {
+  double GradL(double x, double y, double parentAdjoint) const override {
     return parentAdjoint * x / std::hypot(x, y);
   }
 
-  double GradientValueRhs(double x, double y,
-                          double parentAdjoint) const override {
+  double GradR(double x, double y, double parentAdjoint) const override {
     return parentAdjoint * y / std::hypot(x, y);
   }
 
-  ExpressionPtr GradientLhs(const ExpressionPtr& x, const ExpressionPtr& y,
-                            const ExpressionPtr& parentAdjoint) const override {
+  ExpressionPtr GradExprL(const ExpressionPtr& x, const ExpressionPtr& y,
+                          const ExpressionPtr& parentAdjoint) const override {
     return parentAdjoint * x / sleipnir::detail::hypot(x, y);
   }
 
-  ExpressionPtr GradientRhs(const ExpressionPtr& x, const ExpressionPtr& y,
-                            const ExpressionPtr& parentAdjoint) const override {
+  ExpressionPtr GradExprR(const ExpressionPtr& x, const ExpressionPtr& y,
+                          const ExpressionPtr& parentAdjoint) const override {
     return parentAdjoint * y / sleipnir::detail::hypot(x, y);
   }
 };
@@ -1198,13 +1193,12 @@ struct LogExpression final : Expression {
 
   ExpressionType Type() const override { return ExpressionType::kNonlinear; }
 
-  double GradientValueLhs(double x, double,
-                          double parentAdjoint) const override {
+  double GradL(double x, double, double parentAdjoint) const override {
     return parentAdjoint / x;
   }
 
-  ExpressionPtr GradientLhs(const ExpressionPtr& x, const ExpressionPtr&,
-                            const ExpressionPtr& parentAdjoint) const override {
+  ExpressionPtr GradExprL(const ExpressionPtr& x, const ExpressionPtr&,
+                          const ExpressionPtr& parentAdjoint) const override {
     return parentAdjoint / x;
   }
 };
@@ -1245,13 +1239,12 @@ struct Log10Expression final : Expression {
 
   ExpressionType Type() const override { return ExpressionType::kNonlinear; }
 
-  double GradientValueLhs(double x, double,
-                          double parentAdjoint) const override {
+  double GradL(double x, double, double parentAdjoint) const override {
     return parentAdjoint / (std::numbers::ln10 * x);
   }
 
-  ExpressionPtr GradientLhs(const ExpressionPtr& x, const ExpressionPtr&,
-                            const ExpressionPtr& parentAdjoint) const override {
+  ExpressionPtr GradExprL(const ExpressionPtr& x, const ExpressionPtr&,
+                          const ExpressionPtr& parentAdjoint) const override {
     return parentAdjoint /
            (MakeExpressionPtr<ConstExpression>(std::numbers::ln10) * x);
   }
@@ -1300,13 +1293,11 @@ struct PowExpression final : Expression {
 
   ExpressionType Type() const override { return T; }
 
-  double GradientValueLhs(double base, double power,
-                          double parentAdjoint) const override {
+  double GradL(double base, double power, double parentAdjoint) const override {
     return parentAdjoint * std::pow(base, power - 1) * power;
   }
 
-  double GradientValueRhs(double base, double power,
-                          double parentAdjoint) const override {
+  double GradR(double base, double power, double parentAdjoint) const override {
     // Since x * std::log(x) -> 0 as x -> 0
     if (base == 0.0) {
       return 0.0;
@@ -1315,18 +1306,16 @@ struct PowExpression final : Expression {
     }
   }
 
-  ExpressionPtr GradientLhs(const ExpressionPtr& base,
-                            const ExpressionPtr& power,
-                            const ExpressionPtr& parentAdjoint) const override {
+  ExpressionPtr GradExprL(const ExpressionPtr& base, const ExpressionPtr& power,
+                          const ExpressionPtr& parentAdjoint) const override {
     return parentAdjoint *
            sleipnir::detail::pow(
                base, power - MakeExpressionPtr<ConstExpression>(1.0)) *
            power;
   }
 
-  ExpressionPtr GradientRhs(const ExpressionPtr& base,
-                            const ExpressionPtr& power,
-                            const ExpressionPtr& parentAdjoint) const override {
+  ExpressionPtr GradExprR(const ExpressionPtr& base, const ExpressionPtr& power,
+                          const ExpressionPtr& parentAdjoint) const override {
     // Since x * std::log(x) -> 0 as x -> 0
     if (base->value == 0.0) {
       // Return zero
@@ -1410,10 +1399,10 @@ struct SignExpression final : Expression {
 
   ExpressionType Type() const override { return ExpressionType::kNonlinear; }
 
-  double GradientValueLhs(double, double, double) const override { return 0.0; }
+  double GradL(double, double, double) const override { return 0.0; }
 
-  ExpressionPtr GradientLhs(const ExpressionPtr&, const ExpressionPtr&,
-                            const ExpressionPtr&) const override {
+  ExpressionPtr GradExprL(const ExpressionPtr&, const ExpressionPtr&,
+                          const ExpressionPtr&) const override {
     // Return zero
     return MakeExpressionPtr<ConstExpression>();
   }
@@ -1456,13 +1445,12 @@ struct SinExpression final : Expression {
 
   ExpressionType Type() const override { return ExpressionType::kNonlinear; }
 
-  double GradientValueLhs(double x, double,
-                          double parentAdjoint) const override {
+  double GradL(double x, double, double parentAdjoint) const override {
     return parentAdjoint * std::cos(x);
   }
 
-  ExpressionPtr GradientLhs(const ExpressionPtr& x, const ExpressionPtr&,
-                            const ExpressionPtr& parentAdjoint) const override {
+  ExpressionPtr GradExprL(const ExpressionPtr& x, const ExpressionPtr&,
+                          const ExpressionPtr& parentAdjoint) const override {
     return parentAdjoint * sleipnir::detail::cos(x);
   }
 };
@@ -1503,13 +1491,12 @@ struct SinhExpression final : Expression {
 
   ExpressionType Type() const override { return ExpressionType::kNonlinear; }
 
-  double GradientValueLhs(double x, double,
-                          double parentAdjoint) const override {
+  double GradL(double x, double, double parentAdjoint) const override {
     return parentAdjoint * std::cosh(x);
   }
 
-  ExpressionPtr GradientLhs(const ExpressionPtr& x, const ExpressionPtr&,
-                            const ExpressionPtr& parentAdjoint) const override {
+  ExpressionPtr GradExprL(const ExpressionPtr& x, const ExpressionPtr&,
+                          const ExpressionPtr& parentAdjoint) const override {
     return parentAdjoint * sleipnir::detail::cosh(x);
   }
 };
@@ -1550,13 +1537,12 @@ struct SqrtExpression final : Expression {
 
   ExpressionType Type() const override { return ExpressionType::kNonlinear; }
 
-  double GradientValueLhs(double x, double,
-                          double parentAdjoint) const override {
+  double GradL(double x, double, double parentAdjoint) const override {
     return parentAdjoint / (2.0 * std::sqrt(x));
   }
 
-  ExpressionPtr GradientLhs(const ExpressionPtr& x, const ExpressionPtr&,
-                            const ExpressionPtr& parentAdjoint) const override {
+  ExpressionPtr GradExprL(const ExpressionPtr& x, const ExpressionPtr&,
+                          const ExpressionPtr& parentAdjoint) const override {
     return parentAdjoint / (MakeExpressionPtr<ConstExpression>(2.0) *
                             sleipnir::detail::sqrt(x));
   }
@@ -1599,13 +1585,12 @@ struct TanExpression final : Expression {
 
   ExpressionType Type() const override { return ExpressionType::kNonlinear; }
 
-  double GradientValueLhs(double x, double,
-                          double parentAdjoint) const override {
+  double GradL(double x, double, double parentAdjoint) const override {
     return parentAdjoint / (std::cos(x) * std::cos(x));
   }
 
-  ExpressionPtr GradientLhs(const ExpressionPtr& x, const ExpressionPtr&,
-                            const ExpressionPtr& parentAdjoint) const override {
+  ExpressionPtr GradExprL(const ExpressionPtr& x, const ExpressionPtr&,
+                          const ExpressionPtr& parentAdjoint) const override {
     return parentAdjoint /
            (sleipnir::detail::cos(x) * sleipnir::detail::cos(x));
   }
@@ -1647,13 +1632,12 @@ struct TanhExpression final : Expression {
 
   ExpressionType Type() const override { return ExpressionType::kNonlinear; }
 
-  double GradientValueLhs(double x, double,
-                          double parentAdjoint) const override {
+  double GradL(double x, double, double parentAdjoint) const override {
     return parentAdjoint / (std::cosh(x) * std::cosh(x));
   }
 
-  ExpressionPtr GradientLhs(const ExpressionPtr& x, const ExpressionPtr&,
-                            const ExpressionPtr& parentAdjoint) const override {
+  ExpressionPtr GradExprL(const ExpressionPtr& x, const ExpressionPtr&,
+                          const ExpressionPtr& parentAdjoint) const override {
     return parentAdjoint /
            (sleipnir::detail::cosh(x) * sleipnir::detail::cosh(x));
   }

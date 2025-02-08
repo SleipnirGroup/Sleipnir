@@ -120,12 +120,10 @@ inline void UpdateAdjoints(const small_vector<Expression*>& list) {
 
     if (lhs != nullptr) {
       if (rhs != nullptr) {
-        lhs->adjoint +=
-            node->GradientValueLhs(lhs->value, rhs->value, node->adjoint);
-        rhs->adjoint +=
-            node->GradientValueRhs(lhs->value, rhs->value, node->adjoint);
+        lhs->adjoint += node->GradL(lhs->value, rhs->value, node->adjoint);
+        rhs->adjoint += node->GradR(lhs->value, rhs->value, node->adjoint);
       } else {
-        lhs->adjoint += node->GradientValueLhs(lhs->value, 0.0, node->adjoint);
+        lhs->adjoint += node->GradL(lhs->value, 0.0, node->adjoint);
       }
     }
   }
