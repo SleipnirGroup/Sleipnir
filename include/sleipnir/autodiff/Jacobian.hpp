@@ -112,7 +112,7 @@ class SLEIPNIR_DLLEXPORT Jacobian {
     ScopedProfiler graphUpdateProfiler{m_profilers[1]};
 
     for (auto& graph : m_graphs) {
-      graph.Update();
+      graph.UpdateValues();
     }
 
     graphUpdateProfiler.Stop();

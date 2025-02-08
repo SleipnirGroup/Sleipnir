@@ -14,7 +14,7 @@
 #include <Eigen/Core>
 
 #include "sleipnir/autodiff/Expression.hpp"
-#include "sleipnir/autodiff/ValueExpressionGraph.hpp"
+#include "sleipnir/autodiff/ExpressionGraph.hpp"
 #include "sleipnir/util/Assert.hpp"
 #include "sleipnir/util/Concepts.hpp"
 #include "sleipnir/util/SymbolExports.hpp"
@@ -221,9 +221,9 @@ class SLEIPNIR_DLLEXPORT Variable {
    */
   double Value() {
     if (!m_graph) {
-      m_graph = detail::ValueExpressionGraph{expr};
+      m_graph = detail::TopologicalSort(expr);
     }
-    m_graph->Update();
+    detail::UpdateValues(m_graph.value());
 
     return expr->value;
   }
@@ -241,7 +241,7 @@ class SLEIPNIR_DLLEXPORT Variable {
 
   /// Updates the value of this variable based on the values of its dependent
   /// variables
-  std::optional<detail::ValueExpressionGraph> m_graph;
+  std::optional<small_vector<detail::Expression*>> m_graph;
 
   friend SLEIPNIR_DLLEXPORT Variable abs(const Variable& x);
   friend SLEIPNIR_DLLEXPORT Variable acos(const Variable& x);

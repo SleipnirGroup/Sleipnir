@@ -1973,7 +1973,7 @@ functions.
 Parameter ``wrt``:
     Variables with respect to which to compute the gradient.)doc";
 
-static const char *__doc_sleipnir_detail_AdjointExpressionGraph_Update =
+static const char *__doc_sleipnir_detail_AdjointExpressionGraph_UpdateValues =
 R"doc(Update the values of all nodes in this adjoint graph based on the
 values of their dependent nodes.)doc";
 
@@ -2550,6 +2550,15 @@ static const char *__doc_sleipnir_detail_TanhExpression_Type = R"doc()doc";
 
 static const char *__doc_sleipnir_detail_TanhExpression_Value = R"doc()doc";
 
+static const char *__doc_sleipnir_detail_TopologicalSort =
+R"doc(Generate a topological sort of an expression graph from parent to
+child.
+
+https://en.wikipedia.org/wiki/Topological_sorting
+
+Parameter ``root``:
+    The root node of the expression.)doc";
+
 static const char *__doc_sleipnir_detail_UnaryMinusExpression = R"doc()doc";
 
 static const char *__doc_sleipnir_detail_UnaryMinusExpression_2 = R"doc()doc";
@@ -2568,21 +2577,18 @@ Parameter ``lhs``:
 
 static const char *__doc_sleipnir_detail_UnaryMinusExpression_Value = R"doc()doc";
 
-static const char *__doc_sleipnir_detail_ValueExpressionGraph =
-R"doc(This class is an adaptor type that performs value updates of an
-expression's value graph.)doc";
+static const char *__doc_sleipnir_detail_UpdateAdjoints =
+R"doc(Updates the adjoints in the expression graph (computes the gradient).
 
-static const char *__doc_sleipnir_detail_ValueExpressionGraph_Update =
-R"doc(Update the values of all nodes in this value graph based on the values
-of their dependent nodes.)doc";
+Parameter ``list``:
+    Topological sort of graph from parent to child.)doc";
 
-static const char *__doc_sleipnir_detail_ValueExpressionGraph_ValueExpressionGraph =
-R"doc(Generates the value graph for the given expression.
+static const char *__doc_sleipnir_detail_UpdateValues =
+R"doc(Update the values of all nodes in this graph based on the values of
+their dependent nodes.
 
-Parameter ``root``:
-    The root node of the expression.)doc";
-
-static const char *__doc_sleipnir_detail_ValueExpressionGraph_m_topList = R"doc()doc";
+Parameter ``list``:
+    Topological sort of graph from parent to child.)doc";
 
 static const char *__doc_sleipnir_detail_abs =
 R"doc(std::abs() for Expressions.
