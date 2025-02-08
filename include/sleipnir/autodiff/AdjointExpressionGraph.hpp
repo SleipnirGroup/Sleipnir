@@ -68,11 +68,9 @@ class AdjointExpressionGraph {
       auto& rhs = node->args[1];
 
       if (lhs != nullptr) {
-        lhs->adjointExpr =
-            lhs->adjointExpr + node->GradientLhs(lhs, rhs, node->adjointExpr);
+        lhs->adjointExpr += node->GradExprL(lhs, rhs, node->adjointExpr);
         if (rhs != nullptr) {
-          rhs->adjointExpr =
-              rhs->adjointExpr + node->GradientRhs(lhs, rhs, node->adjointExpr);
+          rhs->adjointExpr += node->GradExprR(lhs, rhs, node->adjointExpr);
         }
       }
     }
