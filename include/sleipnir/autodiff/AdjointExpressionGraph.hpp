@@ -7,6 +7,7 @@
 
 #include <Eigen/SparseCore>
 
+#include "sleipnir/autodiff/ExpressionGraph.hpp"
 #include "sleipnir/autodiff/Variable.hpp"
 #include "sleipnir/autodiff/VariableMatrix.hpp"
 #include "sleipnir/util/small_vector.hpp"
@@ -24,51 +25,10 @@ class AdjointExpressionGraph {
    *
    * @param root The root node of the expression.
    */
-  explicit AdjointExpressionGraph(const Variable& root) {
-    // If the root type is a constant, Update() is a no-op, so there's no work
-    // to do
-    if (root.expr == nullptr || root.Type() == ExpressionType::kConstant) {
-      return;
-    }
-
-    // Stack of nodes to explore
-    small_vector<Expression*> stack;
-
-    // Enumerate incoming edges for each node via depth-first search
-    stack.emplace_back(root.expr.Get());
-    while (!stack.empty()) {
-      auto node = stack.back();
-      stack.pop_back();
-
-      for (auto& arg : node->args) {
-        // If the node hasn't been explored yet, add it to the stack
-        if (arg != nullptr && ++arg->incomingEdges == 1) {
-          stack.push_back(arg.Get());
-        }
-      }
-    }
-
-    // Generate topological sort of graph from parent to child.
-    //
-    // A node is only added to the stack after all its incoming edges have been
-    // traversed. Expression::incomingEdges is a decrementing counter for
-    // tracking this.
-    //
-    // https://en.wikipedia.org/wiki/Topological_sorting
-    stack.emplace_back(root.expr.Get());
-    while (!stack.empty()) {
-      auto node = stack.back();
-      stack.pop_back();
-
-      m_topList.emplace_back(node);
+  explicit AdjointExpressionGraph(const Variable& root)
+      : m_topList{TopologicalSort(root.expr)} {
+    for (const auto& node : m_topList) {
       m_colList.emplace_back(node->col);
-
-      for (auto& arg : node->args) {
-        // If we traversed all this node's incoming edges, add it to the stack
-        if (arg != nullptr && --arg->incomingEdges == 0) {
-          stack.push_back(arg.Get());
-        }
-      }
     }
   }
 
@@ -76,21 +36,7 @@ class AdjointExpressionGraph {
    * Update the values of all nodes in this adjoint graph based on the values of
    * their dependent nodes.
    */
-  void Update() {
-    // Traverse graph from child to parent and update values
-    for (auto& node : m_topList | std::views::reverse) {
-      auto& lhs = node->args[0];
-      auto& rhs = node->args[1];
-
-      if (lhs != nullptr) {
-        if (rhs != nullptr) {
-          node->value = node->Value(lhs->value, rhs->value);
-        } else {
-          node->value = node->Value(lhs->value, 0.0);
-        }
-      }
-    }
-  }
+  void UpdateValues() { detail::UpdateValues(m_topList); }
 
   /**
    * Returns the variable's gradient tree.
@@ -156,45 +102,13 @@ class AdjointExpressionGraph {
    */
   void AppendAdjointTriplets(small_vector<Eigen::Triplet<double>>& triplets,
                              int row) const {
-    // Read docs/algorithms.md#Reverse_accumulation_automatic_differentiation
-    // for background on reverse accumulation automatic differentiation.
+    detail::UpdateAdjoints(m_topList);
 
-    if (m_topList.empty()) {
-      return;
-    }
-
-    // Set root node's adjoint to 1 since df/df is 1
-    m_topList[0]->adjoint = 1.0;
-
-    // df/dx = (df/dy)(dy/dx). The adjoint of x is equal to the adjoint of y
-    // multiplied by dy/dx. If there are multiple "paths" from the root node to
-    // variable; the variable's adjoint is the sum of each path's adjoint
-    // contribution.
     for (const auto& [node, col] : std::views::zip(m_topList, m_colList)) {
-      auto& lhs = node->args[0];
-      auto& rhs = node->args[1];
-
-      if (lhs != nullptr) {
-        if (rhs != nullptr) {
-          lhs->adjoint +=
-              node->GradientValueLhs(lhs->value, rhs->value, node->adjoint);
-          rhs->adjoint +=
-              node->GradientValueRhs(lhs->value, rhs->value, node->adjoint);
-        } else {
-          lhs->adjoint +=
-              node->GradientValueLhs(lhs->value, 0.0, node->adjoint);
-        }
-      }
-
       // Append adjoints of wrt to sparse matrix triplets
       if (col != -1 && node->adjoint != 0.0) {
         triplets.emplace_back(row, col, node->adjoint);
       }
-    }
-
-    // Zero adjoints for next run
-    for (auto& node : m_topList) {
-      node->adjoint = 0.0;
     }
   }
 
