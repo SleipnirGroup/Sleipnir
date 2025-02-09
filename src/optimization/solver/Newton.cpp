@@ -201,20 +201,14 @@ void Newton(
     userCallbacksProfiler.Stop();
     ScopedProfiler linearSystemSolveProfiler{linearSystemSolveProf};
 
-    // rhs = −[∇f]
-    Eigen::VectorXd rhs = -g;
-
     // Solve the Newton-KKT system
     //
-    // [H][ pₖˣ] = −[∇f]
+    // Hpₖˣ = −∇f
     solver.Compute(H, 0, config.tolerance / 10.0);
-    Eigen::VectorXd step = solver.Solve(rhs);
+    Eigen::VectorXd p_x = solver.Solve(-g);
 
     linearSystemSolveProfiler.Stop();
     ScopedProfiler lineSearchProfiler{lineSearchProf};
-
-    // step = [ pₖˣ]
-    Eigen::VectorXd p_x = step.segment(0, x.rows());
 
     constexpr double α_max = 1.0;
     double α = α_max;

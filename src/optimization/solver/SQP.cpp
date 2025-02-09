@@ -321,7 +321,7 @@ void SQP(
     // rhs = −[∇f − Aₑᵀy]
     //        [   cₑ    ]
     Eigen::VectorXd rhs{x.rows() + y.rows()};
-    rhs.segment(0, x.rows()) = -(g - A_e.transpose() * y);
+    rhs.segment(0, x.rows()) = -g + A_e.transpose() * y;
     rhs.segment(x.rows(), y.rows()) = -c_e;
 
     linearSystemBuildProfiler.Stop();

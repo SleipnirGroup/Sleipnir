@@ -443,9 +443,8 @@ void InteriorPoint(
     // rhs = −[∇f − Aₑᵀy − Aᵢᵀ(−Σcᵢ + μS⁻¹e + z)]
     //        [               cₑ                ]
     Eigen::VectorXd rhs{x.rows() + y.rows()};
-    rhs.segment(0, x.rows()) =
-        -(g - A_e.transpose() * y -
-          A_i.transpose() * (-Σ * c_i + μ * Sinv * e + z));
+    rhs.segment(0, x.rows()) = -g + A_e.transpose() * y +
+                               A_i.transpose() * (-Σ * c_i + μ * Sinv * e + z);
     rhs.segment(x.rows(), y.rows()) = -c_e;
 
     linearSystemBuildProfiler.Stop();
