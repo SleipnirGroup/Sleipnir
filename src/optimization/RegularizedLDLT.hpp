@@ -124,6 +124,16 @@ class RegularizedLDLT {
   }
 
   /**
+   * Solves the system of equations using a regularized LDLT factorization.
+   *
+   * @param rhs Right-hand side of the system.
+   */
+  template <typename Rhs>
+  auto Solve(const Eigen::SparseMatrixBase<Rhs>& rhs) {
+    return m_solver.solve(rhs);
+  }
+
+  /**
    * Returns the Hessian regularization factor.
    */
   double HessianRegularization() const { return m_δOld; }
