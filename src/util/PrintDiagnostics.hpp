@@ -15,7 +15,6 @@
 #include "sleipnir/util/SetupProfiler.hpp"
 #include "sleipnir/util/SolveProfiler.hpp"
 #include "sleipnir/util/small_vector.hpp"
-#include "util/ToMs.hpp"
 
 namespace sleipnir {
 
@@ -28,6 +27,17 @@ enum class IterationMode : uint8_t {
   /// Second-order correction iteration.
   kSecondOrderCorrection
 };
+
+/**
+ * Converts std::chrono::duration to a number of milliseconds rounded to three
+ * decimals.
+ */
+template <typename Rep, typename Period = std::ratio<1>>
+constexpr double ToMs(const std::chrono::duration<Rep, Period>& duration) {
+  using std::chrono::duration_cast;
+  using std::chrono::microseconds;
+  return duration_cast<microseconds>(duration).count() / 1e3;
+}
 
 /**
  * Prints diagnostics for the current iteration.
