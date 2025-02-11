@@ -435,7 +435,9 @@ void SQP(
           if (config.diagnostics) {
             double E = ErrorEstimate(g, A_e, trial_c_e, trial_y);
             PrintIterationDiagnostics(iterations,
-                                      IterationMode::kSecondOrderCorrection,
+                                      stepAcceptable
+                                          ? IterationType::kAcceptedSOC
+                                          : IterationType::kRejectedSOC,
                                       socProfiler.CurrentDuration(), E,
                                       f.Value(), trial_c_e.lpNorm<1>(), 0.0,
                                       solver.HessianRegularization(), 1.0, 1.0);
@@ -559,7 +561,7 @@ void SQP(
 
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     if (config.diagnostics) {
-      PrintIterationDiagnostics(iterations, IterationMode::kNormal,
+      PrintIterationDiagnostics(iterations, IterationType::kNormal,
                                 innerIterProfiler.CurrentDuration(), E_0,
                                 f.Value(), c_e.lpNorm<1>(), 0.0,
                                 solver.HessianRegularization(), α, α);

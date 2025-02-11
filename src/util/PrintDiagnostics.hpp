@@ -19,13 +19,15 @@
 namespace sleipnir {
 
 /**
- * Iteration mode.
+ * Iteration type.
  */
-enum class IterationMode : uint8_t {
+enum class IterationType : uint8_t {
   /// Normal iteration.
   kNormal,
-  /// Second-order correction iteration.
-  kSecondOrderCorrection
+  /// Accepted second-order correction iteration.
+  kAcceptedSOC,
+  /// Rejected second-order correction iteration.
+  kRejectedSOC
 };
 
 /**
@@ -43,7 +45,7 @@ constexpr double ToMs(const std::chrono::duration<Rep, Period>& duration) {
  * Prints diagnostics for the current iteration.
  *
  * @param iterations Number of iterations.
- * @param mode Which mode the iteration was in.
+ * @param type The iteration's type.
  * @param time The iteration duration.
  * @param error The error.
  * @param cost The cost.
@@ -54,7 +56,7 @@ constexpr double ToMs(const std::chrono::duration<Rep, Period>& duration) {
  * @param dual_α The dual step size.
  */
 template <typename Rep, typename Period = std::ratio<1>>
-void PrintIterationDiagnostics(int iterations, IterationMode mode,
+void PrintIterationDiagnostics(int iterations, IterationType type,
                                const std::chrono::duration<Rep, Period>& time,
                                double error, double cost, double infeasibility,
                                double complementarity, double δ,
@@ -77,7 +79,7 @@ void PrintIterationDiagnostics(int iterations, IterationMode mode,
     sleipnir::println(
         "┃{:^4}│{:^4}│{:^9}│{:^12}│{:^13}│{:^12}│{:^12}│{:^5}│{:^8}│{:^8}│{:^2}"
         "┃",
-        "iter", "mode", "time (ms)", "error", "cost", "infeas.", "complement.",
+        "iter", "type", "time (ms)", "error", "cost", "infeas.", "complement.",
         "reg", "primal α", "dual α", "↩");
     sleipnir::println(
         "┡{:━^4}┷{:━^4}┷{:━^9}┷{:━^12}┷{:━^13}┷{:━^12}┷{:━^12}┷{:━^5}┷{:━^8}┷"
@@ -85,9 +87,9 @@ void PrintIterationDiagnostics(int iterations, IterationMode mode,
         "", "", "", "", "", "", "", "", "", "", "");
   }
 
-  constexpr const char* kIterationModes[] = {"norm", "SOC"};
+  constexpr const char* kIterationTypes[] = {"norm", "✓SOC", "XSOC"};
   sleipnir::print("│{:4} {:4} {:9.3f} {:12e} {:13e} {:12e} {:12e} ", iterations,
-                  kIterationModes[std::to_underlying(mode)], ToMs(time), error,
+                  kIterationTypes[std::to_underlying(type)], ToMs(time), error,
                   cost, infeasibility, complementarity);
 
   // Print regularization

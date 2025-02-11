@@ -606,7 +606,9 @@ void InteriorPoint(
           if (config.diagnostics) {
             double E = ErrorEstimate(g, A_e, trial_c_e, trial_y);
             PrintIterationDiagnostics(
-                iterations, IterationMode::kSecondOrderCorrection,
+                iterations,
+                stepAcceptable ? IterationType::kAcceptedSOC
+                               : IterationType::kRejectedSOC,
                 socProfiler.CurrentDuration(), E, f.Value(),
                 trial_c_e.lpNorm<1>() + (trial_c_i - trial_s).lpNorm<1>(),
                 trial_s.dot(trial_z), solver.HessianRegularization(), 1.0, 1.0);
@@ -779,7 +781,7 @@ void InteriorPoint(
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     if (config.diagnostics) {
       PrintIterationDiagnostics(
-          iterations, IterationMode::kNormal,
+          iterations, IterationType::kNormal,
           innerIterProfiler.CurrentDuration(), E_0, f.Value(),
           c_e.lpNorm<1>() + (c_i - s).lpNorm<1>(), s.dot(z),
           solver.HessianRegularization(), α, α_z);

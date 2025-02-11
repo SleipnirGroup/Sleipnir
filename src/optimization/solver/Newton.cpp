@@ -309,7 +309,7 @@ void Newton(
 
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     if (config.diagnostics) {
-      PrintIterationDiagnostics(iterations, IterationMode::kNormal,
+      PrintIterationDiagnostics(iterations, IterationType::kNormal,
                                 innerIterProfiler.CurrentDuration(), E_0,
                                 f.Value(), 0.0, 0.0,
                                 solver.HessianRegularization(), α, 1.0);

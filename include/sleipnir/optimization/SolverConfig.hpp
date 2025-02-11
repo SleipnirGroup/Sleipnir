@@ -53,8 +53,9 @@ struct SLEIPNIR_DLLEXPORT SolverConfig {
   ///     <td>Iteration number</td>
   ///   </tr>
   ///   <tr>
-  ///     <td>mode</td>
-  ///     <td>Iteration mode (normal, second-order correction aka SOC)</td>
+  ///     <td>type</td>
+  ///     <td>Iteration type (normal, accepted second-order correction, rejected
+  ///     second-order correction)</td>
   ///   </tr>
   ///   <tr>
   ///     <td>time (ms)</td>
