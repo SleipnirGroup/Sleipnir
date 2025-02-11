@@ -48,6 +48,7 @@ constexpr double ToMs(const std::chrono::duration<Rep, Period>& duration) {
  * @param error The error.
  * @param cost The cost.
  * @param infeasibility The infeasibility.
+ * @param complementarity The complementarity.
  * @param δ The Hessian regularization factor.
  * @param primal_α The primal step size.
  * @param dual_α The dual step size.
@@ -56,34 +57,35 @@ template <typename Rep, typename Period = std::ratio<1>>
 void PrintIterationDiagnostics(int iterations, IterationMode mode,
                                const std::chrono::duration<Rep, Period>& time,
                                double error, double cost, double infeasibility,
-                               double δ, double primal_α, double dual_α) {
+                               double complementarity, double δ,
+                               double primal_α, double dual_α) {
   if (iterations % 20 == 0) {
     if (iterations == 0) {
       sleipnir::println(
-          "┏{:━^6}┯{:━^6}┯{:━^11}┯{:━^14}┯{:━^14}┯{:━^15}┯{:━^7}┯{:━^10}┯"
-          "{:━^10}┯{:━^4}┓",
-          "", "", "", "", "", "", "", "", "", "");
+          "┏{:━^4}┯{:━^4}┯{:━^9}┯{:━^12}┯{:━^12}┯{:━^12}┯{:━^12}┯{:━^5}┯{:━^8}┯"
+          "{:━^8}┯{:━^2}┓",
+          "", "", "", "", "", "", "", "", "", "", "");
     } else {
       sleipnir::println(
-          "┢{:━^6}┯{:━^6}┯{:━^11}┯{:━^14}┯{:━^14}┯{:━^15}┯{:━^7}┯{:━^10}┯"
-          "{:━^10}┯{:━^4}┪",
-          "", "", "", "", "", "", "", "", "", "");
+          "┢{:━^4}┯{:━^4}┯{:━^9}┯{:━^12}┯{:━^12}┯{:━^12}┯{:━^12}┯{:━^5}┯{:━^8}┯"
+          "{:━^8}┯{:━^2}┪",
+          "", "", "", "", "", "", "", "", "", "", "");
     }
     sleipnir::println(
-        "┃ {:^4} │ {:^4} │ {:^9} │ {:^12} │ {:^12} │ {:^13} │ {:^5} │ {:^8} │ "
-        "{:^8} │ {:^2} ┃",
-        "iter", "mode", "time (ms)", "error", "cost", "infeasibility", "reg",
-        "primal α", "dual α", "↩");
+        "┃{:^4}│{:^4}│{:^9}│{:^12}│{:^12}│{:^12}│{:^12}│{:^5}│{:^8}│{:^8}│{:^2}"
+        "┃",
+        "iter", "mode", "time (ms)", "error", "cost", "infeas.", "complement.",
+        "reg", "primal α", "dual α", "↩");
     sleipnir::println(
-        "┡{:━^6}┷{:━^6}┷{:━^11}┷{:━^14}┷{:━^14}┷{:━^15}┷{:━^7}┷{:━^10}┷{:━^10}┷"
-        "{:━^4}┩",
-        "", "", "", "", "", "", "", "", "", "");
+        "┡{:━^4}┷{:━^4}┷{:━^9}┷{:━^12}┷{:━^12}┷{:━^12}┷{:━^12}┷{:━^5}┷{:━^8}┷"
+        "{:━^8}┷{:━^2}┩",
+        "", "", "", "", "", "", "", "", "", "", "");
   }
 
   constexpr const char* kIterationModes[] = {"norm", "SOC"};
-  sleipnir::print("│ {:4}   {:4}   {:9.3f}   {:12e}   {:12e}   {:13e}   ",
-                  iterations, kIterationModes[std::to_underlying(mode)],
-                  ToMs(time), error, cost, infeasibility);
+  sleipnir::print("│{:4} {:4} {:9.3f} {:12e} {:12e} {:12e} {:12e} ", iterations,
+                  kIterationModes[std::to_underlying(mode)], ToMs(time), error,
+                  cost, infeasibility, complementarity);
 
   // Print regularization
   if (δ == 0.0) {
@@ -121,7 +123,7 @@ void PrintIterationDiagnostics(int iterations, IterationMode mode,
   }
 
   // Print step sizes and number of backtracks
-  sleipnir::println("   {:.2e}   {:.2e}   {:2d} │", primal_α, dual_α,
+  sleipnir::println(" {:.2e} {:.2e} {:2d}│", primal_α, dual_α,
                     static_cast<int>(-std::log2(primal_α)));
 }
 
@@ -170,7 +172,7 @@ inline void PrintFinalDiagnostics(
     int iterations, const small_vector<SetupProfiler>& setupProfilers,
     const small_vector<SolveProfiler>& solveProfilers) {
   // Print bottom of iteration diagnostics table
-  sleipnir::println("└{:─^106}┘", "");
+  sleipnir::println("└{:─^98}┘", "");
 
   // Print total time
   auto setupDuration = ToMs(setupProfilers[0].Duration());
@@ -181,40 +183,38 @@ inline void PrintFinalDiagnostics(
                     iterations);
 
   // Print setup diagnostics
-  sleipnir::println("\n┏{:━^23}┯{:━^20}┯{:━^12}┓", "", "", "");
-  sleipnir::println("┃ {:^21} │ {:^18} │ {:^10} ┃", "trace", "percent",
-                    "total (ms)");
-  sleipnir::println("┡{:━^23}┷{:━^20}┷{:━^12}┩", "", "", "");
+  sleipnir::println("\n┏{:━^21}┯{:━^18}┯{:━^10}┓", "", "", "");
+  sleipnir::println("┃{:^21}│{:^18}│{:^10}┃", "trace", "percent", "total (ms)");
+  sleipnir::println("┡{:━^21}┷{:━^18}┷{:━^10}┩", "", "", "");
 
   for (auto& profiler : setupProfilers) {
     double norm =
         ToMs(profiler.Duration()) / ToMs(setupProfilers[0].Duration());
-    sleipnir::println("│ {:<21}   {:>6.2f}%▕{}▏   {:>10.3f} │", profiler.name,
+    sleipnir::println("│{:<21} {:>6.2f}%▕{}▏ {:>10.3f}│", profiler.name,
                       norm * 100.0, Histogram<9>(norm),
                       ToMs(profiler.Duration()));
   }
 
-  sleipnir::println("└{:─^57}┘", "");
+  sleipnir::println("└{:─^51}┘", "");
 
   // Print solve diagnostics
-  sleipnir::println("┏{:━^23}┯{:━^20}┯{:━^12}┯{:━^11}┯{:━^6}┓", "", "", "", "",
+  sleipnir::println("┏{:━^21}┯{:━^18}┯{:━^10}┯{:━^9}┯{:━^4}┓", "", "", "", "",
                     "");
-  sleipnir::println("┃ {:^21} │ {:^18} │ {:^10} │ {:^9} │ {:^4} ┃", "trace",
-                    "percent", "total (ms)", "each (ms)", "runs");
-  sleipnir::println("┡{:━^23}┷{:━^20}┷{:━^12}┷{:━^11}┷{:━^6}┩", "", "", "", "",
+  sleipnir::println("┃{:^21}│{:^18}│{:^10}│{:^9}│{:^4}┃", "trace", "percent",
+                    "total (ms)", "each (ms)", "runs");
+  sleipnir::println("┡{:━^21}┷{:━^18}┷{:━^10}┷{:━^9}┷{:━^4}┩", "", "", "", "",
                     "");
 
   for (auto& profiler : solveProfilers) {
     double norm = ToMs(profiler.TotalDuration()) /
                   ToMs(solveProfilers[0].TotalDuration());
-    sleipnir::println(
-        "│ {:<21}   {:>6.2f}%▕{}▏   {:>10.3f}   {:>9.3f}   {:>4} │",
-        profiler.name, norm * 100.0, Histogram<9>(norm),
-        ToMs(profiler.TotalDuration()), ToMs(profiler.AverageDuration()),
-        profiler.NumSolves());
+    sleipnir::println("│{:<21} {:>6.2f}%▕{}▏ {:>10.3f} {:>9.3f} {:>4}│",
+                      profiler.name, norm * 100.0, Histogram<9>(norm),
+                      ToMs(profiler.TotalDuration()),
+                      ToMs(profiler.AverageDuration()), profiler.NumSolves());
   }
 
-  sleipnir::println("└{:─^76}┘\n", "");
+  sleipnir::println("└{:─^66}┘\n", "");
 }
 
 }  // namespace sleipnir

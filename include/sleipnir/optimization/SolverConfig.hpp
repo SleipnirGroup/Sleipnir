@@ -69,8 +69,12 @@ struct SLEIPNIR_DLLEXPORT SolverConfig {
   ///     <td>Cost function value at current iterate</td>
   ///   </tr>
   ///   <tr>
-  ///     <td>infeasibility</td>
+  ///     <td>infeas.</td>
   ///     <td>Constraint infeasibility at current iterate</td>
+  ///   </tr>
+  ///   <tr>
+  ///     <td>complement.</td>
+  ///     <td>Complementary slackness at current iterate (sᵀz)</td>
   ///   </tr>
   ///   <tr>
   ///     <td>reg</td>
