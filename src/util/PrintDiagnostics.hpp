@@ -61,29 +61,32 @@ void PrintIterationDiagnostics(int iterations, IterationMode mode,
                                double primal_α, double dual_α) {
   if (iterations % 20 == 0) {
     if (iterations == 0) {
-      sleipnir::println(
-          "┏{:━^4}┯{:━^4}┯{:━^9}┯{:━^12}┯{:━^12}┯{:━^12}┯{:━^12}┯{:━^5}┯{:━^8}┯"
-          "{:━^8}┯{:━^2}┓",
-          "", "", "", "", "", "", "", "", "", "", "");
+      sleipnir::print("┏");
     } else {
-      sleipnir::println(
-          "┢{:━^4}┯{:━^4}┯{:━^9}┯{:━^12}┯{:━^12}┯{:━^12}┯{:━^12}┯{:━^5}┯{:━^8}┯"
-          "{:━^8}┯{:━^2}┪",
-          "", "", "", "", "", "", "", "", "", "", "");
+      sleipnir::print("┢");
+    }
+    sleipnir::print(
+        "{:━^4}┯{:━^4}┯{:━^9}┯{:━^12}┯{:━^13}┯{:━^12}┯{:━^12}┯{:━^5}┯{:━^8}┯"
+        "{:━^8}┯{:━^2}",
+        "", "", "", "", "", "", "", "", "", "", "");
+    if (iterations == 0) {
+      sleipnir::println("┓");
+    } else {
+      sleipnir::println("┪");
     }
     sleipnir::println(
-        "┃{:^4}│{:^4}│{:^9}│{:^12}│{:^12}│{:^12}│{:^12}│{:^5}│{:^8}│{:^8}│{:^2}"
+        "┃{:^4}│{:^4}│{:^9}│{:^12}│{:^13}│{:^12}│{:^12}│{:^5}│{:^8}│{:^8}│{:^2}"
         "┃",
         "iter", "mode", "time (ms)", "error", "cost", "infeas.", "complement.",
         "reg", "primal α", "dual α", "↩");
     sleipnir::println(
-        "┡{:━^4}┷{:━^4}┷{:━^9}┷{:━^12}┷{:━^12}┷{:━^12}┷{:━^12}┷{:━^5}┷{:━^8}┷"
+        "┡{:━^4}┷{:━^4}┷{:━^9}┷{:━^12}┷{:━^13}┷{:━^12}┷{:━^12}┷{:━^5}┷{:━^8}┷"
         "{:━^8}┷{:━^2}┩",
         "", "", "", "", "", "", "", "", "", "", "");
   }
 
   constexpr const char* kIterationModes[] = {"norm", "SOC"};
-  sleipnir::print("│{:4} {:4} {:9.3f} {:12e} {:12e} {:12e} {:12e} ", iterations,
+  sleipnir::print("│{:4} {:4} {:9.3f} {:12e} {:13e} {:12e} {:12e} ", iterations,
                   kIterationModes[std::to_underlying(mode)], ToMs(time), error,
                   cost, infeasibility, complementarity);
 
@@ -172,7 +175,7 @@ inline void PrintFinalDiagnostics(
     int iterations, const small_vector<SetupProfiler>& setupProfilers,
     const small_vector<SolveProfiler>& solveProfilers) {
   // Print bottom of iteration diagnostics table
-  sleipnir::println("└{:─^98}┘", "");
+  sleipnir::println("└{:─^99}┘", "");
 
   // Print total time
   auto setupDuration = ToMs(setupProfilers[0].Duration());
