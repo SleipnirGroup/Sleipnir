@@ -116,7 +116,7 @@ void BindOptimizationProblem(nb::class_<OptimizationProblem>& cls) {
       // member docs in include/sleipnir/optimization/SolverConfig.hpp.
       //
       // C++'s OptimizationProblem::Solve() takes a SolverConfig object instead
-      // of keyword arguments, so nanobind-mkdoc generates the wrong docs.
+      // of keyword arguments, so pybind11_mkdoc generates the wrong docs.
       R"doc(Solve the optimization problem. The solution will be stored in the
 original variables used to construct the problem.
 
@@ -182,8 +182,12 @@ Parameter ``diagnostics``:
         <td>Cost function value at current iterate</td>
       </tr>
       <tr>
-        <td>infeasibility</td>
+        <td>infeas.</td>
         <td>Constraint infeasibility at current iterate</td>
+      </tr>
+      <tr>
+        <td>complement.</td>
+        <td>Complementary slackness at current iterate (sᵀz)</td>
       </tr>
       <tr>
         <td>reg</td>
