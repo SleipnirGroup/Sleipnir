@@ -385,7 +385,7 @@ void SQP(
       //
       // If first trial point was rejected and constraint violation stayed the
       // same or went up, apply second-order corrections
-      if (nextConstraintViolation >= prevConstraintViolation) {
+      if (α == α_max && nextConstraintViolation >= prevConstraintViolation) {
         // Apply second-order corrections. See section 2.4 of [2].
         Eigen::VectorXd p_x_cor = p_x;
         Eigen::VectorXd p_y_soc = p_y;
