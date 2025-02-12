@@ -398,6 +398,23 @@ void SQP(
              ++soc_iteration) {
           ScopedProfiler socProfiler{socProf};
 
+          scope_exit soc_exit{[&] {
+            socProfiler.Stop();
+
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
+            if (config.diagnostics) {
+              double E = ErrorEstimate(g, A_e, trial_c_e, trial_y);
+              PrintIterationDiagnostics(
+                  iterations,
+                  stepAcceptable ? IterationType::kAcceptedSOC
+                                 : IterationType::kRejectedSOC,
+                  socProfiler.CurrentDuration(), E, f.Value(),
+                  trial_c_e.lpNorm<1>(), 0.0, solver.HessianRegularization(),
+                  α_soc, 1.0);
+            }
+#endif
+          }};
+
           // Rebuild Newton-KKT rhs with updated constraint values.
           //
           // rhs = −[∇f − Aₑᵀy]
@@ -420,6 +437,16 @@ void SQP(
 
           trial_c_e = c_eAD.Value();
 
+          // Constraint violation scale factor for second-order corrections
+          constexpr double κ_soc = 0.99;
+
+          // If constraint violation hasn't been sufficiently reduced, stop
+          // making second-order corrections
+          nextConstraintViolation = trial_c_e.lpNorm<1>();
+          if (nextConstraintViolation > κ_soc * prevConstraintViolation) {
+            break;
+          }
+
           // Check whether filter accepts trial iterate
           entry = filter.MakeEntry(trial_c_e);
           if (filter.TryAdd(entry, α)) {
@@ -428,21 +455,6 @@ void SQP(
             α = α_soc;
             stepAcceptable = true;
           }
-
-          socProfiler.Stop();
-
-#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-          if (config.diagnostics) {
-            double E = ErrorEstimate(g, A_e, trial_c_e, trial_y);
-            PrintIterationDiagnostics(iterations,
-                                      stepAcceptable
-                                          ? IterationType::kAcceptedSOC
-                                          : IterationType::kRejectedSOC,
-                                      socProfiler.CurrentDuration(), E,
-                                      f.Value(), trial_c_e.lpNorm<1>(), 0.0,
-                                      solver.HessianRegularization(), 1.0, 1.0);
-          }
-#endif
         }
 
         if (stepAcceptable) {

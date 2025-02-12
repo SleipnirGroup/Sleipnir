@@ -545,12 +545,31 @@ void InteriorPoint(
         Eigen::VectorXd p_s_soc = p_s;
 
         double α_soc = α;
+        double α_z_soc = α_z;
         Eigen::VectorXd c_e_soc = c_e;
 
         bool stepAcceptable = false;
         for (int soc_iteration = 0; soc_iteration < 5 && !stepAcceptable;
              ++soc_iteration) {
           ScopedProfiler socProfiler{socProf};
+
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
+          scope_exit soc_exit{[&] {
+            socProfiler.Stop();
+
+            if (config.diagnostics) {
+              double E = ErrorEstimate(g, A_e, trial_c_e, trial_y);
+              PrintIterationDiagnostics(
+                  iterations,
+                  stepAcceptable ? IterationType::kAcceptedSOC
+                                 : IterationType::kRejectedSOC,
+                  socProfiler.CurrentDuration(), E, f.Value(),
+                  trial_c_e.lpNorm<1>() + (trial_c_i - trial_s).lpNorm<1>(),
+                  trial_s.dot(trial_z), solver.HessianRegularization(), α_soc,
+                  α_z_soc);
+            }
+          }};
+#endif
 
           // Rebuild Newton-KKT rhs with updated constraint values.
           //
@@ -579,7 +598,7 @@ void InteriorPoint(
           trial_s = s + α_soc * p_s_soc;
 
           // αₖᶻ = max(α ∈ (0, 1] : zₖ + αpₖᶻ ≥ (1−τⱼ)zₖ)
-          double α_z_soc = FractionToTheBoundaryRule(z, p_z_soc, τ);
+          α_z_soc = FractionToTheBoundaryRule(z, p_z_soc, τ);
           trial_y = y + α_z_soc * p_y_soc;
           trial_z = z + α_z_soc * p_z_soc;
 
@@ -588,32 +607,28 @@ void InteriorPoint(
           trial_c_e = c_eAD.Value();
           trial_c_i = c_iAD.Value();
 
+          // Constraint violation scale factor for second-order corrections
+          constexpr double κ_soc = 0.99;
+
+          // If constraint violation hasn't been sufficiently reduced, stop
+          // making second-order corrections
+          nextConstraintViolation =
+              trial_c_e.lpNorm<1>() + (trial_c_i - trial_s).lpNorm<1>();
+          if (nextConstraintViolation > κ_soc * prevConstraintViolation) {
+            break;
+          }
+
           // Check whether filter accepts trial iterate
           entry = filter.MakeEntry(trial_s, trial_c_e, trial_c_i, μ);
           if (filter.TryAdd(entry, α)) {
             p_x = p_x_cor;
             p_y = p_y_soc;
-            p_z = p_z_soc;
             p_s = p_s_soc;
+            p_z = p_z_soc;
             α = α_soc;
             α_z = α_z_soc;
             stepAcceptable = true;
           }
-
-          socProfiler.Stop();
-
-#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-          if (config.diagnostics) {
-            double E = ErrorEstimate(g, A_e, trial_c_e, trial_y);
-            PrintIterationDiagnostics(
-                iterations,
-                stepAcceptable ? IterationType::kAcceptedSOC
-                               : IterationType::kRejectedSOC,
-                socProfiler.CurrentDuration(), E, f.Value(),
-                trial_c_e.lpNorm<1>() + (trial_c_i - trial_s).lpNorm<1>(),
-                trial_s.dot(trial_z), solver.HessianRegularization(), 1.0, 1.0);
-          }
-#endif
         }
 
         if (stepAcceptable) {
