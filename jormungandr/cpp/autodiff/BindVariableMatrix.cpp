@@ -29,14 +29,18 @@ void BindVariableMatrix(nb::module_& autodiff,
           DOC(sleipnir, VariableMatrix, VariableMatrix, 2));
   cls.def(nb::init<int, int>(), "rows"_a, "cols"_a,
           DOC(sleipnir, VariableMatrix, VariableMatrix, 3));
-  cls.def(nb::init<const std::vector<std::vector<double>>&>(), "list"_a,
-          DOC(sleipnir, VariableMatrix, VariableMatrix, 5));
   cls.def(nb::init<const std::vector<std::vector<Variable>>&>(), "list"_a,
+          DOC(sleipnir, VariableMatrix, VariableMatrix, 5));
+  cls.def(nb::init<const std::vector<std::vector<double>>&>(), "list"_a,
           DOC(sleipnir, VariableMatrix, VariableMatrix, 6));
+  cls.def(nb::init<nb::DRef<Eigen::MatrixXd>>(), "values"_a,
+          DOC(sleipnir, VariableMatrix, VariableMatrix, 8));
+  cls.def(nb::init<nb::DRef<Eigen::MatrixXf>>(), "values"_a,
+          DOC(sleipnir, VariableMatrix, VariableMatrix, 8));
   cls.def(nb::init<const Variable&>(), "variable"_a,
-          DOC(sleipnir, VariableMatrix, VariableMatrix, 9));
+          DOC(sleipnir, VariableMatrix, VariableMatrix, 10));
   cls.def(nb::init<const VariableBlock<VariableMatrix>&>(), "values"_a,
-          DOC(sleipnir, VariableMatrix, VariableMatrix, 11));
+          DOC(sleipnir, VariableMatrix, VariableMatrix, 12));
   cls.def(
       "set_value",
       [](VariableMatrix& self, nb::DRef<Eigen::MatrixXd> values) {
