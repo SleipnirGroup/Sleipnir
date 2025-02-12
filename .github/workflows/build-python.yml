@@ -53,6 +53,26 @@ jobs:
             os: ubuntu-24.04
             version: "3.13"
             cmake-env:
+          - name: Linux aarch64
+            os: ubuntu-24.04-arm
+            version: "3.9"
+            cmake-env:
+          - name: Linux aarch64
+            os: ubuntu-24.04-arm
+            version: "3.10"
+            cmake-env:
+          - name: Linux aarch64
+            os: ubuntu-24.04-arm
+            version: "3.11"
+            cmake-env:
+          - name: Linux aarch64
+            os: ubuntu-24.04-arm
+            version: "3.12"
+            cmake-env:
+          - name: Linux aarch64
+            os: ubuntu-24.04-arm
+            version: "3.13"
+            cmake-env:
           - name: macOS universal
             os: macOS-14
             version: "3.10"
