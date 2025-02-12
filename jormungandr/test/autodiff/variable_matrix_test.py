@@ -221,46 +221,56 @@ def test_block_free_function():
     assert (mat2.value() == expected2).all()
 
 
+def expect_solve(A, B):
+    rows = A.shape[0]
+    print(f"Solve {rows}x{rows}")
+
+    slpA = VariableMatrix(A)
+    slpB = VariableMatrix(B)
+    actual_X = autodiff.solve(slpA, slpB)
+
+    expected_X = np.linalg.solve(A, B)
+
+    assert actual_X.shape == expected_X.shape
+    assert np.linalg.norm(slpA.value() @ actual_X.value() - slpB.value()) < 1e-12
+
+
 def test_solve_free_function():
-    A_11 = VariableMatrix([[2.0]])
-    B_11 = VariableMatrix([[5.0]])
-    X_11 = autodiff.solve(A_11, B_11)
+    # 1x1 special case
+    expect_solve(np.array([[2.0]]), np.array([[5.0]]))
 
-    expected_11 = np.array([[2.5]])
-    assert X_11.shape == (1, 1)
-    assert (A_11.value() @ X_11.value() == B_11.value()).all()
-    assert (X_11.value() == expected_11).all()
+    # 2x2 special case
+    expect_solve(np.array([[1.0, 2.0], [3.0, 4.0]]), np.array([[5.0], [6.0]]))
 
-    A_22 = VariableMatrix([[1.0, 2.0], [3.0, 4.0]])
-    B_21 = VariableMatrix([[5.0], [6.0]])
-    X_21 = autodiff.solve(A_22, B_21)
-
-    expected_21 = np.array([[-4.0], [4.5]])
-    assert X_21.shape == (2, 1)
-    assert (A_22.value() @ X_21.value() == B_21.value()).all()
-    assert (X_21.value() == expected_21).all()
-
-    A_33 = VariableMatrix([[1.0, 2.0, 3.0], [-4.0, -5.0, 6.0], [7.0, 8.0, 9.0]])
-    B_31 = VariableMatrix([[10.0], [11.0], [12.0]])
-    X_31 = autodiff.solve(A_33, B_31)
-
-    expected_31 = np.array([[-7.5], [6.0], [11.0 / 6.0]])
-    assert X_31.shape == (3, 1)
-    assert np.linalg.norm(A_33.value() @ X_31.value() - B_31.value()) < 1e-12
-    assert np.linalg.norm(X_31.value() - expected_31) < 1e-12
-
-    A_44 = VariableMatrix(
-        [
-            [1.0, 2.0, 3.0, -4.0],
-            [-5.0, 6.0, 7.0, 8.0],
-            [9.0, 10.0, 11.0, 12.0],
-            [13.0, 14.0, 15.0, 16.0],
-        ]
+    # 3x3 special case
+    expect_solve(
+        np.array([[1.0, 2.0, 3.0], [-4.0, -5.0, 6.0], [7.0, 8.0, 9.0]]),
+        np.array([[10.0], [11.0], [12.0]]),
     )
-    B_41 = VariableMatrix([[17.0], [18.0], [19.0], [20.0]])
-    X_41 = autodiff.solve(A_44, B_41)
 
-    expected_41 = np.array([[4.44089e-16], [-16.25], [16.5], [0.0]])
-    assert X_41.shape == (4, 1)
-    assert np.linalg.norm(A_44.value() @ X_41.value() - B_41.value()) < 1e-12
-    assert np.linalg.norm(X_41.value() - expected_41) < 1e-12
+    # 4x4 special case
+    expect_solve(
+        np.array(
+            [
+                [1.0, 2.0, 3.0, -4.0],
+                [-5.0, 6.0, 7.0, 8.0],
+                [9.0, 10.0, 11.0, 12.0],
+                [13.0, 14.0, 15.0, 16.0],
+            ]
+        ),
+        np.array([[17.0], [18.0], [19.0], [20.0]]),
+    )
+
+    # 5x5 general case
+    expect_solve(
+        np.array(
+            [
+                [1.0, 2.0, 3.0, -4.0, 5.0],
+                [-5.0, 6.0, 7.0, 8.0, 9.0],
+                [9.0, 10.0, 11.0, 12.0, 13.0],
+                [13.0, 14.0, 15.0, 16.0, 17.0],
+                [17.0, 18.0, 19.0, 20.0, 21.0],
+            ]
+        ),
+        np.array([[21.0], [22.0], [23.0], [24.0], [25.0]]),
+    )
