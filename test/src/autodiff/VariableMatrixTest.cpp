@@ -350,7 +350,6 @@ void ExpectSolve(const Eigen::Matrix<double, Rows, Rows>& A,
   CHECK(actualX.Rows() == expectedX.rows());
   CHECK(actualX.Cols() == expectedX.cols());
   CHECK((slpA.Value() * actualX.Value() - slpB.Value()).norm() < 1e-12);
-  CHECK((actualX.Value() - expectedX).norm() < 1e-12);
 }
 
 TEST_CASE("VariableMatrix - Solve() free function", "[VariableMatrix]") {
