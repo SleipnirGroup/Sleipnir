@@ -1,7 +1,7 @@
 [project]
 name = "sleipnirgroup-jormungandr"
 description = "A linearity-exploiting sparse nonlinear constrained optimization problem solver that uses the interior-point method."
-version = "0.0.1.dev124"
+version = "0.0.1.dev369"
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [ "matplotlib", "numpy", "scipy" ]
@@ -13,8 +13,24 @@ dependencies = [ "matplotlib", "numpy", "scipy" ]
   Documentation = "https://sleipnirgroup.github.io/Sleipnir/"
 
 [build-system]
-requires = [ "py-build-cmake~=0.1.8", "nanobind", "pybind11-mkdoc" ]
+requires = [
+  "nanobind",
+  "py-build-cmake~=0.4.1",
+  "pybind11-mkdoc",
+  "typing_extensions; python_version < '3.11'"
+]
 build-backend = "py_build_cmake.build"
+
+[tool.py-build-cmake.cmake]
+build_type = "Release"
+source_path = "."
+build_args = [ "--target", "_jormungandr" ]
+install_components = [ "python_modules" ]
+install_args = [ ]
+
+  [tool.py-build-cmake.cmake.options]
+  BUILD_TESTING = "OFF"
+  BUILD_PYTHON = "ON"
 
 [tool.py-build-cmake.module]
 name = "jormungandr"
@@ -32,16 +48,8 @@ include = [
 ]
 exclude = [ ]
 
-[tool.py-build-cmake.cmake]
-build_type = "Release"
-source_path = "."
-build_args = [ "--target", "_jormungandr" ]
-install_components = [ "python_modules" ]
-install_args = [ ]
-
-  [tool.py-build-cmake.cmake.options]
-  BUILD_TESTING = "OFF"
-  BUILD_PYTHON = "ON"
+[tool.py-build-cmake.wheel]
+platform_tag = "guess"
 
 [tool.pytest.ini_options]
 minversion = "6.0"

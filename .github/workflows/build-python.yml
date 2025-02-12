@@ -76,19 +76,19 @@ jobs:
           - name: macOS universal
             os: macOS-14
             version: "3.10"
-            cmake-env: CMAKE_OSX_ARCHITECTURES="x86_64;arm64"
+            cmake-env: _PYTHON_HOST_PLATFORM=macosx_14_0_universal2 ARCHFLAGS="-arch x86_64 -arch arm64" MACOSX_DEPLOYMENT_TARGET=14.0
           - name: macOS universal
             os: macOS-14
             version: "3.11"
-            cmake-env: CMAKE_OSX_ARCHITECTURES="x86_64;arm64"
+            cmake-env: _PYTHON_HOST_PLATFORM=macosx_14_0_universal2 ARCHFLAGS="-arch x86_64 -arch arm64" MACOSX_DEPLOYMENT_TARGET=14.0
           - name: macOS universal
             os: macOS-14
             version: "3.12"
-            cmake-env: CMAKE_OSX_ARCHITECTURES="x86_64;arm64"
+            cmake-env: _PYTHON_HOST_PLATFORM=macosx_14_0_universal2 ARCHFLAGS="-arch x86_64 -arch arm64" MACOSX_DEPLOYMENT_TARGET=14.0
           - name: macOS universal
             os: macOS-14
             version: "3.13"
-            cmake-env: CMAKE_OSX_ARCHITECTURES="x86_64;arm64"
+            cmake-env: _PYTHON_HOST_PLATFORM=macosx_14_0_universal2 ARCHFLAGS="-arch x86_64 -arch arm64" MACOSX_DEPLOYMENT_TARGET=14.0
 
     name: ${{ matrix.version }} ${{ matrix.name }} wheel
     runs-on: ${{ matrix.os }}
@@ -116,9 +116,6 @@ jobs:
       - run: python3 ./tools/update_version.py
       - run: pip3 install build pytest
       - run: ${{ matrix.cmake-env }} python3 -m build --wheel
-      - run: python3 ../.github/workflows/repair_wheel.py sleipnirgroup_jormungandr-*.whl
-        if: startsWith(matrix.os, 'ubuntu') || startsWith(matrix.os, 'macOS')
-        working-directory: dist
       - run: pip3 install dist/sleipnirgroup_jormungandr-*.whl
         shell: bash
       - run: pytest
