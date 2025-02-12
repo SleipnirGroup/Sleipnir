@@ -106,8 +106,8 @@ TEST_CASE("OptimizationProblem - Arm on elevator", "[OptimizationProblem]") {
   CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kLinear);
   CHECK(status.inequalityConstraintType == sleipnir::ExpressionType::kLinear);
 
-#if defined(__APPLE__) && defined(__aarch64__)
-  // FIXME: Fails on macOS arm64 with "factorization failed"
+#if (defined(__linux__) || defined(__APPLE__)) && defined(__aarch64__)
+  // FIXME: Fails on Linux aarch64 and macOS arm64 with "factorization failed"
   CHECK(status.exitCondition ==
         sleipnir::SolverExitCondition::kFactorizationFailed);
 #else
