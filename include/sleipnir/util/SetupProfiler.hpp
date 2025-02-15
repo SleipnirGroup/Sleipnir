@@ -14,6 +14,7 @@ namespace sleipnir {
  */
 class SetupProfiler {
  public:
+  /// Name of measurement to show in diagnostics.
   std::string name;
 
   /**
@@ -43,7 +44,9 @@ class SetupProfiler {
   }
 
   /**
-   * The setup duration in milliseconds as a double.
+   * Returns the setup duration in milliseconds as a double.
+   *
+   * @return The setup duration in milliseconds as a double.
    */
   const std::chrono::duration<double>& Duration() const {
     return m_setupDuration;

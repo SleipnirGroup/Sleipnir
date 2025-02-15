@@ -40,16 +40,22 @@ class SLEIPNIR_DLLEXPORT Hessian {
    *
    * This is useful when constructing optimization problems with derivatives in
    * them.
+   *
+   * @return The Hessian as a VariableMatrix.
    */
   VariableMatrix Get() const { return m_jacobian.Get(); }
 
   /**
    * Evaluates the Hessian at wrt's value.
+   *
+   * @return The Hessian at wrt's value.
    */
   const Eigen::SparseMatrix<double>& Value() { return m_jacobian.Value(); }
 
   /**
    * Returns the profilers.
+   *
+   * @return The profilers.
    */
   const small_vector<SolveProfiler>& GetProfilers() const {
     return m_jacobian.GetProfilers();

@@ -13,11 +13,21 @@ namespace sleipnir {
 
 namespace slicing {
 
+/**
+ * Type tag used to designate an omitted argument of the slice.
+ */
 struct none_t {};
+
+/**
+ * Designates an omitted argument of the slice.
+ */
 static inline constexpr none_t _;
 
 }  // namespace slicing
 
+/**
+ * Represents a sequence of elements in an iterable object.
+ */
 class SLEIPNIR_DLLEXPORT Slice {
  public:
   /// Start index (inclusive).

@@ -131,6 +131,8 @@ struct Expression {
    * Returns true if the expression is the given constant.
    *
    * @param constant The constant.
+   *
+   * @return True if the expression is the given constant.
    */
   constexpr bool IsConstant(double constant) const {
     return Type() == ExpressionType::kConstant && value == constant;
@@ -347,6 +349,7 @@ struct Expression {
    *
    * @param lhs Left argument to binary operator.
    * @param rhs Right argument to binary operator.
+   * @return The node's value.
    */
   virtual double Value([[maybe_unused]] double lhs,
                        [[maybe_unused]] double rhs) const = 0;
@@ -354,6 +357,8 @@ struct Expression {
   /**
    * Returns the type of this expression (constant, linear, quadratic, or
    * nonlinear).
+   *
+   * @return The type of this expression.
    */
   virtual ExpressionType Type() const = 0;
 
@@ -363,6 +368,7 @@ struct Expression {
    * @param lhs Left argument to binary operator.
    * @param rhs Right argument to binary operator.
    * @param parentAdjoint Adjoint of parent expression.
+   * @return The double adjoint of the left child expression.
    */
   virtual double GradL([[maybe_unused]] double lhs, [[maybe_unused]] double rhs,
                        [[maybe_unused]] double parentAdjoint) const {
@@ -375,6 +381,7 @@ struct Expression {
    * @param lhs Left argument to binary operator.
    * @param rhs Right argument to binary operator.
    * @param parentAdjoint Adjoint of parent expression.
+   * @return The double adjoint of the right child expression.
    */
   virtual double GradR([[maybe_unused]] double lhs, [[maybe_unused]] double rhs,
                        [[maybe_unused]] double parentAdjoint) const {
@@ -387,6 +394,7 @@ struct Expression {
    * @param lhs Left argument to binary operator.
    * @param rhs Right argument to binary operator.
    * @param parentAdjoint Adjoint of parent expression.
+   * @return The Expression adjoint of the left child expression.
    */
   virtual ExpressionPtr GradExprL(
       [[maybe_unused]] const ExpressionPtr& lhs,
@@ -401,6 +409,7 @@ struct Expression {
    * @param lhs Left argument to binary operator.
    * @param rhs Right argument to binary operator.
    * @param parentAdjoint Adjoint of parent expression.
+   * @return The Expression adjoint of the right child expression.
    */
   virtual ExpressionPtr GradExprR(
       [[maybe_unused]] const ExpressionPtr& lhs,
@@ -410,6 +419,11 @@ struct Expression {
   }
 };
 
+/**
+ * Derived expression type for binary minus operator.
+ *
+ * @tparam T Expression type.
+ */
 template <ExpressionType T>
 struct BinaryMinusExpression final : Expression {
   /**
@@ -446,6 +460,11 @@ struct BinaryMinusExpression final : Expression {
   }
 };
 
+/**
+ * Derived expression type for binary plus operator.
+ *
+ * @tparam T Expression type.
+ */
 template <ExpressionType T>
 struct BinaryPlusExpression final : Expression {
   /**
@@ -482,6 +501,9 @@ struct BinaryPlusExpression final : Expression {
   }
 };
 
+/**
+ * Derived expression type for constant.
+ */
 struct ConstExpression final : Expression {
   /**
    * Constructs a constant expression with a value of zero.
@@ -500,6 +522,9 @@ struct ConstExpression final : Expression {
   ExpressionType Type() const override { return ExpressionType::kConstant; }
 };
 
+/**
+ * Derived expression type for decision variable.
+ */
 struct DecisionVariableExpression final : Expression {
   /**
    * Constructs a decision variable expression with a value of zero.
@@ -519,6 +544,11 @@ struct DecisionVariableExpression final : Expression {
   ExpressionType Type() const override { return ExpressionType::kLinear; }
 };
 
+/**
+ * Derived expression type for binary division operator.
+ *
+ * @tparam T Expression type.
+ */
 template <ExpressionType T>
 struct DivExpression final : Expression {
   /**
@@ -555,6 +585,11 @@ struct DivExpression final : Expression {
   }
 };
 
+/**
+ * Derived expression type for binary multiplication operator.
+ *
+ * @tparam T Expression type.
+ */
 template <ExpressionType T>
 struct MultExpression final : Expression {
   /**
@@ -595,6 +630,11 @@ struct MultExpression final : Expression {
   }
 };
 
+/**
+ * Derived expression type for unary minus operator.
+ *
+ * @tparam T Expression type.
+ */
 template <ExpressionType T>
 struct UnaryMinusExpression final : Expression {
   /**
@@ -675,6 +715,9 @@ inline constexpr void IntrusiveSharedPtrDecRefCount(Expression* expr) {
   }
 }
 
+/**
+ * Derived expression type for std::abs().
+ */
 struct AbsExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
@@ -735,6 +778,9 @@ inline ExpressionPtr abs(const ExpressionPtr& x) {
   return MakeExpressionPtr<AbsExpression>(x);
 }
 
+/**
+ * Derived expression type for std::acos().
+ */
 struct AcosExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
@@ -782,6 +828,9 @@ inline ExpressionPtr acos(const ExpressionPtr& x) {
   return MakeExpressionPtr<AcosExpression>(x);
 }
 
+/**
+ * Derived expression type for std::asin().
+ */
 struct AsinExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
@@ -829,6 +878,9 @@ inline ExpressionPtr asin(const ExpressionPtr& x) {
   return MakeExpressionPtr<AsinExpression>(x);
 }
 
+/**
+ * Derived expression type for std::atan().
+ */
 struct AtanExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
@@ -875,6 +927,9 @@ inline ExpressionPtr atan(const ExpressionPtr& x) {
   return MakeExpressionPtr<AtanExpression>(x);
 }
 
+/**
+ * Derived expression type for std::atan2().
+ */
 struct Atan2Expression final : Expression {
   /**
    * Constructs a binary expression (an operator with two arguments).
@@ -935,6 +990,9 @@ inline ExpressionPtr atan2(const ExpressionPtr& y, const ExpressionPtr& x) {
   return MakeExpressionPtr<Atan2Expression>(y, x);
 }
 
+/**
+ * Derived expression type for std::cos().
+ */
 struct CosExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
@@ -980,6 +1038,9 @@ inline ExpressionPtr cos(const ExpressionPtr& x) {
   return MakeExpressionPtr<CosExpression>(x);
 }
 
+/**
+ * Derived expression type for std::cosh().
+ */
 struct CoshExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
@@ -1025,6 +1086,9 @@ inline ExpressionPtr cosh(const ExpressionPtr& x) {
   return MakeExpressionPtr<CoshExpression>(x);
 }
 
+/**
+ * Derived expression type for std::erf().
+ */
 struct ErfExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
@@ -1073,6 +1137,9 @@ inline ExpressionPtr erf(const ExpressionPtr& x) {
   return MakeExpressionPtr<ErfExpression>(x);
 }
 
+/**
+ * Derived expression type for std::exp().
+ */
 struct ExpExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
@@ -1120,6 +1187,9 @@ inline ExpressionPtr exp(const ExpressionPtr& x) {
 
 inline ExpressionPtr hypot(const ExpressionPtr& x, const ExpressionPtr& y);
 
+/**
+ * Derived expression type for std::hypot().
+ */
 struct HypotExpression final : Expression {
   /**
    * Constructs a binary expression (an operator with two arguments).
@@ -1179,6 +1249,9 @@ inline ExpressionPtr hypot(const ExpressionPtr& x, const ExpressionPtr& y) {
   return MakeExpressionPtr<HypotExpression>(x, y);
 }
 
+/**
+ * Derived expression type for std::log().
+ */
 struct LogExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
@@ -1225,6 +1298,9 @@ inline ExpressionPtr log(const ExpressionPtr& x) {
   return MakeExpressionPtr<LogExpression>(x);
 }
 
+/**
+ * Derived expression type for std::log10().
+ */
 struct Log10Expression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
@@ -1274,6 +1350,11 @@ inline ExpressionPtr log10(const ExpressionPtr& x) {
 
 inline ExpressionPtr pow(const ExpressionPtr& base, const ExpressionPtr& power);
 
+/**
+ * Derived expression type for std::pow().
+ *
+ * @tparam Expression type.
+ */
 template <ExpressionType T>
 struct PowExpression final : Expression {
   /**
@@ -1370,6 +1451,9 @@ inline ExpressionPtr pow(const ExpressionPtr& base,
   return MakeExpressionPtr<PowExpression<kNonlinear>>(base, power);
 }
 
+/**
+ * Derived expression type for sign().
+ */
 struct SignExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
@@ -1431,6 +1515,9 @@ inline ExpressionPtr sign(const ExpressionPtr& x) {
   return MakeExpressionPtr<SignExpression>(x);
 }
 
+/**
+ * Derived expression type for std::sin().
+ */
 struct SinExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
@@ -1477,6 +1564,9 @@ inline ExpressionPtr sin(const ExpressionPtr& x) {
   return MakeExpressionPtr<SinExpression>(x);
 }
 
+/**
+ * Derived expression type for std::sinh().
+ */
 struct SinhExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
@@ -1523,6 +1613,9 @@ inline ExpressionPtr sinh(const ExpressionPtr& x) {
   return MakeExpressionPtr<SinhExpression>(x);
 }
 
+/**
+ * Derived expression type for std::sqrt().
+ */
 struct SqrtExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
@@ -1571,6 +1664,9 @@ inline ExpressionPtr sqrt(const ExpressionPtr& x) {
   return MakeExpressionPtr<SqrtExpression>(x);
 }
 
+/**
+ * Derived expression type for std::tan().
+ */
 struct TanExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).
@@ -1618,6 +1714,9 @@ inline ExpressionPtr tan(const ExpressionPtr& x) {
   return MakeExpressionPtr<TanExpression>(x);
 }
 
+/**
+ * Derived expression type for std::tanh().
+ */
 struct TanhExpression final : Expression {
   /**
    * Constructs an unary expression (an operator with one argument).

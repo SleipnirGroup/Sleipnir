@@ -27,22 +27,6 @@ static const char *__doc_Eigen_NumTraits =
 R"doc(NumTraits specialization that allows instantiating Eigen types with
 Variable.)doc";
 
-static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_782_3 = R"doc()doc";
-
-static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_782_3_AddCost = R"doc()doc";
-
-static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_782_3_IsComplex = R"doc()doc";
-
-static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_782_3_IsInteger = R"doc()doc";
-
-static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_782_3_IsSigned = R"doc()doc";
-
-static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_782_3_MulCost = R"doc()doc";
-
-static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_782_3_ReadCost = R"doc()doc";
-
-static const char *__doc_Eigen_NumTraits_unnamed_enum_at_home_tav_git_Sleipnir_include_sleipnir_autodiff_Variable_hpp_782_3_RequireInitialization = R"doc()doc";
-
 static const char *__doc_sleipnir_Block =
 R"doc(Assemble a VariableMatrix from a nested list of blocks.
 
@@ -144,9 +128,16 @@ static const char *__doc_sleipnir_Gradient_Get =
 R"doc(Returns the gradient as a VariableMatrix.
 
 This is useful when constructing optimization problems with
-derivatives in them.)doc";
+derivatives in them.
 
-static const char *__doc_sleipnir_Gradient_GetProfilers = R"doc(Returns the profiler.)doc";
+Returns:
+    The gradient as a VariableMatrix.)doc";
+
+static const char *__doc_sleipnir_Gradient_GetProfilers =
+R"doc(Returns the profiler.
+
+Returns:
+    The profiler.)doc";
 
 static const char *__doc_sleipnir_Gradient_Gradient =
 R"doc(Constructs a Gradient object.
@@ -166,7 +157,11 @@ Parameter ``variable``:
 Parameter ``wrt``:
     Vector of variables with respect to which to compute the gradient.)doc";
 
-static const char *__doc_sleipnir_Gradient_Value = R"doc(Evaluates the gradient at wrt's value.)doc";
+static const char *__doc_sleipnir_Gradient_Value =
+R"doc(Evaluates the gradient at wrt's value.
+
+Returns:
+    The gradient at wrt's value.)doc";
 
 static const char *__doc_sleipnir_Gradient_m_g = R"doc()doc";
 
@@ -186,9 +181,16 @@ static const char *__doc_sleipnir_Hessian_Get =
 R"doc(Returns the Hessian as a VariableMatrix.
 
 This is useful when constructing optimization problems with
-derivatives in them.)doc";
+derivatives in them.
 
-static const char *__doc_sleipnir_Hessian_GetProfilers = R"doc(Returns the profilers.)doc";
+Returns:
+    The Hessian as a VariableMatrix.)doc";
+
+static const char *__doc_sleipnir_Hessian_GetProfilers =
+R"doc(Returns the profilers.
+
+Returns:
+    The profilers.)doc";
 
 static const char *__doc_sleipnir_Hessian_Hessian =
 R"doc(Constructs a Hessian object.
@@ -199,7 +201,11 @@ Parameter ``variable``:
 Parameter ``wrt``:
     Vector of variables with respect to which to compute the Hessian.)doc";
 
-static const char *__doc_sleipnir_Hessian_Value = R"doc(Evaluates the Hessian at wrt's value.)doc";
+static const char *__doc_sleipnir_Hessian_Value =
+R"doc(Evaluates the Hessian at wrt's value.
+
+Returns:
+    The Hessian at wrt's value.)doc";
 
 static const char *__doc_sleipnir_Hessian_m_jacobian = R"doc()doc";
 
@@ -284,9 +290,16 @@ static const char *__doc_sleipnir_Jacobian_Get =
 R"doc(Returns the Jacobian as a VariableMatrix.
 
 This is useful when constructing optimization problems with
-derivatives in them.)doc";
+derivatives in them.
 
-static const char *__doc_sleipnir_Jacobian_GetProfilers = R"doc(Returns the profilers.)doc";
+Returns:
+    The Jacobian as a VariableMatrix.)doc";
+
+static const char *__doc_sleipnir_Jacobian_GetProfilers =
+R"doc(Returns the profilers.
+
+Returns:
+    The profilers.)doc";
 
 static const char *__doc_sleipnir_Jacobian_Jacobian =
 R"doc(Constructs a Jacobian object.
@@ -297,7 +310,11 @@ Parameter ``variables``:
 Parameter ``wrt``:
     Vector of variables with respect to which to compute the Jacobian.)doc";
 
-static const char *__doc_sleipnir_Jacobian_Value = R"doc(Evaluates the Jacobian at wrt's value.)doc";
+static const char *__doc_sleipnir_Jacobian_Value =
+R"doc(Evaluates the Jacobian at wrt's value.
+
+Returns:
+    The Jacobian at wrt's value.)doc";
 
 static const char *__doc_sleipnir_Jacobian_m_J = R"doc()doc";
 
@@ -352,9 +369,9 @@ R"doc(The result of a multistart solve.
 Template parameter ``DecisionVariables``:
     The type containing the decision variable initial guess.)doc";
 
-static const char *__doc_sleipnir_MultistartResult_status = R"doc()doc";
+static const char *__doc_sleipnir_MultistartResult_status = R"doc(The solver status.)doc";
 
-static const char *__doc_sleipnir_MultistartResult_variables = R"doc()doc";
+static const char *__doc_sleipnir_MultistartResult_variables = R"doc(The decision variables.)doc";
 
 static const char *__doc_sleipnir_Newton =
 R"doc(Finds the optimal solution to a nonlinear program using Newton's
@@ -635,7 +652,11 @@ Parameter ``callback``:
 
 static const char *__doc_sleipnir_OptimizationProblem_ClearCallbacks = R"doc(Clears the registered callbacks.)doc";
 
-static const char *__doc_sleipnir_OptimizationProblem_DecisionVariable = R"doc(Create a decision variable in the optimization problem.)doc";
+static const char *__doc_sleipnir_OptimizationProblem_DecisionVariable =
+R"doc(Create a decision variable in the optimization problem.
+
+Returns:
+    A decision variable in the optimization problem.)doc";
 
 static const char *__doc_sleipnir_OptimizationProblem_DecisionVariable_2 =
 R"doc(Create a matrix of decision variables in the optimization problem.
@@ -644,7 +665,10 @@ Parameter ``rows``:
     Number of matrix rows.
 
 Parameter ``cols``:
-    Number of matrix columns.)doc";
+    Number of matrix columns.
+
+Returns:
+    A matrix of decision variables in the optimization problem.)doc";
 
 static const char *__doc_sleipnir_OptimizationProblem_Maximize =
 R"doc(Tells the solver to maximize the output of the given objective
@@ -695,7 +719,10 @@ R"doc(Solve the optimization problem. The solution will be stored in the
 original variables used to construct the problem.
 
 Parameter ``config``:
-    Configuration options for the solver.)doc";
+    Configuration options for the solver.
+
+Returns:
+    The solver status.)doc";
 
 static const char *__doc_sleipnir_OptimizationProblem_SubjectTo =
 R"doc(Tells the solver to solve the problem while satisfying the given
@@ -733,7 +760,11 @@ Variable instances are reused across the diagonal, which helps reduce
 problem dimensionality.
 
 Parameter ``rows``:
-    Number of matrix rows.)doc";
+    Number of matrix rows.
+
+Returns:
+    A symmetric matrix of decision varaibles in the optimization
+    problem.)doc";
 
 static const char *__doc_sleipnir_OptimizationProblem_m_callbacks = R"doc()doc";
 
@@ -798,7 +829,7 @@ Parameter ``x``:
 Parameter ``status``:
     The solver status.)doc";
 
-static const char *__doc_sleipnir_Slice = R"doc()doc";
+static const char *__doc_sleipnir_Slice = R"doc(Represents a sequence of elements in an iterable object.)doc";
 
 static const char *__doc_sleipnir_Slice_Adjust =
 R"doc(Adjusts start and end slice indices assuming a sequence of the
@@ -1028,7 +1059,10 @@ Parameter ``block_rows``:
     The number of rows in the block selection.
 
 Parameter ``block_cols``:
-    The number of columns in the block selection.)doc";
+    The number of columns in the block selection.
+
+Returns:
+    A block of the variable matrix.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_Block_2 =
 R"doc(Returns a block slice of the variable matrix.
@@ -1043,41 +1077,67 @@ Parameter ``block_rows``:
     The number of rows in the block selection.
 
 Parameter ``block_cols``:
-    The number of columns in the block selection.)doc";
+    The number of columns in the block selection.
+
+Returns:
+    A block slice of the variable matrix.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_Col =
 R"doc(Returns a column slice of the variable matrix.
 
 Parameter ``col``:
-    The column to slice.)doc";
+    The column to slice.
+
+Returns:
+    A column slice of the variable matrix.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_Col_2 =
 R"doc(Returns a column slice of the variable matrix.
 
 Parameter ``col``:
-    The column to slice.)doc";
+    The column to slice.
 
-static const char *__doc_sleipnir_VariableBlock_Cols = R"doc(Returns number of columns in the matrix.)doc";
+Returns:
+    A column slice of the variable matrix.)doc";
+
+static const char *__doc_sleipnir_VariableBlock_Cols =
+R"doc(Returns the number of columns in the matrix.
+
+Returns:
+    The number of columns in the matrix.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_CwiseTransform =
 R"doc(Transforms the matrix coefficient-wise with an unary operator.
 
 Parameter ``unary_op``:
-    The unary operator to use for the transform operation.)doc";
+    The unary operator to use for the transform operation.
+
+Returns:
+    Result of the unary operator.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_Row =
 R"doc(Returns a row slice of the variable matrix.
 
 Parameter ``row``:
-    The row to slice.)doc";
+    The row to slice.
+
+Returns:
+    A row slice of the variable matrix.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_Row_2 =
 R"doc(Returns a row slice of the variable matrix.
 
 Parameter ``row``:
-    The row to slice.)doc";
+    The row to slice.
 
-static const char *__doc_sleipnir_VariableBlock_Rows = R"doc(Returns number of rows in the matrix.)doc";
+Returns:
+    A row slice of the variable matrix.)doc";
+
+static const char *__doc_sleipnir_VariableBlock_Rows =
+R"doc(Returns the number of rows in the matrix.
+
+Returns:
+    The number of rows in the matrix.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_Segment =
 R"doc(Returns a segment of the variable vector.
@@ -1086,7 +1146,10 @@ Parameter ``offset``:
     The offset of the segment.
 
 Parameter ``length``:
-    The length of the segment.)doc";
+    The length of the segment.
+
+Returns:
+    A segment of the variable vector.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_Segment_2 =
 R"doc(Returns a segment of the variable vector.
@@ -1095,7 +1158,10 @@ Parameter ``offset``:
     The offset of the segment.
 
 Parameter ``length``:
-    The length of the segment.)doc";
+    The length of the segment.
+
+Returns:
+    A segment of the variable vector.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_SetValue =
 R"doc(Assigns a double to the block.
@@ -1111,7 +1177,11 @@ R"doc(Sets block's internal values.
 Parameter ``values``:
     Eigen matrix of values.)doc";
 
-static const char *__doc_sleipnir_VariableBlock_T = R"doc(Returns the transpose of the variable matrix.)doc";
+static const char *__doc_sleipnir_VariableBlock_T =
+R"doc(Returns the transpose of the variable matrix.
+
+Returns:
+    The transpose of the variable matrix.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_Value =
 R"doc(Returns an element of the variable matrix.
@@ -1120,19 +1190,29 @@ Parameter ``row``:
     The row of the element to return.
 
 Parameter ``col``:
-    The column of the element to return.)doc";
+    The column of the element to return.
+
+Returns:
+    An element of the variable matrix.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_Value_2 =
 R"doc(Returns a row of the variable column vector.
 
 Parameter ``index``:
-    The index of the element to return.)doc";
+    The index of the element to return.
 
-static const char *__doc_sleipnir_VariableBlock_Value_3 = R"doc(Returns the contents of the variable matrix.)doc";
+Returns:
+    A row of the variable column vector.)doc";
 
-static const char *__doc_sleipnir_VariableBlock_VariableBlock = R"doc()doc";
+static const char *__doc_sleipnir_VariableBlock_Value_3 =
+R"doc(Returns the contents of the variable matrix.
 
-static const char *__doc_sleipnir_VariableBlock_VariableBlock_2 = R"doc()doc";
+Returns:
+    The contents of the variable matrix.)doc";
+
+static const char *__doc_sleipnir_VariableBlock_VariableBlock = R"doc(Copy constructor.)doc";
+
+static const char *__doc_sleipnir_VariableBlock_VariableBlock_2 = R"doc(Move constructor.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_VariableBlock_3 =
 R"doc(Constructs a Variable block pointing to all of the given matrix.
@@ -1178,13 +1258,29 @@ Parameter ``col_slice``:
 Parameter ``col_slice_length``:
     The block's column length.)doc";
 
-static const char *__doc_sleipnir_VariableBlock_begin = R"doc(Returns begin iterator.)doc";
+static const char *__doc_sleipnir_VariableBlock_begin =
+R"doc(Returns begin iterator.
 
-static const char *__doc_sleipnir_VariableBlock_begin_2 = R"doc(Returns begin iterator.)doc";
+Returns:
+    Begin iterator.)doc";
 
-static const char *__doc_sleipnir_VariableBlock_cbegin = R"doc(Returns begin iterator.)doc";
+static const char *__doc_sleipnir_VariableBlock_begin_2 =
+R"doc(Returns begin iterator.
 
-static const char *__doc_sleipnir_VariableBlock_cend = R"doc(Returns end iterator.)doc";
+Returns:
+    Begin iterator.)doc";
+
+static const char *__doc_sleipnir_VariableBlock_cbegin =
+R"doc(Returns begin iterator.
+
+Returns:
+    Begin iterator.)doc";
+
+static const char *__doc_sleipnir_VariableBlock_cend =
+R"doc(Returns end iterator.
+
+Returns:
+    End iterator.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_const_iterator = R"doc()doc";
 
@@ -1204,9 +1300,17 @@ static const char *__doc_sleipnir_VariableBlock_const_iterator_operator_inc_2 = 
 
 static const char *__doc_sleipnir_VariableBlock_const_iterator_operator_mul = R"doc()doc";
 
-static const char *__doc_sleipnir_VariableBlock_end = R"doc(Returns end iterator.)doc";
+static const char *__doc_sleipnir_VariableBlock_end =
+R"doc(Returns end iterator.
 
-static const char *__doc_sleipnir_VariableBlock_end_2 = R"doc(Returns end iterator.)doc";
+Returns:
+    End iterator.)doc";
+
+static const char *__doc_sleipnir_VariableBlock_end_2 =
+R"doc(Returns end iterator.
+
+Returns:
+    End iterator.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_iterator = R"doc()doc";
 
@@ -1240,36 +1344,57 @@ static const char *__doc_sleipnir_VariableBlock_operator_assign =
 R"doc(Assigns a VariableBlock to the block.
 
 Parameter ``values``:
-    VariableBlock of values.)doc";
+    VariableBlock of values.
+
+Returns:
+    This VariableBlock.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_operator_assign_2 =
 R"doc(Assigns a VariableBlock to the block.
 
 Parameter ``values``:
-    VariableBlock of values.)doc";
+    VariableBlock of values.
+
+Returns:
+    This VariableBlock.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_operator_assign_3 =
 R"doc(Assigns a double to the block.
 
-This only works for blocks with one row and one column.)doc";
+This only works for blocks with one row and one column.
+
+Parameter ``value``:
+    Value to assign.
+
+Returns:
+    This VariableBlock.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_operator_assign_4 =
 R"doc(Assigns an Eigen matrix to the block.
 
 Parameter ``values``:
-    Eigen matrix of values to assign.)doc";
+    Eigen matrix of values to assign.
+
+Returns:
+    This VariableBlock.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_operator_assign_5 =
 R"doc(Assigns a VariableMatrix to the block.
 
 Parameter ``values``:
-    VariableMatrix of values.)doc";
+    VariableMatrix of values.
+
+Returns:
+    This VariableBlock.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_operator_assign_6 =
 R"doc(Assigns a VariableMatrix to the block.
 
 Parameter ``values``:
-    VariableMatrix of values.)doc";
+    VariableMatrix of values.
+
+Returns:
+    This VariableBlock.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_operator_call =
 R"doc(Returns a scalar subblock at the given row and column.
@@ -1278,7 +1403,10 @@ Parameter ``row``:
     The scalar subblock's row.
 
 Parameter ``col``:
-    The scalar subblock's column.)doc";
+    The scalar subblock's column.
+
+Returns:
+    A scalar subblock at the given row and column.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_operator_call_2 =
 R"doc(Returns a scalar subblock at the given row and column.
@@ -1287,19 +1415,28 @@ Parameter ``row``:
     The scalar subblock's row.
 
 Parameter ``col``:
-    The scalar subblock's column.)doc";
+    The scalar subblock's column.
+
+Returns:
+    A scalar subblock at the given row and column.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_operator_call_3 =
 R"doc(Returns a scalar subblock at the given row.
 
 Parameter ``row``:
-    The scalar subblock's row.)doc";
+    The scalar subblock's row.
+
+Returns:
+    A scalar subblock at the given row.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_operator_call_4 =
 R"doc(Returns a scalar subblock at the given row.
 
 Parameter ``row``:
-    The scalar subblock's row.)doc";
+    The scalar subblock's row.
+
+Returns:
+    A scalar subblock at the given row.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_operator_call_5 =
 R"doc(Returns a slice of the variable matrix.
@@ -1308,7 +1445,10 @@ Parameter ``row_slice``:
     The row slice.
 
 Parameter ``col_slice``:
-    The column slice.)doc";
+    The column slice.
+
+Returns:
+    A slice of the variable matrix.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_operator_call_6 =
 R"doc(Returns a slice of the variable matrix.
@@ -1317,7 +1457,10 @@ Parameter ``row_slice``:
     The row slice.
 
 Parameter ``col_slice``:
-    The column slice.)doc";
+    The column slice.
+
+Returns:
+    A slice of the variable matrix.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_operator_call_7 =
 R"doc(Returns a slice of the variable matrix.
@@ -1335,7 +1478,10 @@ Parameter ``col_slice``:
     The column slice.
 
 Parameter ``col_slice_length``:
-    The column slice length.)doc";
+    The column slice length.
+
+Returns:
+    A slice of the variable matrix.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_operator_call_8 =
 R"doc(Returns a slice of the variable matrix.
@@ -1353,48 +1499,73 @@ Parameter ``col_slice``:
     The column slice.
 
 Parameter ``col_slice_length``:
-    The column slice length.)doc";
+    The column slice length.
+
+Returns:
+    A slice of the variable matrix.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_operator_iadd =
 R"doc(Compound addition-assignment operator.
 
 Parameter ``rhs``:
-    Variable to add.)doc";
+    Variable to add.
+
+Returns:
+    Result of addition.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_operator_idiv =
 R"doc(Compound matrix division-assignment operator (only enabled when rhs is
 a scalar).
 
 Parameter ``rhs``:
-    Variable to divide.)doc";
+    Variable to divide.
+
+Returns:
+    Result of division.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_operator_idiv_2 =
 R"doc(Compound matrix division-assignment operator (only enabled when rhs is
 a scalar).
 
 Parameter ``rhs``:
-    Variable to divide.)doc";
+    Variable to divide.
+
+Returns:
+    Result of division.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_operator_imul =
 R"doc(Compound matrix multiplication-assignment operator.
 
 Parameter ``rhs``:
-    Variable to multiply.)doc";
+    Variable to multiply.
+
+Returns:
+    Result of multiplication.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_operator_imul_2 =
 R"doc(Compound matrix multiplication-assignment operator (only enabled when
 lhs is a scalar).
 
 Parameter ``rhs``:
-    Variable to multiply.)doc";
+    Variable to multiply.
+
+Returns:
+    Result of multiplication.)doc";
 
 static const char *__doc_sleipnir_VariableBlock_operator_isub =
 R"doc(Compound subtraction-assignment operator.
 
 Parameter ``rhs``:
-    Variable to subtract.)doc";
+    Variable to subtract.
 
-static const char *__doc_sleipnir_VariableBlock_size = R"doc(Returns number of elements in matrix.)doc";
+Returns:
+    Result of subtraction.)doc";
+
+static const char *__doc_sleipnir_VariableBlock_size =
+R"doc(Returns number of elements in matrix.
+
+Returns:
+    Number of elements in matrix.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix = R"doc(A matrix of autodiff variables.)doc";
 
@@ -1411,7 +1582,10 @@ Parameter ``block_rows``:
     The number of rows in the block selection.
 
 Parameter ``block_cols``:
-    The number of columns in the block selection.)doc";
+    The number of columns in the block selection.
+
+Returns:
+    A block of the variable matrix.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_Block_2 =
 R"doc(Returns a block of the variable matrix.
@@ -1426,27 +1600,43 @@ Parameter ``block_rows``:
     The number of rows in the block selection.
 
 Parameter ``block_cols``:
-    The number of columns in the block selection.)doc";
+    The number of columns in the block selection.
+
+Returns:
+    A block of the variable matrix.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_Col =
 R"doc(Returns a column slice of the variable matrix.
 
 Parameter ``col``:
-    The column to slice.)doc";
+    The column to slice.
+
+Returns:
+    A column slice of the variable matrix.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_Col_2 =
 R"doc(Returns a column slice of the variable matrix.
 
 Parameter ``col``:
-    The column to slice.)doc";
+    The column to slice.
 
-static const char *__doc_sleipnir_VariableMatrix_Cols = R"doc(Returns number of columns in the matrix.)doc";
+Returns:
+    A column slice of the variable matrix.)doc";
+
+static const char *__doc_sleipnir_VariableMatrix_Cols =
+R"doc(Returns the number of columns in the matrix.
+
+Returns:
+    The number of columns in the matrix.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_CwiseTransform =
 R"doc(Transforms the matrix coefficient-wise with an unary operator.
 
 Parameter ``unary_op``:
-    The unary operator to use for the transform operation.)doc";
+    The unary operator to use for the transform operation.
+
+Returns:
+    Result of the unary operator.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_Ones =
 R"doc(Returns a variable matrix filled with ones.
@@ -1455,21 +1645,34 @@ Parameter ``rows``:
     The number of matrix rows.
 
 Parameter ``cols``:
-    The number of matrix columns.)doc";
+    The number of matrix columns.
+
+Returns:
+    A variable matrix filled with ones.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_Row =
 R"doc(Returns a row slice of the variable matrix.
 
 Parameter ``row``:
-    The row to slice.)doc";
+    The row to slice.
+
+Returns:
+    A row slice of the variable matrix.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_Row_2 =
 R"doc(Returns a row slice of the variable matrix.
 
 Parameter ``row``:
-    The row to slice.)doc";
+    The row to slice.
 
-static const char *__doc_sleipnir_VariableMatrix_Rows = R"doc(Returns number of rows in the matrix.)doc";
+Returns:
+    A row slice of the variable matrix.)doc";
+
+static const char *__doc_sleipnir_VariableMatrix_Rows =
+R"doc(Returns the number of rows in the matrix.
+
+Returns:
+    The number of rows in the matrix.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_Segment =
 R"doc(Returns a segment of the variable vector.
@@ -1478,7 +1681,10 @@ Parameter ``offset``:
     The offset of the segment.
 
 Parameter ``length``:
-    The length of the segment.)doc";
+    The length of the segment.
+
+Returns:
+    A segment of the variable vector.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_Segment_2 =
 R"doc(Returns a segment of the variable vector.
@@ -1487,7 +1693,10 @@ Parameter ``offset``:
     The offset of the segment.
 
 Parameter ``length``:
-    The length of the segment.)doc";
+    The length of the segment.
+
+Returns:
+    A segment of the variable vector.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_SetValue =
 R"doc(Sets the VariableMatrix's internal values.
@@ -1495,7 +1704,11 @@ R"doc(Sets the VariableMatrix's internal values.
 Parameter ``values``:
     Eigen matrix of values.)doc";
 
-static const char *__doc_sleipnir_VariableMatrix_T = R"doc(Returns the transpose of the variable matrix.)doc";
+static const char *__doc_sleipnir_VariableMatrix_T =
+R"doc(Returns the transpose of the variable matrix.
+
+Returns:
+    The transpose of the variable matrix.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_Value =
 R"doc(Returns an element of the variable matrix.
@@ -1504,15 +1717,25 @@ Parameter ``row``:
     The row of the element to return.
 
 Parameter ``col``:
-    The column of the element to return.)doc";
+    The column of the element to return.
+
+Returns:
+    An element of the variable matrix.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_Value_2 =
 R"doc(Returns a row of the variable column vector.
 
 Parameter ``index``:
-    The index of the element to return.)doc";
+    The index of the element to return.
 
-static const char *__doc_sleipnir_VariableMatrix_Value_3 = R"doc(Returns the contents of the variable matrix.)doc";
+Returns:
+    A row of the variable column vector.)doc";
+
+static const char *__doc_sleipnir_VariableMatrix_Value_3 =
+R"doc(Returns the contents of the variable matrix.
+
+Returns:
+    The contents of the variable matrix.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_VariableMatrix = R"doc(Constructs an empty VariableMatrix.)doc";
 
@@ -1624,15 +1847,34 @@ Parameter ``rows``:
     The number of matrix rows.
 
 Parameter ``cols``:
-    The number of matrix columns.)doc";
+    The number of matrix columns.
 
-static const char *__doc_sleipnir_VariableMatrix_begin = R"doc(Returns begin iterator.)doc";
+Returns:
+    A variable matrix filled with zeroes.)doc";
 
-static const char *__doc_sleipnir_VariableMatrix_begin_2 = R"doc(Returns begin iterator.)doc";
+static const char *__doc_sleipnir_VariableMatrix_begin =
+R"doc(Returns begin iterator.
 
-static const char *__doc_sleipnir_VariableMatrix_cbegin = R"doc(Returns begin iterator.)doc";
+Returns:
+    Begin iterator.)doc";
 
-static const char *__doc_sleipnir_VariableMatrix_cend = R"doc(Returns end iterator.)doc";
+static const char *__doc_sleipnir_VariableMatrix_begin_2 =
+R"doc(Returns begin iterator.
+
+Returns:
+    Begin iterator.)doc";
+
+static const char *__doc_sleipnir_VariableMatrix_cbegin =
+R"doc(Returns begin iterator.
+
+Returns:
+    Begin iterator.)doc";
+
+static const char *__doc_sleipnir_VariableMatrix_cend =
+R"doc(Returns end iterator.
+
+Returns:
+    End iterator.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_const_iterator = R"doc()doc";
 
@@ -1650,11 +1892,19 @@ static const char *__doc_sleipnir_VariableMatrix_const_iterator_operator_inc_2 =
 
 static const char *__doc_sleipnir_VariableMatrix_const_iterator_operator_mul = R"doc()doc";
 
-static const char *__doc_sleipnir_VariableMatrix_empty_t = R"doc()doc";
+static const char *__doc_sleipnir_VariableMatrix_empty_t = R"doc(Type tag used to designate an uninitialized VariableMatrix.)doc";
 
-static const char *__doc_sleipnir_VariableMatrix_end = R"doc(Returns end iterator.)doc";
+static const char *__doc_sleipnir_VariableMatrix_end =
+R"doc(Returns end iterator.
 
-static const char *__doc_sleipnir_VariableMatrix_end_2 = R"doc(Returns end iterator.)doc";
+Returns:
+    End iterator.)doc";
+
+static const char *__doc_sleipnir_VariableMatrix_end_2 =
+R"doc(Returns end iterator.
+
+Returns:
+    End iterator.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_iterator = R"doc()doc";
 
@@ -1684,7 +1934,10 @@ static const char *__doc_sleipnir_VariableMatrix_operator_assign =
 R"doc(Assigns an Eigen matrix to a VariableMatrix.
 
 Parameter ``values``:
-    Eigen matrix of values.)doc";
+    Eigen matrix of values.
+
+Returns:
+    This VariableMatrix.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_operator_call =
 R"doc(Returns a block pointing to the given row and column.
@@ -1693,7 +1946,10 @@ Parameter ``row``:
     The block row.
 
 Parameter ``col``:
-    The block column.)doc";
+    The block column.
+
+Returns:
+    A block pointing to the given row and column.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_operator_call_2 =
 R"doc(Returns a block pointing to the given row and column.
@@ -1702,19 +1958,28 @@ Parameter ``row``:
     The block row.
 
 Parameter ``col``:
-    The block column.)doc";
+    The block column.
+
+Returns:
+    A block pointing to the given row and column.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_operator_call_3 =
 R"doc(Returns a block pointing to the given row.
 
 Parameter ``row``:
-    The block row.)doc";
+    The block row.
+
+Returns:
+    A block pointing to the given row.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_operator_call_4 =
 R"doc(Returns a block pointing to the given row.
 
 Parameter ``row``:
-    The block row.)doc";
+    The block row.
+
+Returns:
+    A block pointing to the given row.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_operator_call_5 =
 R"doc(Returns a slice of the variable matrix.
@@ -1723,7 +1988,10 @@ Parameter ``row_slice``:
     The row slice.
 
 Parameter ``col_slice``:
-    The column slice.)doc";
+    The column slice.
+
+Returns:
+    A slice of the variable matrix.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_operator_call_6 =
 R"doc(Returns a slice of the variable matrix.
@@ -1732,7 +2000,10 @@ Parameter ``row_slice``:
     The row slice.
 
 Parameter ``col_slice``:
-    The column slice.)doc";
+    The column slice.
+
+Returns:
+    A slice of the variable matrix.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_operator_call_7 =
 R"doc(Returns a slice of the variable matrix.
@@ -1750,7 +2021,10 @@ Parameter ``col_slice``:
     The column slice.
 
 Parameter ``col_slice_length``:
-    The column slice length.)doc";
+    The column slice length.
+
+Returns:
+    A slice of the variable matrix.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_operator_call_8 =
 R"doc(Returns a slice of the variable matrix.
@@ -1768,34 +2042,53 @@ Parameter ``col_slice``:
     The column slice.
 
 Parameter ``col_slice_length``:
-    The column slice length.)doc";
+    The column slice length.
+
+Returns:
+    A slice of the variable matrix.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_operator_iadd =
 R"doc(Compound addition-assignment operator.
 
 Parameter ``rhs``:
-    Variable to add.)doc";
+    Variable to add.
+
+Returns:
+    Result of addition.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_operator_idiv =
 R"doc(Compound matrix division-assignment operator (only enabled when rhs is
 a scalar).
 
 Parameter ``rhs``:
-    Variable to divide.)doc";
+    Variable to divide.
+
+Returns:
+    Result of division.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_operator_imul =
 R"doc(Compound matrix multiplication-assignment operator.
 
 Parameter ``rhs``:
-    Variable to multiply.)doc";
+    Variable to multiply.
+
+Returns:
+    Result of multiplication.)doc";
 
 static const char *__doc_sleipnir_VariableMatrix_operator_isub =
 R"doc(Compound subtraction-assignment operator.
 
 Parameter ``rhs``:
-    Variable to subtract.)doc";
+    Variable to subtract.
 
-static const char *__doc_sleipnir_VariableMatrix_size = R"doc(Returns number of elements in matrix.)doc";
+Returns:
+    Result of subtraction.)doc";
+
+static const char *__doc_sleipnir_VariableMatrix_size =
+R"doc(Returns number of elements in matrix.
+
+Returns:
+    Number of elements in matrix.)doc";
 
 static const char *__doc_sleipnir_Variable_SetValue =
 R"doc(Sets Variable's internal value.
@@ -1805,9 +2098,16 @@ Parameter ``value``:
 
 static const char *__doc_sleipnir_Variable_Type =
 R"doc(Returns the type of this expression (constant, linear, quadratic, or
-nonlinear).)doc";
+nonlinear).
 
-static const char *__doc_sleipnir_Variable_Value = R"doc(Returns the value of this variable.)doc";
+Returns:
+    The type of this expression.)doc";
+
+static const char *__doc_sleipnir_Variable_Value =
+R"doc(Returns the value of this variable.
+
+Returns:
+    The value of this variable.)doc";
 
 static const char *__doc_sleipnir_Variable_Variable = R"doc(Constructs a linear Variable with a value of zero.)doc";
 
@@ -1839,31 +2139,46 @@ static const char *__doc_sleipnir_Variable_operator_assign =
 R"doc(Assignment operator for double.
 
 Parameter ``value``:
-    The value of the Variable.)doc";
+    The value of the Variable.
+
+Returns:
+    This variable.)doc";
 
 static const char *__doc_sleipnir_Variable_operator_iadd =
 R"doc(Variable-Variable compound addition operator.
 
 Parameter ``rhs``:
-    Operator right-hand side.)doc";
+    Operator right-hand side.
+
+Returns:
+    Result of addition.)doc";
 
 static const char *__doc_sleipnir_Variable_operator_idiv =
 R"doc(Variable-Variable compound division operator.
 
 Parameter ``rhs``:
-    Operator right-hand side.)doc";
+    Operator right-hand side.
+
+Returns:
+    Result of division.)doc";
 
 static const char *__doc_sleipnir_Variable_operator_imul =
 R"doc(Variable-Variable compound multiplication operator.
 
 Parameter ``rhs``:
-    Operator right-hand side.)doc";
+    Operator right-hand side.
+
+Returns:
+    Result of multiplication.)doc";
 
 static const char *__doc_sleipnir_Variable_operator_isub =
 R"doc(Variable-Variable compound subtraction operator.
 
 Parameter ``rhs``:
-    Operator right-hand side.)doc";
+    Operator right-hand side.
+
+Returns:
+    Result of subtraction.)doc";
 
 static const char *__doc_sleipnir_abs =
 R"doc(std::abs() for Variables.
@@ -1910,7 +2225,7 @@ R"doc(std::cosh() for Variables.
 Parameter ``x``:
     The argument.)doc";
 
-static const char *__doc_sleipnir_detail_AbsExpression = R"doc()doc";
+static const char *__doc_sleipnir_detail_AbsExpression = R"doc(Derived expression type for std::abs().)doc";
 
 static const char *__doc_sleipnir_detail_AbsExpression_AbsExpression =
 R"doc(Constructs an unary expression (an operator with one argument).
@@ -1926,7 +2241,7 @@ static const char *__doc_sleipnir_detail_AbsExpression_Type = R"doc()doc";
 
 static const char *__doc_sleipnir_detail_AbsExpression_Value = R"doc()doc";
 
-static const char *__doc_sleipnir_detail_AcosExpression = R"doc()doc";
+static const char *__doc_sleipnir_detail_AcosExpression = R"doc(Derived expression type for std::acos().)doc";
 
 static const char *__doc_sleipnir_detail_AcosExpression_AcosExpression =
 R"doc(Constructs an unary expression (an operator with one argument).
@@ -1973,7 +2288,10 @@ no adjoint. Ensure Variable::expr isn't nullptr before calling member
 functions.
 
 Parameter ``wrt``:
-    Variables with respect to which to compute the gradient.)doc";
+    Variables with respect to which to compute the gradient.
+
+Returns:
+    The variable's gradient tree.)doc";
 
 static const char *__doc_sleipnir_detail_AdjointExpressionGraph_UpdateValues =
 R"doc(Update the values of all nodes in this adjoint graph based on the
@@ -1983,7 +2301,7 @@ static const char *__doc_sleipnir_detail_AdjointExpressionGraph_m_colList = R"do
 
 static const char *__doc_sleipnir_detail_AdjointExpressionGraph_m_topList = R"doc()doc";
 
-static const char *__doc_sleipnir_detail_AsinExpression = R"doc()doc";
+static const char *__doc_sleipnir_detail_AsinExpression = R"doc(Derived expression type for std::asin().)doc";
 
 static const char *__doc_sleipnir_detail_AsinExpression_AsinExpression =
 R"doc(Constructs an unary expression (an operator with one argument).
@@ -1999,7 +2317,7 @@ static const char *__doc_sleipnir_detail_AsinExpression_Type = R"doc()doc";
 
 static const char *__doc_sleipnir_detail_AsinExpression_Value = R"doc()doc";
 
-static const char *__doc_sleipnir_detail_Atan2Expression = R"doc()doc";
+static const char *__doc_sleipnir_detail_Atan2Expression = R"doc(Derived expression type for std::atan2().)doc";
 
 static const char *__doc_sleipnir_detail_Atan2Expression_Atan2Expression =
 R"doc(Constructs a binary expression (an operator with two arguments).
@@ -2022,7 +2340,7 @@ static const char *__doc_sleipnir_detail_Atan2Expression_Type = R"doc()doc";
 
 static const char *__doc_sleipnir_detail_Atan2Expression_Value = R"doc()doc";
 
-static const char *__doc_sleipnir_detail_AtanExpression = R"doc()doc";
+static const char *__doc_sleipnir_detail_AtanExpression = R"doc(Derived expression type for std::atan().)doc";
 
 static const char *__doc_sleipnir_detail_AtanExpression_AtanExpression =
 R"doc(Constructs an unary expression (an operator with one argument).
@@ -2038,9 +2356,17 @@ static const char *__doc_sleipnir_detail_AtanExpression_Type = R"doc()doc";
 
 static const char *__doc_sleipnir_detail_AtanExpression_Value = R"doc()doc";
 
-static const char *__doc_sleipnir_detail_BinaryMinusExpression = R"doc()doc";
+static const char *__doc_sleipnir_detail_BinaryMinusExpression =
+R"doc(Derived expression type for binary minus operator.
 
-static const char *__doc_sleipnir_detail_BinaryMinusExpression_2 = R"doc()doc";
+Template parameter ``T``:
+    Expression type.)doc";
+
+static const char *__doc_sleipnir_detail_BinaryMinusExpression_2 =
+R"doc(Derived expression type for binary minus operator.
+
+Template parameter ``T``:
+    Expression type.)doc";
 
 static const char *__doc_sleipnir_detail_BinaryMinusExpression_BinaryMinusExpression =
 R"doc(Constructs a binary expression (an operator with two arguments).
@@ -2063,9 +2389,17 @@ static const char *__doc_sleipnir_detail_BinaryMinusExpression_Type = R"doc()doc
 
 static const char *__doc_sleipnir_detail_BinaryMinusExpression_Value = R"doc()doc";
 
-static const char *__doc_sleipnir_detail_BinaryPlusExpression = R"doc()doc";
+static const char *__doc_sleipnir_detail_BinaryPlusExpression =
+R"doc(Derived expression type for binary plus operator.
 
-static const char *__doc_sleipnir_detail_BinaryPlusExpression_2 = R"doc()doc";
+Template parameter ``T``:
+    Expression type.)doc";
+
+static const char *__doc_sleipnir_detail_BinaryPlusExpression_2 =
+R"doc(Derived expression type for binary plus operator.
+
+Template parameter ``T``:
+    Expression type.)doc";
 
 static const char *__doc_sleipnir_detail_BinaryPlusExpression_BinaryPlusExpression =
 R"doc(Constructs a binary expression (an operator with two arguments).
@@ -2088,9 +2422,9 @@ static const char *__doc_sleipnir_detail_BinaryPlusExpression_Type = R"doc()doc"
 
 static const char *__doc_sleipnir_detail_BinaryPlusExpression_Value = R"doc()doc";
 
-static const char *__doc_sleipnir_detail_ConstExpression = R"doc()doc";
+static const char *__doc_sleipnir_detail_ConstExpression = R"doc(Derived expression type for constant.)doc";
 
-static const char *__doc_sleipnir_detail_ConstExpression_2 = R"doc()doc";
+static const char *__doc_sleipnir_detail_ConstExpression_2 = R"doc(Derived expression type for constant.)doc";
 
 static const char *__doc_sleipnir_detail_ConstExpression_ConstExpression = R"doc(Constructs a constant expression with a value of zero.)doc";
 
@@ -2104,7 +2438,7 @@ static const char *__doc_sleipnir_detail_ConstExpression_Type = R"doc()doc";
 
 static const char *__doc_sleipnir_detail_ConstExpression_Value = R"doc()doc";
 
-static const char *__doc_sleipnir_detail_CosExpression = R"doc()doc";
+static const char *__doc_sleipnir_detail_CosExpression = R"doc(Derived expression type for std::cos().)doc";
 
 static const char *__doc_sleipnir_detail_CosExpression_CosExpression =
 R"doc(Constructs an unary expression (an operator with one argument).
@@ -2120,7 +2454,7 @@ static const char *__doc_sleipnir_detail_CosExpression_Type = R"doc()doc";
 
 static const char *__doc_sleipnir_detail_CosExpression_Value = R"doc()doc";
 
-static const char *__doc_sleipnir_detail_CoshExpression = R"doc()doc";
+static const char *__doc_sleipnir_detail_CoshExpression = R"doc(Derived expression type for std::cosh().)doc";
 
 static const char *__doc_sleipnir_detail_CoshExpression_CoshExpression =
 R"doc(Constructs an unary expression (an operator with one argument).
@@ -2136,7 +2470,7 @@ static const char *__doc_sleipnir_detail_CoshExpression_Type = R"doc()doc";
 
 static const char *__doc_sleipnir_detail_CoshExpression_Value = R"doc()doc";
 
-static const char *__doc_sleipnir_detail_DecisionVariableExpression = R"doc()doc";
+static const char *__doc_sleipnir_detail_DecisionVariableExpression = R"doc(Derived expression type for decision variable.)doc";
 
 static const char *__doc_sleipnir_detail_DecisionVariableExpression_DecisionVariableExpression = R"doc(Constructs a decision variable expression with a value of zero.)doc";
 
@@ -2150,9 +2484,17 @@ static const char *__doc_sleipnir_detail_DecisionVariableExpression_Type = R"doc
 
 static const char *__doc_sleipnir_detail_DecisionVariableExpression_Value = R"doc()doc";
 
-static const char *__doc_sleipnir_detail_DivExpression = R"doc()doc";
+static const char *__doc_sleipnir_detail_DivExpression =
+R"doc(Derived expression type for binary division operator.
 
-static const char *__doc_sleipnir_detail_DivExpression_2 = R"doc()doc";
+Template parameter ``T``:
+    Expression type.)doc";
+
+static const char *__doc_sleipnir_detail_DivExpression_2 =
+R"doc(Derived expression type for binary division operator.
+
+Template parameter ``T``:
+    Expression type.)doc";
 
 static const char *__doc_sleipnir_detail_DivExpression_DivExpression =
 R"doc(Constructs a binary expression (an operator with two arguments).
@@ -2175,7 +2517,7 @@ static const char *__doc_sleipnir_detail_DivExpression_Type = R"doc()doc";
 
 static const char *__doc_sleipnir_detail_DivExpression_Value = R"doc()doc";
 
-static const char *__doc_sleipnir_detail_ErfExpression = R"doc()doc";
+static const char *__doc_sleipnir_detail_ErfExpression = R"doc(Derived expression type for std::erf().)doc";
 
 static const char *__doc_sleipnir_detail_ErfExpression_ErfExpression =
 R"doc(Constructs an unary expression (an operator with one argument).
@@ -2191,7 +2533,7 @@ static const char *__doc_sleipnir_detail_ErfExpression_Type = R"doc()doc";
 
 static const char *__doc_sleipnir_detail_ErfExpression_Value = R"doc()doc";
 
-static const char *__doc_sleipnir_detail_ExpExpression = R"doc()doc";
+static const char *__doc_sleipnir_detail_ExpExpression = R"doc(Derived expression type for std::exp().)doc";
 
 static const char *__doc_sleipnir_detail_ExpExpression_ExpExpression =
 R"doc(Constructs an unary expression (an operator with one argument).
@@ -2244,7 +2586,10 @@ Parameter ``rhs``:
     Right argument to binary operator.
 
 Parameter ``parent_adjoint``:
-    Adjoint of parent expression.)doc";
+    Adjoint of parent expression.
+
+Returns:
+    The Expression adjoint of the left child expression.)doc";
 
 static const char *__doc_sleipnir_detail_Expression_GradExprR =
 R"doc(Returns Expression adjoint of the right child expression.
@@ -2256,7 +2601,10 @@ Parameter ``rhs``:
     Right argument to binary operator.
 
 Parameter ``parent_adjoint``:
-    Adjoint of parent expression.)doc";
+    Adjoint of parent expression.
+
+Returns:
+    The Expression adjoint of the right child expression.)doc";
 
 static const char *__doc_sleipnir_detail_Expression_GradL =
 R"doc(Returns double adjoint of the left child expression.
@@ -2268,7 +2616,10 @@ Parameter ``rhs``:
     Right argument to binary operator.
 
 Parameter ``parent_adjoint``:
-    Adjoint of parent expression.)doc";
+    Adjoint of parent expression.
+
+Returns:
+    The double adjoint of the left child expression.)doc";
 
 static const char *__doc_sleipnir_detail_Expression_GradR =
 R"doc(Returns double adjoint of the right child expression.
@@ -2280,17 +2631,26 @@ Parameter ``rhs``:
     Right argument to binary operator.
 
 Parameter ``parent_adjoint``:
-    Adjoint of parent expression.)doc";
+    Adjoint of parent expression.
+
+Returns:
+    The double adjoint of the right child expression.)doc";
 
 static const char *__doc_sleipnir_detail_Expression_IsConstant =
 R"doc(Returns true if the expression is the given constant.
 
 Parameter ``constant``:
-    The constant.)doc";
+    The constant.
+
+Returns:
+    True if the expression is the given constant.)doc";
 
 static const char *__doc_sleipnir_detail_Expression_Type =
 R"doc(Returns the type of this expression (constant, linear, quadratic, or
-nonlinear).)doc";
+nonlinear).
+
+Returns:
+    The type of this expression.)doc";
 
 static const char *__doc_sleipnir_detail_Expression_Value =
 R"doc(Either nullary operator with no arguments, unary operator with one
@@ -2301,7 +2661,10 @@ Parameter ``lhs``:
     Left argument to binary operator.
 
 Parameter ``rhs``:
-    Right argument to binary operator.)doc";
+    Right argument to binary operator.
+
+Returns:
+    The node's value.)doc";
 
 static const char *__doc_sleipnir_detail_Expression_adjoint = R"doc(The adjoint of the expression node used during autodiff.)doc";
 
@@ -2319,7 +2682,7 @@ static const char *__doc_sleipnir_detail_Expression_refCount = R"doc(Reference c
 
 static const char *__doc_sleipnir_detail_Expression_value = R"doc(The value of the expression node.)doc";
 
-static const char *__doc_sleipnir_detail_HypotExpression = R"doc()doc";
+static const char *__doc_sleipnir_detail_HypotExpression = R"doc(Derived expression type for std::hypot().)doc";
 
 static const char *__doc_sleipnir_detail_HypotExpression_GradExprL = R"doc()doc";
 
@@ -2366,7 +2729,7 @@ R"doc(Refcount increment for intrusive shared pointer.
 Parameter ``expr``:
     The shared pointer's managed object.)doc";
 
-static const char *__doc_sleipnir_detail_Log10Expression = R"doc()doc";
+static const char *__doc_sleipnir_detail_Log10Expression = R"doc(Derived expression type for std::log10().)doc";
 
 static const char *__doc_sleipnir_detail_Log10Expression_GradExprL = R"doc()doc";
 
@@ -2382,7 +2745,7 @@ static const char *__doc_sleipnir_detail_Log10Expression_Type = R"doc()doc";
 
 static const char *__doc_sleipnir_detail_Log10Expression_Value = R"doc()doc";
 
-static const char *__doc_sleipnir_detail_LogExpression = R"doc()doc";
+static const char *__doc_sleipnir_detail_LogExpression = R"doc(Derived expression type for std::log().)doc";
 
 static const char *__doc_sleipnir_detail_LogExpression_GradExprL = R"doc()doc";
 
@@ -2408,9 +2771,17 @@ Template parameter ``T``:
 Parameter ``args``:
     Constructor arguments for Expression.)doc";
 
-static const char *__doc_sleipnir_detail_MultExpression = R"doc()doc";
+static const char *__doc_sleipnir_detail_MultExpression =
+R"doc(Derived expression type for binary multiplication operator.
 
-static const char *__doc_sleipnir_detail_MultExpression_2 = R"doc()doc";
+Template parameter ``T``:
+    Expression type.)doc";
+
+static const char *__doc_sleipnir_detail_MultExpression_2 =
+R"doc(Derived expression type for binary multiplication operator.
+
+Template parameter ``T``:
+    Expression type.)doc";
 
 static const char *__doc_sleipnir_detail_MultExpression_GradExprL = R"doc()doc";
 
@@ -2433,7 +2804,11 @@ static const char *__doc_sleipnir_detail_MultExpression_Type = R"doc()doc";
 
 static const char *__doc_sleipnir_detail_MultExpression_Value = R"doc()doc";
 
-static const char *__doc_sleipnir_detail_PowExpression = R"doc()doc";
+static const char *__doc_sleipnir_detail_PowExpression =
+R"doc(Derived expression type for std::pow().
+
+Template parameter ``Expression``:
+    type.)doc";
 
 static const char *__doc_sleipnir_detail_PowExpression_GradExprL = R"doc()doc";
 
@@ -2456,7 +2831,7 @@ static const char *__doc_sleipnir_detail_PowExpression_Type = R"doc()doc";
 
 static const char *__doc_sleipnir_detail_PowExpression_Value = R"doc()doc";
 
-static const char *__doc_sleipnir_detail_SignExpression = R"doc()doc";
+static const char *__doc_sleipnir_detail_SignExpression = R"doc(Derived expression type for sign().)doc";
 
 static const char *__doc_sleipnir_detail_SignExpression_GradExprL = R"doc()doc";
 
@@ -2472,7 +2847,7 @@ static const char *__doc_sleipnir_detail_SignExpression_Type = R"doc()doc";
 
 static const char *__doc_sleipnir_detail_SignExpression_Value = R"doc()doc";
 
-static const char *__doc_sleipnir_detail_SinExpression = R"doc()doc";
+static const char *__doc_sleipnir_detail_SinExpression = R"doc(Derived expression type for std::sin().)doc";
 
 static const char *__doc_sleipnir_detail_SinExpression_GradExprL = R"doc()doc";
 
@@ -2488,7 +2863,7 @@ static const char *__doc_sleipnir_detail_SinExpression_Type = R"doc()doc";
 
 static const char *__doc_sleipnir_detail_SinExpression_Value = R"doc()doc";
 
-static const char *__doc_sleipnir_detail_SinhExpression = R"doc()doc";
+static const char *__doc_sleipnir_detail_SinhExpression = R"doc(Derived expression type for std::sinh().)doc";
 
 static const char *__doc_sleipnir_detail_SinhExpression_GradExprL = R"doc()doc";
 
@@ -2504,7 +2879,7 @@ static const char *__doc_sleipnir_detail_SinhExpression_Type = R"doc()doc";
 
 static const char *__doc_sleipnir_detail_SinhExpression_Value = R"doc()doc";
 
-static const char *__doc_sleipnir_detail_SqrtExpression = R"doc()doc";
+static const char *__doc_sleipnir_detail_SqrtExpression = R"doc(Derived expression type for std::sqrt().)doc";
 
 static const char *__doc_sleipnir_detail_SqrtExpression_GradExprL = R"doc()doc";
 
@@ -2520,7 +2895,7 @@ static const char *__doc_sleipnir_detail_SqrtExpression_Type = R"doc()doc";
 
 static const char *__doc_sleipnir_detail_SqrtExpression_Value = R"doc()doc";
 
-static const char *__doc_sleipnir_detail_TanExpression = R"doc()doc";
+static const char *__doc_sleipnir_detail_TanExpression = R"doc(Derived expression type for std::tan().)doc";
 
 static const char *__doc_sleipnir_detail_TanExpression_GradExprL = R"doc()doc";
 
@@ -2536,7 +2911,7 @@ static const char *__doc_sleipnir_detail_TanExpression_Type = R"doc()doc";
 
 static const char *__doc_sleipnir_detail_TanExpression_Value = R"doc()doc";
 
-static const char *__doc_sleipnir_detail_TanhExpression = R"doc()doc";
+static const char *__doc_sleipnir_detail_TanhExpression = R"doc(Derived expression type for std::tanh().)doc";
 
 static const char *__doc_sleipnir_detail_TanhExpression_GradExprL = R"doc()doc";
 
@@ -2561,9 +2936,17 @@ https://en.wikipedia.org/wiki/Topological_sorting
 Parameter ``root``:
     The root node of the expression.)doc";
 
-static const char *__doc_sleipnir_detail_UnaryMinusExpression = R"doc()doc";
+static const char *__doc_sleipnir_detail_UnaryMinusExpression =
+R"doc(Derived expression type for unary minus operator.
 
-static const char *__doc_sleipnir_detail_UnaryMinusExpression_2 = R"doc()doc";
+Template parameter ``T``:
+    Expression type.)doc";
+
+static const char *__doc_sleipnir_detail_UnaryMinusExpression_2 =
+R"doc(Derived expression type for unary minus operator.
+
+Template parameter ``T``:
+    Expression type.)doc";
 
 static const char *__doc_sleipnir_detail_UnaryMinusExpression_GradExprL = R"doc()doc";
 
@@ -2879,7 +3262,7 @@ R"doc(std::sinh() for Variables.
 Parameter ``x``:
     The argument.)doc";
 
-static const char *__doc_sleipnir_slicing_none_t = R"doc()doc";
+static const char *__doc_sleipnir_slicing_none_t = R"doc(Type tag used to designate an omitted argument of the slice.)doc";
 
 static const char *__doc_sleipnir_sqrt =
 R"doc(std::sqrt() for Variables.

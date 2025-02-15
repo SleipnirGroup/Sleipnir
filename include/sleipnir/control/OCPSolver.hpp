@@ -331,7 +331,7 @@ class SLEIPNIR_DLLEXPORT OCPSolver : public OptimizationProblem {
    *
    * Shaped (numStates)x(numSteps+1).
    *
-   * @returns The state variable matrix.
+   * @return The state variable matrix.
    */
   VariableMatrix& X() { return m_X; };
 
@@ -342,7 +342,7 @@ class SLEIPNIR_DLLEXPORT OCPSolver : public OptimizationProblem {
    * Shaped (numInputs)x(numSteps+1), although the last input step is unused in
    * the trajectory.
    *
-   * @returns The input variable matrix.
+   * @return The input variable matrix.
    */
   VariableMatrix& U() { return m_U; };
 
@@ -353,21 +353,21 @@ class SLEIPNIR_DLLEXPORT OCPSolver : public OptimizationProblem {
    * Shaped 1x(numSteps+1), although the last timestep is unused in
    * the trajectory.
    *
-   * @returns The timestep variable matrix.
+   * @return The timestep variable matrix.
    */
   VariableMatrix& DT() { return m_DT; };
 
   /**
    * Convenience function to get the initial state in the trajectory.
    *
-   * @returns The initial state of the trajectory.
+   * @return The initial state of the trajectory.
    */
   VariableMatrix InitialState() { return m_X.Col(0); }
 
   /**
    * Convenience function to get the final state in the trajectory.
    *
-   * @returns The final state of the trajectory.
+   * @return The final state of the trajectory.
    */
   VariableMatrix FinalState() { return m_X.Col(m_numSteps); }
 

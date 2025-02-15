@@ -23,12 +23,16 @@ namespace sleipnir {
 template <typename Mat>
 class VariableBlock {
  public:
-  VariableBlock(const VariableBlock<Mat>& values) = default;
+  /**
+   * Copy constructor.
+   */
+  VariableBlock(const VariableBlock<Mat>&) = default;
 
   /**
    * Assigns a VariableBlock to the block.
    *
    * @param values VariableBlock of values.
+   * @return This VariableBlock.
    */
   VariableBlock<Mat>& operator=(const VariableBlock<Mat>& values) {
     if (this == &values) {
@@ -55,12 +59,16 @@ class VariableBlock {
     return *this;
   }
 
+  /**
+   * Move constructor.
+   */
   VariableBlock(VariableBlock<Mat>&&) = default;
 
   /**
    * Assigns a VariableBlock to the block.
    *
    * @param values VariableBlock of values.
+   * @return This VariableBlock.
    */
   VariableBlock<Mat>& operator=(VariableBlock<Mat>&& values) {
     if (this == &values) {
@@ -139,6 +147,9 @@ class VariableBlock {
    * Assigns a double to the block.
    *
    * This only works for blocks with one row and one column.
+   *
+   * @param value Value to assign.
+   * @return This VariableBlock.
    */
   VariableBlock<Mat>& operator=(double value) {
     Assert(Rows() == 1 && Cols() == 1);
@@ -165,6 +176,7 @@ class VariableBlock {
    * Assigns an Eigen matrix to the block.
    *
    * @param values Eigen matrix of values to assign.
+   * @return This VariableBlock.
    */
   template <typename Derived>
   VariableBlock<Mat>& operator=(const Eigen::MatrixBase<Derived>& values) {
@@ -202,6 +214,7 @@ class VariableBlock {
    * Assigns a VariableMatrix to the block.
    *
    * @param values VariableMatrix of values.
+   * @return This VariableBlock.
    */
   VariableBlock<Mat>& operator=(const Mat& values) {
     Assert(Rows() == values.Rows());
@@ -219,6 +232,7 @@ class VariableBlock {
    * Assigns a VariableMatrix to the block.
    *
    * @param values VariableMatrix of values.
+   * @return This VariableBlock.
    */
   VariableBlock<Mat>& operator=(Mat&& values) {
     Assert(Rows() == values.Rows());
@@ -237,6 +251,7 @@ class VariableBlock {
    *
    * @param row The scalar subblock's row.
    * @param col The scalar subblock's column.
+   * @return A scalar subblock at the given row and column.
    */
   Variable& operator()(int row, int col)
     requires(!std::is_const_v<Mat>)
@@ -252,6 +267,7 @@ class VariableBlock {
    *
    * @param row The scalar subblock's row.
    * @param col The scalar subblock's column.
+   * @return A scalar subblock at the given row and column.
    */
   const Variable& operator()(int row, int col) const {
     Assert(row >= 0 && row < Rows());
@@ -264,6 +280,7 @@ class VariableBlock {
    * Returns a scalar subblock at the given row.
    *
    * @param row The scalar subblock's row.
+   * @return A scalar subblock at the given row.
    */
   Variable& operator()(int row)
     requires(!std::is_const_v<Mat>)
@@ -276,6 +293,7 @@ class VariableBlock {
    * Returns a scalar subblock at the given row.
    *
    * @param row The scalar subblock's row.
+   * @return A scalar subblock at the given row.
    */
   const Variable& operator()(int row) const {
     Assert(row >= 0 && row < Rows() * Cols());
@@ -289,6 +307,7 @@ class VariableBlock {
    * @param colOffset The column offset of the block selection.
    * @param blockRows The number of rows in the block selection.
    * @param blockCols The number of columns in the block selection.
+   * @return A block of the variable matrix.
    */
   VariableBlock<Mat> Block(int rowOffset, int colOffset, int blockRows,
                            int blockCols) {
@@ -307,6 +326,7 @@ class VariableBlock {
    * @param colOffset The column offset of the block selection.
    * @param blockRows The number of rows in the block selection.
    * @param blockCols The number of columns in the block selection.
+   * @return A block slice of the variable matrix.
    */
   const VariableBlock<const Mat> Block(int rowOffset, int colOffset,
                                        int blockRows, int blockCols) const {
@@ -323,6 +343,7 @@ class VariableBlock {
    *
    * @param rowSlice The row slice.
    * @param colSlice The column slice.
+   * @return A slice of the variable matrix.
    */
   VariableBlock<Mat> operator()(Slice rowSlice, Slice colSlice) {
     int rowSliceLength = rowSlice.Adjust(m_rowSliceLength);
@@ -342,6 +363,7 @@ class VariableBlock {
    *
    * @param rowSlice The row slice.
    * @param colSlice The column slice.
+   * @return A slice of the variable matrix.
    */
   const VariableBlock<const Mat> operator()(Slice rowSlice,
                                             Slice colSlice) const {
@@ -367,6 +389,7 @@ class VariableBlock {
    * @param rowSliceLength The row slice length.
    * @param colSlice The column slice.
    * @param colSliceLength The column slice length.
+   * @return A slice of the variable matrix.
    */
   VariableBlock<Mat> operator()(Slice rowSlice, int rowSliceLength,
                                 Slice colSlice, int colSliceLength) {
@@ -390,6 +413,7 @@ class VariableBlock {
    * @param rowSliceLength The row slice length.
    * @param colSlice The column slice.
    * @param colSliceLength The column slice length.
+   * @return A slice of the variable matrix.
    */
   const VariableBlock<const Mat> operator()(Slice rowSlice, int rowSliceLength,
                                             Slice colSlice,
@@ -409,6 +433,7 @@ class VariableBlock {
    *
    * @param offset The offset of the segment.
    * @param length The length of the segment.
+   * @return A segment of the variable vector.
    */
   VariableBlock<Mat> Segment(int offset, int length) {
     Assert(offset >= 0 && offset < Rows() * Cols());
@@ -421,6 +446,7 @@ class VariableBlock {
    *
    * @param offset The offset of the segment.
    * @param length The length of the segment.
+   * @return A segment of the variable vector.
    */
   const VariableBlock<Mat> Segment(int offset, int length) const {
     Assert(offset >= 0 && offset < Rows() * Cols());
@@ -432,6 +458,7 @@ class VariableBlock {
    * Returns a row slice of the variable matrix.
    *
    * @param row The row to slice.
+   * @return A row slice of the variable matrix.
    */
   VariableBlock<Mat> Row(int row) {
     Assert(row >= 0 && row < Rows());
@@ -442,6 +469,7 @@ class VariableBlock {
    * Returns a row slice of the variable matrix.
    *
    * @param row The row to slice.
+   * @return A row slice of the variable matrix.
    */
   VariableBlock<const Mat> Row(int row) const {
     Assert(row >= 0 && row < Rows());
@@ -452,6 +480,7 @@ class VariableBlock {
    * Returns a column slice of the variable matrix.
    *
    * @param col The column to slice.
+   * @return A column slice of the variable matrix.
    */
   VariableBlock<Mat> Col(int col) {
     Assert(col >= 0 && col < Cols());
@@ -462,6 +491,7 @@ class VariableBlock {
    * Returns a column slice of the variable matrix.
    *
    * @param col The column to slice.
+   * @return A column slice of the variable matrix.
    */
   VariableBlock<const Mat> Col(int col) const {
     Assert(col >= 0 && col < Cols());
@@ -472,6 +502,7 @@ class VariableBlock {
    * Compound matrix multiplication-assignment operator.
    *
    * @param rhs Variable to multiply.
+   * @return Result of multiplication.
    */
   VariableBlock<Mat>& operator*=(const VariableBlock<Mat>& rhs) {
     Assert(Cols() == rhs.Rows() && Cols() == rhs.Cols());
@@ -494,6 +525,7 @@ class VariableBlock {
    * is a scalar).
    *
    * @param rhs Variable to multiply.
+   * @return Result of multiplication.
    */
   VariableBlock& operator*=(double rhs) {
     for (int row = 0; row < Rows(); ++row) {
@@ -510,6 +542,7 @@ class VariableBlock {
    * is a scalar).
    *
    * @param rhs Variable to divide.
+   * @return Result of division.
    */
   VariableBlock<Mat>& operator/=(const VariableBlock<Mat>& rhs) {
     Assert(rhs.Rows() == 1 && rhs.Cols() == 1);
@@ -528,6 +561,7 @@ class VariableBlock {
    * is a scalar).
    *
    * @param rhs Variable to divide.
+   * @return Result of division.
    */
   VariableBlock<Mat>& operator/=(double rhs) {
     for (int row = 0; row < Rows(); ++row) {
@@ -543,6 +577,7 @@ class VariableBlock {
    * Compound addition-assignment operator.
    *
    * @param rhs Variable to add.
+   * @return Result of addition.
    */
   VariableBlock<Mat>& operator+=(const VariableBlock<Mat>& rhs) {
     for (int row = 0; row < Rows(); ++row) {
@@ -558,6 +593,7 @@ class VariableBlock {
    * Compound subtraction-assignment operator.
    *
    * @param rhs Variable to subtract.
+   * @return Result of subtraction.
    */
   VariableBlock<Mat>& operator-=(const VariableBlock<Mat>& rhs) {
     for (int row = 0; row < Rows(); ++row) {
@@ -571,6 +607,8 @@ class VariableBlock {
 
   /**
    * Returns the transpose of the variable matrix.
+   *
+   * @return The transpose of the variable matrix.
    */
   std::remove_cv_t<Mat> T() const {
     std::remove_cv_t<Mat> result{Mat::empty, Cols(), Rows()};
@@ -585,12 +623,16 @@ class VariableBlock {
   }
 
   /**
-   * Returns number of rows in the matrix.
+   * Returns the number of rows in the matrix.
+   *
+   * @return The number of rows in the matrix.
    */
   int Rows() const { return m_rowSliceLength; }
 
   /**
-   * Returns number of columns in the matrix.
+   * Returns the number of columns in the matrix.
+   *
+   * @return The number of columns in the matrix.
    */
   int Cols() const { return m_colSliceLength; }
 
@@ -599,6 +641,7 @@ class VariableBlock {
    *
    * @param row The row of the element to return.
    * @param col The column of the element to return.
+   * @return An element of the variable matrix.
    */
   double Value(int row, int col) {
     Assert(row >= 0 && row < Rows());
@@ -612,6 +655,7 @@ class VariableBlock {
    * Returns a row of the variable column vector.
    *
    * @param index The index of the element to return.
+   * @return A row of the variable column vector.
    */
   double Value(int index) {
     Assert(index >= 0 && index < Rows() * Cols());
@@ -620,6 +664,8 @@ class VariableBlock {
 
   /**
    * Returns the contents of the variable matrix.
+   *
+   * @return The contents of the variable matrix.
    */
   Eigen::MatrixXd Value() {
     Eigen::MatrixXd result{Rows(), Cols()};
@@ -637,6 +683,7 @@ class VariableBlock {
    * Transforms the matrix coefficient-wise with an unary operator.
    *
    * @param unaryOp The unary operator to use for the transform operation.
+   * @return Result of the unary operator.
    */
   std::remove_cv_t<Mat> CwiseTransform(
       function_ref<Variable(const Variable& x)> unaryOp) const {
@@ -650,6 +697,8 @@ class VariableBlock {
 
     return result;
   }
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 
   class iterator {
    public:
@@ -719,38 +768,54 @@ class VariableBlock {
     int m_index = 0;
   };
 
+#endif  // DOXYGEN_SHOULD_SKIP_THIS
+
   /**
    * Returns begin iterator.
+   *
+   * @return Begin iterator.
    */
   iterator begin() { return iterator(this, 0); }
 
   /**
    * Returns end iterator.
+   *
+   * @return End iterator.
    */
   iterator end() { return iterator(this, Rows() * Cols()); }
 
   /**
    * Returns begin iterator.
+   *
+   * @return Begin iterator.
    */
   const_iterator begin() const { return const_iterator(this, 0); }
 
   /**
    * Returns end iterator.
+   *
+   * @return End iterator.
    */
   const_iterator end() const { return const_iterator(this, Rows() * Cols()); }
 
   /**
    * Returns begin iterator.
+   *
+   * @return Begin iterator.
    */
   const_iterator cbegin() const { return const_iterator(this, 0); }
 
   /**
    * Returns end iterator.
+   *
+   * @return End iterator.
    */
   const_iterator cend() const { return const_iterator(this, Rows() * Cols()); }
 
   /**
    * Returns number of elements in matrix.
+   *
+   * @return Number of elements in matrix.
    */
   size_t size() const { return Rows() * Cols(); }
 

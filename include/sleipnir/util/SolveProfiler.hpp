@@ -14,6 +14,7 @@ namespace sleipnir {
  */
 class SolveProfiler {
  public:
+  /// Name of measurement to show in diagnostics.
   std::string name;
 
   /**
@@ -55,26 +56,34 @@ class SolveProfiler {
   }
 
   /**
-   * The number of solves.
+   * Returns the number of solves.
+   *
+   * @return The number of solves.
    */
   int NumSolves() const { return m_numSolves; }
 
   /**
-   * The most recent solve duration in milliseconds as a double.
+   * Returns the most recent solve duration in milliseconds as a double.
+   *
+   * @return The most recent solve duration in milliseconds as a double.
    */
   const std::chrono::duration<double>& CurrentDuration() const {
     return m_currentSolveDuration;
   }
 
   /**
-   * The average solve duration in milliseconds as a double.
+   * Returns the average solve duration in milliseconds as a double.
+   *
+   * @return The average solve duration in milliseconds as a double.
    */
   const std::chrono::duration<double>& AverageDuration() const {
     return m_averageSolveDuration;
   }
 
   /**
-   * The sum of all solve durations in milliseconds as a double.
+   * Returns the sum of all solve durations in milliseconds as a double.
+   *
+   * @return The sum of all solve durations in milliseconds as a double.
    */
   const std::chrono::duration<double>& TotalDuration() const {
     return m_totalSolveDuration;

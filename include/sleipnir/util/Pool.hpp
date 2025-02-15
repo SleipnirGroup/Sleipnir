@@ -27,9 +27,28 @@ class SLEIPNIR_DLLEXPORT PoolResource {
   explicit PoolResource(size_t blocksPerChunk)
       : blocksPerChunk{blocksPerChunk} {}
 
+  /**
+   * Copy constructor.
+   */
   PoolResource(const PoolResource&) = delete;
+
+  /**
+   * Copy assignment operator.
+   *
+   * @return This pool resource.
+   */
   PoolResource& operator=(const PoolResource&) = delete;
+
+  /**
+   * Move constructor.
+   */
   PoolResource(PoolResource&&) = default;
+
+  /**
+   * Move assignment operator.
+   *
+   * @return This pool resource.
+   */
   PoolResource& operator=(PoolResource&&) = default;
 
   /**
@@ -37,6 +56,7 @@ class SLEIPNIR_DLLEXPORT PoolResource {
    *
    * @param bytes Number of bytes in the block.
    * @param alignment Alignment of the block (unused).
+   * @return A block of memory from the pool.
    */
   [[nodiscard]]
   void* allocate(size_t bytes, [[maybe_unused]] size_t alignment =
@@ -65,6 +85,9 @@ class SLEIPNIR_DLLEXPORT PoolResource {
 
   /**
    * Returns true if this pool resource has the same backing storage as another.
+   *
+   * @param other The other pool resource.
+   * @return True if this pool resource has the same backing storage as another.
    */
   bool is_equal(const PoolResource& other) const noexcept {
     return this == &other;
@@ -72,6 +95,8 @@ class SLEIPNIR_DLLEXPORT PoolResource {
 
   /**
    * Returns the number of blocks from this pool resource that are in use.
+   *
+   * @return The number of blocks from this pool resource that are in use.
    */
   size_t blocks_in_use() const noexcept {
     return m_buffer.size() * blocksPerChunk - m_freeList.size();
@@ -116,13 +141,23 @@ class PoolAllocator {
    */
   explicit constexpr PoolAllocator(PoolResource* r) : m_memoryResource{r} {}
 
-  constexpr PoolAllocator(const PoolAllocator<T>& other) = default;
+  /**
+   * Copy constructor.
+   */
+  constexpr PoolAllocator(const PoolAllocator<T>&) = default;
+
+  /**
+   * Copy assignment operator.
+   *
+   * @return This pool allocator.
+   */
   constexpr PoolAllocator<T>& operator=(const PoolAllocator<T>&) = default;
 
   /**
    * Returns a block of memory from the pool.
    *
    * @param n Number of bytes in the block.
+   * @return A block of memory from the pool.
    */
   [[nodiscard]]
   constexpr T* allocate(size_t n) {

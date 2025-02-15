@@ -44,6 +44,8 @@ class IntrusiveSharedPtr {
   /**
    * Constructs an intrusive shared pointer from the given pointer and takes
    * ownership.
+   *
+   * @param ptr The pointer of which to take ownership.
    */
   explicit constexpr IntrusiveSharedPtr(T* ptr) noexcept : m_ptr{ptr} {
     if (m_ptr != nullptr) {
@@ -59,6 +61,8 @@ class IntrusiveSharedPtr {
 
   /**
    * Copy constructs from the given intrusive shared pointer.
+   *
+   * @param rhs The other intrusive shared pointer.
    */
   constexpr IntrusiveSharedPtr(const IntrusiveSharedPtr<T>& rhs) noexcept
       : m_ptr{rhs.m_ptr} {
@@ -69,6 +73,8 @@ class IntrusiveSharedPtr {
 
   /**
    * Copy constructs from the given intrusive shared pointer.
+   *
+   * @param rhs The other intrusive shared pointer.
    */
   template <typename U>
     requires(!std::same_as<T, U> && std::convertible_to<U*, T*>)
@@ -82,6 +88,9 @@ class IntrusiveSharedPtr {
 
   /**
    * Makes a copy of the given intrusive shared pointer.
+   *
+   * @param rhs The other intrusive shared pointer.
+   * @return This intrusive shared pointer.
    */
   constexpr IntrusiveSharedPtr<T>& operator=(  // NOLINT
       const IntrusiveSharedPtr<T>& rhs) noexcept {
@@ -104,6 +113,9 @@ class IntrusiveSharedPtr {
 
   /**
    * Makes a copy of the given intrusive shared pointer.
+   *
+   * @param rhs The other intrusive shared pointer.
+   * @return This intrusive shared pointer.
    */
   template <typename U>
     requires(!std::same_as<T, U> && std::convertible_to<U*, T*>)
@@ -128,12 +140,16 @@ class IntrusiveSharedPtr {
 
   /**
    * Move constructs from the given intrusive shared pointer.
+   *
+   * @param rhs The other intrusive shared pointer.
    */
   constexpr IntrusiveSharedPtr(IntrusiveSharedPtr<T>&& rhs) noexcept
       : m_ptr{std::exchange(rhs.m_ptr, nullptr)} {}
 
   /**
    * Move constructs from the given intrusive shared pointer.
+   *
+   * @param rhs The other intrusive shared pointer.
    */
   template <typename U>
     requires(!std::same_as<T, U> && std::convertible_to<U*, T*>)
@@ -143,6 +159,9 @@ class IntrusiveSharedPtr {
 
   /**
    * Move assigns from the given intrusive shared pointer.
+   *
+   * @param rhs The other intrusive shared pointer.
+   * @return This intrusive shared pointer.
    */
   constexpr IntrusiveSharedPtr<T>& operator=(
       IntrusiveSharedPtr<T>&& rhs) noexcept {
@@ -157,6 +176,9 @@ class IntrusiveSharedPtr {
 
   /**
    * Move assigns from the given intrusive shared pointer.
+   *
+   * @param rhs The other intrusive shared pointer.
+   * @return This intrusive shared pointer.
    */
   template <typename U>
     requires(!std::same_as<T, U> && std::convertible_to<U*, T*>)
@@ -173,27 +195,38 @@ class IntrusiveSharedPtr {
 
   /**
    * Returns the internal pointer.
+   *
+   * @return The internal pointer.
    */
   constexpr T* Get() const noexcept { return m_ptr; }
 
   /**
    * Returns the object pointed to by the internal pointer.
+   *
+   * @return The object pointed to by the internal pointer.
    */
   constexpr T& operator*() const noexcept { return *m_ptr; }
 
   /**
    * Returns the internal pointer.
+   *
+   * @return The internal pointer.
    */
   constexpr T* operator->() const noexcept { return m_ptr; }
 
   /**
    * Returns true if the internal pointer isn't nullptr.
+   *
+   * @return True if the internal pointer isn't nullptr.
    */
   explicit constexpr operator bool() const noexcept { return m_ptr != nullptr; }
 
   /**
    * Returns true if the given intrusive shared pointers point to the same
    * object.
+   *
+   * @param lhs The left-hand side.
+   * @param rhs The right-hand side.
    */
   friend constexpr bool operator==(const IntrusiveSharedPtr<T>& lhs,
                                    const IntrusiveSharedPtr<T>& rhs) noexcept {
@@ -203,6 +236,9 @@ class IntrusiveSharedPtr {
   /**
    * Returns true if the given intrusive shared pointers point to different
    * objects.
+   *
+   * @param lhs The left-hand side.
+   * @param rhs The right-hand side.
    */
   friend constexpr bool operator!=(const IntrusiveSharedPtr<T>& lhs,
                                    const IntrusiveSharedPtr<T>& rhs) noexcept {
@@ -211,6 +247,8 @@ class IntrusiveSharedPtr {
 
   /**
    * Returns true if the left-hand intrusive shared pointer points to nullptr.
+   *
+   * @param lhs The left-hand side.
    */
   friend constexpr bool operator==(const IntrusiveSharedPtr<T>& lhs,
                                    std::nullptr_t) noexcept {
@@ -219,6 +257,8 @@ class IntrusiveSharedPtr {
 
   /**
    * Returns true if the right-hand intrusive shared pointer points to nullptr.
+   *
+   * @param rhs The right-hand side.
    */
   friend constexpr bool operator==(std::nullptr_t,
                                    const IntrusiveSharedPtr<T>& rhs) noexcept {
@@ -228,6 +268,8 @@ class IntrusiveSharedPtr {
   /**
    * Returns true if the left-hand intrusive shared pointer doesn't point to
    * nullptr.
+   *
+   * @param lhs The left-hand side.
    */
   friend constexpr bool operator!=(const IntrusiveSharedPtr<T>& lhs,
                                    std::nullptr_t) noexcept {
@@ -237,6 +279,8 @@ class IntrusiveSharedPtr {
   /**
    * Returns true if the right-hand intrusive shared pointer doesn't point to
    * nullptr.
+   *
+   * @param rhs The right-hand side.
    */
   friend constexpr bool operator!=(std::nullptr_t,
                                    const IntrusiveSharedPtr<T>& rhs) noexcept {
