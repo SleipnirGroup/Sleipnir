@@ -80,6 +80,8 @@ class SLEIPNIR_DLLEXPORT Jacobian {
    *
    * This is useful when constructing optimization problems with derivatives in
    * them.
+   *
+   * @return The Jacobian as a VariableMatrix.
    */
   VariableMatrix Get() const {
     VariableMatrix result{VariableMatrix::empty, m_variables.Rows(),
@@ -101,6 +103,8 @@ class SLEIPNIR_DLLEXPORT Jacobian {
 
   /**
    * Evaluates the Jacobian at wrt's value.
+   *
+   * @return The Jacobian at wrt's value.
    */
   const Eigen::SparseMatrix<double>& Value() {
     ScopedProfiler valueProfiler{m_profilers[0]};
@@ -143,6 +147,8 @@ class SLEIPNIR_DLLEXPORT Jacobian {
 
   /**
    * Returns the profilers.
+   *
+   * @return The profilers.
    */
   const small_vector<SolveProfiler>& GetProfilers() const {
     return m_profilers;

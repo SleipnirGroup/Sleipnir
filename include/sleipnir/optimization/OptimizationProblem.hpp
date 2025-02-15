@@ -60,6 +60,8 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
 
   /**
    * Create a decision variable in the optimization problem.
+   *
+   * @return A decision variable in the optimization problem.
    */
   [[nodiscard]]
   Variable DecisionVariable() {
@@ -72,6 +74,7 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
    *
    * @param rows Number of matrix rows.
    * @param cols Number of matrix columns.
+   * @return A matrix of decision variables in the optimization problem.
    */
   [[nodiscard]]
   VariableMatrix DecisionVariable(int rows, int cols = 1) {
@@ -97,6 +100,8 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
    * problem dimensionality.
    *
    * @param rows Number of matrix rows.
+   * @return A symmetric matrix of decision varaibles in the optimization
+   *   problem.
    */
   [[nodiscard]]
   VariableMatrix SymmetricDecisionVariable(int rows) {
@@ -262,6 +267,7 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
    * variables used to construct the problem.
    *
    * @param config Configuration options for the solver.
+   * @return The solver status.
    */
   SolverStatus Solve(const SolverConfig& config = SolverConfig{}) {
     // Create the initial value column vector

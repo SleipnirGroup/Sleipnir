@@ -48,11 +48,15 @@ class SLEIPNIR_DLLEXPORT Gradient {
    *
    * This is useful when constructing optimization problems with derivatives in
    * them.
+   *
+   * @return The gradient as a VariableMatrix.
    */
   VariableMatrix Get() const { return m_jacobian.Get().T(); }
 
   /**
    * Evaluates the gradient at wrt's value.
+   *
+   * @return The gradient at wrt's value.
    */
   const Eigen::SparseVector<double>& Value() {
     m_g = m_jacobian.Value();
@@ -62,6 +66,8 @@ class SLEIPNIR_DLLEXPORT Gradient {
 
   /**
    * Returns the profiler.
+   *
+   * @return The profiler.
    */
   const small_vector<SolveProfiler>& GetProfilers() const {
     return m_jacobian.GetProfilers();

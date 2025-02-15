@@ -20,7 +20,9 @@ namespace sleipnir {
  */
 template <typename DecisionVariables>
 struct MultistartResult {
+  /// The solver status.
   SolverStatus status;
+  /// The decision variables.
   DecisionVariables variables;
 };
 

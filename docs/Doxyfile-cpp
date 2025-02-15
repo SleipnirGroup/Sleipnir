@@ -518,7 +518,7 @@ TIMESTAMP              = YES
 # normally produced when WARNINGS is set to YES.
 # The default value is: NO.
 
-EXTRACT_ALL            = YES
+EXTRACT_ALL            = NO
 
 # If the EXTRACT_PRIVATE tag is set to YES, all private members of a class will
 # be included in the documentation.
@@ -1005,6 +1005,7 @@ RECURSIVE              = YES
 EXCLUDE                = benchmarks \
                          build \
                          examples \
+                         include/sleipnir/util/small_vector.hpp \
                          thirdparty \
                          test \
                          tools
@@ -2357,7 +2358,7 @@ INCLUDE_FILE_PATTERNS  =
 # recursively expanded use the := operator instead of the = operator.
 # This tag requires that the tag ENABLE_PREPROCESSING is set to YES.
 
-PREDEFINED             =
+PREDEFINED             = DOXYGEN_SHOULD_SKIP_THIS
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this
 # tag can be used to specify a list of macro names that should be expanded. The

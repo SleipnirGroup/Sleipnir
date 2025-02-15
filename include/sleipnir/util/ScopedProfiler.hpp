@@ -38,6 +38,8 @@ class ScopedProfiler {
 
   /**
    * Move constructor.
+   *
+   * @param rhs The other ScopedProfiler.
    */
   ScopedProfiler(ScopedProfiler&& rhs) noexcept
       : m_profiler{std::move(rhs.m_profiler)}, m_active{rhs.m_active} {
@@ -60,7 +62,9 @@ class ScopedProfiler {
   }
 
   /**
-   * The most recent solve duration in milliseconds as a double.
+   * Returns the most recent solve duration in milliseconds as a double.
+   *
+   * @return The most recent solve duration in milliseconds as a double.
    */
   const std::chrono::duration<double>& CurrentDuration() const {
     return m_profiler->CurrentDuration();

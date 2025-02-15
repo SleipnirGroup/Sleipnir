@@ -47,6 +47,7 @@ class AdjointExpressionGraph {
    * functions.
    *
    * @param wrt Variables with respect to which to compute the gradient.
+   * @return The variable's gradient tree.
    */
   VariableMatrix GenerateGradientTree(const VariableMatrix& wrt) const {
     // Read docs/algorithms.md#Reverse_accumulation_automatic_differentiation

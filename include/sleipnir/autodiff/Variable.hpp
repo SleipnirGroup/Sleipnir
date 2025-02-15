@@ -83,6 +83,7 @@ class SLEIPNIR_DLLEXPORT Variable {
    * Assignment operator for double.
    *
    * @param value The value of the Variable.
+   * @return This variable.
    */
   Variable& operator=(double value) {
     expr = detail::MakeExpressionPtr<detail::ConstExpression>(value);
@@ -119,6 +120,7 @@ class SLEIPNIR_DLLEXPORT Variable {
    *
    * @param lhs Operator left-hand side.
    * @param rhs Operator right-hand side.
+   * @return Result of multiplication.
    */
   friend SLEIPNIR_DLLEXPORT Variable operator*(const Variable& lhs,
                                                const Variable& rhs) {
@@ -129,6 +131,7 @@ class SLEIPNIR_DLLEXPORT Variable {
    * Variable-Variable compound multiplication operator.
    *
    * @param rhs Operator right-hand side.
+   * @return Result of multiplication.
    */
   Variable& operator*=(const Variable& rhs) {
     *this = *this * rhs;
@@ -140,6 +143,7 @@ class SLEIPNIR_DLLEXPORT Variable {
    *
    * @param lhs Operator left-hand side.
    * @param rhs Operator right-hand side.
+   * @return Result of division.
    */
   friend SLEIPNIR_DLLEXPORT Variable operator/(const Variable& lhs,
                                                const Variable& rhs) {
@@ -150,6 +154,7 @@ class SLEIPNIR_DLLEXPORT Variable {
    * Variable-Variable compound division operator.
    *
    * @param rhs Operator right-hand side.
+   * @return Result of division.
    */
   Variable& operator/=(const Variable& rhs) {
     *this = *this / rhs;
@@ -161,6 +166,7 @@ class SLEIPNIR_DLLEXPORT Variable {
    *
    * @param lhs Operator left-hand side.
    * @param rhs Operator right-hand side.
+   * @return Result of addition.
    */
   friend SLEIPNIR_DLLEXPORT Variable operator+(const Variable& lhs,
                                                const Variable& rhs) {
@@ -171,6 +177,7 @@ class SLEIPNIR_DLLEXPORT Variable {
    * Variable-Variable compound addition operator.
    *
    * @param rhs Operator right-hand side.
+   * @return Result of addition.
    */
   Variable& operator+=(const Variable& rhs) {
     *this = *this + rhs;
@@ -182,6 +189,7 @@ class SLEIPNIR_DLLEXPORT Variable {
    *
    * @param lhs Operator left-hand side.
    * @param rhs Operator right-hand side.
+   * @return Result of subtraction.
    */
   friend SLEIPNIR_DLLEXPORT Variable operator-(const Variable& lhs,
                                                const Variable& rhs) {
@@ -192,6 +200,7 @@ class SLEIPNIR_DLLEXPORT Variable {
    * Variable-Variable compound subtraction operator.
    *
    * @param rhs Operator right-hand side.
+   * @return Result of subtraction.
    */
   Variable& operator-=(const Variable& rhs) {
     *this = *this - rhs;
@@ -218,6 +227,8 @@ class SLEIPNIR_DLLEXPORT Variable {
 
   /**
    * Returns the value of this variable.
+   *
+   * @return The value of this variable.
    */
   double Value() {
     if (!m_graph) {
@@ -231,6 +242,8 @@ class SLEIPNIR_DLLEXPORT Variable {
   /**
    * Returns the type of this expression (constant, linear, quadratic, or
    * nonlinear).
+   *
+   * @return The type of this expression.
    */
   ExpressionType Type() const { return expr->Type(); }
 
@@ -775,19 +788,27 @@ namespace Eigen {
  */
 template <>
 struct NumTraits<sleipnir::Variable> : NumTraits<double> {
+  /// Real type.
   using Real = sleipnir::Variable;
+  /// Non-integer type.
   using NonInteger = sleipnir::Variable;
+  /// Nested type.
   using Nested = sleipnir::Variable;
 
-  enum {
-    IsComplex = 0,
-    IsInteger = 0,
-    IsSigned = 1,
-    RequireInitialization = 1,
-    ReadCost = 1,
-    AddCost = 3,
-    MulCost = 3
-  };
+  /// Is complex.
+  static constexpr int IsComplex = 0;
+  /// Is integer.
+  static constexpr int IsInteger = 0;
+  /// Is signed.
+  static constexpr int IsSigned = 1;
+  /// Require initialization.
+  static constexpr int RequireInitialization = 1;
+  /// Read cost.
+  static constexpr int ReadCost = 1;
+  /// Add cost.
+  static constexpr int AddCost = 3;
+  /// Multiply cost.
+  static constexpr int MulCost = 3;
 };
 
 }  // namespace Eigen
