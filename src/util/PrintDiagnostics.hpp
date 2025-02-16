@@ -193,8 +193,9 @@ inline void PrintFinalDiagnostics(
   sleipnir::println("┡{:━^21}┷{:━^18}┷{:━^10}┩", "", "", "");
 
   for (auto& profiler : setupProfilers) {
-    double norm =
-        ToMs(profiler.Duration()) / ToMs(setupProfilers[0].Duration());
+    double norm = setupDuration == 0.0
+                      ? (&profiler == &setupProfilers[0] ? 1.0 : 0.0)
+                      : ToMs(profiler.Duration()) / setupDuration;
     sleipnir::println("│{:<21} {:>6.2f}%▕{}▏ {:>10.3f}│", profiler.name,
                       norm * 100.0, Histogram<9>(norm),
                       ToMs(profiler.Duration()));
@@ -211,8 +212,9 @@ inline void PrintFinalDiagnostics(
                     "");
 
   for (auto& profiler : solveProfilers) {
-    double norm = ToMs(profiler.TotalDuration()) /
-                  ToMs(solveProfilers[0].TotalDuration());
+    double norm = solveDuration == 0.0
+                      ? (&profiler == &solveProfilers[0] ? 1.0 : 0.0)
+                      : ToMs(profiler.TotalDuration()) / solveDuration;
     sleipnir::println("│{:<21} {:>6.2f}%▕{}▏ {:>10.3f} {:>9.3f} {:>4}│",
                       profiler.name, norm * 100.0, Histogram<9>(norm),
                       ToMs(profiler.TotalDuration()),
