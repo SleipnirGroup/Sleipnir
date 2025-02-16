@@ -336,8 +336,8 @@ void SQP(
     //
     // [H   Aₑᵀ][ pₖˣ] = −[∇f − Aₑᵀy]
     // [Aₑ   0 ][−pₖʸ]    [   cₑ    ]
-    solver.Compute(lhs, equalityConstraints.size(), config.tolerance / 10.0);
-    if (solver.Info() != Eigen::Success) [[unlikely]] {
+    if (solver.Compute(lhs, equalityConstraints.size(), config.tolerance / 10.0)
+            .Info() != Eigen::Success) [[unlikely]] {
       status->exitCondition = SolverExitCondition::kFactorizationFailed;
       return;
     }

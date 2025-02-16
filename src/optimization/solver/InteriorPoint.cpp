@@ -462,8 +462,8 @@ void InteriorPoint(
     //
     // [H + AᵢᵀΣAᵢ  Aₑᵀ][ pₖˣ] = −[∇f − Aₑᵀy + Aᵢᵀ(S⁻¹(Zcᵢ − μe) − z)]
     // [    Aₑ       0 ][−pₖʸ]    [                cₑ                ]
-    solver.Compute(lhs, equalityConstraints.size(), μ);
-    if (solver.Info() != Eigen::Success) [[unlikely]] {
+    if (solver.Compute(lhs, equalityConstraints.size(), μ).Info() !=
+        Eigen::Success) [[unlikely]] {
       status->exitCondition = SolverExitCondition::kFactorizationFailed;
       return;
     }
