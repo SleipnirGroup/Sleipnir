@@ -124,9 +124,15 @@ TEST_CASE("NonlinearProblem - Narrow feasible region", "[NonlinearProblem]") {
   CHECK(status.costFunctionType == sleipnir::ExpressionType::kNonlinear);
   CHECK(status.equalityConstraintType == sleipnir::ExpressionType::kLinear);
   CHECK(status.inequalityConstraintType == sleipnir::ExpressionType::kNone);
+
+#if defined(__linux__) && defined(__aarch64__)
+  // FIXME: Fails on Linux aarch64 with "diverging iterates"
   CHECK(status.exitCondition ==
         sleipnir::SolverExitCondition::kDivergingIterates);
   SKIP("Fails with \"diverging iterates\"");
+#else
+  CHECK(status.exitCondition == sleipnir::SolverExitCondition::kSuccess);
+#endif
 
   CHECK(x.Value() == Catch::Approx(2.5).margin(1e-2));
   CHECK(y.Value() == Catch::Approx(2.5).margin(1e-2));

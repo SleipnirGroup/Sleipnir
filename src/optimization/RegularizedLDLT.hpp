@@ -5,6 +5,7 @@
 #include <cmath>
 #include <cstddef>
 
+#include <Eigen/Cholesky>
 #include <Eigen/Core>
 #include <Eigen/SparseCholesky>
 #include <Eigen/SparseCore>
@@ -20,9 +21,6 @@ namespace sleipnir {
  */
 class RegularizedLDLT {
  public:
-  using Solver = Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>,
-                                       Eigen::Lower, Eigen::AMDOrdering<int>>;
-
   /**
    * Constructs a RegularizedLDLT instance.
    */
@@ -30,8 +28,10 @@ class RegularizedLDLT {
 
   /**
    * Reports whether previous computation was successful.
+   *
+   * @return Whether previous computation was successful.
    */
-  Eigen::ComputationInfo Info() { return m_info; }
+  Eigen::ComputationInfo Info() const { return m_info; }
 
   /**
    * Computes the regularized LDLT factorization of a matrix.
@@ -40,9 +40,10 @@ class RegularizedLDLT {
    * @param numEqualityConstraints The number of equality constraints in the
    *   system.
    * @param μ The barrier parameter for the current interior-point iteration.
+   * @return The factorization.
    */
-  void Compute(const Eigen::SparseMatrix<double>& lhs,
-               size_t numEqualityConstraints, double μ) {
+  RegularizedLDLT& Compute(const Eigen::SparseMatrix<double>& lhs,
+                           size_t numEqualityConstraints, double μ) {
     // The regularization procedure is based on algorithm B.1 of [1]
     m_numDecisionVariables = lhs.rows() - numEqualityConstraints;
     m_numEqualityConstraints = numEqualityConstraints;
@@ -54,23 +55,33 @@ class RegularizedLDLT {
     double δ = 0.0;
     double γ = 0.0;
 
-    AnalyzePattern(lhs);
-    m_solver.factorize(lhs);
+    // Max density is 50% due to the caller only providing the lower triangle.
+    // We consider less than 25% to be sparse.
+    m_isSparse = lhs.nonZeros() < 0.25 * lhs.size();
 
-    if (m_solver.info() == Eigen::Success) {
-      inertia = Inertia{m_solver};
+    if (m_isSparse) {
+      m_info = ComputeSparse(lhs).info();
+    } else {
+      m_info = m_denseSolver.compute(lhs).info();
+    }
+
+    if (m_info == Eigen::Success) {
+      if (m_isSparse) {
+        inertia = Inertia{m_sparseSolver};
+      } else {
+        inertia = Inertia{m_denseSolver};
+      }
 
       // If the inertia is ideal, don't regularize the system
       if (inertia == idealInertia) {
-        m_info = Eigen::Success;
-        return;
+        return *this;
       }
     }
 
     // If the decomposition succeeded and the inertia has some zero eigenvalues,
     // or the decomposition failed, regularize the equality constraints
-    if ((m_solver.info() == Eigen::Success && inertia.zero > 0) ||
-        m_solver.info() != Eigen::Success) {
+    if ((m_info == Eigen::Success && inertia.zero > 0) ||
+        m_info != Eigen::Success) {
       γ = 1e-8 * std::pow(μ, 0.25);
     }
 
@@ -89,17 +100,19 @@ class RegularizedLDLT {
       //
       // lhs = [H + AᵢᵀΣAᵢ + δI   Aₑᵀ]
       //       [       Aₑ        −γI ]
-      Eigen::SparseMatrix<double> lhsReg = lhs + Regularization(δ, γ);
-      AnalyzePattern(lhsReg);
-      m_solver.factorize(lhsReg);
-      inertia = Inertia{m_solver};
+      if (m_isSparse) {
+        m_info = ComputeSparse(lhs + Regularization(δ, γ)).info();
+        inertia = Inertia{m_sparseSolver};
+      } else {
+        m_info = m_denseSolver.compute(lhs + Regularization(δ, γ)).info();
+        inertia = Inertia{m_denseSolver};
+      }
 
       // If the inertia is ideal, store that value of δ and return.
       // Otherwise, increase δ by an order of magnitude and try again.
       if (inertia == idealInertia) {
         m_δOld = δ;
-        m_info = Eigen::Success;
-        return;
+        return *this;
       } else {
         δ *= 10.0;
 
@@ -107,7 +120,7 @@ class RegularizedLDLT {
         // caused by ill-conditioning.
         if (δ > 1e20) {
           m_info = Eigen::NumericalIssue;
-          return;
+          return *this;
         }
       }
     }
@@ -117,29 +130,46 @@ class RegularizedLDLT {
    * Solves the system of equations using a regularized LDLT factorization.
    *
    * @param rhs Right-hand side of the system.
+   * @return The solution.
    */
   template <typename Rhs>
-  auto Solve(const Eigen::MatrixBase<Rhs>& rhs) {
-    return m_solver.solve(rhs);
+  Eigen::VectorXd Solve(const Eigen::MatrixBase<Rhs>& rhs) {
+    if (m_isSparse) {
+      return m_sparseSolver.solve(rhs);
+    } else {
+      return m_denseSolver.solve(rhs);
+    }
   }
 
   /**
    * Solves the system of equations using a regularized LDLT factorization.
    *
    * @param rhs Right-hand side of the system.
+   * @return The solution.
    */
   template <typename Rhs>
-  auto Solve(const Eigen::SparseMatrixBase<Rhs>& rhs) {
-    return m_solver.solve(rhs);
+  Eigen::VectorXd Solve(const Eigen::SparseMatrixBase<Rhs>& rhs) {
+    if (m_isSparse) {
+      return m_sparseSolver.solve(rhs);
+    } else {
+      return m_denseSolver.solve(rhs.toDense());
+    }
   }
 
   /**
    * Returns the Hessian regularization factor.
+   *
+   * @return Hessian regularization factor.
    */
   double HessianRegularization() const { return m_δOld; }
 
  private:
-  Solver m_solver;
+  using SparseSolver = Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>>;
+  using DenseSolver = Eigen::LDLT<Eigen::MatrixXd>;
+
+  SparseSolver m_sparseSolver;
+  DenseSolver m_denseSolver;
+  bool m_isSparse = true;
 
   Eigen::ComputationInfo m_info = Eigen::Success;
 
@@ -156,16 +186,22 @@ class RegularizedLDLT {
   int m_nonZeros = -1;
 
   /**
-   * Reanalize LHS matrix's sparsity pattern if it changed.
+   * Computes factorization of a sparse matrix.
    *
-   * @param lhs Matrix to analyze.
+   * @param lhs Matrix to factorize.
+   * @return The factorization.
    */
-  void AnalyzePattern(const Eigen::SparseMatrix<double>& lhs) {
+  SparseSolver& ComputeSparse(const Eigen::SparseMatrix<double>& lhs) {
+    // Reanalize lhs's sparsity pattern if it changed
     int nonZeros = lhs.nonZeros();
     if (m_nonZeros != nonZeros) {
-      m_solver.analyzePattern(lhs);
+      m_sparseSolver.analyzePattern(lhs);
       m_nonZeros = nonZeros;
     }
+
+    m_sparseSolver.factorize(lhs);
+
+    return m_sparseSolver;
   }
 
   /**
@@ -173,6 +209,7 @@ class RegularizedLDLT {
    *
    * @param δ The Hessian regularization factor.
    * @param γ The equality constraint Jacobian regularization factor.
+   * @return Regularization matrix.
    */
   Eigen::SparseMatrix<double> Regularization(double δ, double γ) {
     Eigen::VectorXd vec{m_numDecisionVariables + m_numEqualityConstraints};
