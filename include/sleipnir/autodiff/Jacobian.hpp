@@ -57,7 +57,7 @@ class SLEIPNIR_DLLEXPORT Jacobian {
         // If the row is linear, compute its gradient once here and cache its
         // triplets. Constant rows are ignored because their gradients have no
         // nonzero triplets.
-        m_graphs[row].AppendAdjointTriplets(m_cachedTriplets, row);
+        m_graphs[row].AppendAdjointTriplets(m_cachedTriplets, row, m_wrt);
       } else if (m_variables(row).Type() > ExpressionType::kLinear) {
         // If the row is quadratic or nonlinear, add it to the list of nonlinear
         // rows to be recomputed in Value().
@@ -128,7 +128,7 @@ class SLEIPNIR_DLLEXPORT Jacobian {
 
     // Compute each nonlinear row of the Jacobian
     for (int row : m_nonlinearRows) {
-      m_graphs[row].AppendAdjointTriplets(triplets, row);
+      m_graphs[row].AppendAdjointTriplets(triplets, row, m_wrt);
     }
 
     adjointsProfiler.Stop();

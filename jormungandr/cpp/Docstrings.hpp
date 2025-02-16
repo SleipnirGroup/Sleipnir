@@ -2277,7 +2277,10 @@ Parameter ``triplets``:
     The sparse matrix triplets.
 
 Parameter ``row``:
-    The row of wrt.)doc";
+    The row of wrt.
+
+Parameter ``wrt``:
+    Vector of variables with respect to which to compute the Jacobian.)doc";
 
 static const char *__doc_sleipnir_detail_AdjointExpressionGraph_GenerateGradientTree =
 R"doc(Returns the variable's gradient tree.
@@ -2961,12 +2964,6 @@ Parameter ``lhs``:
     Unary operator's operand.)doc";
 
 static const char *__doc_sleipnir_detail_UnaryMinusExpression_Value = R"doc()doc";
-
-static const char *__doc_sleipnir_detail_UpdateAdjoints =
-R"doc(Updates the adjoints in the expression graph (computes the gradient).
-
-Parameter ``list``:
-    Topological sort of graph from parent to child.)doc";
 
 static const char *__doc_sleipnir_detail_UpdateValues =
 R"doc(Update the values of all nodes in this graph based on the values of

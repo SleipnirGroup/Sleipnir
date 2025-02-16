@@ -89,44 +89,4 @@ inline void UpdateValues(const small_vector<Expression*>& list) {
   }
 }
 
-/**
- * Updates the adjoints in the expression graph (computes the gradient).
- *
- * @param list Topological sort of graph from parent to child.
- */
-inline void UpdateAdjoints(const small_vector<Expression*>& list) {
-  // Read docs/algorithms.md#Reverse_accumulation_automatic_differentiation
-  // for background on reverse accumulation automatic differentiation.
-
-  if (list.empty()) {
-    return;
-  }
-
-  // Set root node's adjoint to 1 since df/df is 1
-  list[0]->adjoint = 1.0;
-
-  // Zero the rest of the adjoints
-  for (auto& node : list | std::views::drop(1)) {
-    node->adjoint = 0.0;
-  }
-
-  // df/dx = (df/dy)(dy/dx). The adjoint of x is equal to the adjoint of y
-  // multiplied by dy/dx. If there are multiple "paths" from the root node to
-  // variable; the variable's adjoint is the sum of each path's adjoint
-  // contribution.
-  for (const auto& node : list) {
-    auto& lhs = node->args[0];
-    auto& rhs = node->args[1];
-
-    if (lhs != nullptr) {
-      if (rhs != nullptr) {
-        lhs->adjoint += node->GradL(lhs->value, rhs->value, node->adjoint);
-        rhs->adjoint += node->GradR(lhs->value, rhs->value, node->adjoint);
-      } else {
-        lhs->adjoint += node->GradL(lhs->value, 0.0, node->adjoint);
-      }
-    }
-  }
-}
-
 }  // namespace sleipnir::detail
