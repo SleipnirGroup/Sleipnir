@@ -98,15 +98,67 @@ class AdjointExpressionGraph {
    *
    * @param triplets The sparse matrix triplets.
    * @param row The row of wrt.
+   * @param wrt Vector of variables with respect to which to compute the
+   *   Jacobian.
    */
   void AppendAdjointTriplets(small_vector<Eigen::Triplet<double>>& triplets,
-                             int row) const {
-    detail::UpdateAdjoints(m_topList);
+                             int row, const VariableMatrix& wrt) const {
+    // Read docs/algorithms.md#Reverse_accumulation_automatic_differentiation
+    // for background on reverse accumulation automatic differentiation.
 
-    for (const auto& [node, col] : std::views::zip(m_topList, m_colList)) {
-      // Append adjoints of wrt to sparse matrix triplets
-      if (col != -1 && node->adjoint != 0.0) {
-        triplets.emplace_back(row, col, node->adjoint);
+    // If wrt has fewer nodes than graph, zero wrt's adjoints
+    if (static_cast<size_t>(wrt.Rows()) < m_topList.size()) {
+      for (const auto& elem : wrt) {
+        elem.expr->adjoint = 0.0;
+      }
+    }
+
+    if (m_topList.empty()) {
+      return;
+    }
+
+    // Set root node's adjoint to 1 since df/df is 1
+    m_topList[0]->adjoint = 1.0;
+
+    // Zero the rest of the adjoints
+    for (auto& node : m_topList | std::views::drop(1)) {
+      node->adjoint = 0.0;
+    }
+
+    // df/dx = (df/dy)(dy/dx). The adjoint of x is equal to the adjoint of y
+    // multiplied by dy/dx. If there are multiple "paths" from the root node to
+    // variable; the variable's adjoint is the sum of each path's adjoint
+    // contribution.
+    for (const auto& node : m_topList) {
+      auto& lhs = node->args[0];
+      auto& rhs = node->args[1];
+
+      if (lhs != nullptr) {
+        if (rhs != nullptr) {
+          lhs->adjoint += node->GradL(lhs->value, rhs->value, node->adjoint);
+          rhs->adjoint += node->GradR(lhs->value, rhs->value, node->adjoint);
+        } else {
+          lhs->adjoint += node->GradL(lhs->value, 0.0, node->adjoint);
+        }
+      }
+    }
+
+    // If wrt has fewer nodes than graph, iterate over wrt
+    if (static_cast<size_t>(wrt.Rows()) < m_topList.size()) {
+      for (int col = 0; col < wrt.Rows(); ++col) {
+        const auto& node = wrt(col).expr;
+
+        // Append adjoints of wrt to sparse matrix triplets
+        if (node->adjoint != 0.0) {
+          triplets.emplace_back(row, col, node->adjoint);
+        }
+      }
+    } else {
+      for (const auto& [col, node] : std::views::zip(m_colList, m_topList)) {
+        // Append adjoints of wrt to sparse matrix triplets
+        if (col != -1 && node->adjoint != 0.0) {
+          triplets.emplace_back(row, col, node->adjoint);
+        }
       }
     }
   }
