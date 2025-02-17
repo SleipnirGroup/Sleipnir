@@ -291,13 +291,13 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
       // Print cost function and constraint expression types
       sleipnir::println(
           "The cost function is {}.",
-          kExprTypeToName[static_cast<int>(status.costFunctionType)]);
+          kExprTypeToName[std::to_underlying(status.costFunctionType)]);
       sleipnir::println(
           "The equality constraints are {}.",
-          kExprTypeToName[static_cast<int>(status.equalityConstraintType)]);
+          kExprTypeToName[std::to_underlying(status.equalityConstraintType)]);
       sleipnir::println(
           "The inequality constraints are {}.",
-          kExprTypeToName[static_cast<int>(status.inequalityConstraintType)]);
+          kExprTypeToName[std::to_underlying(status.inequalityConstraintType)]);
       sleipnir::println("");
 
       // Print problem dimensionality
