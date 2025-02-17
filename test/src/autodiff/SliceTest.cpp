@@ -36,25 +36,38 @@ TEST_CASE("Slice - One-arg constructor", "[Slice]") {
   // +
   {
     sleipnir::Slice slice{1};
-    CHECK(slice.start == 0);
-    CHECK(slice.stop == 1);
+    CHECK(slice.start == 1);
+    CHECK(slice.stop == 2);
     CHECK(slice.step == 1);
 
     CHECK(slice.Adjust(3) == 1);
-    CHECK(slice.start == 0);
-    CHECK(slice.stop == 1);
+    CHECK(slice.start == 1);
+    CHECK(slice.stop == 2);
     CHECK(slice.step == 1);
   }
 
-  // -
+  // -1
   {
     sleipnir::Slice slice{-1};
-    CHECK(slice.start == 0);
+    CHECK(slice.start == -1);
+    CHECK(slice.stop == std::numeric_limits<int>::max());
+    CHECK(slice.step == 1);
+
+    CHECK(slice.Adjust(3) == 1);
+    CHECK(slice.start == 2);
+    CHECK(slice.stop == 3);
+    CHECK(slice.step == 1);
+  }
+
+  // -2
+  {
+    sleipnir::Slice slice{-2};
+    CHECK(slice.start == -2);
     CHECK(slice.stop == -1);
     CHECK(slice.step == 1);
 
-    CHECK(slice.Adjust(3) == 2);
-    CHECK(slice.start == 0);
+    CHECK(slice.Adjust(3) == 1);
+    CHECK(slice.start == 1);
     CHECK(slice.stop == 2);
     CHECK(slice.step == 1);
   }

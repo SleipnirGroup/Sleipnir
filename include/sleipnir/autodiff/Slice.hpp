@@ -46,14 +46,20 @@ class SLEIPNIR_DLLEXPORT Slice {
 
   /**
    * Constructs a slice.
-   *
-   * @param stop Slice stop index (exclusive).
    */
-  template <typename Stop>
-    requires std::same_as<Stop, slicing::none_t> ||
-             std::convertible_to<Stop, int>
-  constexpr Slice(Stop stop)  // NOLINT
-      : Slice(slicing::_, std::move(stop), 1) {}
+  constexpr Slice(slicing::none_t)  // NOLINT
+      : Slice(0, std::numeric_limits<int>::max(), 1) {}
+
+  /**
+   * Constructs a slice.
+   *
+   * @param start Slice start index (inclusive).
+   */
+  constexpr Slice(int start) {  // NOLINT
+    this->start = start;
+    this->stop = (start == -1) ? std::numeric_limits<int>::max() : start + 1;
+    this->step = 1;
+  }
 
   /**
    * Constructs a slice.

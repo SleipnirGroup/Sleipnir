@@ -843,13 +843,15 @@ Returns:
 
 static const char *__doc_sleipnir_Slice_Slice = R"doc(Constructs a Slice.)doc";
 
-static const char *__doc_sleipnir_Slice_Slice_2 =
-R"doc(Constructs a slice.
-
-Parameter ``stop``:
-    Slice stop index (exclusive).)doc";
+static const char *__doc_sleipnir_Slice_Slice_2 = R"doc(Constructs a slice.)doc";
 
 static const char *__doc_sleipnir_Slice_Slice_3 =
+R"doc(Constructs a slice.
+
+Parameter ``start``:
+    Slice start index (inclusive).)doc";
+
+static const char *__doc_sleipnir_Slice_Slice_4 =
 R"doc(Constructs a slice.
 
 Parameter ``start``:
@@ -858,7 +860,7 @@ Parameter ``start``:
 Parameter ``stop``:
     Slice stop index (exclusive).)doc";
 
-static const char *__doc_sleipnir_Slice_Slice_4 =
+static const char *__doc_sleipnir_Slice_Slice_5 =
 R"doc(Constructs a slice.
 
 Parameter ``start``:

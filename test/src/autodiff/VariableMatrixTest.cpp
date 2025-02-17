@@ -140,7 +140,7 @@ TEST_CASE("VariableMatrix - Slicing", "[VariableMatrix]") {
 
   // Slice from start with step of 2
   {
-    auto s = mat({_}, {_, _, 2});
+    auto s = mat(_, {_, _, 2});
     CHECK(s.Rows() == 4);
     CHECK(s.Cols() == 2);
     CHECK(s ==
@@ -154,6 +154,22 @@ TEST_CASE("VariableMatrix - Slicing", "[VariableMatrix]") {
     CHECK(s.Cols() == 2);
     CHECK(s ==
           Eigen::MatrixXd{{16.0, 14.0}, {12.0, 10.0}, {8.0, 6.0}, {4.0, 2.0}});
+  }
+
+  // Slice from start and column -1
+  {
+    auto s = mat({1, _}, -1);
+    CHECK(s.Rows() == 3);
+    CHECK(s.Cols() == 1);
+    CHECK(s == Eigen::MatrixXd{{8.0}, {12.0}, {16.0}});
+  }
+
+  // Slice from start and column -2
+  {
+    auto s = mat({1, _}, -2);
+    CHECK(s.Rows() == 3);
+    CHECK(s.Cols() == 1);
+    CHECK(s == Eigen::MatrixXd{{7.0}, {11.0}, {15.0}});
   }
 }
 
@@ -258,10 +274,10 @@ TEST_CASE("VariableMatrix - Value", "[VariableMatrix]") {
   CHECK(A.Block(1, 1, 2, 2).T().Block(0, 1, 2, 1).Value(1) == 9.0);
 
   // Slice-of-slice
-  CHECK(A({1, 3}, {1, 3})({_}, {1, _}).Value() ==
+  CHECK(A({1, 3}, {1, 3})(_, {1, _}).Value() ==
         expected.block(1, 1, 2, 2).block(0, 1, 2, 1));
-  CHECK(A({1, 3}, {1, 3})({_}, {1, _}).Value(1) == 9.0);
-  CHECK(A({1, 3}, {1, 3}).T()({_}, {1, _}).Value(1) == 9.0);
+  CHECK(A({1, 3}, {1, 3})(_, {1, _}).Value(1) == 9.0);
+  CHECK(A({1, 3}, {1, 3}).T()(_, {1, _}).Value(1) == 9.0);
 }
 
 TEST_CASE("VariableMatrix - CwiseTransform()", "[VariableMatrix]") {
