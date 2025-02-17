@@ -410,7 +410,7 @@ void SQP(
                                  : IterationType::kRejectedSOC,
                   socProfiler.CurrentDuration(), E, f.Value(),
                   trial_c_e.lpNorm<1>(), 0.0, solver.HessianRegularization(),
-                  α_soc, 1.0);
+                  α_soc, 1.0, 1.0);
             }
 #endif
           }};
@@ -576,7 +576,7 @@ void SQP(
       PrintIterationDiagnostics(iterations, IterationType::kNormal,
                                 innerIterProfiler.CurrentDuration(), E_0,
                                 f.Value(), c_e.lpNorm<1>(), 0.0,
-                                solver.HessianRegularization(), α, α);
+                                solver.HessianRegularization(), α, α_max, α);
     }
 #endif
 

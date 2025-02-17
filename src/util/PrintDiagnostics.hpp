@@ -53,6 +53,7 @@ constexpr double ToMs(const std::chrono::duration<Rep, Period>& duration) {
  * @param complementarity The complementarity.
  * @param δ The Hessian regularization factor.
  * @param primal_α The primal step size.
+ * @param primal_α_max The max primal step size.
  * @param dual_α The dual step size.
  */
 template <typename Rep, typename Period = std::ratio<1>>
@@ -60,7 +61,8 @@ void PrintIterationDiagnostics(int iterations, IterationType type,
                                const std::chrono::duration<Rep, Period>& time,
                                double error, double cost, double infeasibility,
                                double complementarity, double δ,
-                               double primal_α, double dual_α) {
+                               double primal_α, double primal_α_max,
+                               double dual_α) {
   if (iterations % 20 == 0) {
     if (iterations == 0) {
       sleipnir::print("┏");
@@ -127,9 +129,15 @@ void PrintIterationDiagnostics(int iterations, IterationType type,
     }
   }
 
-  // Print step sizes and number of backtracks
+  // Print step sizes and number of backtracks. For the number of backtracks, we
+  // want x such that:
+  //
+  //   α_max 2⁻ˣ = α
+  //   2⁻ˣ = α/α_max
+  //   −x = std::log2(α/α_max)
+  //   x = −std::log2(α/α_max)
   sleipnir::println(" {:.2e} {:.2e} {:2d}│", primal_α, dual_α,
-                    static_cast<int>(-std::log2(primal_α)));
+                    static_cast<int>(-std::log2(primal_α / primal_α_max)));
 }
 
 /**
