@@ -14,8 +14,8 @@ TEST_CASE("Constraints - Equality constraint boolean comparison",
   using sleipnir::Variable;
   using sleipnir::VariableMatrix;
 
-  constexpr std::array<std::tuple<double, double>, 3> args{
-      std::tuple{1.0, 1.0}, {1.0, 2.0}, {2.0, 1.0}};
+  constexpr std::array args{std::tuple{1.0, 1.0}, std::tuple{1.0, 2.0},
+                            std::tuple{2.0, 1.0}};
 
   // double-Variable
   for (const auto& [lhs, rhs] : args) {
@@ -99,8 +99,8 @@ TEST_CASE("Constraints - Inequality constraint boolean comparisons",
   using sleipnir::Variable;
   using sleipnir::VariableMatrix;
 
-  constexpr std::array<std::tuple<double, double>, 3> args{
-      std::tuple{1.0, 1.0}, {1.0, 2.0}, {2.0, 1.0}};
+  constexpr std::array args{std::tuple{1.0, 1.0}, std::tuple{1.0, 2.0},
+                            std::tuple{2.0, 1.0}};
 
   // double-Variable
   for (const auto& [lhs, rhs] : args) {
