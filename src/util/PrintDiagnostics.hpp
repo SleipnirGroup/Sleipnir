@@ -5,6 +5,7 @@
 #include <stdint.h>
 
 #include <algorithm>
+#include <array>
 #include <chrono>
 #include <cmath>
 #include <ranges>
@@ -89,7 +90,7 @@ void PrintIterationDiagnostics(int iterations, IterationType type,
         "", "", "", "", "", "", "", "", "", "", "");
   }
 
-  constexpr const char* kIterationTypes[] = {"norm", "✓SOC", "XSOC"};
+  constexpr std::array kIterationTypes = {"norm", "✓SOC", "XSOC"};
   sleipnir::print("│{:4} {:4} {:9.3f} {:12e} {:13e} {:12e} {:12e} ", iterations,
                   kIterationTypes[std::to_underlying(type)], ToMs(time), error,
                   cost, infeasibility, complementarity);
@@ -119,8 +120,8 @@ void PrintIterationDiagnostics(int iterations, IterationType type,
       if (exponent < 0) {
         reg += "⁻";
       }
-      constexpr const char* strs[] = {"⁰", "¹", "²", "³", "⁴",
-                                      "⁵", "⁶", "⁷", "⁸", "⁹"};
+      constexpr std::array strs = {"⁰", "¹", "²", "³", "⁴",
+                                   "⁵", "⁶", "⁷", "⁸", "⁹"};
       for (const auto& digit : digits | std::views::reverse) {
         reg += strs[digit];
       }
@@ -154,7 +155,7 @@ inline std::string Histogram(double value) {
   double ipart;
   int fpart = static_cast<int>(std::modf(value * Width, &ipart) * 8);
 
-  constexpr const char* strs[] = {" ", "▏", "▎", "▍", "▌", "▋", "▊", "▉", "█"};
+  constexpr std::array strs = {" ", "▏", "▎", "▍", "▌", "▋", "▊", "▉", "█"};
   std::string hist;
 
   int index = 0;
