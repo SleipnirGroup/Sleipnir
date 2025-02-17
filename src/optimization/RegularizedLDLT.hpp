@@ -102,15 +102,19 @@ class RegularizedLDLT {
       //       [       Aₑ        −γI ]
       if (m_isSparse) {
         m_info = ComputeSparse(lhs + Regularization(δ, γ)).info();
-        inertia = Inertia{m_sparseSolver};
+        if (m_info == Eigen::Success) {
+          inertia = Inertia{m_sparseSolver};
+        }
       } else {
         m_info = m_denseSolver.compute(lhs + Regularization(δ, γ)).info();
-        inertia = Inertia{m_denseSolver};
+        if (m_info == Eigen::Success) {
+          inertia = Inertia{m_denseSolver};
+        }
       }
 
       // If the inertia is ideal, store that value of δ and return.
       // Otherwise, increase δ by an order of magnitude and try again.
-      if (inertia == idealInertia) {
+      if (m_info == Eigen::Success && inertia == idealInertia) {
         m_δOld = δ;
         return *this;
       } else {
