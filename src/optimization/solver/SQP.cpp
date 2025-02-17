@@ -409,8 +409,8 @@ void SQP(
                   stepAcceptable ? IterationType::kAcceptedSOC
                                  : IterationType::kRejectedSOC,
                   socProfiler.CurrentDuration(), E, f.Value(),
-                  trial_c_e.lpNorm<1>(), 0.0, solver.HessianRegularization(),
-                  α_soc, 1.0, 1.0);
+                  trial_c_e.lpNorm<1>(), 0.0, 0.0,
+                  solver.HessianRegularization(), α_soc, 1.0, 1.0);
             }
 #endif
           }};
@@ -575,7 +575,7 @@ void SQP(
     if (config.diagnostics) {
       PrintIterationDiagnostics(iterations, IterationType::kNormal,
                                 innerIterProfiler.CurrentDuration(), E_0,
-                                f.Value(), c_e.lpNorm<1>(), 0.0,
+                                f.Value(), c_e.lpNorm<1>(), 0.0, 0.0,
                                 solver.HessianRegularization(), α, α_max, α);
     }
 #endif

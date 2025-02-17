@@ -43,6 +43,47 @@ constexpr double ToMs(const std::chrono::duration<Rep, Period>& duration) {
 }
 
 /**
+ * Renders value as power of 10.
+ *
+ * @param value Value.
+ */
+inline std::string PowerOf10(double value) {
+  if (value == 0.0) {
+    return " 0";
+  } else {
+    int exponent = std::log10(value);
+
+    if (exponent == 0) {
+      return " 1";
+    } else if (exponent == 1) {
+      return "10";
+    } else {
+      // Gather exponent digits
+      int n = std::abs(exponent);
+      small_vector<int> digits;
+      do {
+        digits.emplace_back(n % 10);
+        n /= 10;
+      } while (n > 0);
+
+      std::string output = "10";
+
+      // Append exponent
+      if (exponent < 0) {
+        output += "⁻";
+      }
+      constexpr std::array strs = {"⁰", "¹", "²", "³", "⁴",
+                                   "⁵", "⁶", "⁷", "⁸", "⁹"};
+      for (const auto& digit : digits | std::views::reverse) {
+        output += strs[digit];
+      }
+
+      return output;
+    }
+  }
+}
+
+/**
  * Prints diagnostics for the current iteration.
  *
  * @param iterations Number of iterations.
@@ -52,6 +93,7 @@ constexpr double ToMs(const std::chrono::duration<Rep, Period>& duration) {
  * @param cost The cost.
  * @param infeasibility The infeasibility.
  * @param complementarity The complementarity.
+ * @param μ The barrier parameter.
  * @param δ The Hessian regularization factor.
  * @param primal_α The primal step size.
  * @param primal_α_max The max primal step size.
@@ -61,7 +103,7 @@ template <typename Rep, typename Period = std::ratio<1>>
 void PrintIterationDiagnostics(int iterations, IterationType type,
                                const std::chrono::duration<Rep, Period>& time,
                                double error, double cost, double infeasibility,
-                               double complementarity, double δ,
+                               double complementarity, double μ, double δ,
                                double primal_α, double primal_α_max,
                                double dual_α) {
   if (iterations % 20 == 0) {
@@ -71,74 +113,40 @@ void PrintIterationDiagnostics(int iterations, IterationType type,
       sleipnir::print("┢");
     }
     sleipnir::print(
-        "{:━^4}┯{:━^4}┯{:━^9}┯{:━^12}┯{:━^13}┯{:━^12}┯{:━^12}┯{:━^5}┯{:━^8}┯"
-        "{:━^8}┯{:━^2}",
-        "", "", "", "", "", "", "", "", "", "", "");
+        "{:━^4}┯{:━^4}┯{:━^9}┯{:━^12}┯{:━^13}┯{:━^12}┯{:━^12}┯{:━^5}┯{:━^5}┯"
+        "{:━^8}┯{:━^8}┯{:━^2}",
+        "", "", "", "", "", "", "", "", "", "", "", "");
     if (iterations == 0) {
       sleipnir::println("┓");
     } else {
       sleipnir::println("┪");
     }
     sleipnir::println(
-        "┃{:^4}│{:^4}│{:^9}│{:^12}│{:^13}│{:^12}│{:^12}│{:^5}│{:^8}│{:^8}│{:^2}"
-        "┃",
+        "┃{:^4}│{:^4}│{:^9}│{:^12}│{:^13}│{:^12}│{:^12}│{:^5}│{:^5}│{:^8}│{:^8}"
+        "│{:^2}┃",
         "iter", "type", "time (ms)", "error", "cost", "infeas.", "complement.",
-        "reg", "primal α", "dual α", "↩");
+        "μ", "reg", "primal α", "dual α", "↩");
     sleipnir::println(
-        "┡{:━^4}┷{:━^4}┷{:━^9}┷{:━^12}┷{:━^13}┷{:━^12}┷{:━^12}┷{:━^5}┷{:━^8}┷"
-        "{:━^8}┷{:━^2}┩",
-        "", "", "", "", "", "", "", "", "", "", "");
+        "┡{:━^4}┷{:━^4}┷{:━^9}┷{:━^12}┷{:━^13}┷{:━^12}┷{:━^12}┷{:━^5}┷{:━^5}┷"
+        "{:━^8}┷{:━^8}┷{:━^2}┩",
+        "", "", "", "", "", "", "", "", "", "", "", "");
   }
 
-  constexpr std::array kIterationTypes = {"norm", "✓SOC", "XSOC"};
-  sleipnir::print("│{:4} {:4} {:9.3f} {:12e} {:13e} {:12e} {:12e} ", iterations,
-                  kIterationTypes[std::to_underlying(type)], ToMs(time), error,
-                  cost, infeasibility, complementarity);
-
-  // Print regularization
-  if (δ == 0.0) {
-    sleipnir::print(" 0   ");
-  } else {
-    int exponent = std::log10(δ);
-
-    if (exponent == 0) {
-      sleipnir::print(" 1   ");
-    } else if (exponent == 1) {
-      sleipnir::print("10   ");
-    } else {
-      // Gather regularization exponent digits
-      int n = std::abs(exponent);
-      small_vector<int> digits;
-      do {
-        digits.emplace_back(n % 10);
-        n /= 10;
-      } while (n > 0);
-
-      std::string reg = "10";
-
-      // Append regularization exponent
-      if (exponent < 0) {
-        reg += "⁻";
-      }
-      constexpr std::array strs = {"⁰", "¹", "²", "³", "⁴",
-                                   "⁵", "⁶", "⁷", "⁸", "⁹"};
-      for (const auto& digit : digits | std::views::reverse) {
-        reg += strs[digit];
-      }
-
-      sleipnir::print("{:<5}", reg);
-    }
-  }
-
-  // Print step sizes and number of backtracks. For the number of backtracks, we
-  // want x such that:
+  // For the number of backtracks, we want x such that:
   //
   //   α_max 2⁻ˣ = α
   //   2⁻ˣ = α/α_max
   //   −x = std::log2(α/α_max)
   //   x = −std::log2(α/α_max)
-  sleipnir::println(" {:.2e} {:.2e} {:2d}│", primal_α, dual_α,
-                    static_cast<int>(-std::log2(primal_α / primal_α_max)));
+  int backtracks = static_cast<int>(-std::log2(primal_α / primal_α_max));
+
+  constexpr std::array kIterationTypes = {"norm", "✓SOC", "XSOC"};
+  sleipnir::println(
+      "│{:4} {:4} {:9.3f} {:12e} {:13e} {:12e} {:12e} {:<5} {:<5} {:.2e} "
+      "{:.2e} {:2d}│",
+      iterations, kIterationTypes[std::to_underlying(type)], ToMs(time), error,
+      cost, infeasibility, complementarity, PowerOf10(μ), PowerOf10(δ),
+      primal_α, dual_α, backtracks);
 }
 
 /**
@@ -149,7 +157,7 @@ void PrintIterationDiagnostics(int iterations, IterationType type,
  */
 template <int Width>
   requires(Width > 0)
-inline std::string Histogram(double value) {
+std::string Histogram(double value) {
   value = std::clamp(value, 0.0, 1.0);
 
   double ipart;
@@ -186,7 +194,7 @@ inline void PrintFinalDiagnostics(
     int iterations, const small_vector<SetupProfiler>& setupProfilers,
     const small_vector<SolveProfiler>& solveProfilers) {
   // Print bottom of iteration diagnostics table
-  sleipnir::println("└{:─^99}┘", "");
+  sleipnir::println("└{:─^105}┘", "");
 
   // Print total time
   auto setupDuration = ToMs(setupProfilers[0].Duration());
