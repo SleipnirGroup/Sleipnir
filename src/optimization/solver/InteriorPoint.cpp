@@ -565,8 +565,8 @@ void InteriorPoint(
                                  : IterationType::kRejectedSOC,
                   socProfiler.CurrentDuration(), E, f.Value(),
                   trial_c_e.lpNorm<1>() + (trial_c_i - trial_s).lpNorm<1>(),
-                  trial_s.dot(trial_z), solver.HessianRegularization(), α_soc,
-                  1.0, α_z_soc);
+                  trial_s.dot(trial_z), μ, solver.HessianRegularization(),
+                  α_soc, 1.0, α_z_soc);
             }
           }};
 #endif
@@ -798,7 +798,7 @@ void InteriorPoint(
       PrintIterationDiagnostics(
           iterations, IterationType::kNormal,
           innerIterProfiler.CurrentDuration(), E_0, f.Value(),
-          c_e.lpNorm<1>() + (c_i - s).lpNorm<1>(), s.dot(z),
+          c_e.lpNorm<1>() + (c_i - s).lpNorm<1>(), s.dot(z), μ,
           solver.HessianRegularization(), α, α_max, α_z);
     }
 #endif

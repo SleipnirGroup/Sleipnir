@@ -190,6 +190,10 @@ Parameter ``diagnostics``:
         <td>Complementary slackness at current iterate (sᵀz)</td>
       </tr>
       <tr>
+        <td>μ</td>
+        <td>Barrier parameter</td>
+      </tr>
+      <tr>
         <td>reg</td>
         <td>Iteration matrix regularization</td>
       </tr>
