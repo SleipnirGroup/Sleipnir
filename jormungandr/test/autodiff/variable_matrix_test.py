@@ -92,6 +92,16 @@ def test_slicing():
         )
     ).all()
 
+    # Slice from start and column -1
+    s = mat[1:, -1]
+    assert s.shape == (3, 1)
+    assert (s.value() == np.array([[8.0], [12.0], [16.0]])).all()
+
+    # Slice from start and column -2
+    s = mat[1:, -2]
+    assert s.shape == (3, 1)
+    assert (s.value() == np.array([[7.0], [11.0], [15.0]])).all()
+
 
 def test_subslicing():
     A = VariableMatrix([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]])
