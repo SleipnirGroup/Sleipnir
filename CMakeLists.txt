@@ -180,48 +180,48 @@ install(
 # Add benchmark executables
 if(BUILD_BENCHMARKS)
     # Perf benchmark
-    foreach(benchmark "CartPole" "Flywheel")
+    foreach(benchmark "cart_pole" "flywheel")
         file(
-            GLOB ${benchmark}PerfBenchmark_src
+            GLOB ${benchmark}_perf_benchmark_src
             benchmarks/perf/*.cpp
             benchmarks/perf/${benchmark}/*.cpp
         )
         add_executable(
-            ${benchmark}PerfBenchmark
-            ${${benchmark}PerfBenchmark_src}
+            ${benchmark}_perf_benchmark
+            ${${benchmark}_perf_benchmark_src}
         )
-        compiler_flags(${benchmark}PerfBenchmark)
+        compiler_flags(${benchmark}_perf_benchmark)
         target_include_directories(
-            ${benchmark}PerfBenchmark
+            ${benchmark}_perf_benchmark
             PRIVATE
                 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks
                 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/perf
         )
-        target_link_libraries(${benchmark}PerfBenchmark PRIVATE Sleipnir)
+        target_link_libraries(${benchmark}_perf_benchmark PRIVATE Sleipnir)
     endforeach()
 
     # Scalability benchmark (if CasADi exists)
     find_package(casadi QUIET)
     if(casadi_FOUND)
-        foreach(benchmark "CartPole" "Flywheel")
+        foreach(benchmark "cart_pole" "flywheel")
             file(
-                GLOB ${benchmark}ScalabilityBenchmark_src
+                GLOB ${benchmark}_scalability_benchmark_src
                 benchmarks/scalability/*.cpp
                 benchmarks/scalability/${benchmark}/*.cpp
             )
             add_executable(
-                ${benchmark}ScalabilityBenchmark
-                ${${benchmark}ScalabilityBenchmark_src}
+                ${benchmark}_scalability_benchmark
+                ${${benchmark}_scalability_benchmark_src}
             )
-            compiler_flags(${benchmark}ScalabilityBenchmark)
+            compiler_flags(${benchmark}_scalability_benchmark)
             target_include_directories(
-                ${benchmark}ScalabilityBenchmark
+                ${benchmark}_scalability_benchmark
                 PRIVATE
                     ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks
                     ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/scalability
             )
             target_link_libraries(
-                ${benchmark}ScalabilityBenchmark
+                ${benchmark}_scalability_benchmark
                 PRIVATE Sleipnir casadi
             )
         endforeach()
@@ -234,18 +234,18 @@ if(BUILD_TESTING AND NOT CMAKE_CROSSCOMPILING)
     include(Catch)
 
     # Build Sleipnir tests
-    file(GLOB_RECURSE Sleipnir_test_src test/src/*.cpp)
-    add_executable(SleipnirTest ${Sleipnir_test_src})
-    compiler_flags(SleipnirTest)
+    file(GLOB_RECURSE sleipnir_test_src test/src/*.cpp)
+    add_executable(sleipnir_test ${sleipnir_test_src})
+    compiler_flags(sleipnir_test)
     target_include_directories(
-        SleipnirTest
+        sleipnir_test
         PRIVATE
             ${CMAKE_CURRENT_SOURCE_DIR}/src
             ${CMAKE_CURRENT_SOURCE_DIR}/test/include
     )
-    target_link_libraries(SleipnirTest PRIVATE Sleipnir Catch2::Catch2WithMain)
+    target_link_libraries(sleipnir_test PRIVATE Sleipnir Catch2::Catch2WithMain)
     if(NOT CMAKE_TOOLCHAIN_FILE)
-        catch_discover_tests(SleipnirTest)
+        catch_discover_tests(sleipnir_test)
     endif()
 endif()
 
@@ -270,22 +270,22 @@ if(BUILD_EXAMPLES)
             AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/examples/${example}/test
         )
             file(GLOB_RECURSE test_sources examples/${example}/test/*.cpp)
-            add_executable(${example}Test ${sources} ${test_sources})
-            compiler_flags(${example}Test)
-            target_compile_definitions(${example}Test PUBLIC RUNNING_TESTS)
+            add_executable(${example}_test ${sources} ${test_sources})
+            compiler_flags(${example}_test)
+            target_compile_definitions(${example}_test PUBLIC RUNNING_TESTS)
             target_include_directories(
-                ${example}Test
+                ${example}_test
                 PRIVATE
                     ${CMAKE_CURRENT_SOURCE_DIR}/examples/${example}/include
                     ${CMAKE_CURRENT_SOURCE_DIR}/examples/${example}/src
                     ${CMAKE_CURRENT_SOURCE_DIR}/examples/${example}/test/include
             )
             target_link_libraries(
-                ${example}Test
+                ${example}_test
                 PRIVATE Sleipnir Catch2::Catch2WithMain
             )
             if(NOT CMAKE_TOOLCHAIN_FILE)
-                catch_discover_tests(${example}Test)
+                catch_discover_tests(${example}_test)
             endif()
         endif()
     endforeach()

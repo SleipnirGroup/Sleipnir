@@ -12,21 +12,17 @@ function(pybind11_mkdoc target headers)
     list(TRANSFORM eigen_dirs PREPEND "-I")
 
     add_custom_command(
-        OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/jormungandr/cpp/Docstrings.hpp
+        OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/jormungandr/cpp/docstrings.hpp
         COMMAND
             ${env_vars} ${Python3_EXECUTABLE} -m pybind11_mkdoc ${headers} -o
-            ${CMAKE_CURRENT_SOURCE_DIR}/jormungandr/cpp/Docstrings.hpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/jormungandr/cpp/docstrings.hpp
             -I/usr/lib/clang/`clang++ --version | grep -E -o '[0-9]+' | head
             -1`/include ${target_dirs} ${eigen_dirs} -std=c++23
-        COMMAND
-            ${Python3_EXECUTABLE}
-            ${CMAKE_CURRENT_SOURCE_DIR}/cmake/fix_docstrings.py
-            ${CMAKE_CURRENT_SOURCE_DIR}/jormungandr/cpp/Docstrings.hpp
         DEPENDS ${headers}
         USES_TERMINAL
     )
     add_custom_target(
         ${target}_docstrings
-        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/jormungandr/cpp/Docstrings.hpp
+        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/jormungandr/cpp/docstrings.hpp
     )
 endfunction()
