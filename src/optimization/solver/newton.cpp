@@ -127,6 +127,7 @@ void newton(
   solve_profilers.emplace_back("solve");
   solve_profilers.emplace_back("  ↳ feasibility ✓");
   solve_profilers.emplace_back("  ↳ user callbacks");
+  solve_profilers.emplace_back("  ↳ iter matrix compute");
   solve_profilers.emplace_back("  ↳ iter matrix solve");
   solve_profilers.emplace_back("  ↳ line search");
   solve_profilers.emplace_back("  ↳ spy writes");
@@ -135,11 +136,12 @@ void newton(
   auto& inner_iter_prof = solve_profilers[0];
   auto& feasibility_check_prof = solve_profilers[1];
   auto& user_callbacks_prof = solve_profilers[2];
-  auto& linear_system_solve_prof = solve_profilers[3];
-  auto& line_search_prof = solve_profilers[4];
+  auto& linear_system_compute_prof = solve_profilers[3];
+  auto& linear_system_solve_prof = solve_profilers[4];
+  auto& line_search_prof = solve_profilers[5];
   [[maybe_unused]]
-  auto& spy_writes_prof = solve_profilers[5];
-  auto& next_iter_prep_prof = solve_profilers[6];
+  auto& spy_writes_prof = solve_profilers[6];
+  auto& next_iter_prep_prof = solve_profilers[7];
 
   // Prints final diagnostics when the solver exits
   scope_exit exit{[&] {
@@ -199,12 +201,16 @@ void newton(
     }
 
     user_callbacks_profiler.stop();
-    ScopedProfiler linear_system_solve_profiler{linear_system_solve_prof};
+    ScopedProfiler linear_system_compute_profiler{linear_system_compute_prof};
 
     // Solve the Newton-KKT system
     //
     // Hpₖˣ = −∇f
     solver.compute(H, 0, config.tolerance / 10.0);
+
+    linear_system_compute_profiler.stop();
+    ScopedProfiler linear_system_solve_profiler{linear_system_solve_prof};
+
     Eigen::VectorXd p_x = solver.solve(-g);
 
     linear_system_solve_profiler.stop();

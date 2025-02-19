@@ -188,6 +188,7 @@ void sqp(
   solve_profilers.emplace_back("  ↳ feasibility ✓");
   solve_profilers.emplace_back("  ↳ user callbacks");
   solve_profilers.emplace_back("  ↳ iter matrix build");
+  solve_profilers.emplace_back("  ↳ iter matrix compute");
   solve_profilers.emplace_back("  ↳ iter matrix solve");
   solve_profilers.emplace_back("  ↳ line search");
   solve_profilers.emplace_back("    ↳ SOC");
@@ -198,12 +199,13 @@ void sqp(
   auto& feasibility_check_prof = solve_profilers[1];
   auto& user_callbacks_prof = solve_profilers[2];
   auto& linear_system_build_prof = solve_profilers[3];
-  auto& linear_system_solve_prof = solve_profilers[4];
-  auto& line_search_prof = solve_profilers[5];
-  auto& soc_prof = solve_profilers[6];
+  auto& linear_system_compute_prof = solve_profilers[4];
+  auto& linear_system_solve_prof = solve_profilers[5];
+  auto& line_search_prof = solve_profilers[6];
+  auto& soc_prof = solve_profilers[7];
   [[maybe_unused]]
-  auto& spy_writes_prof = solve_profilers[7];
-  auto& next_iter_prep_prof = solve_profilers[8];
+  auto& spy_writes_prof = solve_profilers[8];
+  auto& next_iter_prep_prof = solve_profilers[9];
 
   // Prints final diagnostics when the solver exits
   scope_exit exit{[&] {
@@ -325,7 +327,7 @@ void sqp(
     rhs.segment(x.rows(), y.rows()) = -c_e;
 
     linear_system_build_profiler.stop();
-    ScopedProfiler linear_system_solve_profiler{linear_system_solve_prof};
+    ScopedProfiler linear_system_compute_profiler{linear_system_compute_prof};
 
     Eigen::VectorXd p_x;
     Eigen::VectorXd p_y;
@@ -342,6 +344,9 @@ void sqp(
       status->exit_condition = SolverExitCondition::FACTORIZATION_FAILED;
       return;
     }
+
+    linear_system_compute_profiler.stop();
+    ScopedProfiler linear_system_solve_profiler{linear_system_solve_prof};
 
     Eigen::VectorXd step = solver.solve(rhs);
 

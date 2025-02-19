@@ -205,27 +205,27 @@ inline void print_final_diagnostics(
                     iterations);
 
   // Print setup diagnostics
-  sleipnir::println("\n┏{:━^21}┯{:━^18}┯{:━^10}┓", "", "", "");
-  sleipnir::println("┃{:^21}│{:^18}│{:^10}┃", "trace", "percent", "total (ms)");
-  sleipnir::println("┡{:━^21}┷{:━^18}┷{:━^10}┩", "", "", "");
+  sleipnir::println("\n┏{:━^23}┯{:━^18}┯{:━^10}┓", "", "", "");
+  sleipnir::println("┃{:^23}│{:^18}│{:^10}┃", "trace", "percent", "total (ms)");
+  sleipnir::println("┡{:━^23}┷{:━^18}┷{:━^10}┩", "", "", "");
 
   for (auto& profiler : setup_profilers) {
     double norm = setup_duration == 0.0
                       ? (&profiler == &setup_profilers[0] ? 1.0 : 0.0)
                       : to_ms(profiler.duration()) / setup_duration;
-    sleipnir::println("│{:<21} {:>6.2f}%▕{}▏ {:>10.3f}│", profiler.name,
+    sleipnir::println("│{:<23} {:>6.2f}%▕{}▏ {:>10.3f}│", profiler.name,
                       norm * 100.0, histogram<9>(norm),
                       to_ms(profiler.duration()));
   }
 
-  sleipnir::println("└{:─^51}┘", "");
+  sleipnir::println("└{:─^53}┘", "");
 
   // Print solve diagnostics
-  sleipnir::println("┏{:━^21}┯{:━^18}┯{:━^10}┯{:━^9}┯{:━^4}┓", "", "", "", "",
+  sleipnir::println("┏{:━^23}┯{:━^18}┯{:━^10}┯{:━^9}┯{:━^4}┓", "", "", "", "",
                     "");
-  sleipnir::println("┃{:^21}│{:^18}│{:^10}│{:^9}│{:^4}┃", "trace", "percent",
+  sleipnir::println("┃{:^23}│{:^18}│{:^10}│{:^9}│{:^4}┃", "trace", "percent",
                     "total (ms)", "each (ms)", "runs");
-  sleipnir::println("┡{:━^21}┷{:━^18}┷{:━^10}┷{:━^9}┷{:━^4}┩", "", "", "", "",
+  sleipnir::println("┡{:━^23}┷{:━^18}┷{:━^10}┷{:━^9}┷{:━^4}┩", "", "", "", "",
                     "");
 
   for (auto& profiler : solve_profilers) {
@@ -233,12 +233,12 @@ inline void print_final_diagnostics(
                       ? (&profiler == &solve_profilers[0] ? 1.0 : 0.0)
                       : to_ms(profiler.total_duration()) / solve_duration;
     sleipnir::println(
-        "│{:<21} {:>6.2f}%▕{}▏ {:>10.3f} {:>9.3f} {:>4}│", profiler.name,
+        "│{:<23} {:>6.2f}%▕{}▏ {:>10.3f} {:>9.3f} {:>4}│", profiler.name,
         norm * 100.0, histogram<9>(norm), to_ms(profiler.total_duration()),
         to_ms(profiler.average_duration()), profiler.num_solves());
   }
 
-  sleipnir::println("└{:─^66}┘\n", "");
+  sleipnir::println("└{:─^68}┘\n", "");
 }
 
 }  // namespace sleipnir
