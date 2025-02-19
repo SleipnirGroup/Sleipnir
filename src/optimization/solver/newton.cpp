@@ -72,12 +72,12 @@ void newton(
   // Hessian of the Lagrangian H
   //
   // Hₖ = ∇²ₓₓL(xₖ, yₖ)
-  Hessian hessian_l{L, x_ad};
+  Hessian hessian_L{L, x_ad};
 
   setup_profilers.back().stop();
   setup_profilers.emplace_back("  ↳ ∇²ₓₓL init solve").start();
 
-  Eigen::SparseMatrix<double> H = hessian_l.value();
+  Eigen::SparseMatrix<double> H = hessian_L.value();
 
   setup_profilers.back().stop();
   setup_profilers.emplace_back("  ↳ precondition ✓").start();
@@ -156,10 +156,10 @@ void newton(
       }
 
       // Append Hessian profilers
-      solve_profilers.push_back(hessian_l.get_profilers()[0]);
+      solve_profilers.push_back(hessian_L.get_profilers()[0]);
       solve_profilers.back().name = "  ↳ ∇²ₓₓL";
       for (const auto& profiler :
-           hessian_l.get_profilers() | std::views::drop(1)) {
+           hessian_L.get_profilers() | std::views::drop(1)) {
         solve_profilers.push_back(profiler);
       }
 
@@ -292,7 +292,7 @@ void newton(
     // Update autodiff for Hessian
     x_ad.set_value(x);
     g = gradient_f.value();
-    H = hessian_l.value();
+    H = hessian_L.value();
 
     ScopedProfiler next_iter_prep_profiler{next_iter_prep_prof};
 
