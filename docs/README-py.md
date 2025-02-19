@@ -100,7 +100,7 @@ for k in range(N + 1):
 problem.minimize(J)
 ```
 
-The cost function passed to Minimize() should produce a scalar output.
+The cost function passed to minimize() should produce a scalar output.
 
 ## Solving the problem
 

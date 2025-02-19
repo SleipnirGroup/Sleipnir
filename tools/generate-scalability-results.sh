@@ -1,12 +1,12 @@
 #!/bin/bash
 
-./build/FlywheelScalabilityBenchmark --casadi
+./build/flywheel_scalability_benchmark --casadi
 
 echo -n "15 second cooldown..."
 sleep 15
 echo " done."
 
-./build/FlywheelScalabilityBenchmark --sleipnir
+./build/flywheel_scalability_benchmark --sleipnir
 
 ./tools/plot_scalability_results.py \
   --filenames \
@@ -22,13 +22,13 @@ echo -n "15 second cooldown..."
 sleep 15
 echo " done."
 
-./build/CartPoleScalabilityBenchmark --casadi
+./build/cart_pole_scalability_benchmark --casadi
 
 echo -n "30 second cooldown..."
 sleep 30
 echo " done."
 
-./build/CartPoleScalabilityBenchmark --sleipnir
+./build/cart_pole_scalability_benchmark --sleipnir
 
 ./tools/plot_scalability_results.py \
   --filenames \

@@ -10,7 +10,7 @@ modifiableFileExclude {
   \.patch$
   \.png$
   \.svg$
-  jormungandr/cpp/Docstrings\.hpp$
+  jormungandr/cpp/docstrings\.hpp$
   jormungandr/py\.typed$
 }
 

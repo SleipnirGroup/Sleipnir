@@ -20,7 +20,7 @@ and the acceleration constraints are -1 ≤ u ≤ 1.
 
 ```cpp
 #include <Eigen/Core>
-#include <sleipnir/optimization/OptimizationProblem.hpp>
+#include <sleipnir/optimization/optimization_problem.hpp>
 ```
 
 ## Initializing a problem instance
@@ -43,10 +43,10 @@ First, we need to make decision variables for our state and input.
 
 ```cpp
 // 2x1 state vector with N + 1 timesteps (includes last state)
-auto X = problem.DecisionVariable(2, N + 1);
+auto X = problem.decision_variable(2, N + 1);
 
 // 1x1 input vector with N timesteps (input at last state doesn't matter)
-auto U = problem.DecisionVariable(1, N);
+auto U = problem.decision_variable(1, N);
 ```
 
 By convention, we use capital letters for the variables to designate
@@ -67,10 +67,10 @@ for (int k = 0; k < N; ++k) {
   auto a_k = U(0, k);
 
   // pₖ₊₁ = pₖ + vₖt + 1/2aₖt²
-  problem.SubjectTo(p_k1 == p_k + v_k * t + 0.5 * a_k * t * t);
+  problem.subject_to(p_k1 == p_k + v_k * t + 0.5 * a_k * t * t);
 
   // vₖ₊₁ = vₖ + aₖt
-  problem.SubjectTo(v_k1 == v_k + a_k * t);
+  problem.subject_to(v_k1 == v_k + a_k * t);
 }
 ```
 
@@ -78,16 +78,16 @@ Next, we'll apply the state and input constraints.
 
 ```cpp
 // Start and end at rest
-problem.SubjectTo(X.Col(0) == Eigen::Matrix<double, 2, 1>{{0.0}, {0.0}});
-problem.SubjectTo(X.Col(N) == Eigen::Matrix<double, 2, 1>{{r}, {0.0}});
+problem.subject_to(X.Col(0) == Eigen::Matrix<double, 2, 1>{{0.0}, {0.0}});
+problem.subject_to(X.Col(N) == Eigen::Matrix<double, 2, 1>{{r}, {0.0}});
 
 // Limit velocity
-problem.SubjectTo(-1 <= X.Row(1));
-problem.SubjectTo(X.Row(1) <= 1);
+problem.subject_to(-1 <= X.row(1));
+problem.subject_to(X.row(1) <= 1);
 
 // Limit acceleration
-problem.SubjectTo(-1 <= U);
-problem.SubjectTo(U <= 1);
+problem.subject_to(-1 <= U);
+problem.subject_to(U <= 1);
 ```
 
 ## Specifying a cost function
@@ -100,17 +100,17 @@ sleipnir::Variable J = 0.0;
 for (int k = 0; k < N + 1; ++k) {
   J += sleipnir::pow(r - X(0, k), 2);
 }
-problem.Minimize(J);
+problem.minimize(J);
 ```
 
-The cost function passed to Minimize() should produce a scalar output.
+The cost function passed to minimize() should produce a scalar output.
 
 ## Solving the problem
 
 Now we can solve the problem.
 
 ```cpp
-problem.Solve();
+problem.solve();
 ```
 
 The solver will find the decision variable values that minimize the cost
@@ -121,9 +121,9 @@ function while satisfying the constraints.
 You can obtain the solution by querying the values of the variables like so.
 
 ```cpp
-double position = X.Value(0, 0);
-double velocity = X.Value(1, 0);
-double acceleration = U.Value(0);
+double position = X.value(0, 0);
+double velocity = X.value(1, 0);
+double acceleration = U.value(0);
 ```
 
 ## Other applications

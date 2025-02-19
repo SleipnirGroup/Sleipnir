@@ -46,7 +46,7 @@ def test_ocp_solver_differential_drive():
     problem.set_max_timestep(3.0)
 
     # Set up cost
-    problem.minimize(problem.DT() @ np.ones((N + 1, 1)))
+    problem.minimize(problem.dt() @ np.ones((N + 1, 1)))
 
     status = problem.solve(max_iterations=1000, diagnostics=True)
 
@@ -88,7 +88,7 @@ def test_ocp_solver_differential_drive():
         assert X.value(4, k) == pytest.approx(x[4, 0], abs=1e-8)
 
         # Project state forward
-        x = rk4(differential_drive_dynamics_double, x, u, problem.DT().value(0, k))
+        x = rk4(differential_drive_dynamics_double, x, u, problem.dt().value(0, k))
 
     # Verify final state
     assert X.value(0, N) == pytest.approx(x_final[0, 0], abs=1e-8)
@@ -109,7 +109,7 @@ def test_ocp_solver_differential_drive():
                 f"{time},{X.value(0, k)},{X.value(1, k)},{X.value(2, k)},{X.value(3, k)},{X.value(4, k)}\n"
             )
 
-            time += problem.DT().value(0, k)
+            time += problem.dt().value(0, k)
 
     # Log inputs for offline viewing
     with open("Differential drive inputs.csv", "w") as f:
@@ -122,4 +122,4 @@ def test_ocp_solver_differential_drive():
             else:
                 f.write(f"{time},0.0,0.0\n")
 
-            time += problem.DT().value(0, k)
+            time += problem.dt().value(0, k)

@@ -132,13 +132,13 @@ def test_iterators():
         assert elem.value() == i
         i += 1
 
-    Asub = A[2:3, 1:3]
+    sub_A = A[2:3, 1:3]
 
     # VariableBlock iterator
-    assert sum(1 for e in Asub) == 2
+    assert sum(1 for e in sub_A) == 2
 
     i = 8
-    for elem in Asub:
+    for elem in sub_A:
         assert elem.value() == i
         i += 1
 
@@ -176,14 +176,14 @@ def test_cwise_transform():
     assert (result1.value() == expected1).all()
 
     # VariableBlock CwiseTransform
-    Asub = A[:2, :2]
+    sub_A = A[:2, :2]
 
-    result2 = Asub.cwise_transform(autodiff.abs)
+    result2 = sub_A.cwise_transform(autodiff.abs)
     expected2 = np.array([[2.0, 3.0], [5.0, 6.0]])
 
     # Don't modify original matrix
     assert (A.value() == -expected1).all()
-    assert (Asub.value() == -expected2).all()
+    assert (sub_A.value() == -expected2).all()
 
     assert (result2.value() == expected2).all()
 
@@ -235,14 +235,14 @@ def expect_solve(A, B):
     rows = A.shape[0]
     print(f"Solve {rows}x{rows}")
 
-    slpA = VariableMatrix(A)
-    slpB = VariableMatrix(B)
-    actual_X = autodiff.solve(slpA, slpB)
+    slp_A = VariableMatrix(A)
+    slp_B = VariableMatrix(B)
+    actual_X = autodiff.solve(slp_A, slp_B)
 
     expected_X = np.linalg.solve(A, B)
 
     assert actual_X.shape == expected_X.shape
-    assert np.linalg.norm(slpA.value() @ actual_X.value() - slpB.value()) < 1e-12
+    assert np.linalg.norm(slp_A.value() @ actual_X.value() - slp_B.value()) < 1e-12
 
 
 def test_solve_free_function():
