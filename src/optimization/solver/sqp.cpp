@@ -35,6 +35,20 @@
 
 // See docs/algorithms.md#Works_cited for citation definitions.
 
+namespace {
+
+/**
+ * SQP step direction.
+ */
+struct Step {
+  /// Primal step.
+  Eigen::VectorXd p_x;
+  /// Dual step.
+  Eigen::VectorXd p_y;
+};
+
+}  // namespace
+
 namespace sleipnir {
 
 void sqp(
@@ -329,8 +343,7 @@ void sqp(
     linear_system_build_profiler.stop();
     ScopedProfiler linear_system_compute_profiler{linear_system_compute_prof};
 
-    Eigen::VectorXd p_x;
-    Eigen::VectorXd p_y;
+    Step step;
     constexpr double α_max = 1.0;
     double α = 1.0;
 
@@ -348,22 +361,24 @@ void sqp(
     linear_system_compute_profiler.stop();
     ScopedProfiler linear_system_solve_profiler{linear_system_solve_prof};
 
-    Eigen::VectorXd step = solver.solve(rhs);
+    auto compute_step = [&](Step& step) {
+      // p = [ pₖˣ]
+      //     [−pₖʸ]
+      Eigen::VectorXd p = solver.solve(rhs);
+      step.p_x = p.segment(0, x.rows());
+      step.p_y = -p.segment(x.rows(), y.rows());
+    };
+    compute_step(step);
 
     linear_system_solve_profiler.stop();
     ScopedProfiler line_search_profiler{line_search_prof};
-
-    // step = [ pₖˣ]
-    //        [−pₖʸ]
-    p_x = step.segment(0, x.rows());
-    p_y = -step.segment(x.rows(), y.rows());
 
     α = α_max;
 
     // Loop until a step is accepted
     while (1) {
-      Eigen::VectorXd trial_x = x + α * p_x;
-      Eigen::VectorXd trial_y = y + α * p_y;
+      Eigen::VectorXd trial_x = x + α * step.p_x;
+      Eigen::VectorXd trial_y = y + α * step.p_y;
 
       x_ad.set_value(trial_x);
 
@@ -394,8 +409,7 @@ void sqp(
       if (α == α_max &&
           next_constraint_violation >= prev_constraint_violation) {
         // Apply second-order corrections. See section 2.4 of [2].
-        Eigen::VectorXd p_x_cor = p_x;
-        Eigen::VectorXd p_y_soc = p_y;
+        auto soc_step = step;
 
         double α_soc = α;
         Eigen::VectorXd c_e_soc = c_e;
@@ -432,13 +446,10 @@ void sqp(
           rhs.bottomRows(y.rows()) = -c_e_soc;
 
           // Solve the Newton-KKT system
-          step = solver.solve(rhs);
+          compute_step(soc_step);
 
-          p_x_cor = step.segment(0, x.rows());
-          p_y_soc = -step.segment(x.rows(), y.rows());
-
-          trial_x = x + α_soc * p_x_cor;
-          trial_y = y + α_soc * p_y_soc;
+          trial_x = x + α_soc * soc_step.p_x;
+          trial_y = y + α_soc * soc_step.p_y;
 
           x_ad.set_value(trial_x);
 
@@ -457,8 +468,7 @@ void sqp(
           // Check whether filter accepts trial iterate
           entry = filter.make_entry(trial_c_e);
           if (filter.try_add(entry, α)) {
-            p_x = p_x_cor;
-            p_y = p_y_soc;
+            step = soc_step;
             α = α_soc;
             step_acceptable = true;
           }
@@ -496,8 +506,8 @@ void sqp(
       if (α < α_min) {
         double current_kkt_error = kkt_error(g, A_e, c_e, y);
 
-        trial_x = x + α_max * p_x;
-        trial_y = y + α_max * p_y;
+        trial_x = x + α_max * step.p_x;
+        trial_y = y + α_max * step.p_y;
 
         // Upate autodiff
         x_ad.set_value(trial_x);
@@ -544,8 +554,8 @@ void sqp(
     // See section 3.9 of [2].
     double max_step_scaled = 0.0;
     for (int row = 0; row < x.rows(); ++row) {
-      max_step_scaled = std::max(max_step_scaled,
-                                 std::abs(p_x(row)) / (1.0 + std::abs(x(row))));
+      max_step_scaled = std::max(
+          max_step_scaled, std::abs(step.p_x(row)) / (1.0 + std::abs(x(row))));
     }
     if (max_step_scaled < 10.0 * std::numeric_limits<double>::epsilon()) {
       α = α_max;
@@ -553,8 +563,8 @@ void sqp(
 
     // xₖ₊₁ = xₖ + αₖpₖˣ
     // yₖ₊₁ = yₖ + αₖpₖʸ
-    x += α * p_x;
-    y += α * p_y;
+    x += α * step.p_x;
+    y += α * step.p_y;
 
     // Update autodiff for Jacobians and Hessian
     x_ad.set_value(x);

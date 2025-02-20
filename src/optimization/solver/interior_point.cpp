@@ -39,6 +39,24 @@
 // See docs/algorithms.md#Interior-point_method for a derivation of the
 // interior-point method formulation being used.
 
+namespace {
+
+/**
+ * Interior-point method step direction.
+ */
+struct Step {
+  /// Primal step.
+  Eigen::VectorXd p_x;
+  /// Equality constraint dual step.
+  Eigen::VectorXd p_y;
+  /// Inequality constraint slack variable step.
+  Eigen::VectorXd p_s;
+  /// Inequality constraint dual step.
+  Eigen::VectorXd p_z;
+};
+
+}  // namespace
+
 namespace sleipnir {
 
 void interior_point(
@@ -452,10 +470,7 @@ void interior_point(
     linear_system_build_profiler.stop();
     ScopedProfiler linear_system_compute_profiler{linear_system_compute_prof};
 
-    Eigen::VectorXd p_x;
-    Eigen::VectorXd p_s;
-    Eigen::VectorXd p_y;
-    Eigen::VectorXd p_z;
+    Step step;
     double α_max = 1.0;
     double α = 1.0;
     double α_z = 1.0;
@@ -473,34 +488,35 @@ void interior_point(
     linear_system_compute_profiler.stop();
     ScopedProfiler linear_system_solve_profiler{linear_system_solve_prof};
 
-    Eigen::VectorXd step = solver.solve(rhs);
+    auto compute_step = [&](Step& step) {
+      // p = [ pₖˣ]
+      //     [−pₖʸ]
+      Eigen::VectorXd p = solver.solve(rhs);
+      step.p_x = p.segment(0, x.rows());
+      step.p_y = -p.segment(x.rows(), y.rows());
+
+      // pₖˢ = cᵢ − s + Aᵢpₖˣ
+      // pₖᶻ = −Σcᵢ + μS⁻¹e − ΣAᵢpₖˣ
+      step.p_s = c_i - s + A_i * step.p_x;
+      step.p_z = -Σ * c_i + μ * Sinv * e - Σ * A_i * step.p_x;
+    };
+    compute_step(step);
 
     linear_system_solve_profiler.stop();
     ScopedProfiler line_search_profiler{line_search_prof};
 
-    // step = [ pₖˣ]
-    //        [−pₖʸ]
-    p_x = step.segment(0, x.rows());
-    p_y = -step.segment(x.rows(), y.rows());
-
-    // pₖˢ = cᵢ − s + Aᵢpₖˣ
-    p_s = c_i - s + A_i * p_x;
-
-    // pₖᶻ = −Σcᵢ + μS⁻¹e − ΣAᵢpₖˣ
-    p_z = -Σ * c_i + μ * Sinv * e - Σ * A_i * p_x;
-
     // αᵐᵃˣ = max(α ∈ (0, 1] : sₖ + αpₖˢ ≥ (1−τⱼ)sₖ)
-    α_max = fraction_to_the_boundary_rule(s, p_s, τ);
+    α_max = fraction_to_the_boundary_rule(s, step.p_s, τ);
     α = α_max;
 
     // αₖᶻ = max(α ∈ (0, 1] : zₖ + αpₖᶻ ≥ (1−τⱼ)zₖ)
-    α_z = fraction_to_the_boundary_rule(z, p_z, τ);
+    α_z = fraction_to_the_boundary_rule(z, step.p_z, τ);
 
     // Loop until a step is accepted
     while (1) {
-      Eigen::VectorXd trial_x = x + α * p_x;
-      Eigen::VectorXd trial_y = y + α_z * p_y;
-      Eigen::VectorXd trial_z = z + α_z * p_z;
+      Eigen::VectorXd trial_x = x + α * step.p_x;
+      Eigen::VectorXd trial_y = y + α_z * step.p_y;
+      Eigen::VectorXd trial_z = z + α_z * step.p_z;
 
       x_ad.set_value(trial_x);
 
@@ -524,7 +540,7 @@ void interior_point(
         // See equation (19.30) in [1].
         trial_s = trial_c_i;
       } else {
-        trial_s = s + α * p_s;
+        trial_s = s + α * step.p_s;
       }
 
       // Check whether filter accepts trial iterate
@@ -546,10 +562,7 @@ void interior_point(
       if (α == α_max &&
           next_constraint_violation >= prev_constraint_violation) {
         // Apply second-order corrections. See section 2.4 of [2].
-        Eigen::VectorXd p_x_cor = p_x;
-        Eigen::VectorXd p_y_soc = p_y;
-        Eigen::VectorXd p_z_soc = p_z;
-        Eigen::VectorXd p_s_soc = p_s;
+        auto soc_step = step;
 
         double α_soc = α;
         double α_z_soc = α_z;
@@ -588,26 +601,17 @@ void interior_point(
           rhs.bottomRows(y.rows()) = -c_e_soc;
 
           // Solve the Newton-KKT system
-          step = solver.solve(rhs);
-
-          p_x_cor = step.segment(0, x.rows());
-          p_y_soc = -step.segment(x.rows(), y.rows());
-
-          // pₖˢ = cᵢ − s + Aᵢpₖˣ
-          p_s_soc = c_i - s + A_i * p_x_cor;
-
-          // pₖᶻ = −Σcᵢ + μS⁻¹e − ΣAᵢpₖˣ
-          p_z_soc = -Σ * c_i + μ * Sinv * e - Σ * A_i * p_x_cor;
+          compute_step(soc_step);
 
           // αˢᵒᶜ = max(α ∈ (0, 1] : sₖ + αpₖˢ ≥ (1−τⱼ)sₖ)
-          α_soc = fraction_to_the_boundary_rule(s, p_s_soc, τ);
-          trial_x = x + α_soc * p_x_cor;
-          trial_s = s + α_soc * p_s_soc;
+          α_soc = fraction_to_the_boundary_rule(s, soc_step.p_s, τ);
+          trial_x = x + α_soc * soc_step.p_x;
+          trial_s = s + α_soc * soc_step.p_s;
 
           // αₖᶻ = max(α ∈ (0, 1] : zₖ + αpₖᶻ ≥ (1−τⱼ)zₖ)
-          α_z_soc = fraction_to_the_boundary_rule(z, p_z_soc, τ);
-          trial_y = y + α_z_soc * p_y_soc;
-          trial_z = z + α_z_soc * p_z_soc;
+          α_z_soc = fraction_to_the_boundary_rule(z, soc_step.p_z, τ);
+          trial_y = y + α_z_soc * soc_step.p_y;
+          trial_z = z + α_z_soc * soc_step.p_z;
 
           x_ad.set_value(trial_x);
 
@@ -628,10 +632,7 @@ void interior_point(
           // Check whether filter accepts trial iterate
           entry = filter.make_entry(trial_s, trial_c_e, trial_c_i, μ);
           if (filter.try_add(entry, α)) {
-            p_x = p_x_cor;
-            p_y = p_y_soc;
-            p_s = p_s_soc;
-            p_z = p_z_soc;
+            step = soc_step;
             α = α_soc;
             α_z = α_z_soc;
             step_acceptable = true;
@@ -670,11 +671,11 @@ void interior_point(
       if (α < α_min) {
         double current_kkt_error = kkt_error(g, A_e, c_e, A_i, c_i, s, y, z, μ);
 
-        trial_x = x + α_max * p_x;
-        trial_s = s + α_max * p_s;
+        trial_x = x + α_max * step.p_x;
+        trial_s = s + α_max * step.p_s;
 
-        trial_y = y + α_z * p_y;
-        trial_z = z + α_z * p_z;
+        trial_y = y + α_z * step.p_y;
+        trial_z = z + α_z * step.p_z;
 
         // Upate autodiff
         x_ad.set_value(trial_x);
@@ -726,8 +727,8 @@ void interior_point(
     // See section 3.9 of [2].
     double max_step_scaled = 0.0;
     for (int row = 0; row < x.rows(); ++row) {
-      max_step_scaled = std::max(max_step_scaled,
-                                 std::abs(p_x(row)) / (1.0 + std::abs(x(row))));
+      max_step_scaled = std::max(
+          max_step_scaled, std::abs(step.p_x(row)) / (1.0 + std::abs(x(row))));
     }
     if (max_step_scaled < 10.0 * std::numeric_limits<double>::epsilon()) {
       α = α_max;
@@ -740,10 +741,10 @@ void interior_point(
     // sₖ₊₁ = sₖ + αₖpₖˢ
     // yₖ₊₁ = yₖ + αₖᶻpₖʸ
     // zₖ₊₁ = zₖ + αₖᶻpₖᶻ
-    x += α * p_x;
-    s += α * p_s;
-    y += α_z * p_y;
-    z += α_z * p_z;
+    x += α * step.p_x;
+    s += α * step.p_s;
+    y += α_z * step.p_y;
+    z += α_z * step.p_z;
 
     // A requirement for the convergence proof is that the "primal-dual barrier
     // term Hessian" Σₖ does not deviate arbitrarily much from the "primal
