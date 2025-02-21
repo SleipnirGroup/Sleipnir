@@ -79,17 +79,17 @@ TEST_CASE("OCPSolver - Differential drive", "[OCPSolver]") {
     u = U.col(k).value();
 
     // Input constraints
-    CHECK(U(0, k).value() >= -u_max(0));
-    CHECK(U(0, k).value() <= u_max(0));
-    CHECK(U(1, k).value() >= -u_max(1));
-    CHECK(U(1, k).value() <= u_max(1));
+    CHECK(U(0, k).value() >= -u_max[0]);
+    CHECK(U(0, k).value() <= u_max[0]);
+    CHECK(U(1, k).value() >= -u_max[1]);
+    CHECK(U(1, k).value() <= u_max[1]);
 
     // Verify state
-    CHECK(X.value(0, k) == Catch::Approx(x(0)).margin(1e-8));
-    CHECK(X.value(1, k) == Catch::Approx(x(1)).margin(1e-8));
-    CHECK(X.value(2, k) == Catch::Approx(x(2)).margin(1e-8));
-    CHECK(X.value(3, k) == Catch::Approx(x(3)).margin(1e-8));
-    CHECK(X.value(4, k) == Catch::Approx(x(4)).margin(1e-8));
+    CHECK(X.value(0, k) == Catch::Approx(x[0]).margin(1e-8));
+    CHECK(X.value(1, k) == Catch::Approx(x[1]).margin(1e-8));
+    CHECK(X.value(2, k) == Catch::Approx(x[2]).margin(1e-8));
+    CHECK(X.value(3, k) == Catch::Approx(x[3]).margin(1e-8));
+    CHECK(X.value(4, k) == Catch::Approx(x[4]).margin(1e-8));
 
     INFO(std::format("  k = {}", k));
 
@@ -99,11 +99,11 @@ TEST_CASE("OCPSolver - Differential drive", "[OCPSolver]") {
   }
 
   // Verify final state
-  CHECK(X.value(0, N) == Catch::Approx(x_final(0)).margin(1e-8));
-  CHECK(X.value(1, N) == Catch::Approx(x_final(1)).margin(1e-8));
-  CHECK(X.value(2, N) == Catch::Approx(x_final(2)).margin(1e-8));
-  CHECK(X.value(3, N) == Catch::Approx(x_final(3)).margin(1e-8));
-  CHECK(X.value(4, N) == Catch::Approx(x_final(4)).margin(1e-8));
+  CHECK(X.value(0, N) == Catch::Approx(x_final[0]).margin(1e-8));
+  CHECK(X.value(1, N) == Catch::Approx(x_final[1]).margin(1e-8));
+  CHECK(X.value(2, N) == Catch::Approx(x_final[2]).margin(1e-8));
+  CHECK(X.value(3, N) == Catch::Approx(x_final[3]).margin(1e-8));
+  CHECK(X.value(4, N) == Catch::Approx(x_final[4]).margin(1e-8));
 
   // Log states for offline viewing
   std::ofstream states{"OCPSolver Differential drive states.csv"};

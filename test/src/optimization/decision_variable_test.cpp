@@ -29,12 +29,12 @@ TEST_CASE("decision_variable - Vector init assign", "[decision_variable]") {
   CHECK(y.value(1) == 0.0);
 
   // Vector assignment
-  y(0).set_value(1.0);
-  y(1).set_value(2.0);
+  y[0].set_value(1.0);
+  y[1].set_value(2.0);
   CHECK(y.value(0) == 1.0);
   CHECK(y.value(1) == 2.0);
-  y(0).set_value(3.0);
-  y(1).set_value(4.0);
+  y[0].set_value(3.0);
+  y[1].set_value(4.0);
   CHECK(y.value(0) == 3.0);
   CHECK(y.value(1) == 4.0);
 }

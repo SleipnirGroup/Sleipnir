@@ -50,8 +50,8 @@ TEST_CASE("quadratic_problem - Unconstrained 2D", "[quadratic_problem]") {
     sleipnir::OptimizationProblem problem;
 
     auto x = problem.decision_variable(2);
-    x(0).set_value(1.0);
-    x(1).set_value(2.0);
+    x[0].set_value(1.0);
+    x[1].set_value(2.0);
 
     problem.minimize(x.T() * x);
 
@@ -131,8 +131,8 @@ TEST_CASE("quadratic_problem - Equality-constrained", "[quadratic_problem]") {
     sleipnir::OptimizationProblem problem;
 
     auto x = problem.decision_variable(2);
-    x(0).set_value(1.0);
-    x(1).set_value(2.0);
+    x[0].set_value(1.0);
+    x[1].set_value(2.0);
 
     problem.minimize(x.T() * x);
 

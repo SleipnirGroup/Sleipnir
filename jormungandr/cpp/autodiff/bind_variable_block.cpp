@@ -69,7 +69,7 @@ void bind_variable_block(nb::class_<VariableBlock<VariableMatrix>>& cls) {
         if (row < 0) {
           row += self.size();
         }
-        return self(row) = value;
+        return self[row] = value;
       },
       "row"_a, "value"_a);
   cls.def(
@@ -155,7 +155,7 @@ void bind_variable_block(nb::class_<VariableBlock<VariableMatrix>>& cls) {
         if (row < 0) {
           row += self.size();
         }
-        return self(row);
+        return self[row];
       },
       nb::keep_alive<0, 1>(), "row"_a,
       DOC(sleipnir, VariableBlock, operator, call, 3));

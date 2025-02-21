@@ -105,7 +105,7 @@ TEST_CASE("OptimizationProblem - Cart-pole", "[OptimizationProblem]") {
         rk4(cart_pole_dynamics_double, X.col(k).value(), U.col(k).value(), dt);
     Eigen::VectorXd actual_x_k1 = X.col(k + 1).value();
     for (int row = 0; row < actual_x_k1.rows(); ++row) {
-      CHECK(actual_x_k1(row) == Catch::Approx(expected_x_k1(row)).margin(1e-8));
+      CHECK(actual_x_k1[row] == Catch::Approx(expected_x_k1[row]).margin(1e-8));
       INFO(std::format("  x({} @ k = {}", row, k));
     }
   }

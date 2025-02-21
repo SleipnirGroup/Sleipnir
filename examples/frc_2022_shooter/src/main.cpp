@@ -95,11 +95,11 @@ int main() {
   // Position initial guess is linear interpolation between start and end
   // position
   for (int k = 0; k < N; ++k) {
-    p_x(k).set_value(std::lerp(shooter_wrt_field(0), target_wrt_field(0),
+    p_x[k].set_value(std::lerp(shooter_wrt_field(0), target_wrt_field(0),
                                static_cast<double>(k) / N));
-    p_y(k).set_value(std::lerp(shooter_wrt_field(1), target_wrt_field(1),
+    p_y[k].set_value(std::lerp(shooter_wrt_field(1), target_wrt_field(1),
                                static_cast<double>(k) / N));
-    p_z(k).set_value(std::lerp(shooter_wrt_field(2), target_wrt_field(2),
+    p_z[k].set_value(std::lerp(shooter_wrt_field(2), target_wrt_field(2),
                                static_cast<double>(k) / N));
   }
 
@@ -119,9 +119,9 @@ int main() {
   //
   //   √{v_x² + v_y² + v_z²) ≤ vₘₐₓ
   //   v_x² + v_y² + v_z² ≤ vₘₐₓ²
-  problem.subject_to(slp::pow(v_x(0) - robot_wrt_field(3), 2) +
-                         slp::pow(v_y(0) - robot_wrt_field(4), 2) +
-                         slp::pow(v_z(0) - robot_wrt_field(5), 2) <=
+  problem.subject_to(slp::pow(v_x[0] - robot_wrt_field[3], 2) +
+                         slp::pow(v_y[0] - robot_wrt_field[4], 2) +
+                         slp::pow(v_z[0] - robot_wrt_field[5], 2) <=
                      max_initial_velocity * max_initial_velocity);
 
   // Dynamics constraints - RK4 integration
@@ -141,7 +141,7 @@ int main() {
   problem.subject_to(p.col(N - 1) == target_wrt_field.block(0, 0, 3, 1));
 
   // Require the final velocity is down
-  problem.subject_to(v_z(N - 1) < 0.0);
+  problem.subject_to(v_z[N - 1] < 0.0);
 
   // Minimize time-to-target
   problem.minimize(T);
@@ -155,10 +155,10 @@ int main() {
   double velocity = v0.norm();
   std::println("Velocity = {:.03} ms", velocity);
 
-  double pitch = std::atan2(v0(2), std::hypot(v0(0), v0(1)));
+  double pitch = std::atan2(v0[2], std::hypot(v0[0], v0[1]));
   std::println("Pitch = {:.03}°", pitch * 180.0 / std::numbers::pi);
 
-  double yaw = std::atan2(v0(1), v0(0));
+  double yaw = std::atan2(v0[1], v0[0]);
   std::println("Yaw = {:.03}°", yaw * 180.0 / std::numbers::pi);
 
   std::println("Total time = {:.03} s", T.value());

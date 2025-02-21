@@ -273,7 +273,7 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
     // Create the initial value column vector
     Eigen::VectorXd x{m_decision_variables.size()};
     for (size_t i = 0; i < m_decision_variables.size(); ++i) {
-      x(i) = m_decision_variables[i].value();
+      x[i] = m_decision_variables[i].value();
     }
 
     status.exit_condition = SolverExitCondition::SUCCESS;

@@ -41,9 +41,9 @@ class Inertia {
   explicit Inertia(const EigenSolver auto& solver) {
     const auto& D = solver.vectorD();
     for (int row = 0; row < D.rows(); ++row) {
-      if (D(row) > 0.0) {
+      if (D[row] > 0.0) {
         ++positive;
-      } else if (D(row) < 0.0) {
+      } else if (D[row] < 0.0) {
         ++negative;
       } else {
         ++zero;
