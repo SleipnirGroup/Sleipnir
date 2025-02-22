@@ -428,9 +428,8 @@ void interior_point(
     //     [0  ⋯ 0 zₘ]
     //
     // Σ = S⁻¹Z
-    Eigen::SparseMatrix<double> Sinv;
-    Sinv = s.cwiseInverse().asDiagonal();
-    const Eigen::SparseMatrix<double> Σ = Sinv * z.asDiagonal();
+    const Eigen::SparseMatrix<double> Σ{s.cwiseInverse().asDiagonal() *
+                                        z.asDiagonal()};
 
     // lhs = [H + AᵢᵀΣAᵢ  Aₑᵀ]
     //       [    Aₑ       0 ]
@@ -458,13 +457,12 @@ void interior_point(
     lhs.setFromSortedTriplets(triplets.begin(), triplets.end(),
                               [](const auto&, const auto& b) { return b; });
 
-    const Eigen::VectorXd e = Eigen::VectorXd::Ones(s.rows());
-
     // rhs = −[∇f − Aₑᵀy − Aᵢᵀ(−Σcᵢ + μS⁻¹e + z)]
     //        [               cₑ                ]
     Eigen::VectorXd rhs{x.rows() + y.rows()};
-    rhs.segment(0, x.rows()) = -g + A_e.transpose() * y +
-                               A_i.transpose() * (-Σ * c_i + μ * Sinv * e + z);
+    rhs.segment(0, x.rows()) =
+        -g + A_e.transpose() * y +
+        A_i.transpose() * (-Σ * c_i + μ * s.cwiseInverse() + z);
     rhs.segment(x.rows(), y.rows()) = -c_e;
 
     linear_system_build_profiler.stop();
@@ -477,8 +475,8 @@ void interior_point(
 
     // Solve the Newton-KKT system
     //
-    // [H + AᵢᵀΣAᵢ  Aₑᵀ][ pₖˣ] = −[∇f − Aₑᵀy + Aᵢᵀ(S⁻¹(Zcᵢ − μe) − z)]
-    // [    Aₑ       0 ][−pₖʸ]    [                cₑ                ]
+    // [H + AᵢᵀΣAᵢ  Aₑᵀ][ pₖˣ] = −[∇f − Aₑᵀy − Aᵢᵀ(−Σcᵢ + μS⁻¹e + z)]
+    // [    Aₑ       0 ][−pₖʸ]    [               cₑ                ]
     if (solver.compute(lhs, equality_constraints.size(), μ).info() !=
         Eigen::Success) [[unlikely]] {
       status->exit_condition = SolverExitCondition::FACTORIZATION_FAILED;
@@ -498,7 +496,7 @@ void interior_point(
       // pₖˢ = cᵢ − s + Aᵢpₖˣ
       // pₖᶻ = −Σcᵢ + μS⁻¹e − ΣAᵢpₖˣ
       step.p_s = c_i - s + A_i * step.p_x;
-      step.p_z = -Σ * c_i + μ * Sinv * e - Σ * A_i * step.p_x;
+      step.p_z = -Σ * c_i + μ * s.cwiseInverse() - Σ * A_i * step.p_x;
     };
     compute_step(step);
 
