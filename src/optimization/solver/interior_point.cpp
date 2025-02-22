@@ -149,7 +149,7 @@ void interior_point(
   // Hessian of the Lagrangian H
   //
   // Hₖ = ∇²ₓₓL(xₖ, sₖ, yₖ, zₖ)
-  Hessian hessian_L{L, x_ad};
+  Hessian<Eigen::Lower> hessian_L{L, x_ad};
 
   setup_profilers.back().stop();
   setup_profilers.emplace_back("  ↳ ∇²ₓₓL init solve").start();
@@ -436,8 +436,7 @@ void interior_point(
     //
     // Don't assign upper triangle because solver only uses lower triangle.
     const Eigen::SparseMatrix<double> top_left =
-        H.triangularView<Eigen::Lower>() +
-        (A_i.transpose() * Σ * A_i).triangularView<Eigen::Lower>();
+        H + (A_i.transpose() * Σ * A_i).triangularView<Eigen::Lower>();
     triplets.clear();
     triplets.reserve(top_left.nonZeros() + A_e.nonZeros());
     for (int col = 0; col < H.cols(); ++col) {
