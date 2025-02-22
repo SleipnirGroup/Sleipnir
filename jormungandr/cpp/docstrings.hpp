@@ -137,7 +137,10 @@ vector of variables.
 
 The gradient tree is cached so subsequent Hessian calculations are
 faster, and the Hessian is only recomputed if the variable expression
-is nonlinear.)doc";
+is nonlinear.
+
+Template parameter ``UpLo``:
+    Which part of the Hessian to compute (Lower or Lower | Upper).)doc";
 
 static const char *__doc_sleipnir_Hessian_2 = R"doc()doc";
 
@@ -165,7 +168,19 @@ R"doc(Returns the profilers.
 Returns:
     The profilers.)doc";
 
-static const char *__doc_sleipnir_Hessian_m_jacobian = R"doc()doc";
+static const char *__doc_sleipnir_Hessian_m_H = R"doc()doc";
+
+static const char *__doc_sleipnir_Hessian_m_cached_triplets = R"doc()doc";
+
+static const char *__doc_sleipnir_Hessian_m_graphs = R"doc()doc";
+
+static const char *__doc_sleipnir_Hessian_m_nonlinear_rows = R"doc()doc";
+
+static const char *__doc_sleipnir_Hessian_m_profilers = R"doc()doc";
+
+static const char *__doc_sleipnir_Hessian_m_variables = R"doc()doc";
+
+static const char *__doc_sleipnir_Hessian_m_wrt = R"doc()doc";
 
 static const char *__doc_sleipnir_Hessian_value =
 R"doc(Evaluates the Hessian at wrt's value.

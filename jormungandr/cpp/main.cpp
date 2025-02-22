@@ -36,7 +36,7 @@ NB_MODULE(_jormungandr, m) {
       autodiff, "VariableBlock", DOC(sleipnir, VariableBlock)};
 
   nb::class_<Gradient> gradient{autodiff, "Gradient", DOC(sleipnir, Gradient)};
-  nb::class_<Hessian> hessian{autodiff, "Hessian", DOC(sleipnir, Hessian)};
+  nb::class_<Hessian<>> hessian{autodiff, "Hessian", DOC(sleipnir, Hessian)};
   nb::class_<Jacobian> jacobian{autodiff, "Jacobian", DOC(sleipnir, Jacobian)};
 
   nb::class_<EqualityConstraints> equality_constraints{

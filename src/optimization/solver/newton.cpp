@@ -72,7 +72,7 @@ void newton(
   // Hessian of the Lagrangian H
   //
   // Hₖ = ∇²ₓₓL(xₖ, yₖ)
-  Hessian hessian_L{L, x_ad};
+  Hessian<Eigen::Lower> hessian_L{L, x_ad};
 
   setup_profilers.back().stop();
   setup_profilers.emplace_back("  ↳ ∇²ₓₓL init solve").start();

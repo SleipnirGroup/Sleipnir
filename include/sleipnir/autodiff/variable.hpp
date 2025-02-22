@@ -30,6 +30,8 @@ namespace sleipnir {
 namespace detail {
 class AdjointExpressionGraph;
 }  // namespace detail
+template <int UpLo = Eigen::Lower | Eigen::Upper>
+  requires(UpLo == Eigen::Lower) || (UpLo == (Eigen::Lower | Eigen::Upper))
 class SLEIPNIR_DLLEXPORT Hessian;
 class SLEIPNIR_DLLEXPORT Jacobian;
 
@@ -282,6 +284,8 @@ class SLEIPNIR_DLLEXPORT Variable {
                                            const Variable& z);
 
   friend class detail::AdjointExpressionGraph;
+  template <int UpLo>
+    requires(UpLo == Eigen::Lower) || (UpLo == (Eigen::Lower | Eigen::Upper))
   friend class SLEIPNIR_DLLEXPORT Hessian;
   friend class SLEIPNIR_DLLEXPORT Jacobian;
 };

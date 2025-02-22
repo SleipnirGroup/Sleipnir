@@ -28,7 +28,7 @@ void bind_variable_matrix(nb::module_& autodiff,
 void bind_variable_block(nb::class_<VariableBlock<VariableMatrix>>& cls);
 
 void bind_gradient(nb::class_<Gradient>& cls);
-void bind_hessian(nb::class_<Hessian>& cls);
+void bind_hessian(nb::class_<Hessian<>>& cls);
 void bind_jacobian(nb::class_<Jacobian>& cls);
 
 void bind_equality_constraints(nb::class_<EqualityConstraints>& cls);
