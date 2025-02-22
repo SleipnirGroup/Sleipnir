@@ -1,7 +1,6 @@
 """This problem tests the case where regularization fails"""
 
 import math
-import platform
 
 import numpy as np
 
@@ -99,9 +98,4 @@ def test_optimization_problem_arm_on_elevator():
     assert status.cost_function_type == ExpressionType.QUADRATIC
     assert status.equality_constraint_type == ExpressionType.LINEAR
     assert status.inequality_constraint_type == ExpressionType.LINEAR
-
-    if platform.system() == "Linux" and platform.machine() == "aarch64":
-        # FIXME: Fails on Linux aarch64 with "factorization failed"
-        assert status.exit_condition == SolverExitCondition.FACTORIZATION_FAILED
-    else:
-        assert status.exit_condition == SolverExitCondition.SUCCESS
+    assert status.exit_condition == SolverExitCondition.SUCCESS
