@@ -251,7 +251,8 @@ void sqp(
         solve_profilers.push_back(profiler);
       }
 
-      print_final_diagnostics(iterations, setup_profilers, solve_profilers);
+      print_final_diagnostics(iterations, status->exit_condition,
+                              setup_profilers, solve_profilers);
     }
 #endif
   }};

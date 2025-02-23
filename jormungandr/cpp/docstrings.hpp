@@ -636,8 +636,6 @@ Parameter ``config``:
 Returns:
     The solver status.)doc";
 
-static const char *__doc_sleipnir_OptimizationProblem_status = R"doc()doc";
-
 static const char *__doc_sleipnir_OptimizationProblem_subject_to =
 R"doc(Tells the solver to solve the problem while satisfying the given
 equality constraint.
@@ -860,6 +858,12 @@ R"doc(The timesteps are equal length but allowed to vary as a single
 decision variable.)doc";
 
 static const char *__doc_sleipnir_ToMessage =
+R"doc(Returns user-readable message corresponding to the expression type.
+
+Parameter ``exit_condition``:
+    Solver exit condition.)doc";
+
+static const char *__doc_sleipnir_ToMessage_2 =
 R"doc(Returns user-readable message corresponding to the exit condition.
 
 Parameter ``exit_condition``:

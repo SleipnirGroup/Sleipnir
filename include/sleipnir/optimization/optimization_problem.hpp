@@ -3,28 +3,29 @@
 #pragma once
 
 #include <algorithm>
+#include <cmath>
 #include <concepts>
 #include <functional>
 #include <iterator>
 #include <optional>
+#include <string_view>
 #include <utility>
 
 #include <Eigen/Core>
 
+#include "sleipnir/autodiff/expression_type.hpp"
 #include "sleipnir/autodiff/variable.hpp"
 #include "sleipnir/autodiff/variable_matrix.hpp"
 #include "sleipnir/optimization/solver/interior_point.hpp"
 #include "sleipnir/optimization/solver/newton.hpp"
 #include "sleipnir/optimization/solver/sqp.hpp"
 #include "sleipnir/optimization/solver_config.hpp"
-#include "sleipnir/optimization/solver_exit_condition.hpp"
 #include "sleipnir/optimization/solver_iteration_info.hpp"
 #include "sleipnir/optimization/solver_status.hpp"
 #include "sleipnir/util/small_vector.hpp"
 #include "sleipnir/util/symbol_exports.hpp"
 
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-#include <array>
 #include "sleipnir/util/print.hpp"
 #endif
 
@@ -137,10 +138,7 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
    *
    * @param cost The cost function to minimize.
    */
-  void minimize(const Variable& cost) {
-    m_f = cost;
-    status.cost_function_type = m_f.value().type();
-  }
+  void minimize(const Variable& cost) { m_f = cost; }
 
   /**
    * Tells the solver to minimize the output of the given cost function.
@@ -151,10 +149,7 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
    *
    * @param cost The cost function to minimize.
    */
-  void minimize(Variable&& cost) {
-    m_f = std::move(cost);
-    status.cost_function_type = m_f.value().type();
-  }
+  void minimize(Variable&& cost) { m_f = std::move(cost); }
 
   /**
    * Tells the solver to maximize the output of the given objective function.
@@ -168,7 +163,6 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
   void maximize(const Variable& objective) {
     // Maximizing a cost function is the same as minimizing its negative
     m_f = -objective;
-    status.cost_function_type = m_f.value().type();
   }
 
   /**
@@ -183,7 +177,6 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
   void maximize(Variable&& objective) {
     // Maximizing a cost function is the same as minimizing its negative
     m_f = -std::move(objective);
-    status.cost_function_type = m_f.value().type();
   }
 
   /**
@@ -193,12 +186,6 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
    * @param constraint The constraint to satisfy.
    */
   void subject_to(const EqualityConstraints& constraint) {
-    // Get the highest order equality constraint expression type
-    for (const auto& c : constraint.constraints) {
-      status.equality_constraint_type =
-          std::max(status.equality_constraint_type, c.type());
-    }
-
     m_equality_constraints.reserve(m_equality_constraints.size() +
                                    constraint.constraints.size());
     std::ranges::copy(constraint.constraints,
@@ -212,12 +199,6 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
    * @param constraint The constraint to satisfy.
    */
   void subject_to(EqualityConstraints&& constraint) {
-    // Get the highest order equality constraint expression type
-    for (const auto& c : constraint.constraints) {
-      status.equality_constraint_type =
-          std::max(status.equality_constraint_type, c.type());
-    }
-
     m_equality_constraints.reserve(m_equality_constraints.size() +
                                    constraint.constraints.size());
     std::ranges::copy(constraint.constraints,
@@ -231,12 +212,6 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
    * @param constraint The constraint to satisfy.
    */
   void subject_to(const InequalityConstraints& constraint) {
-    // Get the highest order inequality constraint expression type
-    for (const auto& c : constraint.constraints) {
-      status.inequality_constraint_type =
-          std::max(status.inequality_constraint_type, c.type());
-    }
-
     m_inequality_constraints.reserve(m_inequality_constraints.size() +
                                      constraint.constraints.size());
     std::ranges::copy(constraint.constraints,
@@ -250,12 +225,6 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
    * @param constraint The constraint to satisfy.
    */
   void subject_to(InequalityConstraints&& constraint) {
-    // Get the highest order inequality constraint expression type
-    for (const auto& c : constraint.constraints) {
-      status.inequality_constraint_type =
-          std::max(status.inequality_constraint_type, c.type());
-    }
-
     m_inequality_constraints.reserve(m_inequality_constraints.size() +
                                      constraint.constraints.size());
     std::ranges::copy(constraint.constraints,
@@ -270,71 +239,129 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
    * @return The solver status.
    */
   SolverStatus solve(const SolverConfig& config = SolverConfig{}) {
+    SolverStatus status;
+
     // Create the initial value column vector
     Eigen::VectorXd x{m_decision_variables.size()};
     for (size_t i = 0; i < m_decision_variables.size(); ++i) {
       x[i] = m_decision_variables[i].value();
     }
 
-    status.exit_condition = SolverExitCondition::SUCCESS;
+    if (m_f) {
+      status.cost_function_type = m_f.value().type();
+    } else {
+      // If there's no cost function, make it zero and continue
+      m_f = 0.0;
+    }
 
-    // If there's no cost function, make it zero and continue
-    if (!m_f.has_value()) {
-      m_f = Variable();
+    // Get the highest order constraint expression types
+    if (!m_equality_constraints.empty()) {
+      status.equality_constraint_type =
+          std::ranges::max(m_equality_constraints, {}, &Variable::type).type();
+    }
+    if (!m_inequality_constraints.empty()) {
+      status.inequality_constraint_type =
+          std::ranges::max(m_inequality_constraints, {}, &Variable::type)
+              .type();
     }
 
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     if (config.diagnostics) {
-      constexpr std::array EXPR_TYPE_TO_NAME{"empty", "constant", "linear",
-                                             "quadratic", "nonlinear"};
+      // Print possible solver exit conditions
+      sleipnir::println("User-configured solver exit conditions:");
+      sleipnir::println("  ↳ error below {}", config.tolerance);
+      sleipnir::println("  ↳ error below {} for {} iterations",
+                        config.acceptable_tolerance,
+                        config.max_acceptable_iterations);
+      if (!m_callbacks.empty()) {
+        sleipnir::println("  ↳ user callback requested stop");
+      }
+      if (std::isfinite(config.max_iterations)) {
+        sleipnir::println("  ↳ executed {} iterations", config.max_iterations);
+      }
+      if (std::isfinite(config.timeout.count())) {
+        sleipnir::println("  ↳ {} elapsed", config.timeout);
+      }
 
-      // Print cost function and constraint expression types
-      sleipnir::println(
-          "The cost function is {}.",
-          EXPR_TYPE_TO_NAME[std::to_underlying(status.cost_function_type)]);
-      sleipnir::println("The equality constraints are {}.",
-                        EXPR_TYPE_TO_NAME[std::to_underlying(
-                            status.equality_constraint_type)]);
-      sleipnir::println("The inequality constraints are {}.",
-                        EXPR_TYPE_TO_NAME[std::to_underlying(
-                            status.inequality_constraint_type)]);
-      sleipnir::println("");
+      sleipnir::println("\n{} decision variables", m_decision_variables.size());
 
-      // Print problem dimensionality
-      sleipnir::println("Number of decision variables: {}",
-                        m_decision_variables.size());
-      sleipnir::println("Number of equality constraints: {}",
+      // Print constraint expression types
+      auto print_constraints = [](const small_vector<Variable>& constraints,
+                                  ExpressionType type) {
+        if (size_t count =
+                std::ranges::count(constraints, type, &Variable::type);
+            count > 0) {
+          sleipnir::println("  ↳ {} {}", count, ToMessage(type));
+        }
+      };
+
+      sleipnir::println("{} equality constraints",
                         m_equality_constraints.size());
-      sleipnir::println("Number of inequality constraints: {}\n",
+      print_constraints(m_equality_constraints, ExpressionType::NONLINEAR);
+      print_constraints(m_equality_constraints, ExpressionType::QUADRATIC);
+      print_constraints(m_equality_constraints, ExpressionType::LINEAR);
+      print_constraints(m_equality_constraints, ExpressionType::CONSTANT);
+
+      sleipnir::println("{} inequality constraints",
                         m_inequality_constraints.size());
+      print_constraints(m_inequality_constraints, ExpressionType::NONLINEAR);
+      print_constraints(m_inequality_constraints, ExpressionType::QUADRATIC);
+      print_constraints(m_inequality_constraints, ExpressionType::LINEAR);
+      print_constraints(m_inequality_constraints, ExpressionType::CONSTANT);
     }
+
+    auto print_chosen_solver = [](std::string_view solver_name,
+                                  const SolverStatus& status) {
+      sleipnir::println("\nUsing {} solver due to:", solver_name);
+      sleipnir::println("  ↳ {} cost function",
+                        ToMessage(status.cost_function_type));
+      sleipnir::println("  ↳ {} equality constraints",
+                        ToMessage(status.equality_constraint_type));
+      sleipnir::println("  ↳ {} inequality constraints",
+                        ToMessage(status.inequality_constraint_type));
+      sleipnir::println("");
+    };
 #endif
 
     // If the problem is empty or constant, there's nothing to do
     if (status.cost_function_type <= ExpressionType::CONSTANT &&
         status.equality_constraint_type <= ExpressionType::CONSTANT &&
         status.inequality_constraint_type <= ExpressionType::CONSTANT) {
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
+      if (config.diagnostics) {
+        print_chosen_solver("no-op", status);
+      }
+#endif
       return status;
     }
 
     // Solve the optimization problem
     if (m_equality_constraints.empty() && m_inequality_constraints.empty()) {
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
+      if (config.diagnostics) {
+        print_chosen_solver("Newton", status);
+      }
+#endif
       newton(m_decision_variables, m_f.value(), m_callbacks, config, x,
              &status);
     } else if (m_inequality_constraints.empty()) {
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
+      if (config.diagnostics) {
+        print_chosen_solver("SQP", status);
+      }
+#endif
       sqp(m_decision_variables, m_equality_constraints, m_f.value(),
           m_callbacks, config, x, &status);
     } else {
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
+      if (config.diagnostics) {
+        print_chosen_solver("IPM", status);
+      }
+#endif
       interior_point(m_decision_variables, m_equality_constraints,
                      m_inequality_constraints, m_f.value(), m_callbacks, config,
                      x, &status);
     }
-
-#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-    if (config.diagnostics) {
-      sleipnir::println("Exit condition: {}", ToMessage(status.exit_condition));
-    }
-#endif
 
     // Assign the solution to the original Variable instances
     VariableMatrix{m_decision_variables}.set_value(x);
@@ -399,9 +426,6 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
   // The user callback
   small_vector<std::function<bool(const SolverIterationInfo& info)>>
       m_callbacks;
-
-  // The solver status
-  SolverStatus status;
 };
 
 }  // namespace sleipnir
