@@ -860,8 +860,8 @@ decision variable.)doc";
 static const char *__doc_sleipnir_ToMessage =
 R"doc(Returns user-readable message corresponding to the expression type.
 
-Parameter ``exit_condition``:
-    Solver exit condition.)doc";
+Parameter ``type``:
+    Expression type.)doc";
 
 static const char *__doc_sleipnir_ToMessage_2 =
 R"doc(Returns user-readable message corresponding to the exit condition.
