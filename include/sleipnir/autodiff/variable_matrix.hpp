@@ -558,7 +558,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
 
     for (int i = 0; i < lhs.rows(); ++i) {
       for (int j = 0; j < rhs.cols(); ++j) {
-        Variable sum{0.0};
+        Variable sum;
         for (int k = 0; k < lhs.cols(); ++k) {
           sum += lhs(i, k) * rhs(k, j);
         }
@@ -640,7 +640,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
 
     for (int i = 0; i < rows(); ++i) {
       for (int j = 0; j < rhs.cols(); ++j) {
-        Variable sum{0.0};
+        Variable sum;
         for (int k = 0; k < cols(); ++k) {
           sum += (*this)(i, k) * rhs(k, j);
         }
