@@ -8,7 +8,7 @@ concurrency:
 
 jobs:
   coverage:
-    timeout-minutes: 15
+    timeout-minutes: 10
     name: "Coverage"
     runs-on: ubuntu-24.04
     steps:
