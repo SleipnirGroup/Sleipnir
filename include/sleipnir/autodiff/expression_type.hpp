@@ -4,6 +4,10 @@
 
 #include <stdint.h>
 
+#include <string_view>
+
+#include "sleipnir/util/symbol_exports.hpp"
+
 namespace sleipnir {
 
 /**
@@ -23,5 +27,30 @@ enum class ExpressionType : uint8_t {
   /// The expression is composed of nonlinear and lower-order operators.
   NONLINEAR
 };
+
+/**
+ * Returns user-readable message corresponding to the expression type.
+ *
+ * @param exit_condition Solver exit condition.
+ */
+SLEIPNIR_DLLEXPORT constexpr std::string_view ToMessage(
+    const ExpressionType& type) {
+  using enum ExpressionType;
+
+  switch (type) {
+    case NONE:
+      return "none";
+    case CONSTANT:
+      return "constant";
+    case LINEAR:
+      return "linear";
+    case QUADRATIC:
+      return "quadratic";
+    case NONLINEAR:
+      return "nonlinear";
+    default:
+      return "unknown";
+  }
+}
 
 }  // namespace sleipnir

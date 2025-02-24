@@ -338,16 +338,11 @@ void interior_point(
         solve_profilers.push_back(profiler);
       }
 
-      print_final_diagnostics(iterations, setup_profilers, solve_profilers);
+      print_final_diagnostics(iterations, status->exit_condition,
+                              setup_profilers, solve_profilers);
     }
 #endif
   }};
-
-#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-  if (config.diagnostics) {
-    sleipnir::println("Error tolerance: {}\n", config.tolerance);
-  }
-#endif
 
   while (E_0 > config.tolerance &&
          acceptable_iter_counter < config.max_acceptable_iterations) {

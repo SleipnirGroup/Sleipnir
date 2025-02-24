@@ -12,6 +12,7 @@
 #include <string>
 #include <utility>
 
+#include "sleipnir/optimization/solver_exit_condition.hpp"
 #include "sleipnir/util/print.hpp"
 #include "sleipnir/util/setup_profiler.hpp"
 #include "sleipnir/util/small_vector.hpp"
@@ -187,19 +188,23 @@ std::string histogram(double value) {
  * Prints final diagnostics.
  *
  * @param iterations Number of iterations.
+ * @param exit_condition The solver's exit condition.
  * @param setup_profilers Setup profilers.
  * @param solve_profilers Solve profilers.
  */
 inline void print_final_diagnostics(
-    int iterations, const small_vector<SetupProfiler>& setup_profilers,
+    int iterations, SolverExitCondition exit_condition,
+    const small_vector<SetupProfiler>& setup_profilers,
     const small_vector<SolveProfiler>& solve_profilers) {
   // Print bottom of iteration diagnostics table
   sleipnir::println("└{:─^105}┘", "");
 
+  sleipnir::println("\nExit: {}", ToMessage(exit_condition));
+
   // Print total time
   auto setup_duration = to_ms(setup_profilers[0].duration());
   auto solve_duration = to_ms(solve_profilers[0].total_duration());
-  sleipnir::println("\nTime: {:.3f} ms", setup_duration + solve_duration);
+  sleipnir::println("Time: {:.3f} ms", setup_duration + solve_duration);
   sleipnir::println("  ↳ setup: {:.3f} ms", setup_duration);
   sleipnir::println("  ↳ solve: {:.3f} ms ({} iterations)", solve_duration,
                     iterations);
@@ -238,7 +243,7 @@ inline void print_final_diagnostics(
         to_ms(profiler.average_duration()), profiler.num_solves());
   }
 
-  sleipnir::println("└{:─^68}┘\n", "");
+  sleipnir::println("└{:─^68}┘", "");
 }
 
 }  // namespace sleipnir
