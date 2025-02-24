@@ -8,7 +8,7 @@ fi
 
 # Build executable
 cmake -B build-coverage -S . -DCMAKE_BUILD_TYPE=Coverage -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
-cmake --build build-coverage --target $1
+cmake --build build-coverage --target $1 --parallel $(nproc)
 
 # Run executable and generate reports
 pushd build-coverage
