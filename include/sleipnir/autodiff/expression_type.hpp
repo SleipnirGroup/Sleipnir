@@ -31,7 +31,7 @@ enum class ExpressionType : uint8_t {
 /**
  * Returns user-readable message corresponding to the expression type.
  *
- * @param exit_condition Solver exit condition.
+ * @param type Expression type.
  */
 SLEIPNIR_DLLEXPORT constexpr std::string_view ToMessage(
     const ExpressionType& type) {
