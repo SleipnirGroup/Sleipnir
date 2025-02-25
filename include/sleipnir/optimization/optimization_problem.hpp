@@ -3,11 +3,13 @@
 #pragma once
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <concepts>
 #include <functional>
 #include <iterator>
 #include <optional>
+#include <ranges>
 #include <string_view>
 #include <utility>
 
@@ -285,29 +287,28 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
 
       sleipnir::println("\n{} decision variables", m_decision_variables.size());
 
-      // Print constraint expression types
-      auto print_constraints = [](const small_vector<Variable>& constraints,
-                                  ExpressionType type) {
-        if (size_t count =
-                std::ranges::count(constraints, type, &Variable::type);
-            count > 0) {
-          sleipnir::println("  ↳ {} {}", count, ToMessage(type));
-        }
-      };
+      auto print_constraint_types =
+          [](const small_vector<Variable>& constraints) {
+            std::array<size_t, 5> type_counts{};
+            for (const auto& constraint : constraints) {
+              ++type_counts[std::to_underlying(constraint.type())];
+            }
+            for (const auto& [count, name] : std::views::zip(
+                     type_counts, std::array{"empty", "constant", "linear",
+                                             "quadratic", "nonlinear"})) {
+              if (count > 0) {
+                sleipnir::println("  ↳ {} {}", count, name);
+              }
+            }
+          };
 
+      // Print constraint types
       sleipnir::println("{} equality constraints",
                         m_equality_constraints.size());
-      print_constraints(m_equality_constraints, ExpressionType::NONLINEAR);
-      print_constraints(m_equality_constraints, ExpressionType::QUADRATIC);
-      print_constraints(m_equality_constraints, ExpressionType::LINEAR);
-      print_constraints(m_equality_constraints, ExpressionType::CONSTANT);
-
+      print_constraint_types(m_equality_constraints);
       sleipnir::println("{} inequality constraints",
                         m_inequality_constraints.size());
-      print_constraints(m_inequality_constraints, ExpressionType::NONLINEAR);
-      print_constraints(m_inequality_constraints, ExpressionType::QUADRATIC);
-      print_constraints(m_inequality_constraints, ExpressionType::LINEAR);
-      print_constraints(m_inequality_constraints, ExpressionType::CONSTANT);
+      print_constraint_types(m_inequality_constraints);
     }
 
     auto print_chosen_solver = [](std::string_view solver_name,
