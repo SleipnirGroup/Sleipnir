@@ -118,12 +118,12 @@ inline double error_estimate(const Eigen::VectorXd& g,
       std::max(s_max, z.lpNorm<1>() / num_inequality_constraints) / s_max;
 
   const auto S = s.asDiagonal();
-  const Eigen::VectorXd e = Eigen::VectorXd::Ones(s.rows());
+  const Eigen::VectorXd μe = Eigen::VectorXd::Constant(s.rows(), μ);
 
   return std::max({(g - A_e.transpose() * y - A_i.transpose() * z)
                            .lpNorm<Eigen::Infinity>() /
                        s_d,
-                   (S * z - μ * e).lpNorm<Eigen::Infinity>() / s_c,
+                   (S * z - μe).lpNorm<Eigen::Infinity>() / s_c,
                    c_e.lpNorm<Eigen::Infinity>(),
                    (c_i - s).lpNorm<Eigen::Infinity>()});
 }
