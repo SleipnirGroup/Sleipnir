@@ -111,7 +111,7 @@ void newton(
 
   Filter filter{f};
 
-  RegularizedLDLT solver;
+  RegularizedLDLT solver{decision_variables.size(), 0};
 
   // Variables for determining when a step is acceptable
   constexpr double α_red_factor = 0.5;
@@ -207,7 +207,7 @@ void newton(
     // Solve the Newton-KKT system
     //
     // Hpₖˣ = −∇f
-    solver.compute(H, 0, config.tolerance / 10.0);
+    solver.compute(H);
 
     linear_system_compute_profiler.stop();
     ScopedProfiler linear_system_solve_profiler{linear_system_solve_prof};

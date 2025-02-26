@@ -23,8 +23,16 @@ class RegularizedLDLT {
  public:
   /**
    * Constructs a RegularizedLDLT instance.
+   *
+   * @param num_decision_variables The number of decision variables in the
+   *   system.
+   * @param num_equality_constraints The number of equality constraints in the
+   *   system.
    */
-  RegularizedLDLT() = default;
+  RegularizedLDLT(size_t num_decision_variables,
+                  size_t num_equality_constraints)
+      : m_num_decision_variables{num_decision_variables},
+        m_num_equality_constraints{num_equality_constraints} {}
 
   /**
    * Reports whether previous computation was successful.
@@ -37,40 +45,34 @@ class RegularizedLDLT {
    * Computes the regularized LDLT factorization of a matrix.
    *
    * @param lhs Left-hand side of the system.
-   * @param num_equality_constraints The number of equality constraints in the
-   *   system.
+   * @return The factorization.
+   */
+  RegularizedLDLT& compute(const Eigen::SparseMatrix<double>& lhs) {
+    return compute(lhs, 1e-9);
+  }
+
+  /**
+   * Computes the regularized LDLT factorization of a matrix.
+   *
+   * @param lhs Left-hand side of the system.
    * @param μ The barrier parameter for the current interior-point iteration.
    * @return The factorization.
    */
-  RegularizedLDLT& compute(const Eigen::SparseMatrix<double>& lhs,
-                           size_t num_equality_constraints, double μ) {
+  RegularizedLDLT& compute(const Eigen::SparseMatrix<double>& lhs, double μ) {
     // The regularization procedure is based on algorithm B.1 of [1]
-    m_num_decision_variables = lhs.rows() - num_equality_constraints;
-    m_num_equality_constraints = num_equality_constraints;
-
-    const Inertia ideal_inertia{m_num_decision_variables,
-                                m_num_equality_constraints, 0};
-    Inertia inertia;
-
-    double δ = 0.0;
-    double γ = 0.0;
 
     // Max density is 50% due to the caller only providing the lower triangle.
     // We consider less than 25% to be sparse.
     m_is_sparse = lhs.nonZeros() < 0.25 * lhs.size();
 
-    if (m_is_sparse) {
-      m_info = compute_sparse(lhs).info();
-    } else {
-      m_info = m_dense_solver.compute(lhs).info();
-    }
+    m_info = m_is_sparse ? compute_sparse(lhs).info()
+                         : m_dense_solver.compute(lhs).info();
+
+    Inertia inertia;
 
     if (m_info == Eigen::Success) {
-      if (m_is_sparse) {
-        inertia = Inertia{m_sparse_solver};
-      } else {
-        inertia = Inertia{m_dense_solver};
-      }
+      inertia =
+          m_is_sparse ? Inertia{m_sparse_solver} : Inertia{m_dense_solver};
 
       // If the inertia is ideal, don't regularize the system
       if (inertia == ideal_inertia) {
@@ -78,22 +80,18 @@ class RegularizedLDLT {
       }
     }
 
-    // If the decomposition succeeded and the inertia has some zero eigenvalues,
-    // or the decomposition failed, regularize the equality constraints
-    if ((m_info == Eigen::Success && inertia.zero > 0) ||
-        m_info != Eigen::Success) {
-      γ = 1e-8 * std::pow(μ, 0.25);
-    }
-
     // Also regularize the Hessian. If the Hessian wasn't regularized in a
     // previous run of Compute(), start at a small value of δ. Otherwise,
     // attempt a δ half as big as the previous run so δ can trend downwards over
     // time.
-    if (m_δ_old == 0.0) {
-      δ = 1e-4;
-    } else {
-      δ = m_δ_old / 2.0;
-    }
+    double δ = m_δ_old == 0.0 ? 1e-4 : m_δ_old / 2.0;
+
+    // If the decomposition succeeded and the inertia has some zero eigenvalues,
+    // or the decomposition failed, regularize the equality constraints
+    double γ = (m_info == Eigen::Success && inertia.zero > 0) ||
+                       m_info != Eigen::Success
+                   ? 1e-8 * std::pow(μ, 0.25)
+                   : 0.0;
 
     while (true) {
       // Regularize lhs by adding a multiple of the identity matrix
@@ -182,6 +180,10 @@ class RegularizedLDLT {
 
   /// The number of equality constraints in the system.
   size_t m_num_equality_constraints = 0;
+
+  /// The ideal system inertia.
+  Inertia ideal_inertia{m_num_decision_variables, m_num_equality_constraints,
+                        0};
 
   /// The value of δ from the previous run of Compute().
   double m_δ_old = 0.0;
