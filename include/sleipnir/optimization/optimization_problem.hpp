@@ -285,7 +285,12 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
         sleipnir::println("  ↳ {} elapsed", config.timeout);
       }
 
-      sleipnir::println("\n{} decision variables", m_decision_variables.size());
+      if (m_decision_variables.size() == 1) {
+        sleipnir::println("\n1 decision variable");
+      } else {
+        sleipnir::println("\n{} decision variables",
+                          m_decision_variables.size());
+      }
 
       auto print_constraint_types =
           [](const small_vector<Variable>& constraints) {
@@ -303,11 +308,19 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
           };
 
       // Print constraint types
-      sleipnir::println("{} equality constraints",
-                        m_equality_constraints.size());
+      if (m_equality_constraints.size() == 1) {
+        sleipnir::println("1 equality constraint");
+      } else {
+        sleipnir::println("{} equality constraints",
+                          m_equality_constraints.size());
+      }
       print_constraint_types(m_equality_constraints);
-      sleipnir::println("{} inequality constraints",
-                        m_inequality_constraints.size());
+      if (m_inequality_constraints.size() == 1) {
+        sleipnir::println("1 inequality constraint");
+      } else {
+        sleipnir::println("{} inequality constraints",
+                          m_inequality_constraints.size());
+      }
       print_constraint_types(m_inequality_constraints);
     }
 
