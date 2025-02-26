@@ -78,10 +78,10 @@ inline double kkt_error(const Eigen::VectorXd& g,
   //   cᵢ − s = 0
 
   const auto S = s.asDiagonal();
-  const Eigen::VectorXd e = Eigen::VectorXd::Ones(s.rows());
+  const Eigen::VectorXd μe = Eigen::VectorXd::Constant(s.rows(), μ);
 
   return (g - A_e.transpose() * y - A_i.transpose() * z).lpNorm<1>() +
-         (S * z - μ * e).lpNorm<1>() + c_e.lpNorm<1>() + (c_i - s).lpNorm<1>();
+         (S * z - μe).lpNorm<1>() + c_e.lpNorm<1>() + (c_i - s).lpNorm<1>();
 }
 
 }  // namespace sleipnir
