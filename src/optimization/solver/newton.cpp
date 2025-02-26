@@ -25,7 +25,6 @@
 #include "util/scope_exit.hpp"
 
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-#include "sleipnir/util/print.hpp"
 #include "sleipnir/util/spy.hpp"
 #include "util/print_diagnostics.hpp"
 #endif
@@ -170,12 +169,6 @@ void newton(
     }
 #endif
   }};
-
-#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-  if (config.diagnostics) {
-    sleipnir::println("Error tolerance: {}\n", config.tolerance);
-  }
-#endif
 
   while (E_0 > config.tolerance &&
          acceptable_iter_counter < config.max_acceptable_iterations) {
