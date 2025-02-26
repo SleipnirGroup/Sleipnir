@@ -217,15 +217,9 @@ class RegularizedLDLT {
    */
   Eigen::SparseMatrix<double> regularization(double δ, double γ) {
     Eigen::VectorXd vec{m_num_decision_variables + m_num_equality_constraints};
-    size_t row = 0;
-    while (row < m_num_decision_variables) {
-      vec[row] = δ;
-      ++row;
-    }
-    while (row < m_num_decision_variables + m_num_equality_constraints) {
-      vec[row] = -γ;
-      ++row;
-    }
+    vec.segment(0, m_num_decision_variables).setConstant(δ);
+    vec.segment(m_num_decision_variables, m_num_equality_constraints)
+        .setConstant(-γ);
 
     return Eigen::SparseMatrix<double>{vec.asDiagonal()};
   }
