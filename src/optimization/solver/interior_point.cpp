@@ -10,7 +10,8 @@
 #include <memory>
 #include <ranges>
 
-#include <Eigen/SparseCholesky>
+#include <Eigen/Core>
+#include <Eigen/SparseCore>
 
 #include "optimization/regularized_ldlt.hpp"
 #include "optimization/solver/util/error_estimate.hpp"
@@ -21,7 +22,11 @@
 #include "sleipnir/autodiff/gradient.hpp"
 #include "sleipnir/autodiff/hessian.hpp"
 #include "sleipnir/autodiff/jacobian.hpp"
+#include "sleipnir/autodiff/variable.hpp"
+#include "sleipnir/optimization/solver_config.hpp"
 #include "sleipnir/optimization/solver_exit_condition.hpp"
+#include "sleipnir/optimization/solver_iteration_info.hpp"
+#include "sleipnir/optimization/solver_status.hpp"
 #include "sleipnir/util/scoped_profiler.hpp"
 #include "sleipnir/util/setup_profiler.hpp"
 #include "sleipnir/util/small_vector.hpp"
