@@ -183,7 +183,8 @@ void sqp(
   // Kept outside the loop so its storage can be reused
   small_vector<Eigen::Triplet<double>> triplets;
 
-  RegularizedLDLT solver;
+  RegularizedLDLT solver{decision_variables.size(),
+                         equality_constraints.size()};
 
   // Variables for determining when a step is acceptable
   constexpr double α_red_factor = 0.5;
@@ -349,9 +350,7 @@ void sqp(
     //
     // [H   Aₑᵀ][ pₖˣ] = −[∇f − Aₑᵀy]
     // [Aₑ   0 ][−pₖʸ]    [   cₑ    ]
-    if (solver
-            .compute(lhs, equality_constraints.size(), config.tolerance / 10.0)
-            .info() != Eigen::Success) [[unlikely]] {
+    if (solver.compute(lhs).info() != Eigen::Success) [[unlikely]] {
       status->exit_condition = SolverExitCondition::FACTORIZATION_FAILED;
       return;
     }
