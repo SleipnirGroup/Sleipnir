@@ -4,7 +4,7 @@
 
 #include <cstddef>
 
-#include "sleipnir/util/concepts.hpp"
+#include <Eigen/Core>
 
 namespace sleipnir {
 
@@ -21,8 +21,8 @@ class Inertia {
   constexpr Inertia() = default;
 
   /**
-   * Constructs the Inertia type with the given number of positive, negative,
-   * and zero eigenvalues.
+   * Constructs Inertia with the given number of positive, negative, and zero
+   * eigenvalues.
    *
    * @param positive The number of positive eigenvalues.
    * @param negative The number of negative eigenvalues.
@@ -32,18 +32,16 @@ class Inertia {
       : positive{positive}, negative{negative}, zero{zero} {}
 
   /**
-   * Constructs the Inertia type with the inertia of the given LDLT
-   * decomposition.
+   * Constructs Inertia from the D matrix of an LDLT decomposition
+   * (see https://en.wikipedia.org/wiki/Sylvester's_law_of_inertia).
    *
-   * @tparam Solver Eigen sparse linear system solver.
-   * @param solver The LDLT decomposition of which to compute the inertia.
+   * @param D The D matrix of an LDLT decomposition in vector form.
    */
-  explicit Inertia(const EigenSolver auto& solver) {
-    const auto& D = solver.vectorD();
-    for (int row = 0; row < D.rows(); ++row) {
-      if (D[row] > 0.0) {
+  explicit Inertia(const Eigen::VectorXd& D) {
+    for (const auto& elem : D) {
+      if (elem > 0.0) {
         ++positive;
-      } else if (D[row] < 0.0) {
+      } else if (elem < 0.0) {
         ++negative;
       } else {
         ++zero;
