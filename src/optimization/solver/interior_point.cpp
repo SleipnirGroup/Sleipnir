@@ -228,7 +228,7 @@ void interior_point(
   // Fraction-to-the-boundary rule scale factor τ
   double τ = τ_min;
 
-  Filter filter{f};
+  Filter filter;
 
   // This should be run when the error estimate is below a desired threshold for
   // the current barrier parameter
@@ -536,8 +536,7 @@ void interior_point(
       }
 
       // Check whether filter accepts trial iterate
-      auto entry = filter.make_entry(trial_s, trial_c_e, trial_c_i, μ);
-      if (filter.try_add(entry, α)) {
+      if (filter.try_add(FilterEntry{f, trial_s, trial_c_e, trial_c_i, μ}, α)) {
         // Accept step
         break;
       }
@@ -622,8 +621,8 @@ void interior_point(
           }
 
           // Check whether filter accepts trial iterate
-          entry = filter.make_entry(trial_s, trial_c_e, trial_c_i, μ);
-          if (filter.try_add(entry, α)) {
+          if (filter.try_add(FilterEntry{f, trial_s, trial_c_e, trial_c_i, μ},
+                             α)) {
             step = soc_step;
             α = α_soc;
             α_z = α_z_soc;
@@ -649,7 +648,8 @@ void interior_point(
       //
       // See section 3.2 case I of [2].
       if (full_step_rejected_counter >= 4 &&
-          filter.max_constraint_violation > entry.constraint_violation / 10.0) {
+          filter.max_constraint_violation >
+              filter.back().constraint_violation / 10.0) {
         filter.max_constraint_violation *= 0.1;
         filter.reset();
         continue;
