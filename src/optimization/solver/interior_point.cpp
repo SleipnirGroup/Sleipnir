@@ -29,7 +29,6 @@
 #include "util/scope_exit.hpp"
 
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-#include "sleipnir/util/print.hpp"
 #include "sleipnir/util/spy.hpp"
 #include "util/print_diagnostics.hpp"
 #endif
@@ -169,14 +168,7 @@ void interior_point(
   if (equality_constraints.size() > decision_variables.size()) {
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     if (config.diagnostics) {
-      sleipnir::println("The problem has too few degrees of freedom.");
-      sleipnir::println(
-          "Violated constraints (cₑ(x) = 0) in order of declaration:");
-      for (int row = 0; row < c_e.rows(); ++row) {
-        if (c_e[row] < 0.0) {
-          sleipnir::println("  {}/{}: {} = 0", row + 1, c_e.rows(), c_e[row]);
-        }
-      }
+      print_too_many_dofs_error(c_e);
     }
 #endif
 
@@ -354,16 +346,7 @@ void interior_point(
     if (is_equality_locally_infeasible(A_e, c_e)) {
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
       if (config.diagnostics) {
-        sleipnir::println(
-            "The problem is locally infeasible due to violated equality "
-            "constraints.");
-        sleipnir::println(
-            "Violated constraints (cₑ(x) = 0) in order of declaration:");
-        for (int row = 0; row < c_e.rows(); ++row) {
-          if (c_e[row] < 0.0) {
-            sleipnir::println("  {}/{}: {} = 0", row + 1, c_e.rows(), c_e[row]);
-          }
-        }
+        print_c_e_local_infeasibility_error(c_e);
       }
 #endif
 
@@ -375,16 +358,7 @@ void interior_point(
     if (is_inequality_locally_infeasible(A_i, c_i)) {
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
       if (config.diagnostics) {
-        sleipnir::println(
-            "The problem is infeasible due to violated inequality "
-            "constraints.");
-        sleipnir::println(
-            "Violated constraints (cᵢ(x) ≥ 0) in order of declaration:");
-        for (int row = 0; row < c_i.rows(); ++row) {
-          if (c_i[row] < 0.0) {
-            sleipnir::println("  {}/{}: {} ≥ 0", row + 1, c_i.rows(), c_i[row]);
-          }
-        }
+        print_c_i_local_infeasibility_error(c_i);
       }
 #endif
 
