@@ -71,8 +71,8 @@ class RegularizedLDLT {
     Inertia inertia;
 
     if (m_info == Eigen::Success) {
-      inertia =
-          m_is_sparse ? Inertia{m_sparse_solver} : Inertia{m_dense_solver};
+      inertia = m_is_sparse ? Inertia{m_sparse_solver.vectorD()}
+                            : Inertia{m_dense_solver.vectorD()};
 
       // If the inertia is ideal, don't regularize the system
       if (inertia == ideal_inertia) {
@@ -101,12 +101,12 @@ class RegularizedLDLT {
       if (m_is_sparse) {
         m_info = compute_sparse(lhs + regularization(δ, γ)).info();
         if (m_info == Eigen::Success) {
-          inertia = Inertia{m_sparse_solver};
+          inertia = Inertia{m_sparse_solver.vectorD()};
         }
       } else {
         m_info = m_dense_solver.compute(lhs + regularization(δ, γ)).info();
         if (m_info == Eigen::Success) {
-          inertia = Inertia{m_dense_solver};
+          inertia = Inertia{m_dense_solver.vectorD()};
         }
       }
 

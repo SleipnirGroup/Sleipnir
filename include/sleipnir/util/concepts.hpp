@@ -29,7 +29,4 @@ concept SleipnirMatrixLike = requires(T t, int rows, int cols) {
 template <typename T>
 concept MatrixLike = SleipnirMatrixLike<T> || EigenMatrixLike<T>;
 
-template <typename T>
-concept EigenSolver = requires(T t) { t.solve(Eigen::VectorXd{}); };
-
 }  // namespace sleipnir
