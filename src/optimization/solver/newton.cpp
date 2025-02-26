@@ -109,7 +109,7 @@ void newton(
 
   int iterations = 0;
 
-  Filter filter{f};
+  Filter filter;
 
   RegularizedLDLT solver{decision_variables.size(), 0};
 
@@ -235,8 +235,7 @@ void newton(
       }
 
       // Check whether filter accepts trial iterate
-      auto entry = filter.make_entry();
-      if (filter.try_add(entry, α)) {
+      if (filter.try_add(FilterEntry{f}, α)) {
         // Accept step
         break;
       }

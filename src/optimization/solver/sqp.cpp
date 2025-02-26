@@ -178,7 +178,7 @@ void sqp(
 
   int iterations = 0;
 
-  Filter filter{f};
+  Filter filter;
 
   // Kept outside the loop so its storage can be reused
   small_vector<Eigen::Triplet<double>> triplets;
@@ -390,8 +390,7 @@ void sqp(
       }
 
       // Check whether filter accepts trial iterate
-      auto entry = filter.make_entry(trial_c_e);
-      if (filter.try_add(entry, α)) {
+      if (filter.try_add(FilterEntry{f, trial_c_e}, α)) {
         // Accept step
         break;
       }
@@ -463,8 +462,7 @@ void sqp(
           }
 
           // Check whether filter accepts trial iterate
-          entry = filter.make_entry(trial_c_e);
-          if (filter.try_add(entry, α)) {
+          if (filter.try_add(FilterEntry{f, trial_c_e}, α)) {
             step = soc_step;
             α = α_soc;
             step_acceptable = true;
@@ -489,7 +487,8 @@ void sqp(
       //
       // See section 3.2 case I of [2].
       if (full_step_rejected_counter >= 4 &&
-          filter.max_constraint_violation > entry.constraint_violation / 10.0) {
+          filter.max_constraint_violation >
+              filter.back().constraint_violation / 10.0) {
         filter.max_constraint_violation *= 0.1;
         filter.reset();
         continue;

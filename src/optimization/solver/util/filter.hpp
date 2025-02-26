@@ -36,6 +36,36 @@ struct FilterEntry {
    */
   constexpr FilterEntry(double cost, double constraint_violation)
       : cost{cost}, constraint_violation{constraint_violation} {}
+
+  /**
+   * Constructs a Newton's method filter entry.
+   *
+   * @param f The cost function.
+   */
+  explicit FilterEntry(Variable& f) : FilterEntry{f.value(), 0.0} {}
+
+  /**
+   * Constructs a Sequential Quadratic Programming filter entry.
+   *
+   * @param f The cost function.
+   * @param c_e The equality constraint values (nonzero means violation).
+   */
+  FilterEntry(Variable& f, const Eigen::VectorXd& c_e)
+      : FilterEntry{f.value(), c_e.lpNorm<1>()} {}
+
+  /**
+   * Constructs an interior-point method filter entry.
+   *
+   * @param f The cost function.
+   * @param s The inequality constraint slack variables.
+   * @param c_e The equality constraint values (nonzero means violation).
+   * @param c_i The inequality constraint values (negative means violation).
+   * @param μ The barrier parameter.
+   */
+  FilterEntry(Variable& f, Eigen::VectorXd& s, const Eigen::VectorXd& c_e,
+              const Eigen::VectorXd& c_i, double μ)
+      : FilterEntry{f.value() - μ * s.array().log().sum(),
+                    c_e.lpNorm<1>() + (c_i - s).lpNorm<1>()} {}
 };
 
 /**
@@ -48,20 +78,16 @@ class Filter {
   double max_constraint_violation = 1e4;
 
   /**
-   * Construct an empty filter.
-   *
-   * @param f The cost function.
+   * Constructs an empty filter.
    */
-  explicit Filter(Variable& f) {
-    m_f = &f;
-
+  Filter() {
     // Initial filter entry rejects constraint violations above max
     m_filter.emplace_back(std::numeric_limits<double>::infinity(),
                           max_constraint_violation);
   }
 
   /**
-   * Reset the filter.
+   * Resets the filter.
    */
   void reset() {
     m_filter.clear();
@@ -72,35 +98,7 @@ class Filter {
   }
 
   /**
-   * Creates a new Newton's method filter entry.
-   */
-  FilterEntry make_entry() { return FilterEntry{m_f->value(), 0.0}; }
-
-  /**
-   * Creates a new Sequential Quadratic Programming filter entry.
-   *
-   * @param c_e The equality constraint values (nonzero means violation).
-   */
-  FilterEntry make_entry(const Eigen::VectorXd& c_e) {
-    return FilterEntry{m_f->value(), c_e.lpNorm<1>()};
-  }
-
-  /**
-   * Creates a new interior-point method filter entry.
-   *
-   * @param s The inequality constraint slack variables.
-   * @param c_e The equality constraint values (nonzero means violation).
-   * @param c_i The inequality constraint values (negative means violation).
-   * @param μ The barrier parameter.
-   */
-  FilterEntry make_entry(Eigen::VectorXd& s, const Eigen::VectorXd& c_e,
-                         const Eigen::VectorXd& c_i, double μ) {
-    return FilterEntry{m_f->value() - μ * s.array().log().sum(),
-                       c_e.lpNorm<1>() + (c_i - s).lpNorm<1>()};
-  }
-
-  /**
-   * Add a new entry to the filter.
+   * Adds a new entry to the filter.
    *
    * @param entry The entry to add to the filter.
    */
@@ -115,7 +113,7 @@ class Filter {
   }
 
   /**
-   * Add a new entry to the filter.
+   * Adds a new entry to the filter.
    *
    * @param entry The entry to add to the filter.
    */
@@ -184,11 +182,17 @@ class Filter {
     });
   }
 
+  /**
+   * Returns the most recently added filter entry.
+   *
+   * @return The most recently added filter entry.
+   */
+  const FilterEntry& back() const { return m_filter.back(); }
+
  private:
   static constexpr double γ_cost = 1e-8;
   static constexpr double γ_constraint = 1e-5;
 
-  Variable* m_f = nullptr;
   small_vector<FilterEntry> m_filter;
 };
 
