@@ -206,8 +206,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    */
   template <typename Derived>
   VariableMatrix& operator=(const Eigen::MatrixBase<Derived>& values) {
-    slp_assert(rows() == values.rows());
-    slp_assert(cols() == values.cols());
+    slp_assert(rows() == values.rows() && cols() == values.cols());
 
     for (int row = 0; row < values.rows(); ++row) {
       for (int col = 0; col < values.cols(); ++col) {
@@ -226,8 +225,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
   template <typename Derived>
     requires std::same_as<typename Derived::Scalar, double>
   void set_value(const Eigen::MatrixBase<Derived>& values) {
-    slp_assert(rows() == values.rows());
-    slp_assert(cols() == values.cols());
+    slp_assert(rows() == values.rows() && cols() == values.cols());
 
     for (int row = 0; row < values.rows(); ++row) {
       for (int col = 0; col < values.cols(); ++col) {
@@ -697,6 +695,8 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    */
   friend SLEIPNIR_DLLEXPORT VariableMatrix
   operator+(const VariableMatrix& lhs, const VariableMatrix& rhs) {
+    slp_assert(lhs.rows() == rhs.rows() && lhs.cols() == rhs.cols());
+
     VariableMatrix result{VariableMatrix::empty, lhs.rows(), lhs.cols()};
 
     for (int row = 0; row < result.rows(); ++row) {
@@ -715,6 +715,8 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @return Result of addition.
    */
   VariableMatrix& operator+=(const VariableMatrix& rhs) {
+    slp_assert(rows() == rhs.rows() && cols() == rhs.cols());
+
     for (int row = 0; row < rows(); ++row) {
       for (int col = 0; col < cols(); ++col) {
         (*this)(row, col) += rhs(row, col);
@@ -733,6 +735,8 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    */
   friend SLEIPNIR_DLLEXPORT VariableMatrix
   operator-(const VariableMatrix& lhs, const VariableMatrix& rhs) {
+    slp_assert(lhs.rows() == rhs.rows() && lhs.cols() == rhs.cols());
+
     VariableMatrix result{VariableMatrix::empty, lhs.rows(), lhs.cols()};
 
     for (int row = 0; row < result.rows(); ++row) {
@@ -751,6 +755,8 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @return Result of subtraction.
    */
   VariableMatrix& operator-=(const VariableMatrix& rhs) {
+    slp_assert(rows() == rhs.rows() && cols() == rhs.cols());
+
     for (int row = 0; row < rows(); ++row) {
       for (int col = 0; col < cols(); ++col) {
         (*this)(row, col) -= rhs(row, col);
@@ -1045,8 +1051,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
 SLEIPNIR_DLLEXPORT inline VariableMatrix cwise_reduce(
     const VariableMatrix& lhs, const VariableMatrix& rhs,
     function_ref<Variable(const Variable& x, const Variable& y)> binary_op) {
-  slp_assert(lhs.rows() == rhs.rows());
-  slp_assert(lhs.rows() == rhs.rows());
+  slp_assert(lhs.rows() == rhs.rows() && lhs.rows() == rhs.rows());
 
   VariableMatrix result{VariableMatrix::empty, lhs.rows(), lhs.cols()};
 

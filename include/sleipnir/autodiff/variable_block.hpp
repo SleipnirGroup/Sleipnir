@@ -46,8 +46,7 @@ class VariableBlock {
       m_col_slice = values.m_col_slice;
       m_col_slice_length = values.m_col_slice_length;
     } else {
-      slp_assert(rows() == values.rows());
-      slp_assert(cols() == values.cols());
+      slp_assert(rows() == values.rows() && cols() == values.cols());
 
       for (int row = 0; row < rows(); ++row) {
         for (int col = 0; col < cols(); ++col) {
@@ -82,8 +81,7 @@ class VariableBlock {
       m_col_slice = values.m_col_slice;
       m_col_slice_length = values.m_col_slice_length;
     } else {
-      slp_assert(rows() == values.rows());
-      slp_assert(cols() == values.cols());
+      slp_assert(rows() == values.rows() && cols() == values.cols());
 
       for (int row = 0; row < rows(); ++row) {
         for (int col = 0; col < cols(); ++col) {
@@ -180,8 +178,7 @@ class VariableBlock {
    */
   template <typename Derived>
   VariableBlock<Mat>& operator=(const Eigen::MatrixBase<Derived>& values) {
-    slp_assert(rows() == values.rows());
-    slp_assert(cols() == values.cols());
+    slp_assert(rows() == values.rows() && cols() == values.cols());
 
     for (int row = 0; row < rows(); ++row) {
       for (int col = 0; col < cols(); ++col) {
@@ -200,8 +197,7 @@ class VariableBlock {
   template <typename Derived>
     requires std::same_as<typename Derived::Scalar, double>
   void set_value(const Eigen::MatrixBase<Derived>& values) {
-    slp_assert(rows() == values.rows());
-    slp_assert(cols() == values.cols());
+    slp_assert(rows() == values.rows() && cols() == values.cols());
 
     for (int row = 0; row < rows(); ++row) {
       for (int col = 0; col < cols(); ++col) {
@@ -217,8 +213,7 @@ class VariableBlock {
    * @return This VariableBlock.
    */
   VariableBlock<Mat>& operator=(const Mat& values) {
-    slp_assert(rows() == values.rows());
-    slp_assert(cols() == values.cols());
+    slp_assert(rows() == values.rows() && cols() == values.cols());
 
     for (int row = 0; row < rows(); ++row) {
       for (int col = 0; col < cols(); ++col) {
@@ -235,8 +230,7 @@ class VariableBlock {
    * @return This VariableBlock.
    */
   VariableBlock<Mat>& operator=(Mat&& values) {
-    slp_assert(rows() == values.rows());
-    slp_assert(cols() == values.cols());
+    slp_assert(rows() == values.rows() && cols() == values.cols());
 
     for (int row = 0; row < rows(); ++row) {
       for (int col = 0; col < cols(); ++col) {
@@ -581,6 +575,8 @@ class VariableBlock {
    * @return Result of addition.
    */
   VariableBlock<Mat>& operator+=(const VariableBlock<Mat>& rhs) {
+    slp_assert(rows() == rhs.rows() && cols() == rhs.cols());
+
     for (int row = 0; row < rows(); ++row) {
       for (int col = 0; col < cols(); ++col) {
         (*this)(row, col) += rhs(row, col);
@@ -597,6 +593,8 @@ class VariableBlock {
    * @return Result of subtraction.
    */
   VariableBlock<Mat>& operator-=(const VariableBlock<Mat>& rhs) {
+    slp_assert(rows() == rhs.rows() && cols() == rhs.cols());
+
     for (int row = 0; row < rows(); ++row) {
       for (int col = 0; col < cols(); ++col) {
         (*this)(row, col) -= rhs(row, col);
