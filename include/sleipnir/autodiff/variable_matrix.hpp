@@ -16,6 +16,7 @@
 #include "sleipnir/autodiff/variable.hpp"
 #include "sleipnir/autodiff/variable_block.hpp"
 #include "sleipnir/util/assert.hpp"
+#include "sleipnir/util/concepts.hpp"
 #include "sleipnir/util/function_ref.hpp"
 #include "sleipnir/util/small_vector.hpp"
 #include "sleipnir/util/symbol_exports.hpp"
@@ -213,6 +214,22 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
         (*this)(row, col) = values(row, col);
       }
     }
+
+    return *this;
+  }
+
+  /**
+   * Assigns a double to the matrix.
+   *
+   * This only works for matrices with one row and one column.
+   *
+   * @param value Value to assign.
+   * @return This VariableMatrix.
+   */
+  VariableMatrix& operator=(ScalarLike auto value) {
+    slp_assert(rows() == 1 && cols() == 1);
+
+    (*this)(0, 0) = value;
 
     return *this;
   }
@@ -548,11 +565,13 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param lhs Operator left-hand side.
    * @param rhs Operator right-hand side.
    */
-  friend SLEIPNIR_DLLEXPORT VariableMatrix
-  operator*(const VariableMatrix& lhs, const VariableMatrix& rhs) {
+  template <MatrixLike LHS, MatrixLike RHS>
+    requires SleipnirMatrixLike<LHS> || SleipnirMatrixLike<RHS>
+  friend SLEIPNIR_DLLEXPORT VariableMatrix operator*(const LHS& lhs,
+                                                     const RHS& rhs) {
     slp_assert(lhs.cols() == rhs.rows());
 
-    VariableMatrix result{VariableMatrix::empty, lhs.rows(), rhs.cols()};
+    VariableMatrix result(VariableMatrix::empty, lhs.rows(), rhs.cols());
 
     for (int i = 0; i < lhs.rows(); ++i) {
       for (int j = 0; j < rhs.cols(); ++j) {
@@ -573,8 +592,8 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param lhs Operator left-hand side.
    * @param rhs Operator right-hand side.
    */
-  friend SLEIPNIR_DLLEXPORT VariableMatrix operator*(const VariableMatrix& lhs,
-                                                     const Variable& rhs) {
+  friend SLEIPNIR_DLLEXPORT VariableMatrix
+  operator*(const SleipnirMatrixLike auto& lhs, const ScalarLike auto& rhs) {
     VariableMatrix result{VariableMatrix::empty, lhs.rows(), lhs.cols()};
 
     for (int row = 0; row < result.rows(); ++row) {
@@ -592,9 +611,17 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param lhs Operator left-hand side.
    * @param rhs Operator right-hand side.
    */
-  friend SLEIPNIR_DLLEXPORT VariableMatrix operator*(const VariableMatrix& lhs,
-                                                     double rhs) {
-    return lhs * Variable{rhs};
+  friend SLEIPNIR_DLLEXPORT VariableMatrix operator*(const MatrixLike auto& lhs,
+                                                     const Variable& rhs) {
+    VariableMatrix result(VariableMatrix::empty, lhs.rows(), lhs.cols());
+
+    for (int row = 0; row < result.rows(); ++row) {
+      for (int col = 0; col < result.cols(); ++col) {
+        result(row, col) = lhs(row, col) * rhs;
+      }
+    }
+
+    return result;
   }
 
   /**
@@ -604,7 +631,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param rhs Operator right-hand side.
    */
   friend SLEIPNIR_DLLEXPORT VariableMatrix
-  operator*(const Variable& lhs, const VariableMatrix& rhs) {
+  operator*(const ScalarLike auto& lhs, const SleipnirMatrixLike auto& rhs) {
     VariableMatrix result{VariableMatrix::empty, rhs.rows(), rhs.cols()};
 
     for (int row = 0; row < result.rows(); ++row) {
@@ -623,8 +650,16 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param rhs Operator right-hand side.
    */
   friend SLEIPNIR_DLLEXPORT VariableMatrix
-  operator*(double lhs, const VariableMatrix& rhs) {
-    return Variable{lhs} * rhs;
+  operator*(const Variable& lhs, const MatrixLike auto& rhs) {
+    VariableMatrix result(VariableMatrix::empty, rhs.rows(), rhs.cols());
+
+    for (int row = 0; row < result.rows(); ++row) {
+      for (int col = 0; col < result.cols(); ++col) {
+        result(row, col) = rhs(row, col) * lhs;
+      }
+    }
+
+    return result;
   }
 
   /**
@@ -633,7 +668,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param rhs Variable to multiply.
    * @return Result of multiplication.
    */
-  VariableMatrix& operator*=(const VariableMatrix& rhs) {
+  VariableMatrix& operator*=(const MatrixLike auto& rhs) {
     slp_assert(cols() == rhs.rows() && cols() == rhs.cols());
 
     for (int i = 0; i < rows(); ++i) {
@@ -650,15 +685,31 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
   }
 
   /**
-   * Binary division operator (only enabled when rhs is a scalar).
+   * Compound matrix-scalar multiplication-assignment operator.
+   *
+   * @param rhs Variable to multiply.
+   * @return Result of multiplication.
+   */
+  VariableMatrix& operator*=(const ScalarLike auto& rhs) {
+    for (int row = 0; row < rows(); ++row) {
+      for (int col = 0; col < rhs.cols(); ++col) {
+        (*this)(row, col) *= rhs;
+      }
+    }
+
+    return *this;
+  }
+
+  /**
+   * Binary division operator.
    *
    * @param lhs Operator left-hand side.
    * @param rhs Operator right-hand side.
    * @return Result of division.
    */
-  friend SLEIPNIR_DLLEXPORT VariableMatrix operator/(const VariableMatrix& lhs,
-                                                     const Variable& rhs) {
-    VariableMatrix result{VariableMatrix::empty, lhs.rows(), lhs.cols()};
+  friend SLEIPNIR_DLLEXPORT VariableMatrix
+  operator/(const MatrixLike auto& lhs, const ScalarLike auto& rhs) {
+    VariableMatrix result(VariableMatrix::empty, lhs.rows(), lhs.cols());
 
     for (int row = 0; row < result.rows(); ++row) {
       for (int col = 0; col < result.cols(); ++col) {
@@ -670,13 +721,12 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
   }
 
   /**
-   * Compound matrix division-assignment operator (only enabled when rhs
-   * is a scalar).
+   * Compound matrix division-assignment operator.
    *
    * @param rhs Variable to divide.
    * @return Result of division.
    */
-  VariableMatrix& operator/=(const Variable& rhs) {
+  VariableMatrix& operator/=(const ScalarLike auto& rhs) {
     for (int row = 0; row < rows(); ++row) {
       for (int col = 0; col < cols(); ++col) {
         (*this)(row, col) /= rhs;
@@ -693,11 +743,13 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param rhs Operator right-hand side.
    * @return Result of addition.
    */
-  friend SLEIPNIR_DLLEXPORT VariableMatrix
-  operator+(const VariableMatrix& lhs, const VariableMatrix& rhs) {
+  template <MatrixLike LHS, MatrixLike RHS>
+    requires SleipnirMatrixLike<LHS> || SleipnirMatrixLike<RHS>
+  friend SLEIPNIR_DLLEXPORT VariableMatrix operator+(const LHS& lhs,
+                                                     const RHS& rhs) {
     slp_assert(lhs.rows() == rhs.rows() && lhs.cols() == rhs.cols());
 
-    VariableMatrix result{VariableMatrix::empty, lhs.rows(), lhs.cols()};
+    VariableMatrix result(VariableMatrix::empty, lhs.rows(), lhs.cols());
 
     for (int row = 0; row < result.rows(); ++row) {
       for (int col = 0; col < result.cols(); ++col) {
@@ -714,12 +766,30 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param rhs Variable to add.
    * @return Result of addition.
    */
-  VariableMatrix& operator+=(const VariableMatrix& rhs) {
+  VariableMatrix& operator+=(const MatrixLike auto& rhs) {
     slp_assert(rows() == rhs.rows() && cols() == rhs.cols());
 
     for (int row = 0; row < rows(); ++row) {
       for (int col = 0; col < cols(); ++col) {
         (*this)(row, col) += rhs(row, col);
+      }
+    }
+
+    return *this;
+  }
+
+  /**
+   * Compound addition-assignment operator.
+   *
+   * @param rhs Variable to add.
+   * @return Result of addition.
+   */
+  VariableMatrix& operator+=(const ScalarLike auto& rhs) {
+    slp_assert(rows() == 1 && cols() == 1);
+
+    for (int row = 0; row < rows(); ++row) {
+      for (int col = 0; col < cols(); ++col) {
+        (*this)(row, col) += rhs;
       }
     }
 
@@ -733,11 +803,13 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param rhs Operator right-hand side.
    * @return Result of subtraction.
    */
-  friend SLEIPNIR_DLLEXPORT VariableMatrix
-  operator-(const VariableMatrix& lhs, const VariableMatrix& rhs) {
+  template <MatrixLike LHS, MatrixLike RHS>
+    requires SleipnirMatrixLike<LHS> || SleipnirMatrixLike<RHS>
+  friend SLEIPNIR_DLLEXPORT VariableMatrix operator-(const LHS& lhs,
+                                                     const RHS& rhs) {
     slp_assert(lhs.rows() == rhs.rows() && lhs.cols() == rhs.cols());
 
-    VariableMatrix result{VariableMatrix::empty, lhs.rows(), lhs.cols()};
+    VariableMatrix result(VariableMatrix::empty, lhs.rows(), lhs.cols());
 
     for (int row = 0; row < result.rows(); ++row) {
       for (int col = 0; col < result.cols(); ++col) {
@@ -754,7 +826,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param rhs Variable to subtract.
    * @return Result of subtraction.
    */
-  VariableMatrix& operator-=(const VariableMatrix& rhs) {
+  VariableMatrix& operator-=(const MatrixLike auto& rhs) {
     slp_assert(rows() == rhs.rows() && cols() == rhs.cols());
 
     for (int row = 0; row < rows(); ++row) {
@@ -767,12 +839,30 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
   }
 
   /**
+   * Compound subtraction-assignment operator.
+   *
+   * @param rhs Variable to subtract.
+   * @return Result of subtraction.
+   */
+  VariableMatrix& operator-=(const ScalarLike auto& rhs) {
+    slp_assert(rows() == 1 && cols() == 1);
+
+    for (int row = 0; row < rows(); ++row) {
+      for (int col = 0; col < cols(); ++col) {
+        (*this)(row, col) -= rhs;
+      }
+    }
+
+    return *this;
+  }
+
+  /**
    * Unary minus operator.
    *
    * @param lhs Operand for unary minus.
    */
   friend SLEIPNIR_DLLEXPORT VariableMatrix
-  operator-(const VariableMatrix& lhs) {
+  operator-(const SleipnirMatrixLike auto& lhs) {
     VariableMatrix result{VariableMatrix::empty, lhs.rows(), lhs.cols()};
 
     for (int row = 0; row < result.rows(); ++row) {

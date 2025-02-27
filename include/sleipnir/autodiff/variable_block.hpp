@@ -149,7 +149,7 @@ class VariableBlock {
    * @param value Value to assign.
    * @return This VariableBlock.
    */
-  VariableBlock<Mat>& operator=(double value) {
+  VariableBlock<Mat>& operator=(ScalarLike auto value) {
     slp_assert(rows() == 1 && cols() == 1);
 
     (*this)(0, 0) = value;
@@ -499,7 +499,7 @@ class VariableBlock {
    * @param rhs Variable to multiply.
    * @return Result of multiplication.
    */
-  VariableBlock<Mat>& operator*=(const VariableBlock<Mat>& rhs) {
+  VariableBlock<Mat>& operator*=(const MatrixLike auto& rhs) {
     slp_assert(cols() == rhs.rows() && cols() == rhs.cols());
 
     for (int i = 0; i < rows(); ++i) {
@@ -516,13 +516,12 @@ class VariableBlock {
   }
 
   /**
-   * Compound matrix multiplication-assignment operator (only enabled when lhs
-   * is a scalar).
+   * Compound matrix multiplication-assignment operator.
    *
    * @param rhs Variable to multiply.
    * @return Result of multiplication.
    */
-  VariableBlock& operator*=(double rhs) {
+  VariableBlock<Mat>& operator*=(const ScalarLike auto& rhs) {
     for (int row = 0; row < rows(); ++row) {
       for (int col = 0; col < cols(); ++col) {
         (*this)(row, col) *= rhs;
@@ -533,13 +532,12 @@ class VariableBlock {
   }
 
   /**
-   * Compound matrix division-assignment operator (only enabled when rhs
-   * is a scalar).
+   * Compound matrix division-assignment operator.
    *
    * @param rhs Variable to divide.
    * @return Result of division.
    */
-  VariableBlock<Mat>& operator/=(const VariableBlock<Mat>& rhs) {
+  VariableBlock<Mat>& operator/=(const MatrixLike auto& rhs) {
     slp_assert(rhs.rows() == 1 && rhs.cols() == 1);
 
     for (int row = 0; row < rows(); ++row) {
@@ -552,13 +550,12 @@ class VariableBlock {
   }
 
   /**
-   * Compound matrix division-assignment operator (only enabled when rhs
-   * is a scalar).
+   * Compound matrix division-assignment operator.
    *
    * @param rhs Variable to divide.
    * @return Result of division.
    */
-  VariableBlock<Mat>& operator/=(double rhs) {
+  VariableBlock<Mat>& operator/=(const ScalarLike auto& rhs) {
     for (int row = 0; row < rows(); ++row) {
       for (int col = 0; col < cols(); ++col) {
         (*this)(row, col) /= rhs;
@@ -574,7 +571,7 @@ class VariableBlock {
    * @param rhs Variable to add.
    * @return Result of addition.
    */
-  VariableBlock<Mat>& operator+=(const VariableBlock<Mat>& rhs) {
+  VariableBlock<Mat>& operator+=(const MatrixLike auto& rhs) {
     slp_assert(rows() == rhs.rows() && cols() == rhs.cols());
 
     for (int row = 0; row < rows(); ++row) {
@@ -587,12 +584,30 @@ class VariableBlock {
   }
 
   /**
+   * Compound addition-assignment operator.
+   *
+   * @param rhs Variable to add.
+   * @return Result of addition.
+   */
+  VariableBlock<Mat>& operator+=(const ScalarLike auto& rhs) {
+    slp_assert(rows() == 1 && cols() == 1);
+
+    for (int row = 0; row < rows(); ++row) {
+      for (int col = 0; col < cols(); ++col) {
+        (*this)(row, col) += rhs;
+      }
+    }
+
+    return *this;
+  }
+
+  /**
    * Compound subtraction-assignment operator.
    *
    * @param rhs Variable to subtract.
    * @return Result of subtraction.
    */
-  VariableBlock<Mat>& operator-=(const VariableBlock<Mat>& rhs) {
+  VariableBlock<Mat>& operator-=(const MatrixLike auto& rhs) {
     slp_assert(rows() == rhs.rows() && cols() == rhs.cols());
 
     for (int row = 0; row < rows(); ++row) {
@@ -602,6 +617,32 @@ class VariableBlock {
     }
 
     return *this;
+  }
+
+  /**
+   * Compound subtraction-assignment operator.
+   *
+   * @param rhs Variable to subtract.
+   * @return Result of subtraction.
+   */
+  VariableBlock<Mat>& operator-=(const ScalarLike auto& rhs) {
+    slp_assert(rows() == 1 && cols() == 1);
+
+    for (int row = 0; row < rows(); ++row) {
+      for (int col = 0; col < cols(); ++col) {
+        (*this)(row, col) -= rhs;
+      }
+    }
+
+    return *this;
+  }
+
+  /**
+   * Implicit conversion operator from 1x1 VariableBlock to Variable.
+   */
+  operator Variable() const {  // NOLINT
+    slp_assert(rows() == 1 && cols() == 1);
+    return (*this)(0, 0);
   }
 
   /**
