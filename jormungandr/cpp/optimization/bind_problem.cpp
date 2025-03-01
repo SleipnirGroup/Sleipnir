@@ -7,7 +7,7 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/function.h>
 #include <sleipnir/optimization/problem.hpp>
-#include <sleipnir/optimization/solver_config.hpp>
+#include <sleipnir/optimization/solver/options.hpp>
 
 #include "docstrings.hpp"
 
@@ -53,56 +53,62 @@ void bind_problem(nb::class_<Problem>& cls) {
   cls.def("subject_to",
           nb::overload_cast<const InequalityConstraints&>(&Problem::subject_to),
           "constraint"_a, DOC(slp, Problem, subject_to, 3));
+  cls.def("cost_function_type", &Problem::cost_function_type,
+          DOC(slp, Problem, cost_function_type));
+  cls.def("equality_constraint_type", &Problem::equality_constraint_type,
+          DOC(slp, Problem, equality_constraint_type));
+  cls.def("inequality_constraint_type", &Problem::inequality_constraint_type,
+          DOC(slp, Problem, inequality_constraint_type));
   cls.def(
       "solve",
       [](Problem& self, const nb::kwargs& kwargs) {
         // Make Python signals (e.g., SIGINT from Ctrl-C) abort the solve
-        self.add_callback([](const SolverIterationInfo&) -> bool {
+        self.add_callback([](const IterationInfo&) -> bool {
           if (PyErr_CheckSignals() != 0) {
             throw nb::python_error();
           }
           return false;
         });
 
-        SolverConfig config;
+        Options options;
 
         for (auto [key, value] : kwargs) {
           // XXX: The keyword arguments are manually copied from the struct
-          // members in include/sleipnir/optimization/SolverConfig.hpp.
+          // members in include/sleipnir/optimization/solver/options.hpp.
           //
-          // C++'s Problem::Solve() takes a SolverConfig object instead of
-          // keyword arguments, so there's no compile-time checking that the
-          // arguments match.
+          // C++'s Problem::Solve() takes an Options object instead of keyword
+          // arguments, so there's no compile-time checking that the arguments
+          // match.
           auto key_str = nb::cast<std::string>(key);
           if (key_str == "tolerance") {
-            config.tolerance = nb::cast<double>(value);
+            options.tolerance = nb::cast<double>(value);
           } else if (key_str == "max_iterations") {
-            config.max_iterations = nb::cast<int>(value);
+            options.max_iterations = nb::cast<int>(value);
           } else if (key_str == "acceptable_tolerance") {
-            config.acceptable_tolerance = nb::cast<double>(value);
+            options.acceptable_tolerance = nb::cast<double>(value);
           } else if (key_str == "max_acceptable_iterations") {
-            config.max_acceptable_iterations = nb::cast<int>(value);
+            options.max_acceptable_iterations = nb::cast<int>(value);
           } else if (key_str == "timeout") {
-            config.timeout =
+            options.timeout =
                 std::chrono::duration<double>{nb::cast<double>(value)};
           } else if (key_str == "feasible_ipm") {
-            config.feasible_ipm = nb::cast<bool>(value);
+            options.feasible_ipm = nb::cast<bool>(value);
           } else if (key_str == "diagnostics") {
-            config.diagnostics = nb::cast<bool>(value);
+            options.diagnostics = nb::cast<bool>(value);
           } else if (key_str == "spy") {
-            config.spy = nb::cast<bool>(value);
+            options.spy = nb::cast<bool>(value);
           } else {
             throw nb::key_error(
                 std::format("Invalid keyword argument: {}", key_str).c_str());
           }
         }
 
-        return self.solve(config);
+        return self.solve(options);
       },
       // XXX: The keyword argument docs are manually copied from the struct
-      // member docs in include/sleipnir/optimization/SolverConfig.hpp.
+      // member docs in include/sleipnir/optimization/solver/options.hpp.
       //
-      // C++'s Problem::Solve() takes a SolverConfig object instead of keyword
+      // C++'s Problem::Solve() takes an Options object instead of keyword
       // arguments, so pybind11_mkdoc generates the wrong docs.
       R"doc(Solve the optimization problem. The solution will be stored in the
 original variables used to construct the problem.
@@ -208,7 +214,7 @@ Parameter ``spy``:
   cls.def(
       "add_callback",
       [](Problem& self,
-         std::function<bool(const SolverIterationInfo& info)> callback) {
+         std::function<bool(const IterationInfo& info)> callback) {
         self.add_callback(std::move(callback));
       },
       "callback"_a, DOC(slp, Problem, add_callback, 2));

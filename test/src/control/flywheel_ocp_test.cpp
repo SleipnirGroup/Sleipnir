@@ -53,12 +53,11 @@ void TestFlywheel(
       Eigen::Matrix<double, 1, N + 1>::Constant(r);
   problem.minimize((r_mat - problem.X()) * (r_mat - problem.X()).T());
 
-  auto status = problem.solve({.diagnostics = true});
+  CHECK(problem.cost_function_type() == slp::ExpressionType::QUADRATIC);
+  CHECK(problem.equality_constraint_type() == slp::ExpressionType::LINEAR);
+  CHECK(problem.inequality_constraint_type() == slp::ExpressionType::LINEAR);
 
-  CHECK(status.cost_function_type == slp::ExpressionType::QUADRATIC);
-  CHECK(status.equality_constraint_type == slp::ExpressionType::LINEAR);
-  CHECK(status.inequality_constraint_type == slp::ExpressionType::LINEAR);
-  CHECK(status.exit_condition == slp::SolverExitCondition::SUCCESS);
+  CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
   // Voltage for steady-state velocity:
   //

@@ -6,7 +6,7 @@
 #include <future>
 #include <span>
 
-#include "sleipnir/optimization/solver_status.hpp"
+#include "sleipnir/optimization/solver/exit_status.hpp"
 #include "sleipnir/util/function_ref.hpp"
 #include "sleipnir/util/small_vector.hpp"
 
@@ -20,8 +20,10 @@ namespace slp {
  */
 template <typename DecisionVariables>
 struct MultistartResult {
-  /// The solver status.
-  SolverStatus status;
+  /// The solver exit status.
+  ExitStatus status;
+  /// The solution's cost.
+  double cost;
   /// The decision variables.
   DecisionVariables variables;
 };
@@ -62,13 +64,12 @@ MultistartResult<DecisionVariables> Multistart(
 
   return *std::ranges::min_element(results, [](const auto& a, const auto& b) {
     // Prioritize successful solve
-    if (a.status.exit_condition == SolverExitCondition::SUCCESS &&
-        b.status.exit_condition != SolverExitCondition::SUCCESS) {
+    if (a.status == ExitStatus::SUCCESS && b.status != ExitStatus::SUCCESS) {
       return true;
     }
 
     // Otherwise prioritize solution with lower cost
-    return a.status.cost < b.status.cost;
+    return a.cost < b.cost;
   });
 }
 

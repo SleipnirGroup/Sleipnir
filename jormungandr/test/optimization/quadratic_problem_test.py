@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from jormungandr.autodiff import ExpressionType
-from jormungandr.optimization import Problem, SolverExitCondition
+from jormungandr.optimization import ExitStatus, Problem
 
 
 def test_unconstrained1d():
@@ -13,12 +13,11 @@ def test_unconstrained1d():
 
     problem.minimize(x * x - 6.0 * x)
 
-    status = problem.solve(diagnostics=True)
+    assert problem.cost_function_type() == ExpressionType.QUADRATIC
+    assert problem.equality_constraint_type() == ExpressionType.NONE
+    assert problem.inequality_constraint_type() == ExpressionType.NONE
 
-    assert status.cost_function_type == ExpressionType.QUADRATIC
-    assert status.equality_constraint_type == ExpressionType.NONE
-    assert status.inequality_constraint_type == ExpressionType.NONE
-    assert status.exit_condition == SolverExitCondition.SUCCESS
+    assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
 
     assert x.value() == pytest.approx(3.0, abs=1e-6)
 
@@ -33,12 +32,11 @@ def test_unconstrained2d_1():
 
     problem.minimize(x * x + y * y)
 
-    status = problem.solve(diagnostics=True)
+    assert problem.cost_function_type() == ExpressionType.QUADRATIC
+    assert problem.equality_constraint_type() == ExpressionType.NONE
+    assert problem.inequality_constraint_type() == ExpressionType.NONE
 
-    assert status.cost_function_type == ExpressionType.QUADRATIC
-    assert status.equality_constraint_type == ExpressionType.NONE
-    assert status.inequality_constraint_type == ExpressionType.NONE
-    assert status.exit_condition == SolverExitCondition.SUCCESS
+    assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
 
     assert x.value() == pytest.approx(0.0, abs=1e-6)
     assert y.value() == pytest.approx(0.0, abs=1e-6)
@@ -53,12 +51,11 @@ def test_unconstrained2d_2():
 
     problem.minimize(x.T @ x)
 
-    status = problem.solve(diagnostics=True)
+    assert problem.cost_function_type() == ExpressionType.QUADRATIC
+    assert problem.equality_constraint_type() == ExpressionType.NONE
+    assert problem.inequality_constraint_type() == ExpressionType.NONE
 
-    assert status.cost_function_type == ExpressionType.QUADRATIC
-    assert status.equality_constraint_type == ExpressionType.NONE
-    assert status.inequality_constraint_type == ExpressionType.NONE
-    assert status.exit_condition == SolverExitCondition.SUCCESS
+    assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
 
     assert x.value(0) == pytest.approx(0.0, abs=1e-6)
     assert x.value(1) == pytest.approx(0.0, abs=1e-6)
@@ -112,12 +109,11 @@ def test_equality_constrained_1():
 
     problem.subject_to(x + 3 * y == 36)
 
-    status = problem.solve(diagnostics=True)
+    assert problem.cost_function_type() == ExpressionType.QUADRATIC
+    assert problem.equality_constraint_type() == ExpressionType.LINEAR
+    assert problem.inequality_constraint_type() == ExpressionType.NONE
 
-    assert status.cost_function_type == ExpressionType.QUADRATIC
-    assert status.equality_constraint_type == ExpressionType.LINEAR
-    assert status.inequality_constraint_type == ExpressionType.NONE
-    assert status.exit_condition == SolverExitCondition.SUCCESS
+    assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
 
     assert x.value() == pytest.approx(18.0, abs=1e-5)
     assert y.value() == pytest.approx(6.0, abs=1e-5)
@@ -134,12 +130,11 @@ def test_equality_constrained_2():
 
     problem.subject_to(x == np.array([[3.0], [3.0]]))
 
-    status = problem.solve(diagnostics=True)
+    assert problem.cost_function_type() == ExpressionType.QUADRATIC
+    assert problem.equality_constraint_type() == ExpressionType.LINEAR
+    assert problem.inequality_constraint_type() == ExpressionType.NONE
 
-    assert status.cost_function_type == ExpressionType.QUADRATIC
-    assert status.equality_constraint_type == ExpressionType.LINEAR
-    assert status.inequality_constraint_type == ExpressionType.NONE
-    assert status.exit_condition == SolverExitCondition.SUCCESS
+    assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
 
     assert x.value(0) == pytest.approx(3.0, abs=1e-5)
     assert x.value(1) == pytest.approx(3.0, abs=1e-5)

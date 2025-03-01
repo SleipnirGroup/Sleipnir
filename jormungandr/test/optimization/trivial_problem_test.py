@@ -1,18 +1,17 @@
 import numpy as np
 
 from jormungandr.autodiff import ExpressionType
-from jormungandr.optimization import Problem, SolverExitCondition
+from jormungandr.optimization import ExitStatus, Problem
 
 
 def test_empty():
     problem = Problem()
 
-    status = problem.solve(diagnostics=True)
+    assert problem.cost_function_type() == ExpressionType.NONE
+    assert problem.equality_constraint_type() == ExpressionType.NONE
+    assert problem.inequality_constraint_type() == ExpressionType.NONE
 
-    assert status.cost_function_type == ExpressionType.NONE
-    assert status.equality_constraint_type == ExpressionType.NONE
-    assert status.inequality_constraint_type == ExpressionType.NONE
-    assert status.exit_condition == SolverExitCondition.SUCCESS
+    assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
 
 
 def test_no_cost_unconstrained_1():
@@ -20,12 +19,11 @@ def test_no_cost_unconstrained_1():
 
     X = problem.decision_variable(2, 3)
 
-    status = problem.solve(diagnostics=True)
+    assert problem.cost_function_type() == ExpressionType.NONE
+    assert problem.equality_constraint_type() == ExpressionType.NONE
+    assert problem.inequality_constraint_type() == ExpressionType.NONE
 
-    assert status.cost_function_type == ExpressionType.NONE
-    assert status.equality_constraint_type == ExpressionType.NONE
-    assert status.inequality_constraint_type == ExpressionType.NONE
-    assert status.exit_condition == SolverExitCondition.SUCCESS
+    assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
 
     for row in range(X.rows()):
         for col in range(X.cols()):
@@ -38,12 +36,11 @@ def test_no_cost_unconstrained_2():
     X = problem.decision_variable(2, 3)
     X.set_value(np.array([[1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]))
 
-    status = problem.solve(diagnostics=True)
+    assert problem.cost_function_type() == ExpressionType.NONE
+    assert problem.equality_constraint_type() == ExpressionType.NONE
+    assert problem.inequality_constraint_type() == ExpressionType.NONE
 
-    assert status.cost_function_type == ExpressionType.NONE
-    assert status.equality_constraint_type == ExpressionType.NONE
-    assert status.inequality_constraint_type == ExpressionType.NONE
-    assert status.exit_condition == SolverExitCondition.SUCCESS
+    assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
 
     for row in range(X.rows()):
         for col in range(X.cols()):

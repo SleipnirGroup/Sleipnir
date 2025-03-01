@@ -76,15 +76,13 @@ TEST_CASE("OCP - Cart-pole", "[OCP]") {
   }
   problem.minimize(J);
 
-  auto status = problem.solve({.diagnostics = true});
-
-  CHECK(status.cost_function_type == slp::ExpressionType::QUADRATIC);
-  CHECK(status.equality_constraint_type == slp::ExpressionType::NONLINEAR);
-  CHECK(status.inequality_constraint_type == slp::ExpressionType::LINEAR);
+  CHECK(problem.cost_function_type() == slp::ExpressionType::QUADRATIC);
+  CHECK(problem.equality_constraint_type() == slp::ExpressionType::NONLINEAR);
+  CHECK(problem.inequality_constraint_type() == slp::ExpressionType::LINEAR);
 
   // FIXME: Fails with "factorization failed"
-  CHECK(status.exit_condition ==
-        slp::SolverExitCondition::FACTORIZATION_FAILED);
+  CHECK(problem.solve({.diagnostics = true}) ==
+        slp::ExitStatus::FACTORIZATION_FAILED);
   SKIP("Fails with \"factorization failed\"");
 
   // Verify initial state

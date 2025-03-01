@@ -6,9 +6,8 @@
 #include <sleipnir/autodiff/variable_matrix.hpp>
 #include <sleipnir/control/ocp.hpp>
 #include <sleipnir/optimization/problem.hpp>
-#include <sleipnir/optimization/solver_exit_condition.hpp>
-#include <sleipnir/optimization/solver_iteration_info.hpp>
-#include <sleipnir/optimization/solver_status.hpp>
+#include <sleipnir/optimization/solver/exit_status.hpp>
+#include <sleipnir/optimization/solver/iteration_info.hpp>
 
 #include "binders.hpp"
 #include "docstrings.hpp"
@@ -44,12 +43,10 @@ NB_MODULE(_jormungandr, m) {
   nb::class_<InequalityConstraints> inequality_constraints{
       optimization, "InequalityConstraints", DOC(slp_InequalityConstraints)};
 
-  nb::enum_<SolverExitCondition> solver_exit_condition{
-      optimization, "SolverExitCondition", DOC(slp, SolverExitCondition)};
-  nb::class_<SolverIterationInfo> solver_iteration_info{
-      optimization, "SolverIterationInfo", DOC(slp, SolverIterationInfo)};
-  nb::class_<SolverStatus> solver_status{optimization, "SolverStatus",
-                                         DOC(slp, SolverStatus)};
+  nb::enum_<ExitStatus> exit_status{optimization, "ExitStatus",
+                                    DOC(slp, ExitStatus)};
+  nb::class_<IterationInfo> iteration_info{optimization, "IterationInfo",
+                                           DOC(slp, IterationInfo)};
 
   nb::class_<Problem> problem{optimization, "Problem", DOC(slp, Problem)};
 
@@ -78,9 +75,8 @@ NB_MODULE(_jormungandr, m) {
   bind_equality_constraints(equality_constraints);
   bind_inequality_constraints(inequality_constraints);
 
-  bind_solver_exit_condition(solver_exit_condition);
-  bind_solver_iteration_info(solver_iteration_info);
-  bind_solver_status(solver_status);
+  bind_exit_status(exit_status);
+  bind_iteration_info(iteration_info);
 
   bind_problem(problem);
 

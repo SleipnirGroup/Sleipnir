@@ -10,13 +10,13 @@
 #include "catch_string_converters.hpp"
 
 TEST_CASE("multistart - Mishra's Bird function", "[nonlinear_problem]") {
-  struct decision_variables {
+  struct DecisionVariables {
     double x;
     double y;
   };
 
-  auto Solve = [](const decision_variables& input)
-      -> slp::MultistartResult<decision_variables> {
+  auto Solve = [](const DecisionVariables& input)
+      -> slp::MultistartResult<DecisionVariables> {
     slp::Problem problem;
 
     auto x = problem.decision_variable();
@@ -25,23 +25,22 @@ TEST_CASE("multistart - Mishra's Bird function", "[nonlinear_problem]") {
     y.set_value(input.y);
 
     // https://en.wikipedia.org/wiki/Test_functions_for_optimization#Test_functions_for_constrained_optimization
-    problem.minimize(slp::sin(y) * slp::exp(slp::pow(1 - slp::cos(x), 2)) +
-                     slp::cos(x) * slp::exp(slp::pow(1 - slp::sin(y), 2)) +
-                     slp::pow(x - y, 2));
+    slp::Variable J = slp::sin(y) * slp::exp(slp::pow(1 - slp::cos(x), 2)) +
+                      slp::cos(x) * slp::exp(slp::pow(1 - slp::sin(y), 2)) +
+                      slp::pow(x - y, 2);
+    problem.minimize(J);
 
     problem.subject_to(slp::pow(x + 5, 2) + slp::pow(y + 5, 2) < 25);
 
-    return {problem.solve(), decision_variables{x.value(), y.value()}};
+    return {problem.solve(), J.value(),
+            DecisionVariables{x.value(), y.value()}};
   };
 
-  auto [status, variables] = slp::Multistart<decision_variables>(
+  auto [status, cost, variables] = slp::Multistart<DecisionVariables>(
       Solve,
-      std::vector{decision_variables{-3, -8}, decision_variables{-3, -1.5}});
+      std::vector{DecisionVariables{-3, -8}, DecisionVariables{-3, -1.5}});
 
-  CHECK(status.cost_function_type == slp::ExpressionType::NONLINEAR);
-  CHECK(status.equality_constraint_type == slp::ExpressionType::NONE);
-  CHECK(status.inequality_constraint_type == slp::ExpressionType::QUADRATIC);
-  CHECK(status.exit_condition == slp::SolverExitCondition::SUCCESS);
+  CHECK(status == slp::ExitStatus::SUCCESS);
 
   CHECK(variables.x == Catch::Approx(-3.130246803458174).margin(1e-15));
   CHECK(variables.y == Catch::Approx(-1.5821421769364057).margin(1e-15));

@@ -20,10 +20,9 @@
 #include "sleipnir/autodiff/gradient.hpp"
 #include "sleipnir/autodiff/hessian.hpp"
 #include "sleipnir/autodiff/variable.hpp"
-#include "sleipnir/optimization/solver_config.hpp"
-#include "sleipnir/optimization/solver_exit_condition.hpp"
-#include "sleipnir/optimization/solver_iteration_info.hpp"
-#include "sleipnir/optimization/solver_status.hpp"
+#include "sleipnir/optimization/solver/exit_status.hpp"
+#include "sleipnir/optimization/solver/iteration_info.hpp"
+#include "sleipnir/optimization/solver/options.hpp"
 #include "sleipnir/util/scoped_profiler.hpp"
 #include "sleipnir/util/setup_profiler.hpp"
 #include "sleipnir/util/solve_profiler.hpp"
@@ -38,10 +37,10 @@
 
 namespace slp {
 
-void newton(
+ExitStatus newton(
     std::span<Variable> decision_variables, Variable& f,
-    std::span<std::function<bool(const SolverIterationInfo& info)>> callbacks,
-    const SolverConfig& config, Eigen::VectorXd& x, SolverStatus* status) {
+    std::span<std::function<bool(const IterationInfo& info)>> callbacks,
+    const Options& options, Eigen::VectorXd& x) {
   const auto solve_start_time = std::chrono::steady_clock::now();
 
   small_vector<SetupProfiler> setup_profilers;
@@ -49,7 +48,6 @@ void newton(
 
   // Map decision variables and constraints to VariableMatrices for Lagrangian
   VariableMatrix x_ad{decision_variables};
-  x_ad.set_value(x);
 
   setup_profilers.back().stop();
   setup_profilers.emplace_back("  ↳ L setup").start();
@@ -88,19 +86,17 @@ void newton(
 
   // Check whether initial guess has finite f(xₖ)
   if (!std::isfinite(f.value())) {
-    status->exit_condition =
-        SolverExitCondition::NONFINITE_INITIAL_COST_OR_CONSTRAINTS;
-    return;
+    return ExitStatus::NONFINITE_INITIAL_COST_OR_CONSTRAINTS;
   }
 
   setup_profilers.back().stop();
   setup_profilers.emplace_back("  ↳ spy setup").start();
 
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-  // Sparsity pattern files written when spy flag is set in SolverConfig
+  // Sparsity pattern files written when spy flag is set in Config
   std::unique_ptr<Spy> H_spy;
   std::unique_ptr<Spy> lhs_spy;
-  if (config.spy) {
+  if (options.spy) {
     H_spy = std::make_unique<Spy>("H.spy", "Hessian", "Decision variables",
                                   "Decision variables", H.rows(), H.cols());
     lhs_spy =
@@ -149,10 +145,8 @@ void newton(
 
   // Prints final diagnostics when the solver exits
   scope_exit exit{[&] {
-    status->cost = f.value();
-
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-    if (config.diagnostics) {
+    if (options.diagnostics) {
       // Append gradient profilers
       solve_profilers.push_back(gradient_f.get_profilers()[0]);
       solve_profilers.back().name = "  ↳ ∇f(x)";
@@ -169,21 +163,19 @@ void newton(
         solve_profilers.push_back(profiler);
       }
 
-      print_final_diagnostics(iterations, status->exit_condition,
-                              setup_profilers, solve_profilers);
+      print_final_diagnostics(iterations, setup_profilers, solve_profilers);
     }
 #endif
   }};
 
-  while (E_0 > config.tolerance &&
-         acceptable_iter_counter < config.max_acceptable_iterations) {
+  while (E_0 > options.tolerance &&
+         acceptable_iter_counter < options.max_acceptable_iterations) {
     ScopedProfiler inner_iter_profiler{inner_iter_prof};
     ScopedProfiler feasibility_check_profiler{feasibility_check_prof};
 
     // Check for diverging iterates
     if (x.lpNorm<Eigen::Infinity>() > 1e20 || !x.allFinite()) {
-      status->exit_condition = SolverExitCondition::DIVERGING_ITERATES;
-      return;
+      return ExitStatus::DIVERGING_ITERATES;
     }
 
     feasibility_check_profiler.stop();
@@ -194,8 +186,7 @@ void newton(
       if (callback({iterations, x, Eigen::VectorXd::Zero(0), g, H,
                     Eigen::SparseMatrix<double>{},
                     Eigen::SparseMatrix<double>{}})) {
-        status->exit_condition = SolverExitCondition::CALLBACK_REQUESTED_STOP;
-        return;
+        return ExitStatus::CALLBACK_REQUESTED_STOP;
       }
     }
 
@@ -261,8 +252,7 @@ void newton(
           break;
         }
 
-        status->exit_condition = SolverExitCondition::LINE_SEARCH_FAILED;
-        return;
+        return ExitStatus::LINE_SEARCH_FAILED;
       }
     }
 
@@ -283,7 +273,7 @@ void newton(
 
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     // Write out spy file contents if that's enabled
-    if (config.spy) {
+    if (options.spy) {
       ScopedProfiler spy_writes_profiler{spy_writes_prof};
       H_spy->add(H);
       lhs_spy->add(H);
@@ -302,7 +292,7 @@ void newton(
 
     // Update the error estimate
     E_0 = error_estimate(g);
-    if (E_0 < config.acceptable_tolerance) {
+    if (E_0 < options.acceptable_tolerance) {
       ++acceptable_iter_counter;
     } else {
       acceptable_iter_counter = 0;
@@ -312,7 +302,7 @@ void newton(
     inner_iter_profiler.stop();
 
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-    if (config.diagnostics) {
+    if (options.diagnostics) {
       print_iteration_diagnostics(
           iterations, IterationType::NORMAL,
           inner_iter_profiler.current_duration(), E_0, f.value(), 0.0, 0.0, 0.0,
@@ -323,25 +313,23 @@ void newton(
     ++iterations;
 
     // Check for max iterations
-    if (iterations >= config.max_iterations) {
-      status->exit_condition = SolverExitCondition::MAX_ITERATIONS_EXCEEDED;
-      return;
+    if (iterations >= options.max_iterations) {
+      return ExitStatus::MAX_ITERATIONS_EXCEEDED;
     }
 
     // Check for max wall clock time
-    if (std::chrono::steady_clock::now() - solve_start_time > config.timeout) {
-      status->exit_condition = SolverExitCondition::TIMEOUT;
-      return;
+    if (std::chrono::steady_clock::now() - solve_start_time > options.timeout) {
+      return ExitStatus::TIMEOUT;
     }
 
     // Check for solve to acceptable tolerance
-    if (E_0 > config.tolerance &&
-        acceptable_iter_counter == config.max_acceptable_iterations) {
-      status->exit_condition =
-          SolverExitCondition::SOLVED_TO_ACCEPTABLE_TOLERANCE;
-      return;
+    if (E_0 > options.tolerance &&
+        acceptable_iter_counter == options.max_acceptable_iterations) {
+      return ExitStatus::SOLVED_TO_ACCEPTABLE_TOLERANCE;
     }
   }
+
+  return ExitStatus::SUCCESS;
 }
 
 }  // namespace slp

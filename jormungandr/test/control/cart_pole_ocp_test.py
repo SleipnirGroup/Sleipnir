@@ -5,7 +5,7 @@ import pytest
 
 from jormungandr.autodiff import ExpressionType, VariableMatrix
 from jormungandr.control import *
-from jormungandr.optimization import SolverExitCondition
+from jormungandr.optimization import ExitStatus
 from jormungandr.test.cart_pole_util import cart_pole_dynamics
 from jormungandr.test.rk4 import rk4
 
@@ -70,14 +70,12 @@ def test_cart_pole_ocp():
         J += U[:, k : k + 1].T @ U[:, k : k + 1]
     problem.minimize(J)
 
-    status = problem.solve(diagnostics=True)
-
-    assert status.cost_function_type == ExpressionType.QUADRATIC
-    assert status.equality_constraint_type == ExpressionType.NONLINEAR
-    assert status.inequality_constraint_type == ExpressionType.LINEAR
+    assert problem.cost_function_type() == ExpressionType.QUADRATIC
+    assert problem.equality_constraint_type() == ExpressionType.NONLINEAR
+    assert problem.inequality_constraint_type() == ExpressionType.LINEAR
 
     # FIXME: Fails with "factorization failed"
-    assert status.exit_condition == SolverExitCondition.FACTORIZATION_FAILED
+    assert problem.solve(diagnostics=True) == ExitStatus.FACTORIZATION_FAILED
     return
 
     # Verify initial state

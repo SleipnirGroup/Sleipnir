@@ -12,9 +12,8 @@
 #include <sleipnir/autodiff/variable_matrix.hpp>
 #include <sleipnir/control/ocp.hpp>
 #include <sleipnir/optimization/problem.hpp>
-#include <sleipnir/optimization/solver_exit_condition.hpp>
-#include <sleipnir/optimization/solver_iteration_info.hpp>
-#include <sleipnir/optimization/solver_status.hpp>
+#include <sleipnir/optimization/solver/exit_status.hpp>
+#include <sleipnir/optimization/solver/iteration_info.hpp>
 
 namespace nb = nanobind;
 
@@ -34,9 +33,8 @@ void bind_jacobian(nb::class_<Jacobian>& cls);
 void bind_equality_constraints(nb::class_<EqualityConstraints>& cls);
 void bind_inequality_constraints(nb::class_<InequalityConstraints>& cls);
 
-void bind_solver_exit_condition(nb::enum_<SolverExitCondition>& e);
-void bind_solver_iteration_info(nb::class_<SolverIterationInfo>& cls);
-void bind_solver_status(nb::class_<SolverStatus>& cls);
+void bind_exit_status(nb::enum_<ExitStatus>& e);
+void bind_iteration_info(nb::class_<IterationInfo>& cls);
 
 void bind_problem(nb::class_<Problem>& cls);
 

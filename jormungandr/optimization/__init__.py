@@ -33,7 +33,7 @@ def multistart(solve, initial_guesses):
     return min(
         results,
         key=lambda x: (
-            int(x[0].exit_condition != SolverExitCondition.SUCCESS),
-            x[0].cost,
+            int(x[0] != ExitStatus.SUCCESS),
+            x[1],
         ),
     )

@@ -3,7 +3,7 @@ import pytest
 
 from jormungandr.autodiff import ExpressionType
 from jormungandr.control import *
-from jormungandr.optimization import SolverExitCondition
+from jormungandr.optimization import ExitStatus
 from jormungandr.test.differential_drive_util import (
     differential_drive_dynamics,
     differential_drive_dynamics_double,
@@ -48,12 +48,11 @@ def test_differential_drive_ocp():
     # Set up cost
     problem.minimize(problem.dt() @ np.ones((N + 1, 1)))
 
-    status = problem.solve(max_iterations=1000, diagnostics=True)
+    assert problem.cost_function_type() == ExpressionType.LINEAR
+    assert problem.equality_constraint_type() == ExpressionType.NONLINEAR
+    assert problem.inequality_constraint_type() == ExpressionType.LINEAR
 
-    assert status.cost_function_type == ExpressionType.LINEAR
-    assert status.equality_constraint_type == ExpressionType.NONLINEAR
-    assert status.inequality_constraint_type == ExpressionType.LINEAR
-    assert status.exit_condition == SolverExitCondition.SUCCESS
+    assert problem.solve(max_iterations=1000, diagnostics=True) == ExitStatus.SUCCESS
 
     X = problem.X()
     U = problem.U()

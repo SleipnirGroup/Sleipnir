@@ -68,12 +68,11 @@ TEST_CASE("Problem - Double integrator", "[Problem]") {
   }
   problem.minimize(J);
 
-  auto status = problem.solve({.diagnostics = true});
+  CHECK(problem.cost_function_type() == slp::ExpressionType::QUADRATIC);
+  CHECK(problem.equality_constraint_type() == slp::ExpressionType::LINEAR);
+  CHECK(problem.inequality_constraint_type() == slp::ExpressionType::LINEAR);
 
-  CHECK(status.cost_function_type == slp::ExpressionType::QUADRATIC);
-  CHECK(status.equality_constraint_type == slp::ExpressionType::LINEAR);
-  CHECK(status.inequality_constraint_type == slp::ExpressionType::LINEAR);
-  CHECK(status.exit_condition == slp::SolverExitCondition::SUCCESS);
+  CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
   Eigen::Matrix<double, 2, 2> A{{1.0, dt.count()}, {0.0, 1.0}};
   Eigen::Matrix<double, 2, 1> B{0.5 * dt.count() * dt.count(), dt.count()};

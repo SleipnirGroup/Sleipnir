@@ -6,7 +6,7 @@
 
 #include <catch2/catch_tostring.hpp>
 #include <sleipnir/autodiff/expression_type.hpp>
-#include <sleipnir/optimization/solver_exit_condition.hpp>
+#include <sleipnir/optimization/solver/exit_status.hpp>
 
 namespace Catch {
 
@@ -33,11 +33,11 @@ struct StringMaker<slp::ExpressionType> {
 };
 
 template <>
-struct StringMaker<slp::SolverExitCondition> {
-  static std::string convert(const slp::SolverExitCondition& exit_condition) {
-    using enum slp::SolverExitCondition;
+struct StringMaker<slp::ExitStatus> {
+  static std::string convert(const slp::ExitStatus& exit_status) {
+    using enum slp::ExitStatus;
 
-    switch (exit_condition) {
+    switch (exit_status) {
       case SUCCESS:
         return "SUCCESS";
       case SOLVED_TO_ACCEPTABLE_TOLERANCE:

@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from jormungandr.autodiff import ExpressionType
-from jormungandr.optimization import Problem, SolverExitCondition
+from jormungandr.optimization import ExitStatus, Problem
 from jormungandr.test.cart_pole_util import (
     cart_pole_dynamics,
     cart_pole_dynamics_double,
@@ -67,12 +67,11 @@ def test_cart_pole_problem():
         J += U[:, k : k + 1].T @ U[:, k : k + 1]
     problem.minimize(J)
 
-    status = problem.solve(diagnostics=True)
+    assert problem.cost_function_type() == ExpressionType.QUADRATIC
+    assert problem.equality_constraint_type() == ExpressionType.NONLINEAR
+    assert problem.inequality_constraint_type() == ExpressionType.LINEAR
 
-    assert status.cost_function_type == ExpressionType.QUADRATIC
-    assert status.equality_constraint_type == ExpressionType.NONLINEAR
-    assert status.inequality_constraint_type == ExpressionType.LINEAR
-    assert status.exit_condition == SolverExitCondition.SUCCESS
+    assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
 
     # Verify initial state
     assert X.value(0, 0) == pytest.approx(x_initial[0, 0], abs=1e-8)

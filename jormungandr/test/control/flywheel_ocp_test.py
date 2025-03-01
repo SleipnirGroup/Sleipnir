@@ -6,7 +6,7 @@ import pytest
 
 from jormungandr.autodiff import ExpressionType, VariableMatrix
 from jormungandr.control import *
-from jormungandr.optimization import SolverExitCondition
+from jormungandr.optimization import ExitStatus
 
 
 def near(expected, actual, tolerance):
@@ -42,12 +42,11 @@ def flywheel_test(
     r_mat = np.full((1, N + 1), r)
     problem.minimize((r_mat - problem.X()) @ (r_mat - problem.X()).T)
 
-    status = problem.solve(diagnostics=True)
+    assert problem.cost_function_type() == ExpressionType.QUADRATIC
+    assert problem.equality_constraint_type() == ExpressionType.LINEAR
+    assert problem.inequality_constraint_type() == ExpressionType.LINEAR
 
-    assert status.cost_function_type == ExpressionType.QUADRATIC
-    assert status.equality_constraint_type == ExpressionType.LINEAR
-    assert status.inequality_constraint_type == ExpressionType.LINEAR
-    assert status.exit_condition == SolverExitCondition.SUCCESS
+    assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
 
     # Voltage for steady-state velocity:
     #

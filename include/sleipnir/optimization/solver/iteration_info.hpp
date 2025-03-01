@@ -10,7 +10,7 @@ namespace slp {
 /**
  * Solver iteration information exposed to a user callback.
  */
-struct SolverIterationInfo {
+struct IterationInfo {
   /// The solver iteration.
   int iteration;
 

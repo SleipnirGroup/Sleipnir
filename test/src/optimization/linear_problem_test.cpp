@@ -23,12 +23,11 @@ TEST_CASE("Problem - Maximize", "[Problem]") {
   problem.subject_to(x >= 0);
   problem.subject_to(y >= 0);
 
-  auto status = problem.solve({.diagnostics = true});
+  CHECK(problem.cost_function_type() == slp::ExpressionType::LINEAR);
+  CHECK(problem.equality_constraint_type() == slp::ExpressionType::NONE);
+  CHECK(problem.inequality_constraint_type() == slp::ExpressionType::LINEAR);
 
-  CHECK(status.cost_function_type == slp::ExpressionType::LINEAR);
-  CHECK(status.equality_constraint_type == slp::ExpressionType::NONE);
-  CHECK(status.inequality_constraint_type == slp::ExpressionType::LINEAR);
-  CHECK(status.exit_condition == slp::SolverExitCondition::SUCCESS);
+  CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
   CHECK(x.value() == Catch::Approx(375.0).margin(1e-6));
   CHECK(y.value() == Catch::Approx(250.0).margin(1e-6));
@@ -43,12 +42,11 @@ TEST_CASE("Problem - Free variable", "[Problem]") {
 
   problem.subject_to(x[0] == 0);
 
-  auto status = problem.solve({.diagnostics = true});
+  CHECK(problem.cost_function_type() == slp::ExpressionType::NONE);
+  CHECK(problem.equality_constraint_type() == slp::ExpressionType::LINEAR);
+  CHECK(problem.inequality_constraint_type() == slp::ExpressionType::NONE);
 
-  CHECK(status.cost_function_type == slp::ExpressionType::NONE);
-  CHECK(status.equality_constraint_type == slp::ExpressionType::LINEAR);
-  CHECK(status.inequality_constraint_type == slp::ExpressionType::NONE);
-  CHECK(status.exit_condition == slp::SolverExitCondition::SUCCESS);
+  CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
   CHECK(x[0].value() == Catch::Approx(0.0).margin(1e-6));
   CHECK(x[1].value() == Catch::Approx(2.0).margin(1e-6));
