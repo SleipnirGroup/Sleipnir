@@ -5,7 +5,7 @@
 #include <print>
 
 #include <Eigen/Core>
-#include <sleipnir/control/ocp_solver.hpp>
+#include <sleipnir/control/ocp.hpp>
 
 #ifndef RUNNING_TESTS
 int main() {
@@ -30,9 +30,9 @@ int main() {
 
   constexpr double r = 10.0;
 
-  slp::OCPSolver solver(1, 1, dt, N, f_discrete, slp::DynamicsType::DISCRETE,
-                        slp::TimestepMethod::FIXED,
-                        slp::TranscriptionMethod::DIRECT_TRANSCRIPTION);
+  slp::OCP solver(1, 1, dt, N, f_discrete, slp::DynamicsType::DISCRETE,
+                  slp::TimestepMethod::FIXED,
+                  slp::TranscriptionMethod::DIRECT_TRANSCRIPTION);
   solver.constrain_initial_state(0.0);
   solver.set_upper_input_bound(12);
   solver.set_lower_input_bound(-12);

@@ -282,7 +282,7 @@ static const char *__doc_slp_MultistartResult_status = R"doc(The solver status.)
 
 static const char *__doc_slp_MultistartResult_variables = R"doc(The decision variables.)doc";
 
-static const char *__doc_slp_OCPSolver =
+static const char *__doc_slp_OCP =
 R"doc(This class allows the user to pose and solve a constrained optimal
 control problem (OCP) in a variety of ways.
 
@@ -309,7 +309,7 @@ single-shooting can use either an ODE or state transition function.
 https://underactuated.mit.edu/trajopt.html goes into more detail on
 each transcription method.)doc";
 
-static const char *__doc_slp_OCPSolver_ForEachStep =
+static const char *__doc_slp_OCP_ForEachStep =
 R"doc(Set the constraint evaluation function. This function is called
 `num_steps+1` times, with the corresponding state and input
 VariableMatrices.
@@ -318,7 +318,7 @@ Parameter ``callback``:
     The callback f(t, x, u, dt) where t is time, x is the state
     vector, u is the input vector, and dt is the timestep duration.)doc";
 
-static const char *__doc_slp_OCPSolver_OCPSolver =
+static const char *__doc_slp_OCP_OCP =
 R"doc(Build an optimization problem using a system evolution function
 (explicit ODE or discrete state transition function).
 
@@ -349,7 +349,7 @@ Parameter ``timestep_method``:
 Parameter ``method``:
     The transcription method.)doc";
 
-static const char *__doc_slp_OCPSolver_OCPSolver_2 =
+static const char *__doc_slp_OCP_OCP_2 =
 R"doc(Build an optimization problem using a system evolution function
 (explicit ODE or discrete state transition function).
 
@@ -380,19 +380,19 @@ Parameter ``timestep_method``:
 Parameter ``method``:
     The transcription method.)doc";
 
-static const char *__doc_slp_OCPSolver_SetMaxTimestep =
+static const char *__doc_slp_OCP_SetMaxTimestep =
 R"doc(Convenience function to set an upper bound on the timestep.
 
 Parameter ``max_timestep``:
     The maximum timestep.)doc";
 
-static const char *__doc_slp_OCPSolver_SetMinTimestep =
+static const char *__doc_slp_OCP_SetMinTimestep =
 R"doc(Convenience function to set a lower bound on the timestep.
 
 Parameter ``min_timestep``:
     The minimum timestep.)doc";
 
-static const char *__doc_slp_OCPSolver_U =
+static const char *__doc_slp_OCP_U =
 R"doc(Get the input variables. After the problem is solved, this will
 contain the inputs corresponding to the optimized trajectory.
 
@@ -402,7 +402,7 @@ unused in the trajectory.
 Returns:
     The input variable matrix.)doc";
 
-static const char *__doc_slp_OCPSolver_X =
+static const char *__doc_slp_OCP_X =
 R"doc(Get the state variables. After the problem is solved, this will
 contain the optimized trajectory.
 
@@ -411,25 +411,25 @@ Shaped (num_states)x(num_steps+1).
 Returns:
     The state variable matrix.)doc";
 
-static const char *__doc_slp_OCPSolver_constrain_direct_collocation = R"doc()doc";
+static const char *__doc_slp_OCP_constrain_direct_collocation = R"doc()doc";
 
-static const char *__doc_slp_OCPSolver_constrain_direct_transcription = R"doc()doc";
+static const char *__doc_slp_OCP_constrain_direct_transcription = R"doc()doc";
 
-static const char *__doc_slp_OCPSolver_constrain_final_state =
+static const char *__doc_slp_OCP_constrain_final_state =
 R"doc(Utility function to constrain the final state.
 
 Parameter ``final_state``:
     the final state to constrain to.)doc";
 
-static const char *__doc_slp_OCPSolver_constrain_initial_state =
+static const char *__doc_slp_OCP_constrain_initial_state =
 R"doc(Utility function to constrain the initial state.
 
 Parameter ``initial_state``:
     the initial state to constrain to.)doc";
 
-static const char *__doc_slp_OCPSolver_constrain_single_shooting = R"doc()doc";
+static const char *__doc_slp_OCP_constrain_single_shooting = R"doc()doc";
 
-static const char *__doc_slp_OCPSolver_dt =
+static const char *__doc_slp_OCP_dt =
 R"doc(Get the timestep variables. After the problem is solved, this will
 contain the timesteps corresponding to the optimized trajectory.
 
@@ -439,13 +439,13 @@ trajectory.
 Returns:
     The timestep variable matrix.)doc";
 
-static const char *__doc_slp_OCPSolver_final_state =
+static const char *__doc_slp_OCP_final_state =
 R"doc(Convenience function to get the final state in the trajectory.
 
 Returns:
     The final state of the trajectory.)doc";
 
-static const char *__doc_slp_OCPSolver_for_each_step =
+static const char *__doc_slp_OCP_for_each_step =
 R"doc(Set the constraint evaluation function. This function is called
 `num_steps+1` times, with the corresponding state and input
 VariableMatrices.
@@ -454,42 +454,42 @@ Parameter ``callback``:
     The callback f(x, u) where x is the state and u is the input
     vector.)doc";
 
-static const char *__doc_slp_OCPSolver_initial_state =
+static const char *__doc_slp_OCP_initial_state =
 R"doc(Convenience function to get the initial state in the trajectory.
 
 Returns:
     The initial state of the trajectory.)doc";
 
-static const char *__doc_slp_OCPSolver_m_DT = R"doc()doc";
+static const char *__doc_slp_OCP_m_DT = R"doc()doc";
 
-static const char *__doc_slp_OCPSolver_m_U = R"doc()doc";
+static const char *__doc_slp_OCP_m_U = R"doc()doc";
 
-static const char *__doc_slp_OCPSolver_m_X = R"doc()doc";
+static const char *__doc_slp_OCP_m_X = R"doc()doc";
 
-static const char *__doc_slp_OCPSolver_m_dt = R"doc()doc";
+static const char *__doc_slp_OCP_m_dt = R"doc()doc";
 
-static const char *__doc_slp_OCPSolver_m_dynamics_function = R"doc()doc";
+static const char *__doc_slp_OCP_m_dynamics_function = R"doc()doc";
 
-static const char *__doc_slp_OCPSolver_m_dynamics_type = R"doc()doc";
+static const char *__doc_slp_OCP_m_dynamics_type = R"doc()doc";
 
-static const char *__doc_slp_OCPSolver_m_num_inputs = R"doc()doc";
+static const char *__doc_slp_OCP_m_num_inputs = R"doc()doc";
 
-static const char *__doc_slp_OCPSolver_m_num_states = R"doc()doc";
+static const char *__doc_slp_OCP_m_num_states = R"doc()doc";
 
-static const char *__doc_slp_OCPSolver_m_num_steps = R"doc()doc";
+static const char *__doc_slp_OCP_m_num_steps = R"doc()doc";
 
-static const char *__doc_slp_OCPSolver_m_timestep_method = R"doc()doc";
+static const char *__doc_slp_OCP_m_timestep_method = R"doc()doc";
 
-static const char *__doc_slp_OCPSolver_m_transcription_method = R"doc()doc";
+static const char *__doc_slp_OCP_m_transcription_method = R"doc()doc";
 
-static const char *__doc_slp_OCPSolver_set_lower_input_bound =
+static const char *__doc_slp_OCP_set_lower_input_bound =
 R"doc(Convenience function to set a lower bound on the input.
 
 Parameter ``lower_bound``:
     The lower bound that inputs must always be above. Must be shaped
     (num_inputs)x1.)doc";
 
-static const char *__doc_slp_OCPSolver_set_upper_input_bound =
+static const char *__doc_slp_OCP_set_upper_input_bound =
 R"doc(Convenience function to set an upper bound on the input.
 
 Parameter ``upper_bound``:

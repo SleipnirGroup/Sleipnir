@@ -100,7 +100,7 @@ enum class TimestepMethod : uint8_t {
  * https://underactuated.mit.edu/trajopt.html goes into more detail on each
  * transcription method.
  */
-class SLEIPNIR_DLLEXPORT OCPSolver : public Problem {
+class SLEIPNIR_DLLEXPORT OCP : public Problem {
  public:
   /**
    * Build an optimization problem using a system evolution function (explicit
@@ -119,8 +119,7 @@ class SLEIPNIR_DLLEXPORT OCPSolver : public Problem {
    * @param timestep_method The timestep method.
    * @param method The transcription method.
    */
-  OCPSolver(
-      int num_states, int num_inputs, std::chrono::duration<double> dt,
+  OCP(int num_states, int num_inputs, std::chrono::duration<double> dt,
       int num_steps,
       function_ref<VariableMatrix(const VariableMatrix& x,
                                   const VariableMatrix& u)>
@@ -128,19 +127,19 @@ class SLEIPNIR_DLLEXPORT OCPSolver : public Problem {
       DynamicsType dynamics_type = DynamicsType::EXPLICIT_ODE,
       TimestepMethod timestep_method = TimestepMethod::FIXED,
       TranscriptionMethod method = TranscriptionMethod::DIRECT_TRANSCRIPTION)
-      : OCPSolver{num_states,
-                  num_inputs,
-                  dt,
-                  num_steps,
-                  [=]([[maybe_unused]] const VariableMatrix& t,
-                      const VariableMatrix& x, const VariableMatrix& u,
-                      [[maybe_unused]]
-                      const VariableMatrix& dt) -> VariableMatrix {
-                    return dynamics(x, u);
-                  },
-                  dynamics_type,
-                  timestep_method,
-                  method} {}
+      : OCP{num_states,
+            num_inputs,
+            dt,
+            num_steps,
+            [=]([[maybe_unused]] const VariableMatrix& t,
+                const VariableMatrix& x, const VariableMatrix& u,
+                [[maybe_unused]]
+                const VariableMatrix& dt) -> VariableMatrix {
+              return dynamics(x, u);
+            },
+            dynamics_type,
+            timestep_method,
+            method} {}
 
   /**
    * Build an optimization problem using a system evolution function (explicit
@@ -159,8 +158,7 @@ class SLEIPNIR_DLLEXPORT OCPSolver : public Problem {
    * @param timestep_method The timestep method.
    * @param method The transcription method.
    */
-  OCPSolver(
-      int num_states, int num_inputs, std::chrono::duration<double> dt,
+  OCP(int num_states, int num_inputs, std::chrono::duration<double> dt,
       int num_steps,
       function_ref<VariableMatrix(const Variable& t, const VariableMatrix& x,
                                   const VariableMatrix& u, const Variable& dt)>
