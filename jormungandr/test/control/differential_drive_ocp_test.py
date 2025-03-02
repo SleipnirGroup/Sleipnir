@@ -11,7 +11,7 @@ from jormungandr.test.differential_drive_util import (
 from jormungandr.test.rk4 import rk4
 
 
-def test_ocp_solver_differential_drive():
+def test_differential_drive_ocp():
     N = 50
 
     min_timestep = 0.05  # s
@@ -20,7 +20,7 @@ def test_ocp_solver_differential_drive():
     u_min = np.array([[-12.0], [-12.0]])
     u_max = np.array([[12.0], [12.0]])
 
-    problem = OCPSolver(
+    problem = OCP(
         5,
         2,
         min_timestep,

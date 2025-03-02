@@ -14,7 +14,7 @@ def lerp(a, b, t):
     return a + t * (b - a)
 
 
-def test_ocp_solver_cart_pole():
+def test_cart_pole_ocp():
     T = 5  # s
     dt = 0.05  # s
     N = int(T / dt)
@@ -25,7 +25,7 @@ def test_ocp_solver_cart_pole():
     x_initial = np.zeros((4, 1))
     x_final = np.array([[1.0], [math.pi], [0.0], [0.0]])
 
-    problem = OCPSolver(
+    problem = OCP(
         4,
         1,
         dt,

@@ -33,7 +33,7 @@ def flywheel_test(
 
     r = 10.0
 
-    solver = OCPSolver(1, 1, dt, N, F, dynamics_type, TimestepMethod.FIXED, method)
+    solver = OCP(1, 1, dt, N, F, dynamics_type, TimestepMethod.FIXED, method)
     solver.constrain_initial_state(0.0)
     solver.set_upper_input_bound(12)
     solver.set_lower_input_bound(-12)
@@ -120,7 +120,7 @@ def flywheel_test(
                 f.write(f"{k * dt},0.0\n")
 
 
-def test_ocp_solver_flywheel_explicit():
+def test_flywheel_explicit_ocp():
     A = -1.0
     B = 1.0
 
@@ -128,7 +128,7 @@ def test_ocp_solver_flywheel_explicit():
         return A * x + B * u
 
     flywheel_test(
-        "OCPSolver Flywheel Explicit Collocation",
+        "OCP Flywheel Explicit Collocation",
         A,
         B,
         f_ode,
@@ -136,7 +136,7 @@ def test_ocp_solver_flywheel_explicit():
         TranscriptionMethod.DIRECT_COLLOCATION,
     )
     flywheel_test(
-        "OCPSolver Flywheel Explicit Transcription",
+        "OCP Flywheel Explicit Transcription",
         A,
         B,
         f_ode,
@@ -144,7 +144,7 @@ def test_ocp_solver_flywheel_explicit():
         TranscriptionMethod.DIRECT_TRANSCRIPTION,
     )
     flywheel_test(
-        "OCPSolver Flywheel Explicit Single-Shooting",
+        "OCP Flywheel Explicit Single-Shooting",
         A,
         B,
         f_ode,
@@ -153,7 +153,7 @@ def test_ocp_solver_flywheel_explicit():
     )
 
 
-def test_ocp_solver_flywheel_discrete():
+def test_flywheel_discrete_ocp():
     A = -1.0
     B = 1.0
     dt = 0.005  # s
@@ -165,7 +165,7 @@ def test_ocp_solver_flywheel_discrete():
         return A_discrete * x + B_discrete * u
 
     flywheel_test(
-        "OCPSolver Flywheel Discrete Transcription",
+        "OCP Flywheel Discrete Transcription",
         A,
         B,
         f_discrete,
@@ -173,7 +173,7 @@ def test_ocp_solver_flywheel_discrete():
         TranscriptionMethod.DIRECT_TRANSCRIPTION,
     )
     flywheel_test(
-        "OCPSolver Flywheel Discrete Single-Shooting",
+        "OCP Flywheel Discrete Single-Shooting",
         A,
         B,
         f_discrete,

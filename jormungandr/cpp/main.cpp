@@ -4,7 +4,7 @@
 #include <sleipnir/autodiff/variable.hpp>
 #include <sleipnir/autodiff/variable_block.hpp>
 #include <sleipnir/autodiff/variable_matrix.hpp>
-#include <sleipnir/control/ocp_solver.hpp>
+#include <sleipnir/control/ocp.hpp>
 #include <sleipnir/optimization/problem.hpp>
 #include <sleipnir/optimization/solver_exit_condition.hpp>
 #include <sleipnir/optimization/solver_iteration_info.hpp>
@@ -59,8 +59,7 @@ NB_MODULE(_jormungandr, m) {
                                         DOC(slp, DynamicsType)};
   nb::enum_<TimestepMethod> timestep_method{control, "TimestepMethod",
                                             DOC(slp, TimestepMethod)};
-  nb::class_<OCPSolver, Problem> ocp_solver{control, "OCPSolver",
-                                            DOC(slp, OCPSolver)};
+  nb::class_<OCP, Problem> ocp{control, "OCP", DOC(slp, OCP)};
 
   bind_expression_type(expression_type);
 
@@ -85,8 +84,7 @@ NB_MODULE(_jormungandr, m) {
 
   bind_problem(problem);
 
-  bind_ocp_solver(transcription_method, dynamics_type, timestep_method,
-                  ocp_solver);
+  bind_ocp(transcription_method, dynamics_type, timestep_method, ocp);
 }
 
 }  // namespace slp

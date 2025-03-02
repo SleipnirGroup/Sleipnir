@@ -9,14 +9,14 @@
 #include <Eigen/Core>
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
-#include <sleipnir/control/ocp_solver.hpp>
+#include <sleipnir/control/ocp.hpp>
 
 #include "cart_pole_util.hpp"
 #include "catch_string_converters.hpp"
 #include "rk4.hpp"
 #include "util/scope_exit.hpp"
 
-TEST_CASE("OCPSolver - Cart-pole", "[OCPSolver]") {
+TEST_CASE("OCP - Cart-pole", "[OCP]") {
   using namespace std::chrono_literals;
 
   slp::scope_exit exit{
@@ -32,10 +32,10 @@ TEST_CASE("OCPSolver - Cart-pole", "[OCPSolver]") {
   constexpr Eigen::Vector<double, 4> x_initial{{0.0, 0.0, 0.0, 0.0}};
   constexpr Eigen::Vector<double, 4> x_final{{1.0, std::numbers::pi, 0.0, 0.0}};
 
-  slp::OCPSolver problem(4, 1, dt, N, cart_pole_dynamics,
-                         slp::DynamicsType::EXPLICIT_ODE,
-                         slp::TimestepMethod::VARIABLE_SINGLE,
-                         slp::TranscriptionMethod::DIRECT_COLLOCATION);
+  slp::OCP problem(4, 1, dt, N, cart_pole_dynamics,
+                   slp::DynamicsType::EXPLICIT_ODE,
+                   slp::TimestepMethod::VARIABLE_SINGLE,
+                   slp::TranscriptionMethod::DIRECT_COLLOCATION);
 
   // x = [q, q̇]ᵀ = [x, θ, ẋ, θ̇]ᵀ
   auto X = problem.X();
@@ -123,7 +123,7 @@ TEST_CASE("OCPSolver - Cart-pole", "[OCPSolver]") {
   CHECK(X.value(3, N - 1) == Catch::Approx(x_final(3)).margin(1e-8));
 
   // Log states for offline viewing
-  std::ofstream states{"OCPSolver Cart-pole states.csv"};
+  std::ofstream states{"OCP Cart-pole states.csv"};
   if (states.is_open()) {
     states << "Time (s),Cart position (m),Pole angle (rad),Cart velocity (m/s),"
               "Pole angular velocity (rad/s)\n";
@@ -135,7 +135,7 @@ TEST_CASE("OCPSolver - Cart-pole", "[OCPSolver]") {
   }
 
   // Log inputs for offline viewing
-  std::ofstream inputs{"OCPSolver Cart-pole inputs.csv"};
+  std::ofstream inputs{"OCP Cart-pole inputs.csv"};
   if (inputs.is_open()) {
     inputs << "Time (s),Cart force (N)\n";
 

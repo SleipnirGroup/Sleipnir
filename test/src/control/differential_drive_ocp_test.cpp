@@ -7,14 +7,14 @@
 #include <Eigen/Core>
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
-#include <sleipnir/control/ocp_solver.hpp>
+#include <sleipnir/control/ocp.hpp>
 
 #include "catch_string_converters.hpp"
 #include "differential_drive_util.hpp"
 #include "rk4.hpp"
 #include "util/scope_exit.hpp"
 
-TEST_CASE("OCPSolver - Differential drive", "[OCPSolver]") {
+TEST_CASE("OCP - Differential drive", "[OCP]") {
   using namespace std::chrono_literals;
 
   slp::scope_exit exit{
@@ -28,10 +28,10 @@ TEST_CASE("OCPSolver - Differential drive", "[OCPSolver]") {
   constexpr Eigen::Matrix<double, 2, 1> u_min{{-12.0, -12.0}};
   constexpr Eigen::Matrix<double, 2, 1> u_max{{12.0, 12.0}};
 
-  slp::OCPSolver problem(5, 2, min_timestep, N, differential_drive_dynamics,
-                         slp::DynamicsType::EXPLICIT_ODE,
-                         slp::TimestepMethod::VARIABLE_SINGLE,
-                         slp::TranscriptionMethod::DIRECT_TRANSCRIPTION);
+  slp::OCP problem(5, 2, min_timestep, N, differential_drive_dynamics,
+                   slp::DynamicsType::EXPLICIT_ODE,
+                   slp::TimestepMethod::VARIABLE_SINGLE,
+                   slp::TranscriptionMethod::DIRECT_TRANSCRIPTION);
 
   // Seed the min time formulation with lerp between waypoints
   for (int i = 0; i < N + 1; ++i) {
@@ -105,7 +105,7 @@ TEST_CASE("OCPSolver - Differential drive", "[OCPSolver]") {
   CHECK(X.value(4, N) == Catch::Approx(x_final[4]).margin(1e-8));
 
   // Log states for offline viewing
-  std::ofstream states{"OCPSolver Differential drive states.csv"};
+  std::ofstream states{"OCP Differential drive states.csv"};
   if (states.is_open()) {
     states << "Time (s),X position (m),Y position (m),Heading (rad),Left "
               "velocity (m/s),Right velocity (m/s)\n";
@@ -122,7 +122,7 @@ TEST_CASE("OCPSolver - Differential drive", "[OCPSolver]") {
   }
 
   // Log inputs for offline viewing
-  std::ofstream inputs{"OCPSolver Differential drive inputs.csv"};
+  std::ofstream inputs{"OCP Differential drive inputs.csv"};
   if (inputs.is_open()) {
     inputs << "Time (s),Left voltage (V),Right voltage (V)\n";
 

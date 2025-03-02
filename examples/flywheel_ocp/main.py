@@ -27,7 +27,7 @@ def main():
 
     r = 10.0
 
-    solver = OCPSolver(
+    solver = OCP(
         1,
         1,
         dt,

@@ -9,7 +9,7 @@
 #include <Eigen/Core>
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
-#include <sleipnir/control/ocp_solver.hpp>
+#include <sleipnir/control/ocp.hpp>
 
 #include "catch_string_converters.hpp"
 #include "util/scope_exit.hpp"
@@ -42,8 +42,8 @@ void TestFlywheel(
 
   constexpr double r = 10.0;
 
-  slp::OCPSolver solver(1, 1, dt, N, F, dynamics_type,
-                        slp::TimestepMethod::FIXED, method);
+  slp::OCP solver(1, 1, dt, N, F, dynamics_type, slp::TimestepMethod::FIXED,
+                  method);
   solver.constrain_initial_state(0.0);
   solver.set_upper_input_bound(12);
   solver.set_lower_input_bound(-12);
@@ -141,7 +141,7 @@ void TestFlywheel(
   }
 }
 
-TEST_CASE("OCPSolver - Flywheel (explicit)", "[OCPSolver]") {
+TEST_CASE("OCP - Flywheel (explicit)", "[OCP]") {
   constexpr double A = -1.0;
   constexpr double B = 1.0;
 
@@ -149,18 +149,18 @@ TEST_CASE("OCPSolver - Flywheel (explicit)", "[OCPSolver]") {
     return A * x + B * u;
   };
 
-  TestFlywheel("OCPSolver Flywheel Explicit Collocation", A, B, f_ode,
+  TestFlywheel("OCP Flywheel Explicit Collocation", A, B, f_ode,
                slp::DynamicsType::EXPLICIT_ODE,
                slp::TranscriptionMethod::DIRECT_COLLOCATION);
-  TestFlywheel("OCPSolver Flywheel Explicit Transcription", A, B, f_ode,
+  TestFlywheel("OCP Flywheel Explicit Transcription", A, B, f_ode,
                slp::DynamicsType::EXPLICIT_ODE,
                slp::TranscriptionMethod::DIRECT_TRANSCRIPTION);
-  TestFlywheel("OCPSolver Flywheel Explicit Single-Shooting", A, B, f_ode,
+  TestFlywheel("OCP Flywheel Explicit Single-Shooting", A, B, f_ode,
                slp::DynamicsType::EXPLICIT_ODE,
                slp::TranscriptionMethod::SINGLE_SHOOTING);
 }
 
-TEST_CASE("OCPSolver - Flywheel (discrete)", "[OCPSolver]") {
+TEST_CASE("OCP - Flywheel (discrete)", "[OCP]") {
   constexpr double A = -1.0;
   constexpr double B = 1.0;
   constexpr std::chrono::duration<double> dt = 5ms;
@@ -172,10 +172,10 @@ TEST_CASE("OCPSolver - Flywheel (discrete)", "[OCPSolver]") {
     return A_discrete * x + B_discrete * u;
   };
 
-  TestFlywheel("OCPSolver Flywheel Discrete Transcription", A, B, f_discrete,
+  TestFlywheel("OCP Flywheel Discrete Transcription", A, B, f_discrete,
                slp::DynamicsType::DISCRETE,
                slp::TranscriptionMethod::DIRECT_TRANSCRIPTION);
-  TestFlywheel("OCPSolver Flywheel Discrete Single-Shooting", A, B, f_discrete,
+  TestFlywheel("OCP Flywheel Discrete Single-Shooting", A, B, f_discrete,
                slp::DynamicsType::DISCRETE,
                slp::TranscriptionMethod::SINGLE_SHOOTING);
 }
