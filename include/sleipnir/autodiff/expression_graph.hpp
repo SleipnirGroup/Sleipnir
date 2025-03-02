@@ -7,7 +7,7 @@
 #include "sleipnir/autodiff/expression.hpp"
 #include "sleipnir/util/small_vector.hpp"
 
-namespace sleipnir::detail {
+namespace slp::detail {
 
 /**
  * Generate a topological sort of an expression graph from parent to child.
@@ -89,4 +89,4 @@ inline void update_values(const small_vector<Expression*>& list) {
   }
 }
 
-}  // namespace sleipnir::detail
+}  // namespace slp::detail

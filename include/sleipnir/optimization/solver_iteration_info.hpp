@@ -5,7 +5,7 @@
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
 
-namespace sleipnir {
+namespace slp {
 
 /**
  * Solver iteration information exposed to a user callback.
@@ -33,4 +33,4 @@ struct SolverIterationInfo {
   const Eigen::SparseMatrix<double>& A_i;
 };
 
-}  // namespace sleipnir
+}  // namespace slp

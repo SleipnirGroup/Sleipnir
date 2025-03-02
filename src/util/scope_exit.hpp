@@ -4,7 +4,7 @@
 
 #include <utility>
 
-namespace sleipnir {
+namespace slp {
 
 template <typename F>
 class scope_exit {
@@ -32,4 +32,4 @@ class scope_exit {
   bool m_active = true;
 };
 
-}  // namespace sleipnir
+}  // namespace slp

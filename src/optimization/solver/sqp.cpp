@@ -53,7 +53,7 @@ struct Step {
 
 }  // namespace
 
-namespace sleipnir {
+namespace slp {
 
 void sqp(
     std::span<Variable> decision_variables,
@@ -599,4 +599,4 @@ void sqp(
   }
 }
 
-}  // namespace sleipnir
+}  // namespace slp

@@ -10,7 +10,7 @@
 #include "sleipnir/util/function_ref.hpp"
 #include "sleipnir/util/small_vector.hpp"
 
-namespace sleipnir {
+namespace slp {
 
 /**
  * The result of a multistart solve.
@@ -72,4 +72,4 @@ MultistartResult<DecisionVariables> Multistart(
   });
 }
 
-}  // namespace sleipnir
+}  // namespace slp

@@ -7,7 +7,7 @@
 #include "catch_string_converters.hpp"
 
 TEST_CASE("linear_problem - Maximize", "[linear_problem]") {
-  sleipnir::OptimizationProblem problem;
+  slp::OptimizationProblem problem;
 
   auto x = problem.decision_variable();
   x.set_value(1.0);
@@ -25,17 +25,17 @@ TEST_CASE("linear_problem - Maximize", "[linear_problem]") {
 
   auto status = problem.solve({.diagnostics = true});
 
-  CHECK(status.cost_function_type == sleipnir::ExpressionType::LINEAR);
-  CHECK(status.equality_constraint_type == sleipnir::ExpressionType::NONE);
-  CHECK(status.inequality_constraint_type == sleipnir::ExpressionType::LINEAR);
-  CHECK(status.exit_condition == sleipnir::SolverExitCondition::SUCCESS);
+  CHECK(status.cost_function_type == slp::ExpressionType::LINEAR);
+  CHECK(status.equality_constraint_type == slp::ExpressionType::NONE);
+  CHECK(status.inequality_constraint_type == slp::ExpressionType::LINEAR);
+  CHECK(status.exit_condition == slp::SolverExitCondition::SUCCESS);
 
   CHECK(x.value() == Catch::Approx(375.0).margin(1e-6));
   CHECK(y.value() == Catch::Approx(250.0).margin(1e-6));
 }
 
 TEST_CASE("linear_problem - Free variable", "[linear_problem]") {
-  sleipnir::OptimizationProblem problem;
+  slp::OptimizationProblem problem;
 
   auto x = problem.decision_variable(2);
   x[0].set_value(1.0);
@@ -45,10 +45,10 @@ TEST_CASE("linear_problem - Free variable", "[linear_problem]") {
 
   auto status = problem.solve({.diagnostics = true});
 
-  CHECK(status.cost_function_type == sleipnir::ExpressionType::NONE);
-  CHECK(status.equality_constraint_type == sleipnir::ExpressionType::LINEAR);
-  CHECK(status.inequality_constraint_type == sleipnir::ExpressionType::NONE);
-  CHECK(status.exit_condition == sleipnir::SolverExitCondition::SUCCESS);
+  CHECK(status.cost_function_type == slp::ExpressionType::NONE);
+  CHECK(status.equality_constraint_type == slp::ExpressionType::LINEAR);
+  CHECK(status.inequality_constraint_type == slp::ExpressionType::NONE);
+  CHECK(status.exit_condition == slp::SolverExitCondition::SUCCESS);
 
   CHECK(x[0].value() == Catch::Approx(0.0).margin(1e-6));
   CHECK(x[1].value() == Catch::Approx(2.0).margin(1e-6));

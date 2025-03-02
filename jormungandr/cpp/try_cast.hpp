@@ -10,7 +10,7 @@
 
 namespace nb = nanobind;
 
-namespace sleipnir {
+namespace slp {
 
 /**
  * Converts the given nb::object to a C++ type.
@@ -46,4 +46,4 @@ try_cast_to_eigen(const nb::object& obj) {
   }
 }
 
-}  // namespace sleipnir
+}  // namespace slp

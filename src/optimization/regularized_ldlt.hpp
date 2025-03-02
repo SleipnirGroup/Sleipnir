@@ -14,7 +14,7 @@
 
 // See docs/algorithms.md#Works_cited for citation definitions
 
-namespace sleipnir {
+namespace slp {
 
 /**
  * Solves systems of linear equations using a regularized LDLT factorization.
@@ -227,4 +227,4 @@ class RegularizedLDLT {
   }
 };
 
-}  // namespace sleipnir
+}  // namespace slp

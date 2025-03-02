@@ -15,7 +15,7 @@
 
 namespace nb = nanobind;
 
-namespace sleipnir {
+namespace slp {
 
 NB_MODULE(_jormungandr, m) {
   m.doc() =
@@ -27,42 +27,41 @@ NB_MODULE(_jormungandr, m) {
   nb::module_ control = m.def_submodule("control");
 
   nb::enum_<ExpressionType> expression_type{autodiff, "ExpressionType",
-                                            DOC(sleipnir, ExpressionType)};
+                                            DOC(slp, ExpressionType)};
 
-  nb::class_<Variable> variable{autodiff, "Variable", DOC(sleipnir, Variable)};
+  nb::class_<Variable> variable{autodiff, "Variable", DOC(slp, Variable)};
   nb::class_<VariableMatrix> variable_matrix{autodiff, "VariableMatrix",
-                                             DOC(sleipnir, VariableMatrix)};
+                                             DOC(slp, VariableMatrix)};
   nb::class_<VariableBlock<VariableMatrix>> variable_block{
-      autodiff, "VariableBlock", DOC(sleipnir, VariableBlock)};
+      autodiff, "VariableBlock", DOC(slp, VariableBlock)};
 
-  nb::class_<Gradient> gradient{autodiff, "Gradient", DOC(sleipnir, Gradient)};
-  nb::class_<Hessian<>> hessian{autodiff, "Hessian", DOC(sleipnir, Hessian)};
-  nb::class_<Jacobian> jacobian{autodiff, "Jacobian", DOC(sleipnir, Jacobian)};
+  nb::class_<Gradient> gradient{autodiff, "Gradient", DOC(slp, Gradient)};
+  nb::class_<Hessian<>> hessian{autodiff, "Hessian", DOC(slp, Hessian)};
+  nb::class_<Jacobian> jacobian{autodiff, "Jacobian", DOC(slp, Jacobian)};
 
   nb::class_<EqualityConstraints> equality_constraints{
-      optimization, "EqualityConstraints", DOC(sleipnir, EqualityConstraints)};
+      optimization, "EqualityConstraints", DOC(slp, EqualityConstraints)};
   nb::class_<InequalityConstraints> inequality_constraints{
-      optimization, "InequalityConstraints",
-      DOC(sleipnir_InequalityConstraints)};
+      optimization, "InequalityConstraints", DOC(slp_InequalityConstraints)};
 
   nb::enum_<SolverExitCondition> solver_exit_condition{
-      optimization, "SolverExitCondition", DOC(sleipnir, SolverExitCondition)};
+      optimization, "SolverExitCondition", DOC(slp, SolverExitCondition)};
   nb::class_<SolverIterationInfo> solver_iteration_info{
-      optimization, "SolverIterationInfo", DOC(sleipnir, SolverIterationInfo)};
+      optimization, "SolverIterationInfo", DOC(slp, SolverIterationInfo)};
   nb::class_<SolverStatus> solver_status{optimization, "SolverStatus",
-                                         DOC(sleipnir, SolverStatus)};
+                                         DOC(slp, SolverStatus)};
 
   nb::class_<OptimizationProblem> optimization_problem{
-      optimization, "OptimizationProblem", DOC(sleipnir, OptimizationProblem)};
+      optimization, "OptimizationProblem", DOC(slp, OptimizationProblem)};
 
   nb::enum_<TranscriptionMethod> transcription_method{
-      control, "TranscriptionMethod", DOC(sleipnir, TranscriptionMethod)};
+      control, "TranscriptionMethod", DOC(slp, TranscriptionMethod)};
   nb::enum_<DynamicsType> dynamics_type{control, "DynamicsType",
-                                        DOC(sleipnir, DynamicsType)};
+                                        DOC(slp, DynamicsType)};
   nb::enum_<TimestepMethod> timestep_method{control, "TimestepMethod",
-                                            DOC(sleipnir, TimestepMethod)};
-  nb::class_<OCPSolver, OptimizationProblem> ocp_solver{
-      control, "OCPSolver", DOC(sleipnir, OCPSolver)};
+                                            DOC(slp, TimestepMethod)};
+  nb::class_<OCPSolver, OptimizationProblem> ocp_solver{control, "OCPSolver",
+                                                        DOC(slp, OCPSolver)};
 
   bind_expression_type(expression_type);
 
@@ -91,4 +90,4 @@ NB_MODULE(_jormungandr, m) {
                   ocp_solver);
 }
 
-}  // namespace sleipnir
+}  // namespace slp

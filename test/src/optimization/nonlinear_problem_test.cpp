@@ -10,21 +10,21 @@
 #include "range.hpp"
 
 TEST_CASE("nonlinear_problem - Quartic", "[nonlinear_problem]") {
-  sleipnir::OptimizationProblem problem;
+  slp::OptimizationProblem problem;
 
   auto x = problem.decision_variable();
   x.set_value(20.0);
 
-  problem.minimize(sleipnir::pow(x, 4));
+  problem.minimize(slp::pow(x, 4));
 
   problem.subject_to(x >= 1);
 
   auto status = problem.solve({.diagnostics = true});
 
-  CHECK(status.cost_function_type == sleipnir::ExpressionType::NONLINEAR);
-  CHECK(status.equality_constraint_type == sleipnir::ExpressionType::NONE);
-  CHECK(status.inequality_constraint_type == sleipnir::ExpressionType::LINEAR);
-  CHECK(status.exit_condition == sleipnir::SolverExitCondition::SUCCESS);
+  CHECK(status.cost_function_type == slp::ExpressionType::NONLINEAR);
+  CHECK(status.equality_constraint_type == slp::ExpressionType::NONE);
+  CHECK(status.inequality_constraint_type == slp::ExpressionType::LINEAR);
+  CHECK(status.exit_condition == slp::SolverExitCondition::SUCCESS);
 
   CHECK(x.value() == Catch::Approx(1.0).margin(1e-6));
 }
@@ -34,26 +34,26 @@ TEST_CASE("nonlinear_problem - Rosenbrock with cubic and line constraint",
   // https://en.wikipedia.org/wiki/Test_functions_for_optimization#Test_functions_for_constrained_optimization
   for (auto x0 : range(-1.5, 1.5, 0.1)) {
     for (auto y0 : range(-0.5, 2.5, 0.1)) {
-      sleipnir::OptimizationProblem problem;
+      slp::OptimizationProblem problem;
 
       auto x = problem.decision_variable();
       x.set_value(x0);
       auto y = problem.decision_variable();
       y.set_value(y0);
 
-      problem.minimize(sleipnir::pow(1 - x, 2) +
-                       100 * sleipnir::pow(y - sleipnir::pow(x, 2), 2));
+      problem.minimize(slp::pow(1 - x, 2) +
+                       100 * slp::pow(y - slp::pow(x, 2), 2));
 
-      problem.subject_to(sleipnir::pow(x - 1, 3) - y + 1 <= 0);
+      problem.subject_to(slp::pow(x - 1, 3) - y + 1 <= 0);
       problem.subject_to(x + y - 2 <= 0);
 
       auto status = problem.solve({.diagnostics = true});
 
-      CHECK(status.cost_function_type == sleipnir::ExpressionType::NONLINEAR);
-      CHECK(status.equality_constraint_type == sleipnir::ExpressionType::NONE);
+      CHECK(status.cost_function_type == slp::ExpressionType::NONLINEAR);
+      CHECK(status.equality_constraint_type == slp::ExpressionType::NONE);
       CHECK(status.inequality_constraint_type ==
-            sleipnir::ExpressionType::NONLINEAR);
-      CHECK(status.exit_condition == sleipnir::SolverExitCondition::SUCCESS);
+            slp::ExpressionType::NONLINEAR);
+      CHECK(status.exit_condition == slp::SolverExitCondition::SUCCESS);
 
       auto Near = [](double expected, double actual, double tolerance) {
         return std::abs(expected - actual) < tolerance;
@@ -76,25 +76,25 @@ TEST_CASE("nonlinear_problem - Rosenbrock with disk constraint",
   // https://en.wikipedia.org/wiki/Test_functions_for_optimization#Test_functions_for_constrained_optimization
   for (auto x0 : range(-1.5, 1.5, 0.1)) {
     for (auto y0 : range(-1.5, 1.5, 0.1)) {
-      sleipnir::OptimizationProblem problem;
+      slp::OptimizationProblem problem;
 
       auto x = problem.decision_variable();
       x.set_value(x0);
       auto y = problem.decision_variable();
       y.set_value(y0);
 
-      problem.minimize(sleipnir::pow(1 - x, 2) +
-                       100 * sleipnir::pow(y - sleipnir::pow(x, 2), 2));
+      problem.minimize(slp::pow(1 - x, 2) +
+                       100 * slp::pow(y - slp::pow(x, 2), 2));
 
-      problem.subject_to(sleipnir::pow(x, 2) + sleipnir::pow(y, 2) <= 2);
+      problem.subject_to(slp::pow(x, 2) + slp::pow(y, 2) <= 2);
 
       auto status = problem.solve({.diagnostics = true});
 
-      CHECK(status.cost_function_type == sleipnir::ExpressionType::NONLINEAR);
-      CHECK(status.equality_constraint_type == sleipnir::ExpressionType::NONE);
+      CHECK(status.cost_function_type == slp::ExpressionType::NONLINEAR);
+      CHECK(status.equality_constraint_type == slp::ExpressionType::NONE);
       CHECK(status.inequality_constraint_type ==
-            sleipnir::ExpressionType::QUADRATIC);
-      CHECK(status.exit_condition == sleipnir::SolverExitCondition::SUCCESS);
+            slp::ExpressionType::QUADRATIC);
+      CHECK(status.exit_condition == slp::SolverExitCondition::SUCCESS);
 
       CHECK(x.value() == Catch::Approx(1.0).margin(1e-1));
       INFO(std::format("  (x₀, y₀) = ({}, {})\n", x0, y0));
@@ -107,7 +107,7 @@ TEST_CASE("nonlinear_problem - Rosenbrock with disk constraint",
 }
 
 TEST_CASE("nonlinear_problem - Narrow feasible region", "[nonlinear_problem]") {
-  sleipnir::OptimizationProblem problem;
+  slp::OptimizationProblem problem;
 
   auto x = problem.decision_variable();
   x.set_value(20.0);
@@ -115,23 +115,22 @@ TEST_CASE("nonlinear_problem - Narrow feasible region", "[nonlinear_problem]") {
   auto y = problem.decision_variable();
   y.set_value(50.0);
 
-  problem.minimize(sleipnir::sqrt(x * x + y * y));
+  problem.minimize(slp::sqrt(x * x + y * y));
 
   problem.subject_to(y == -x + 5.0);
 
   auto status = problem.solve({.diagnostics = true});
 
-  CHECK(status.cost_function_type == sleipnir::ExpressionType::NONLINEAR);
-  CHECK(status.equality_constraint_type == sleipnir::ExpressionType::LINEAR);
-  CHECK(status.inequality_constraint_type == sleipnir::ExpressionType::NONE);
+  CHECK(status.cost_function_type == slp::ExpressionType::NONLINEAR);
+  CHECK(status.equality_constraint_type == slp::ExpressionType::LINEAR);
+  CHECK(status.inequality_constraint_type == slp::ExpressionType::NONE);
 
 #if defined(__linux__) && defined(__aarch64__)
   // FIXME: Fails on Linux aarch64 with "diverging iterates"
-  CHECK(status.exit_condition ==
-        sleipnir::SolverExitCondition::DIVERGING_ITERATES);
+  CHECK(status.exit_condition == slp::SolverExitCondition::DIVERGING_ITERATES);
   SKIP("Fails with \"diverging iterates\"");
 #else
-  CHECK(status.exit_condition == sleipnir::SolverExitCondition::SUCCESS);
+  CHECK(status.exit_condition == slp::SolverExitCondition::SUCCESS);
 #endif
 
   CHECK(x.value() == Catch::Approx(2.5).margin(1e-2));

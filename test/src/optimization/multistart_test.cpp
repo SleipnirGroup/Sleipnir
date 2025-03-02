@@ -16,8 +16,8 @@ TEST_CASE("multistart - Mishra's Bird function", "[nonlinear_problem]") {
   };
 
   auto Solve = [](const decision_variables& input)
-      -> sleipnir::MultistartResult<decision_variables> {
-    sleipnir::OptimizationProblem problem;
+      -> slp::MultistartResult<decision_variables> {
+    slp::OptimizationProblem problem;
 
     auto x = problem.decision_variable();
     x.set_value(input.x);
@@ -25,26 +25,23 @@ TEST_CASE("multistart - Mishra's Bird function", "[nonlinear_problem]") {
     y.set_value(input.y);
 
     // https://en.wikipedia.org/wiki/Test_functions_for_optimization#Test_functions_for_constrained_optimization
-    problem.minimize(sleipnir::sin(y) *
-                         sleipnir::exp(sleipnir::pow(1 - sleipnir::cos(x), 2)) +
-                     sleipnir::cos(x) *
-                         sleipnir::exp(sleipnir::pow(1 - sleipnir::sin(y), 2)) +
-                     sleipnir::pow(x - y, 2));
+    problem.minimize(slp::sin(y) * slp::exp(slp::pow(1 - slp::cos(x), 2)) +
+                     slp::cos(x) * slp::exp(slp::pow(1 - slp::sin(y), 2)) +
+                     slp::pow(x - y, 2));
 
-    problem.subject_to(sleipnir::pow(x + 5, 2) + sleipnir::pow(y + 5, 2) < 25);
+    problem.subject_to(slp::pow(x + 5, 2) + slp::pow(y + 5, 2) < 25);
 
     return {problem.solve(), decision_variables{x.value(), y.value()}};
   };
 
-  auto [status, variables] = sleipnir::Multistart<decision_variables>(
+  auto [status, variables] = slp::Multistart<decision_variables>(
       Solve,
       std::vector{decision_variables{-3, -8}, decision_variables{-3, -1.5}});
 
-  CHECK(status.cost_function_type == sleipnir::ExpressionType::NONLINEAR);
-  CHECK(status.equality_constraint_type == sleipnir::ExpressionType::NONE);
-  CHECK(status.inequality_constraint_type ==
-        sleipnir::ExpressionType::QUADRATIC);
-  CHECK(status.exit_condition == sleipnir::SolverExitCondition::SUCCESS);
+  CHECK(status.cost_function_type == slp::ExpressionType::NONLINEAR);
+  CHECK(status.equality_constraint_type == slp::ExpressionType::NONE);
+  CHECK(status.inequality_constraint_type == slp::ExpressionType::QUADRATIC);
+  CHECK(status.exit_condition == slp::SolverExitCondition::SUCCESS);
 
   CHECK(variables.x == Catch::Approx(-3.130246803458174).margin(1e-15));
   CHECK(variables.y == Catch::Approx(-1.5821421769364057).margin(1e-15));

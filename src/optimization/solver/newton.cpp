@@ -36,7 +36,7 @@
 
 // See docs/algorithms.md#Works_cited for citation definitions.
 
-namespace sleipnir {
+namespace slp {
 
 void newton(
     std::span<Variable> decision_variables, Variable& f,
@@ -344,4 +344,4 @@ void newton(
   }
 }
 
-}  // namespace sleipnir
+}  // namespace slp

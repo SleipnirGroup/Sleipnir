@@ -33,9 +33,9 @@ Eigen::Vector<double, 5> differential_drive_dynamics_double(
   return xdot;
 }
 
-sleipnir::VariableMatrix differential_drive_dynamics(
-    const sleipnir::VariableMatrix& x, const sleipnir::VariableMatrix& u) {
-  sleipnir::VariableMatrix xdot{5};
+slp::VariableMatrix differential_drive_dynamics(const slp::VariableMatrix& x,
+                                                const slp::VariableMatrix& u) {
+  slp::VariableMatrix xdot{5};
 
   auto v = (x[3] + x[4]) / 2.0;
   xdot[0] = v * cos(x[2]);  // NOLINT

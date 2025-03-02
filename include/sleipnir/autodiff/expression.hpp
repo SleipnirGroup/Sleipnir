@@ -16,7 +16,7 @@
 #include "sleipnir/util/pool.hpp"
 #include "sleipnir/util/small_vector.hpp"
 
-namespace sleipnir::detail {
+namespace slp::detail {
 
 // The global pool allocator uses a thread-local static pool resource, which
 // isn't guaranteed to be initialized properly across DLL boundaries on Windows
@@ -813,8 +813,7 @@ struct AcosExpression final : Expression {
       const ExpressionPtr& x, const ExpressionPtr&,
       const ExpressionPtr& parent_adjoint) const override {
     return -parent_adjoint /
-           sleipnir::detail::sqrt(make_expression_ptr<ConstExpression>(1.0) -
-                                  x * x);
+           slp::detail::sqrt(make_expression_ptr<ConstExpression>(1.0) - x * x);
   }
 };
 
@@ -864,8 +863,7 @@ struct AsinExpression final : Expression {
       const ExpressionPtr& x, const ExpressionPtr&,
       const ExpressionPtr& parent_adjoint) const override {
     return parent_adjoint /
-           sleipnir::detail::sqrt(make_expression_ptr<ConstExpression>(1.0) -
-                                  x * x);
+           slp::detail::sqrt(make_expression_ptr<ConstExpression>(1.0) - x * x);
   }
 };
 
@@ -1030,7 +1028,7 @@ struct CosExpression final : Expression {
   ExpressionPtr grad_expr_l(
       const ExpressionPtr& x, const ExpressionPtr&,
       const ExpressionPtr& parent_adjoint) const override {
-    return parent_adjoint * -sleipnir::detail::sin(x);
+    return parent_adjoint * -slp::detail::sin(x);
   }
 };
 
@@ -1079,7 +1077,7 @@ struct CoshExpression final : Expression {
   ExpressionPtr grad_expr_l(
       const ExpressionPtr& x, const ExpressionPtr&,
       const ExpressionPtr& parent_adjoint) const override {
-    return parent_adjoint * sleipnir::detail::sinh(x);
+    return parent_adjoint * slp::detail::sinh(x);
   }
 };
 
@@ -1131,7 +1129,7 @@ struct ErfExpression final : Expression {
     return parent_adjoint *
            make_expression_ptr<ConstExpression>(2.0 *
                                                 std::numbers::inv_sqrtpi) *
-           sleipnir::detail::exp(-x * x);
+           slp::detail::exp(-x * x);
   }
 };
 
@@ -1181,7 +1179,7 @@ struct ExpExpression final : Expression {
   ExpressionPtr grad_expr_l(
       const ExpressionPtr& x, const ExpressionPtr&,
       const ExpressionPtr& parent_adjoint) const override {
-    return parent_adjoint * sleipnir::detail::exp(x);
+    return parent_adjoint * slp::detail::exp(x);
   }
 };
 
@@ -1238,13 +1236,13 @@ struct HypotExpression final : Expression {
   ExpressionPtr grad_expr_l(
       const ExpressionPtr& x, const ExpressionPtr& y,
       const ExpressionPtr& parent_adjoint) const override {
-    return parent_adjoint * x / sleipnir::detail::hypot(x, y);
+    return parent_adjoint * x / slp::detail::hypot(x, y);
   }
 
   ExpressionPtr grad_expr_r(
       const ExpressionPtr& x, const ExpressionPtr& y,
       const ExpressionPtr& parent_adjoint) const override {
-    return parent_adjoint * y / sleipnir::detail::hypot(x, y);
+    return parent_adjoint * y / slp::detail::hypot(x, y);
   }
 };
 
@@ -1418,8 +1416,8 @@ struct PowExpression final : Expression {
       const ExpressionPtr& base, const ExpressionPtr& power,
       const ExpressionPtr& parent_adjoint) const override {
     return parent_adjoint *
-           sleipnir::detail::pow(
-               base, power - make_expression_ptr<ConstExpression>(1.0)) *
+           slp::detail::pow(base,
+                            power - make_expression_ptr<ConstExpression>(1.0)) *
            power;
   }
 
@@ -1432,9 +1430,9 @@ struct PowExpression final : Expression {
       return base;
     } else {
       return parent_adjoint *
-             sleipnir::detail::pow(
+             slp::detail::pow(
                  base, power - make_expression_ptr<ConstExpression>(1.0)) *
-             base * sleipnir::detail::log(base);
+             base * slp::detail::log(base);
     }
   }
 };
@@ -1568,7 +1566,7 @@ struct SinExpression final : Expression {
   ExpressionPtr grad_expr_l(
       const ExpressionPtr& x, const ExpressionPtr&,
       const ExpressionPtr& parent_adjoint) const override {
-    return parent_adjoint * sleipnir::detail::cos(x);
+    return parent_adjoint * slp::detail::cos(x);
   }
 };
 
@@ -1618,7 +1616,7 @@ struct SinhExpression final : Expression {
   ExpressionPtr grad_expr_l(
       const ExpressionPtr& x, const ExpressionPtr&,
       const ExpressionPtr& parent_adjoint) const override {
-    return parent_adjoint * sleipnir::detail::cosh(x);
+    return parent_adjoint * slp::detail::cosh(x);
   }
 };
 
@@ -1668,8 +1666,8 @@ struct SqrtExpression final : Expression {
   ExpressionPtr grad_expr_l(
       const ExpressionPtr& x, const ExpressionPtr&,
       const ExpressionPtr& parent_adjoint) const override {
-    return parent_adjoint / (make_expression_ptr<ConstExpression>(2.0) *
-                             sleipnir::detail::sqrt(x));
+    return parent_adjoint /
+           (make_expression_ptr<ConstExpression>(2.0) * slp::detail::sqrt(x));
   }
 };
 
@@ -1720,8 +1718,7 @@ struct TanExpression final : Expression {
   ExpressionPtr grad_expr_l(
       const ExpressionPtr& x, const ExpressionPtr&,
       const ExpressionPtr& parent_adjoint) const override {
-    return parent_adjoint /
-           (sleipnir::detail::cos(x) * sleipnir::detail::cos(x));
+    return parent_adjoint / (slp::detail::cos(x) * slp::detail::cos(x));
   }
 };
 
@@ -1771,8 +1768,7 @@ struct TanhExpression final : Expression {
   ExpressionPtr grad_expr_l(
       const ExpressionPtr& x, const ExpressionPtr&,
       const ExpressionPtr& parent_adjoint) const override {
-    return parent_adjoint /
-           (sleipnir::detail::cosh(x) * sleipnir::detail::cosh(x));
+    return parent_adjoint / (slp::detail::cosh(x) * slp::detail::cosh(x));
   }
 };
 
@@ -1798,4 +1794,4 @@ inline ExpressionPtr tanh(const ExpressionPtr& x) {
   return make_expression_ptr<TanhExpression>(x);
 }
 
-}  // namespace sleipnir::detail
+}  // namespace slp::detail

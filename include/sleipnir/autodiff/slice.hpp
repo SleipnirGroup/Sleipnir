@@ -9,7 +9,7 @@
 #include "sleipnir/util/assert.hpp"
 #include "sleipnir/util/symbol_exports.hpp"
 
-namespace sleipnir {
+namespace slp {
 
 namespace slicing {
 
@@ -171,4 +171,4 @@ class SLEIPNIR_DLLEXPORT Slice {
   }
 };
 
-}  // namespace sleipnir
+}  // namespace slp

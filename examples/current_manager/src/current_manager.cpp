@@ -18,8 +18,8 @@ CurrentManager::CurrentManager(std::span<const double> current_tolerances,
     m_desired_currents[row] = std::numeric_limits<double>::infinity();
   }
 
-  sleipnir::Variable J = 0.0;
-  sleipnir::Variable current_sum = 0.0;
+  slp::Variable J = 0.0;
+  slp::Variable current_sum = 0.0;
   for (size_t i = 0; i < current_tolerances.size(); ++i) {
     // The weight is 1/tolᵢ² where tolᵢ is the tolerance between the desired
     // and allocated current for subsystem i

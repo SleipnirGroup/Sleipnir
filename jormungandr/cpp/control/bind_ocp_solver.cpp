@@ -11,7 +11,7 @@
 
 namespace nb = nanobind;
 
-namespace sleipnir {
+namespace slp {
 
 void bind_ocp_solver(nb::enum_<TranscriptionMethod>& transcription_method,
                      nb::enum_<DynamicsType>& dynamics_type,
@@ -21,25 +21,25 @@ void bind_ocp_solver(nb::enum_<TranscriptionMethod>& transcription_method,
 
   transcription_method.value(
       "DIRECT_TRANSCRIPTION", TranscriptionMethod::DIRECT_TRANSCRIPTION,
-      DOC(sleipnir, TranscriptionMethod, DIRECT_TRANSCRIPTION));
-  transcription_method.value(
-      "DIRECT_COLLOCATION", TranscriptionMethod::DIRECT_COLLOCATION,
-      DOC(sleipnir, TranscriptionMethod, DIRECT_COLLOCATION));
-  transcription_method.value(
-      "SINGLE_SHOOTING", TranscriptionMethod::SINGLE_SHOOTING,
-      DOC(sleipnir, TranscriptionMethod, SINGLE_SHOOTING));
+      DOC(slp, TranscriptionMethod, DIRECT_TRANSCRIPTION));
+  transcription_method.value("DIRECT_COLLOCATION",
+                             TranscriptionMethod::DIRECT_COLLOCATION,
+                             DOC(slp, TranscriptionMethod, DIRECT_COLLOCATION));
+  transcription_method.value("SINGLE_SHOOTING",
+                             TranscriptionMethod::SINGLE_SHOOTING,
+                             DOC(slp, TranscriptionMethod, SINGLE_SHOOTING));
 
   dynamics_type.value("EXPLICIT_ODE", DynamicsType::EXPLICIT_ODE,
-                      DOC(sleipnir, DynamicsType, EXPLICIT_ODE));
+                      DOC(slp, DynamicsType, EXPLICIT_ODE));
   dynamics_type.value("DISCRETE", DynamicsType::DISCRETE,
-                      DOC(sleipnir, DynamicsType, DISCRETE));
+                      DOC(slp, DynamicsType, DISCRETE));
 
   timestep_method.value("FIXED", TimestepMethod::FIXED,
-                        DOC(sleipnir, TimestepMethod, FIXED));
+                        DOC(slp, TimestepMethod, FIXED));
   timestep_method.value("VARIABLE", TimestepMethod::VARIABLE,
-                        DOC(sleipnir, TimestepMethod, VARIABLE));
+                        DOC(slp, TimestepMethod, VARIABLE));
   timestep_method.value("VARIABLE_SINGLE", TimestepMethod::VARIABLE_SINGLE,
-                        DOC(sleipnir, TimestepMethod, VARIABLE_SINGLE));
+                        DOC(slp, TimestepMethod, VARIABLE_SINGLE));
 
   cls.def(nb::init<int, int, std::chrono::duration<double>, int,
                    const std::function<VariableMatrix(
@@ -49,41 +49,41 @@ void bind_ocp_solver(nb::enum_<TranscriptionMethod>& transcription_method,
           "dynamics_type"_a = DynamicsType::EXPLICIT_ODE,
           "timestep_method"_a = TimestepMethod::FIXED,
           "transcription_method"_a = TranscriptionMethod::DIRECT_TRANSCRIPTION,
-          DOC(sleipnir, OCPSolver, OCPSolver));
+          DOC(slp, OCPSolver, OCPSolver));
 
   cls.def("constrain_initial_state",
           &OCPSolver::constrain_initial_state<double>, "initial_state"_a,
-          DOC(sleipnir, OCPSolver, constrain_initial_state));
+          DOC(slp, OCPSolver, constrain_initial_state));
   cls.def("constrain_initial_state", &OCPSolver::constrain_initial_state<int>,
-          "initial_state"_a, DOC(sleipnir, OCPSolver, constrain_initial_state));
+          "initial_state"_a, DOC(slp, OCPSolver, constrain_initial_state));
   cls.def("constrain_initial_state",
           &OCPSolver::constrain_initial_state<Variable>, "initial_state"_a,
-          DOC(sleipnir, OCPSolver, constrain_initial_state));
+          DOC(slp, OCPSolver, constrain_initial_state));
   cls.def(
       "constrain_initial_state",
       [](OCPSolver& self, nb::DRef<Eigen::MatrixXd> initial_state) {
         self.constrain_initial_state(initial_state);
       },
-      "initial_state"_a, DOC(sleipnir, OCPSolver, constrain_initial_state));
+      "initial_state"_a, DOC(slp, OCPSolver, constrain_initial_state));
   cls.def("constrain_initial_state",
           &OCPSolver::constrain_initial_state<VariableMatrix>,
-          "initial_state"_a, DOC(sleipnir, OCPSolver, constrain_initial_state));
+          "initial_state"_a, DOC(slp, OCPSolver, constrain_initial_state));
 
   cls.def("constrain_final_state", &OCPSolver::constrain_final_state<double>,
-          "final_state"_a, DOC(sleipnir, OCPSolver, constrain_final_state));
+          "final_state"_a, DOC(slp, OCPSolver, constrain_final_state));
   cls.def("constrain_final_state", &OCPSolver::constrain_final_state<int>,
-          "final_state"_a, DOC(sleipnir, OCPSolver, constrain_final_state));
+          "final_state"_a, DOC(slp, OCPSolver, constrain_final_state));
   cls.def("constrain_final_state", &OCPSolver::constrain_final_state<Variable>,
-          "final_state"_a, DOC(sleipnir, OCPSolver, constrain_final_state));
+          "final_state"_a, DOC(slp, OCPSolver, constrain_final_state));
   cls.def(
       "constrain_final_state",
       [](OCPSolver& self, nb::DRef<Eigen::MatrixXd> final_state) {
         self.constrain_final_state(final_state);
       },
-      "final_state"_a, DOC(sleipnir, OCPSolver, constrain_final_state));
+      "final_state"_a, DOC(slp, OCPSolver, constrain_final_state));
   cls.def("constrain_final_state",
           &OCPSolver::constrain_final_state<VariableMatrix>, "final_state"_a,
-          DOC(sleipnir, OCPSolver, constrain_final_state));
+          DOC(slp, OCPSolver, constrain_final_state));
 
   cls.def(
       "for_each_step",
@@ -92,52 +92,52 @@ void bind_ocp_solver(nb::enum_<TranscriptionMethod>& transcription_method,
                                   const VariableMatrix& u)>& callback) {
         self.for_each_step(callback);
       },
-      "callback"_a, DOC(sleipnir, OCPSolver, for_each_step));
+      "callback"_a, DOC(slp, OCPSolver, for_each_step));
 
   cls.def("set_lower_input_bound", &OCPSolver::set_lower_input_bound<double>,
-          "lower_bound"_a, DOC(sleipnir, OCPSolver, set_lower_input_bound));
+          "lower_bound"_a, DOC(slp, OCPSolver, set_lower_input_bound));
   cls.def("set_lower_input_bound", &OCPSolver::set_lower_input_bound<int>,
-          "lower_bound"_a, DOC(sleipnir, OCPSolver, set_lower_input_bound));
+          "lower_bound"_a, DOC(slp, OCPSolver, set_lower_input_bound));
   cls.def("set_lower_input_bound", &OCPSolver::set_lower_input_bound<Variable>,
-          "lower_bound"_a, DOC(sleipnir, OCPSolver, set_lower_input_bound));
+          "lower_bound"_a, DOC(slp, OCPSolver, set_lower_input_bound));
   cls.def(
       "set_lower_input_bound",
       [](OCPSolver& self, nb::DRef<Eigen::MatrixXd> lower_bound) {
         self.set_lower_input_bound(lower_bound);
       },
-      "lower_bound"_a, DOC(sleipnir, OCPSolver, set_lower_input_bound));
+      "lower_bound"_a, DOC(slp, OCPSolver, set_lower_input_bound));
   cls.def("set_lower_input_bound",
           &OCPSolver::set_lower_input_bound<VariableMatrix>, "lower_bound"_a,
-          DOC(sleipnir, OCPSolver, set_lower_input_bound));
+          DOC(slp, OCPSolver, set_lower_input_bound));
 
   cls.def("set_upper_input_bound", &OCPSolver::set_upper_input_bound<double>,
-          "upper_bound"_a, DOC(sleipnir, OCPSolver, set_upper_input_bound));
+          "upper_bound"_a, DOC(slp, OCPSolver, set_upper_input_bound));
   cls.def("set_upper_input_bound", &OCPSolver::set_upper_input_bound<int>,
-          "upper_bound"_a, DOC(sleipnir, OCPSolver, set_upper_input_bound));
+          "upper_bound"_a, DOC(slp, OCPSolver, set_upper_input_bound));
   cls.def("set_upper_input_bound", &OCPSolver::set_upper_input_bound<Variable>,
-          "upper_bound"_a, DOC(sleipnir, OCPSolver, set_upper_input_bound));
+          "upper_bound"_a, DOC(slp, OCPSolver, set_upper_input_bound));
   cls.def(
       "set_upper_input_bound",
       [](OCPSolver& self, nb::DRef<Eigen::MatrixXd> upper_bound) {
         self.set_upper_input_bound(upper_bound);
       },
-      "upper_bound"_a, DOC(sleipnir, OCPSolver, set_upper_input_bound));
+      "upper_bound"_a, DOC(slp, OCPSolver, set_upper_input_bound));
   cls.def("set_upper_input_bound",
           &OCPSolver::set_upper_input_bound<VariableMatrix>, "upper_bound"_a,
-          DOC(sleipnir, OCPSolver, set_upper_input_bound));
+          DOC(slp, OCPSolver, set_upper_input_bound));
 
   cls.def("set_min_timestep", &OCPSolver::SetMinTimestep, "min_timestep"_a,
-          DOC(sleipnir, OCPSolver, SetMinTimestep));
+          DOC(slp, OCPSolver, SetMinTimestep));
   cls.def("set_max_timestep", &OCPSolver::SetMaxTimestep, "max_timestep"_a,
-          DOC(sleipnir, OCPSolver, SetMaxTimestep));
+          DOC(slp, OCPSolver, SetMaxTimestep));
 
-  cls.def("X", &OCPSolver::X, DOC(sleipnir, OCPSolver, X));
-  cls.def("U", &OCPSolver::U, DOC(sleipnir, OCPSolver, U));
-  cls.def("dt", &OCPSolver::dt, DOC(sleipnir, OCPSolver, dt));
+  cls.def("X", &OCPSolver::X, DOC(slp, OCPSolver, X));
+  cls.def("U", &OCPSolver::U, DOC(slp, OCPSolver, U));
+  cls.def("dt", &OCPSolver::dt, DOC(slp, OCPSolver, dt));
   cls.def("initial_state", &OCPSolver::initial_state,
-          DOC(sleipnir, OCPSolver, initial_state));
+          DOC(slp, OCPSolver, initial_state));
   cls.def("final_state", &OCPSolver::final_state,
-          DOC(sleipnir, OCPSolver, final_state));
+          DOC(slp, OCPSolver, final_state));
 }
 
-}  // namespace sleipnir
+}  // namespace slp

@@ -24,17 +24,15 @@ int main() {
   Eigen::Matrix<double, 1, 1> A_discrete{std::exp(A(0) * dt.count())};
   Eigen::Matrix<double, 1, 1> B_discrete{(1.0 - A_discrete(0)) * B(0)};
 
-  auto f_discrete = [=](sleipnir::VariableMatrix x,
-                        sleipnir::VariableMatrix u) {
+  auto f_discrete = [=](slp::VariableMatrix x, slp::VariableMatrix u) {
     return A_discrete * x + B_discrete * u;
   };
 
   constexpr double r = 10.0;
 
-  sleipnir::OCPSolver solver(
-      1, 1, dt, N, f_discrete, sleipnir::DynamicsType::DISCRETE,
-      sleipnir::TimestepMethod::FIXED,
-      sleipnir::TranscriptionMethod::DIRECT_TRANSCRIPTION);
+  slp::OCPSolver solver(1, 1, dt, N, f_discrete, slp::DynamicsType::DISCRETE,
+                        slp::TimestepMethod::FIXED,
+                        slp::TranscriptionMethod::DIRECT_TRANSCRIPTION);
   solver.constrain_initial_state(0.0);
   solver.set_upper_input_bound(12);
   solver.set_lower_input_bound(-12);

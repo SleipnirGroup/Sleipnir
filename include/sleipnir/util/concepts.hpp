@@ -7,7 +7,7 @@
 
 #include <Eigen/Core>
 
-namespace sleipnir {
+namespace slp {
 
 template <typename T>
 concept ScalarLike = requires(std::decay_t<T> t) {
@@ -28,4 +28,4 @@ concept SleipnirMatrixLike = requires(T t, int rows, int cols) {
 template <typename T>
 concept MatrixLike = SleipnirMatrixLike<T> || EigenMatrixLike<T>;
 
-}  // namespace sleipnir
+}  // namespace slp

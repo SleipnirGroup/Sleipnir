@@ -34,7 +34,7 @@ constexpr int N = T / dt;
 
 constexpr double r = 2.0;
 
-sleipnir::OptimizationProblem problem;
+slp::OptimizationProblem problem;
 ```
 
 ## Creating decision variables
@@ -96,9 +96,9 @@ Next, we'll create a cost function for minimizing position error.
 
 ```cpp
 // Cost function - minimize position error
-sleipnir::Variable J = 0.0;
+slp::Variable J = 0.0;
 for (int k = 0; k < N + 1; ++k) {
-  J += sleipnir::pow(r - X(0, k), 2);
+  J += slp::pow(r - X(0, k), 2);
 }
 problem.minimize(J);
 ```

@@ -28,7 +28,7 @@ constexpr double to_ms(const std::chrono::duration<Rep, Period>& duration) {
 int main() {
   auto setup_start = std::chrono::steady_clock::now();
 
-  sleipnir::OptimizationProblem problem;
+  slp::OptimizationProblem problem;
 
   // camera calibration
   constexpr double fx = 600;
@@ -43,10 +43,10 @@ int main() {
   auto robot_θ = problem.decision_variable();
 
   // cache autodiff variables
-  auto sinθ = sleipnir::sin(robot_θ);
-  auto cosθ = sleipnir::cos(robot_θ);
+  auto sinθ = slp::sin(robot_θ);
+  auto cosθ = slp::cos(robot_θ);
 
-  sleipnir::VariableMatrix field2robot{
+  slp::VariableMatrix field2robot{
       {cosθ, -sinθ, 0, robot_x},
       {sinθ, cosθ, 0, robot_y},
       {0, 0, 1, robot_z},
@@ -64,15 +64,13 @@ int main() {
   auto field2camera = field2robot * robot2camera;
 
   // Cost
-  sleipnir::Variable J = 0.0;
+  slp::Variable J = 0.0;
 
   // list of points in field space to reproject. Each one is a 4x1 vector of
   // (x,y,z,1)
-  std::vector<sleipnir::VariableMatrix> field2points;
-  field2points.push_back(
-      sleipnir::VariableMatrix{{2, 0 - 0.08255, 0.4, 1}}.T());
-  field2points.push_back(
-      sleipnir::VariableMatrix{{2, 0 + 0.08255, 0.4, 1}}.T());
+  std::vector<slp::VariableMatrix> field2points;
+  field2points.push_back(slp::VariableMatrix{{2, 0 - 0.08255, 0.4, 1}}.T());
+  field2points.push_back(slp::VariableMatrix{{2, 0 + 0.08255, 0.4, 1}}.T());
 
   // List of points we saw the target at. These are exactly what we expect for a
   // camera located at 0,0,0 (hand-calculated)
@@ -84,8 +82,7 @@ int main() {
   robot_θ.set_value(0.2);
 
   // field2camera * field2camera⁻¹ = I
-  auto camera2field =
-      sleipnir::solve(field2camera, Eigen::Matrix4d::Identity());
+  auto camera2field = slp::solve(field2camera, Eigen::Matrix4d::Identity());
 
   for (const auto& [field2point, observation] :
        std::views::zip(field2points, point_observations)) {

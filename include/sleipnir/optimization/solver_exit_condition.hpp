@@ -8,7 +8,7 @@
 
 #include "sleipnir/util/symbol_exports.hpp"
 
-namespace sleipnir {
+namespace slp {
 
 /**
  * Solver exit condition.
@@ -81,4 +81,4 @@ SLEIPNIR_DLLEXPORT constexpr std::string_view ToMessage(
   }
 }
 
-}  // namespace sleipnir
+}  // namespace slp

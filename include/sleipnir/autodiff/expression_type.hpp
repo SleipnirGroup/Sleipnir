@@ -8,7 +8,7 @@
 
 #include "sleipnir/util/symbol_exports.hpp"
 
-namespace sleipnir {
+namespace slp {
 
 /**
  * Expression type.
@@ -53,4 +53,4 @@ SLEIPNIR_DLLEXPORT constexpr std::string_view ToMessage(
   }
 }
 
-}  // namespace sleipnir
+}  // namespace slp

@@ -20,7 +20,7 @@
 #include "sleipnir/util/small_vector.hpp"
 #include "sleipnir/util/solve_profiler.hpp"
 
-namespace sleipnir {
+namespace slp {
 
 /**
  * Iteration type.
@@ -93,12 +93,11 @@ inline std::string power_of_10(double value) {
  *   iterate.
  */
 inline void print_too_many_dofs_error(const Eigen::VectorXd& c_e) {
-  sleipnir::println("The problem has too few degrees of freedom.");
-  sleipnir::println(
-      "Violated constraints (cₑ(x) = 0) in order of declaration:");
+  slp::println("The problem has too few degrees of freedom.");
+  slp::println("Violated constraints (cₑ(x) = 0) in order of declaration:");
   for (int row = 0; row < c_e.rows(); ++row) {
     if (c_e(row) < 0.0) {
-      sleipnir::println("  {}/{}: {} = 0", row + 1, c_e.rows(), c_e(row));
+      slp::println("  {}/{}: {} = 0", row + 1, c_e.rows(), c_e(row));
     }
   }
 }
@@ -110,14 +109,13 @@ inline void print_too_many_dofs_error(const Eigen::VectorXd& c_e) {
  *   iterate.
  */
 inline void print_c_e_local_infeasibility_error(const Eigen::VectorXd& c_e) {
-  sleipnir::println(
+  slp::println(
       "The problem is locally infeasible due to violated equality "
       "constraints.");
-  sleipnir::println(
-      "Violated constraints (cₑ(x) = 0) in order of declaration:");
+  slp::println("Violated constraints (cₑ(x) = 0) in order of declaration:");
   for (int row = 0; row < c_e.rows(); ++row) {
     if (c_e[row] < 0.0) {
-      sleipnir::println("  {}/{}: {} = 0", row + 1, c_e.rows(), c_e[row]);
+      slp::println("  {}/{}: {} = 0", row + 1, c_e.rows(), c_e[row]);
     }
   }
 }
@@ -129,14 +127,13 @@ inline void print_c_e_local_infeasibility_error(const Eigen::VectorXd& c_e) {
  *   current iterate.
  */
 inline void print_c_i_local_infeasibility_error(const Eigen::VectorXd& c_i) {
-  sleipnir::println(
+  slp::println(
       "The problem is infeasible due to violated inequality "
       "constraints.");
-  sleipnir::println(
-      "Violated constraints (cᵢ(x) ≥ 0) in order of declaration:");
+  slp::println("Violated constraints (cᵢ(x) ≥ 0) in order of declaration:");
   for (int row = 0; row < c_i.rows(); ++row) {
     if (c_i[row] < 0.0) {
-      sleipnir::println("  {}/{}: {} ≥ 0", row + 1, c_i.rows(), c_i[row]);
+      slp::println("  {}/{}: {} ≥ 0", row + 1, c_i.rows(), c_i[row]);
     }
   }
 }
@@ -166,25 +163,25 @@ void print_iteration_diagnostics(int iterations, IterationType type,
                                  double primal_α_max, double dual_α) {
   if (iterations % 20 == 0) {
     if (iterations == 0) {
-      sleipnir::print("┏");
+      slp::print("┏");
     } else {
-      sleipnir::print("┢");
+      slp::print("┢");
     }
-    sleipnir::print(
+    slp::print(
         "{:━^4}┯{:━^4}┯{:━^9}┯{:━^12}┯{:━^13}┯{:━^12}┯{:━^12}┯{:━^5}┯{:━^5}┯"
         "{:━^8}┯{:━^8}┯{:━^2}",
         "", "", "", "", "", "", "", "", "", "", "", "");
     if (iterations == 0) {
-      sleipnir::println("┓");
+      slp::println("┓");
     } else {
-      sleipnir::println("┪");
+      slp::println("┪");
     }
-    sleipnir::println(
+    slp::println(
         "┃{:^4}│{:^4}│{:^9}│{:^12}│{:^13}│{:^12}│{:^12}│{:^5}│{:^5}│{:^8}│{:^8}"
         "│{:^2}┃",
         "iter", "type", "time (ms)", "error", "cost", "infeas.", "complement.",
         "μ", "reg", "primal α", "dual α", "↩");
-    sleipnir::println(
+    slp::println(
         "┡{:━^4}┷{:━^4}┷{:━^9}┷{:━^12}┷{:━^13}┷{:━^12}┷{:━^12}┷{:━^5}┷{:━^5}┷"
         "{:━^8}┷{:━^8}┷{:━^2}┩",
         "", "", "", "", "", "", "", "", "", "", "", "");
@@ -199,7 +196,7 @@ void print_iteration_diagnostics(int iterations, IterationType type,
   int backtracks = static_cast<int>(-std::log2(primal_α / primal_α_max));
 
   constexpr std::array ITERATION_TYPES = {"norm", "✓SOC", "XSOC"};
-  sleipnir::println(
+  slp::println(
       "│{:4} {:4} {:9.3f} {:12e} {:13e} {:12e} {:12e} {:<5} {:<5} {:.2e} "
       "{:.2e} {:2d}│",
       iterations, ITERATION_TYPES[std::to_underlying(type)], to_ms(time), error,
@@ -254,53 +251,50 @@ inline void print_final_diagnostics(
     const small_vector<SetupProfiler>& setup_profilers,
     const small_vector<SolveProfiler>& solve_profilers) {
   // Print bottom of iteration diagnostics table
-  sleipnir::println("└{:─^105}┘", "");
+  slp::println("└{:─^105}┘", "");
 
-  sleipnir::println("\nExit: {}", ToMessage(exit_condition));
+  slp::println("\nExit: {}", ToMessage(exit_condition));
 
   // Print total time
   auto setup_duration = to_ms(setup_profilers[0].duration());
   auto solve_duration = to_ms(solve_profilers[0].total_duration());
-  sleipnir::println("Time: {:.3f} ms", setup_duration + solve_duration);
-  sleipnir::println("  ↳ setup: {:.3f} ms", setup_duration);
-  sleipnir::println("  ↳ solve: {:.3f} ms ({} iterations)", solve_duration,
-                    iterations);
+  slp::println("Time: {:.3f} ms", setup_duration + solve_duration);
+  slp::println("  ↳ setup: {:.3f} ms", setup_duration);
+  slp::println("  ↳ solve: {:.3f} ms ({} iterations)", solve_duration,
+               iterations);
 
   // Print setup diagnostics
-  sleipnir::println("\n┏{:━^23}┯{:━^18}┯{:━^10}┓", "", "", "");
-  sleipnir::println("┃{:^23}│{:^18}│{:^10}┃", "trace", "percent", "total (ms)");
-  sleipnir::println("┡{:━^23}┷{:━^18}┷{:━^10}┩", "", "", "");
+  slp::println("\n┏{:━^23}┯{:━^18}┯{:━^10}┓", "", "", "");
+  slp::println("┃{:^23}│{:^18}│{:^10}┃", "trace", "percent", "total (ms)");
+  slp::println("┡{:━^23}┷{:━^18}┷{:━^10}┩", "", "", "");
 
   for (auto& profiler : setup_profilers) {
     double norm = setup_duration == 0.0
                       ? (&profiler == &setup_profilers[0] ? 1.0 : 0.0)
                       : to_ms(profiler.duration()) / setup_duration;
-    sleipnir::println("│{:<23} {:>6.2f}%▕{}▏ {:>10.3f}│", profiler.name,
-                      norm * 100.0, histogram<9>(norm),
-                      to_ms(profiler.duration()));
+    slp::println("│{:<23} {:>6.2f}%▕{}▏ {:>10.3f}│", profiler.name,
+                 norm * 100.0, histogram<9>(norm), to_ms(profiler.duration()));
   }
 
-  sleipnir::println("└{:─^53}┘", "");
+  slp::println("└{:─^53}┘", "");
 
   // Print solve diagnostics
-  sleipnir::println("┏{:━^23}┯{:━^18}┯{:━^10}┯{:━^9}┯{:━^4}┓", "", "", "", "",
-                    "");
-  sleipnir::println("┃{:^23}│{:^18}│{:^10}│{:^9}│{:^4}┃", "trace", "percent",
-                    "total (ms)", "each (ms)", "runs");
-  sleipnir::println("┡{:━^23}┷{:━^18}┷{:━^10}┷{:━^9}┷{:━^4}┩", "", "", "", "",
-                    "");
+  slp::println("┏{:━^23}┯{:━^18}┯{:━^10}┯{:━^9}┯{:━^4}┓", "", "", "", "", "");
+  slp::println("┃{:^23}│{:^18}│{:^10}│{:^9}│{:^4}┃", "trace", "percent",
+               "total (ms)", "each (ms)", "runs");
+  slp::println("┡{:━^23}┷{:━^18}┷{:━^10}┷{:━^9}┷{:━^4}┩", "", "", "", "", "");
 
   for (auto& profiler : solve_profilers) {
     double norm = solve_duration == 0.0
                       ? (&profiler == &solve_profilers[0] ? 1.0 : 0.0)
                       : to_ms(profiler.total_duration()) / solve_duration;
-    sleipnir::println(
-        "│{:<23} {:>6.2f}%▕{}▏ {:>10.3f} {:>9.3f} {:>4}│", profiler.name,
-        norm * 100.0, histogram<9>(norm), to_ms(profiler.total_duration()),
-        to_ms(profiler.average_duration()), profiler.num_solves());
+    slp::println("│{:<23} {:>6.2f}%▕{}▏ {:>10.3f} {:>9.3f} {:>4}│",
+                 profiler.name, norm * 100.0, histogram<9>(norm),
+                 to_ms(profiler.total_duration()),
+                 to_ms(profiler.average_duration()), profiler.num_solves());
   }
 
-  sleipnir::println("└{:─^68}┘", "");
+  slp::println("└{:─^68}┘", "");
 }
 
-}  // namespace sleipnir
+}  // namespace slp

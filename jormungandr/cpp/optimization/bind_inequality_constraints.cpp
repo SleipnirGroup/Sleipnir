@@ -11,17 +11,17 @@
 
 namespace nb = nanobind;
 
-namespace sleipnir {
+namespace slp {
 
 void bind_inequality_constraints(nb::class_<InequalityConstraints>& cls) {
   using namespace nb::literals;
 
   cls.def(nb::init<const std::vector<InequalityConstraints>&>(),
           "inequality_constraints"_a,
-          DOC(sleipnir, InequalityConstraints, InequalityConstraints, 2));
+          DOC(slp, InequalityConstraints, InequalityConstraints, 2));
   cls.def(
       "__bool__", [](InequalityConstraints& self) -> bool { return self; },
-      nb::is_operator(), DOC(sleipnir, InequalityConstraints, operator, bool));
+      nb::is_operator(), DOC(slp, InequalityConstraints, operator, bool));
 }
 
-}  // namespace sleipnir
+}  // namespace slp

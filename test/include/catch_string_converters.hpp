@@ -11,9 +11,9 @@
 namespace Catch {
 
 template <>
-struct StringMaker<sleipnir::ExpressionType> {
-  static std::string convert(const sleipnir::ExpressionType& type) {
-    using enum sleipnir::ExpressionType;
+struct StringMaker<slp::ExpressionType> {
+  static std::string convert(const slp::ExpressionType& type) {
+    using enum slp::ExpressionType;
 
     switch (type) {
       case NONE:
@@ -33,10 +33,9 @@ struct StringMaker<sleipnir::ExpressionType> {
 };
 
 template <>
-struct StringMaker<sleipnir::SolverExitCondition> {
-  static std::string convert(
-      const sleipnir::SolverExitCondition& exit_condition) {
-    using enum sleipnir::SolverExitCondition;
+struct StringMaker<slp::SolverExitCondition> {
+  static std::string convert(const slp::SolverExitCondition& exit_condition) {
+    using enum slp::SolverExitCondition;
 
     switch (exit_condition) {
       case SUCCESS:

@@ -14,8 +14,6 @@
 // hit the 2024 FRC game's target that minimizes z sensitivity to initial
 // velocity.
 
-namespace slp = sleipnir;
-
 using Eigen::Vector3d;
 using Vector6d = Eigen::Vector<double, 6>;
 

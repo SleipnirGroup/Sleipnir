@@ -13,7 +13,7 @@
 #include "sleipnir/util/assert.hpp"
 #include "sleipnir/util/function_ref.hpp"
 
-namespace sleipnir {
+namespace slp {
 
 /**
  * A submatrix of autodiff variables with reference semantics.
@@ -869,4 +869,4 @@ class VariableBlock {
   int m_col_slice_length = 0;
 };
 
-}  // namespace sleipnir
+}  // namespace slp

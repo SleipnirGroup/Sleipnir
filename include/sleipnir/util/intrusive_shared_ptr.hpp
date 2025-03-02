@@ -7,7 +7,7 @@
 #include <memory>
 #include <utility>
 
-namespace sleipnir {
+namespace slp {
 
 /**
  * A custom intrusive shared pointer implementation without thread
@@ -323,4 +323,4 @@ IntrusiveSharedPtr<T> allocate_intrusive_shared(Alloc alloc, Args&&... args) {
   return IntrusiveSharedPtr<T>{ptr};
 }
 
-}  // namespace sleipnir
+}  // namespace slp

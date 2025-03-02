@@ -12,8 +12,8 @@
  * @param dt Timestep duration.
  * @param N Number of samples in the problem.
  */
-sleipnir::OptimizationProblem flywheel_sleipnir(
-    std::chrono::duration<double> dt, int N);
+slp::OptimizationProblem flywheel_sleipnir(std::chrono::duration<double> dt,
+                                           int N);
 
 /**
  * Creates a cart-pole nonlinear optimization problem with Sleipnir.
@@ -21,5 +21,5 @@ sleipnir::OptimizationProblem flywheel_sleipnir(
  * @param dt Timestep duration.
  * @param N Number of samples in the problem.
  */
-sleipnir::OptimizationProblem cart_pole_sleipnir(
-    std::chrono::duration<double> dt, int N);
+slp::OptimizationProblem cart_pole_sleipnir(std::chrono::duration<double> dt,
+                                            int N);

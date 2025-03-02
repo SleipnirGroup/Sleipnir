@@ -13,8 +13,8 @@
 TEST_CASE("OptimizationProblem - Arm on elevator", "[OptimizationProblem]") {
   using namespace std::chrono_literals;
 
-  sleipnir::scope_exit exit{
-      [] { CHECK(sleipnir::global_pool_resource().blocks_in_use() == 0u); }};
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
   constexpr int N = 800;
 
@@ -36,7 +36,7 @@ TEST_CASE("OptimizationProblem - Arm on elevator", "[OptimizationProblem]") {
   constexpr std::chrono::duration<double> TOTAL_TIME = 4s;
   constexpr auto dt = TOTAL_TIME / N;
 
-  sleipnir::OptimizationProblem problem;
+  slp::OptimizationProblem problem;
 
   auto elevator = problem.decision_variable(2, N + 1);
   auto elevator_accel = problem.decision_variable(1, N);
@@ -90,29 +90,29 @@ TEST_CASE("OptimizationProblem - Arm on elevator", "[OptimizationProblem]") {
   // Height limit
 #if 0
   auto heights =
-      elevator.row(0) + ARM_LENGTH * arm.row(0).cwise_transform(sleipnir::sin);
+      elevator.row(0) + ARM_LENGTH * arm.row(0).cwise_transform(slp::sin);
   problem.subject_to(heights <= END_EFFECTOR_MAX_HEIGHT);
 #endif
 
   // Cost function
-  sleipnir::Variable J = 0.0;
+  slp::Variable J = 0.0;
   for (int k = 0; k < N + 1; ++k) {
-    J += sleipnir::pow(ELEVATOR_END_HEIGHT - elevator(0, k), 2) +
-         sleipnir::pow(ARM_END_ANGLE - arm(0, k), 2);
+    J += slp::pow(ELEVATOR_END_HEIGHT - elevator(0, k), 2) +
+         slp::pow(ARM_END_ANGLE - arm(0, k), 2);
   }
   problem.minimize(J);
 
   auto status = problem.solve({.diagnostics = true});
 
-  CHECK(status.cost_function_type == sleipnir::ExpressionType::QUADRATIC);
-  CHECK(status.equality_constraint_type == sleipnir::ExpressionType::LINEAR);
-  CHECK(status.inequality_constraint_type == sleipnir::ExpressionType::LINEAR);
+  CHECK(status.cost_function_type == slp::ExpressionType::QUADRATIC);
+  CHECK(status.equality_constraint_type == slp::ExpressionType::LINEAR);
+  CHECK(status.inequality_constraint_type == slp::ExpressionType::LINEAR);
 
 #if (defined(__linux__) || defined(__APPLE__)) && defined(__aarch64__)
   // FIXME: Fails on Linux aarch64 and macOS arm64 with "factorization failed"
   CHECK(status.exit_condition ==
-        sleipnir::SolverExitCondition::FACTORIZATION_FAILED);
+        slp::SolverExitCondition::FACTORIZATION_FAILED);
 #else
-  CHECK(status.exit_condition == sleipnir::SolverExitCondition::SUCCESS);
+  CHECK(status.exit_condition == slp::SolverExitCondition::SUCCESS);
 #endif
 }

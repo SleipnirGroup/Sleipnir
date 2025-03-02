@@ -6,7 +6,7 @@
 #include <string>
 #include <string_view>
 
-namespace sleipnir {
+namespace slp {
 
 /**
  * Records the number of profiler measurements (start/stop pairs) and the
@@ -100,4 +100,4 @@ class SolveProfiler {
   std::chrono::duration<double> m_average_solve_duration{0.0};
 };
 
-}  // namespace sleipnir
+}  // namespace slp

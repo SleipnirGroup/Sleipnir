@@ -11,8 +11,7 @@
 
 TEST_CASE("VariableMatrix - Construct from Eigen::MatrixBase",
           "[VariableMatrix]") {
-  sleipnir::VariableMatrix mat{
-      Eigen::MatrixXd{{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}}};
+  slp::VariableMatrix mat{Eigen::MatrixXd{{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}}};
 
   Eigen::MatrixXd expected{{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}};
   CHECK(mat.value() == expected);
@@ -20,19 +19,19 @@ TEST_CASE("VariableMatrix - Construct from Eigen::MatrixBase",
 
 TEST_CASE("VariableMatrix - Construct from Eigen::DiagonalBase",
           "[VariableMatrix]") {
-  sleipnir::VariableMatrix mat{Eigen::VectorXd{{1.0, 2.0, 3.0}}.asDiagonal()};
+  slp::VariableMatrix mat{Eigen::VectorXd{{1.0, 2.0, 3.0}}.asDiagonal()};
 
   Eigen::MatrixXd expected{{1.0, 0.0, 0.0}, {0.0, 2.0, 0.0}, {0.0, 0.0, 3.0}};
   CHECK(mat.value() == expected);
 }
 
 TEST_CASE("VariableMatrix - Assignment to default", "[VariableMatrix]") {
-  sleipnir::VariableMatrix mat;
+  slp::VariableMatrix mat;
 
   CHECK(mat.rows() == 0);
   CHECK(mat.cols() == 0);
 
-  mat = sleipnir::VariableMatrix{2, 2};
+  mat = slp::VariableMatrix{2, 2};
 
   CHECK(mat.rows() == 2);
   CHECK(mat.cols() == 2);
@@ -53,8 +52,8 @@ TEST_CASE("VariableMatrix - Assignment to default", "[VariableMatrix]") {
 }
 
 TEST_CASE("VariableMatrix - Assignment aliasing", "[VariableMatrix]") {
-  sleipnir::VariableMatrix A{{1.0, 2.0}, {3.0, 4.0}};
-  sleipnir::VariableMatrix B{{5.0, 6.0}, {7.0, 8.0}};
+  slp::VariableMatrix A{{1.0, 2.0}, {3.0, 4.0}};
+  slp::VariableMatrix B{{5.0, 6.0}, {7.0, 8.0}};
 
   Eigen::MatrixXd expected_A{{1.0, 2.0}, {3.0, 4.0}};
   Eigen::MatrixXd expected_B{{5.0, 6.0}, {7.0, 8.0}};
@@ -74,7 +73,7 @@ TEST_CASE("VariableMatrix - Assignment aliasing", "[VariableMatrix]") {
 }
 
 TEST_CASE("VariableMatrix - Block() member function", "[VariableMatrix]") {
-  sleipnir::VariableMatrix A{{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}, {7.0, 8.0, 9.0}};
+  slp::VariableMatrix A{{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}, {7.0, 8.0, 9.0}};
 
   // Block assignment
   A.block(1, 1, 2, 2) = Eigen::Matrix<double, 2, 2>{{10.0, 11.0}, {12.0, 13.0}};
@@ -92,9 +91,9 @@ TEST_CASE("VariableMatrix - Block() member function", "[VariableMatrix]") {
 }
 
 TEST_CASE("VariableMatrix - Slicing", "[VariableMatrix]") {
-  using namespace sleipnir::slicing;
+  using namespace slp::slicing;
 
-  sleipnir::VariableMatrix mat{
+  slp::VariableMatrix mat{
       {1, 2, 3, 4}, {5, 6, 7, 8}, {9, 10, 11, 12}, {13, 14, 15, 16}};
   CHECK(mat.rows() == 4);
   CHECK(mat.cols() == 4);
@@ -174,9 +173,9 @@ TEST_CASE("VariableMatrix - Slicing", "[VariableMatrix]") {
 }
 
 TEST_CASE("VariableMatrix - Subslicing", "[VariableMatrix]") {
-  using namespace sleipnir::slicing;
+  using namespace slp::slicing;
 
-  sleipnir::VariableMatrix A{{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}, {7.0, 8.0, 9.0}};
+  slp::VariableMatrix A{{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}, {7.0, 8.0, 9.0}};
 
   // Block assignment
   CHECK(A({1, 3}, {1, 3}).rows() == 2);
@@ -198,7 +197,7 @@ TEST_CASE("VariableMatrix - Subslicing", "[VariableMatrix]") {
 }
 
 TEST_CASE("VariableMatrix - Iterators", "[VariableMatrix]") {
-  sleipnir::VariableMatrix A{{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}, {7.0, 8.0, 9.0}};
+  slp::VariableMatrix A{{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}, {7.0, 8.0, 9.0}};
 
   // VariableMatrix iterator
   CHECK(std::distance(A.begin(), A.end()) == 9);
@@ -246,9 +245,9 @@ TEST_CASE("VariableMatrix - Iterators", "[VariableMatrix]") {
 }
 
 TEST_CASE("VariableMatrix - Value", "[VariableMatrix]") {
-  using namespace sleipnir::slicing;
+  using namespace slp::slicing;
 
-  sleipnir::VariableMatrix A{{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}, {7.0, 8.0, 9.0}};
+  slp::VariableMatrix A{{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}, {7.0, 8.0, 9.0}};
   Eigen::Matrix<double, 3, 3> expected{
       {1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}, {7.0, 8.0, 9.0}};
 
@@ -282,9 +281,9 @@ TEST_CASE("VariableMatrix - Value", "[VariableMatrix]") {
 
 TEST_CASE("VariableMatrix - cwise_transform()", "[VariableMatrix]") {
   // VariableMatrix cwise_transform
-  sleipnir::VariableMatrix A{{-2.0, -3.0, -4.0}, {-5.0, -6.0, -7.0}};
+  slp::VariableMatrix A{{-2.0, -3.0, -4.0}, {-5.0, -6.0, -7.0}};
 
-  sleipnir::VariableMatrix result1 = A.cwise_transform(sleipnir::abs);
+  slp::VariableMatrix result1 = A.cwise_transform(slp::abs);
   Eigen::Matrix<double, 2, 3> expected1{{2.0, 3.0, 4.0}, {5.0, 6.0, 7.0}};
 
   // Don't modify original matrix
@@ -295,7 +294,7 @@ TEST_CASE("VariableMatrix - cwise_transform()", "[VariableMatrix]") {
   // VariableBlock cwise_transform
   auto sub_A = A.block(0, 0, 2, 2);
 
-  sleipnir::VariableMatrix result2 = sub_A.cwise_transform(sleipnir::abs);
+  slp::VariableMatrix result2 = sub_A.cwise_transform(slp::abs);
   Eigen::Matrix<double, 2, 2> expected2{{2.0, 3.0}, {5.0, 6.0}};
 
   // Don't modify original matrix
@@ -306,7 +305,7 @@ TEST_CASE("VariableMatrix - cwise_transform()", "[VariableMatrix]") {
 }
 
 TEST_CASE("VariableMatrix - Zero() static function", "[VariableMatrix]") {
-  auto A = sleipnir::VariableMatrix::zero(2, 3);
+  auto A = slp::VariableMatrix::zero(2, 3);
 
   for (auto& elem : A) {
     CHECK(elem.value() == 0.0);
@@ -314,7 +313,7 @@ TEST_CASE("VariableMatrix - Zero() static function", "[VariableMatrix]") {
 }
 
 TEST_CASE("VariableMatrix - Ones() static function", "[VariableMatrix]") {
-  auto A = sleipnir::VariableMatrix::ones(2, 3);
+  auto A = slp::VariableMatrix::ones(2, 3);
 
   for (auto& elem : A) {
     CHECK(elem.value() == 1.0);
@@ -322,29 +321,28 @@ TEST_CASE("VariableMatrix - Ones() static function", "[VariableMatrix]") {
 }
 
 TEST_CASE("VariableMatrix - cwise_reduce()", "[VariableMatrix]") {
-  sleipnir::VariableMatrix A{{2.0, 3.0, 4.0}, {5.0, 6.0, 7.0}};
-  sleipnir::VariableMatrix B{{8.0, 9.0, 10.0}, {11.0, 12.0, 13.0}};
-  sleipnir::VariableMatrix result =
-      sleipnir::cwise_reduce(A, B, std::multiplies<>{});
+  slp::VariableMatrix A{{2.0, 3.0, 4.0}, {5.0, 6.0, 7.0}};
+  slp::VariableMatrix B{{8.0, 9.0, 10.0}, {11.0, 12.0, 13.0}};
+  slp::VariableMatrix result = slp::cwise_reduce(A, B, std::multiplies<>{});
 
   Eigen::Matrix<double, 2, 3> expected{{16.0, 27.0, 40.0}, {55.0, 72.0, 91.0}};
   CHECK(result.value() == expected);
 }
 
 TEST_CASE("VariableMatrix - Block() free function", "[VariableMatrix]") {
-  sleipnir::VariableMatrix A{{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}};
-  sleipnir::VariableMatrix B{{7.0}, {8.0}};
+  slp::VariableMatrix A{{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}};
+  slp::VariableMatrix B{{7.0}, {8.0}};
 
-  sleipnir::VariableMatrix mat1 = sleipnir::block({{A, B}});
+  slp::VariableMatrix mat1 = slp::block({{A, B}});
   Eigen::Matrix<double, 2, 4> expected1{{1.0, 2.0, 3.0, 7.0},
                                         {4.0, 5.0, 6.0, 8.0}};
   CHECK(mat1.rows() == 2);
   CHECK(mat1.cols() == 4);
   CHECK(mat1.value() == expected1);
 
-  sleipnir::VariableMatrix C{{9.0, 10.0, 11.0, 12.0}};
+  slp::VariableMatrix C{{9.0, 10.0, 11.0, 12.0}};
 
-  sleipnir::VariableMatrix mat2 = sleipnir::block({{A, B}, {C}});
+  slp::VariableMatrix mat2 = slp::block({{A, B}, {C}});
   Eigen::Matrix<double, 3, 4> expected2{
       {1.0, 2.0, 3.0, 7.0}, {4.0, 5.0, 6.0, 8.0}, {9.0, 10.0, 11.0, 12.0}};
   CHECK(mat2.rows() == 3);
@@ -357,9 +355,9 @@ void ExpectSolve(const Eigen::Matrix<double, Rows, Rows>& A,
                  const Eigen::Matrix<double, Rows, 1>& B) {
   INFO(std::format("Solve {}x{}", Rows, Rows));
 
-  sleipnir::VariableMatrix slp_A{A};
-  sleipnir::VariableMatrix slp_B{B};
-  auto actual_X = sleipnir::solve(slp_A, slp_B);
+  slp::VariableMatrix slp_A{A};
+  slp::VariableMatrix slp_B{B};
+  auto actual_X = slp::solve(slp_A, slp_B);
 
   Eigen::Matrix<double, Rows, 1> expected_X = A.householderQr().solve(B);
 

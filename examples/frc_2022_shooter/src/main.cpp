@@ -12,8 +12,6 @@
 // This program finds the initial velocity, pitch, and yaw for a game piece to
 // hit the 2022 FRC game's target that minimizes time-to-target.
 
-namespace slp = sleipnir;
-
 using Eigen::Vector3d;
 using Vector6d = Eigen::Vector<double, 6>;
 
