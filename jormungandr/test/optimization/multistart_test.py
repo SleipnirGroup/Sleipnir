@@ -2,11 +2,7 @@ import pytest
 
 import jormungandr.autodiff as autodiff
 from jormungandr.autodiff import ExpressionType
-from jormungandr.optimization import (
-    OptimizationProblem,
-    SolverExitCondition,
-    multistart,
-)
+from jormungandr.optimization import Problem, SolverExitCondition, multistart
 
 
 class DecisionVariables:
@@ -16,7 +12,7 @@ class DecisionVariables:
 
 
 def mishras_bird_function_solve(input: DecisionVariables):
-    problem = OptimizationProblem()
+    problem = Problem()
 
     x = problem.decision_variable()
     x.set_value(input.x)

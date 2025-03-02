@@ -5,7 +5,7 @@
 #include <sleipnir/autodiff/variable_block.hpp>
 #include <sleipnir/autodiff/variable_matrix.hpp>
 #include <sleipnir/control/ocp_solver.hpp>
-#include <sleipnir/optimization/optimization_problem.hpp>
+#include <sleipnir/optimization/problem.hpp>
 #include <sleipnir/optimization/solver_exit_condition.hpp>
 #include <sleipnir/optimization/solver_iteration_info.hpp>
 #include <sleipnir/optimization/solver_status.hpp>
@@ -51,8 +51,7 @@ NB_MODULE(_jormungandr, m) {
   nb::class_<SolverStatus> solver_status{optimization, "SolverStatus",
                                          DOC(slp, SolverStatus)};
 
-  nb::class_<OptimizationProblem> optimization_problem{
-      optimization, "OptimizationProblem", DOC(slp, OptimizationProblem)};
+  nb::class_<Problem> problem{optimization, "Problem", DOC(slp, Problem)};
 
   nb::enum_<TranscriptionMethod> transcription_method{
       control, "TranscriptionMethod", DOC(slp, TranscriptionMethod)};
@@ -60,8 +59,8 @@ NB_MODULE(_jormungandr, m) {
                                         DOC(slp, DynamicsType)};
   nb::enum_<TimestepMethod> timestep_method{control, "TimestepMethod",
                                             DOC(slp, TimestepMethod)};
-  nb::class_<OCPSolver, OptimizationProblem> ocp_solver{control, "OCPSolver",
-                                                        DOC(slp, OCPSolver)};
+  nb::class_<OCPSolver, Problem> ocp_solver{control, "OCPSolver",
+                                            DOC(slp, OCPSolver)};
 
   bind_expression_type(expression_type);
 
@@ -84,7 +83,7 @@ NB_MODULE(_jormungandr, m) {
   bind_solver_iteration_info(solver_iteration_info);
   bind_solver_status(solver_status);
 
-  bind_optimization_problem(optimization_problem);
+  bind_problem(problem);
 
   bind_ocp_solver(transcription_method, dynamics_type, timestep_method,
                   ocp_solver);

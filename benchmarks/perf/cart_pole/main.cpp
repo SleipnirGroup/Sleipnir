@@ -5,7 +5,7 @@
 #include <numbers>
 
 #include <Eigen/Core>
-#include <sleipnir/optimization/optimization_problem.hpp>
+#include <sleipnir/optimization/problem.hpp>
 
 #include "cmdline_args.hpp"
 #include "rk4.hpp"
@@ -78,15 +78,14 @@ slp::VariableMatrix cart_pole_dynamics(const slp::VariableMatrix& x,
   return qddot;
 }
 
-slp::OptimizationProblem cart_pole_problem(std::chrono::duration<double> dt,
-                                           int N) {
+slp::Problem cart_pole_problem(std::chrono::duration<double> dt, int N) {
   constexpr double u_max = 20.0;  // N
   constexpr double d_max = 2.0;   // m
 
   constexpr Eigen::Vector<double, 4> x_initial{{0.0, 0.0, 0.0, 0.0}};
   constexpr Eigen::Vector<double, 4> x_final{{1.0, std::numbers::pi, 0.0, 0.0}};
 
-  slp::OptimizationProblem problem;
+  slp::Problem problem;
 
   // x = [q, q̇]ᵀ = [x, θ, ẋ, θ̇]ᵀ
   auto X = problem.decision_variable(4, N + 1);

@@ -63,7 +63,7 @@ import jormungandr as jmg
 N = 100
 T_max = 5.0
 
-problem = jmg.optimization.OptimizationProblem()
+problem = jmg.optimization.Problem()
 
 x = problem.decision_variable(N + 1)
 v = problem.decision_variable(N)
@@ -93,7 +93,7 @@ import jormungandr as jmg
 N = 100
 T_max = 5.0
 
-problem = jmg.optimization.OptimizationProblem()
+problem = jmg.optimization.Problem()
 
 x = problem.decision_variable(N + 1)
 v = problem.decision_variable(N)

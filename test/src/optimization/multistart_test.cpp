@@ -5,7 +5,7 @@
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <sleipnir/optimization/multistart.hpp>
-#include <sleipnir/optimization/optimization_problem.hpp>
+#include <sleipnir/optimization/problem.hpp>
 
 #include "catch_string_converters.hpp"
 
@@ -17,7 +17,7 @@ TEST_CASE("multistart - Mishra's Bird function", "[nonlinear_problem]") {
 
   auto Solve = [](const decision_variables& input)
       -> slp::MultistartResult<decision_variables> {
-    slp::OptimizationProblem problem;
+    slp::Problem problem;
 
     auto x = problem.decision_variable();
     x.set_value(input.x);

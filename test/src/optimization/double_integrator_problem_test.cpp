@@ -8,12 +8,12 @@
 #include <Eigen/Core>
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
-#include <sleipnir/optimization/optimization_problem.hpp>
+#include <sleipnir/optimization/problem.hpp>
 
 #include "catch_string_converters.hpp"
 #include "util/scope_exit.hpp"
 
-TEST_CASE("OptimizationProblem - Double integrator", "[OptimizationProblem]") {
+TEST_CASE("Problem - Double integrator", "[Problem]") {
   using namespace std::chrono_literals;
 
   slp::scope_exit exit{
@@ -25,7 +25,7 @@ TEST_CASE("OptimizationProblem - Double integrator", "[OptimizationProblem]") {
 
   constexpr double r = 2.0;  // m
 
-  slp::OptimizationProblem problem;
+  slp::Problem problem;
 
   // 2x1 state vector with N + 1 timesteps (includes last state)
   auto X = problem.decision_variable(2, N + 1);
@@ -127,7 +127,7 @@ TEST_CASE("OptimizationProblem - Double integrator", "[OptimizationProblem]") {
   CHECK(X.value(1, N) == Catch::Approx(0.0).margin(1e-8));
 
   // Log states for offline viewing
-  std::ofstream states{"OptimizationProblem Double Integrator states.csv"};
+  std::ofstream states{"Problem Double Integrator states.csv"};
   if (states.is_open()) {
     states << "Time (s),Position (m),Velocity (m/s)\n";
 
@@ -138,7 +138,7 @@ TEST_CASE("OptimizationProblem - Double integrator", "[OptimizationProblem]") {
   }
 
   // Log inputs for offline viewing
-  std::ofstream inputs{"OptimizationProblem Double Integrator inputs.csv"};
+  std::ofstream inputs{"Problem Double Integrator inputs.csv"};
   if (inputs.is_open()) {
     inputs << "Time (s),Acceleration (m/s²)\n";
 

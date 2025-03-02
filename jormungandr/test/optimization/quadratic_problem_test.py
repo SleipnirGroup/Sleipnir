@@ -2,11 +2,11 @@ import numpy as np
 import pytest
 
 from jormungandr.autodiff import ExpressionType
-from jormungandr.optimization import OptimizationProblem, SolverExitCondition
+from jormungandr.optimization import Problem, SolverExitCondition
 
 
 def test_unconstrained1d():
-    problem = OptimizationProblem()
+    problem = Problem()
 
     x = problem.decision_variable()
     x.set_value(2.0)
@@ -24,7 +24,7 @@ def test_unconstrained1d():
 
 
 def test_unconstrained2d_1():
-    problem = OptimizationProblem()
+    problem = Problem()
 
     x = problem.decision_variable()
     x.set_value(1.0)
@@ -45,7 +45,7 @@ def test_unconstrained2d_1():
 
 
 def test_unconstrained2d_2():
-    problem = OptimizationProblem()
+    problem = Problem()
 
     x = problem.decision_variable(2)
     x[0].set_value(1.0)
@@ -103,7 +103,7 @@ def test_unconstrained2d_2():
 # [y] = [ 6]
 # [λ]   [ 6]
 def test_equality_constrained_1():
-    problem = OptimizationProblem()
+    problem = Problem()
 
     x = problem.decision_variable()
     y = problem.decision_variable()
@@ -124,7 +124,7 @@ def test_equality_constrained_1():
 
 
 def test_equality_constrained_2():
-    problem = OptimizationProblem()
+    problem = Problem()
 
     x = problem.decision_variable(2)
     x[0].set_value(1.0)

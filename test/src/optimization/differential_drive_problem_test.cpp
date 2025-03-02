@@ -8,14 +8,14 @@
 #include <Eigen/Core>
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
-#include <sleipnir/optimization/optimization_problem.hpp>
+#include <sleipnir/optimization/problem.hpp>
 
 #include "catch_string_converters.hpp"
 #include "differential_drive_util.hpp"
 #include "rk4.hpp"
 #include "util/scope_exit.hpp"
 
-TEST_CASE("OptimizationProblem - Differential drive", "[OptimizationProblem]") {
+TEST_CASE("Problem - Differential drive", "[Problem]") {
   using namespace std::chrono_literals;
 
   slp::scope_exit exit{
@@ -30,7 +30,7 @@ TEST_CASE("OptimizationProblem - Differential drive", "[OptimizationProblem]") {
   constexpr Eigen::Vector<double, 5> x_initial{{0.0, 0.0, 0.0, 0.0, 0.0}};
   constexpr Eigen::Vector<double, 5> x_final{{1.0, 1.0, 0.0, 0.0, 0.0}};
 
-  slp::OptimizationProblem problem;
+  slp::Problem problem;
 
   // x = [x, y, heading, left velocity, right velocity]ᵀ
   auto X = problem.decision_variable(5, N + 1);

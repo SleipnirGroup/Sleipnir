@@ -2,12 +2,12 @@
 
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
-#include <sleipnir/optimization/optimization_problem.hpp>
+#include <sleipnir/optimization/problem.hpp>
 
 #include "catch_string_converters.hpp"
 
-TEST_CASE("linear_problem - Maximize", "[linear_problem]") {
-  slp::OptimizationProblem problem;
+TEST_CASE("Problem - Maximize", "[Problem]") {
+  slp::Problem problem;
 
   auto x = problem.decision_variable();
   x.set_value(1.0);
@@ -34,8 +34,8 @@ TEST_CASE("linear_problem - Maximize", "[linear_problem]") {
   CHECK(y.value() == Catch::Approx(250.0).margin(1e-6));
 }
 
-TEST_CASE("linear_problem - Free variable", "[linear_problem]") {
-  slp::OptimizationProblem problem;
+TEST_CASE("Problem - Free variable", "[Problem]") {
+  slp::Problem problem;
 
   auto x = problem.decision_variable(2);
   x[0].set_value(1.0);

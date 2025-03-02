@@ -2,12 +2,12 @@
 
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
-#include <sleipnir/optimization/optimization_problem.hpp>
+#include <sleipnir/optimization/problem.hpp>
 
 #include "catch_string_converters.hpp"
 
-TEST_CASE("quadratic_problem - Unconstrained 1D", "[quadratic_problem]") {
-  slp::OptimizationProblem problem;
+TEST_CASE("Problem - Unconstrained 1D", "[Problem]") {
+  slp::Problem problem;
 
   auto x = problem.decision_variable();
   x.set_value(2.0);
@@ -24,9 +24,9 @@ TEST_CASE("quadratic_problem - Unconstrained 1D", "[quadratic_problem]") {
   CHECK(x.value() == Catch::Approx(3.0).margin(1e-6));
 }
 
-TEST_CASE("quadratic_problem - Unconstrained 2D", "[quadratic_problem]") {
+TEST_CASE("Problem - Unconstrained 2D", "[Problem]") {
   {
-    slp::OptimizationProblem problem;
+    slp::Problem problem;
 
     auto x = problem.decision_variable();
     x.set_value(1.0);
@@ -47,7 +47,7 @@ TEST_CASE("quadratic_problem - Unconstrained 2D", "[quadratic_problem]") {
   }
 
   {
-    slp::OptimizationProblem problem;
+    slp::Problem problem;
 
     auto x = problem.decision_variable(2);
     x[0].set_value(1.0);
@@ -67,7 +67,7 @@ TEST_CASE("quadratic_problem - Unconstrained 2D", "[quadratic_problem]") {
   }
 }
 
-TEST_CASE("quadratic_problem - Equality-constrained", "[quadratic_problem]") {
+TEST_CASE("Problem - Equality-constrained", "[Problem]") {
   // Maximize xy subject to x + 3y = 36.
   //
   // Maximize f(x,y) = xy
@@ -107,7 +107,7 @@ TEST_CASE("quadratic_problem - Equality-constrained", "[quadratic_problem]") {
   // [y] = [ 6]
   // [λ]   [ 6]
   {
-    slp::OptimizationProblem problem;
+    slp::Problem problem;
 
     auto x = problem.decision_variable();
     auto y = problem.decision_variable();
@@ -128,7 +128,7 @@ TEST_CASE("quadratic_problem - Equality-constrained", "[quadratic_problem]") {
   }
 
   {
-    slp::OptimizationProblem problem;
+    slp::Problem problem;
 
     auto x = problem.decision_variable(2);
     x[0].set_value(1.0);

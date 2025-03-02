@@ -1,11 +1,11 @@
 """These tests ensure coverage of the off-nominal solver exit conditions"""
 
 from jormungandr.autodiff import ExpressionType
-from jormungandr.optimization import OptimizationProblem, SolverExitCondition
+from jormungandr.optimization import Problem, SolverExitCondition
 
 
 def test_callback_requested_stop():
-    problem = OptimizationProblem()
+    problem = Problem()
 
     x = problem.decision_variable()
     problem.minimize(x * x)
@@ -25,7 +25,7 @@ def test_callback_requested_stop():
 
 
 def test_too_few_dofs():
-    problem = OptimizationProblem()
+    problem = Problem()
 
     x = problem.decision_variable()
     y = problem.decision_variable()
@@ -45,7 +45,7 @@ def test_too_few_dofs():
 
 
 def test_locally_infeasible_equality_constraints():
-    problem = OptimizationProblem()
+    problem = Problem()
 
     x = problem.decision_variable()
     y = problem.decision_variable()
@@ -64,7 +64,7 @@ def test_locally_infeasible_equality_constraints():
 
 
 def test_locally_infeasible_inequality_constraints():
-    problem = OptimizationProblem()
+    problem = Problem()
 
     x = problem.decision_variable()
     y = problem.decision_variable()
@@ -83,7 +83,7 @@ def test_locally_infeasible_inequality_constraints():
 
 
 def test_diverging_iterates():
-    problem = OptimizationProblem()
+    problem = Problem()
 
     x = problem.decision_variable()
     problem.minimize(x)
@@ -97,7 +97,7 @@ def test_diverging_iterates():
 
 
 def test_max_iterations_exceeded():
-    problem = OptimizationProblem()
+    problem = Problem()
 
     x = problem.decision_variable()
     problem.minimize(x * x)
@@ -111,7 +111,7 @@ def test_max_iterations_exceeded():
 
 
 def test_timeout():
-    problem = OptimizationProblem()
+    problem = Problem()
 
     x = problem.decision_variable()
     problem.minimize(x * x)

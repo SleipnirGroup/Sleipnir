@@ -1,11 +1,11 @@
 import numpy as np
 
 from jormungandr.autodiff import ExpressionType
-from jormungandr.optimization import OptimizationProblem, SolverExitCondition
+from jormungandr.optimization import Problem, SolverExitCondition
 
 
 def test_empty():
-    problem = OptimizationProblem()
+    problem = Problem()
 
     status = problem.solve(diagnostics=True)
 
@@ -16,7 +16,7 @@ def test_empty():
 
 
 def test_no_cost_unconstrained_1():
-    problem = OptimizationProblem()
+    problem = Problem()
 
     X = problem.decision_variable(2, 3)
 
@@ -33,7 +33,7 @@ def test_no_cost_unconstrained_1():
 
 
 def test_no_cost_unconstrained_2():
-    problem = OptimizationProblem()
+    problem = Problem()
 
     X = problem.decision_variable(2, 3)
     X.set_value(np.array([[1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]))

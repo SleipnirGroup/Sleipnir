@@ -5,7 +5,7 @@
 #include <span>
 #include <vector>
 
-#include <sleipnir/optimization/optimization_problem.hpp>
+#include <sleipnir/optimization/problem.hpp>
 
 /**
  * This class computes the optimal current allocation for a list of subsystems
@@ -37,7 +37,7 @@ class CurrentManager {
   std::vector<double> calculate(std::span<const double> desired_currents);
 
  private:
-  slp::OptimizationProblem m_problem;
+  slp::Problem m_problem;
   slp::VariableMatrix m_desired_currents;
   slp::VariableMatrix m_allocated_currents;
 };

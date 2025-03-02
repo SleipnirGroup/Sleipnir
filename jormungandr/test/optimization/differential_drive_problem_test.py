@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from jormungandr.autodiff import ExpressionType
-from jormungandr.optimization import OptimizationProblem, SolverExitCondition
+from jormungandr.optimization import Problem, SolverExitCondition
 from jormungandr.test.differential_drive_util import (
     differential_drive_dynamics,
     differential_drive_dynamics_double,
@@ -14,7 +14,7 @@ def lerp(a, b, t):
     return a + t * (b - a)
 
 
-def test_optimization_problem_differential_drive():
+def test_differential_drive_problem():
     T = 5.0  # s
     dt = 0.05  # s
     N = int(T / dt)
@@ -24,7 +24,7 @@ def test_optimization_problem_differential_drive():
     x_initial = np.zeros((5, 1))
     x_final = np.array([[1.0], [1.0], [0.0], [0.0], [0.0]])
 
-    problem = OptimizationProblem()
+    problem = Problem()
 
     # x = [x, y, heading, left velocity, right velocity]ᵀ
     X = problem.decision_variable(5, N + 1)

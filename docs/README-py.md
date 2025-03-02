@@ -19,7 +19,7 @@ and the acceleration constraints are -1 ≤ u ≤ 1.
 ## Importing required libraries
 
 ```py
-from jormungandr.optimization import OptimizationProblem
+from jormungandr.optimization import Problem
 import numpy as np
 ```
 
@@ -34,7 +34,7 @@ N = int(T / dt)
 
 r = 2.0
 
-problem = OptimizationProblem()
+problem = Problem()
 ```
 
 ## Creating decision variables

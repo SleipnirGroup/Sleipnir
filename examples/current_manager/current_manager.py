@@ -1,5 +1,5 @@
 from jormungandr.autodiff import Variable, VariableMatrix
-from jormungandr.optimization import OptimizationProblem
+from jormungandr.optimization import Problem
 
 
 class CurrentManager:
@@ -21,7 +21,7 @@ class CurrentManager:
             The current budget to allocate between subsystems.
         """
         self.__desired_currents = VariableMatrix(len(current_tolerances), 1)
-        self.__problem = OptimizationProblem()
+        self.__problem = Problem()
         self.__allocated_currents = self.__problem.decision_variable(
             len(current_tolerances)
         )

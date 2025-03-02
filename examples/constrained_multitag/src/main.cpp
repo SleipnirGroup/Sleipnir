@@ -12,7 +12,7 @@
 
 #include <Eigen/Core>
 #include <sleipnir/autodiff/variable_matrix.hpp>
-#include <sleipnir/optimization/optimization_problem.hpp>
+#include <sleipnir/optimization/problem.hpp>
 
 /**
  * Converts std::chrono::duration to a number of milliseconds rounded to three
@@ -28,7 +28,7 @@ constexpr double to_ms(const std::chrono::duration<Rep, Period>& duration) {
 int main() {
   auto setup_start = std::chrono::steady_clock::now();
 
-  slp::OptimizationProblem problem;
+  slp::Problem problem;
 
   // camera calibration
   constexpr double fx = 600;

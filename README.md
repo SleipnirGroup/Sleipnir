@@ -15,11 +15,11 @@ Named after Odin's eight-legged horse from Norse mythology, Sleipnir is a linear
 ```cpp
 #include <print>
 
-#include <sleipnir/optimization/optimization_problem.hpp>
+#include <sleipnir/optimization/problem.hpp>
 
 int main() {
   // Find the x, y pair with the largest product for which x + 3y = 36
-  slp::OptimizationProblem problem;
+  slp::Problem problem;
 
   auto x = problem.decision_variable();
   auto y = problem.decision_variable();
@@ -36,12 +36,12 @@ int main() {
 ```python
 #!/usr/bin/env python3
 
-from jormungandr.optimization import OptimizationProblem
+from jormungandr.optimization import Problem
 
 
 def main():
     # Find the x, y pair with the largest product for which x + 3y = 36
-    problem = OptimizationProblem()
+    problem = Problem()
 
     x = problem.decision_variable()
     y = problem.decision_variable()

@@ -8,7 +8,7 @@
 #include <utility>
 
 #include "sleipnir/autodiff/variable_matrix.hpp"
-#include "sleipnir/optimization/optimization_problem.hpp"
+#include "sleipnir/optimization/problem.hpp"
 #include "sleipnir/util/assert.hpp"
 #include "sleipnir/util/concepts.hpp"
 #include "sleipnir/util/function_ref.hpp"
@@ -100,7 +100,7 @@ enum class TimestepMethod : uint8_t {
  * https://underactuated.mit.edu/trajopt.html goes into more detail on each
  * transcription method.
  */
-class SLEIPNIR_DLLEXPORT OCPSolver : public OptimizationProblem {
+class SLEIPNIR_DLLEXPORT OCPSolver : public Problem {
  public:
   /**
    * Build an optimization problem using a system evolution function (explicit

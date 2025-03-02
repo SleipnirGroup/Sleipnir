@@ -8,7 +8,7 @@
 #include <Eigen/Core>
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
-#include <sleipnir/optimization/optimization_problem.hpp>
+#include <sleipnir/optimization/problem.hpp>
 
 #include "catch_string_converters.hpp"
 #include "util/scope_exit.hpp"
@@ -19,7 +19,7 @@ bool Near(double expected, double actual, double tolerance) {
 }
 }  // namespace
 
-TEST_CASE("OptimizationProblem - Flywheel", "[OptimizationProblem]") {
+TEST_CASE("Problem - Flywheel", "[Problem]") {
   using namespace std::chrono_literals;
 
   slp::scope_exit exit{
@@ -35,7 +35,7 @@ TEST_CASE("OptimizationProblem - Flywheel", "[OptimizationProblem]") {
   double A = std::exp(-dt.count());
   double B = 1.0 - std::exp(-dt.count());
 
-  slp::OptimizationProblem problem;
+  slp::Problem problem;
   auto X = problem.decision_variable(1, N + 1);
   auto U = problem.decision_variable(1, N);
 
@@ -113,7 +113,7 @@ TEST_CASE("OptimizationProblem - Flywheel", "[OptimizationProblem]") {
   CHECK(X.value(0, N) == Catch::Approx(r(0)).margin(1e-7));
 
   // Log states for offline viewing
-  std::ofstream states{"OptimizationProblem Flywheel states.csv"};
+  std::ofstream states{"Problem Flywheel states.csv"};
   if (states.is_open()) {
     states << "Time (s),Velocity (rad/s)\n";
 
@@ -123,7 +123,7 @@ TEST_CASE("OptimizationProblem - Flywheel", "[OptimizationProblem]") {
   }
 
   // Log inputs for offline viewing
-  std::ofstream inputs{"OptimizationProblem Flywheel inputs.csv"};
+  std::ofstream inputs{"Problem Flywheel inputs.csv"};
   if (inputs.is_open()) {
     inputs << "Time (s),Voltage (V)\n";
 

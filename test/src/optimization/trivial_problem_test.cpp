@@ -1,12 +1,12 @@
 // Copyright (c) Sleipnir contributors
 
 #include <catch2/catch_test_macros.hpp>
-#include <sleipnir/optimization/optimization_problem.hpp>
+#include <sleipnir/optimization/problem.hpp>
 
 #include "catch_string_converters.hpp"
 
-TEST_CASE("trivial_problem - Empty", "[trivial_problem]") {
-  slp::OptimizationProblem problem;
+TEST_CASE("Problem - Empty", "[Problem]") {
+  slp::Problem problem;
 
   auto status = problem.solve({.diagnostics = true});
 
@@ -16,9 +16,9 @@ TEST_CASE("trivial_problem - Empty", "[trivial_problem]") {
   CHECK(status.exit_condition == slp::SolverExitCondition::SUCCESS);
 }
 
-TEST_CASE("trivial_problem - No cost, unconstrained", "[trivial_problem]") {
+TEST_CASE("Problem - No cost, unconstrained", "[Problem]") {
   {
-    slp::OptimizationProblem problem;
+    slp::Problem problem;
 
     auto X = problem.decision_variable(2, 3);
 
@@ -37,7 +37,7 @@ TEST_CASE("trivial_problem - No cost, unconstrained", "[trivial_problem]") {
   }
 
   {
-    slp::OptimizationProblem problem;
+    slp::Problem problem;
 
     auto X = problem.decision_variable(2, 3);
     X.set_value(Eigen::Matrix<double, 2, 3>{{1.0, 1.0, 1.0}, {1.0, 1.0, 1.0}});

@@ -4,13 +4,13 @@
 
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
-#include <sleipnir/optimization/optimization_problem.hpp>
+#include <sleipnir/optimization/problem.hpp>
 
 #include "catch_string_converters.hpp"
 #include "range.hpp"
 
-TEST_CASE("nonlinear_problem - Quartic", "[nonlinear_problem]") {
-  slp::OptimizationProblem problem;
+TEST_CASE("Problem - Quartic", "[Problem]") {
+  slp::Problem problem;
 
   auto x = problem.decision_variable();
   x.set_value(20.0);
@@ -29,12 +29,11 @@ TEST_CASE("nonlinear_problem - Quartic", "[nonlinear_problem]") {
   CHECK(x.value() == Catch::Approx(1.0).margin(1e-6));
 }
 
-TEST_CASE("nonlinear_problem - Rosenbrock with cubic and line constraint",
-          "[nonlinear_problem]") {
+TEST_CASE("Problem - Rosenbrock with cubic and line constraint", "[Problem]") {
   // https://en.wikipedia.org/wiki/Test_functions_for_optimization#Test_functions_for_constrained_optimization
   for (auto x0 : range(-1.5, 1.5, 0.1)) {
     for (auto y0 : range(-0.5, 2.5, 0.1)) {
-      slp::OptimizationProblem problem;
+      slp::Problem problem;
 
       auto x = problem.decision_variable();
       x.set_value(x0);
@@ -71,12 +70,11 @@ TEST_CASE("nonlinear_problem - Rosenbrock with cubic and line constraint",
   }
 }
 
-TEST_CASE("nonlinear_problem - Rosenbrock with disk constraint",
-          "[nonlinear_problem]") {
+TEST_CASE("Problem - Rosenbrock with disk constraint", "[Problem]") {
   // https://en.wikipedia.org/wiki/Test_functions_for_optimization#Test_functions_for_constrained_optimization
   for (auto x0 : range(-1.5, 1.5, 0.1)) {
     for (auto y0 : range(-1.5, 1.5, 0.1)) {
-      slp::OptimizationProblem problem;
+      slp::Problem problem;
 
       auto x = problem.decision_variable();
       x.set_value(x0);
@@ -106,8 +104,8 @@ TEST_CASE("nonlinear_problem - Rosenbrock with disk constraint",
   }
 }
 
-TEST_CASE("nonlinear_problem - Narrow feasible region", "[nonlinear_problem]") {
-  slp::OptimizationProblem problem;
+TEST_CASE("Problem - Narrow feasible region", "[Problem]") {
+  slp::Problem problem;
 
   auto x = problem.decision_variable();
   x.set_value(20.0);

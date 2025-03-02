@@ -6,7 +6,7 @@
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/function.h>
-#include <sleipnir/optimization/optimization_problem.hpp>
+#include <sleipnir/optimization/problem.hpp>
 #include <sleipnir/optimization/solver_config.hpp>
 
 #include "docstrings.hpp"
@@ -15,59 +15,47 @@ namespace nb = nanobind;
 
 namespace slp {
 
-void bind_optimization_problem(nb::class_<OptimizationProblem>& cls) {
+void bind_problem(nb::class_<Problem>& cls) {
   using namespace nb::literals;
 
-  cls.def(nb::init<>(), DOC(slp, OptimizationProblem, OptimizationProblem));
+  cls.def(nb::init<>(), DOC(slp, Problem, Problem));
+  cls.def("decision_variable", nb::overload_cast<>(&Problem::decision_variable),
+          DOC(slp, Problem, decision_variable));
   cls.def("decision_variable",
-          nb::overload_cast<>(&OptimizationProblem::decision_variable),
-          DOC(slp, OptimizationProblem, decision_variable));
-  cls.def("decision_variable",
-          nb::overload_cast<int, int>(&OptimizationProblem::decision_variable),
-          "rows"_a, "cols"_a = 1,
-          DOC(slp, OptimizationProblem, decision_variable, 2));
-  cls.def("symmetric_decision_variable",
-          &OptimizationProblem::symmetric_decision_variable, "rows"_a,
-          DOC(slp, OptimizationProblem, symmetric_decision_variable));
-  cls.def("minimize",
-          nb::overload_cast<const Variable&>(&OptimizationProblem::minimize),
-          "cost"_a, DOC(slp, OptimizationProblem, minimize));
+          nb::overload_cast<int, int>(&Problem::decision_variable), "rows"_a,
+          "cols"_a = 1, DOC(slp, Problem, decision_variable, 2));
+  cls.def("symmetric_decision_variable", &Problem::symmetric_decision_variable,
+          "rows"_a, DOC(slp, Problem, symmetric_decision_variable));
+  cls.def("minimize", nb::overload_cast<const Variable&>(&Problem::minimize),
+          "cost"_a, DOC(slp, Problem, minimize));
   cls.def(
       "minimize",
-      [](OptimizationProblem& self, const VariableMatrix& cost) {
-        self.minimize(cost);
-      },
-      "cost"_a, DOC(slp, OptimizationProblem, minimize));
+      [](Problem& self, const VariableMatrix& cost) { self.minimize(cost); },
+      "cost"_a, DOC(slp, Problem, minimize));
   cls.def(
-      "minimize",
-      [](OptimizationProblem& self, double cost) { self.minimize(cost); },
-      "cost"_a, DOC(slp, OptimizationProblem, minimize));
-  cls.def("maximize",
-          nb::overload_cast<const Variable&>(&OptimizationProblem::maximize),
-          "objective"_a, DOC(slp, OptimizationProblem, maximize));
+      "minimize", [](Problem& self, double cost) { self.minimize(cost); },
+      "cost"_a, DOC(slp, Problem, minimize));
+  cls.def("maximize", nb::overload_cast<const Variable&>(&Problem::maximize),
+          "objective"_a, DOC(slp, Problem, maximize));
   cls.def(
       "maximize",
-      [](OptimizationProblem& self, const VariableMatrix& objective) {
+      [](Problem& self, const VariableMatrix& objective) {
         self.maximize(objective);
       },
-      "objective"_a, DOC(slp, OptimizationProblem, maximize));
+      "objective"_a, DOC(slp, Problem, maximize));
   cls.def(
       "maximize",
-      [](OptimizationProblem& self, double objective) {
-        self.maximize(objective);
-      },
-      "objective"_a, DOC(slp, OptimizationProblem, maximize));
+      [](Problem& self, double objective) { self.maximize(objective); },
+      "objective"_a, DOC(slp, Problem, maximize));
   cls.def("subject_to",
-          nb::overload_cast<const EqualityConstraints&>(
-              &OptimizationProblem::subject_to),
-          "constraint"_a, DOC(slp, OptimizationProblem, subject_to));
+          nb::overload_cast<const EqualityConstraints&>(&Problem::subject_to),
+          "constraint"_a, DOC(slp, Problem, subject_to));
   cls.def("subject_to",
-          nb::overload_cast<const InequalityConstraints&>(
-              &OptimizationProblem::subject_to),
-          "constraint"_a, DOC(slp, OptimizationProblem, subject_to, 3));
+          nb::overload_cast<const InequalityConstraints&>(&Problem::subject_to),
+          "constraint"_a, DOC(slp, Problem, subject_to, 3));
   cls.def(
       "solve",
-      [](OptimizationProblem& self, const nb::kwargs& kwargs) {
+      [](Problem& self, const nb::kwargs& kwargs) {
         // Make Python signals (e.g., SIGINT from Ctrl-C) abort the solve
         self.add_callback([](const SolverIterationInfo&) -> bool {
           if (PyErr_CheckSignals() != 0) {
@@ -82,9 +70,9 @@ void bind_optimization_problem(nb::class_<OptimizationProblem>& cls) {
           // XXX: The keyword arguments are manually copied from the struct
           // members in include/sleipnir/optimization/SolverConfig.hpp.
           //
-          // C++'s OptimizationProblem::Solve() takes a SolverConfig object
-          // instead of keyword arguments, so there's no compile-time checking
-          // that the arguments match.
+          // C++'s Problem::Solve() takes a SolverConfig object instead of
+          // keyword arguments, so there's no compile-time checking that the
+          // arguments match.
           auto key_str = nb::cast<std::string>(key);
           if (key_str == "tolerance") {
             config.tolerance = nb::cast<double>(value);
@@ -114,8 +102,8 @@ void bind_optimization_problem(nb::class_<OptimizationProblem>& cls) {
       // XXX: The keyword argument docs are manually copied from the struct
       // member docs in include/sleipnir/optimization/SolverConfig.hpp.
       //
-      // C++'s OptimizationProblem::Solve() takes a SolverConfig object instead
-      // of keyword arguments, so pybind11_mkdoc generates the wrong docs.
+      // C++'s Problem::Solve() takes a SolverConfig object instead of keyword
+      // arguments, so pybind11_mkdoc generates the wrong docs.
       R"doc(Solve the optimization problem. The solution will be stored in the
 original variables used to construct the problem.
 
@@ -219,13 +207,13 @@ Parameter ``spy``:
     (default: False))doc");
   cls.def(
       "add_callback",
-      [](OptimizationProblem& self,
+      [](Problem& self,
          std::function<bool(const SolverIterationInfo& info)> callback) {
         self.add_callback(std::move(callback));
       },
-      "callback"_a, DOC(slp, OptimizationProblem, add_callback, 2));
-  cls.def("clear_callbacks", &OptimizationProblem::clear_callbacks,
-          DOC(slp, OptimizationProblem, clear_callbacks));
+      "callback"_a, DOC(slp, Problem, add_callback, 2));
+  cls.def("clear_callbacks", &Problem::clear_callbacks,
+          DOC(slp, Problem, clear_callbacks));
 }
 
 }  // namespace slp

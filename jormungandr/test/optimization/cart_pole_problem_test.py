@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from jormungandr.autodiff import ExpressionType
-from jormungandr.optimization import OptimizationProblem, SolverExitCondition
+from jormungandr.optimization import Problem, SolverExitCondition
 from jormungandr.test.cart_pole_util import (
     cart_pole_dynamics,
     cart_pole_dynamics_double,
@@ -16,7 +16,7 @@ def lerp(a, b, t):
     return a + t * (b - a)
 
 
-def test_optimization_problem_cart_pole():
+def test_cart_pole_problem():
     T = 5.0  # s
     dt = 0.05  # s
     N = int(T / dt)
@@ -27,7 +27,7 @@ def test_optimization_problem_cart_pole():
     x_initial = np.zeros((4, 1))
     x_final = np.array([[1.0], [math.pi], [0.0], [0.0]])
 
-    problem = OptimizationProblem()
+    problem = Problem()
 
     # x = [q, q̇]ᵀ = [x, θ, ẋ, θ̇]ᵀ
     X = problem.decision_variable(4, N + 1)
