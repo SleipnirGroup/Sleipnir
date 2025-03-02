@@ -11,7 +11,7 @@
 namespace slp {
 
 /**
- * Solver exit condition.
+ * Solver exit condition. Negative values indicate failure.
  */
 enum class SolverExitCondition : int8_t {
   /// Solved the problem to the desired tolerance.
