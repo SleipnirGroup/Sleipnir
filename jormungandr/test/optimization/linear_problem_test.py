@@ -1,11 +1,11 @@
 import pytest
 
 from jormungandr.autodiff import ExpressionType
-from jormungandr.optimization import OptimizationProblem, SolverExitCondition
+from jormungandr.optimization import Problem, SolverExitCondition
 
 
 def test_maximize():
-    problem = OptimizationProblem()
+    problem = Problem()
 
     x = problem.decision_variable()
     x.set_value(1.0)
@@ -33,7 +33,7 @@ def test_maximize():
 
 
 def test_free_variable():
-    problem = OptimizationProblem()
+    problem = Problem()
 
     x = problem.decision_variable(2)
     x[0].set_value(1.0)

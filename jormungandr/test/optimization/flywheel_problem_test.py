@@ -4,14 +4,14 @@ import numpy as np
 import pytest
 
 from jormungandr.autodiff import ExpressionType
-from jormungandr.optimization import OptimizationProblem, SolverExitCondition
+from jormungandr.optimization import Problem, SolverExitCondition
 
 
 def near(expected, actual, tolerance):
     return abs(expected - actual) < tolerance
 
 
-def test_optimization_problem_flywheel():
+def test_flywheel_problem():
     T = 5.0
     dt = 0.005
     N = int(T / dt)
@@ -22,7 +22,7 @@ def test_optimization_problem_flywheel():
     A = math.exp(-dt)
     B = 1.0 - math.exp(-dt)
 
-    problem = OptimizationProblem()
+    problem = Problem()
     X = problem.decision_variable(1, N + 1)
     U = problem.decision_variable(1, N)
 

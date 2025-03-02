@@ -2,17 +2,17 @@ import numpy as np
 import pytest
 
 from jormungandr.autodiff import ExpressionType
-from jormungandr.optimization import OptimizationProblem, SolverExitCondition
+from jormungandr.optimization import Problem, SolverExitCondition
 
 
-def test_optimization_problem_double_integrator():
+def test_double_integrator_problem():
     T = 3.5
     dt = 0.005
     N = int(T / dt)
 
     r = 2.0
 
-    problem = OptimizationProblem()
+    problem = Problem()
 
     # 2x1 state vector with N + 1 timesteps (includes last state)
     X = problem.decision_variable(2, N + 1)

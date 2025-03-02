@@ -4,13 +4,13 @@
 #include <numbers>
 
 #include <catch2/catch_test_macros.hpp>
-#include <sleipnir/optimization/optimization_problem.hpp>
+#include <sleipnir/optimization/problem.hpp>
 
 #include "catch_string_converters.hpp"
 #include "util/scope_exit.hpp"
 
 // This problem tests the case where regularization fails
-TEST_CASE("OptimizationProblem - Arm on elevator", "[OptimizationProblem]") {
+TEST_CASE("Problem - Arm on elevator", "[Problem]") {
   using namespace std::chrono_literals;
 
   slp::scope_exit exit{
@@ -36,7 +36,7 @@ TEST_CASE("OptimizationProblem - Arm on elevator", "[OptimizationProblem]") {
   constexpr std::chrono::duration<double> TOTAL_TIME = 4s;
   constexpr auto dt = TOTAL_TIME / N;
 
-  slp::OptimizationProblem problem;
+  slp::Problem problem;
 
   auto elevator = problem.decision_variable(2, N + 1);
   auto elevator_accel = problem.decision_variable(1, N);

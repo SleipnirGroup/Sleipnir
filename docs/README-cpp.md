@@ -20,7 +20,7 @@ and the acceleration constraints are -1 ≤ u ≤ 1.
 
 ```cpp
 #include <Eigen/Core>
-#include <sleipnir/optimization/optimization_problem.hpp>
+#include <sleipnir/optimization/problem.hpp>
 ```
 
 ## Initializing a problem instance
@@ -34,7 +34,7 @@ constexpr int N = T / dt;
 
 constexpr double r = 2.0;
 
-slp::OptimizationProblem problem;
+slp::Problem problem;
 ```
 
 ## Creating decision variables

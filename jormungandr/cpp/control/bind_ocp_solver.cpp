@@ -16,7 +16,7 @@ namespace slp {
 void bind_ocp_solver(nb::enum_<TranscriptionMethod>& transcription_method,
                      nb::enum_<DynamicsType>& dynamics_type,
                      nb::enum_<TimestepMethod>& timestep_method,
-                     nb::class_<OCPSolver, OptimizationProblem>& cls) {
+                     nb::class_<OCPSolver, Problem>& cls) {
   using namespace nb::literals;
 
   transcription_method.value(

@@ -6,10 +6,10 @@ import numpy as np
 
 import jormungandr.autodiff as autodiff
 from jormungandr.autodiff import ExpressionType
-from jormungandr.optimization import OptimizationProblem, SolverExitCondition
+from jormungandr.optimization import Problem, SolverExitCondition
 
 
-def test_optimization_problem_arm_on_elevator():
+def test_arm_on_elevator_problem():
     N = 800
 
     ELEVATOR_START_HEIGHT = 1.0  # m
@@ -28,7 +28,7 @@ def test_optimization_problem_arm_on_elevator():
     TOTAL_TIME = 4.0  # s
     dt = TOTAL_TIME / N
 
-    problem = OptimizationProblem()
+    problem = Problem()
 
     elevator = problem.decision_variable(2, N + 1)
     elevator_accel = problem.decision_variable(1, N)

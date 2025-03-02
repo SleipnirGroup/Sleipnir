@@ -11,7 +11,7 @@
 #include <string_view>
 
 #include <casadi/casadi.hpp>
-#include <sleipnir/optimization/optimization_problem.hpp>
+#include <sleipnir/optimization/problem.hpp>
 #include <sleipnir/util/function_ref.hpp>
 
 /**
@@ -30,7 +30,7 @@ constexpr double to_ms(const std::chrono::duration<Rep, Period>& duration) {
  * setup time and solve time for each, then writes them to a CSV file.
  *
  * @tparam Problem The optimization problem's type (casadi::Opti or
- *   slp::OptimizationProblem).
+ *   slp::Problem).
  * @param results The CSV file to which to write the results.
  * @param setup A function that returns an optimization problem instance.
  * @param solve A function that takes an optimization problem instance and
@@ -68,7 +68,7 @@ void run_benchmark(std::ofstream& results, slp::function_ref<Problem()> setup,
  * timesteps within the time horizon.
  *
  * @tparam Problem The optimization problem's type (casadi::Opti or
- *   slp::OptimizationProblem).
+ *   slp::Problem).
  * @param filename Results CSV filename.
  * @param diagnostics Whether to enable diagnostic prints.
  * @param T The time horizon of the optimization problem.

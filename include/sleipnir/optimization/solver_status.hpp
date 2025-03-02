@@ -9,8 +9,8 @@
 namespace slp {
 
 /**
- * Return value of OptimizationProblem::Solve() containing the cost function and
- * constraint types and solver's exit condition.
+ * Return value of Problem::Solve() containing the cost function and constraint
+ * types and solver's exit condition.
  */
 struct SLEIPNIR_DLLEXPORT SolverStatus {
   /// The cost function type detected by the solver.

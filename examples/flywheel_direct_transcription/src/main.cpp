@@ -4,7 +4,7 @@
 #include <cmath>
 #include <print>
 
-#include <sleipnir/optimization/optimization_problem.hpp>
+#include <sleipnir/optimization/problem.hpp>
 
 #ifndef RUNNING_TESTS
 int main() {
@@ -20,7 +20,7 @@ int main() {
   Eigen::Matrix<double, 1, 1> A{std::exp(-dt.count())};
   Eigen::Matrix<double, 1, 1> B{1.0 - std::exp(-dt.count())};
 
-  slp::OptimizationProblem problem;
+  slp::Problem problem;
   auto X = problem.decision_variable(1, N + 1);
   auto U = problem.decision_variable(1, N);
 

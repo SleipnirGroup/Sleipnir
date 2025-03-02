@@ -14,7 +14,7 @@ import numpy as np
 from numpy.linalg import norm
 
 from jormungandr.autodiff import Gradient, VariableMatrix
-from jormungandr.optimization import OptimizationProblem
+from jormungandr.optimization import Problem
 
 field_width = 8.2296  # 27 ft -> m
 field_length = 16.4592  # 54 ft -> m
@@ -91,7 +91,7 @@ def main():
     shooter_wrt_robot = np.array([[0.0], [0.0], [0.6096], [0.0], [0.0], [0.0]])
     shooter_wrt_field = robot_wrt_field + shooter_wrt_robot
 
-    problem = OptimizationProblem()
+    problem = Problem()
 
     # Set up duration decision variables
     N = 10

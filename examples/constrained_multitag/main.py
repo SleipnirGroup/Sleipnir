@@ -9,11 +9,11 @@ The robot pose is constrained to be on the floor (z = 0).
 import numpy as np
 
 from jormungandr.autodiff import Variable, VariableMatrix, cos, sin, solve
-from jormungandr.optimization import OptimizationProblem
+from jormungandr.optimization import Problem
 
 
 def main():
-    problem = OptimizationProblem()
+    problem = Problem()
 
     # camera calibration
     fx = 600

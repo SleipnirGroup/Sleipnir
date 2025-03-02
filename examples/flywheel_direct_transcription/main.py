@@ -4,7 +4,7 @@ import math
 
 import numpy as np
 
-from jormungandr.optimization import OptimizationProblem
+from jormungandr.optimization import Problem
 
 
 def main():
@@ -18,7 +18,7 @@ def main():
     A = math.exp(-dt)
     B = 1.0 - math.exp(-dt)
 
-    problem = OptimizationProblem()
+    problem = Problem()
     X = problem.decision_variable(1, N + 1)
     U = problem.decision_variable(1, N)
 

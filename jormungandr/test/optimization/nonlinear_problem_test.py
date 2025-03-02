@@ -5,11 +5,11 @@ import pytest
 
 import jormungandr.autodiff as autodiff
 from jormungandr.autodiff import ExpressionType
-from jormungandr.optimization import OptimizationProblem, SolverExitCondition
+from jormungandr.optimization import Problem, SolverExitCondition
 
 
 def test_quartic():
-    problem = OptimizationProblem()
+    problem = Problem()
 
     x = problem.decision_variable()
     x.set_value(20.0)
@@ -32,7 +32,7 @@ def test_rosenbrock_with_cubic_and_line_constraint():
     # https://en.wikipedia.org/wiki/Test_functions_for_optimization#Test_functions_for_constrained_optimization
     for x0 in np.arange(-1.5, 1.5, 0.1):
         for y0 in np.arange(-0.5, 2.5, 0.1):
-            problem = OptimizationProblem()
+            problem = Problem()
 
             x = problem.decision_variable()
             x.set_value(x0)
@@ -67,7 +67,7 @@ def test_rosenbrock_with_disk_constraint():
     # https://en.wikipedia.org/wiki/Test_functions_for_optimization#Test_functions_for_constrained_optimization
     for x0 in np.arange(-1.5, 1.5, 0.1):
         for y0 in np.arange(-1.5, 1.5, 0.1):
-            problem = OptimizationProblem()
+            problem = Problem()
 
             x = problem.decision_variable()
             x.set_value(x0)
@@ -92,7 +92,7 @@ def test_rosenbrock_with_disk_constraint():
 
 
 def test_narrow_feasible_region():
-    problem = OptimizationProblem()
+    problem = Problem()
 
     x = problem.decision_variable()
     x.set_value(20.0)

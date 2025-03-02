@@ -9,14 +9,14 @@
 #include <Eigen/Core>
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
-#include <sleipnir/optimization/optimization_problem.hpp>
+#include <sleipnir/optimization/problem.hpp>
 
 #include "cart_pole_util.hpp"
 #include "catch_string_converters.hpp"
 #include "rk4.hpp"
 #include "util/scope_exit.hpp"
 
-TEST_CASE("OptimizationProblem - Cart-pole", "[OptimizationProblem]") {
+TEST_CASE("Problem - Cart-pole", "[Problem]") {
   using namespace std::chrono_literals;
 
   slp::scope_exit exit{
@@ -32,7 +32,7 @@ TEST_CASE("OptimizationProblem - Cart-pole", "[OptimizationProblem]") {
   constexpr Eigen::Vector<double, 4> x_initial{{0.0, 0.0, 0.0, 0.0}};
   constexpr Eigen::Vector<double, 4> x_final{{1.0, std::numbers::pi, 0.0, 0.0}};
 
-  slp::OptimizationProblem problem;
+  slp::Problem problem;
 
   // x = [q, q̇]ᵀ = [x, θ, ẋ, θ̇]ᵀ
   auto X = problem.decision_variable(4, N + 1);
@@ -117,7 +117,7 @@ TEST_CASE("OptimizationProblem - Cart-pole", "[OptimizationProblem]") {
   CHECK(X.value(3, N) == Catch::Approx(x_final(3)).margin(1e-8));
 
   // Log states for offline viewing
-  std::ofstream states{"OptimizationProblem Cart-pole states.csv"};
+  std::ofstream states{"Problem Cart-pole states.csv"};
   if (states.is_open()) {
     states << "Time (s),Cart position (m),Pole angle (rad),Cart velocity (m/s),"
               "Pole angular velocity (rad/s)\n";
@@ -129,7 +129,7 @@ TEST_CASE("OptimizationProblem - Cart-pole", "[OptimizationProblem]") {
   }
 
   // Log inputs for offline viewing
-  std::ofstream inputs{"OptimizationProblem Cart-pole inputs.csv"};
+  std::ofstream inputs{"Problem Cart-pole inputs.csv"};
   if (inputs.is_open()) {
     inputs << "Time (s),Cart force (N)\n";
 

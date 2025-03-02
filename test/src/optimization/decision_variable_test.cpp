@@ -2,12 +2,12 @@
 
 #include <Eigen/Core>
 #include <catch2/catch_test_macros.hpp>
-#include <sleipnir/optimization/optimization_problem.hpp>
+#include <sleipnir/optimization/problem.hpp>
 
 #include "catch_string_converters.hpp"
 
 TEST_CASE("decision_variable - Scalar init assign", "[decision_variable]") {
-  slp::OptimizationProblem problem;
+  slp::Problem problem;
 
   // Scalar zero init
   auto x = problem.decision_variable();
@@ -21,7 +21,7 @@ TEST_CASE("decision_variable - Scalar init assign", "[decision_variable]") {
 }
 
 TEST_CASE("decision_variable - Vector init assign", "[decision_variable]") {
-  slp::OptimizationProblem problem;
+  slp::Problem problem;
 
   // Vector zero init
   auto y = problem.decision_variable(2);
@@ -41,7 +41,7 @@ TEST_CASE("decision_variable - Vector init assign", "[decision_variable]") {
 
 TEST_CASE("decision_variable - Static matrix init assign",
           "[decision_variable]") {
-  slp::OptimizationProblem problem;
+  slp::Problem problem;
 
   // Matrix zero init
   auto z = problem.decision_variable(3, 2);
@@ -91,7 +91,7 @@ TEST_CASE("decision_variable - Static matrix init assign",
 
 TEST_CASE("decision_variable - Dynamic matrix init assign",
           "[decision_variable]") {
-  slp::OptimizationProblem problem;
+  slp::Problem problem;
 
   // Matrix zero init
   auto z = problem.decision_variable(3, 2);
@@ -147,7 +147,7 @@ TEST_CASE("decision_variable - Dynamic matrix init assign",
 }
 
 TEST_CASE("decision_variable - Symmetric matrix", "[decision_variable]") {
-  slp::OptimizationProblem problem;
+  slp::Problem problem;
 
   // Matrix zero init
   auto A = problem.symmetric_decision_variable(2);

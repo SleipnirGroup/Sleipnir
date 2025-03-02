@@ -1,7 +1,7 @@
 // Copyright (c) Sleipnir contributors
 
 #include <catch2/catch_test_macros.hpp>
-#include <sleipnir/optimization/optimization_problem.hpp>
+#include <sleipnir/optimization/problem.hpp>
 
 #include "catch_string_converters.hpp"
 
@@ -9,7 +9,7 @@
 
 TEST_CASE("SolverExitCondition - Callback requested stop",
           "[SolverExitCondition]") {
-  slp::OptimizationProblem problem;
+  slp::Problem problem;
 
   auto x = problem.decision_variable();
   problem.minimize(x * x);
@@ -33,7 +33,7 @@ TEST_CASE("SolverExitCondition - Callback requested stop",
 }
 
 TEST_CASE("SolverExitCondition - Too few DOFs", "[SolverExitCondition]") {
-  slp::OptimizationProblem problem;
+  slp::Problem problem;
 
   auto x = problem.decision_variable();
   auto y = problem.decision_variable();
@@ -55,7 +55,7 @@ TEST_CASE("SolverExitCondition - Too few DOFs", "[SolverExitCondition]") {
 TEST_CASE("SolverExitCondition - Locally infeasible", "[SolverExitCondition]") {
   // Equality constraints
   {
-    slp::OptimizationProblem problem;
+    slp::Problem problem;
 
     auto x = problem.decision_variable();
     auto y = problem.decision_variable();
@@ -76,7 +76,7 @@ TEST_CASE("SolverExitCondition - Locally infeasible", "[SolverExitCondition]") {
 
   // Inequality constraints
   {
-    slp::OptimizationProblem problem;
+    slp::Problem problem;
 
     auto x = problem.decision_variable();
     auto y = problem.decision_variable();
@@ -98,7 +98,7 @@ TEST_CASE("SolverExitCondition - Locally infeasible", "[SolverExitCondition]") {
 
 TEST_CASE("SolverExitCondition - Nonfinite initial cost or constraints",
           "[SolverExitCondition]") {
-  slp::OptimizationProblem problem;
+  slp::Problem problem;
 
   auto x = problem.decision_variable();
   x.set_value(-1.0);
@@ -114,7 +114,7 @@ TEST_CASE("SolverExitCondition - Nonfinite initial cost or constraints",
 }
 
 TEST_CASE("SolverExitCondition - Diverging iterates", "[SolverExitCondition]") {
-  slp::OptimizationProblem problem;
+  slp::Problem problem;
 
   auto x = problem.decision_variable();
   problem.minimize(x);
@@ -129,7 +129,7 @@ TEST_CASE("SolverExitCondition - Diverging iterates", "[SolverExitCondition]") {
 
 TEST_CASE("SolverExitCondition - Max iterations exceeded",
           "[SolverExitCondition]") {
-  slp::OptimizationProblem problem;
+  slp::Problem problem;
 
   auto x = problem.decision_variable();
   problem.minimize(x * x);
@@ -146,7 +146,7 @@ TEST_CASE("SolverExitCondition - Max iterations exceeded",
 TEST_CASE("SolverExitCondition - Timeout", "[SolverExitCondition]") {
   using namespace std::chrono_literals;
 
-  slp::OptimizationProblem problem;
+  slp::Problem problem;
 
   auto x = problem.decision_variable();
   problem.minimize(x * x);

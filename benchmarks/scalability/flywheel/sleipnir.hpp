@@ -4,7 +4,7 @@
 
 #include <chrono>
 
-#include <sleipnir/optimization/optimization_problem.hpp>
+#include <sleipnir/optimization/problem.hpp>
 
 /**
  * Creates a flywheel quadratic optimization problem with Sleipnir.
@@ -12,8 +12,7 @@
  * @param dt Timestep duration.
  * @param N Number of samples in the problem.
  */
-slp::OptimizationProblem flywheel_sleipnir(std::chrono::duration<double> dt,
-                                           int N);
+slp::Problem flywheel_sleipnir(std::chrono::duration<double> dt, int N);
 
 /**
  * Creates a cart-pole nonlinear optimization problem with Sleipnir.
@@ -21,5 +20,4 @@ slp::OptimizationProblem flywheel_sleipnir(std::chrono::duration<double> dt,
  * @param dt Timestep duration.
  * @param N Number of samples in the problem.
  */
-slp::OptimizationProblem cart_pole_sleipnir(std::chrono::duration<double> dt,
-                                            int N);
+slp::Problem cart_pole_sleipnir(std::chrono::duration<double> dt, int N);

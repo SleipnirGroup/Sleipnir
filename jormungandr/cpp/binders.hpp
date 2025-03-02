@@ -11,7 +11,7 @@
 #include <sleipnir/autodiff/variable_block.hpp>
 #include <sleipnir/autodiff/variable_matrix.hpp>
 #include <sleipnir/control/ocp_solver.hpp>
-#include <sleipnir/optimization/optimization_problem.hpp>
+#include <sleipnir/optimization/problem.hpp>
 #include <sleipnir/optimization/solver_exit_condition.hpp>
 #include <sleipnir/optimization/solver_iteration_info.hpp>
 #include <sleipnir/optimization/solver_status.hpp>
@@ -38,11 +38,11 @@ void bind_solver_exit_condition(nb::enum_<SolverExitCondition>& e);
 void bind_solver_iteration_info(nb::class_<SolverIterationInfo>& cls);
 void bind_solver_status(nb::class_<SolverStatus>& cls);
 
-void bind_optimization_problem(nb::class_<OptimizationProblem>& cls);
+void bind_problem(nb::class_<Problem>& cls);
 
 void bind_ocp_solver(nb::enum_<TranscriptionMethod>& transcription_method,
                      nb::enum_<DynamicsType>& dynamics_type,
                      nb::enum_<TimestepMethod>& timestep_method,
-                     nb::class_<OCPSolver, OptimizationProblem>& cls);
+                     nb::class_<OCPSolver, Problem>& cls);
 
 }  // namespace slp

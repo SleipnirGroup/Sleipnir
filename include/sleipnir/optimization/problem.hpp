@@ -54,12 +54,12 @@ subject to cₑ(x) = 0
  * the form shown above manually; they can write it in natural mathematical form
  * and it'll be converted for them.
  */
-class SLEIPNIR_DLLEXPORT OptimizationProblem {
+class SLEIPNIR_DLLEXPORT Problem {
  public:
   /**
    * Construct the optimization problem.
    */
-  OptimizationProblem() noexcept = default;
+  Problem() noexcept = default;
 
   /**
    * Create a decision variable in the optimization problem.

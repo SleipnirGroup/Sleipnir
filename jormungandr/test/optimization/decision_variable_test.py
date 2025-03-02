@@ -1,10 +1,10 @@
 import numpy as np
 
-from jormungandr.optimization import OptimizationProblem
+from jormungandr.optimization import Problem
 
 
 def test_scalar_init_assign():
-    problem = OptimizationProblem()
+    problem = Problem()
 
     # Scalar zero init
     x = problem.decision_variable()
@@ -18,7 +18,7 @@ def test_scalar_init_assign():
 
 
 def test_vector_init_assign():
-    problem = OptimizationProblem()
+    problem = Problem()
 
     # Vector zero init
     y = problem.decision_variable(2)
@@ -37,7 +37,7 @@ def test_vector_init_assign():
 
 
 def test_matrix_init_assign():
-    problem = OptimizationProblem()
+    problem = Problem()
 
     # Matrix zero init
     z = problem.decision_variable(3, 2)
@@ -67,7 +67,7 @@ def test_matrix_init_assign():
 
 
 def test_symmetric_matrix():
-    problem = OptimizationProblem()
+    problem = Problem()
 
     # Matrix zero init
     A = problem.symmetric_decision_variable(2)

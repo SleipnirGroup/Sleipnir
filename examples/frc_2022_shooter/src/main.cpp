@@ -5,7 +5,7 @@
 #include <print>
 
 #include <Eigen/Core>
-#include <sleipnir/optimization/optimization_problem.hpp>
+#include <sleipnir/optimization/problem.hpp>
 
 // FRC 2022 shooter trajectory optimization.
 //
@@ -61,7 +61,7 @@ int main() {
   Vector6d shooter_wrt_robot{{0.0}, {0.0}, {1.2}, {0.0}, {0.0}, {0.0}};
   Vector6d shooter_wrt_field = robot_wrt_field + shooter_wrt_robot;
 
-  slp::OptimizationProblem problem;
+  slp::Problem problem;
 
   // Set up duration decision variables
   constexpr int N = 10;

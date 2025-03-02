@@ -496,7 +496,7 @@ Parameter ``upper_bound``:
     The upper bound that inputs must always be below. Must be shaped
     (num_inputs)x1.)doc";
 
-static const char *__doc_slp_OptimizationProblem =
+static const char *__doc_slp_Problem =
 R"doc(This class allows the user to pose a constrained nonlinear
 optimization problem in natural mathematical notation and solve it.
 
@@ -514,9 +514,9 @@ The nice thing about this class is users don't have to put their
 system in the form shown above manually; they can write it in natural
 mathematical form and it'll be converted for them.)doc";
 
-static const char *__doc_slp_OptimizationProblem_OptimizationProblem = R"doc(Construct the optimization problem.)doc";
+static const char *__doc_slp_Problem_Problem = R"doc(Construct the optimization problem.)doc";
 
-static const char *__doc_slp_OptimizationProblem_add_callback =
+static const char *__doc_slp_Problem_add_callback =
 R"doc(Adds a callback to be called at each solver iteration.
 
 The callback for this overload should return void.
@@ -524,7 +524,7 @@ The callback for this overload should return void.
 Parameter ``callback``:
     The callback.)doc";
 
-static const char *__doc_slp_OptimizationProblem_add_callback_2 =
+static const char *__doc_slp_Problem_add_callback_2 =
 R"doc(Adds a callback to be called at each solver iteration.
 
 The callback for this overload should return bool.
@@ -533,15 +533,15 @@ Parameter ``callback``:
     The callback. Returning true from the callback causes the solver
     to exit early with the solution it has so far.)doc";
 
-static const char *__doc_slp_OptimizationProblem_clear_callbacks = R"doc(Clears the registered callbacks.)doc";
+static const char *__doc_slp_Problem_clear_callbacks = R"doc(Clears the registered callbacks.)doc";
 
-static const char *__doc_slp_OptimizationProblem_decision_variable =
+static const char *__doc_slp_Problem_decision_variable =
 R"doc(Create a decision variable in the optimization problem.
 
 Returns:
     A decision variable in the optimization problem.)doc";
 
-static const char *__doc_slp_OptimizationProblem_decision_variable_2 =
+static const char *__doc_slp_Problem_decision_variable_2 =
 R"doc(Create a matrix of decision variables in the optimization problem.
 
 Parameter ``rows``:
@@ -553,17 +553,17 @@ Parameter ``cols``:
 Returns:
     A matrix of decision variables in the optimization problem.)doc";
 
-static const char *__doc_slp_OptimizationProblem_m_callbacks = R"doc()doc";
+static const char *__doc_slp_Problem_m_callbacks = R"doc()doc";
 
-static const char *__doc_slp_OptimizationProblem_m_decision_variables = R"doc()doc";
+static const char *__doc_slp_Problem_m_decision_variables = R"doc()doc";
 
-static const char *__doc_slp_OptimizationProblem_m_equality_constraints = R"doc()doc";
+static const char *__doc_slp_Problem_m_equality_constraints = R"doc()doc";
 
-static const char *__doc_slp_OptimizationProblem_m_f = R"doc()doc";
+static const char *__doc_slp_Problem_m_f = R"doc()doc";
 
-static const char *__doc_slp_OptimizationProblem_m_inequality_constraints = R"doc()doc";
+static const char *__doc_slp_Problem_m_inequality_constraints = R"doc()doc";
 
-static const char *__doc_slp_OptimizationProblem_maximize =
+static const char *__doc_slp_Problem_maximize =
 R"doc(Tells the solver to maximize the output of the given objective
 function.
 
@@ -574,7 +574,7 @@ in the feasible set.
 Parameter ``objective``:
     The objective function to maximize.)doc";
 
-static const char *__doc_slp_OptimizationProblem_maximize_2 =
+static const char *__doc_slp_Problem_maximize_2 =
 R"doc(Tells the solver to maximize the output of the given objective
 function.
 
@@ -585,7 +585,7 @@ in the feasible set.
 Parameter ``objective``:
     The objective function to maximize.)doc";
 
-static const char *__doc_slp_OptimizationProblem_minimize =
+static const char *__doc_slp_Problem_minimize =
 R"doc(Tells the solver to minimize the output of the given cost function.
 
 Note that this is optional. If only constraints are specified, the
@@ -595,7 +595,7 @@ in the feasible set.
 Parameter ``cost``:
     The cost function to minimize.)doc";
 
-static const char *__doc_slp_OptimizationProblem_minimize_2 =
+static const char *__doc_slp_Problem_minimize_2 =
 R"doc(Tells the solver to minimize the output of the given cost function.
 
 Note that this is optional. If only constraints are specified, the
@@ -605,7 +605,7 @@ in the feasible set.
 Parameter ``cost``:
     The cost function to minimize.)doc";
 
-static const char *__doc_slp_OptimizationProblem_solve =
+static const char *__doc_slp_Problem_solve =
 R"doc(Solve the optimization problem. The solution will be stored in the
 original variables used to construct the problem.
 
@@ -615,35 +615,35 @@ Parameter ``config``:
 Returns:
     The solver status.)doc";
 
-static const char *__doc_slp_OptimizationProblem_subject_to =
+static const char *__doc_slp_Problem_subject_to =
 R"doc(Tells the solver to solve the problem while satisfying the given
 equality constraint.
 
 Parameter ``constraint``:
     The constraint to satisfy.)doc";
 
-static const char *__doc_slp_OptimizationProblem_subject_to_2 =
+static const char *__doc_slp_Problem_subject_to_2 =
 R"doc(Tells the solver to solve the problem while satisfying the given
 equality constraint.
 
 Parameter ``constraint``:
     The constraint to satisfy.)doc";
 
-static const char *__doc_slp_OptimizationProblem_subject_to_3 =
+static const char *__doc_slp_Problem_subject_to_3 =
 R"doc(Tells the solver to solve the problem while satisfying the given
 inequality constraint.
 
 Parameter ``constraint``:
     The constraint to satisfy.)doc";
 
-static const char *__doc_slp_OptimizationProblem_subject_to_4 =
+static const char *__doc_slp_Problem_subject_to_4 =
 R"doc(Tells the solver to solve the problem while satisfying the given
 inequality constraint.
 
 Parameter ``constraint``:
     The constraint to satisfy.)doc";
 
-static const char *__doc_slp_OptimizationProblem_symmetric_decision_variable =
+static const char *__doc_slp_Problem_symmetric_decision_variable =
 R"doc(Create a symmetric matrix of decision variables in the optimization
 problem.
 
@@ -813,8 +813,8 @@ static const char *__doc_slp_SolverIterationInfo_s = R"doc(The inequality constr
 static const char *__doc_slp_SolverIterationInfo_x = R"doc(The decision variables.)doc";
 
 static const char *__doc_slp_SolverStatus =
-R"doc(Return value of OptimizationProblem::Solve() containing the cost
-function and constraint types and solver's exit condition.)doc";
+R"doc(Return value of Problem::Solve() containing the cost function and
+constraint types and solver's exit condition.)doc";
 
 static const char *__doc_slp_SolverStatus_cost = R"doc(The solution's cost.)doc";
 
