@@ -51,12 +51,12 @@ TEST_CASE("OCP - Differential drive", "[OCP]") {
   // Set up cost
   problem.minimize(problem.dt() * Eigen::Matrix<double, N + 1, 1>::Ones());
 
-  auto status = problem.solve({.max_iterations = 1000, .diagnostics = true});
+  CHECK(problem.cost_function_type() == slp::ExpressionType::LINEAR);
+  CHECK(problem.equality_constraint_type() == slp::ExpressionType::NONLINEAR);
+  CHECK(problem.inequality_constraint_type() == slp::ExpressionType::LINEAR);
 
-  CHECK(status.cost_function_type == slp::ExpressionType::LINEAR);
-  CHECK(status.equality_constraint_type == slp::ExpressionType::NONLINEAR);
-  CHECK(status.inequality_constraint_type == slp::ExpressionType::LINEAR);
-  CHECK(status.exit_condition == slp::SolverExitCondition::SUCCESS);
+  CHECK(problem.solve({.max_iterations = 1000, .diagnostics = true}) ==
+        slp::ExitStatus::SUCCESS);
 
   auto X = problem.X();
   auto U = problem.U();

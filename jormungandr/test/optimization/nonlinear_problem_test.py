@@ -5,7 +5,7 @@ import pytest
 
 import jormungandr.autodiff as autodiff
 from jormungandr.autodiff import ExpressionType
-from jormungandr.optimization import Problem, SolverExitCondition
+from jormungandr.optimization import ExitStatus, Problem
 
 
 def test_quartic():
@@ -18,12 +18,11 @@ def test_quartic():
 
     problem.subject_to(x >= 1)
 
-    status = problem.solve(diagnostics=True)
+    assert problem.cost_function_type() == ExpressionType.NONLINEAR
+    assert problem.equality_constraint_type() == ExpressionType.NONE
+    assert problem.inequality_constraint_type() == ExpressionType.LINEAR
 
-    assert status.cost_function_type == ExpressionType.NONLINEAR
-    assert status.equality_constraint_type == ExpressionType.NONE
-    assert status.inequality_constraint_type == ExpressionType.LINEAR
-    assert status.exit_condition == SolverExitCondition.SUCCESS
+    assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
 
     assert x.value() == pytest.approx(1.0, abs=1e-6)
 
@@ -46,12 +45,11 @@ def test_rosenbrock_with_cubic_and_line_constraint():
             problem.subject_to(autodiff.pow(x - 1, 3) - y + 1 <= 0)
             problem.subject_to(x + y - 2 <= 0)
 
-            status = problem.solve()
+            assert problem.cost_function_type() == ExpressionType.NONLINEAR
+            assert problem.equality_constraint_type() == ExpressionType.NONE
+            assert problem.inequality_constraint_type() == ExpressionType.NONLINEAR
 
-            assert status.cost_function_type == ExpressionType.NONLINEAR
-            assert status.equality_constraint_type == ExpressionType.NONE
-            assert status.inequality_constraint_type == ExpressionType.NONLINEAR
-            assert status.exit_condition == SolverExitCondition.SUCCESS
+            assert problem.solve() == ExitStatus.SUCCESS
 
             # Local minimum at (0.0, 0.0)
             # Global minimum at (1.0, 1.0)
@@ -80,12 +78,11 @@ def test_rosenbrock_with_disk_constraint():
 
             problem.subject_to(autodiff.pow(x, 2) + autodiff.pow(y, 2) <= 2)
 
-            status = problem.solve()
+            assert problem.cost_function_type() == ExpressionType.NONLINEAR
+            assert problem.equality_constraint_type() == ExpressionType.NONE
+            assert problem.inequality_constraint_type() == ExpressionType.QUADRATIC
 
-            assert status.cost_function_type == ExpressionType.NONLINEAR
-            assert status.equality_constraint_type == ExpressionType.NONE
-            assert status.inequality_constraint_type == ExpressionType.QUADRATIC
-            assert status.exit_condition == SolverExitCondition.SUCCESS
+            assert problem.solve() == ExitStatus.SUCCESS
 
             assert x.value() == pytest.approx(1.0, abs=1e-1)
             assert y.value() == pytest.approx(1.0, abs=1e-1)
@@ -104,18 +101,16 @@ def test_narrow_feasible_region():
 
     problem.subject_to(y == -x + 5.0)
 
-    status = problem.solve(diagnostics=True)
-
-    assert status.cost_function_type == ExpressionType.NONLINEAR
-    assert status.equality_constraint_type == ExpressionType.LINEAR
-    assert status.inequality_constraint_type == ExpressionType.NONE
+    assert problem.cost_function_type() == ExpressionType.NONLINEAR
+    assert problem.equality_constraint_type() == ExpressionType.LINEAR
+    assert problem.inequality_constraint_type() == ExpressionType.NONE
 
     if platform.system() == "Linux" and platform.machine() == "aarch64":
         # FIXME: Fails on Linux aarch64 with "diverging iterates"
-        assert status.exit_condition == SolverExitCondition.DIVERGING_ITERATES
+        assert problem.solve(diagnostics=True) == ExitStatus.DIVERGING_ITERATES
         return
     else:
-        assert status.exit_condition == SolverExitCondition.SUCCESS
+        assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
 
     assert x.value() == pytest.approx(2.5, abs=1e-2)
     assert y.value() == pytest.approx(2.5, abs=1e-2)

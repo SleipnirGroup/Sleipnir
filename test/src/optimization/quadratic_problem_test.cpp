@@ -14,12 +14,11 @@ TEST_CASE("Problem - Unconstrained 1D", "[Problem]") {
 
   problem.minimize(x * x - 6.0 * x);
 
-  auto status = problem.solve({.diagnostics = true});
+  CHECK(problem.cost_function_type() == slp::ExpressionType::QUADRATIC);
+  CHECK(problem.equality_constraint_type() == slp::ExpressionType::NONE);
+  CHECK(problem.inequality_constraint_type() == slp::ExpressionType::NONE);
 
-  CHECK(status.cost_function_type == slp::ExpressionType::QUADRATIC);
-  CHECK(status.equality_constraint_type == slp::ExpressionType::NONE);
-  CHECK(status.inequality_constraint_type == slp::ExpressionType::NONE);
-  CHECK(status.exit_condition == slp::SolverExitCondition::SUCCESS);
+  CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
   CHECK(x.value() == Catch::Approx(3.0).margin(1e-6));
 }
@@ -35,12 +34,11 @@ TEST_CASE("Problem - Unconstrained 2D", "[Problem]") {
 
     problem.minimize(x * x + y * y);
 
-    auto status = problem.solve({.diagnostics = true});
+    CHECK(problem.cost_function_type() == slp::ExpressionType::QUADRATIC);
+    CHECK(problem.equality_constraint_type() == slp::ExpressionType::NONE);
+    CHECK(problem.inequality_constraint_type() == slp::ExpressionType::NONE);
 
-    CHECK(status.cost_function_type == slp::ExpressionType::QUADRATIC);
-    CHECK(status.equality_constraint_type == slp::ExpressionType::NONE);
-    CHECK(status.inequality_constraint_type == slp::ExpressionType::NONE);
-    CHECK(status.exit_condition == slp::SolverExitCondition::SUCCESS);
+    CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
     CHECK(x.value() == Catch::Approx(0.0).margin(1e-6));
     CHECK(y.value() == Catch::Approx(0.0).margin(1e-6));
@@ -55,12 +53,11 @@ TEST_CASE("Problem - Unconstrained 2D", "[Problem]") {
 
     problem.minimize(x.T() * x);
 
-    auto status = problem.solve({.diagnostics = true});
+    CHECK(problem.cost_function_type() == slp::ExpressionType::QUADRATIC);
+    CHECK(problem.equality_constraint_type() == slp::ExpressionType::NONE);
+    CHECK(problem.inequality_constraint_type() == slp::ExpressionType::NONE);
 
-    CHECK(status.cost_function_type == slp::ExpressionType::QUADRATIC);
-    CHECK(status.equality_constraint_type == slp::ExpressionType::NONE);
-    CHECK(status.inequality_constraint_type == slp::ExpressionType::NONE);
-    CHECK(status.exit_condition == slp::SolverExitCondition::SUCCESS);
+    CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
     CHECK(x.value(0) == Catch::Approx(0.0).margin(1e-6));
     CHECK(x.value(1) == Catch::Approx(0.0).margin(1e-6));
@@ -116,12 +113,11 @@ TEST_CASE("Problem - Equality-constrained", "[Problem]") {
 
     problem.subject_to(x + 3 * y == 36);
 
-    auto status = problem.solve({.diagnostics = true});
+    CHECK(problem.cost_function_type() == slp::ExpressionType::QUADRATIC);
+    CHECK(problem.equality_constraint_type() == slp::ExpressionType::LINEAR);
+    CHECK(problem.inequality_constraint_type() == slp::ExpressionType::NONE);
 
-    CHECK(status.cost_function_type == slp::ExpressionType::QUADRATIC);
-    CHECK(status.equality_constraint_type == slp::ExpressionType::LINEAR);
-    CHECK(status.inequality_constraint_type == slp::ExpressionType::NONE);
-    CHECK(status.exit_condition == slp::SolverExitCondition::SUCCESS);
+    CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
     CHECK(x.value() == Catch::Approx(18.0).margin(1e-5));
     CHECK(y.value() == Catch::Approx(6.0).margin(1e-5));
@@ -138,12 +134,11 @@ TEST_CASE("Problem - Equality-constrained", "[Problem]") {
 
     problem.subject_to(x == Eigen::Matrix<double, 2, 1>{{3.0, 3.0}});
 
-    auto status = problem.solve({.diagnostics = true});
+    CHECK(problem.cost_function_type() == slp::ExpressionType::QUADRATIC);
+    CHECK(problem.equality_constraint_type() == slp::ExpressionType::LINEAR);
+    CHECK(problem.inequality_constraint_type() == slp::ExpressionType::NONE);
 
-    CHECK(status.cost_function_type == slp::ExpressionType::QUADRATIC);
-    CHECK(status.equality_constraint_type == slp::ExpressionType::LINEAR);
-    CHECK(status.inequality_constraint_type == slp::ExpressionType::NONE);
-    CHECK(status.exit_condition == slp::SolverExitCondition::SUCCESS);
+    CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
     CHECK(x.value(0) == Catch::Approx(3.0).margin(1e-5));
     CHECK(x.value(1) == Catch::Approx(3.0).margin(1e-5));

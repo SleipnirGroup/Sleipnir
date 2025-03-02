@@ -1,7 +1,7 @@
 import pytest
 
 from jormungandr.autodiff import ExpressionType
-from jormungandr.optimization import Problem, SolverExitCondition
+from jormungandr.optimization import ExitStatus, Problem
 
 
 def test_maximize():
@@ -21,12 +21,11 @@ def test_maximize():
     problem.subject_to(x >= 0)
     problem.subject_to(y >= 0)
 
-    status = problem.solve(diagnostics=True)
+    assert problem.cost_function_type() == ExpressionType.LINEAR
+    assert problem.equality_constraint_type() == ExpressionType.NONE
+    assert problem.inequality_constraint_type() == ExpressionType.LINEAR
 
-    assert status.cost_function_type == ExpressionType.LINEAR
-    assert status.equality_constraint_type == ExpressionType.NONE
-    assert status.inequality_constraint_type == ExpressionType.LINEAR
-    assert status.exit_condition == SolverExitCondition.SUCCESS
+    assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
 
     assert x.value() == pytest.approx(375.0, abs=1e-6)
     assert y.value() == pytest.approx(250.0, abs=1e-6)
@@ -41,12 +40,11 @@ def test_free_variable():
 
     problem.subject_to(x[0] == 0)
 
-    status = problem.solve(diagnostics=True)
+    assert problem.cost_function_type() == ExpressionType.NONE
+    assert problem.equality_constraint_type() == ExpressionType.LINEAR
+    assert problem.inequality_constraint_type() == ExpressionType.NONE
 
-    assert status.cost_function_type == ExpressionType.NONE
-    assert status.equality_constraint_type == ExpressionType.LINEAR
-    assert status.inequality_constraint_type == ExpressionType.NONE
-    assert status.exit_condition == SolverExitCondition.SUCCESS
+    assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
 
     assert x[0].value() == pytest.approx(0.0, abs=1e-6)
     assert x[1].value() == pytest.approx(2.0, abs=1e-6)

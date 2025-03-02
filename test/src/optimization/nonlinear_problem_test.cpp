@@ -19,12 +19,11 @@ TEST_CASE("Problem - Quartic", "[Problem]") {
 
   problem.subject_to(x >= 1);
 
-  auto status = problem.solve({.diagnostics = true});
+  CHECK(problem.cost_function_type() == slp::ExpressionType::NONLINEAR);
+  CHECK(problem.equality_constraint_type() == slp::ExpressionType::NONE);
+  CHECK(problem.inequality_constraint_type() == slp::ExpressionType::LINEAR);
 
-  CHECK(status.cost_function_type == slp::ExpressionType::NONLINEAR);
-  CHECK(status.equality_constraint_type == slp::ExpressionType::NONE);
-  CHECK(status.inequality_constraint_type == slp::ExpressionType::LINEAR);
-  CHECK(status.exit_condition == slp::SolverExitCondition::SUCCESS);
+  CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
   CHECK(x.value() == Catch::Approx(1.0).margin(1e-6));
 }
@@ -46,13 +45,12 @@ TEST_CASE("Problem - Rosenbrock with cubic and line constraint", "[Problem]") {
       problem.subject_to(slp::pow(x - 1, 3) - y + 1 <= 0);
       problem.subject_to(x + y - 2 <= 0);
 
-      auto status = problem.solve({.diagnostics = true});
-
-      CHECK(status.cost_function_type == slp::ExpressionType::NONLINEAR);
-      CHECK(status.equality_constraint_type == slp::ExpressionType::NONE);
-      CHECK(status.inequality_constraint_type ==
+      CHECK(problem.cost_function_type() == slp::ExpressionType::NONLINEAR);
+      CHECK(problem.equality_constraint_type() == slp::ExpressionType::NONE);
+      CHECK(problem.inequality_constraint_type() ==
             slp::ExpressionType::NONLINEAR);
-      CHECK(status.exit_condition == slp::SolverExitCondition::SUCCESS);
+
+      CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
       auto Near = [](double expected, double actual, double tolerance) {
         return std::abs(expected - actual) < tolerance;
@@ -86,13 +84,12 @@ TEST_CASE("Problem - Rosenbrock with disk constraint", "[Problem]") {
 
       problem.subject_to(slp::pow(x, 2) + slp::pow(y, 2) <= 2);
 
-      auto status = problem.solve({.diagnostics = true});
-
-      CHECK(status.cost_function_type == slp::ExpressionType::NONLINEAR);
-      CHECK(status.equality_constraint_type == slp::ExpressionType::NONE);
-      CHECK(status.inequality_constraint_type ==
+      CHECK(problem.cost_function_type() == slp::ExpressionType::NONLINEAR);
+      CHECK(problem.equality_constraint_type() == slp::ExpressionType::NONE);
+      CHECK(problem.inequality_constraint_type() ==
             slp::ExpressionType::QUADRATIC);
-      CHECK(status.exit_condition == slp::SolverExitCondition::SUCCESS);
+
+      CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
       CHECK(x.value() == Catch::Approx(1.0).margin(1e-1));
       INFO(std::format("  (x₀, y₀) = ({}, {})\n", x0, y0));
@@ -117,18 +114,17 @@ TEST_CASE("Problem - Narrow feasible region", "[Problem]") {
 
   problem.subject_to(y == -x + 5.0);
 
-  auto status = problem.solve({.diagnostics = true});
-
-  CHECK(status.cost_function_type == slp::ExpressionType::NONLINEAR);
-  CHECK(status.equality_constraint_type == slp::ExpressionType::LINEAR);
-  CHECK(status.inequality_constraint_type == slp::ExpressionType::NONE);
+  CHECK(problem.cost_function_type() == slp::ExpressionType::NONLINEAR);
+  CHECK(problem.equality_constraint_type() == slp::ExpressionType::LINEAR);
+  CHECK(problem.inequality_constraint_type() == slp::ExpressionType::NONE);
 
 #if defined(__linux__) && defined(__aarch64__)
   // FIXME: Fails on Linux aarch64 with "diverging iterates"
-  CHECK(status.exit_condition == slp::SolverExitCondition::DIVERGING_ITERATES);
+  CHECK(problem.solve({.diagnostics = true}) ==
+        slp::ExitStatus::DIVERGING_ITERATES);
   SKIP("Fails with \"diverging iterates\"");
 #else
-  CHECK(status.exit_condition == slp::SolverExitCondition::SUCCESS);
+  CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 #endif
 
   CHECK(x.value() == Catch::Approx(2.5).margin(1e-2));

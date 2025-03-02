@@ -11,9 +11,9 @@
 namespace slp {
 
 /**
- * Solver exit condition. Negative values indicate failure.
+ * Solver exit status. Negative values indicate failure.
  */
-enum class SolverExitCondition : int8_t {
+enum class ExitStatus : int8_t {
   /// Solved the problem to the desired tolerance.
   SUCCESS = 0,
   /// Solved the problem to an acceptable tolerance, but not the desired one.
@@ -42,15 +42,15 @@ enum class SolverExitCondition : int8_t {
 };
 
 /**
- * Returns user-readable message corresponding to the exit condition.
+ * Returns user-readable message corresponding to the solver exit status.
  *
- * @param exit_condition Solver exit condition.
+ * @param exit_status Solver exit status.
  */
 SLEIPNIR_DLLEXPORT constexpr std::string_view ToMessage(
-    const SolverExitCondition& exit_condition) {
-  using enum SolverExitCondition;
+    const ExitStatus& exit_status) {
+  using enum ExitStatus;
 
-  switch (exit_condition) {
+  switch (exit_status) {
     case SUCCESS:
       return "solved to desired tolerance";
     case SOLVED_TO_ACCEPTABLE_TOLERANCE:

@@ -14,7 +14,6 @@
 
 #include <Eigen/Core>
 
-#include "sleipnir/optimization/solver_exit_condition.hpp"
 #include "sleipnir/util/print.hpp"
 #include "sleipnir/util/setup_profiler.hpp"
 #include "sleipnir/util/small_vector.hpp"
@@ -242,23 +241,19 @@ std::string histogram(double value) {
  * Prints final diagnostics.
  *
  * @param iterations Number of iterations.
- * @param exit_condition The solver's exit condition.
  * @param setup_profilers Setup profilers.
  * @param solve_profilers Solve profilers.
  */
 inline void print_final_diagnostics(
-    int iterations, SolverExitCondition exit_condition,
-    const small_vector<SetupProfiler>& setup_profilers,
+    int iterations, const small_vector<SetupProfiler>& setup_profilers,
     const small_vector<SolveProfiler>& solve_profilers) {
   // Print bottom of iteration diagnostics table
   slp::println("└{:─^105}┘", "");
 
-  slp::println("\nExit: {}", ToMessage(exit_condition));
-
   // Print total time
   auto setup_duration = to_ms(setup_profilers[0].duration());
   auto solve_duration = to_ms(solve_profilers[0].total_duration());
-  slp::println("Time: {:.3f} ms", setup_duration + solve_duration);
+  slp::println("\nTime: {:.3f} ms", setup_duration + solve_duration);
   slp::println("  ↳ setup: {:.3f} ms", setup_duration);
   slp::println("  ↳ solve: {:.3f} ms ({} iterations)", solve_duration,
                iterations);

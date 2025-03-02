@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from jormungandr.autodiff import ExpressionType
-from jormungandr.optimization import Problem, SolverExitCondition
+from jormungandr.optimization import ExitStatus, Problem
 
 
 def test_double_integrator_problem():
@@ -53,12 +53,11 @@ def test_double_integrator_problem():
         J += (r - X[0, k]) ** 2
     problem.minimize(J)
 
-    status = problem.solve(diagnostics=True)
+    assert problem.cost_function_type() == ExpressionType.QUADRATIC
+    assert problem.equality_constraint_type() == ExpressionType.LINEAR
+    assert problem.inequality_constraint_type() == ExpressionType.LINEAR
 
-    assert status.cost_function_type == ExpressionType.QUADRATIC
-    assert status.equality_constraint_type == ExpressionType.LINEAR
-    assert status.inequality_constraint_type == ExpressionType.LINEAR
-    assert status.exit_condition == SolverExitCondition.SUCCESS
+    assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
 
     A = np.array([[1.0, dt], [0.0, 1.0]])
     B = np.array([[0.5 * dt * dt], [dt]])

@@ -66,6 +66,46 @@ static const char *__doc_slp_EqualityConstraints_constraints = R"doc(A vector of
 
 static const char *__doc_slp_EqualityConstraints_operator_bool = R"doc(Implicit conversion operator to bool.)doc";
 
+static const char *__doc_slp_ExitStatus = R"doc(Solver exit status. Negative values indicate failure.)doc";
+
+static const char *__doc_slp_ExitStatus_CALLBACK_REQUESTED_STOP =
+R"doc(The solver returned its solution so far after the user requested a
+stop.)doc";
+
+static const char *__doc_slp_ExitStatus_DIVERGING_ITERATES =
+R"doc(The solver encountered diverging primal iterates xₖ and/or sₖ and gave
+up.)doc";
+
+static const char *__doc_slp_ExitStatus_FACTORIZATION_FAILED = R"doc(The linear system factorization failed.)doc";
+
+static const char *__doc_slp_ExitStatus_LINE_SEARCH_FAILED =
+R"doc(The backtracking line search failed, and the problem isn't locally
+infeasible.)doc";
+
+static const char *__doc_slp_ExitStatus_LOCALLY_INFEASIBLE =
+R"doc(The solver determined the problem to be locally infeasible and gave
+up.)doc";
+
+static const char *__doc_slp_ExitStatus_MAX_ITERATIONS_EXCEEDED =
+R"doc(The solver returned its solution so far after exceeding the maximum
+number of iterations.)doc";
+
+static const char *__doc_slp_ExitStatus_NONFINITE_INITIAL_COST_OR_CONSTRAINTS =
+R"doc(The solver encountered nonfinite initial cost or constraints and gave
+up.)doc";
+
+static const char *__doc_slp_ExitStatus_SOLVED_TO_ACCEPTABLE_TOLERANCE =
+R"doc(Solved the problem to an acceptable tolerance, but not the desired
+one.)doc";
+
+static const char *__doc_slp_ExitStatus_SUCCESS = R"doc(Solved the problem to the desired tolerance.)doc";
+
+static const char *__doc_slp_ExitStatus_TIMEOUT =
+R"doc(The solver returned its solution so far after exceeding the maximum
+elapsed wall clock time.)doc";
+
+static const char *__doc_slp_ExitStatus_TOO_FEW_DOFS = R"doc(The solver determined the problem to be overconstrained and gave up.)doc";
+
 static const char *__doc_slp_ExpressionType =
 R"doc(Expression type.
 
@@ -207,6 +247,22 @@ static const char *__doc_slp_InequalityConstraints_constraints = R"doc(A vector 
 
 static const char *__doc_slp_InequalityConstraints_operator_bool = R"doc(Implicit conversion operator to bool.)doc";
 
+static const char *__doc_slp_IterationInfo = R"doc(Solver iteration information exposed to a user callback.)doc";
+
+static const char *__doc_slp_IterationInfo_A_e = R"doc(The equality constraint Jacobian.)doc";
+
+static const char *__doc_slp_IterationInfo_A_i = R"doc(The inequality constraint Jacobian.)doc";
+
+static const char *__doc_slp_IterationInfo_H = R"doc(The Hessian of the Lagrangian.)doc";
+
+static const char *__doc_slp_IterationInfo_g = R"doc(The gradient of the cost function.)doc";
+
+static const char *__doc_slp_IterationInfo_iteration = R"doc(The solver iteration.)doc";
+
+static const char *__doc_slp_IterationInfo_s = R"doc(The inequality constraint slack variables.)doc";
+
+static const char *__doc_slp_IterationInfo_x = R"doc(The decision variables.)doc";
+
 static const char *__doc_slp_Jacobian =
 R"doc(This class calculates the Jacobian of a vector of variables with
 respect to a vector of variables.
@@ -278,7 +334,9 @@ R"doc(The result of a multistart solve.
 Template parameter ``DecisionVariables``:
     The type containing the decision variable initial guess.)doc";
 
-static const char *__doc_slp_MultistartResult_status = R"doc(The solver status.)doc";
+static const char *__doc_slp_MultistartResult_cost = R"doc(The solution's cost.)doc";
+
+static const char *__doc_slp_MultistartResult_status = R"doc(The solver exit status.)doc";
 
 static const char *__doc_slp_MultistartResult_variables = R"doc(The decision variables.)doc";
 
@@ -496,6 +554,56 @@ Parameter ``upper_bound``:
     The upper bound that inputs must always be below. Must be shaped
     (num_inputs)x1.)doc";
 
+static const char *__doc_slp_Options = R"doc(Solver options.)doc";
+
+static const char *__doc_slp_Options_acceptable_tolerance =
+R"doc(The solver will stop once the error is below this tolerance for
+`acceptable_iterations` iterations. This is useful in cases where the
+solver might not be able to achieve the desired level of accuracy due
+to floating-point round-off.)doc";
+
+static const char *__doc_slp_Options_diagnostics =
+R"doc(Enables diagnostic prints.
+
+<table> <tr> <th>Heading</th> <th>Description</th> </tr> <tr>
+<td>iter</td> <td>Iteration number</td> </tr> <tr> <td>type</td>
+<td>Iteration type (normal, accepted second-order correction, rejected
+second-order correction)</td> </tr> <tr> <td>time (ms)</td>
+<td>Duration of iteration in milliseconds</td> </tr> <tr>
+<td>error</td> <td>Error estimate</td> </tr> <tr> <td>cost</td>
+<td>Cost function value at current iterate</td> </tr> <tr>
+<td>infeas.</td> <td>Constraint infeasibility at current iterate</td>
+</tr> <tr> <td>complement.</td> <td>Complementary slackness at current
+iterate (sᵀz)</td> </tr> <tr> <td>μ</td> <td>Barrier parameter</td>
+</tr> <tr> <td>reg</td> <td>Iteration matrix regularization</td> </tr>
+<tr> <td>primal α</td> <td>Primal step size</td> </tr> <tr> <td>dual
+α</td> <td>Dual step size</td> </tr> <tr> <td>↩</td> <td>Number of
+line search backtracks</td> </tr> </table>)doc";
+
+static const char *__doc_slp_Options_feasible_ipm =
+R"doc(Enables the feasible interior-point method. When the inequality
+constraints are all feasible, step sizes are reduced when necessary to
+prevent them becoming infeasible again. This is useful when parts of
+the problem are ill-conditioned in infeasible regions (e.g., square
+root of a negative value). This can slow or prevent progress toward a
+solution though, so only enable it if necessary.)doc";
+
+static const char *__doc_slp_Options_max_acceptable_iterations =
+R"doc(The solver will stop once the error is below `acceptable_tolerance`
+for this many iterations.)doc";
+
+static const char *__doc_slp_Options_max_iterations = R"doc(The maximum number of solver iterations before returning a solution.)doc";
+
+static const char *__doc_slp_Options_spy =
+R"doc(Enables writing sparsity patterns of H, Aₑ, and Aᵢ to files named
+H.spy, A_e.spy, and A_i.spy respectively during solve.
+
+Use tools/spy.py to plot them.)doc";
+
+static const char *__doc_slp_Options_timeout = R"doc(The maximum elapsed wall clock time before returning a solution.)doc";
+
+static const char *__doc_slp_Options_tolerance = R"doc(The solver will stop once the error is below this tolerance.)doc";
+
 static const char *__doc_slp_Problem =
 R"doc(This class allows the user to pose a constrained nonlinear
 optimization problem in natural mathematical notation and solve it.
@@ -535,6 +643,12 @@ Parameter ``callback``:
 
 static const char *__doc_slp_Problem_clear_callbacks = R"doc(Clears the registered callbacks.)doc";
 
+static const char *__doc_slp_Problem_cost_function_type =
+R"doc(Returns the cost function's type.
+
+Returns:
+    The cost function's type.)doc";
+
 static const char *__doc_slp_Problem_decision_variable =
 R"doc(Create a decision variable in the optimization problem.
 
@@ -552,6 +666,18 @@ Parameter ``cols``:
 
 Returns:
     A matrix of decision variables in the optimization problem.)doc";
+
+static const char *__doc_slp_Problem_equality_constraint_type =
+R"doc(Returns the type of the highest order equality constraint.
+
+Returns:
+    The type of the highest order equality constraint.)doc";
+
+static const char *__doc_slp_Problem_inequality_constraint_type =
+R"doc(Returns the type of the highest order inequality constraint.
+
+Returns:
+    The type of the highest order inequality constraint.)doc";
 
 static const char *__doc_slp_Problem_m_callbacks = R"doc()doc";
 
@@ -609,8 +735,8 @@ static const char *__doc_slp_Problem_solve =
 R"doc(Solve the optimization problem. The solution will be stored in the
 original variables used to construct the problem.
 
-Parameter ``config``:
-    Configuration options for the solver.
+Parameter ``options``:
+    Solver options.
 
 Returns:
     The solver status.)doc";
@@ -706,126 +832,6 @@ static const char *__doc_slp_Slice_step = R"doc(Step.)doc";
 
 static const char *__doc_slp_Slice_stop = R"doc(Stop index (exclusive).)doc";
 
-static const char *__doc_slp_SolverConfig = R"doc(Solver configuration.)doc";
-
-static const char *__doc_slp_SolverConfig_acceptable_tolerance =
-R"doc(The solver will stop once the error is below this tolerance for
-`acceptable_iterations` iterations. This is useful in cases where the
-solver might not be able to achieve the desired level of accuracy due
-to floating-point round-off.)doc";
-
-static const char *__doc_slp_SolverConfig_diagnostics =
-R"doc(Enables diagnostic prints.
-
-<table> <tr> <th>Heading</th> <th>Description</th> </tr> <tr>
-<td>iter</td> <td>Iteration number</td> </tr> <tr> <td>type</td>
-<td>Iteration type (normal, accepted second-order correction, rejected
-second-order correction)</td> </tr> <tr> <td>time (ms)</td>
-<td>Duration of iteration in milliseconds</td> </tr> <tr>
-<td>error</td> <td>Error estimate</td> </tr> <tr> <td>cost</td>
-<td>Cost function value at current iterate</td> </tr> <tr>
-<td>infeas.</td> <td>Constraint infeasibility at current iterate</td>
-</tr> <tr> <td>complement.</td> <td>Complementary slackness at current
-iterate (sᵀz)</td> </tr> <tr> <td>μ</td> <td>Barrier parameter</td>
-</tr> <tr> <td>reg</td> <td>Iteration matrix regularization</td> </tr>
-<tr> <td>primal α</td> <td>Primal step size</td> </tr> <tr> <td>dual
-α</td> <td>Dual step size</td> </tr> <tr> <td>↩</td> <td>Number of
-line search backtracks</td> </tr> </table>)doc";
-
-static const char *__doc_slp_SolverConfig_feasible_ipm =
-R"doc(Enables the feasible interior-point method. When the inequality
-constraints are all feasible, step sizes are reduced when necessary to
-prevent them becoming infeasible again. This is useful when parts of
-the problem are ill-conditioned in infeasible regions (e.g., square
-root of a negative value). This can slow or prevent progress toward a
-solution though, so only enable it if necessary.)doc";
-
-static const char *__doc_slp_SolverConfig_max_acceptable_iterations =
-R"doc(The solver will stop once the error is below `acceptable_tolerance`
-for this many iterations.)doc";
-
-static const char *__doc_slp_SolverConfig_max_iterations = R"doc(The maximum number of solver iterations before returning a solution.)doc";
-
-static const char *__doc_slp_SolverConfig_spy =
-R"doc(Enables writing sparsity patterns of H, Aₑ, and Aᵢ to files named
-H.spy, A_e.spy, and A_i.spy respectively during solve.
-
-Use tools/spy.py to plot them.)doc";
-
-static const char *__doc_slp_SolverConfig_timeout = R"doc(The maximum elapsed wall clock time before returning a solution.)doc";
-
-static const char *__doc_slp_SolverConfig_tolerance = R"doc(The solver will stop once the error is below this tolerance.)doc";
-
-static const char *__doc_slp_SolverExitCondition = R"doc(Solver exit condition.)doc";
-
-static const char *__doc_slp_SolverExitCondition_CALLBACK_REQUESTED_STOP =
-R"doc(The solver returned its solution so far after the user requested a
-stop.)doc";
-
-static const char *__doc_slp_SolverExitCondition_DIVERGING_ITERATES =
-R"doc(The solver encountered diverging primal iterates xₖ and/or sₖ and gave
-up.)doc";
-
-static const char *__doc_slp_SolverExitCondition_FACTORIZATION_FAILED = R"doc(The linear system factorization failed.)doc";
-
-static const char *__doc_slp_SolverExitCondition_LINE_SEARCH_FAILED =
-R"doc(The backtracking line search failed, and the problem isn't locally
-infeasible.)doc";
-
-static const char *__doc_slp_SolverExitCondition_LOCALLY_INFEASIBLE =
-R"doc(The solver determined the problem to be locally infeasible and gave
-up.)doc";
-
-static const char *__doc_slp_SolverExitCondition_MAX_ITERATIONS_EXCEEDED =
-R"doc(The solver returned its solution so far after exceeding the maximum
-number of iterations.)doc";
-
-static const char *__doc_slp_SolverExitCondition_NONFINITE_INITIAL_COST_OR_CONSTRAINTS =
-R"doc(The solver encountered nonfinite initial cost or constraints and gave
-up.)doc";
-
-static const char *__doc_slp_SolverExitCondition_SOLVED_TO_ACCEPTABLE_TOLERANCE =
-R"doc(Solved the problem to an acceptable tolerance, but not the desired
-one.)doc";
-
-static const char *__doc_slp_SolverExitCondition_SUCCESS = R"doc(Solved the problem to the desired tolerance.)doc";
-
-static const char *__doc_slp_SolverExitCondition_TIMEOUT =
-R"doc(The solver returned its solution so far after exceeding the maximum
-elapsed wall clock time.)doc";
-
-static const char *__doc_slp_SolverExitCondition_TOO_FEW_DOFS = R"doc(The solver determined the problem to be overconstrained and gave up.)doc";
-
-static const char *__doc_slp_SolverIterationInfo = R"doc(Solver iteration information exposed to a user callback.)doc";
-
-static const char *__doc_slp_SolverIterationInfo_A_e = R"doc(The equality constraint Jacobian.)doc";
-
-static const char *__doc_slp_SolverIterationInfo_A_i = R"doc(The inequality constraint Jacobian.)doc";
-
-static const char *__doc_slp_SolverIterationInfo_H = R"doc(The Hessian of the Lagrangian.)doc";
-
-static const char *__doc_slp_SolverIterationInfo_g = R"doc(The gradient of the cost function.)doc";
-
-static const char *__doc_slp_SolverIterationInfo_iteration = R"doc(The solver iteration.)doc";
-
-static const char *__doc_slp_SolverIterationInfo_s = R"doc(The inequality constraint slack variables.)doc";
-
-static const char *__doc_slp_SolverIterationInfo_x = R"doc(The decision variables.)doc";
-
-static const char *__doc_slp_SolverStatus =
-R"doc(Return value of Problem::Solve() containing the cost function and
-constraint types and solver's exit condition.)doc";
-
-static const char *__doc_slp_SolverStatus_cost = R"doc(The solution's cost.)doc";
-
-static const char *__doc_slp_SolverStatus_cost_function_type = R"doc(The cost function type detected by the solver.)doc";
-
-static const char *__doc_slp_SolverStatus_equality_constraint_type = R"doc(The equality constraint type detected by the solver.)doc";
-
-static const char *__doc_slp_SolverStatus_exit_condition = R"doc(The solver's exit condition.)doc";
-
-static const char *__doc_slp_SolverStatus_inequality_constraint_type = R"doc(The inequality constraint type detected by the solver.)doc";
-
 static const char *__doc_slp_TimestepMethod = R"doc(Enum describing the type of system timestep.)doc";
 
 static const char *__doc_slp_TimestepMethod_FIXED = R"doc(The timestep is a fixed constant.)doc";
@@ -843,10 +849,10 @@ Parameter ``type``:
     Expression type.)doc";
 
 static const char *__doc_slp_ToMessage_2 =
-R"doc(Returns user-readable message corresponding to the exit condition.
+R"doc(Returns user-readable message corresponding to the solver exit status.
 
-Parameter ``exit_condition``:
-    Solver exit condition.)doc";
+Parameter ``exit_status``:
+    Solver exit status.)doc";
 
 static const char *__doc_slp_TranscriptionMethod = R"doc(Enum describing an OCP transcription method.)doc";
 
@@ -2987,14 +2993,14 @@ Parameter ``f``:
 Parameter ``callbacks``:
     The list of user callbacks.
 
-Parameter ``config``:
-    Configuration options for the solver.
+Parameter ``options``:
+    Solver options.
 
 Parameter ``x``:
     The initial guess and output location for the decision variables.
 
-Parameter ``status``:
-    The solver status.)doc";
+Returns:
+    The exit status.)doc";
 
 static const char *__doc_slp_log =
 R"doc(std::log() for Variables.
@@ -3041,14 +3047,14 @@ Parameter ``f``:
 Parameter ``callbacks``:
     The list of user callbacks.
 
-Parameter ``config``:
-    Configuration options for the solver.
+Parameter ``options``:
+    Solver options.
 
 Parameter ``x``:
     The initial guess and output location for the decision variables.
 
-Parameter ``status``:
-    The solver status.)doc";
+Returns:
+    The exit status.)doc";
 
 static const char *__doc_slp_operator_eq =
 R"doc(Equality operator that returns an equality constraint for two
@@ -3183,14 +3189,14 @@ Parameter ``f``:
 Parameter ``callbacks``:
     The list of user callbacks.
 
-Parameter ``config``:
-    Configuration options for the solver.
+Parameter ``options``:
+    Solver options.
 
 Parameter ``x``:
     The initial guess and output location for the decision variables.
 
-Parameter ``status``:
-    The solver status.)doc";
+Returns:
+    The exit status.)doc";
 
 static const char *__doc_slp_sqrt =
 R"doc(std::sqrt() for Variables.

@@ -112,8 +112,8 @@ int run_benchmarks_and_log(
             }
             problem.solve();
           } else {
-            auto status = problem.solve({.diagnostics = diagnostics});
-            if (status.exit_condition != slp::SolverExitCondition::SUCCESS) {
+            if (problem.solve({.diagnostics = diagnostics}) !=
+                slp::ExitStatus::SUCCESS) {
               std::print(stderr, " FAIL ");
             }
           }

@@ -72,12 +72,11 @@ TEST_CASE("Problem - Differential drive", "[Problem]") {
   }
   problem.minimize(J);
 
-  auto status = problem.solve({.diagnostics = true});
+  CHECK(problem.cost_function_type() == slp::ExpressionType::QUADRATIC);
+  CHECK(problem.equality_constraint_type() == slp::ExpressionType::NONLINEAR);
+  CHECK(problem.inequality_constraint_type() == slp::ExpressionType::LINEAR);
 
-  CHECK(status.cost_function_type == slp::ExpressionType::QUADRATIC);
-  CHECK(status.equality_constraint_type == slp::ExpressionType::NONLINEAR);
-  CHECK(status.inequality_constraint_type == slp::ExpressionType::LINEAR);
-  CHECK(status.exit_condition == slp::SolverExitCondition::SUCCESS);
+  CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
   // Verify initial state
   CHECK(X.value(0, 0) == Catch::Approx(x_initial(0)).margin(1e-8));

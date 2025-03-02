@@ -8,9 +8,9 @@
 #include <Eigen/Core>
 
 #include "sleipnir/autodiff/variable.hpp"
-#include "sleipnir/optimization/solver_config.hpp"
-#include "sleipnir/optimization/solver_iteration_info.hpp"
-#include "sleipnir/optimization/solver_status.hpp"
+#include "sleipnir/optimization/solver/exit_status.hpp"
+#include "sleipnir/optimization/solver/iteration_info.hpp"
+#include "sleipnir/optimization/solver/options.hpp"
 #include "sleipnir/util/symbol_exports.hpp"
 
 namespace slp {
@@ -35,16 +35,16 @@ are the inequality constraints.
 @param[in] inequality_constraints The list of inequality constraints.
 @param[in] f The cost function.
 @param[in] callbacks The list of user callbacks.
-@param[in] config Configuration options for the solver.
+@param[in] options Solver options.
 @param[in,out] x The initial guess and output location for the decision
   variables.
-@param[out] status The solver status.
+@return The exit status.
 */
-SLEIPNIR_DLLEXPORT void interior_point(
+SLEIPNIR_DLLEXPORT ExitStatus interior_point(
     std::span<Variable> decision_variables,
     std::span<Variable> equality_constraints,
     std::span<Variable> inequality_constraints, Variable& f,
-    std::span<std::function<bool(const SolverIterationInfo& info)>> callbacks,
-    const SolverConfig& config, Eigen::VectorXd& x, SolverStatus* status);
+    std::span<std::function<bool(const IterationInfo& info)>> callbacks,
+    const Options& options, Eigen::VectorXd& x);
 
 }  // namespace slp
