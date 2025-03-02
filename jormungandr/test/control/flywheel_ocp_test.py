@@ -33,16 +33,16 @@ def flywheel_test(
 
     r = 10.0
 
-    solver = OCP(1, 1, dt, N, F, dynamics_type, TimestepMethod.FIXED, method)
-    solver.constrain_initial_state(0.0)
-    solver.set_upper_input_bound(12)
-    solver.set_lower_input_bound(-12)
+    problem = OCP(1, 1, dt, N, F, dynamics_type, TimestepMethod.FIXED, method)
+    problem.constrain_initial_state(0.0)
+    problem.set_upper_input_bound(12)
+    problem.set_lower_input_bound(-12)
 
     # Set up cost
     r_mat = np.full((1, N + 1), r)
-    solver.minimize((r_mat - solver.X()) @ (r_mat - solver.X()).T)
+    problem.minimize((r_mat - problem.X()) @ (r_mat - problem.X()).T)
 
-    status = solver.solve(diagnostics=True)
+    status = problem.solve(diagnostics=True)
 
     assert status.cost_function_type == ExpressionType.QUADRATIC
     assert status.equality_constraint_type == ExpressionType.LINEAR
@@ -58,14 +58,14 @@ def flywheel_test(
     u_ss = 1.0 / B_discrete * (1.0 - A_discrete) * r
 
     # Verify initial state
-    assert solver.X().value(0, 0) == pytest.approx(0.0, abs=1e-8)
+    assert problem.X().value(0, 0) == pytest.approx(0.0, abs=1e-8)
 
     # Verify solution
     x = 0.0
     u = 0.0
     for k in range(N):
         # Verify state
-        assert solver.X().value(0, k) == pytest.approx(x, abs=1e-2)
+        assert problem.X().value(0, k) == pytest.approx(x, abs=1e-2)
 
         # Determine expected input for this timestep
         error = r - x
@@ -80,34 +80,34 @@ def flywheel_test(
         if (
             k > 0
             and k < N - 1
-            and near(12.0, solver.U().value(0, k - 1), 1e-2)
-            and near(u_ss, solver.U().value(0, k + 1), 1e-2)
+            and near(12.0, problem.U().value(0, k - 1), 1e-2)
+            and near(u_ss, problem.U().value(0, k + 1), 1e-2)
         ):
             # If control input is transitioning between 12 and u_ss, ensure it's
             # within (u_ss, 12)
-            assert solver.U().value(0, k) >= u_ss
-            assert solver.U().value(0, k) <= 12.0
+            assert problem.U().value(0, k) >= u_ss
+            assert problem.U().value(0, k) <= 12.0
         else:
             if method == TranscriptionMethod.DIRECT_COLLOCATION:
                 # The tolerance is large because the trajectory is represented by a
                 # spline, and splines chatter when transitioning quickly between
                 # steady-states.
-                assert solver.U().value(0, k) == pytest.approx(u, abs=2.0)
+                assert problem.U().value(0, k) == pytest.approx(u, abs=2.0)
             else:
-                assert solver.U().value(0, k) == pytest.approx(u, abs=1e-4)
+                assert problem.U().value(0, k) == pytest.approx(u, abs=1e-4)
 
         # Project state forward
         x = A_discrete * x + B_discrete * u
 
     # Verify final state
-    assert solver.X().value(0, N) == pytest.approx(r, abs=1e-6)
+    assert problem.X().value(0, N) == pytest.approx(r, abs=1e-6)
 
     # Log states for offline viewing
     with open("Flywheel states.csv", "w") as f:
         f.write("Time (s),Velocity (rad/s)\n")
 
         for k in range(N + 1):
-            f.write(f"{k * dt},{solver.X().value(0, k)}\n")
+            f.write(f"{k * dt},{problem.X().value(0, k)}\n")
 
     # Log inputs for offline viewing
     with open("Flywheel inputs.csv", "w") as f:
@@ -115,7 +115,7 @@ def flywheel_test(
 
         for k in range(N + 1):
             if k < N:
-                f.write(f"{k * dt},{solver.U().value(0, k)}\n")
+                f.write(f"{k * dt},{problem.U().value(0, k)}\n")
             else:
                 f.write(f"{k * dt},0.0\n")
 
