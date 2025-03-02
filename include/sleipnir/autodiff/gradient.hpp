@@ -32,7 +32,7 @@ class SLEIPNIR_DLLEXPORT Gradient {
    * @param wrt Variable with respect to which to compute the gradient.
    */
   Gradient(Variable variable, Variable wrt) noexcept
-      : m_jacobian{std::move(variable), VariableMatrix{std::move(wrt)}} {}
+      : m_jacobian{std::move(variable), std::move(wrt)} {}
 
   /**
    * Constructs a Gradient object.
@@ -42,7 +42,7 @@ class SLEIPNIR_DLLEXPORT Gradient {
    *   gradient.
    */
   Gradient(Variable variable, SleipnirMatrixLike auto wrt) noexcept
-      : m_jacobian{std::move(variable), std::move(wrt)} {}
+      : m_jacobian{VariableMatrix{std::move(variable)}, std::move(wrt)} {}
 
   /**
    * Returns the gradient as a VariableMatrix.

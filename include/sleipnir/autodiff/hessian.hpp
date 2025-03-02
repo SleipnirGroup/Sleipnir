@@ -34,6 +34,15 @@ class SLEIPNIR_DLLEXPORT Hessian {
    * Constructs a Hessian object.
    *
    * @param variable Variable of which to compute the Hessian.
+   * @param wrt Variable with respect to which to compute the Hessian.
+   */
+  Hessian(Variable variable, Variable wrt) noexcept
+      : Hessian{std::move(variable), VariableMatrix{std::move(wrt)}} {}
+
+  /**
+   * Constructs a Hessian object.
+   *
+   * @param variable Variable of which to compute the Hessian.
    * @param wrt Vector of variables with respect to which to compute the
    *   Hessian.
    */
