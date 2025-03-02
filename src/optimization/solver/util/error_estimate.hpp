@@ -9,7 +9,7 @@
 
 // See docs/algorithms.md#Works_cited for citation definitions
 
-namespace sleipnir {
+namespace slp {
 
 /**
  * Returns the error estimate using the KKT conditions for Newton's method.
@@ -128,4 +128,4 @@ inline double error_estimate(const Eigen::VectorXd& g,
                    (c_i - s).lpNorm<Eigen::Infinity>()});
 }
 
-}  // namespace sleipnir
+}  // namespace slp

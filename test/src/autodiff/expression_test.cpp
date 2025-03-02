@@ -7,14 +7,14 @@
 
 #include "catch_string_converters.hpp"
 
-using sleipnir::detail::ConstExpression;
-using sleipnir::detail::make_expression_ptr;
+using slp::detail::ConstExpression;
+using slp::detail::make_expression_ptr;
 
 TEST_CASE("Expression - Default constructor", "[Expression]") {
   auto expr = make_expression_ptr<ConstExpression>();
 
   CHECK(expr->val == 0.0);
-  CHECK(expr->type() == sleipnir::ExpressionType::CONSTANT);
+  CHECK(expr->type() == slp::ExpressionType::CONSTANT);
 }
 
 TEST_CASE("Expression - Zero", "[Expression]") {

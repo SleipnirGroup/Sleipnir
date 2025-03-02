@@ -8,7 +8,7 @@
 #include "sleipnir/util/setup_profiler.hpp"
 #include "sleipnir/util/solve_profiler.hpp"
 
-namespace sleipnir {
+namespace slp {
 
 /**
  * Starts a profiler in the constructor and stops it in the destructor.
@@ -75,4 +75,4 @@ class ScopedProfiler {
   bool m_active = true;
 };
 
-}  // namespace sleipnir
+}  // namespace slp

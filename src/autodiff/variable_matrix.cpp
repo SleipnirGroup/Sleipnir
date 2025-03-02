@@ -4,7 +4,7 @@
 
 #include <Eigen/QR>
 
-namespace sleipnir {
+namespace slp {
 
 VariableMatrix solve(const VariableMatrix& A, const VariableMatrix& B) {
   // m x n * n x p = m x p
@@ -24,7 +24,7 @@ VariableMatrix solve(const VariableMatrix& A, const VariableMatrix& B) {
     const auto& c = A(1, 0);
     const auto& d = A(1, 1);
 
-    sleipnir::VariableMatrix adj_A{{d, -b}, {-c, a}};
+    slp::VariableMatrix adj_A{{d, -b}, {-c, a}};
     auto det_A = a * d - b * c;
     return adj_A / det_A * B;
   } else if (A.rows() == 3 && A.cols() == 3) {
@@ -72,9 +72,9 @@ VariableMatrix solve(const VariableMatrix& A, const VariableMatrix& B) {
     auto adj_A10 = fg - di;
     auto adj_A20 = dh - eg;
 
-    sleipnir::VariableMatrix adj_A{{adj_A00, ch - bi, bf - ce},
-                                   {adj_A10, ai - cg, cd - af},
-                                   {adj_A20, bg - ah, ae - bd}};
+    slp::VariableMatrix adj_A{{adj_A00, ch - bi, bf - ce},
+                              {adj_A10, ai - cg, cd - af},
+                              {adj_A20, bg - ah, ae - bd}};
     auto det_A = a * adj_A00 + b * adj_A10 + c * adj_A20;
     return adj_A / det_A * B;
   } else if (A.rows() == 4 && A.cols() == 4) {
@@ -220,10 +220,10 @@ VariableMatrix solve(const VariableMatrix& A, const VariableMatrix& B) {
     auto adj_A32 = -afo + agn + beo - bgm - cen + cfm;
     auto adj_A33 = afk - agj - bek + bgi + cej - cfi;
 
-    sleipnir::VariableMatrix adj_A{{adj_A00, adj_A01, adj_A02, adj_A03},
-                                   {adj_A10, adj_A11, adj_A12, adj_A13},
-                                   {adj_A20, adj_A21, adj_A22, adj_A23},
-                                   {adj_A30, adj_A31, adj_A32, adj_A33}};
+    slp::VariableMatrix adj_A{{adj_A00, adj_A01, adj_A02, adj_A03},
+                              {adj_A10, adj_A11, adj_A12, adj_A13},
+                              {adj_A20, adj_A21, adj_A22, adj_A23},
+                              {adj_A30, adj_A31, adj_A32, adj_A33}};
     auto det_A = a * adj_A00 + b * adj_A10 + c * adj_A20 + d * adj_A30;
     return adj_A / det_A * B;
   } else {
@@ -256,4 +256,4 @@ VariableMatrix solve(const VariableMatrix& A, const VariableMatrix& B) {
   }
 }
 
-}  // namespace sleipnir
+}  // namespace slp

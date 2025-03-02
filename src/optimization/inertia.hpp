@@ -6,7 +6,7 @@
 
 #include <Eigen/Core>
 
-namespace sleipnir {
+namespace slp {
 
 /**
  * Represents the inertia of a matrix (the number of positive, negative, and
@@ -52,4 +52,4 @@ class Inertia {
   bool operator==(const Inertia&) const = default;
 };
 
-}  // namespace sleipnir
+}  // namespace slp

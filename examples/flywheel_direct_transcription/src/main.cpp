@@ -20,7 +20,7 @@ int main() {
   Eigen::Matrix<double, 1, 1> A{std::exp(-dt.count())};
   Eigen::Matrix<double, 1, 1> B{1.0 - std::exp(-dt.count())};
 
-  sleipnir::OptimizationProblem problem;
+  slp::OptimizationProblem problem;
   auto X = problem.decision_variable(1, N + 1);
   auto U = problem.decision_variable(1, N);
 
@@ -36,7 +36,7 @@ int main() {
 
   // Cost function - minimize error
   Eigen::Matrix<double, 1, 1> r{10.0};
-  sleipnir::Variable J = 0.0;
+  slp::Variable J = 0.0;
   for (int k = 0; k < N + 1; ++k) {
     J += (r - X.col(k)).T() * (r - X.col(k));
   }

@@ -30,16 +30,15 @@ constexpr double to_ms(const std::chrono::duration<Rep, Period>& duration) {
  * setup time and solve time for each, then writes them to a CSV file.
  *
  * @tparam Problem The optimization problem's type (casadi::Opti or
- *   sleipnir::OptimizationProblem).
+ *   slp::OptimizationProblem).
  * @param results The CSV file to which to write the results.
  * @param setup A function that returns an optimization problem instance.
  * @param solve A function that takes an optimization problem instance and
  *   solves it.
  */
 template <typename Problem>
-void run_benchmark(std::ofstream& results,
-                   sleipnir::function_ref<Problem()> setup,
-                   sleipnir::function_ref<void(Problem& problem)> solve) {
+void run_benchmark(std::ofstream& results, slp::function_ref<Problem()> setup,
+                   slp::function_ref<void(Problem& problem)> solve) {
   // Record setup time
   auto setup_start_time = std::chrono::steady_clock::now();
   auto problem = setup();
@@ -69,7 +68,7 @@ void run_benchmark(std::ofstream& results,
  * timesteps within the time horizon.
  *
  * @tparam Problem The optimization problem's type (casadi::Opti or
- *   sleipnir::OptimizationProblem).
+ *   slp::OptimizationProblem).
  * @param filename Results CSV filename.
  * @param diagnostics Whether to enable diagnostic prints.
  * @param T The time horizon of the optimization problem.
@@ -85,8 +84,7 @@ template <typename Problem>
 int run_benchmarks_and_log(
     std::string_view filename, bool diagnostics,
     std::chrono::duration<double> T, std::span<int> sample_sizes_to_test,
-    sleipnir::function_ref<Problem(std::chrono::duration<double> dt, int N)>
-        setup) {
+    slp::function_ref<Problem(std::chrono::duration<double> dt, int N)> setup) {
   std::ofstream results{std::string{filename}};
   if (!results.is_open()) {
     return 1;
@@ -115,8 +113,7 @@ int run_benchmarks_and_log(
             problem.solve();
           } else {
             auto status = problem.solve({.diagnostics = diagnostics});
-            if (status.exit_condition !=
-                sleipnir::SolverExitCondition::SUCCESS) {
+            if (status.exit_condition != slp::SolverExitCondition::SUCCESS) {
               std::print(stderr, " FAIL ");
             }
           }

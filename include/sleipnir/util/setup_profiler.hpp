@@ -6,7 +6,7 @@
 #include <string>
 #include <string_view>
 
-namespace sleipnir {
+namespace slp {
 
 /**
  * Records the number of profiler measurements (start/stop pairs) and the
@@ -58,4 +58,4 @@ class SetupProfiler {
   std::chrono::duration<double> m_setup_duration{0.0};
 };
 
-}  // namespace sleipnir
+}  // namespace slp

@@ -6,8 +6,8 @@
 #include "catch_string_converters.hpp"
 
 TEST_CASE("Variable - Default constructor", "[Variable]") {
-  sleipnir::Variable a;
+  slp::Variable a;
 
   CHECK(a.value() == 0.0);
-  CHECK(a.type() == sleipnir::ExpressionType::LINEAR);
+  CHECK(a.type() == slp::ExpressionType::LINEAR);
 }

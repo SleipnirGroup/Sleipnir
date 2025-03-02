@@ -13,7 +13,7 @@
 #include "sleipnir/optimization/solver_status.hpp"
 #include "sleipnir/util/symbol_exports.hpp"
 
-namespace sleipnir {
+namespace slp {
 
 /**
 Finds the optimal solution to a nonlinear program using Newton's method.
@@ -39,4 +39,4 @@ SLEIPNIR_DLLEXPORT void newton(
     std::span<std::function<bool(const SolverIterationInfo& info)>> callbacks,
     const SolverConfig& config, Eigen::VectorXd& x, SolverStatus* status);
 
-}  // namespace sleipnir
+}  // namespace slp

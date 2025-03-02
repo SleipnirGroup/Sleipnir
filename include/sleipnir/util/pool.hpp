@@ -8,7 +8,7 @@
 #include "sleipnir/util/small_vector.hpp"
 #include "sleipnir/util/symbol_exports.hpp"
 
-namespace sleipnir {
+namespace slp {
 
 /**
  * This class implements a pool memory resource.
@@ -193,4 +193,4 @@ PoolAllocator<T> global_pool_allocator() {
   return PoolAllocator<T>{&global_pool_resource()};
 }
 
-}  // namespace sleipnir
+}  // namespace slp

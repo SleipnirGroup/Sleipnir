@@ -7,7 +7,7 @@
 
 #include "sleipnir/util/symbol_exports.hpp"
 
-namespace sleipnir {
+namespace slp {
 
 /**
  * Solver configuration.
@@ -107,4 +107,4 @@ struct SLEIPNIR_DLLEXPORT SolverConfig {
   bool spy = false;
 };
 
-}  // namespace sleipnir
+}  // namespace slp

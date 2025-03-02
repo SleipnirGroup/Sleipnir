@@ -10,8 +10,8 @@
 #include "cmdline_args.hpp"
 #include "rk4.hpp"
 
-sleipnir::VariableMatrix cart_pole_dynamics(const sleipnir::VariableMatrix& x,
-                                            const sleipnir::VariableMatrix& u) {
+slp::VariableMatrix cart_pole_dynamics(const slp::VariableMatrix& x,
+                                       const slp::VariableMatrix& u) {
   // https://underactuated.mit.edu/acrobot.html#cart_pole
   //
   // θ is CCW+ measured from negative y-axis.
@@ -47,7 +47,7 @@ sleipnir::VariableMatrix cart_pole_dynamics(const sleipnir::VariableMatrix& x,
 
   //        [ m_c + m_p  m_p l cosθ]
   // M(q) = [m_p l cosθ    m_p l²  ]
-  sleipnir::VariableMatrix M{2, 2};
+  slp::VariableMatrix M{2, 2};
   M(0, 0) = m_c + m_p;
   M(0, 1) = m_p * l * cos(theta);  // NOLINT
   M(1, 0) = m_p * l * cos(theta);  // NOLINT
@@ -55,7 +55,7 @@ sleipnir::VariableMatrix cart_pole_dynamics(const sleipnir::VariableMatrix& x,
 
   //           [0  −m_p lθ̇ sinθ]
   // C(q, q̇) = [0       0      ]
-  sleipnir::VariableMatrix C{2, 2};
+  slp::VariableMatrix C{2, 2};
   C(0, 0) = 0;
   C(0, 1) = -m_p * l * thetadot * sin(theta);  // NOLINT
   C(1, 0) = 0;
@@ -63,7 +63,7 @@ sleipnir::VariableMatrix cart_pole_dynamics(const sleipnir::VariableMatrix& x,
 
   //          [     0      ]
   // τ_g(q) = [-m_p gl sinθ]
-  sleipnir::VariableMatrix tau_g{2, 1};
+  slp::VariableMatrix tau_g{2, 1};
   tau_g[0] = 0;
   tau_g[1] = -m_p * g * l * sin(theta);  // NOLINT
 
@@ -72,21 +72,21 @@ sleipnir::VariableMatrix cart_pole_dynamics(const sleipnir::VariableMatrix& x,
   Eigen::Matrix<double, 2, 1> B{{1}, {0}};
 
   // q̈ = M⁻¹(q)(τ_g(q) − C(q, q̇)q̇ + Bu)
-  sleipnir::VariableMatrix qddot{4, 1};
+  slp::VariableMatrix qddot{4, 1};
   qddot.segment(0, 2) = qdot;
-  qddot.segment(2, 2) = sleipnir::solve(M, tau_g - C * qdot + B * u);
+  qddot.segment(2, 2) = slp::solve(M, tau_g - C * qdot + B * u);
   return qddot;
 }
 
-sleipnir::OptimizationProblem cart_pole_problem(
-    std::chrono::duration<double> dt, int N) {
+slp::OptimizationProblem cart_pole_problem(std::chrono::duration<double> dt,
+                                           int N) {
   constexpr double u_max = 20.0;  // N
   constexpr double d_max = 2.0;   // m
 
   constexpr Eigen::Vector<double, 4> x_initial{{0.0, 0.0, 0.0, 0.0}};
   constexpr Eigen::Vector<double, 4> x_final{{1.0, std::numbers::pi, 0.0, 0.0}};
 
-  sleipnir::OptimizationProblem problem;
+  slp::OptimizationProblem problem;
 
   // x = [q, q̇]ᵀ = [x, θ, ẋ, θ̇]ᵀ
   auto X = problem.decision_variable(4, N + 1);
@@ -118,14 +118,14 @@ sleipnir::OptimizationProblem cart_pole_problem(
 
   // Dynamics constraints - RK4 integration
   for (int k = 0; k < N; ++k) {
-    problem.subject_to(X.col(k + 1) ==
-                       rk4<decltype(cart_pole_dynamics),
-                           sleipnir::VariableMatrix, sleipnir::VariableMatrix>(
-                           cart_pole_dynamics, X.col(k), U.col(k), dt));
+    problem.subject_to(
+        X.col(k + 1) ==
+        rk4<decltype(cart_pole_dynamics), slp::VariableMatrix,
+            slp::VariableMatrix>(cart_pole_dynamics, X.col(k), U.col(k), dt));
   }
 
   // Minimize sum squared inputs
-  sleipnir::Variable J = 0.0;
+  slp::Variable J = 0.0;
   for (int k = 0; k < N; ++k) {
     J += U.col(k).T() * U.col(k);
   }

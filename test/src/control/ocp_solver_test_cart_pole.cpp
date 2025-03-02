@@ -19,8 +19,8 @@
 TEST_CASE("OCPSolver - Cart-pole", "[OCPSolver]") {
   using namespace std::chrono_literals;
 
-  sleipnir::scope_exit exit{
-      [] { CHECK(sleipnir::global_pool_resource().blocks_in_use() == 0u); }};
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
   constexpr std::chrono::duration<double> T = 5s;
   constexpr std::chrono::duration<double> dt = 50ms;
@@ -32,10 +32,10 @@ TEST_CASE("OCPSolver - Cart-pole", "[OCPSolver]") {
   constexpr Eigen::Vector<double, 4> x_initial{{0.0, 0.0, 0.0, 0.0}};
   constexpr Eigen::Vector<double, 4> x_final{{1.0, std::numbers::pi, 0.0, 0.0}};
 
-  sleipnir::OCPSolver problem(
-      4, 1, dt, N, cart_pole_dynamics, sleipnir::DynamicsType::EXPLICIT_ODE,
-      sleipnir::TimestepMethod::VARIABLE_SINGLE,
-      sleipnir::TranscriptionMethod::DIRECT_COLLOCATION);
+  slp::OCPSolver problem(4, 1, dt, N, cart_pole_dynamics,
+                         slp::DynamicsType::EXPLICIT_ODE,
+                         slp::TimestepMethod::VARIABLE_SINGLE,
+                         slp::TranscriptionMethod::DIRECT_COLLOCATION);
 
   // x = [q, q̇]ᵀ = [x, θ, ẋ, θ̇]ᵀ
   auto X = problem.X();
@@ -58,9 +58,9 @@ TEST_CASE("OCPSolver - Cart-pole", "[OCPSolver]") {
   problem.constrain_final_state(x_final);
 
   // Cart position constraints
-  problem.for_each_step([&](const sleipnir::VariableMatrix& x,
+  problem.for_each_step([&](const slp::VariableMatrix& x,
                             [[maybe_unused]]
-                            const sleipnir::VariableMatrix& u) {
+                            const slp::VariableMatrix& u) {
     problem.subject_to(x[0] >= 0.0);
     problem.subject_to(x[0] <= d_max);
   });
@@ -70,7 +70,7 @@ TEST_CASE("OCPSolver - Cart-pole", "[OCPSolver]") {
   problem.set_upper_input_bound(u_max);
 
   // Minimize sum squared inputs
-  sleipnir::Variable J = 0.0;
+  slp::Variable J = 0.0;
   for (int k = 0; k < N; ++k) {
     J += U.col(k).T() * U.col(k);
   }
@@ -78,13 +78,13 @@ TEST_CASE("OCPSolver - Cart-pole", "[OCPSolver]") {
 
   auto status = problem.solve({.diagnostics = true});
 
-  CHECK(status.cost_function_type == sleipnir::ExpressionType::QUADRATIC);
-  CHECK(status.equality_constraint_type == sleipnir::ExpressionType::NONLINEAR);
-  CHECK(status.inequality_constraint_type == sleipnir::ExpressionType::LINEAR);
+  CHECK(status.cost_function_type == slp::ExpressionType::QUADRATIC);
+  CHECK(status.equality_constraint_type == slp::ExpressionType::NONLINEAR);
+  CHECK(status.inequality_constraint_type == slp::ExpressionType::LINEAR);
 
   // FIXME: Fails with "factorization failed"
   CHECK(status.exit_condition ==
-        sleipnir::SolverExitCondition::FACTORIZATION_FAILED);
+        slp::SolverExitCondition::FACTORIZATION_FAILED);
   SKIP("Fails with \"factorization failed\"");
 
   // Verify initial state

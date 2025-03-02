@@ -17,8 +17,8 @@
 TEST_CASE("OCPSolver - Differential drive", "[OCPSolver]") {
   using namespace std::chrono_literals;
 
-  sleipnir::scope_exit exit{
-      [] { CHECK(sleipnir::global_pool_resource().blocks_in_use() == 0u); }};
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
   constexpr int N = 50;
 
@@ -28,11 +28,10 @@ TEST_CASE("OCPSolver - Differential drive", "[OCPSolver]") {
   constexpr Eigen::Matrix<double, 2, 1> u_min{{-12.0, -12.0}};
   constexpr Eigen::Matrix<double, 2, 1> u_max{{12.0, 12.0}};
 
-  sleipnir::OCPSolver problem(
-      5, 2, min_timestep, N, differential_drive_dynamics,
-      sleipnir::DynamicsType::EXPLICIT_ODE,
-      sleipnir::TimestepMethod::VARIABLE_SINGLE,
-      sleipnir::TranscriptionMethod::DIRECT_TRANSCRIPTION);
+  slp::OCPSolver problem(5, 2, min_timestep, N, differential_drive_dynamics,
+                         slp::DynamicsType::EXPLICIT_ODE,
+                         slp::TimestepMethod::VARIABLE_SINGLE,
+                         slp::TranscriptionMethod::DIRECT_TRANSCRIPTION);
 
   // Seed the min time formulation with lerp between waypoints
   for (int i = 0; i < N + 1; ++i) {
@@ -54,10 +53,10 @@ TEST_CASE("OCPSolver - Differential drive", "[OCPSolver]") {
 
   auto status = problem.solve({.max_iterations = 1000, .diagnostics = true});
 
-  CHECK(status.cost_function_type == sleipnir::ExpressionType::LINEAR);
-  CHECK(status.equality_constraint_type == sleipnir::ExpressionType::NONLINEAR);
-  CHECK(status.inequality_constraint_type == sleipnir::ExpressionType::LINEAR);
-  CHECK(status.exit_condition == sleipnir::SolverExitCondition::SUCCESS);
+  CHECK(status.cost_function_type == slp::ExpressionType::LINEAR);
+  CHECK(status.equality_constraint_type == slp::ExpressionType::NONLINEAR);
+  CHECK(status.inequality_constraint_type == slp::ExpressionType::LINEAR);
+  CHECK(status.exit_condition == slp::SolverExitCondition::SUCCESS);
 
   auto X = problem.X();
   auto U = problem.U();

@@ -13,7 +13,7 @@
 
 #include "sleipnir/util/symbol_exports.hpp"
 
-namespace sleipnir {
+namespace slp {
 
 /**
  * Writes the sparsity pattern of a sparse matrix to a file.
@@ -119,4 +119,4 @@ class SLEIPNIR_DLLEXPORT Spy {
   }
 };
 
-}  // namespace sleipnir
+}  // namespace slp

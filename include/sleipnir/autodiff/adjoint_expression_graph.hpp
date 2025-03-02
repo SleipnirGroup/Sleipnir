@@ -12,7 +12,7 @@
 #include "sleipnir/autodiff/variable_matrix.hpp"
 #include "sleipnir/util/small_vector.hpp"
 
-namespace sleipnir::detail {
+namespace slp::detail {
 
 /**
  * This class is an adaptor type that performs value updates of an expression's
@@ -171,4 +171,4 @@ class AdjointExpressionGraph {
   small_vector<int> m_col_list;
 };
 
-}  // namespace sleipnir::detail
+}  // namespace slp::detail

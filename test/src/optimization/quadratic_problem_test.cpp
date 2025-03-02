@@ -7,7 +7,7 @@
 #include "catch_string_converters.hpp"
 
 TEST_CASE("quadratic_problem - Unconstrained 1D", "[quadratic_problem]") {
-  sleipnir::OptimizationProblem problem;
+  slp::OptimizationProblem problem;
 
   auto x = problem.decision_variable();
   x.set_value(2.0);
@@ -16,17 +16,17 @@ TEST_CASE("quadratic_problem - Unconstrained 1D", "[quadratic_problem]") {
 
   auto status = problem.solve({.diagnostics = true});
 
-  CHECK(status.cost_function_type == sleipnir::ExpressionType::QUADRATIC);
-  CHECK(status.equality_constraint_type == sleipnir::ExpressionType::NONE);
-  CHECK(status.inequality_constraint_type == sleipnir::ExpressionType::NONE);
-  CHECK(status.exit_condition == sleipnir::SolverExitCondition::SUCCESS);
+  CHECK(status.cost_function_type == slp::ExpressionType::QUADRATIC);
+  CHECK(status.equality_constraint_type == slp::ExpressionType::NONE);
+  CHECK(status.inequality_constraint_type == slp::ExpressionType::NONE);
+  CHECK(status.exit_condition == slp::SolverExitCondition::SUCCESS);
 
   CHECK(x.value() == Catch::Approx(3.0).margin(1e-6));
 }
 
 TEST_CASE("quadratic_problem - Unconstrained 2D", "[quadratic_problem]") {
   {
-    sleipnir::OptimizationProblem problem;
+    slp::OptimizationProblem problem;
 
     auto x = problem.decision_variable();
     x.set_value(1.0);
@@ -37,17 +37,17 @@ TEST_CASE("quadratic_problem - Unconstrained 2D", "[quadratic_problem]") {
 
     auto status = problem.solve({.diagnostics = true});
 
-    CHECK(status.cost_function_type == sleipnir::ExpressionType::QUADRATIC);
-    CHECK(status.equality_constraint_type == sleipnir::ExpressionType::NONE);
-    CHECK(status.inequality_constraint_type == sleipnir::ExpressionType::NONE);
-    CHECK(status.exit_condition == sleipnir::SolverExitCondition::SUCCESS);
+    CHECK(status.cost_function_type == slp::ExpressionType::QUADRATIC);
+    CHECK(status.equality_constraint_type == slp::ExpressionType::NONE);
+    CHECK(status.inequality_constraint_type == slp::ExpressionType::NONE);
+    CHECK(status.exit_condition == slp::SolverExitCondition::SUCCESS);
 
     CHECK(x.value() == Catch::Approx(0.0).margin(1e-6));
     CHECK(y.value() == Catch::Approx(0.0).margin(1e-6));
   }
 
   {
-    sleipnir::OptimizationProblem problem;
+    slp::OptimizationProblem problem;
 
     auto x = problem.decision_variable(2);
     x[0].set_value(1.0);
@@ -57,10 +57,10 @@ TEST_CASE("quadratic_problem - Unconstrained 2D", "[quadratic_problem]") {
 
     auto status = problem.solve({.diagnostics = true});
 
-    CHECK(status.cost_function_type == sleipnir::ExpressionType::QUADRATIC);
-    CHECK(status.equality_constraint_type == sleipnir::ExpressionType::NONE);
-    CHECK(status.inequality_constraint_type == sleipnir::ExpressionType::NONE);
-    CHECK(status.exit_condition == sleipnir::SolverExitCondition::SUCCESS);
+    CHECK(status.cost_function_type == slp::ExpressionType::QUADRATIC);
+    CHECK(status.equality_constraint_type == slp::ExpressionType::NONE);
+    CHECK(status.inequality_constraint_type == slp::ExpressionType::NONE);
+    CHECK(status.exit_condition == slp::SolverExitCondition::SUCCESS);
 
     CHECK(x.value(0) == Catch::Approx(0.0).margin(1e-6));
     CHECK(x.value(1) == Catch::Approx(0.0).margin(1e-6));
@@ -107,7 +107,7 @@ TEST_CASE("quadratic_problem - Equality-constrained", "[quadratic_problem]") {
   // [y] = [ 6]
   // [λ]   [ 6]
   {
-    sleipnir::OptimizationProblem problem;
+    slp::OptimizationProblem problem;
 
     auto x = problem.decision_variable();
     auto y = problem.decision_variable();
@@ -118,17 +118,17 @@ TEST_CASE("quadratic_problem - Equality-constrained", "[quadratic_problem]") {
 
     auto status = problem.solve({.diagnostics = true});
 
-    CHECK(status.cost_function_type == sleipnir::ExpressionType::QUADRATIC);
-    CHECK(status.equality_constraint_type == sleipnir::ExpressionType::LINEAR);
-    CHECK(status.inequality_constraint_type == sleipnir::ExpressionType::NONE);
-    CHECK(status.exit_condition == sleipnir::SolverExitCondition::SUCCESS);
+    CHECK(status.cost_function_type == slp::ExpressionType::QUADRATIC);
+    CHECK(status.equality_constraint_type == slp::ExpressionType::LINEAR);
+    CHECK(status.inequality_constraint_type == slp::ExpressionType::NONE);
+    CHECK(status.exit_condition == slp::SolverExitCondition::SUCCESS);
 
     CHECK(x.value() == Catch::Approx(18.0).margin(1e-5));
     CHECK(y.value() == Catch::Approx(6.0).margin(1e-5));
   }
 
   {
-    sleipnir::OptimizationProblem problem;
+    slp::OptimizationProblem problem;
 
     auto x = problem.decision_variable(2);
     x[0].set_value(1.0);
@@ -140,10 +140,10 @@ TEST_CASE("quadratic_problem - Equality-constrained", "[quadratic_problem]") {
 
     auto status = problem.solve({.diagnostics = true});
 
-    CHECK(status.cost_function_type == sleipnir::ExpressionType::QUADRATIC);
-    CHECK(status.equality_constraint_type == sleipnir::ExpressionType::LINEAR);
-    CHECK(status.inequality_constraint_type == sleipnir::ExpressionType::NONE);
-    CHECK(status.exit_condition == sleipnir::SolverExitCondition::SUCCESS);
+    CHECK(status.cost_function_type == slp::ExpressionType::QUADRATIC);
+    CHECK(status.equality_constraint_type == slp::ExpressionType::LINEAR);
+    CHECK(status.inequality_constraint_type == slp::ExpressionType::NONE);
+    CHECK(status.exit_condition == slp::SolverExitCondition::SUCCESS);
 
     CHECK(x.value(0) == Catch::Approx(3.0).margin(1e-5));
     CHECK(x.value(1) == Catch::Approx(3.0).margin(1e-5));

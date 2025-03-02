@@ -19,7 +19,7 @@ Named after Odin's eight-legged horse from Norse mythology, Sleipnir is a linear
 
 int main() {
   // Find the x, y pair with the largest product for which x + 3y = 36
-  sleipnir::OptimizationProblem problem;
+  slp::OptimizationProblem problem;
 
   auto x = problem.decision_variable();
   auto y = problem.decision_variable();

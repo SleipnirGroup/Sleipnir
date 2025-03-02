@@ -18,8 +18,8 @@
 TEST_CASE("OptimizationProblem - Differential drive", "[OptimizationProblem]") {
   using namespace std::chrono_literals;
 
-  sleipnir::scope_exit exit{
-      [] { CHECK(sleipnir::global_pool_resource().blocks_in_use() == 0u); }};
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
   constexpr std::chrono::duration<double> T = 5s;
   constexpr std::chrono::duration<double> dt = 50ms;
@@ -30,7 +30,7 @@ TEST_CASE("OptimizationProblem - Differential drive", "[OptimizationProblem]") {
   constexpr Eigen::Vector<double, 5> x_initial{{0.0, 0.0, 0.0, 0.0, 0.0}};
   constexpr Eigen::Vector<double, 5> x_final{{1.0, 1.0, 0.0, 0.0, 0.0}};
 
-  sleipnir::OptimizationProblem problem;
+  slp::OptimizationProblem problem;
 
   // x = [x, y, heading, left velocity, right velocity]ᵀ
   auto X = problem.decision_variable(5, N + 1);
@@ -60,13 +60,13 @@ TEST_CASE("OptimizationProblem - Differential drive", "[OptimizationProblem]") {
   for (int k = 0; k < N; ++k) {
     problem.subject_to(
         X.col(k + 1) ==
-        rk4<decltype(differential_drive_dynamics), sleipnir::VariableMatrix,
-            sleipnir::VariableMatrix>(differential_drive_dynamics, X.col(k),
-                                      U.col(k), dt));
+        rk4<decltype(differential_drive_dynamics), slp::VariableMatrix,
+            slp::VariableMatrix>(differential_drive_dynamics, X.col(k),
+                                 U.col(k), dt));
   }
 
   // Minimize sum squared states and inputs
-  sleipnir::Variable J = 0.0;
+  slp::Variable J = 0.0;
   for (int k = 0; k < N; ++k) {
     J += X.col(k).T() * X.col(k) + U.col(k).T() * U.col(k);
   }
@@ -74,10 +74,10 @@ TEST_CASE("OptimizationProblem - Differential drive", "[OptimizationProblem]") {
 
   auto status = problem.solve({.diagnostics = true});
 
-  CHECK(status.cost_function_type == sleipnir::ExpressionType::QUADRATIC);
-  CHECK(status.equality_constraint_type == sleipnir::ExpressionType::NONLINEAR);
-  CHECK(status.inequality_constraint_type == sleipnir::ExpressionType::LINEAR);
-  CHECK(status.exit_condition == sleipnir::SolverExitCondition::SUCCESS);
+  CHECK(status.cost_function_type == slp::ExpressionType::QUADRATIC);
+  CHECK(status.equality_constraint_type == slp::ExpressionType::NONLINEAR);
+  CHECK(status.inequality_constraint_type == slp::ExpressionType::LINEAR);
+  CHECK(status.exit_condition == slp::SolverExitCondition::SUCCESS);
 
   // Verify initial state
   CHECK(X.value(0, 0) == Catch::Approx(x_initial(0)).margin(1e-8));

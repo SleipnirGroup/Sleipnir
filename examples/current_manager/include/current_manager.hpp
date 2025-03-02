@@ -37,7 +37,7 @@ class CurrentManager {
   std::vector<double> calculate(std::span<const double> desired_currents);
 
  private:
-  sleipnir::OptimizationProblem m_problem;
-  sleipnir::VariableMatrix m_desired_currents;
-  sleipnir::VariableMatrix m_allocated_currents;
+  slp::OptimizationProblem m_problem;
+  slp::VariableMatrix m_desired_currents;
+  slp::VariableMatrix m_allocated_currents;
 };

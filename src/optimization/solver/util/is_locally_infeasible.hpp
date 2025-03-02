@@ -7,7 +7,7 @@
 
 // See docs/algorithms.md#Works_cited for citation definitions
 
-namespace sleipnir {
+namespace slp {
 
 /**
  * Returns true if the problem's equality constraints are locally infeasible.
@@ -60,4 +60,4 @@ inline bool is_inequality_locally_infeasible(
   return false;
 }
 
-}  // namespace sleipnir
+}  // namespace slp

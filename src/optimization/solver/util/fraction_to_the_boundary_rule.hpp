@@ -6,7 +6,7 @@
 
 // See docs/algorithms.md#Works_cited for citation definitions
 
-namespace sleipnir {
+namespace slp {
 
 /**
  * Applies fraction-to-the-boundary rule to a variable and its iterate, then
@@ -42,4 +42,4 @@ inline double fraction_to_the_boundary_rule(
   return α;
 }
 
-}  // namespace sleipnir
+}  // namespace slp

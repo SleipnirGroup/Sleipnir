@@ -31,7 +31,7 @@
 #include "sleipnir/util/print.hpp"
 #endif
 
-namespace sleipnir {
+namespace slp {
 
 /**
  * This class allows the user to pose a constrained nonlinear optimization
@@ -270,26 +270,25 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     if (config.diagnostics) {
       // Print possible solver exit conditions
-      sleipnir::println("User-configured solver exit conditions:");
-      sleipnir::println("  ↳ error below {}", config.tolerance);
-      sleipnir::println("  ↳ error below {} for {} iterations",
-                        config.acceptable_tolerance,
-                        config.max_acceptable_iterations);
+      slp::println("User-configured solver exit conditions:");
+      slp::println("  ↳ error below {}", config.tolerance);
+      slp::println("  ↳ error below {} for {} iterations",
+                   config.acceptable_tolerance,
+                   config.max_acceptable_iterations);
       if (!m_callbacks.empty()) {
-        sleipnir::println("  ↳ user callback requested stop");
+        slp::println("  ↳ user callback requested stop");
       }
       if (std::isfinite(config.max_iterations)) {
-        sleipnir::println("  ↳ executed {} iterations", config.max_iterations);
+        slp::println("  ↳ executed {} iterations", config.max_iterations);
       }
       if (std::isfinite(config.timeout.count())) {
-        sleipnir::println("  ↳ {} elapsed", config.timeout);
+        slp::println("  ↳ {} elapsed", config.timeout);
       }
 
       if (m_decision_variables.size() == 1) {
-        sleipnir::println("\n1 decision variable");
+        slp::println("\n1 decision variable");
       } else {
-        sleipnir::println("\n{} decision variables",
-                          m_decision_variables.size());
+        slp::println("\n{} decision variables", m_decision_variables.size());
       }
 
       auto print_constraint_types =
@@ -302,38 +301,37 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
                      type_counts, std::array{"empty", "constant", "linear",
                                              "quadratic", "nonlinear"})) {
               if (count > 0) {
-                sleipnir::println("  ↳ {} {}", count, name);
+                slp::println("  ↳ {} {}", count, name);
               }
             }
           };
 
       // Print constraint types
       if (m_equality_constraints.size() == 1) {
-        sleipnir::println("1 equality constraint");
+        slp::println("1 equality constraint");
       } else {
-        sleipnir::println("{} equality constraints",
-                          m_equality_constraints.size());
+        slp::println("{} equality constraints", m_equality_constraints.size());
       }
       print_constraint_types(m_equality_constraints);
       if (m_inequality_constraints.size() == 1) {
-        sleipnir::println("1 inequality constraint");
+        slp::println("1 inequality constraint");
       } else {
-        sleipnir::println("{} inequality constraints",
-                          m_inequality_constraints.size());
+        slp::println("{} inequality constraints",
+                     m_inequality_constraints.size());
       }
       print_constraint_types(m_inequality_constraints);
     }
 
     auto print_chosen_solver = [](std::string_view solver_name,
                                   const SolverStatus& status) {
-      sleipnir::println("\nUsing {} solver due to:", solver_name);
-      sleipnir::println("  ↳ {} cost function",
-                        ToMessage(status.cost_function_type));
-      sleipnir::println("  ↳ {} equality constraints",
-                        ToMessage(status.equality_constraint_type));
-      sleipnir::println("  ↳ {} inequality constraints",
-                        ToMessage(status.inequality_constraint_type));
-      sleipnir::println("");
+      slp::println("\nUsing {} solver due to:", solver_name);
+      slp::println("  ↳ {} cost function",
+                   ToMessage(status.cost_function_type));
+      slp::println("  ↳ {} equality constraints",
+                   ToMessage(status.equality_constraint_type));
+      slp::println("  ↳ {} inequality constraints",
+                   ToMessage(status.inequality_constraint_type));
+      slp::println("");
     };
 #endif
 
@@ -442,4 +440,4 @@ class SLEIPNIR_DLLEXPORT OptimizationProblem {
       m_callbacks;
 };
 
-}  // namespace sleipnir
+}  // namespace slp

@@ -14,7 +14,7 @@
 #include "sleipnir/util/function_ref.hpp"
 #include "sleipnir/util/symbol_exports.hpp"
 
-namespace sleipnir {
+namespace slp {
 
 /**
  * Performs 4th order Runge-Kutta integration of dx/dt = f(t, x, u) for dt.
@@ -468,4 +468,4 @@ class SLEIPNIR_DLLEXPORT OCPSolver : public OptimizationProblem {
   VariableMatrix m_DT;
 };
 
-}  // namespace sleipnir
+}  // namespace slp

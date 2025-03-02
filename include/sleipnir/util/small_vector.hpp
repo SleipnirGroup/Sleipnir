@@ -29,7 +29,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace sleipnir {
+namespace slp {
 
 namespace concepts {
 
@@ -4377,4 +4377,4 @@ small_vector(InputIt, InputIt, Allocator = Allocator())
     -> small_vector<typename std::iterator_traits<InputIt>::value_type,
                     InlineCapacity, Allocator>;
 
-}  // namespace sleipnir
+}  // namespace slp

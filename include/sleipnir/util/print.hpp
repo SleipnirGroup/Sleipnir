@@ -7,7 +7,7 @@
 #include <system_error>
 #include <utility>
 
-namespace sleipnir {
+namespace slp {
 
 /**
  * Wrapper around std::print() that squelches write failure exceptions.
@@ -53,4 +53,4 @@ inline void println(std::FILE* f, std::format_string<T...> fmt, T&&... args) {
   }
 }
 
-}  // namespace sleipnir
+}  // namespace slp

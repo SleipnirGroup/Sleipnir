@@ -16,8 +16,8 @@
 TEST_CASE("OptimizationProblem - Double integrator", "[OptimizationProblem]") {
   using namespace std::chrono_literals;
 
-  sleipnir::scope_exit exit{
-      [] { CHECK(sleipnir::global_pool_resource().blocks_in_use() == 0u); }};
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
   constexpr std::chrono::duration<double> T = 3.5s;
   constexpr std::chrono::duration<double> dt = 5ms;
@@ -25,7 +25,7 @@ TEST_CASE("OptimizationProblem - Double integrator", "[OptimizationProblem]") {
 
   constexpr double r = 2.0;  // m
 
-  sleipnir::OptimizationProblem problem;
+  slp::OptimizationProblem problem;
 
   // 2x1 state vector with N + 1 timesteps (includes last state)
   auto X = problem.decision_variable(2, N + 1);
@@ -62,18 +62,18 @@ TEST_CASE("OptimizationProblem - Double integrator", "[OptimizationProblem]") {
   problem.subject_to(U <= 1);
 
   // Cost function - minimize position error
-  sleipnir::Variable J = 0.0;
+  slp::Variable J = 0.0;
   for (int k = 0; k < N + 1; ++k) {
-    J += sleipnir::pow(r - X(0, k), 2);
+    J += slp::pow(r - X(0, k), 2);
   }
   problem.minimize(J);
 
   auto status = problem.solve({.diagnostics = true});
 
-  CHECK(status.cost_function_type == sleipnir::ExpressionType::QUADRATIC);
-  CHECK(status.equality_constraint_type == sleipnir::ExpressionType::LINEAR);
-  CHECK(status.inequality_constraint_type == sleipnir::ExpressionType::LINEAR);
-  CHECK(status.exit_condition == sleipnir::SolverExitCondition::SUCCESS);
+  CHECK(status.cost_function_type == slp::ExpressionType::QUADRATIC);
+  CHECK(status.equality_constraint_type == slp::ExpressionType::LINEAR);
+  CHECK(status.inequality_constraint_type == slp::ExpressionType::LINEAR);
+  CHECK(status.exit_condition == slp::SolverExitCondition::SUCCESS);
 
   Eigen::Matrix<double, 2, 2> A{{1.0, dt.count()}, {0.0, 1.0}};
   Eigen::Matrix<double, 2, 1> B{0.5 * dt.count() * dt.count(), dt.count()};

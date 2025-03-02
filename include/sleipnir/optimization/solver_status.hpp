@@ -6,7 +6,7 @@
 #include "sleipnir/optimization/solver_exit_condition.hpp"
 #include "sleipnir/util/symbol_exports.hpp"
 
-namespace sleipnir {
+namespace slp {
 
 /**
  * Return value of OptimizationProblem::Solve() containing the cost function and
@@ -29,4 +29,4 @@ struct SLEIPNIR_DLLEXPORT SolverStatus {
   double cost = 0.0;
 };
 
-}  // namespace sleipnir
+}  // namespace slp

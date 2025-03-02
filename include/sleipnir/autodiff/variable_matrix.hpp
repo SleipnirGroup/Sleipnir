@@ -21,7 +21,7 @@
 #include "sleipnir/util/small_vector.hpp"
 #include "sleipnir/util/symbol_exports.hpp"
 
-namespace sleipnir {
+namespace slp {
 
 /**
  * A matrix of autodiff variables.
@@ -1272,4 +1272,4 @@ SLEIPNIR_DLLEXPORT inline VariableMatrix block(
 SLEIPNIR_DLLEXPORT VariableMatrix solve(const VariableMatrix& A,
                                         const VariableMatrix& B);
 
-}  // namespace sleipnir
+}  // namespace slp

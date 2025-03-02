@@ -61,7 +61,7 @@ struct Step {
 
 }  // namespace
 
-namespace sleipnir {
+namespace slp {
 
 void interior_point(
     std::span<Variable> decision_variables,
@@ -816,4 +816,4 @@ void interior_point(
   }
 }
 
-}  // namespace sleipnir
+}  // namespace slp

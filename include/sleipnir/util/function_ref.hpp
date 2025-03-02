@@ -7,7 +7,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace sleipnir {
+namespace slp {
 
 template <class F>
 class function_ref;
@@ -113,4 +113,4 @@ constexpr void swap(function_ref<R(Args...)>& lhs,
 template <typename R, typename... Args>
 function_ref(R (*)(Args...)) -> function_ref<R(Args...)>;
 
-}  // namespace sleipnir
+}  // namespace slp

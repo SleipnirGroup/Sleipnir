@@ -8,15 +8,15 @@
 
 namespace nb = nanobind;
 
-namespace sleipnir {
+namespace slp {
 
 void bind_jacobian(nb::class_<Jacobian>& cls) {
   using namespace nb::literals;
 
   cls.def(nb::init<VariableMatrix, VariableMatrix>(), "variables"_a, "wrt"_a,
-          DOC(sleipnir, Jacobian, Jacobian));
-  cls.def("get", &Jacobian::get, DOC(sleipnir, Jacobian, get));
-  cls.def("value", &Jacobian::value, DOC(sleipnir, Jacobian, value));
+          DOC(slp, Jacobian, Jacobian));
+  cls.def("get", &Jacobian::get, DOC(slp, Jacobian, get));
+  cls.def("value", &Jacobian::value, DOC(slp, Jacobian, value));
 }
 
-}  // namespace sleipnir
+}  // namespace slp

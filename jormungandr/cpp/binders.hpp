@@ -18,7 +18,7 @@
 
 namespace nb = nanobind;
 
-namespace sleipnir {
+namespace slp {
 
 void bind_expression_type(nb::enum_<ExpressionType>& e);
 
@@ -45,4 +45,4 @@ void bind_ocp_solver(nb::enum_<TranscriptionMethod>& transcription_method,
                      nb::enum_<TimestepMethod>& timestep_method,
                      nb::class_<OCPSolver, OptimizationProblem>& cls);
 
-}  // namespace sleipnir
+}  // namespace slp

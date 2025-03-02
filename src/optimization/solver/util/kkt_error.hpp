@@ -7,7 +7,7 @@
 
 // See docs/algorithms.md#Works_cited for citation definitions
 
-namespace sleipnir {
+namespace slp {
 
 /**
  * Returns the KKT error for Newton's method.
@@ -84,4 +84,4 @@ inline double kkt_error(const Eigen::VectorXd& g,
          (S * z - μe).lpNorm<1>() + c_e.lpNorm<1>() + (c_i - s).lpNorm<1>();
 }
 
-}  // namespace sleipnir
+}  // namespace slp

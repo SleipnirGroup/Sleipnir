@@ -11,8 +11,8 @@
 
 TEST_CASE("constraints - Equality constraint boolean comparison",
           "[constraints]") {
-  using sleipnir::Variable;
-  using sleipnir::VariableMatrix;
+  using slp::Variable;
+  using slp::VariableMatrix;
 
   constexpr std::array args{std::tuple{1.0, 1.0}, std::tuple{1.0, 2.0},
                             std::tuple{2.0, 1.0}};
@@ -96,8 +96,8 @@ TEST_CASE("constraints - Equality constraint boolean comparison",
 // constraint
 TEST_CASE("constraints - Inequality constraint boolean comparisons",
           "[constraints]") {
-  using sleipnir::Variable;
-  using sleipnir::VariableMatrix;
+  using slp::Variable;
+  using slp::VariableMatrix;
 
   constexpr std::array args{std::tuple{1.0, 1.0}, std::tuple{1.0, 2.0},
                             std::tuple{2.0, 1.0}};
@@ -228,8 +228,8 @@ TEST_CASE("constraints - Inequality constraint boolean comparisons",
 }
 
 TEST_CASE("constraints - Equality constraint concatenation", "[constraints]") {
-  using sleipnir::EqualityConstraints;
-  using sleipnir::Variable;
+  using slp::EqualityConstraints;
+  using slp::Variable;
 
   EqualityConstraints eq1 = Variable{1.0} == Variable{1.0};
   EqualityConstraints eq2 = Variable{1.0} == Variable{2.0};
@@ -249,8 +249,8 @@ TEST_CASE("constraints - Equality constraint concatenation", "[constraints]") {
 
 TEST_CASE("constraints - Inequality constraint concatenation",
           "[constraints]") {
-  using sleipnir::InequalityConstraints;
-  using sleipnir::Variable;
+  using slp::InequalityConstraints;
+  using slp::Variable;
 
   InequalityConstraints ineq1 = Variable{2.0} < Variable{1.0};
   InequalityConstraints ineq2 = Variable{1.0} < Variable{2.0};

@@ -67,8 +67,8 @@ Eigen::Vector<double, 4> cart_pole_dynamics_double(
   return qddot;
 }
 
-sleipnir::VariableMatrix cart_pole_dynamics(const sleipnir::VariableMatrix& x,
-                                            const sleipnir::VariableMatrix& u) {
+slp::VariableMatrix cart_pole_dynamics(const slp::VariableMatrix& x,
+                                       const slp::VariableMatrix& u) {
   auto q = x.segment(0, 2);
   auto qdot = x.segment(2, 2);
   auto theta = q[1];
@@ -76,26 +76,26 @@ sleipnir::VariableMatrix cart_pole_dynamics(const sleipnir::VariableMatrix& x,
 
   //        [ m_c + m_p  m_p l cosθ]
   // M(q) = [m_p l cosθ    m_p l²  ]
-  sleipnir::VariableMatrix M{
+  slp::VariableMatrix M{
       {m_c + m_p, m_p * l * cos(theta)},              // NOLINT
       {m_p * l * cos(theta), m_p * std::pow(l, 2)}};  // NOLINT
 
   //           [0  −m_p lθ̇ sinθ]
   // C(q, q̇) = [0       0      ]
-  sleipnir::VariableMatrix C{{0, -m_p * l * thetadot * sin(theta)},  // NOLINT
-                             {0, 0}};
+  slp::VariableMatrix C{{0, -m_p * l * thetadot * sin(theta)},  // NOLINT
+                        {0, 0}};
 
   //          [     0      ]
   // τ_g(q) = [-m_p gl sinθ]
-  sleipnir::VariableMatrix tau_g{{0}, {-m_p * g * l * sin(theta)}};  // NOLINT
+  slp::VariableMatrix tau_g{{0}, {-m_p * g * l * sin(theta)}};  // NOLINT
 
   //     [1]
   // B = [0]
   constexpr Eigen::Matrix<double, 2, 1> B{{1}, {0}};
 
   // q̈ = M⁻¹(q)(τ_g(q) − C(q, q̇)q̇ + Bu)
-  sleipnir::VariableMatrix qddot{4};
+  slp::VariableMatrix qddot{4};
   qddot.segment(0, 2) = qdot;
-  qddot.segment(2, 2) = sleipnir::solve(M, tau_g - C * qdot + B * u);
+  qddot.segment(2, 2) = slp::solve(M, tau_g - C * qdot + B * u);
   return qddot;
 }

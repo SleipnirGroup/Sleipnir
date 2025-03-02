@@ -24,7 +24,7 @@
 #include "sleipnir/util/print.hpp"
 #endif
 
-namespace sleipnir {
+namespace slp {
 
 // Forward declarations for friend declarations in Variable
 namespace detail {
@@ -107,7 +107,7 @@ class SLEIPNIR_DLLEXPORT Variable {
       // operators both use it
       if (expr->args[0] != nullptr) {
         auto location = std::source_location::current();
-        sleipnir::println(
+        slp::println(
             stderr,
             "WARNING: {}:{}: {}: Modified the value of a dependent variable",
             location.file_name(), location.line(), location.function_name());
@@ -474,8 +474,7 @@ SLEIPNIR_DLLEXPORT inline Variable tanh(const Variable& x) {
  */
 SLEIPNIR_DLLEXPORT inline Variable hypot(const Variable& x, const Variable& y,
                                          const Variable& z) {
-  return Variable{sleipnir::sqrt(sleipnir::pow(x, 2) + sleipnir::pow(y, 2) +
-                                 sleipnir::pow(z, 2))};
+  return Variable{slp::sqrt(slp::pow(x, 2) + slp::pow(y, 2) + slp::pow(z, 2))};
 }
 
 /**
@@ -737,7 +736,7 @@ InequalityConstraints operator>=(LHS&& lhs, RHS&& rhs) {
   return InequalityConstraints{lhs, rhs};
 }
 
-}  // namespace sleipnir
+}  // namespace slp
 
 namespace Eigen {
 
@@ -745,13 +744,13 @@ namespace Eigen {
  * NumTraits specialization that allows instantiating Eigen types with Variable.
  */
 template <>
-struct NumTraits<sleipnir::Variable> : NumTraits<double> {
+struct NumTraits<slp::Variable> : NumTraits<double> {
   /// Real type.
-  using Real = sleipnir::Variable;
+  using Real = slp::Variable;
   /// Non-integer type.
-  using NonInteger = sleipnir::Variable;
+  using NonInteger = slp::Variable;
   /// Nested type.
-  using Nested = sleipnir::Variable;
+  using Nested = slp::Variable;
 
   /// Is complex.
   static constexpr int IsComplex = 0;

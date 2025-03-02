@@ -22,14 +22,13 @@ bool Near(double expected, double actual, double tolerance) {
 }
 }  // namespace
 
-void TestFlywheel(std::string test_name, double A, double B,
-                  const sleipnir::function_ref<sleipnir::VariableMatrix(
-                      const sleipnir::VariableMatrix& x,
-                      const sleipnir::VariableMatrix& u)>& F,
-                  sleipnir::DynamicsType dynamics_type,
-                  sleipnir::TranscriptionMethod method) {
-  sleipnir::scope_exit exit{
-      [] { CHECK(sleipnir::global_pool_resource().blocks_in_use() == 0u); }};
+void TestFlywheel(
+    std::string test_name, double A, double B,
+    const slp::function_ref<slp::VariableMatrix(
+        const slp::VariableMatrix& x, const slp::VariableMatrix& u)>& F,
+    slp::DynamicsType dynamics_type, slp::TranscriptionMethod method) {
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
   constexpr std::chrono::duration<double> T = 5s;
   constexpr std::chrono::duration<double> dt = 5ms;
@@ -43,8 +42,8 @@ void TestFlywheel(std::string test_name, double A, double B,
 
   constexpr double r = 10.0;
 
-  sleipnir::OCPSolver solver(1, 1, dt, N, F, dynamics_type,
-                             sleipnir::TimestepMethod::FIXED, method);
+  slp::OCPSolver solver(1, 1, dt, N, F, dynamics_type,
+                        slp::TimestepMethod::FIXED, method);
   solver.constrain_initial_state(0.0);
   solver.set_upper_input_bound(12);
   solver.set_lower_input_bound(-12);
@@ -56,10 +55,10 @@ void TestFlywheel(std::string test_name, double A, double B,
 
   auto status = solver.solve({.diagnostics = true});
 
-  CHECK(status.cost_function_type == sleipnir::ExpressionType::QUADRATIC);
-  CHECK(status.equality_constraint_type == sleipnir::ExpressionType::LINEAR);
-  CHECK(status.inequality_constraint_type == sleipnir::ExpressionType::LINEAR);
-  CHECK(status.exit_condition == sleipnir::SolverExitCondition::SUCCESS);
+  CHECK(status.cost_function_type == slp::ExpressionType::QUADRATIC);
+  CHECK(status.equality_constraint_type == slp::ExpressionType::LINEAR);
+  CHECK(status.inequality_constraint_type == slp::ExpressionType::LINEAR);
+  CHECK(status.exit_condition == slp::SolverExitCondition::SUCCESS);
 
   // Voltage for steady-state velocity:
   //
@@ -97,7 +96,7 @@ void TestFlywheel(std::string test_name, double A, double B,
       CHECK(solver.U().value(0, k) >= u_ss);
       CHECK(solver.U().value(0, k) <= 12.0);
     } else {
-      if (method == sleipnir::TranscriptionMethod::DIRECT_COLLOCATION) {
+      if (method == slp::TranscriptionMethod::DIRECT_COLLOCATION) {
         // The tolerance is large because the trajectory is represented by a
         // spline, and splines chatter when transitioning quickly between
         // steady-states.
@@ -146,19 +145,19 @@ TEST_CASE("OCPSolver - Flywheel (explicit)", "[OCPSolver]") {
   constexpr double A = -1.0;
   constexpr double B = 1.0;
 
-  auto f_ode = [=](sleipnir::VariableMatrix x, sleipnir::VariableMatrix u) {
+  auto f_ode = [=](slp::VariableMatrix x, slp::VariableMatrix u) {
     return A * x + B * u;
   };
 
   TestFlywheel("OCPSolver Flywheel Explicit Collocation", A, B, f_ode,
-               sleipnir::DynamicsType::EXPLICIT_ODE,
-               sleipnir::TranscriptionMethod::DIRECT_COLLOCATION);
+               slp::DynamicsType::EXPLICIT_ODE,
+               slp::TranscriptionMethod::DIRECT_COLLOCATION);
   TestFlywheel("OCPSolver Flywheel Explicit Transcription", A, B, f_ode,
-               sleipnir::DynamicsType::EXPLICIT_ODE,
-               sleipnir::TranscriptionMethod::DIRECT_TRANSCRIPTION);
+               slp::DynamicsType::EXPLICIT_ODE,
+               slp::TranscriptionMethod::DIRECT_TRANSCRIPTION);
   TestFlywheel("OCPSolver Flywheel Explicit Single-Shooting", A, B, f_ode,
-               sleipnir::DynamicsType::EXPLICIT_ODE,
-               sleipnir::TranscriptionMethod::SINGLE_SHOOTING);
+               slp::DynamicsType::EXPLICIT_ODE,
+               slp::TranscriptionMethod::SINGLE_SHOOTING);
 }
 
 TEST_CASE("OCPSolver - Flywheel (discrete)", "[OCPSolver]") {
@@ -169,15 +168,14 @@ TEST_CASE("OCPSolver - Flywheel (discrete)", "[OCPSolver]") {
   double A_discrete = std::exp(A * dt.count());
   double B_discrete = (1.0 - A_discrete) * B;
 
-  auto f_discrete = [=](sleipnir::VariableMatrix x,
-                        sleipnir::VariableMatrix u) {
+  auto f_discrete = [=](slp::VariableMatrix x, slp::VariableMatrix u) {
     return A_discrete * x + B_discrete * u;
   };
 
   TestFlywheel("OCPSolver Flywheel Discrete Transcription", A, B, f_discrete,
-               sleipnir::DynamicsType::DISCRETE,
-               sleipnir::TranscriptionMethod::DIRECT_TRANSCRIPTION);
+               slp::DynamicsType::DISCRETE,
+               slp::TranscriptionMethod::DIRECT_TRANSCRIPTION);
   TestFlywheel("OCPSolver Flywheel Discrete Single-Shooting", A, B, f_discrete,
-               sleipnir::DynamicsType::DISCRETE,
-               sleipnir::TranscriptionMethod::SINGLE_SHOOTING);
+               slp::DynamicsType::DISCRETE,
+               slp::TranscriptionMethod::SINGLE_SHOOTING);
 }

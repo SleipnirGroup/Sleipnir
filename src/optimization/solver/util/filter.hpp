@@ -14,7 +14,7 @@
 
 // See docs/algorithms.md#Works_cited for citation definitions.
 
-namespace sleipnir {
+namespace slp {
 
 /**
  * Filter entry consisting of cost and constraint violation.
@@ -196,4 +196,4 @@ class Filter {
   small_vector<FilterEntry> m_filter;
 };
 
-}  // namespace sleipnir
+}  // namespace slp

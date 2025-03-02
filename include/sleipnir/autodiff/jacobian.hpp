@@ -15,7 +15,7 @@
 #include "sleipnir/util/solve_profiler.hpp"
 #include "sleipnir/util/symbol_exports.hpp"
 
-namespace sleipnir {
+namespace slp {
 
 /**
  * This class calculates the Jacobian of a vector of variables with respect to a
@@ -173,4 +173,4 @@ class SLEIPNIR_DLLEXPORT Jacobian {
   small_vector<SolveProfiler> m_profilers;
 };
 
-}  // namespace sleipnir
+}  // namespace slp

@@ -7,7 +7,7 @@
 
 namespace nb = nanobind;
 
-namespace sleipnir {
+namespace slp {
 
 void bind_solver_status(nb::class_<SolverStatus>& cls) {
   using namespace nb::literals;
@@ -20,16 +20,16 @@ void bind_solver_status(nb::class_<SolverStatus>& cls) {
           "inequality_constraint_type"_a = ExpressionType::NONE,
           "exit_condition"_a = SolverExitCondition::SUCCESS, "cost"_a = 0.0);
   cls.def_rw("cost_function_type", &SolverStatus::cost_function_type,
-             DOC(sleipnir, SolverStatus, cost_function_type));
+             DOC(slp, SolverStatus, cost_function_type));
   cls.def_rw("equality_constraint_type",
              &SolverStatus::equality_constraint_type,
-             DOC(sleipnir, SolverStatus, equality_constraint_type));
+             DOC(slp, SolverStatus, equality_constraint_type));
   cls.def_rw("inequality_constraint_type",
              &SolverStatus::inequality_constraint_type,
-             DOC(sleipnir, SolverStatus, inequality_constraint_type));
+             DOC(slp, SolverStatus, inequality_constraint_type));
   cls.def_rw("exit_condition", &SolverStatus::exit_condition,
-             DOC(sleipnir, SolverStatus, exit_condition));
-  cls.def_rw("cost", &SolverStatus::cost, DOC(sleipnir, SolverStatus, cost));
+             DOC(slp, SolverStatus, exit_condition));
+  cls.def_rw("cost", &SolverStatus::cost, DOC(slp, SolverStatus, cost));
 }
 
-}  // namespace sleipnir
+}  // namespace slp
