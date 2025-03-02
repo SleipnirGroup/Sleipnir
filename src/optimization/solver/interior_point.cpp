@@ -73,34 +73,23 @@ ExitStatus interior_point(
   small_vector<SetupProfiler> setup_profilers;
   setup_profilers.emplace_back("setup").start();
 
-  setup_profilers.emplace_back("  ↳ s,y,z setup").start();
-
-  // Map decision variables and constraints to VariableMatrices for Lagrangian
   VariableMatrix x_ad{decision_variables};
-  VariableMatrix c_e_ad{equality_constraints};
-  VariableMatrix c_i_ad{inequality_constraints};
 
-  // Create autodiff variables for s, y, and z for Lagrangian
-  VariableMatrix s_ad(inequality_constraints.size());
-  for (auto& s : s_ad) {
-    s.set_value(1.0);
-  }
-  VariableMatrix y_ad(equality_constraints.size());
-  for (auto& y : y_ad) {
-    y.set_value(0.0);
-  }
-  VariableMatrix z_ad(inequality_constraints.size());
-  for (auto& z : z_ad) {
-    z.set_value(1.0);
-  }
+  VariableMatrix c_e_ad{equality_constraints};
+  Eigen::VectorXd c_e = c_e_ad.value();
+
+  VariableMatrix c_i_ad{inequality_constraints};
+  Eigen::VectorXd c_i = c_i_ad.value();
+
+  setup_profilers.emplace_back("  ↳ ∇f(x) setup").start();
+
+  // Gradient of f ∇f
+  Gradient gradient_f{f, x_ad};
 
   setup_profilers.back().stop();
-  setup_profilers.emplace_back("  ↳ L setup").start();
+  setup_profilers.emplace_back("  ↳ ∇f(x) init solve").start();
 
-  // Lagrangian L
-  //
-  // L(xₖ, sₖ, yₖ, zₖ) = f(xₖ) − yₖᵀcₑ(xₖ) − zₖᵀ(cᵢ(xₖ) − sₖ)
-  auto L = f - (y_ad.T() * c_e_ad)[0] - (z_ad.T() * (c_i_ad - s_ad))[0];
+  Eigen::SparseVector<double> g = gradient_f.value();
 
   setup_profilers.back().stop();
   setup_profilers.emplace_back("  ↳ ∂cₑ/∂x setup").start();
@@ -135,15 +124,30 @@ ExitStatus interior_point(
   Eigen::SparseMatrix<double> A_i = jacobian_c_i.value();
 
   setup_profilers.back().stop();
-  setup_profilers.emplace_back("  ↳ ∇f(x) setup").start();
+  setup_profilers.emplace_back("  ↳ s,y,z setup").start();
 
-  // Gradient of f ∇f
-  Gradient gradient_f{f, x_ad};
+  // Create autodiff variables for s for Lagrangian
+  Eigen::VectorXd s = Eigen::VectorXd::Ones(inequality_constraints.size());
+  VariableMatrix s_ad(inequality_constraints.size());
+  s_ad.set_value(s);
+
+  // Create autodiff variables for y for Lagrangian
+  Eigen::VectorXd y = Eigen::VectorXd::Zero(equality_constraints.size());
+  VariableMatrix y_ad(equality_constraints.size());
+  y_ad.set_value(y);
+
+  // Create autodiff variables for z for Lagrangian
+  Eigen::VectorXd z = Eigen::VectorXd::Ones(inequality_constraints.size());
+  VariableMatrix z_ad(inequality_constraints.size());
+  z_ad.set_value(z);
 
   setup_profilers.back().stop();
-  setup_profilers.emplace_back("  ↳ ∇f(x) init solve").start();
+  setup_profilers.emplace_back("  ↳ L setup").start();
 
-  Eigen::SparseVector<double> g = gradient_f.value();
+  // Lagrangian L
+  //
+  // L(xₖ, sₖ, yₖ, zₖ) = f(xₖ) − yₖᵀcₑ(xₖ) − zₖᵀ(cᵢ(xₖ) − sₖ)
+  auto L = f - (y_ad.T() * c_e_ad)[0] - (z_ad.T() * (c_i_ad - s_ad))[0];
 
   setup_profilers.back().stop();
   setup_profilers.emplace_back("  ↳ ∇²ₓₓL setup").start();
@@ -160,12 +164,6 @@ ExitStatus interior_point(
 
   setup_profilers.back().stop();
   setup_profilers.emplace_back("  ↳ precondition ✓").start();
-
-  Eigen::VectorXd s = s_ad.value();
-  Eigen::VectorXd y = y_ad.value();
-  Eigen::VectorXd z = z_ad.value();
-  Eigen::VectorXd c_e = c_e_ad.value();
-  Eigen::VectorXd c_i = c_i_ad.value();
 
   // Check for overconstrained problem
   if (equality_constraints.size() > decision_variables.size()) {
