@@ -42,18 +42,18 @@ void TestFlywheel(
 
   constexpr double r = 10.0;
 
-  slp::OCP solver(1, 1, dt, N, F, dynamics_type, slp::TimestepMethod::FIXED,
-                  method);
-  solver.constrain_initial_state(0.0);
-  solver.set_upper_input_bound(12);
-  solver.set_lower_input_bound(-12);
+  slp::OCP problem(1, 1, dt, N, F, dynamics_type, slp::TimestepMethod::FIXED,
+                   method);
+  problem.constrain_initial_state(0.0);
+  problem.set_upper_input_bound(12);
+  problem.set_lower_input_bound(-12);
 
   // Set up cost
   Eigen::Matrix<double, 1, N + 1> r_mat =
       Eigen::Matrix<double, 1, N + 1>::Constant(r);
-  solver.minimize((r_mat - solver.X()) * (r_mat - solver.X()).T());
+  problem.minimize((r_mat - problem.X()) * (r_mat - problem.X()).T());
 
-  auto status = solver.solve({.diagnostics = true});
+  auto status = problem.solve({.diagnostics = true});
 
   CHECK(status.cost_function_type == slp::ExpressionType::QUADRATIC);
   CHECK(status.equality_constraint_type == slp::ExpressionType::LINEAR);
@@ -69,14 +69,14 @@ void TestFlywheel(
   double u_ss = 1.0 / B_discrete * (1.0 - A_discrete) * r;
 
   // Verify initial state
-  CHECK(solver.X().value(0, 0) == Catch::Approx(0.0).margin(1e-8));
+  CHECK(problem.X().value(0, 0) == Catch::Approx(0.0).margin(1e-8));
 
   // Verify solution
   double x = 0.0;
   double u = 0.0;
   for (int k = 0; k < N; ++k) {
     // Verify state
-    CHECK(solver.X().value(0, k) == Catch::Approx(x).margin(1e-2));
+    CHECK(problem.X().value(0, k) == Catch::Approx(x).margin(1e-2));
 
     // Determine expected input for this timestep
     double error = r - x;
@@ -89,20 +89,20 @@ void TestFlywheel(
     }
 
     // Verify input
-    if (k > 0 && k < N - 1 && Near(12.0, solver.U().value(0, k - 1), 1e-2) &&
-        Near(u_ss, solver.U().value(0, k + 1), 1e-2)) {
+    if (k > 0 && k < N - 1 && Near(12.0, problem.U().value(0, k - 1), 1e-2) &&
+        Near(u_ss, problem.U().value(0, k + 1), 1e-2)) {
       // If control input is transitioning between 12 and u_ss, ensure it's
       // within (u_ss, 12)
-      CHECK(solver.U().value(0, k) >= u_ss);
-      CHECK(solver.U().value(0, k) <= 12.0);
+      CHECK(problem.U().value(0, k) >= u_ss);
+      CHECK(problem.U().value(0, k) <= 12.0);
     } else {
       if (method == slp::TranscriptionMethod::DIRECT_COLLOCATION) {
         // The tolerance is large because the trajectory is represented by a
         // spline, and splines chatter when transitioning quickly between
         // steady-states.
-        CHECK(solver.U().value(0, k) == Catch::Approx(u).margin(2.0));
+        CHECK(problem.U().value(0, k) == Catch::Approx(u).margin(2.0));
       } else {
-        CHECK(solver.U().value(0, k) == Catch::Approx(u).margin(1e-4));
+        CHECK(problem.U().value(0, k) == Catch::Approx(u).margin(1e-4));
       }
     }
 
@@ -113,7 +113,7 @@ void TestFlywheel(
   }
 
   // Verify final state
-  CHECK(solver.X().value(0, N) == Catch::Approx(r).margin(1e-7));
+  CHECK(problem.X().value(0, N) == Catch::Approx(r).margin(1e-7));
 
   // Log states for offline viewing
   std::ofstream states{std::format("{} states.csv", test_name)};
@@ -121,7 +121,7 @@ void TestFlywheel(
     states << "Time (s),Velocity (rad/s)\n";
 
     for (int k = 0; k < N + 1; ++k) {
-      states << std::format("{},{}\n", k * dt.count(), solver.X().value(0, k));
+      states << std::format("{},{}\n", k * dt.count(), problem.X().value(0, k));
     }
   }
 
@@ -133,7 +133,7 @@ void TestFlywheel(
     for (int k = 0; k < N + 1; ++k) {
       if (k < N) {
         inputs << std::format("{},{}\n", k * dt.count(),
-                              solver.U().value(0, k));
+                              problem.U().value(0, k));
       } else {
         inputs << std::format("{},{}\n", k * dt.count(), 0.0);
       }
