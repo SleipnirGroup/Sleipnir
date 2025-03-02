@@ -1566,9 +1566,9 @@ class small_vector_data_base {
   }
 
  private:
-  ptr m_data_ptr;
-  size_ty m_capacity;
-  size_ty m_size;
+  ptr m_data_ptr = nullptr;
+  size_ty m_capacity = 0;
+  size_ty m_size = 0;
 };
 
 template <typename Pointer, typename SizeT, typename T, unsigned InlineCapacity>
