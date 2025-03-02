@@ -177,7 +177,16 @@ Template parameter ``UpLo``:
 
 static const char *__doc_slp_Hessian_2 = R"doc()doc";
 
-static const char *__doc_slp_Hessian_Hessian = R"doc()doc";
+static const char *__doc_slp_Hessian_Hessian =
+R"doc(Constructs a Hessian object.
+
+Parameter ``variable``:
+    Variable of which to compute the Hessian.
+
+Parameter ``wrt``:
+    Variable with respect to which to compute the Hessian.)doc";
+
+static const char *__doc_slp_Hessian_Hessian_2 = R"doc()doc";
 
 static const char *__doc_slp_Hessian_get =
 R"doc(Returns the Hessian as a VariableMatrix.
@@ -272,7 +281,16 @@ quadratic or higher order.)doc";
 
 static const char *__doc_slp_Jacobian_2 = R"doc()doc";
 
-static const char *__doc_slp_Jacobian_Jacobian = R"doc()doc";
+static const char *__doc_slp_Jacobian_Jacobian =
+R"doc(Constructs a Jacobian object.
+
+Parameter ``variable``:
+    Variable of which to compute the Jacobian.
+
+Parameter ``wrt``:
+    Variable with respect to which to compute the Jacobian.)doc";
+
+static const char *__doc_slp_Jacobian_Jacobian_2 = R"doc()doc";
 
 static const char *__doc_slp_Jacobian_get =
 R"doc(Returns the Jacobian as a VariableMatrix.
