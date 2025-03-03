@@ -88,7 +88,7 @@ def test_rosenbrock_with_disk_constraint():
             assert y.value() == pytest.approx(1.0, abs=1e-1)
 
 
-def test_globalization_1():
+def test_minimum_2d_distance_with_linear_constraint():
     problem = Problem()
 
     x = problem.decision_variable()
@@ -116,25 +116,23 @@ def test_globalization_1():
     assert y.value() == pytest.approx(2.5, abs=1e-2)
 
 
-def test_globalization_2():
-    # See the following source for more discussion on this problem:
-    #
-    # Biegler, Lorenz T. "Nonlinear Programming", p. 156. SIAM, 2010.
+def test_wachter_and_biegler_line_search_failure():
+    # See example 19.2 of [1]
 
     problem = Problem()
 
-    x1 = problem.decision_variable()
-    x1.set_value(-2)
-    x2 = problem.decision_variable()
-    x2.set_value(3)
-    x3 = problem.decision_variable()
-    x3.set_value(1)
+    x = problem.decision_variable()
+    x.set_value(-2)
+    s1 = problem.decision_variable()
+    s1.set_value(3)
+    s2 = problem.decision_variable()
+    s2.set_value(1)
 
-    problem.minimize(x1)
-    problem.subject_to(x1**2 - x2 - 1 == 0)
-    problem.subject_to(x1 - x3 - 0.5 == 0)
-    problem.subject_to(x2 >= 0)
-    problem.subject_to(x3 >= 0)
+    problem.minimize(x)
+    problem.subject_to(x**2 - s1 - 1 == 0)
+    problem.subject_to(x - s2 - 0.5 == 0)
+    problem.subject_to(s1 >= 0)
+    problem.subject_to(s2 >= 0)
 
     assert problem.cost_function_type() == ExpressionType.LINEAR
     assert problem.equality_constraint_type() == ExpressionType.QUADRATIC
@@ -144,6 +142,6 @@ def test_globalization_2():
     assert problem.solve(diagnostics=True) == ExitStatus.FACTORIZATION_FAILED
     return
 
-    assert x1.value() == 1.0
-    assert x2.value() == 0.0
-    assert x3.value() == 0.5
+    assert x.value() == 1.0
+    assert s1.value() == 0.0
+    assert s2.value() == 0.5

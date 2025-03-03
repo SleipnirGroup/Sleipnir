@@ -103,7 +103,7 @@ TEST_CASE("Problem - Rosenbrock with disk constraint", "[Problem]") {
   }
 }
 
-TEST_CASE("Problem - Globalization 1", "[Problem]") {
+TEST_CASE("Problem - Minimum 2D distance with linear constraint", "[Problem]") {
   slp::Problem problem;
 
   auto x = problem.decision_variable();
@@ -133,25 +133,23 @@ TEST_CASE("Problem - Globalization 1", "[Problem]") {
   CHECK(y.value() == Catch::Approx(2.5).margin(1e-2));
 }
 
-TEST_CASE("Problem - Globalization 2", "[Problem]") {
-  // See the following source for more discussion on this problem:
-  //
-  // Biegler, Lorenz T. "Nonlinear Programming", p. 156. SIAM, 2010.
+TEST_CASE("Problem - Wachter and Biegler line search failure", "[Problem]") {
+  // See example 19.2 of [1]
 
   auto problem = slp::Problem();
 
-  auto x1 = problem.decision_variable();
-  x1.set_value(-2);
-  auto x2 = problem.decision_variable();
-  x2.set_value(3);
-  auto x3 = problem.decision_variable();
-  x3.set_value(1);
+  auto x = problem.decision_variable();
+  x.set_value(-2);
+  auto s1 = problem.decision_variable();
+  s1.set_value(3);
+  auto s2 = problem.decision_variable();
+  s2.set_value(1);
 
-  problem.minimize(x1);
-  problem.subject_to(slp::pow(x1, 2) - x2 - 1 == 0);
-  problem.subject_to(x1 - x3 - 0.5 == 0);
-  problem.subject_to(x2 >= 0);
-  problem.subject_to(x3 >= 0);
+  problem.minimize(x);
+  problem.subject_to(slp::pow(x, 2) - s1 - 1 == 0);
+  problem.subject_to(x - s2 - 0.5 == 0);
+  problem.subject_to(s1 >= 0);
+  problem.subject_to(s2 >= 0);
 
   CHECK(problem.cost_function_type() == slp::ExpressionType::LINEAR);
   CHECK(problem.equality_constraint_type() == slp::ExpressionType::QUADRATIC);
@@ -162,7 +160,7 @@ TEST_CASE("Problem - Globalization 2", "[Problem]") {
         slp::ExitStatus::FACTORIZATION_FAILED);
   SKIP("Fails with \"factorization failed\"");
 
-  CHECK(x1.value() == 1.0);
-  CHECK(x2.value() == 0.0);
-  CHECK(x3.value() == 0.5);
+  CHECK(x.value() == 1.0);
+  CHECK(s1.value() == 0.0);
+  CHECK(s2.value() == 0.5);
 }
