@@ -47,17 +47,15 @@ def main():
 
     field2camera = field2robot @ robot2camera
 
-    # Cost
-    J = 0.0
-
     # list of points in field space to reproject. Each one is a 4x1 vector of
     # (x,y,z,1)
-    field2points = []
-    field2points.append(VariableMatrix([[2, 0 - 0.08255, 0.4, 1]]).T)
-    field2points.append(VariableMatrix([[2, 0 + 0.08255, 0.4, 1]]).T)
+    field2points = [
+        VariableMatrix([[2, 0 - 0.08255, 0.4, 1]]).T,
+        VariableMatrix([[2, 0 + 0.08255, 0.4, 1]]).T,
+    ]
 
-    # List of points we saw the target at. These are exactly what we expect for a
-    # camera located at 0,0,0 (hand-calculated)
+    # List of points we saw the target at. These are exactly what we expect for
+    # a camera located at 0,0,0 (hand-calculated)
     point_observations = [(325, 30), (275, 30)]
 
     # initial guess at robot pose. We expect the robot to converge to 0,0,0
@@ -66,8 +64,10 @@ def main():
     robot_θ.set_value(0.2)
 
     # field2camera * field2camera⁻¹ = I
-    camera2field = solve(field2camera, VariableMatrix(np.eye(4)))
+    camera2field = solve(field2camera, VariableMatrix(np.identity(4)))
 
+    # Cost
+    J = 0
     for field2point, observation in zip(field2points, point_observations):
         # camera2point = field2camera⁻¹ * field2point
         # field2camera * camera2point = field2point
@@ -96,7 +96,7 @@ def main():
         v_err = v - v_observed
 
         # Cost function is square of reprojection error
-        J += u_err * u_err + v_err * v_err
+        J += u_err**2 + v_err**2
 
     problem.minimize(J)
 
