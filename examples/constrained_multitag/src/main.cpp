@@ -4,7 +4,6 @@
 //
 // The robot pose is constrained to be on the floor (z = 0).
 
-#include <chrono>
 #include <print>
 #include <ranges>
 #include <utility>
@@ -14,20 +13,7 @@
 #include <sleipnir/autodiff/variable_matrix.hpp>
 #include <sleipnir/optimization/problem.hpp>
 
-/**
- * Converts std::chrono::duration to a number of milliseconds rounded to three
- * decimals.
- */
-template <typename Rep, typename Period = std::ratio<1>>
-constexpr double to_ms(const std::chrono::duration<Rep, Period>& duration) {
-  using std::chrono::duration_cast;
-  using std::chrono::microseconds;
-  return duration_cast<microseconds>(duration).count() / 1e3;
-}
-
 int main() {
-  auto setup_start = std::chrono::steady_clock::now();
-
   slp::Problem problem;
 
   // camera calibration
@@ -63,14 +49,10 @@ int main() {
 
   auto field2camera = field2robot * robot2camera;
 
-  // Cost
-  slp::Variable J = 0.0;
-
   // list of points in field space to reproject. Each one is a 4x1 vector of
   // (x,y,z,1)
-  std::vector<slp::VariableMatrix> field2points;
-  field2points.push_back(slp::VariableMatrix{{2, 0 - 0.08255, 0.4, 1}}.T());
-  field2points.push_back(slp::VariableMatrix{{2, 0 + 0.08255, 0.4, 1}}.T());
+  std::vector field2points{slp::VariableMatrix{{2, 0 - 0.08255, 0.4, 1}}.T(),
+                           slp::VariableMatrix{{2, 0 + 0.08255, 0.4, 1}}.T()};
 
   // List of points we saw the target at. These are exactly what we expect for a
   // camera located at 0,0,0 (hand-calculated)
@@ -84,6 +66,8 @@ int main() {
   // field2camera * field2camera⁻¹ = I
   auto camera2field = slp::solve(field2camera, Eigen::Matrix4d::Identity());
 
+  // Cost
+  slp::Variable J = 0.0;
   for (const auto& [field2point, observation] :
        std::views::zip(field2points, point_observations)) {
     // camera2point = field2camera⁻¹ * field2point
@@ -118,14 +102,7 @@ int main() {
 
   problem.minimize(J);
 
-  auto setup_end = std::chrono::steady_clock::now();
-
-  auto solve_start = std::chrono::steady_clock::now();
   problem.solve({.diagnostics = true});
-  auto solve_end = std::chrono::steady_clock::now();
-
-  std::println("setup time = {} ms", to_ms(setup_end - setup_start));
-  std::println("solve time = {} ms", to_ms(solve_end - solve_start));
 
   std::println("x = {} m", robot_x.value());
   std::println("y = {} m", robot_y.value());
