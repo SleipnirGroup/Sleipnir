@@ -122,13 +122,15 @@ def test_wachter_and_biegler_line_search_failure():
     problem = Problem()
 
     x = problem.decision_variable()
-    x.set_value(-2)
     s1 = problem.decision_variable()
-    s1.set_value(3)
     s2 = problem.decision_variable()
+
+    x.set_value(-2)
+    s1.set_value(3)
     s2.set_value(1)
 
     problem.minimize(x)
+
     problem.subject_to(x**2 - s1 - 1 == 0)
     problem.subject_to(x - s2 - 0.5 == 0)
     problem.subject_to(s1 >= 0)
