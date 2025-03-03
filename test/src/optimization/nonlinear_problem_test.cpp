@@ -4,7 +4,9 @@
 
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <sleipnir/autodiff/expression_type.hpp>
 #include <sleipnir/optimization/problem.hpp>
+#include <sleipnir/optimization/solver/exit_status.hpp>
 
 #include "catch_string_converters.hpp"
 #include "range.hpp"
@@ -101,7 +103,7 @@ TEST_CASE("Problem - Rosenbrock with disk constraint", "[Problem]") {
   }
 }
 
-TEST_CASE("Problem - Narrow feasible region", "[Problem]") {
+TEST_CASE("Problem - Globalization 1", "[Problem]") {
   slp::Problem problem;
 
   auto x = problem.decision_variable();
@@ -129,4 +131,38 @@ TEST_CASE("Problem - Narrow feasible region", "[Problem]") {
 
   CHECK(x.value() == Catch::Approx(2.5).margin(1e-2));
   CHECK(y.value() == Catch::Approx(2.5).margin(1e-2));
+}
+
+TEST_CASE("Problem - Globalization 2", "[Problem]") {
+  // See the following source for more discussion on this problem:
+  //
+  // Biegler, Lorenz T. "Nonlinear Programming", p. 156. SIAM, 2010.
+
+  auto problem = slp::Problem();
+
+  auto x1 = problem.decision_variable();
+  x1.set_value(-2);
+  auto x2 = problem.decision_variable();
+  x2.set_value(3);
+  auto x3 = problem.decision_variable();
+  x3.set_value(1);
+
+  problem.minimize(x1);
+  problem.subject_to(slp::pow(x1, 2) - x2 - 1 == 0);
+  problem.subject_to(x1 - x3 - 0.5 == 0);
+  problem.subject_to(x2 >= 0);
+  problem.subject_to(x3 >= 0);
+
+  CHECK(problem.cost_function_type() == slp::ExpressionType::LINEAR);
+  CHECK(problem.equality_constraint_type() == slp::ExpressionType::QUADRATIC);
+  CHECK(problem.inequality_constraint_type() == slp::ExpressionType::LINEAR);
+
+  // FIXME: Fails with "factorization failed"
+  CHECK(problem.solve({.diagnostics = true}) ==
+        slp::ExitStatus::FACTORIZATION_FAILED);
+  SKIP("Fails with \"factorization failed\"");
+
+  CHECK(x1.value() == 1.0);
+  CHECK(x2.value() == 0.0);
+  CHECK(x3.value() == 0.5);
 }

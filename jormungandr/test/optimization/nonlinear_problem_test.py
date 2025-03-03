@@ -88,7 +88,7 @@ def test_rosenbrock_with_disk_constraint():
             assert y.value() == pytest.approx(1.0, abs=1e-1)
 
 
-def test_narrow_feasible_region():
+def test_globalization_1():
     problem = Problem()
 
     x = problem.decision_variable()
@@ -114,3 +114,36 @@ def test_narrow_feasible_region():
 
     assert x.value() == pytest.approx(2.5, abs=1e-2)
     assert y.value() == pytest.approx(2.5, abs=1e-2)
+
+
+def test_globalization_2():
+    # See the following source for more discussion on this problem:
+    #
+    # Biegler, Lorenz T. "Nonlinear Programming", p. 156. SIAM, 2010.
+
+    problem = Problem()
+
+    x1 = problem.decision_variable()
+    x1.set_value(-2)
+    x2 = problem.decision_variable()
+    x2.set_value(3)
+    x3 = problem.decision_variable()
+    x3.set_value(1)
+
+    problem.minimize(x1)
+    problem.subject_to(x1**2 - x2 - 1 == 0)
+    problem.subject_to(x1 - x3 - 0.5 == 0)
+    problem.subject_to(x2 >= 0)
+    problem.subject_to(x3 >= 0)
+
+    assert problem.cost_function_type() == ExpressionType.LINEAR
+    assert problem.equality_constraint_type() == ExpressionType.QUADRATIC
+    assert problem.inequality_constraint_type() == ExpressionType.LINEAR
+
+    # FIXME: Fails with "factorization failed"
+    assert problem.solve(diagnostics=True) == ExitStatus.FACTORIZATION_FAILED
+    return
+
+    assert x1.value() == 1.0
+    assert x2.value() == 0.0
+    assert x3.value() == 0.5
