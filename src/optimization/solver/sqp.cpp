@@ -177,7 +177,7 @@ ExitStatus sqp(
 
   // Variables for determining when a step is acceptable
   constexpr double α_red_factor = 0.5;
-  constexpr double α_min = 1e-20;
+  constexpr double α_min = 1e-7;
   int acceptable_iter_counter = 0;
 
   int full_step_rejected_counter = 0;
@@ -465,7 +465,7 @@ ExitStatus sqp(
       α *= α_red_factor;
 
       // If step size hit a minimum, check if the KKT error was reduced. If it
-      // wasn't, report bad line search.
+      // wasn't, report line search failure.
       if (α < α_min) {
         double current_kkt_error = kkt_error(g, A_e, c_e, y);
 

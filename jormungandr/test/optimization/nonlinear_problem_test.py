@@ -106,8 +106,8 @@ def test_minimum_2d_distance_with_linear_constraint():
     assert problem.inequality_constraint_type() == ExpressionType.NONE
 
     if platform.system() == "Linux" and platform.machine() == "aarch64":
-        # FIXME: Fails on Linux aarch64 with "diverging iterates"
-        assert problem.solve(diagnostics=True) == ExitStatus.DIVERGING_ITERATES
+        # FIXME: Fails on Linux aarch64 with "line search failed"
+        assert problem.solve(diagnostics=True) == ExitStatus.LINE_SEARCH_FAILED
         return
     else:
         assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
@@ -140,8 +140,8 @@ def test_wachter_and_biegler_line_search_failure():
     assert problem.equality_constraint_type() == ExpressionType.QUADRATIC
     assert problem.inequality_constraint_type() == ExpressionType.LINEAR
 
-    # FIXME: Fails with "factorization failed"
-    assert problem.solve(diagnostics=True) == ExitStatus.FACTORIZATION_FAILED
+    # FIXME: Fails with "line search failed"
+    assert problem.solve(diagnostics=True) == ExitStatus.LINE_SEARCH_FAILED
     return
 
     assert x.value() == 1.0
