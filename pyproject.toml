@@ -15,7 +15,7 @@ dependencies = [ "matplotlib", "numpy", "scipy" ]
 [build-system]
 requires = [
   "nanobind",
-  "py-build-cmake~=0.4.1",
+  "py-build-cmake~=0.4.2",
   "pybind11-mkdoc",
   "typing_extensions; python_version < '3.11'"
 ]
