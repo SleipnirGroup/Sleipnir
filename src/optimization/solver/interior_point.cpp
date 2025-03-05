@@ -256,7 +256,7 @@ ExitStatus interior_point(
 
   // Variables for determining when a step is acceptable
   constexpr double α_red_factor = 0.5;
-  constexpr double α_min = 1e-20;
+  constexpr double α_min = 1e-7;
   int acceptable_iter_counter = 0;
 
   int full_step_rejected_counter = 0;
@@ -465,6 +465,11 @@ ExitStatus interior_point(
     α_max = fraction_to_the_boundary_rule(s, step.p_s, τ);
     α = α_max;
 
+    // If maximum step size is below minimum, report line search failure
+    if (α < α_min) {
+      return ExitStatus::LINE_SEARCH_FAILED;
+    }
+
     // αₖᶻ = max(α ∈ (0, 1] : zₖ + αpₖᶻ ≥ (1−τⱼ)zₖ)
     α_z = fraction_to_the_boundary_rule(z, step.p_z, τ);
 
@@ -623,7 +628,7 @@ ExitStatus interior_point(
       α *= α_red_factor;
 
       // If step size hit a minimum, check if the KKT error was reduced. If it
-      // wasn't, report bad line search.
+      // wasn't, report line search failure.
       if (α < α_min) {
         double current_kkt_error = kkt_error(g, A_e, c_e, A_i, c_i, s, y, z, μ);
 

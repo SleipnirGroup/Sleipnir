@@ -121,10 +121,10 @@ TEST_CASE("Problem - Minimum 2D distance with linear constraint", "[Problem]") {
   CHECK(problem.inequality_constraint_type() == slp::ExpressionType::NONE);
 
 #if defined(__linux__) && defined(__aarch64__)
-  // FIXME: Fails on Linux aarch64 with "diverging iterates"
+  // FIXME: Fails on Linux aarch64 with "line search failed"
   CHECK(problem.solve({.diagnostics = true}) ==
-        slp::ExitStatus::DIVERGING_ITERATES);
-  SKIP("Fails with \"diverging iterates\"");
+        slp::ExitStatus::LINE_SEARCH_FAILED);
+  SKIP("Fails with \"line search failed\"");
 #else
   CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 #endif
@@ -157,10 +157,10 @@ TEST_CASE("Problem - Wachter and Biegler line search failure", "[Problem]") {
   CHECK(problem.equality_constraint_type() == slp::ExpressionType::QUADRATIC);
   CHECK(problem.inequality_constraint_type() == slp::ExpressionType::LINEAR);
 
-  // FIXME: Fails with "factorization failed"
+  // FIXME: Fails with "line search failed"
   CHECK(problem.solve({.diagnostics = true}) ==
-        slp::ExitStatus::FACTORIZATION_FAILED);
-  SKIP("Fails with \"factorization failed\"");
+        slp::ExitStatus::LINE_SEARCH_FAILED);
+  SKIP("Fails with \"line search failed\"");
 
   CHECK(x.value() == 1.0);
   CHECK(s1.value() == 0.0);
