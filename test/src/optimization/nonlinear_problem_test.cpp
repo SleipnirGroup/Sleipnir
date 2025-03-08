@@ -136,7 +136,7 @@ TEST_CASE("Problem - Minimum 2D distance with linear constraint", "[Problem]") {
 TEST_CASE("Problem - Wachter and Biegler line search failure", "[Problem]") {
   // See example 19.2 of [1]
 
-  auto problem = slp::Problem();
+  slp::Problem problem;
 
   auto x = problem.decision_variable();
   auto s1 = problem.decision_variable();
