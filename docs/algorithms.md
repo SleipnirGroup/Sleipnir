@@ -200,11 +200,11 @@ Eliminate the second row and column.
 Solve the third row for pᶻ.
 
 ```
-  Aₑpˣ + Σ⁻¹pᶻ = −cᵢ + μZ⁻¹e
-  Σ⁻¹pᶻ = −cᵢ + μZ⁻¹e − Aₑpˣ
-  pᶻ = −Σcᵢ + μΣZ⁻¹e − ΣAₑpˣ
-  pᶻ = −Σcᵢ + μ(S⁻¹Z)Z⁻¹e − ΣAₑpˣ
-  pᶻ = −Σcᵢ + μS⁻¹e − ΣAₑpˣ
+  Aᵢpˣ + Σ⁻¹pᶻ = −cᵢ + μZ⁻¹e
+  Σ⁻¹pᶻ = −cᵢ + μZ⁻¹e − Aᵢpˣ
+  pᶻ = −Σcᵢ + μΣZ⁻¹e − ΣAᵢpˣ
+  pᶻ = −Σcᵢ + μ(S⁻¹Z)Z⁻¹e − ΣAᵢpˣ
+  pᶻ = −Σcᵢ + μS⁻¹e − ΣAᵢpˣ
 ```
 
 Substitute the explicit formula for pᶻ into the first row.
