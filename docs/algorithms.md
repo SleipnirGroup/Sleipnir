@@ -201,7 +201,10 @@ Solve the third row for pᶻ.
 
 ```
   Aₑpˣ + Σ⁻¹pᶻ = −cᵢ + μZ⁻¹e
-  pᶻ = −Σcᵢ + μS⁻¹e − ΣAᵢpˣ
+  Σ⁻¹pᶻ = −cᵢ + μZ⁻¹e − Aₑpˣ
+  pᶻ = −Σcᵢ + μΣZ⁻¹e − ΣAₑpˣ
+  pᶻ = −Σcᵢ + μ(S⁻¹Z)Z⁻¹e − ΣAₑpˣ
+  pᶻ = −Σcᵢ + μS⁻¹e − ΣAₑpˣ
 ```
 
 Substitute the explicit formula for pᶻ into the first row.
@@ -215,7 +218,7 @@ Expand and simplify.
 
 ```
   Hpˣ − Aₑᵀpʸ + AᵢᵀΣcᵢ − AᵢᵀμS⁻¹e + AᵢᵀΣAᵢpˣ = −∇f(x) + Aₑᵀy + Aᵢᵀz
-  Hpˣ + AᵢᵀΣAᵢpˣ − Aₑᵀpʸ  = −∇f(x) + Aₑᵀy + AᵢᵀΣcᵢ + AᵢᵀμS⁻¹e + Aᵢᵀz
+  Hpˣ + AᵢᵀΣAᵢpˣ − Aₑᵀpʸ  = −∇f(x) + Aₑᵀy − AᵢᵀΣcᵢ + AᵢᵀμS⁻¹e + Aᵢᵀz
   (H + AᵢᵀΣAᵢ)pˣ − Aₑᵀpʸ = −∇f(x) + Aₑᵀy + Aᵢᵀ(−Σcᵢ + μS⁻¹e + z)
   (H + AᵢᵀΣAᵢ)pˣ − Aₑᵀpʸ = −(∇f(x) − Aₑᵀy − Aᵢᵀ(−Σcᵢ + μS⁻¹e + z))
 ```
