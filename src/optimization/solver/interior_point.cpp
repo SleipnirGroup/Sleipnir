@@ -378,16 +378,8 @@ ExitStatus interior_point(
     user_callbacks_profiler.stop();
     ScopedProfiler linear_system_build_profiler{linear_system_build_prof};
 
-    //     [s₁ 0 ⋯ 0 ]
-    // S = [0  ⋱   ⋮ ]
-    //     [⋮    ⋱ 0 ]
-    //     [0  ⋯ 0 sₘ]
-    //
-    //     [z₁ 0 ⋯ 0 ]
-    // Z = [0  ⋱   ⋮ ]
-    //     [⋮    ⋱ 0 ]
-    //     [0  ⋯ 0 zₘ]
-    //
+    // S = diag(s)
+    // Z = diag(z)
     // Σ = S⁻¹Z
     const Eigen::SparseMatrix<double> Σ{s.cwiseInverse().asDiagonal() *
                                         z.asDiagonal()};
@@ -435,8 +427,8 @@ ExitStatus interior_point(
 
     // Solve the Newton-KKT system
     //
-    // [H + AᵢᵀΣAᵢ  Aₑᵀ][ pₖˣ] = −[∇f − Aₑᵀy − Aᵢᵀ(−Σcᵢ + μS⁻¹e + z)]
-    // [    Aₑ       0 ][−pₖʸ]    [               cₑ                ]
+    // [H + AᵢᵀΣAᵢ  Aₑᵀ][ pˣ] = −[∇f − Aₑᵀy − Aᵢᵀ(−Σcᵢ + μS⁻¹e + z)]
+    // [    Aₑ       0 ][−pʸ]    [               cₑ                ]
     if (solver.compute(lhs, μ).info() != Eigen::Success) [[unlikely]] {
       return ExitStatus::FACTORIZATION_FAILED;
     }
@@ -445,14 +437,14 @@ ExitStatus interior_point(
     ScopedProfiler linear_system_solve_profiler{linear_system_solve_prof};
 
     auto compute_step = [&](Step& step) {
-      // p = [ pₖˣ]
-      //     [−pₖʸ]
+      // p = [ pˣ]
+      //     [−pʸ]
       Eigen::VectorXd p = solver.solve(rhs);
       step.p_x = p.segment(0, x.rows());
       step.p_y = -p.segment(x.rows(), y.rows());
 
-      // pₖˢ = cᵢ − s + Aᵢpₖˣ
-      // pₖᶻ = −Σcᵢ + μS⁻¹e − ΣAᵢpₖˣ
+      // pˢ = cᵢ − s + Aᵢpˣ
+      // pᶻ = −Σcᵢ + μS⁻¹e − ΣAᵢpˣ
       step.p_s = c_i - s + A_i * step.p_x;
       step.p_z = -Σ * c_i + μ * s.cwiseInverse() - Σ * A_i * step.p_x;
     };

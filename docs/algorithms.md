@@ -25,158 +25,245 @@ https://en.wikipedia.org/wiki/Automatic_differentiation#Beyond_forward_and_rever
 
 ## Interior-point method
 
-Let f(x)ₖ be the cost function, cₑ(x)ₖ be the equality constraints, and cᵢ(x)ₖ be the inequality constraints. The Lagrangian of the optimization problem is
+We want to solve the following optimization problem.
 
 ```
-  L(x, s, y, z)ₖ = f(x)ₖ − yₖᵀcₑ(x)ₖ − zₖᵀ(cᵢ(x)ₖ − sₖ)
+   min f(x)
+    x
+  s.t. cₑ(x) = 0
+       cᵢ(x) ≥ 0
 ```
 
-The Hessian of the Lagrangian is
+where f(x) is the cost function, cₑ(x) is the equality constraints, and cᵢ(x) is the inequality constraints. First, we'll reformulate the inequality constraints as equality constraints with slack variables.
 
 ```
-  H(x)ₖ = ∇²ₓₓL(x, s, y, z)ₖ
+   min f(x)
+    x
+  s.t. cₑ(x) = 0
+       cᵢ(x) − s = 0
+       s ≥ 0
 ```
 
-The primal-dual barrier term Hessian Σ is defined as
+To make this easier to solve, we'll reformulate it as the following barrier problem.
 
 ```
-  Σ = S⁻¹Z
+  min f(x) − μ Σ ln(sᵢ)
+   x           i
+  s.t. cₑ(x) = 0
+       cᵢ(x) − s = 0
 ```
 
-where
+where μ is the barrier parameter. As μ → 0, the solution of the barrier problem approaches the solution of the original problem.
+
+### Lagrangian
+
+The Lagrangian of the barrier problem is
 
 ```
-      [s₁ 0 ⋯ 0 ]
-  S = [0  ⋱   ⋮ ]
-      [⋮    ⋱ 0 ]
-      [0  ⋯ 0 sₘ]
-
-      [z₁ 0 ⋯ 0 ]
-  Z = [0  ⋱   ⋮ ]
-      [⋮    ⋱ 0 ]
-      [0  ⋯ 0 zₘ]
+  L(x, s, y, z) = f(x) − μ Σ ln(sᵢ) − yᵀcₑ(x) − zᵀ(cᵢ(x) − s)
+                           i
 ```
 
-and where m is the number of inequality constraints.
+### Gradients of the Lagrangian
 
-Let f(x) = f(x)ₖ, H = H(x)ₖ, Aₑ = Aₑ(x)ₖ, and Aᵢ = Aᵢ(x)ₖ for clarity. We want to solve the following Newton-KKT system shown in equation (19.12) of [^1].
-
-```
-  [H    0  Aₑᵀ  Aᵢᵀ][ pₖˣ]    [∇f(x) − Aₑᵀy − Aᵢᵀz]
-  [0    Σ   0   −I ][ pₖˢ] = −[     z − μS⁻¹e     ]
-  [Aₑ   0   0    0 ][−pₖʸ]    [        cₑ         ]
-  [Aᵢ  −I   0    0 ][−pₖᶻ]    [      cᵢ − s       ]
-```
-
-where e is a column vector of ones with a number of rows equal to the number of inequality constraints.
-
-Solve the second row for pₖˢ.
+The gradients are
 
 ```
-  Σpₖˢ + pₖᶻ = μS⁻¹e − z
-  Σpₖˢ = μS⁻¹e − z − pₖᶻ
-  pₖˢ = μΣ⁻¹S⁻¹e − Σ⁻¹z − Σ⁻¹pₖᶻ
+  ∇ₓL(x, s, y, z) = ∇f − Aₑᵀy − Aᵢᵀz
+  ∇ₛL(x, s, y, z) = z − μS⁻¹e
+  ∇_yL(x, s, y, z) = −cₑ
+  ∇_zL(x, s, y, z) = −cᵢ + s
+```
+
+The first-order necessary conditions for optimality are
+
+```
+  ∇f − Aₑᵀy − Aᵢᵀz = 0
+  z − μS⁻¹e = 0
+  −cₑ = 0
+  −cᵢ + s = 0
+```
+
+where Aₑ = ∂cₑ/∂x, Aᵢ = ∂cᵢ/∂x, S = diag(s), and e is a column vector of ones. We'll rearrange them for the primal-dual system.
+
+```
+  ∇f − Aₑᵀy − Aᵢᵀz = 0
+  Sz − μe = 0
+  cₑ = 0
+  cᵢ − s = 0
+```
+
+### Newton's method
+
+Next, we'll apply Newton's method to the optimality conditions. Let H be ∂²L/∂x², Σ be the primal-dual barrier term Hessian S⁻¹Z, pˣ be the step for x, pˢ be the step for s, pʸ be the step for y, and pᶻ be the step for z.
+
+```
+  ∇ₓL(x + pˣ, s + pˢ, y + pʸ, z + pᶻ)
+    ≈ ∇ₓL(x, s, y, z) + ∂²L/∂x²pˣ + ∂²L/∂x∂s∇s + ∂²L/∂x∂ypʸ + ∂²L/∂x∂zpᶻ
+  ∇ₓL(x, s, y, z) + Hpˣ − Aₑᵀpʸ − Aᵢᵀpᶻ = 0
+  Hpˣ − Aₑᵀpʸ − Aᵢᵀpᶻ = −∇ₓL(x, s, y, z)
+  Hpˣ − Aₑᵀpʸ − Aᵢᵀpᶻ = −(∇f − Aₑᵀy − Aᵢᵀz)
+```
+```
+  ∇ₛL(x + pˣ, s + pˢ, y + pʸ, z + pᶻ)
+    ≈ ∇ₛL(x, s, y, z) + ∂²L/∂s∂xpˣ + ∂²L/∂s²pˢ + ∂²L/∂s∂ypʸ + ∂²L/∂s∂zpᶻ
+  ∇ₛL(x, s, y, z) + Zpˢ + Spᶻ = 0
+  Zpˢ + Spᶻ = −∇ₛL(x, s, y, z)
+  Zpˢ + Spᶻ = −(Sz − μe)
+```
+```
+  ∇_yL(x + pˣ, s + pˢ, y + pʸ, z + pᶻ)
+    ≈ ∇_yL(x, s, y, z) + ∂²L/∂y∂xpˣ + ∂²L/∂y∂spˢ + ∂²L/∂y²pʸ + ∂²L/∂y∂zpᶻ
+  ∇_yL(x, s, y, z) + Aₑpˣ = 0
+  Aₑpˣ = −∇_yL(x, s, y, z)
+  Aₑpˣ = −cₑ
+```
+```
+  ∇_zL(x + pˣ, s + pˢ, y + pʸ, z + pᶻ)
+    ≈ ∇_zL(x, s, y, z) + ∂²L/∂z∂xpˣ + ∂²L/∂z∂spˢ + ∂²L/∂z∂ypʸ + ∂²L/∂z²pᶻ
+  ∇_zL(x, s, y, z) + Aᵢpˣ − pˢ = 0
+  Aᵢpˣ − pˢ = −∇_zL(x, s, y, z)
+  Aᵢpˣ − pˢ = −(cᵢ − s)
+```
+
+### Matrix equation
+
+Group them into a matrix equation.
+
+```
+  [H    0  −Aₑᵀ  −Aᵢᵀ][pˣ]    [∇f(x) − Aₑᵀy − Aᵢᵀz]
+  [0    Z   0     S  ][pˢ] = −[      Sz − μe      ]
+  [Aₑ   0   0     0  ][pʸ]    [        cₑ         ]
+  [Aᵢ  −I   0     0  ][pᶻ]    [      cᵢ − s       ]
+```
+
+Invert pʸ and pᶻ.
+
+```
+  [H    0  Aₑᵀ  Aᵢᵀ][ pˣ]    [∇f(x) − Aₑᵀy − Aᵢᵀz]
+  [0    Z   0    S ][ pˢ] = −[      Sz − μe      ]
+  [Aₑ   0   0    0 ][−pʸ]    [        cₑ         ]
+  [Aᵢ  −I   0    0 ][−pᶻ]    [      cᵢ − s       ]
+```
+
+Multiply the second row by S⁻¹ and replace S⁻¹Z with Σ.
+
+```
+  [H    0  Aₑᵀ  Aᵢᵀ][ pˣ]    [∇f(x) − Aₑᵀy − Aᵢᵀz]
+  [0    Σ   0   −I ][ pˢ] = −[     z − μS⁻¹e     ]
+  [Aₑ   0   0    0 ][−pʸ]    [        cₑ         ]
+  [Aᵢ  −I   0    0 ][−pᶻ]    [      cᵢ − s       ]
+```
+
+Solve the second row for pˢ.
+
+```
+  Σpˢ + pᶻ = μS⁻¹e − z
+  Σpˢ = μS⁻¹e − z − pᶻ
+  pˢ = μΣ⁻¹S⁻¹e − Σ⁻¹z − Σ⁻¹pᶻ
 ```
 
 Substitute Σ = S⁻¹Z into the first two terms.
 
 ```
-  pₖˢ = μ(S⁻¹Z)⁻¹S⁻¹e − (S⁻¹Z)⁻¹z − Σ⁻¹pₖᶻ
-  pₖˢ = μZ⁻¹SS⁻¹e − Z⁻¹Sz − Σ⁻¹pₖᶻ
-  pₖˢ = μZ⁻¹e − s − Σ⁻¹pₖᶻ
+  pˢ = μ(S⁻¹Z)⁻¹S⁻¹e − (S⁻¹Z)⁻¹z − Σ⁻¹pᶻ
+  pˢ = μZ⁻¹SS⁻¹e − Z⁻¹Sz − Σ⁻¹pᶻ
+  pˢ = μZ⁻¹e − s − Σ⁻¹pᶻ
 ```
 
-Substitute the explicit formula for pₖˢ into the fourth row and simplify.
+Substitute the explicit formula for pˢ into the fourth row and simplify.
 
 ```
-  Aᵢpₖˣ − pₖˢ = s − cᵢ
-  Aᵢpₖˣ − (μZ⁻¹e − s − Σ⁻¹pₖᶻ) = s − cᵢ
-  Aᵢpₖˣ − μZ⁻¹e + s + Σ⁻¹pₖᶻ = s − cᵢ
-  Aᵢpₖˣ + Σ⁻¹pₖᶻ = −cᵢ + μZ⁻¹e
+  Aᵢpˣ − pˢ = s − cᵢ
+  Aᵢpˣ − (μZ⁻¹e − s − Σ⁻¹pᶻ) = s − cᵢ
+  Aᵢpˣ − μZ⁻¹e + s + Σ⁻¹pᶻ = s − cᵢ
+  Aᵢpˣ + Σ⁻¹pᶻ = −cᵢ + μZ⁻¹e
 ```
 
 Substitute the new second and fourth rows into the system.
 
 ```
-  [H   0  Aₑᵀ  Aᵢᵀ ][ pₖˣ]    [∇f(x) − Aₑᵀy − Aᵢᵀz]
-  [0   I   0    0  ][ pₖˢ] = −[−μZ⁻¹e + s + Σ⁻¹pₖᶻ]
-  [Aₑ  0   0    0  ][−pₖʸ]    [        cₑ         ]
-  [Aᵢ  0   0   −Σ⁻¹][−pₖᶻ]    [     cᵢ − μZ⁻¹e    ]
+  [H   0  Aₑᵀ  Aᵢᵀ ][ pˣ]    [∇f(x) − Aₑᵀy − Aᵢᵀz]
+  [0   I   0    0  ][ pˢ] = −[−μZ⁻¹e + s + Σ⁻¹pᶻ ]
+  [Aₑ  0   0    0  ][−pʸ]    [        cₑ         ]
+  [Aᵢ  0   0   −Σ⁻¹][−pᶻ]    [     cᵢ − μZ⁻¹e    ]
 ```
 
 Eliminate the second row and column.
 
 ```
-  [H   Aₑᵀ  Aᵢᵀ ][ pₖˣ]    [∇f(x) − Aₑᵀy − Aᵢᵀz]
-  [Aₑ   0    0  ][−pₖʸ] = −[        cₑ         ]
-  [Aᵢ   0   −Σ⁻¹][−pₖᶻ]    [    cᵢ − μZ⁻¹e     ]
+  [H   Aₑᵀ  Aᵢᵀ ][ pˣ]    [∇f(x) − Aₑᵀy − Aᵢᵀz]
+  [Aₑ   0    0  ][−pʸ] = −[        cₑ         ]
+  [Aᵢ   0   −Σ⁻¹][−pᶻ]    [    cᵢ − μZ⁻¹e     ]
 ```
 
-Solve the third row for pₖᶻ.
+Solve the third row for pᶻ.
 
 ```
-  Aₑpₖˣ + Σ⁻¹pₖᶻ = −cᵢ + μZ⁻¹e
-  pₖᶻ = −Σcᵢ + μS⁻¹e − ΣAᵢpₖˣ
+  Aₑpˣ + Σ⁻¹pᶻ = −cᵢ + μZ⁻¹e
+  pᶻ = −Σcᵢ + μS⁻¹e − ΣAᵢpˣ
 ```
 
-Substitute the explicit formula for pₖᶻ into the first row.
+Substitute the explicit formula for pᶻ into the first row.
 
 ```
-  Hpₖˣ − Aₑᵀpₖʸ − Aᵢᵀpₖᶻ = −∇f(x) + Aₑᵀy + Aᵢᵀz
-  Hpₖˣ − Aₑᵀpₖʸ − Aᵢᵀ(−Σcᵢ + μS⁻¹e − ΣAᵢpₖˣ) = −∇f(x) + Aₑᵀy + Aᵢᵀz
+  Hpˣ − Aₑᵀpʸ − Aᵢᵀpᶻ = −∇f(x) + Aₑᵀy + Aᵢᵀz
+  Hpˣ − Aₑᵀpʸ − Aᵢᵀ(−Σcᵢ + μS⁻¹e − ΣAᵢpˣ) = −∇f(x) + Aₑᵀy + Aᵢᵀz
 ```
 
 Expand and simplify.
 
 ```
-  Hpₖˣ − Aₑᵀpₖʸ + AᵢᵀΣcᵢ − AᵢᵀμS⁻¹e + AᵢᵀΣAᵢpₖˣ = −∇f(x) + Aₑᵀy + Aᵢᵀz
-  Hpₖˣ + AᵢᵀΣAᵢpₖˣ − Aₑᵀpₖʸ  = −∇f(x) + Aₑᵀy + AᵢᵀΣcᵢ + AᵢᵀμS⁻¹e + Aᵢᵀz
-  (H + AᵢᵀΣAᵢ)pₖˣ − Aₑᵀpₖʸ = −∇f(x) + Aₑᵀy + Aᵢᵀ(−Σcᵢ + μS⁻¹e + z)
-  (H + AᵢᵀΣAᵢ)pₖˣ − Aₑᵀpₖʸ = −(∇f(x) − Aₑᵀy − Aᵢᵀ(−Σcᵢ + μS⁻¹e + z))
+  Hpˣ − Aₑᵀpʸ + AᵢᵀΣcᵢ − AᵢᵀμS⁻¹e + AᵢᵀΣAᵢpˣ = −∇f(x) + Aₑᵀy + Aᵢᵀz
+  Hpˣ + AᵢᵀΣAᵢpˣ − Aₑᵀpʸ  = −∇f(x) + Aₑᵀy + AᵢᵀΣcᵢ + AᵢᵀμS⁻¹e + Aᵢᵀz
+  (H + AᵢᵀΣAᵢ)pˣ − Aₑᵀpʸ = −∇f(x) + Aₑᵀy + Aᵢᵀ(−Σcᵢ + μS⁻¹e + z)
+  (H + AᵢᵀΣAᵢ)pˣ − Aₑᵀpʸ = −(∇f(x) − Aₑᵀy − Aᵢᵀ(−Σcᵢ + μS⁻¹e + z))
 ```
 
 Substitute the new first and third rows into the system.
 
 ```
-  [H + AᵢᵀΣAᵢ   Aₑᵀ  0][ pₖˣ]    [∇f(x) − Aₑᵀy − Aᵢᵀ(−Σcᵢ + μS⁻¹e + z)]
-  [    Aₑ        0   0][−pₖʸ] = −[                 cₑ                 ]
-  [    0         0   I][−pₖᶻ]    [       −Σcᵢ + μS⁻¹e − ΣAᵢpₖˣ        ]
+  [H + AᵢᵀΣAᵢ   Aₑᵀ  0][ pˣ]    [∇f(x) − Aₑᵀy − Aᵢᵀ(−Σcᵢ + μS⁻¹e + z)]
+  [    Aₑ        0   0][−pʸ] = −[                 cₑ                 ]
+  [    0         0   I][−pᶻ]    [        −Σcᵢ + μS⁻¹e − ΣAᵢpˣ        ]
 ```
 
 Eliminate the third row and column.
 
 ```
-  [H + AᵢᵀΣAᵢ  Aₑᵀ][ pₖˣ] = −[∇f − Aₑᵀy − Aᵢᵀ(−Σcᵢ + μS⁻¹e + z)]
-  [    Aₑ       0 ][−pₖʸ]    [               cₑ                ]
+  [H + AᵢᵀΣAᵢ  Aₑᵀ][ pˣ] = −[∇f − Aₑᵀy − Aᵢᵀ(−Σcᵢ + μS⁻¹e + z)]
+  [    Aₑ       0 ][−pʸ]    [               cₑ                ]
 ```
 
-Expand and simplify pₖˢ.
+Expand and simplify pˢ.
 
 ```
-  pₖˢ = μZ⁻¹e − s − Σ⁻¹pₖᶻ
-  pₖˢ = μZ⁻¹e − s − (S⁻¹Z)⁻¹pₖᶻ
-  pₖˢ = μZ⁻¹e − s − Z⁻¹Spₖᶻ
-  pₖˢ = μZ⁻¹e − s − Z⁻¹S(−Σcᵢ + μS⁻¹e − ΣAᵢpₖˣ)
-  pₖˢ = μZ⁻¹e − s − Z⁻¹S(−S⁻¹Zcᵢ + μS⁻¹e − S⁻¹ZAᵢpₖˣ)
-  pₖˢ = μZ⁻¹e − s − Z⁻¹(−Zcᵢ + μe − ZAᵢpₖˣ)
-  pₖˢ = μZ⁻¹e − s − (−cᵢ + μZ⁻¹e − Aᵢpₖˣ)
-  pₖˢ = μZ⁻¹e − s + cᵢ − μZ⁻¹e + Aᵢpₖˣ
-  pₖˢ = −s + cᵢ + Aᵢpₖˣ
-  pₖˢ = cᵢ − s + Aᵢpₖˣ
+  pˢ = μZ⁻¹e − s − Σ⁻¹pᶻ
+  pˢ = μZ⁻¹e − s − (S⁻¹Z)⁻¹pᶻ
+  pˢ = μZ⁻¹e − s − Z⁻¹Spᶻ
+  pˢ = μZ⁻¹e − s − Z⁻¹S(−Σcᵢ + μS⁻¹e − ΣAᵢpˣ)
+  pˢ = μZ⁻¹e − s − Z⁻¹S(−S⁻¹Zcᵢ + μS⁻¹e − S⁻¹ZAᵢpˣ)
+  pˢ = μZ⁻¹e − s − Z⁻¹(−Zcᵢ + μe − ZAᵢpˣ)
+  pˢ = μZ⁻¹e − s − (−cᵢ + μZ⁻¹e − Aᵢpˣ)
+  pˢ = μZ⁻¹e − s + cᵢ − μZ⁻¹e + Aᵢpˣ
+  pˢ = −s + cᵢ + Aᵢpˣ
+  pˢ = cᵢ − s + Aᵢpˣ
 ```
+
+### Final results
 
 In summary, the reduced 2x2 block system gives the iterates pₖˣ and pₖʸ.
 
 ```
-  [H + AᵢᵀΣAᵢ  Aₑᵀ][ pₖˣ] = −[∇f − Aₑᵀy − Aᵢᵀ(−Σcᵢ + μS⁻¹e + z)]
-  [    Aₑ       0 ][−pₖʸ]    [               cₑ                ]
+  [H + AᵢᵀΣAᵢ  Aₑᵀ][ pˣ] = −[∇f − Aₑᵀy − Aᵢᵀ(−Σcᵢ + μS⁻¹e + z)]
+  [    Aₑ       0 ][−pʸ]    [               cₑ                ]
 ```
 
-The iterates pₖˢ and pₖᶻ are given by
+The iterates pˢ and pᶻ are given by
 
 ```
-  pₖˢ = cᵢ − s + Aᵢpₖˣ
-  pₖᶻ = −Σcᵢ + μS⁻¹e − ΣAᵢpₖˣ
+  pˢ = cᵢ − s + Aᵢpˣ
+  pᶻ = −Σcᵢ + μS⁻¹e − ΣAᵢpˣ
 ```
 
 The iterates are applied like so

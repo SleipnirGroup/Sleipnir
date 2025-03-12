@@ -194,7 +194,7 @@ ExitStatus newton(
 
     // Solve the Newton-KKT system
     //
-    // Hpₖˣ = −∇f
+    // Hpˣ = −∇f
     solver.compute(H);
 
     linear_system_compute_profiler.stop();
