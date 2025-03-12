@@ -316,8 +316,8 @@ ExitStatus sqp(
 
     // Solve the Newton-KKT system
     //
-    // [H   Aₑᵀ][ pₖˣ] = −[∇f − Aₑᵀy]
-    // [Aₑ   0 ][−pₖʸ]    [   cₑ    ]
+    // [H   Aₑᵀ][ pˣ] = −[∇f − Aₑᵀy]
+    // [Aₑ   0 ][−pʸ]    [   cₑ    ]
     if (solver.compute(lhs).info() != Eigen::Success) [[unlikely]] {
       return ExitStatus::FACTORIZATION_FAILED;
     }
@@ -326,8 +326,8 @@ ExitStatus sqp(
     ScopedProfiler linear_system_solve_profiler{linear_system_solve_prof};
 
     auto compute_step = [&](Step& step) {
-      // p = [ pₖˣ]
-      //     [−pₖʸ]
+      // p = [ pˣ]
+      //     [−pʸ]
       Eigen::VectorXd p = solver.solve(rhs);
       step.p_x = p.segment(0, x.rows());
       step.p_y = -p.segment(x.rows(), y.rows());
