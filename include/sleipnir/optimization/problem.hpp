@@ -343,15 +343,21 @@ class SLEIPNIR_DLLEXPORT Problem {
       print_constraint_types(m_inequality_constraints);
     }
 
-    auto print_chosen_solver =
-        [](std::string_view solver_name, const ExpressionType& f_type,
-           const ExpressionType& c_e_type, const ExpressionType& c_i_type) {
-          slp::println("\nUsing {} solver due to:", solver_name);
-          slp::println("  ↳ {} cost function", ToMessage(f_type));
-          slp::println("  ↳ {} equality constraints", ToMessage(c_e_type));
-          slp::println("  ↳ {} inequality constraints", ToMessage(c_i_type));
-          slp::println("");
-        };
+    auto print_chosen_solver = [](std::string_view solver_name,
+                                  const ExpressionType& f_type,
+                                  const ExpressionType& c_e_type,
+                                  const ExpressionType& c_i_type) {
+      constexpr std::array types{"no", "constant", "linear", "quadratic",
+                                 "nonlinear"};
+
+      slp::println("\nUsing {} solver due to:", solver_name);
+      slp::println("  ↳ {} cost function", types[std::to_underlying(f_type)]);
+      slp::println("  ↳ {} equality constraints",
+                   types[std::to_underlying(c_e_type)]);
+      slp::println("  ↳ {} inequality constraints",
+                   types[std::to_underlying(c_i_type)]);
+      slp::println("");
+    };
 #endif
 
     // Get the highest order constraint expression types
