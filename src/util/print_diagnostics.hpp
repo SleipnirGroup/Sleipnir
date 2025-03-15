@@ -167,7 +167,7 @@ void print_iteration_diagnostics(int iterations, IterationType type,
       slp::print("┢");
     }
     slp::print(
-        "{:━^4}┯{:━^4}┯{:━^9}┯{:━^12}┯{:━^13}┯{:━^12}┯{:━^12}┯{:━^5}┯{:━^5}┯"
+        "{:━^4}┯{:━^4}┯{:━^9}┯{:━^12}┯{:━^13}┯{:━^12}┯{:━^12}┯{:━^8}┯{:━^5}┯"
         "{:━^8}┯{:━^8}┯{:━^2}",
         "", "", "", "", "", "", "", "", "", "", "", "");
     if (iterations == 0) {
@@ -176,12 +176,12 @@ void print_iteration_diagnostics(int iterations, IterationType type,
       slp::println("┪");
     }
     slp::println(
-        "┃{:^4}│{:^4}│{:^9}│{:^12}│{:^13}│{:^12}│{:^12}│{:^5}│{:^5}│{:^8}│{:^8}"
+        "┃{:^4}│{:^4}│{:^9}│{:^12}│{:^13}│{:^12}│{:^12}│{:^8}│{:^5}│{:^8}│{:^8}"
         "│{:^2}┃",
         "iter", "type", "time (ms)", "error", "cost", "infeas.", "complement.",
         "μ", "reg", "primal α", "dual α", "↩");
     slp::println(
-        "┡{:━^4}┷{:━^4}┷{:━^9}┷{:━^12}┷{:━^13}┷{:━^12}┷{:━^12}┷{:━^5}┷{:━^5}┷"
+        "┡{:━^4}┷{:━^4}┷{:━^9}┷{:━^12}┷{:━^13}┷{:━^12}┷{:━^12}┷{:━^8}┷{:━^5}┷"
         "{:━^8}┷{:━^8}┷{:━^2}┩",
         "", "", "", "", "", "", "", "", "", "", "", "");
   }
@@ -196,11 +196,11 @@ void print_iteration_diagnostics(int iterations, IterationType type,
 
   constexpr std::array ITERATION_TYPES = {"norm", "✓SOC", "XSOC"};
   slp::println(
-      "│{:4} {:4} {:9.3f} {:12e} {:13e} {:12e} {:12e} {:<5} {:<5} {:.2e} "
+      "│{:4} {:4} {:9.3f} {:12e} {:13e} {:12e} {:12e} {:.2e} {:<5} {:.2e} "
       "{:.2e} {:2d}│",
       iterations, ITERATION_TYPES[std::to_underlying(type)], to_ms(time), error,
-      cost, infeasibility, complementarity, power_of_10(μ), power_of_10(δ),
-      primal_α, dual_α, backtracks);
+      cost, infeasibility, complementarity, μ, power_of_10(δ), primal_α, dual_α,
+      backtracks);
 }
 
 /**
@@ -248,7 +248,7 @@ inline void print_final_diagnostics(
     int iterations, const small_vector<SetupProfiler>& setup_profilers,
     const small_vector<SolveProfiler>& solve_profilers) {
   // Print bottom of iteration diagnostics table
-  slp::println("└{:─^105}┘", "");
+  slp::println("└{:─^108}┘", "");
 
   // Print total time
   auto setup_duration = to_ms(setup_profilers[0].duration());
