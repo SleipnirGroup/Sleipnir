@@ -39,8 +39,6 @@ inline double error_estimate(const Eigen::VectorXd& g,
                              const Eigen::SparseMatrix<double>& A_e,
                              const Eigen::VectorXd& c_e,
                              const Eigen::VectorXd& y) {
-  int num_equality_constraints = A_e.rows();
-
   // Update the error estimate using the KKT conditions from equations (19.5a)
   // through (19.5d) of [1].
   //
@@ -55,8 +53,7 @@ inline double error_estimate(const Eigen::VectorXd& g,
 
   // s_d = max(sₘₐₓ, ‖y‖₁ / m) / sₘₐₓ
   constexpr double s_max = 100.0;
-  double s_d =
-      std::max(s_max, y.lpNorm<1>() / num_equality_constraints) / s_max;
+  double s_d = std::max(s_max, y.lpNorm<1>() / y.rows()) / s_max;
 
   return std::max({(g - A_e.transpose() * y).lpNorm<Eigen::Infinity>() / s_d,
                    c_e.lpNorm<Eigen::Infinity>()});
@@ -87,9 +84,6 @@ inline double error_estimate(const Eigen::VectorXd& g,
                              const Eigen::VectorXd& c_i,
                              const Eigen::VectorXd& s, const Eigen::VectorXd& y,
                              const Eigen::VectorXd& z, double μ) {
-  int num_equality_constraints = A_e.rows();
-  int num_inequality_constraints = A_i.rows();
-
   // Update the error estimate using the KKT conditions from equations (19.5a)
   // through (19.5d) of [1].
   //
@@ -108,14 +102,12 @@ inline double error_estimate(const Eigen::VectorXd& g,
 
   // s_d = max(sₘₐₓ, (‖y‖₁ + ‖z‖₁) / (m + n)) / sₘₐₓ
   constexpr double s_max = 100.0;
-  double s_d = std::max(s_max, (y.lpNorm<1>() + z.lpNorm<1>()) /
-                                   (num_equality_constraints +
-                                    num_inequality_constraints)) /
-               s_max;
+  double s_d =
+      std::max(s_max, (y.lpNorm<1>() + z.lpNorm<1>()) / (y.rows() + z.rows())) /
+      s_max;
 
   // s_c = max(sₘₐₓ, ‖z‖₁ / n) / sₘₐₓ
-  double s_c =
-      std::max(s_max, z.lpNorm<1>() / num_inequality_constraints) / s_max;
+  double s_c = std::max(s_max, z.lpNorm<1>() / z.rows()) / s_max;
 
   const auto S = s.asDiagonal();
   const Eigen::VectorXd μe = Eigen::VectorXd::Constant(s.rows(), μ);
