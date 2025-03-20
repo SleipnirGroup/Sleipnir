@@ -482,6 +482,10 @@ ExitStatus interior_point(
           !trial_c_i.allFinite()) {
         // Reduce step size
         α *= α_red_factor;
+
+        if (α < α_min) {
+          return ExitStatus::LINE_SEARCH_FAILED;
+        }
         continue;
       }
 
