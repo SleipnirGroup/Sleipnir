@@ -370,7 +370,7 @@ ExitStatus interior_point(
 
     // Call user callbacks
     for (const auto& callback : callbacks) {
-      if (callback({iterations, x, s, g, H, A_e, A_i})) {
+      if (callback({iterations, x, g, H, A_e, A_i})) {
         return ExitStatus::CALLBACK_REQUESTED_STOP;
       }
     }
