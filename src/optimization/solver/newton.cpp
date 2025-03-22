@@ -182,8 +182,7 @@ ExitStatus newton(
 
     // Call user callbacks
     for (const auto& callback : callbacks) {
-      if (callback({iterations, x, Eigen::VectorXd::Zero(0), g, H,
-                    Eigen::SparseMatrix<double>{},
+      if (callback({iterations, x, g, H, Eigen::SparseMatrix<double>{},
                     Eigen::SparseMatrix<double>{}})) {
         return ExitStatus::CALLBACK_REQUESTED_STOP;
       }
