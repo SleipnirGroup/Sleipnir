@@ -74,15 +74,16 @@ def test_cart_pole_ocp():
     assert problem.equality_constraint_type() == ExpressionType.NONLINEAR
     assert problem.inequality_constraint_type() == ExpressionType.LINEAR
 
-    # FIXME: Fails with "factorization failed"
-    assert problem.solve(diagnostics=True) == ExitStatus.FACTORIZATION_FAILED
-    return
+    assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
 
     # Verify initial state
     assert X.value(0, 0) == pytest.approx(x_initial[0, 0], abs=1e-8)
     assert X.value(1, 0) == pytest.approx(x_initial[1, 0], abs=1e-8)
     assert X.value(2, 0) == pytest.approx(x_initial[2, 0], abs=1e-8)
     assert X.value(3, 0) == pytest.approx(x_initial[3, 0], abs=1e-8)
+
+    # FIXME: Replay diverges
+    return
 
     # Verify solution
     x = np.zeros((4, 1))

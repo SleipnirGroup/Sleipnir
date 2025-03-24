@@ -429,7 +429,7 @@ ExitStatus interior_point(
     //
     // [H + AᵢᵀΣAᵢ  Aₑᵀ][ pˣ] = −[∇f − Aₑᵀy − Aᵢᵀ(−Σcᵢ + μS⁻¹e + z)]
     // [    Aₑ       0 ][−pʸ]    [               cₑ                ]
-    if (solver.compute(lhs, μ).info() != Eigen::Success) [[unlikely]] {
+    if (solver.compute(lhs).info() != Eigen::Success) [[unlikely]] {
       return ExitStatus::FACTORIZATION_FAILED;
     }
 
