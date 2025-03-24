@@ -48,17 +48,6 @@ class RegularizedLDLT {
    * @return The factorization.
    */
   RegularizedLDLT& compute(const Eigen::SparseMatrix<double>& lhs) {
-    return compute(lhs, 1e-9);
-  }
-
-  /**
-   * Computes the regularized LDLT factorization of a matrix.
-   *
-   * @param lhs Left-hand side of the system.
-   * @param μ The barrier parameter for the current interior-point iteration.
-   * @return The factorization.
-   */
-  RegularizedLDLT& compute(const Eigen::SparseMatrix<double>& lhs, double μ) {
     // The regularization procedure is based on algorithm B.1 of [1]
 
     // Max density is 50% due to the caller only providing the lower triangle.
@@ -81,17 +70,11 @@ class RegularizedLDLT {
     }
 
     // Also regularize the Hessian. If the Hessian wasn't regularized in a
-    // previous run of Compute(), start at a small value of δ. Otherwise,
-    // attempt a δ half as big as the previous run so δ can trend downwards over
-    // time.
+    // previous run of Compute(), start at small values of δ and γ. Otherwise,
+    // attempt a δ and γ half as big as the previous run so δ and γ can trend
+    // downwards over time.
     double δ = m_δ_old == 0.0 ? 1e-4 : m_δ_old / 2.0;
-
-    // If the decomposition succeeded and the inertia has some zero eigenvalues,
-    // or the decomposition failed, regularize the equality constraints
-    double γ = (m_info == Eigen::Success && inertia.zero > 0) ||
-                       m_info != Eigen::Success
-                   ? 1e-8 * std::pow(μ, 0.25)
-                   : 0.0;
+    double γ = 1e-10;
 
     while (true) {
       // Regularize lhs by adding a multiple of the identity matrix
@@ -110,20 +93,37 @@ class RegularizedLDLT {
         }
       }
 
-      // If the inertia is ideal, store that value of δ and return.
-      // Otherwise, increase δ by an order of magnitude and try again.
-      if (m_info == Eigen::Success && inertia == ideal_inertia) {
-        m_δ_old = δ;
-        return *this;
-      } else {
-        δ *= 10.0;
-
-        // If the Hessian perturbation is too high, report failure. This can be
-        // caused by ill-conditioning.
-        if (δ > 1e20) {
-          m_info = Eigen::NumericalIssue;
+      if (m_info == Eigen::Success) {
+        if (inertia == ideal_inertia) {
+          // If the inertia is ideal, store δ and return
+          m_δ_old = δ;
           return *this;
+        } else if (inertia.zero > 0) {
+          // If there's zero eigenvalues, increase δ and γ by an order of
+          // magnitude and try again
+          δ *= 10.0;
+          γ *= 10.0;
+        } else if (inertia.negative > ideal_inertia.negative) {
+          // If there's too many negative eigenvalues, increase δ by an order of
+          // magnitude and try again
+          δ *= 10.0;
+        } else if (inertia.positive > ideal_inertia.positive) {
+          // If there's too many positive eigenvalues, increase γ by an order of
+          // magnitude and try again
+          γ *= 10.0;
         }
+      } else {
+        // If the decomposition failed, increase δ and γ by an order of
+        // magnitude and try again
+        δ *= 10.0;
+        γ *= 10.0;
+      }
+
+      // If the Hessian perturbation is too high, report failure. This can be
+      // caused by ill-conditioning.
+      if (δ > 1e20 || γ > 1e20) {
+        m_info = Eigen::NumericalIssue;
+        return *this;
       }
     }
   }

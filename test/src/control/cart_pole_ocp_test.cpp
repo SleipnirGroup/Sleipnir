@@ -80,16 +80,16 @@ TEST_CASE("OCP - Cart-pole", "[OCP]") {
   CHECK(problem.equality_constraint_type() == slp::ExpressionType::NONLINEAR);
   CHECK(problem.inequality_constraint_type() == slp::ExpressionType::LINEAR);
 
-  // FIXME: Fails with "factorization failed"
-  CHECK(problem.solve({.diagnostics = true}) ==
-        slp::ExitStatus::FACTORIZATION_FAILED);
-  SKIP("Fails with \"factorization failed\"");
+  CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
   // Verify initial state
   CHECK(X.value(0, 0) == Catch::Approx(x_initial(0)).margin(1e-8));
   CHECK(X.value(1, 0) == Catch::Approx(x_initial(1)).margin(1e-8));
   CHECK(X.value(2, 0) == Catch::Approx(x_initial(2)).margin(1e-8));
   CHECK(X.value(3, 0) == Catch::Approx(x_initial(3)).margin(1e-8));
+
+  // FIXME: Replay diverges
+  SKIP("Replay diverges");
 
   // Verify solution
   Eigen::Matrix<double, 4, 1> x{0.0, 0.0, 0.0, 0.0};
