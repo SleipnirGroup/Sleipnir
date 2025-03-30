@@ -65,22 +65,23 @@ class RegularizedLDLT {
 
       // If the inertia is ideal, don't regularize the system
       if (inertia == ideal_inertia) {
+        m_prev_δ = 0.0;
         return *this;
       }
     }
 
     // Also regularize the Hessian. If the Hessian wasn't regularized in a
-    // previous run of Compute(), start at small values of δ and γ. Otherwise,
+    // previous run of compute(), start at small values of δ and γ. Otherwise,
     // attempt a δ and γ half as big as the previous run so δ and γ can trend
     // downwards over time.
-    double δ = m_δ_old == 0.0 ? 1e-4 : m_δ_old / 2.0;
+    double δ = m_prev_δ == 0.0 ? 1e-4 : m_prev_δ / 2.0;
     double γ = 1e-10;
 
     while (true) {
       // Regularize lhs by adding a multiple of the identity matrix
       //
-      // lhs = [H + AᵢᵀΣAᵢ + δI   Aₑᵀ]
-      //       [       Aₑ        −γI ]
+      // lhs = [H + AᵢᵀΣAᵢ + δI  Aₑᵀ]
+      //       [      Aₑ         −γI]
       if (m_is_sparse) {
         m_info = compute_sparse(lhs + regularization(δ, γ)).info();
         if (m_info == Eigen::Success) {
@@ -96,7 +97,7 @@ class RegularizedLDLT {
       if (m_info == Eigen::Success) {
         if (inertia == ideal_inertia) {
           // If the inertia is ideal, store δ and return
-          m_δ_old = δ;
+          m_prev_δ = δ;
           return *this;
         } else if (inertia.zero > 0) {
           // If there's zero eigenvalues, increase δ and γ by an order of
@@ -163,7 +164,7 @@ class RegularizedLDLT {
    *
    * @return Hessian regularization factor.
    */
-  double hessian_regularization() const { return m_δ_old; }
+  double hessian_regularization() const { return m_prev_δ; }
 
  private:
   using SparseSolver = Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>>;
@@ -185,8 +186,8 @@ class RegularizedLDLT {
   Inertia ideal_inertia{m_num_decision_variables, m_num_equality_constraints,
                         0};
 
-  /// The value of δ from the previous run of Compute().
-  double m_δ_old = 0.0;
+  /// The value of δ from the previous run of compute().
+  double m_prev_δ = 0.0;
 
   // Number of non-zeros in LHS.
   int m_non_zeros = -1;
