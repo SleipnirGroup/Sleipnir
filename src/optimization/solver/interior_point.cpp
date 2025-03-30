@@ -702,19 +702,22 @@ ExitStatus interior_point(
     y += α_z * step.p_y;
     z += α_z * step.p_z;
 
-    // A requirement for the convergence proof is that the "primal-dual barrier
-    // term Hessian" Σₖ does not deviate arbitrarily much from the "primal
-    // Hessian" μⱼSₖ⁻². We ensure this by resetting
+    // A requirement for the convergence proof is that the primal-dual barrier
+    // term Hessian Σₖ₊₁ does not deviate arbitrarily much from the primal
+    // barrier term Hessian μSₖ₊₁⁻².
     //
-    //   zₖ₊₁⁽ⁱ⁾ = max(min(zₖ₊₁⁽ⁱ⁾, κ_Σ μⱼ/sₖ₊₁⁽ⁱ⁾), μⱼ/(κ_Σ sₖ₊₁⁽ⁱ⁾))
+    //   Σₖ₊₁ = μSₖ₊₁⁻²
+    //   Sₖ₊₁⁻¹Zₖ₊₁ = μSₖ₊₁⁻²
+    //   Zₖ₊₁ = μSₖ₊₁⁻¹
+    //
+    // We ensure this by resetting
+    //
+    //   zₖ₊₁ = clamp(zₖ₊₁, 1/κ_Σ μ/sₖ₊₁, κ_Σ μ/sₖ₊₁)
     //
     // for some fixed κ_Σ ≥ 1 after each step. See equation (16) of [2].
     for (int row = 0; row < z.rows(); ++row) {
-      // Barrier parameter scale factor for inequality constraint Lagrange
-      // multiplier safeguard
       constexpr double κ_Σ = 1e10;
-
-      z[row] = std::max(std::min(z[row], κ_Σ * μ / s[row]), μ / (κ_Σ * s[row]));
+      z[row] = std::clamp(z[row], 1.0 / κ_Σ * μ / s[row], κ_Σ * μ / s[row]);
     }
 
     // Update autodiff for Jacobians and Hessian
