@@ -23,6 +23,64 @@ w̄₁ = w̄₄(∂w₄/∂w₁) + w̄₃(∂w₃/∂w₁) = w̄₄cos(w₁) + w
 
 https://en.wikipedia.org/wiki/Automatic_differentiation#Beyond_forward_and_reverse_accumulation
 
+## Unconstrained optimization
+
+We want to solve the following optimization problem.
+
+```
+   min f(x)
+    x
+```
+
+where f(x) is the cost function.
+
+### Lagrangian
+
+The Lagrangian of the problem is
+
+```
+  L(x) = f(x)
+```
+
+### Gradients of the Lagrangian
+
+The gradients are
+
+```
+  ∇ₓL(x) = ∇f
+```
+
+The first-order necessary conditions for optimality are
+
+```
+  ∇f = 0
+```
+
+### Newton's method
+
+Next, we'll apply Newton's method to the optimality conditions. Let H be ∂²L/∂x² and pˣ be the step for x.
+
+```
+  ∇ₓL(x + pˣ) ≈ ∇ₓL(x) + ∂²L/∂x²pˣ
+  ∇ₓL(x) + Hpˣ = 0
+  Hpˣ = −∇ₓL(x, y)
+  Hpˣ = −(∇f)
+```
+
+### Final results
+
+In summary, the following system gives the iterate pₖˣ.
+
+```
+  Hpˣ = −∇f(x)
+```
+
+The iterate is applied like so
+
+```
+  xₖ₊₁ = xₖ + pₖˣ
+```
+
 ## Sequential quadratic programming
 
 We want to solve the following optimization problem.
