@@ -61,11 +61,11 @@ TEST_CASE("Problem - Rosenbrock with cubic and line constraint", "[Problem]") {
       // Local minimum at (0.0, 0.0)
       // Global minimum at (1.0, 1.0)
       CHECK((Near(0.0, x.value(), 1e-2) || Near(1.0, x.value(), 1e-2)));
-      INFO(std::format("  (x₀, y₀) = ({}, {})\n", x0, y0));
-      INFO(std::format("  x.value(0) = {}", x.value()));
+      INFO(std::format("  (x₀, y₀) = ({}, {})", x0, y0));
+      INFO(std::format("  (x, y) = ({}, {})", x.value(), y.value()));
       CHECK((Near(0.0, y.value(), 1e-2) || Near(1.0, y.value(), 1e-2)));
-      INFO(std::format("  (x₀, y₀) = ({}, {})\n", x0, y0));
-      INFO(std::format("  y.value(0) = {}", y.value()));
+      INFO(std::format("  (x₀, y₀) = ({}, {})", x0, y0));
+      INFO(std::format("  (x, y) = ({}, {})", x.value(), y.value()));
     }
   }
 }
@@ -93,12 +93,12 @@ TEST_CASE("Problem - Rosenbrock with disk constraint", "[Problem]") {
 
       CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
-      CHECK(x.value() == Catch::Approx(1.0).margin(1e-1));
-      INFO(std::format("  (x₀, y₀) = ({}, {})\n", x0, y0));
-      INFO(std::format("  x.value(0) = {}", x.value()));
-      CHECK(y.value() == Catch::Approx(1.0).margin(1e-1));
-      INFO(std::format("  (x₀, y₀) = ({}, {})\n", x0, y0));
-      INFO(std::format("  x.value(0) = {}", x.value()));
+      CHECK(x.value() == Catch::Approx(1.0).margin(1e-3));
+      INFO(std::format("  (x₀, y₀) = ({}, {})", x0, y0));
+      INFO(std::format("  (x, y) = ({}, {})", x.value(), y.value()));
+      CHECK(y.value() == Catch::Approx(1.0).margin(1e-3));
+      INFO(std::format("  (x₀, y₀) = ({}, {})", x0, y0));
+      INFO(std::format("  (x, y) = ({}, {})", x.value(), y.value()));
     }
   }
 }
