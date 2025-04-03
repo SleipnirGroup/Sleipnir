@@ -84,8 +84,8 @@ def test_rosenbrock_with_disk_constraint():
 
             assert problem.solve() == ExitStatus.SUCCESS
 
-            assert x.value() == pytest.approx(1.0, abs=1e-1)
-            assert y.value() == pytest.approx(1.0, abs=1e-1)
+            assert x.value() == pytest.approx(1.0, abs=1e-3)
+            assert y.value() == pytest.approx(1.0, abs=1e-3)
 
 
 def test_minimum_2d_distance_with_linear_constraint():
