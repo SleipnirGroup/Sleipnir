@@ -23,6 +23,100 @@ w̄₁ = w̄₄(∂w₄/∂w₁) + w̄₃(∂w₃/∂w₁) = w̄₄cos(w₁) + w
 
 https://en.wikipedia.org/wiki/Automatic_differentiation#Beyond_forward_and_reverse_accumulation
 
+## Sequential quadratic programming
+
+We want to solve the following optimization problem.
+
+```
+   min f(x)
+    x
+  s.t. cₑ(x) = 0
+```
+
+where f(x) is the cost function and cₑ(x) is the equality constraints.
+
+### Lagrangian
+
+The Lagrangian of the problem is
+
+```
+  L(x, y) = f(x) − yᵀcₑ(x)
+```
+
+### Gradients of the Lagrangian
+
+The gradients are
+
+```
+  ∇ₓL(x, y) = ∇f − Aₑᵀy
+  ∇_yL(x, y) = −cₑ
+```
+
+The first-order necessary conditions for optimality are
+
+```
+  ∇f − Aₑᵀy = 0
+  −cₑ = 0
+```
+
+where Aₑ = ∂cₑ/∂x. We'll rearrange them for the primal-dual system.
+
+```
+  ∇f − Aₑᵀy = 0
+  cₑ = 0
+```
+
+### Newton's method
+
+Next, we'll apply Newton's method to the optimality conditions. Let H be ∂²L/∂x², pˣ be the step for x, and pʸ be the step for y.
+
+```
+  ∇ₓL(x + pˣ, y + pʸ) ≈ ∇ₓL(x, y) + ∂²L/∂x²pˣ + ∂²L/∂x∂ypʸ
+  ∇ₓL(x, y) + Hpˣ − Aₑᵀpʸ = 0
+  Hpˣ − Aₑᵀpʸ = −∇ₓL(x, y)
+  Hpˣ − Aₑᵀpʸ = −(∇f − Aₑᵀy)
+```
+```
+  ∇_yL(x + pˣ, y + pʸ) ≈ ∇_yL(x, y) + ∂²L/∂y∂xpˣ + ∂²L/∂y²pʸ
+  ∇_yL(x, y) + Aₑpˣ = 0
+  Aₑpˣ = −∇_yL(x, y)
+  Aₑpˣ = −cₑ
+```
+
+### Matrix equation
+
+Group them into a matrix equation.
+
+```
+  [H   −Aₑᵀ][pˣ] = −[∇f(x) − Aₑᵀy]
+  [Aₑ   0  ][pʸ]    [     cₑ     ]
+```
+
+Invert pʸ.
+
+```
+  [H   Aₑᵀ][ pˣ] = −[∇f(x) − Aₑᵀy]
+  [Aₑ   0 ][−pʸ]    [     cₑ     ]
+```
+
+### Final results
+
+In summary, the reduced 2x2 block system gives the iterates pₖˣ and pₖʸ.
+
+```
+  [H   Aₑᵀ][ pˣ] = −[∇f(x) − Aₑᵀy]
+  [Aₑ   0 ][−pʸ]    [     cₑ     ]
+```
+
+The iterates are applied like so
+
+```
+  xₖ₊₁ = xₖ + pₖˣ
+  yₖ₊₁ = yₖ + pₖʸ
+```
+
+Section 6 of [^3] describes how to check for local infeasibility.
+
 ## Interior-point method
 
 We want to solve the following optimization problem.
@@ -99,7 +193,7 @@ Next, we'll apply Newton's method to the optimality conditions. Let H be ∂²L/
 
 ```
   ∇ₓL(x + pˣ, s + pˢ, y + pʸ, z + pᶻ)
-    ≈ ∇ₓL(x, s, y, z) + ∂²L/∂x²pˣ + ∂²L/∂x∂s∇s + ∂²L/∂x∂ypʸ + ∂²L/∂x∂zpᶻ
+    ≈ ∇ₓL(x, s, y, z) + ∂²L/∂x²pˣ + ∂²L/∂x∂spˢ + ∂²L/∂x∂ypʸ + ∂²L/∂x∂zpᶻ
   ∇ₓL(x, s, y, z) + Hpˣ − Aₑᵀpʸ − Aᵢᵀpᶻ = 0
   Hpˣ − Aₑᵀpʸ − Aᵢᵀpᶻ = −∇ₓL(x, s, y, z)
   Hpˣ − Aₑᵀpʸ − Aᵢᵀpᶻ = −(∇f − Aₑᵀy − Aᵢᵀz)
