@@ -39,11 +39,11 @@ def test_rosenbrock_with_cubic_and_line_constraint():
             y.set_value(y0)
 
             problem.minimize(
-                autodiff.pow(1 - x, 2) + 100 * autodiff.pow(y - autodiff.pow(x, 2), 2)
+                100 * autodiff.pow(y - autodiff.pow(x, 2), 2) + autodiff.pow(1 - x, 2)
             )
 
-            problem.subject_to(autodiff.pow(x - 1, 3) - y + 1 <= 0)
-            problem.subject_to(x + y - 2 <= 0)
+            problem.subject_to(y >= autodiff.pow(x - 1, 3) + 1)
+            problem.subject_to(y <= -x + 2)
 
             assert problem.cost_function_type() == ExpressionType.NONLINEAR
             assert problem.equality_constraint_type() == ExpressionType.NONE
@@ -73,7 +73,7 @@ def test_rosenbrock_with_disk_constraint():
             y.set_value(y0)
 
             problem.minimize(
-                autodiff.pow(1 - x, 2) + 100 * autodiff.pow(y - autodiff.pow(x, 2), 2)
+                100 * autodiff.pow(y - autodiff.pow(x, 2), 2) + autodiff.pow(1 - x, 2)
             )
 
             problem.subject_to(autodiff.pow(x, 2) + autodiff.pow(y, 2) <= 2)

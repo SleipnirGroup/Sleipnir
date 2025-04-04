@@ -41,11 +41,11 @@ TEST_CASE("Problem - Rosenbrock with cubic and line constraint", "[Problem]") {
       auto y = problem.decision_variable();
       y.set_value(y0);
 
-      problem.minimize(slp::pow(1 - x, 2) +
-                       100 * slp::pow(y - slp::pow(x, 2), 2));
+      problem.minimize(100 * slp::pow(y - slp::pow(x, 2), 2) +
+                       slp::pow(1 - x, 2));
 
-      problem.subject_to(slp::pow(x - 1, 3) - y + 1 <= 0);
-      problem.subject_to(x + y - 2 <= 0);
+      problem.subject_to(y >= slp::pow(x - 1, 3) + 1);
+      problem.subject_to(y <= -x + 2);
 
       CHECK(problem.cost_function_type() == slp::ExpressionType::NONLINEAR);
       CHECK(problem.equality_constraint_type() == slp::ExpressionType::NONE);
