@@ -113,7 +113,7 @@ ExitStatus newton(
   RegularizedLDLT solver{decision_variables.size(), 0};
 
   // Variables for determining when a step is acceptable
-  constexpr double α_red_factor = 0.5;
+  constexpr double α_reduction_factor = 0.5;
   constexpr double α_min = 1e-20;
   int acceptable_iter_counter = 0;
 
@@ -217,7 +217,7 @@ ExitStatus newton(
       // If f(xₖ + αpₖˣ) isn't finite, reduce step size immediately
       if (!std::isfinite(f.value())) {
         // Reduce step size
-        α *= α_red_factor;
+        α *= α_reduction_factor;
         continue;
       }
 
@@ -228,7 +228,7 @@ ExitStatus newton(
       }
 
       // Reduce step size
-      α *= α_red_factor;
+      α *= α_reduction_factor;
 
       // If step size hit a minimum, check if the KKT error was reduced. If it
       // wasn't, report bad line search.
@@ -304,7 +304,7 @@ ExitStatus newton(
       print_iteration_diagnostics(
           iterations, IterationType::NORMAL,
           inner_iter_profiler.current_duration(), E_0, f.value(), 0.0, 0.0, 0.0,
-          solver.hessian_regularization(), α, α_max, 1.0);
+          solver.hessian_regularization(), α, α_max, α_reduction_factor, 1.0);
     }
 #endif
 

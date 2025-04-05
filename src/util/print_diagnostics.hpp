@@ -151,6 +151,8 @@ inline void print_c_i_local_infeasibility_error(const Eigen::VectorXd& c_i) {
  * @param δ The Hessian regularization factor.
  * @param primal_α The primal step size.
  * @param primal_α_max The max primal step size.
+ * @param α_reduction_factor Factor by which primal_α is reduced during
+ *   backtracking.
  * @param dual_α The dual step size.
  */
 template <typename Rep, typename Period = std::ratio<1>>
@@ -159,7 +161,8 @@ void print_iteration_diagnostics(int iterations, IterationType type,
                                  double error, double cost,
                                  double infeasibility, double complementarity,
                                  double μ, double δ, double primal_α,
-                                 double primal_α_max, double dual_α) {
+                                 double primal_α_max, double α_reduction_factor,
+                                 double dual_α) {
   if (iterations % 20 == 0) {
     if (iterations == 0) {
       slp::print("┏");
@@ -188,11 +191,16 @@ void print_iteration_diagnostics(int iterations, IterationType type,
 
   // For the number of backtracks, we want x such that:
   //
-  //   α_max 2⁻ˣ = α
-  //   2⁻ˣ = α/α_max
-  //   −x = std::log2(α/α_max)
-  //   x = −std::log2(α/α_max)
-  int backtracks = static_cast<int>(-std::log2(primal_α / primal_α_max));
+  //   αᵐᵃˣrˣ = α
+  //
+  // where r ∈ (0, 1) is the reduction factor.
+  //
+  //   rˣ = α/αᵐᵃˣ
+  //   ln(rˣ) = ln(α/αᵐᵃˣ)
+  //   x ln(r) = ln(α/αᵐᵃˣ)
+  //   x = ln(α/αᵐᵃˣ)/ln(r)
+  int backtracks = static_cast<int>(std::log(primal_α / primal_α_max) /
+                                    std::log(α_reduction_factor));
 
   constexpr std::array ITERATION_TYPES = {"norm", "✓SOC", "XSOC"};
   slp::println(

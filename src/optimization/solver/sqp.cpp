@@ -176,7 +176,7 @@ ExitStatus sqp(
                          equality_constraints.size()};
 
   // Variables for determining when a step is acceptable
-  constexpr double α_red_factor = 0.5;
+  constexpr double α_reduction_factor = 0.5;
   constexpr double α_min = 1e-7;
   int acceptable_iter_counter = 0;
 
@@ -351,7 +351,7 @@ ExitStatus sqp(
       // immediately
       if (!std::isfinite(f.value()) || !trial_c_e.allFinite()) {
         // Reduce step size
-        α *= α_red_factor;
+        α *= α_reduction_factor;
         continue;
       }
 
@@ -387,13 +387,14 @@ ExitStatus sqp(
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
             if (options.diagnostics) {
               double E = error_estimate(g, A_e, trial_c_e, trial_y);
-              print_iteration_diagnostics(
-                  iterations,
-                  step_acceptable ? IterationType::ACCEPTED_SOC
-                                  : IterationType::REJECTED_SOC,
-                  soc_profiler.current_duration(), E, f.value(),
-                  trial_c_e.lpNorm<1>(), 0.0, 0.0,
-                  solver.hessian_regularization(), α_soc, 1.0, 1.0);
+              print_iteration_diagnostics(iterations,
+                                          step_acceptable
+                                              ? IterationType::ACCEPTED_SOC
+                                              : IterationType::REJECTED_SOC,
+                                          soc_profiler.current_duration(), E,
+                                          f.value(), trial_c_e.lpNorm<1>(), 0.0,
+                                          0.0, solver.hessian_regularization(),
+                                          α_soc, 1.0, α_reduction_factor, 1.0);
             }
 #endif
           }};
@@ -461,7 +462,7 @@ ExitStatus sqp(
       }
 
       // Reduce step size
-      α *= α_red_factor;
+      α *= α_reduction_factor;
 
       // If step size hit a minimum, check if the KKT error was reduced. If it
       // wasn't, report line search failure.
@@ -554,7 +555,8 @@ ExitStatus sqp(
       print_iteration_diagnostics(iterations, IterationType::NORMAL,
                                   inner_iter_profiler.current_duration(), E_0,
                                   f.value(), c_e.lpNorm<1>(), 0.0, 0.0,
-                                  solver.hessian_regularization(), α, α_max, α);
+                                  solver.hessian_regularization(), α, α_max,
+                                  α_reduction_factor, α);
     }
 #endif
 
