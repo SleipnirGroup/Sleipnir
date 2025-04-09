@@ -121,10 +121,10 @@ void bind_ocp(nb::enum_<TranscriptionMethod>& transcription_method,
   cls.def("set_upper_input_bound", &OCP::set_upper_input_bound<VariableMatrix>,
           "upper_bound"_a, DOC(slp, OCP, set_upper_input_bound));
 
-  cls.def("set_min_timestep", &OCP::SetMinTimestep, "min_timestep"_a,
-          DOC(slp, OCP, SetMinTimestep));
-  cls.def("set_max_timestep", &OCP::SetMaxTimestep, "max_timestep"_a,
-          DOC(slp, OCP, SetMaxTimestep));
+  cls.def("set_min_timestep", &OCP::set_min_timestep, "min_timestep"_a,
+          DOC(slp, OCP, set_min_timestep));
+  cls.def("set_max_timestep", &OCP::set_max_timestep, "max_timestep"_a,
+          DOC(slp, OCP, set_max_timestep));
 
   cls.def("X", &OCP::X, DOC(slp, OCP, X));
   cls.def("U", &OCP::U, DOC(slp, OCP, U));

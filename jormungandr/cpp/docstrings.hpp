@@ -383,15 +383,6 @@ single-shooting can use either an ODE or state transition function.
 https://underactuated.mit.edu/trajopt.html goes into more detail on
 each transcription method.)doc";
 
-static const char *__doc_slp_OCP_ForEachStep =
-R"doc(Set the constraint evaluation function. This function is called
-`num_steps+1` times, with the corresponding state and input
-VariableMatrices.
-
-Parameter ``callback``:
-    The callback f(t, x, u, dt) where t is time, x is the state
-    vector, u is the input vector, and dt is the timestep duration.)doc";
-
 static const char *__doc_slp_OCP_OCP =
 R"doc(Build an optimization problem using a system evolution function
 (explicit ODE or discrete state transition function).
@@ -453,18 +444,6 @@ Parameter ``timestep_method``:
 
 Parameter ``method``:
     The transcription method.)doc";
-
-static const char *__doc_slp_OCP_SetMaxTimestep =
-R"doc(Convenience function to set an upper bound on the timestep.
-
-Parameter ``max_timestep``:
-    The maximum timestep.)doc";
-
-static const char *__doc_slp_OCP_SetMinTimestep =
-R"doc(Convenience function to set a lower bound on the timestep.
-
-Parameter ``min_timestep``:
-    The minimum timestep.)doc";
 
 static const char *__doc_slp_OCP_U =
 R"doc(Get the input variables. After the problem is solved, this will
@@ -528,6 +507,15 @@ Parameter ``callback``:
     The callback f(x, u) where x is the state and u is the input
     vector.)doc";
 
+static const char *__doc_slp_OCP_for_each_step_2 =
+R"doc(Set the constraint evaluation function. This function is called
+`num_steps+1` times, with the corresponding state and input
+VariableMatrices.
+
+Parameter ``callback``:
+    The callback f(t, x, u, dt) where t is time, x is the state
+    vector, u is the input vector, and dt is the timestep duration.)doc";
+
 static const char *__doc_slp_OCP_initial_state =
 R"doc(Convenience function to get the initial state in the trajectory.
 
@@ -562,6 +550,18 @@ R"doc(Convenience function to set a lower bound on the input.
 Parameter ``lower_bound``:
     The lower bound that inputs must always be above. Must be shaped
     (num_inputs)x1.)doc";
+
+static const char *__doc_slp_OCP_set_max_timestep =
+R"doc(Convenience function to set an upper bound on the timestep.
+
+Parameter ``max_timestep``:
+    The maximum timestep.)doc";
+
+static const char *__doc_slp_OCP_set_min_timestep =
+R"doc(Convenience function to set a lower bound on the timestep.
+
+Parameter ``min_timestep``:
+    The minimum timestep.)doc";
 
 static const char *__doc_slp_OCP_set_upper_input_bound =
 R"doc(Convenience function to set an upper bound on the input.

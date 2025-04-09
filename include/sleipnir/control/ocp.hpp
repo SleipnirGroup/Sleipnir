@@ -261,7 +261,7 @@ class SLEIPNIR_DLLEXPORT OCP : public Problem {
    * @param callback The callback f(t, x, u, dt) where t is time, x is the state
    *   vector, u is the input vector, and dt is the timestep duration.
    */
-  void ForEachStep(
+  void for_each_step(
       const function_ref<void(const Variable& t, const VariableMatrix& x,
                               const VariableMatrix& u, const Variable& dt)>
           callback) {
@@ -310,7 +310,7 @@ class SLEIPNIR_DLLEXPORT OCP : public Problem {
    *
    * @param min_timestep The minimum timestep.
    */
-  void SetMinTimestep(std::chrono::duration<double> min_timestep) {
+  void set_min_timestep(std::chrono::duration<double> min_timestep) {
     subject_to(dt() >= min_timestep.count());
   }
 
@@ -319,7 +319,7 @@ class SLEIPNIR_DLLEXPORT OCP : public Problem {
    *
    * @param max_timestep The maximum timestep.
    */
-  void SetMaxTimestep(std::chrono::duration<double> max_timestep) {
+  void set_max_timestep(std::chrono::duration<double> max_timestep) {
     subject_to(dt() <= max_timestep.count());
   }
 
