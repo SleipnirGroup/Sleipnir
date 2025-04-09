@@ -45,8 +45,8 @@ TEST_CASE("OCP - Differential drive", "[OCP]") {
   problem.set_lower_input_bound(u_min);
   problem.set_upper_input_bound(u_max);
 
-  problem.SetMinTimestep(min_timestep);
-  problem.SetMaxTimestep(3s);
+  problem.set_min_timestep(min_timestep);
+  problem.set_max_timestep(3s);
 
   // Set up cost
   problem.minimize(problem.dt() * Eigen::Matrix<double, N + 1, 1>::Ones());
