@@ -19,16 +19,6 @@ struct SLEIPNIR_DLLEXPORT Options {
   /// The maximum number of solver iterations before returning a solution.
   int max_iterations = 5000;
 
-  /// The solver will stop once the error is below this tolerance for
-  /// `acceptable_iterations` iterations. This is useful in cases where the
-  /// solver might not be able to achieve the desired level of accuracy due to
-  /// floating-point round-off.
-  double acceptable_tolerance = 1e-6;
-
-  /// The solver will stop once the error is below `acceptable_tolerance` for
-  /// this many iterations.
-  int max_acceptable_iterations = 15;
-
   /// The maximum elapsed wall clock time before returning a solution.
   std::chrono::duration<double> timeout{
       std::numeric_limits<double>::infinity()};

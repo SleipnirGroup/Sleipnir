@@ -11,9 +11,6 @@ namespace slp {
 
 void bind_exit_status(nb::enum_<ExitStatus>& e) {
   e.value("SUCCESS", ExitStatus::SUCCESS, DOC(slp, ExitStatus, SUCCESS));
-  e.value("SOLVED_TO_ACCEPTABLE_TOLERANCE",
-          ExitStatus::SOLVED_TO_ACCEPTABLE_TOLERANCE,
-          DOC(slp, ExitStatus, SOLVED_TO_ACCEPTABLE_TOLERANCE));
   e.value("CALLBACK_REQUESTED_STOP", ExitStatus::CALLBACK_REQUESTED_STOP,
           DOC(slp, ExitStatus, CALLBACK_REQUESTED_STOP));
   e.value("TOO_FEW_DOFS", ExitStatus::TOO_FEW_DOFS,
