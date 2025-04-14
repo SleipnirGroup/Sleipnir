@@ -844,18 +844,6 @@ static const char *__doc_slp_TimestepMethod_VARIABLE_SINGLE =
 R"doc(The timesteps are equal length but allowed to vary as a single
 decision variable.)doc";
 
-static const char *__doc_slp_ToMessage =
-R"doc(Returns user-readable message corresponding to the expression type.
-
-Parameter ``type``:
-    Expression type.)doc";
-
-static const char *__doc_slp_ToMessage_2 =
-R"doc(Returns user-readable message corresponding to the solver exit status.
-
-Parameter ``exit_status``:
-    Solver exit status.)doc";
-
 static const char *__doc_slp_TranscriptionMethod = R"doc(Enum describing an OCP transcription method.)doc";
 
 static const char *__doc_slp_TranscriptionMethod_DIRECT_COLLOCATION =
@@ -3217,6 +3205,18 @@ R"doc(std::tanh() for Variables.
 
 Parameter ``x``:
     The argument.)doc";
+
+static const char *__doc_slp_to_message =
+R"doc(Returns user-readable message corresponding to the expression type.
+
+Parameter ``type``:
+    Expression type.)doc";
+
+static const char *__doc_slp_to_message_2 =
+R"doc(Returns user-readable message corresponding to the solver exit status.
+
+Parameter ``exit_status``:
+    Solver exit status.)doc";
 
 #if defined(__GNUG__)
 #pragma GCC diagnostic pop
