@@ -16,10 +16,8 @@ namespace slp {
 enum class ExitStatus : int8_t {
   /// Solved the problem to the desired tolerance.
   SUCCESS = 0,
-  /// Solved the problem to an acceptable tolerance, but not the desired one.
-  SOLVED_TO_ACCEPTABLE_TOLERANCE = 1,
   /// The solver returned its solution so far after the user requested a stop.
-  CALLBACK_REQUESTED_STOP = 2,
+  CALLBACK_REQUESTED_STOP = 1,
   /// The solver determined the problem to be overconstrained and gave up.
   TOO_FEW_DOFS = -1,
   /// The solver determined the problem to be locally infeasible and gave up.
@@ -53,8 +51,6 @@ SLEIPNIR_DLLEXPORT constexpr std::string_view ToMessage(
   switch (exit_status) {
     case SUCCESS:
       return "solved to desired tolerance";
-    case SOLVED_TO_ACCEPTABLE_TOLERANCE:
-      return "solved to acceptable tolerance";
     case CALLBACK_REQUESTED_STOP:
       return "callback requested stop";
     case TOO_FEW_DOFS:

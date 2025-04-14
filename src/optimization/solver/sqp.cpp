@@ -178,7 +178,6 @@ ExitStatus sqp(
   // Variables for determining when a step is acceptable
   constexpr double α_reduction_factor = 0.5;
   constexpr double α_min = 1e-7;
-  int acceptable_iter_counter = 0;
 
   int full_step_rejected_counter = 0;
 
@@ -244,8 +243,7 @@ ExitStatus sqp(
 #endif
   }};
 
-  while (E_0 > options.tolerance &&
-         acceptable_iter_counter < options.max_acceptable_iterations) {
+  while (E_0 > options.tolerance) {
     ScopedProfiler inner_iter_profiler{inner_iter_prof};
     ScopedProfiler feasibility_check_profiler{feasibility_check_prof};
 
@@ -541,11 +539,6 @@ ExitStatus sqp(
 
     // Update the error estimate
     E_0 = error_estimate(g, A_e, c_e, y);
-    if (E_0 < options.acceptable_tolerance) {
-      ++acceptable_iter_counter;
-    } else {
-      acceptable_iter_counter = 0;
-    }
 
     next_iter_prep_profiler.stop();
     inner_iter_profiler.stop();
@@ -570,12 +563,6 @@ ExitStatus sqp(
     // Check for max wall clock time
     if (std::chrono::steady_clock::now() - solve_start_time > options.timeout) {
       return ExitStatus::TIMEOUT;
-    }
-
-    // Check for solve to acceptable tolerance
-    if (E_0 > options.tolerance &&
-        acceptable_iter_counter == options.max_acceptable_iterations) {
-      return ExitStatus::SOLVED_TO_ACCEPTABLE_TOLERANCE;
     }
   }
 

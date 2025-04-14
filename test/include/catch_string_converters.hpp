@@ -40,8 +40,6 @@ struct StringMaker<slp::ExitStatus> {
     switch (exit_status) {
       case SUCCESS:
         return "SUCCESS";
-      case SOLVED_TO_ACCEPTABLE_TOLERANCE:
-        return "SOLVED_TO_ACCEPTABLE_TOLERANCE";
       case CALLBACK_REQUESTED_STOP:
         return "CALLBACK_REQUESTED_STOP";
       case TOO_FEW_DOFS:

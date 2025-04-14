@@ -84,10 +84,6 @@ void bind_problem(nb::class_<Problem>& cls) {
             options.tolerance = nb::cast<double>(value);
           } else if (key_str == "max_iterations") {
             options.max_iterations = nb::cast<int>(value);
-          } else if (key_str == "acceptable_tolerance") {
-            options.acceptable_tolerance = nb::cast<double>(value);
-          } else if (key_str == "max_acceptable_iterations") {
-            options.max_acceptable_iterations = nb::cast<int>(value);
           } else if (key_str == "timeout") {
             options.timeout =
                 std::chrono::duration<double>{nb::cast<double>(value)};
@@ -120,18 +116,6 @@ Parameter ``tolerance``:
 Parameter ``max_iterations``:
     The maximum number of solver iterations before returning a solution.
     (default: 5000)
-
-Parameter ``acceptable_tolerance``:
-    The solver will stop once the error is below this tolerance for
-    `acceptable_iterations` iterations. This is useful in cases where the
-    solver might not be able to achieve the desired level of accuracy due to
-    floating-point round-off.
-    (default: 1e-6)
-
-Parameter ``max_acceptable_iterations``:
-    The solver will stop once the error is below `acceptable_tolerance` for
-    this many iterations.
-    (default: 15)
 
 Parameter ``timeout``:
     The maximum elapsed wall clock time before returning a solution.

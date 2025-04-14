@@ -293,9 +293,6 @@ class SLEIPNIR_DLLEXPORT Problem {
       // Print possible exit conditions
       slp::println("User-configured exit conditions:");
       slp::println("  ↳ error below {}", options.tolerance);
-      slp::println("  ↳ error below {} for {} iterations",
-                   options.acceptable_tolerance,
-                   options.max_acceptable_iterations);
       if (!m_callbacks.empty()) {
         slp::println("  ↳ user callback requested stop");
       }

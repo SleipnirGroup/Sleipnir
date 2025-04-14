@@ -94,10 +94,6 @@ static const char *__doc_slp_ExitStatus_NONFINITE_INITIAL_COST_OR_CONSTRAINTS =
 R"doc(The solver encountered nonfinite initial cost or constraints and gave
 up.)doc";
 
-static const char *__doc_slp_ExitStatus_SOLVED_TO_ACCEPTABLE_TOLERANCE =
-R"doc(Solved the problem to an acceptable tolerance, but not the desired
-one.)doc";
-
 static const char *__doc_slp_ExitStatus_SUCCESS = R"doc(Solved the problem to the desired tolerance.)doc";
 
 static const char *__doc_slp_ExitStatus_TIMEOUT =
@@ -572,12 +568,6 @@ Parameter ``upper_bound``:
 
 static const char *__doc_slp_Options = R"doc(Solver options.)doc";
 
-static const char *__doc_slp_Options_acceptable_tolerance =
-R"doc(The solver will stop once the error is below this tolerance for
-`acceptable_iterations` iterations. This is useful in cases where the
-solver might not be able to achieve the desired level of accuracy due
-to floating-point round-off.)doc";
-
 static const char *__doc_slp_Options_diagnostics =
 R"doc(Enables diagnostic prints.
 
@@ -603,10 +593,6 @@ prevent them becoming infeasible again. This is useful when parts of
 the problem are ill-conditioned in infeasible regions (e.g., square
 root of a negative value). This can slow or prevent progress toward a
 solution though, so only enable it if necessary.)doc";
-
-static const char *__doc_slp_Options_max_acceptable_iterations =
-R"doc(The solver will stop once the error is below `acceptable_tolerance`
-for this many iterations.)doc";
 
 static const char *__doc_slp_Options_max_iterations = R"doc(The maximum number of solver iterations before returning a solution.)doc";
 
