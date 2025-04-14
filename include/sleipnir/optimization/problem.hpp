@@ -423,7 +423,7 @@ class SLEIPNIR_DLLEXPORT Problem {
 
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     if (options.diagnostics) {
-      slp::println("\nExit: {}", ToMessage(status));
+      slp::println("\nExit: {}", to_message(status));
     }
 #endif
 

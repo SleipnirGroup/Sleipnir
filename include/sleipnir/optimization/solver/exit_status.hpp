@@ -44,34 +44,31 @@ enum class ExitStatus : int8_t {
  *
  * @param exit_status Solver exit status.
  */
-SLEIPNIR_DLLEXPORT constexpr std::string_view ToMessage(
+SLEIPNIR_DLLEXPORT constexpr std::string_view to_message(
     const ExitStatus& exit_status) {
   using enum ExitStatus;
 
   switch (exit_status) {
     case SUCCESS:
-      return "solved to desired tolerance";
+      return "success";
     case CALLBACK_REQUESTED_STOP:
       return "callback requested stop";
     case TOO_FEW_DOFS:
-      return "problem has too few degrees of freedom";
+      return "too few degrees of freedom";
     case LOCALLY_INFEASIBLE:
-      return "problem is locally infeasible";
+      return "locally infeasible";
     case FACTORIZATION_FAILED:
-      return "linear system factorization failed";
+      return "factorization failed";
     case LINE_SEARCH_FAILED:
-      return "backtracking line search failed, and the problem isn't locally "
-             "infeasible";
+      return "line search failed";
     case NONFINITE_INITIAL_COST_OR_CONSTRAINTS:
-      return "solver encountered nonfinite initial cost or constraints and "
-             "gave up";
+      return "nonfinite initial cost or constraints";
     case DIVERGING_ITERATES:
-      return "solver encountered diverging primal iterates xₖ and/or sₖ and "
-             "gave up";
+      return "diverging iterates";
     case MAX_ITERATIONS_EXCEEDED:
-      return "solution returned after maximum iterations exceeded";
+      return "max iterations exceeded";
     case TIMEOUT:
-      return "solution returned after maximum wall clock time exceeded";
+      return "timeout";
     default:
       return "unknown";
   }

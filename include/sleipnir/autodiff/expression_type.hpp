@@ -33,7 +33,7 @@ enum class ExpressionType : uint8_t {
  *
  * @param type Expression type.
  */
-SLEIPNIR_DLLEXPORT constexpr std::string_view ToMessage(
+SLEIPNIR_DLLEXPORT constexpr std::string_view to_message(
     const ExpressionType& type) {
   using enum ExpressionType;
 
