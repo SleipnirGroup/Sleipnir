@@ -350,6 +350,10 @@ ExitStatus sqp(
       if (!std::isfinite(f.value()) || !trial_c_e.allFinite()) {
         // Reduce step size
         α *= α_reduction_factor;
+
+        if (α < α_min) {
+          return ExitStatus::LINE_SEARCH_FAILED;
+        }
         continue;
       }
 

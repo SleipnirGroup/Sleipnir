@@ -216,6 +216,10 @@ ExitStatus newton(
       if (!std::isfinite(f.value())) {
         // Reduce step size
         α *= α_reduction_factor;
+
+        if (α < α_min) {
+          return ExitStatus::LINE_SEARCH_FAILED;
+        }
         continue;
       }
 
