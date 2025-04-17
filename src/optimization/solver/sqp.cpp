@@ -259,7 +259,7 @@ ExitStatus sqp(
     }
 
     // Check for diverging iterates
-    if (x.lpNorm<Eigen::Infinity>() > 1e20 || !x.allFinite()) {
+    if (x.lpNorm<Eigen::Infinity>() > 1e10 || !x.allFinite()) {
       return ExitStatus::DIVERGING_ITERATES;
     }
 

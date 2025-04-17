@@ -358,8 +358,8 @@ ExitStatus interior_point(
     }
 
     // Check for diverging iterates
-    if (x.lpNorm<Eigen::Infinity>() > 1e20 || !x.allFinite() ||
-        s.lpNorm<Eigen::Infinity>() > 1e20 || !s.allFinite()) {
+    if (x.lpNorm<Eigen::Infinity>() > 1e10 || !x.allFinite() ||
+        s.lpNorm<Eigen::Infinity>() > 1e10 || !s.allFinite()) {
       return ExitStatus::DIVERGING_ITERATES;
     }
 
