@@ -113,8 +113,8 @@ Sleipnir requires somewhat newer operating systems and C++ runtimes for std::pri
   * OS: Ubuntu 24.04
   * Runtime: GCC 14 libstdc++ (run `sudo apt install g++-14`)
 * macOS
-  * OS: macOS 14
-  * Runtime: Apple Clang 15.0.0 libc++ from Xcode 15.3 (run `xcode-select --install`)
+  * OS: macOS 14.5
+  * Runtime: Apple Clang 16.0.0 libc++ from Xcode 16.2 (run `xcode-select --install`)
 
 ### C++ library
 
@@ -155,7 +155,7 @@ See the [examples](https://github.com/SleipnirGroup/Sleipnir/tree/main/examples)
 * C++23 compiler
   * On Windows 10 or greater, install [Visual Studio Community 2022](https://visualstudio.microsoft.com/vs/community/) and select the C++ programming language during installation
   * On Ubuntu 24.04 or greater, install GCC 14 via `sudo apt install g++-14`
-  * On macOS 14 or greater, install the Xcode 15.3 command-line build tools via `xcode-select --install`
+  * On macOS 14.5 or greater, install the Xcode 16.2 command-line build tools via `xcode-select --install`
 * [CMake](https://cmake.org/download/) 3.21 or greater
   * On Windows, install from the link above
   * On Linux, install via `sudo apt install cmake`

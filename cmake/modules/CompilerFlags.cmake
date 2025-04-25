@@ -27,8 +27,6 @@ macro(compiler_flags target)
             ${target}
             PUBLIC /std:c++23preview /MP /utf-8 /bigobj
         )
-    elseif(APPLE)
-        target_compile_options(${target} PUBLIC -Wno-pre-c++2b-compat)
     endif()
 
     if(NOT MSVC)
