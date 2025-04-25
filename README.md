@@ -104,11 +104,11 @@ See [benchmark details](https://github.com/SleipnirGroup/Sleipnir/?tab=readme-ov
 
 ### Minimum system requirements
 
-Sleipnir requires somewhat newer operating systems and C++ runtimes for std::print().
+Sleipnir requires somewhat newer operating systems and C++ runtimes for std::print() and multidimensional subscript operator.
 
 * Windows
   * OS: Windows 10
-  * Runtime: [Microsoft Visual C++ 2022 redistributable](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170)
+  * Runtime: [Microsoft Visual C++ 2022 redistributable](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170) from Visual Studio 2022 17.13
 * Linux
   * OS: Ubuntu 24.04
   * Runtime: GCC 14 libstdc++ (run `sudo apt install g++-14`)
