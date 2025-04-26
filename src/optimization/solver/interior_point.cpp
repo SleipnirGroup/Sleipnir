@@ -146,8 +146,13 @@ ExitStatus interior_point(
 
   // Lagrangian L
   //
-  // L(xₖ, sₖ, yₖ, zₖ) = f(xₖ) − yₖᵀcₑ(xₖ) − zₖᵀ(cᵢ(xₖ) − sₖ)
-  auto L = f - (y_ad.T() * c_e_ad)[0] - (z_ad.T() * (c_i_ad - s_ad))[0];
+  //   L(xₖ, sₖ, yₖ, zₖ) = f(xₖ) − yₖᵀcₑ(xₖ) − zₖᵀ(cᵢ(xₖ) − sₖ)
+  //
+  // Drop the slack variable term since it won't affect the Hessian and we don't
+  // use the Lagrangian value anywhere.
+  //
+  //   L(xₖ, yₖ, zₖ) = f(xₖ) − yₖᵀcₑ(xₖ) − zₖᵀcᵢ(xₖ)
+  auto L = f - (y_ad.T() * c_e_ad)[0] - (z_ad.T() * c_i_ad)[0];
 
   setup_profilers.back().stop();
   setup_profilers.emplace_back("  ↳ ∇²ₓₓL setup").start();
