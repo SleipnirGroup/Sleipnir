@@ -252,7 +252,74 @@ static const char *__doc_slp_InequalityConstraints_constraints = R"doc(A vector 
 
 static const char *__doc_slp_InequalityConstraints_operator_bool = R"doc(Implicit conversion operator to bool.)doc";
 
-static const char *__doc_slp_IterationInfo = R"doc(Solver iteration information exposed to a user callback.)doc";
+static const char *__doc_slp_InteriorPointMatrixCallbacks = R"doc(Matrix callbacks for the interior-point method solver.)doc";
+
+static const char *__doc_slp_InteriorPointMatrixCallbacks_A_e =
+R"doc(Equality constraint Jacobian ∂cₑ/∂x getter.
+
+@verbatim [∇ᵀcₑ₁(xₖ)] Aₑ(x) = [∇ᵀcₑ₂(xₖ)] [ ⋮ ] [∇ᵀcₑₘ(xₖ)]
+@endverbatim
+
+<table> <tr> <th>Variable</th> <th>Rows</th> <th>Columns</th> </tr>
+<tr> <td>x</td> <td>num_decision_variables</td> <td>1</td> </tr> <tr>
+<td>Aₑ(x)</td> <td>num_equality_constraints</td>
+<td>num_decision_variables</td> </tr> </table>)doc";
+
+static const char *__doc_slp_InteriorPointMatrixCallbacks_A_i =
+R"doc(Inequality constraint Jacobian ∂cᵢ/∂x getter.
+
+@verbatim [∇ᵀcᵢ₁(xₖ)] Aᵢ(x) = [∇ᵀcᵢ₂(xₖ)] [ ⋮ ] [∇ᵀcᵢₘ(xₖ)]
+@endverbatim
+
+<table> <tr> <th>Variable</th> <th>Rows</th> <th>Columns</th> </tr>
+<tr> <td>x</td> <td>num_decision_variables</td> <td>1</td> </tr> <tr>
+<td>Aᵢ(x)</td> <td>num_inequality_constraints</td>
+<td>num_decision_variables</td> </tr> </table>)doc";
+
+static const char *__doc_slp_InteriorPointMatrixCallbacks_H =
+R"doc(Lagrangian Hessian ∇ₓₓ²L(x, y, z) getter.
+
+L(xₖ, yₖ, zₖ) = f(xₖ) − yₖᵀcₑ(xₖ) − zₖᵀcᵢ(xₖ)
+
+<table> <tr> <th>Variable</th> <th>Rows</th> <th>Columns</th> </tr>
+<tr> <td>x</td> <td>num_decision_variables</td> <td>1</td> </tr> <tr>
+<td>y</td> <td>num_equality_constraints</td> <td>1</td> </tr> <tr>
+<td>z</td> <td>num_inequality_constraints</td> <td>1</td> </tr> <tr>
+<td>∇ₓₓ²L(x, y, z)</td> <td>num_decision_variables</td>
+<td>num_decision_variables</td> </tr> </table>)doc";
+
+static const char *__doc_slp_InteriorPointMatrixCallbacks_c_e =
+R"doc(Equality constraint value cₑ(x) getter.
+
+<table> <tr> <th>Variable</th> <th>Rows</th> <th>Columns</th> </tr>
+<tr> <td>x</td> <td>num_decision_variables</td> <td>1</td> </tr> <tr>
+<td>cₑ(x)</td> <td>num_equality_constraints</td> <td>1</td> </tr>
+</table>)doc";
+
+static const char *__doc_slp_InteriorPointMatrixCallbacks_c_i =
+R"doc(Inequality constraint value cᵢ(x) getter.
+
+<table> <tr> <th>Variable</th> <th>Rows</th> <th>Columns</th> </tr>
+<tr> <td>x</td> <td>num_decision_variables</td> <td>1</td> </tr> <tr>
+<td>cᵢ(x)</td> <td>num_inequality_constraints</td> <td>1</td> </tr>
+</table>)doc";
+
+static const char *__doc_slp_InteriorPointMatrixCallbacks_f =
+R"doc(Cost function value f(x) getter.
+
+<table> <tr> <th>Variable</th> <th>Rows</th> <th>Columns</th> </tr>
+<tr> <td>x</td> <td>num_decision_variables</td> <td>1</td> </tr> <tr>
+<td>f(x)</td> <td>1</td> <td>1</td> </tr> </table>)doc";
+
+static const char *__doc_slp_InteriorPointMatrixCallbacks_g =
+R"doc(Cost function gradient ∇f(x) getter.
+
+<table> <tr> <th>Variable</th> <th>Rows</th> <th>Columns</th> </tr>
+<tr> <td>x</td> <td>num_decision_variables</td> <td>1</td> </tr> <tr>
+<td>∇f(x)</td> <td>num_decision_variables</td> <td>1</td> </tr>
+</table>)doc";
+
+static const char *__doc_slp_IterationInfo = R"doc(Solver iteration information exposed to an iteration callback.)doc";
 
 static const char *__doc_slp_IterationInfo_A_e = R"doc(The equality constraint Jacobian.)doc";
 
@@ -351,6 +418,33 @@ static const char *__doc_slp_MultistartResult_cost = R"doc(The solution's cost.)
 static const char *__doc_slp_MultistartResult_status = R"doc(The solver exit status.)doc";
 
 static const char *__doc_slp_MultistartResult_variables = R"doc(The decision variables.)doc";
+
+static const char *__doc_slp_NewtonMatrixCallbacks = R"doc(Matrix callbacks for the Newton's method solver.)doc";
+
+static const char *__doc_slp_NewtonMatrixCallbacks_H =
+R"doc(Lagrangian Hessian ∇ₓₓ²L(x) getter.
+
+L(xₖ) = f(xₖ)
+
+<table> <tr> <th>Variable</th> <th>Rows</th> <th>Columns</th> </tr>
+<tr> <td>x</td> <td>num_decision_variables</td> <td>1</td> </tr> <tr>
+<td>∇ₓₓ²L(x)</td> <td>num_decision_variables</td>
+<td>num_decision_variables</td> </tr> </table>)doc";
+
+static const char *__doc_slp_NewtonMatrixCallbacks_f =
+R"doc(Cost function value f(x) getter.
+
+<table> <tr> <th>Variable</th> <th>Rows</th> <th>Columns</th> </tr>
+<tr> <td>x</td> <td>num_decision_variables</td> <td>1</td> </tr> <tr>
+<td>f(x)</td> <td>1</td> <td>1</td> </tr> </table>)doc";
+
+static const char *__doc_slp_NewtonMatrixCallbacks_g =
+R"doc(Cost function gradient ∇f(x) getter.
+
+<table> <tr> <th>Variable</th> <th>Rows</th> <th>Columns</th> </tr>
+<tr> <td>x</td> <td>num_decision_variables</td> <td>1</td> </tr> <tr>
+<td>∇f(x)</td> <td>num_decision_variables</td> <td>1</td> </tr>
+</table>)doc";
 
 static const char *__doc_slp_OCP =
 R"doc(This class allows the user to pose and solve a constrained optimal
@@ -784,6 +878,55 @@ Parameter ``rows``:
 Returns:
     A symmetric matrix of decision varaibles in the optimization
     problem.)doc";
+
+static const char *__doc_slp_SQPMatrixCallbacks =
+R"doc(Matrix callbacks for the Sequential Quadratic Programming (SQP)
+solver.)doc";
+
+static const char *__doc_slp_SQPMatrixCallbacks_A_e =
+R"doc(Equality constraint Jacobian ∂cₑ/∂x getter.
+
+@verbatim [∇ᵀcₑ₁(xₖ)] Aₑ(x) = [∇ᵀcₑ₂(xₖ)] [ ⋮ ] [∇ᵀcₑₘ(xₖ)]
+@endverbatim
+
+<table> <tr> <th>Variable</th> <th>Rows</th> <th>Columns</th> </tr>
+<tr> <td>x</td> <td>num_decision_variables</td> <td>1</td> </tr> <tr>
+<td>Aₑ(x)</td> <td>num_equality_constraints</td>
+<td>num_decision_variables</td> </tr> </table>)doc";
+
+static const char *__doc_slp_SQPMatrixCallbacks_H =
+R"doc(Lagrangian Hessian ∇ₓₓ²L(x, y) getter.
+
+L(xₖ, yₖ) = f(xₖ) − yₖᵀcₑ(xₖ)
+
+<table> <tr> <th>Variable</th> <th>Rows</th> <th>Columns</th> </tr>
+<tr> <td>x</td> <td>num_decision_variables</td> <td>1</td> </tr> <tr>
+<td>y</td> <td>num_equality_constraints</td> <td>1</td> </tr> <tr>
+<td>∇ₓₓ²L(x, y)</td> <td>num_decision_variables</td>
+<td>num_decision_variables</td> </tr> </table>)doc";
+
+static const char *__doc_slp_SQPMatrixCallbacks_c_e =
+R"doc(Equality constraint value cₑ(x) getter.
+
+<table> <tr> <th>Variable</th> <th>Rows</th> <th>Columns</th> </tr>
+<tr> <td>x</td> <td>num_decision_variables</td> <td>1</td> </tr> <tr>
+<td>cₑ(x)</td> <td>num_equality_constraints</td> <td>1</td> </tr>
+</table>)doc";
+
+static const char *__doc_slp_SQPMatrixCallbacks_f =
+R"doc(Cost function value f(x) getter.
+
+<table> <tr> <th>Variable</th> <th>Rows</th> <th>Columns</th> </tr>
+<tr> <td>x</td> <td>num_decision_variables</td> <td>1</td> </tr> <tr>
+<td>f(x)</td> <td>1</td> <td>1</td> </tr> </table>)doc";
+
+static const char *__doc_slp_SQPMatrixCallbacks_g =
+R"doc(Cost function gradient ∇f(x) getter.
+
+<table> <tr> <th>Variable</th> <th>Rows</th> <th>Columns</th> </tr>
+<tr> <td>x</td> <td>num_decision_variables</td> <td>1</td> </tr> <tr>
+<td>∇f(x)</td> <td>num_decision_variables</td> <td>1</td> </tr>
+</table>)doc";
 
 static const char *__doc_slp_Slice = R"doc(Represents a sequence of elements in an iterable object.)doc";
 
@@ -2970,20 +3113,11 @@ A nonlinear program has the form:
 where f(x) is the cost function, cₑ(x) are the equality constraints,
 and cᵢ(x) are the inequality constraints.
 
-Parameter ``decision_variables``:
-    The list of decision variables.
+Parameter ``matrix_callbacks``:
+    Matrix callbacks.
 
-Parameter ``equality_constraints``:
-    The list of equality constraints.
-
-Parameter ``inequality_constraints``:
-    The list of inequality constraints.
-
-Parameter ``f``:
-    The cost function.
-
-Parameter ``callbacks``:
-    The list of user callbacks.
+Parameter ``iteration_callbacks``:
+    The list of iteration callbacks.
 
 Parameter ``options``:
     Solver options.
@@ -3030,14 +3164,11 @@ A nonlinear program has the form:
 
 where f(x) is the cost function.
 
-Parameter ``decision_variables``:
-    The list of decision variables.
+Parameter ``matrix_callbacks``:
+    Matrix callbacks.
 
-Parameter ``f``:
-    The cost function.
-
-Parameter ``callbacks``:
-    The list of user callbacks.
+Parameter ``iteration_callbacks``:
+    The list of iteration callbacks.
 
 Parameter ``options``:
     Solver options.
@@ -3169,17 +3300,11 @@ A nonlinear program has the form:
 where f(x) is the cost function and cₑ(x) are the equality
 constraints.
 
-Parameter ``decision_variables``:
-    The list of decision variables.
+Parameter ``matrix_callbacks``:
+    Matrix callbacks.
 
-Parameter ``equality_constraints``:
-    The list of equality constraints.
-
-Parameter ``f``:
-    The cost function.
-
-Parameter ``callbacks``:
-    The list of user callbacks.
+Parameter ``iteration_callbacks``:
+    The list of iteration callbacks.
 
 Parameter ``options``:
     Solver options.

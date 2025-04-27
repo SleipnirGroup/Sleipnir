@@ -9,7 +9,6 @@
 
 #include <Eigen/Core>
 
-#include "sleipnir/autodiff/variable.hpp"
 #include "sleipnir/util/small_vector.hpp"
 
 // See docs/algorithms.md#Works_cited for citation definitions.
@@ -40,31 +39,31 @@ struct FilterEntry {
   /**
    * Constructs a Newton's method filter entry.
    *
-   * @param f The cost function.
+   * @param f The cost function value.
    */
-  explicit FilterEntry(Variable& f) : FilterEntry{f.value(), 0.0} {}
+  explicit FilterEntry(double f) : FilterEntry{f, 0.0} {}
 
   /**
    * Constructs a Sequential Quadratic Programming filter entry.
    *
-   * @param f The cost function.
+   * @param f The cost function value.
    * @param c_e The equality constraint values (nonzero means violation).
    */
-  FilterEntry(Variable& f, const Eigen::VectorXd& c_e)
-      : FilterEntry{f.value(), c_e.lpNorm<1>()} {}
+  FilterEntry(double f, const Eigen::VectorXd& c_e)
+      : FilterEntry{f, c_e.lpNorm<1>()} {}
 
   /**
    * Constructs an interior-point method filter entry.
    *
-   * @param f The cost function.
+   * @param f The cost function value.
    * @param s The inequality constraint slack variables.
    * @param c_e The equality constraint values (nonzero means violation).
    * @param c_i The inequality constraint values (negative means violation).
    * @param μ The barrier parameter.
    */
-  FilterEntry(Variable& f, Eigen::VectorXd& s, const Eigen::VectorXd& c_e,
+  FilterEntry(double f, Eigen::VectorXd& s, const Eigen::VectorXd& c_e,
               const Eigen::VectorXd& c_i, double μ)
-      : FilterEntry{f.value() - μ * s.array().log().sum(),
+      : FilterEntry{f - μ * s.array().log().sum(),
                     c_e.lpNorm<1>() + (c_i - s).lpNorm<1>()} {}
 };
 

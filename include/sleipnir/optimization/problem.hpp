@@ -3,14 +3,12 @@
 #pragma once
 
 #include <algorithm>
-#include <array>
 #include <cmath>
 #include <concepts>
 #include <functional>
 #include <iterator>
 #include <optional>
 #include <ranges>
-#include <string_view>
 #include <utility>
 
 #include <Eigen/Core>
@@ -19,17 +17,10 @@
 #include "sleipnir/autodiff/variable.hpp"
 #include "sleipnir/autodiff/variable_matrix.hpp"
 #include "sleipnir/optimization/solver/exit_status.hpp"
-#include "sleipnir/optimization/solver/interior_point.hpp"
 #include "sleipnir/optimization/solver/iteration_info.hpp"
-#include "sleipnir/optimization/solver/newton.hpp"
 #include "sleipnir/optimization/solver/options.hpp"
-#include "sleipnir/optimization/solver/sqp.hpp"
 #include "sleipnir/util/small_vector.hpp"
 #include "sleipnir/util/symbol_exports.hpp"
-
-#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-#include "sleipnir/util/print.hpp"
-#endif
 
 namespace slp {
 
@@ -281,157 +272,7 @@ class SLEIPNIR_DLLEXPORT Problem {
    * @param options Solver options.
    * @return The solver status.
    */
-  ExitStatus solve(const Options& options = Options{}) {
-    // Create the initial value column vector
-    Eigen::VectorXd x{m_decision_variables.size()};
-    for (size_t i = 0; i < m_decision_variables.size(); ++i) {
-      x[i] = m_decision_variables[i].value();
-    }
-
-#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-    if (options.diagnostics) {
-      // Print possible exit conditions
-      slp::println("User-configured exit conditions:");
-      slp::println("  ↳ error below {}", options.tolerance);
-      if (!m_callbacks.empty()) {
-        slp::println("  ↳ user callback requested stop");
-      }
-      if (std::isfinite(options.max_iterations)) {
-        slp::println("  ↳ executed {} iterations", options.max_iterations);
-      }
-      if (std::isfinite(options.timeout.count())) {
-        slp::println("  ↳ {} elapsed", options.timeout);
-      }
-
-      if (m_decision_variables.size() == 1) {
-        slp::println("\n1 decision variable");
-      } else {
-        slp::println("\n{} decision variables", m_decision_variables.size());
-      }
-
-      auto print_constraint_types =
-          [](const small_vector<Variable>& constraints) {
-            std::array<size_t, 5> type_counts{};
-            for (const auto& constraint : constraints) {
-              ++type_counts[std::to_underlying(constraint.type())];
-            }
-            for (const auto& [count, name] : std::views::zip(
-                     type_counts, std::array{"empty", "constant", "linear",
-                                             "quadratic", "nonlinear"})) {
-              if (count > 0) {
-                slp::println("  ↳ {} {}", count, name);
-              }
-            }
-          };
-
-      // Print constraint types
-      if (m_equality_constraints.size() == 1) {
-        slp::println("1 equality constraint");
-      } else {
-        slp::println("{} equality constraints", m_equality_constraints.size());
-      }
-      print_constraint_types(m_equality_constraints);
-      if (m_inequality_constraints.size() == 1) {
-        slp::println("1 inequality constraint");
-      } else {
-        slp::println("{} inequality constraints",
-                     m_inequality_constraints.size());
-      }
-      print_constraint_types(m_inequality_constraints);
-    }
-
-    auto print_chosen_solver = [](std::string_view solver_name,
-                                  const ExpressionType& f_type,
-                                  const ExpressionType& c_e_type,
-                                  const ExpressionType& c_i_type) {
-      constexpr std::array types{"no", "constant", "linear", "quadratic",
-                                 "nonlinear"};
-
-      slp::println("\nUsing {} solver due to:", solver_name);
-      slp::println("  ↳ {} cost function", types[std::to_underlying(f_type)]);
-      slp::println("  ↳ {} equality constraints",
-                   types[std::to_underlying(c_e_type)]);
-      slp::println("  ↳ {} inequality constraints",
-                   types[std::to_underlying(c_i_type)]);
-      slp::println("");
-    };
-#endif
-
-    // Get the highest order constraint expression types
-    auto f_type = cost_function_type();
-    auto c_e_type = equality_constraint_type();
-    auto c_i_type = inequality_constraint_type();
-
-    // If the problem is empty or constant, there's nothing to do
-    if (f_type <= ExpressionType::CONSTANT &&
-        c_e_type <= ExpressionType::CONSTANT &&
-        c_i_type <= ExpressionType::CONSTANT) {
-#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-      if (options.diagnostics) {
-        print_chosen_solver("no-op", f_type, c_e_type, c_i_type);
-      }
-#endif
-      return ExitStatus::SUCCESS;
-    }
-
-    // Solve the optimization problem
-    ExitStatus status;
-    if (m_equality_constraints.empty() && m_inequality_constraints.empty()) {
-#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-      if (options.diagnostics) {
-        print_chosen_solver("Newton", f_type, c_e_type, c_i_type);
-      }
-#endif
-      if (m_f) {
-        status =
-            newton(m_decision_variables, m_f.value(), m_callbacks, options, x);
-      } else {
-        Variable zero = 0.0;
-        status = newton(m_decision_variables, zero, m_callbacks, options, x);
-      }
-    } else if (m_inequality_constraints.empty()) {
-#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-      if (options.diagnostics) {
-        print_chosen_solver("SQP", f_type, c_e_type, c_i_type);
-      }
-#endif
-      if (m_f) {
-        status = sqp(m_decision_variables, m_equality_constraints, m_f.value(),
-                     m_callbacks, options, x);
-      } else {
-        Variable zero = 0.0;
-        status = sqp(m_decision_variables, m_equality_constraints, zero,
-                     m_callbacks, options, x);
-      }
-    } else {
-#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-      if (options.diagnostics) {
-        print_chosen_solver("IPM", f_type, c_e_type, c_i_type);
-      }
-#endif
-      if (m_f) {
-        status = interior_point(m_decision_variables, m_equality_constraints,
-                                m_inequality_constraints, m_f.value(),
-                                m_callbacks, options, x);
-      } else {
-        Variable zero = 0.0;
-        status = interior_point(m_decision_variables, m_equality_constraints,
-                                m_inequality_constraints, zero, m_callbacks,
-                                options, x);
-      }
-    }
-
-#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-    if (options.diagnostics) {
-      slp::println("\nExit: {}", to_message(status));
-    }
-#endif
-
-    // Assign the solution to the original Variable instances
-    VariableMatrix{m_decision_variables}.set_value(x);
-
-    return status;
-  }
+  ExitStatus solve(const Options& options = Options{});
 
   /**
    * Adds a callback to be called at each solver iteration.
@@ -487,7 +328,7 @@ class SLEIPNIR_DLLEXPORT Problem {
   // The list of inequality constraints: cᵢ(x) ≥ 0
   small_vector<Variable> m_inequality_constraints;
 
-  // The user callback
+  // The iteration callbacks
   small_vector<std::function<bool(const IterationInfo& info)>> m_callbacks;
 };
 

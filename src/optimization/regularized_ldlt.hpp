@@ -3,7 +3,6 @@
 #pragma once
 
 #include <cmath>
-#include <cstddef>
 
 #include <Eigen/Cholesky>
 #include <Eigen/Core>
@@ -29,8 +28,7 @@ class RegularizedLDLT {
    * @param num_equality_constraints The number of equality constraints in the
    *   system.
    */
-  RegularizedLDLT(size_t num_decision_variables,
-                  size_t num_equality_constraints)
+  RegularizedLDLT(int num_decision_variables, int num_equality_constraints)
       : m_num_decision_variables{num_decision_variables},
         m_num_equality_constraints{num_equality_constraints} {}
 
@@ -177,10 +175,10 @@ class RegularizedLDLT {
   Eigen::ComputationInfo m_info = Eigen::Success;
 
   /// The number of decision variables in the system.
-  size_t m_num_decision_variables = 0;
+  int m_num_decision_variables = 0;
 
   /// The number of equality constraints in the system.
-  size_t m_num_equality_constraints = 0;
+  int m_num_equality_constraints = 0;
 
   /// The ideal system inertia.
   Inertia ideal_inertia{m_num_decision_variables, m_num_equality_constraints,
