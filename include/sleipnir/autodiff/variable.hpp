@@ -250,13 +250,15 @@ class SLEIPNIR_DLLEXPORT Variable {
   ExpressionType type() const { return expr->type(); }
 
  private:
-  /// The expression node.
+  /// The expression node
   detail::ExpressionPtr expr =
       detail::make_expression_ptr<detail::DecisionVariableExpression>();
 
-  /// Updates the value of this variable based on the values of its dependent
-  /// variables
+  /// Used to update the value of this variable based on the values of its
+  /// dependent variables
   small_vector<detail::Expression*> m_graph;
+
+  /// Used for lazy initialization of m_graph
   bool m_graph_initialized = false;
 
   friend SLEIPNIR_DLLEXPORT Variable abs(const Variable& x);
