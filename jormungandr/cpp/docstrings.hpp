@@ -1861,11 +1861,13 @@ R"doc(Constructs a Variable pointing to the specified expression.
 Parameter ``expr``:
     The autodiff variable.)doc";
 
-static const char *__doc_slp_Variable_expr = R"doc(The expression node.)doc";
+static const char *__doc_slp_Variable_expr = R"doc(The expression node)doc";
 
 static const char *__doc_slp_Variable_m_graph =
-R"doc(Updates the value of this variable based on the values of its
+R"doc(Used to update the value of this variable based on the values of its
 dependent variables)doc";
+
+static const char *__doc_slp_Variable_m_graph_initialized = R"doc(Used for lazy initialization of m_graph)doc";
 
 static const char *__doc_slp_Variable_operator_assign =
 R"doc(Assignment operator for double.
