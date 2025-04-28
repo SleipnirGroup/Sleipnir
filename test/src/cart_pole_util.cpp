@@ -43,18 +43,17 @@ Eigen::Vector<double, 4> cart_pole_dynamics_double(
   //        [ m_c + m_p  m_p l cosθ]
   // M(q) = [m_p l cosθ    m_p l²  ]
   Eigen::Matrix<double, 2, 2> M{
-      {m_c + m_p, m_p * l * cos(theta)},              // NOLINT
-      {m_p * l * cos(theta), m_p * std::pow(l, 2)}};  // NOLINT
+      {m_c + m_p, m_p * l * std::cos(theta)},
+      {m_p * l * std::cos(theta), m_p * std::pow(l, 2)}};
 
   //           [0  −m_p lθ̇ sinθ]
   // C(q, q̇) = [0       0      ]
-  Eigen::Matrix<double, 2, 2> C{
-      {0, -m_p * l * thetadot * sin(theta)},  // NOLINT
-      {0, 0}};
+  Eigen::Matrix<double, 2, 2> C{{0, -m_p * l * thetadot * std::sin(theta)},
+                                {0, 0}};
 
   //          [     0      ]
   // τ_g(q) = [-m_p gl sinθ]
-  Eigen::Vector<double, 2> tau_g{{0}, {-m_p * g * l * sin(theta)}};  // NOLINT
+  Eigen::Vector<double, 2> tau_g{{0}, {-m_p * g * l * std::sin(theta)}};
 
   //     [1]
   // B = [0]
@@ -76,18 +75,16 @@ slp::VariableMatrix cart_pole_dynamics(const slp::VariableMatrix& x,
 
   //        [ m_c + m_p  m_p l cosθ]
   // M(q) = [m_p l cosθ    m_p l²  ]
-  slp::VariableMatrix M{
-      {m_c + m_p, m_p * l * cos(theta)},              // NOLINT
-      {m_p * l * cos(theta), m_p * std::pow(l, 2)}};  // NOLINT
+  slp::VariableMatrix M{{m_c + m_p, m_p * l * slp::cos(theta)},
+                        {m_p * l * slp::cos(theta), m_p * std::pow(l, 2)}};
 
   //           [0  −m_p lθ̇ sinθ]
   // C(q, q̇) = [0       0      ]
-  slp::VariableMatrix C{{0, -m_p * l * thetadot * sin(theta)},  // NOLINT
-                        {0, 0}};
+  slp::VariableMatrix C{{0, -m_p * l * thetadot * slp::sin(theta)}, {0, 0}};
 
   //          [     0      ]
   // τ_g(q) = [-m_p gl sinθ]
-  slp::VariableMatrix tau_g{{0}, {-m_p * g * l * sin(theta)}};  // NOLINT
+  slp::VariableMatrix tau_g{{0}, {-m_p * g * l * slp::sin(theta)}};
 
   //     [1]
   // B = [0]

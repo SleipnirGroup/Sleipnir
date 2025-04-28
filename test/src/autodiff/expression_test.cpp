@@ -86,99 +86,99 @@ TEST_CASE("Expression - Prune abs()", "[Expression]") {
   auto zero = make_expression_ptr<ConstExpression>(0.0);
   auto one = make_expression_ptr<ConstExpression>(1.0);
 
-  CHECK(abs(zero)->is_constant(0.0));  // NOLINT
-  CHECK(abs(one)->is_constant(1.0));   // NOLINT
+  CHECK(slp::detail::abs(zero)->is_constant(0.0));
+  CHECK(slp::detail::abs(one)->is_constant(1.0));
 }
 
 TEST_CASE("Expression - Prune acos()", "[Expression]") {
   auto zero = make_expression_ptr<ConstExpression>(0.0);
   auto one = make_expression_ptr<ConstExpression>(1.0);
 
-  CHECK(acos(zero)->is_constant(std::numbers::pi / 2.0));  // NOLINT
-  CHECK(acos(one)->is_constant(std::acos(1.0)));           // NOLINT
+  CHECK(slp::detail::acos(zero)->is_constant(std::numbers::pi / 2.0));
+  CHECK(slp::detail::acos(one)->is_constant(std::acos(1.0)));
 }
 
 TEST_CASE("Expression - Prune asin()", "[Expression]") {
   auto zero = make_expression_ptr<ConstExpression>(0.0);
   auto one = make_expression_ptr<ConstExpression>(1.0);
 
-  CHECK(asin(zero)->is_constant(0.0));            // NOLINT
-  CHECK(asin(one)->is_constant(std::asin(1.0)));  // NOLINT
+  CHECK(slp::detail::asin(zero)->is_constant(0.0));
+  CHECK(slp::detail::asin(one)->is_constant(std::asin(1.0)));
 }
 
 TEST_CASE("Expression - Prune atan()", "[Expression]") {
   auto zero = make_expression_ptr<ConstExpression>(0.0);
   auto one = make_expression_ptr<ConstExpression>(1.0);
 
-  CHECK(atan(zero)->is_constant(0.0));            // NOLINT
-  CHECK(atan(one)->is_constant(std::atan(1.0)));  // NOLINT
+  CHECK(slp::detail::atan(zero)->is_constant(0.0));
+  CHECK(slp::detail::atan(one)->is_constant(std::atan(1.0)));
 }
 
 TEST_CASE("Expression - Prune atan2()", "[Expression]") {
   auto zero = make_expression_ptr<ConstExpression>(0.0);
   auto one = make_expression_ptr<ConstExpression>(1.0);
 
-  CHECK(atan2(zero, one)->is_constant(0.0));                     // NOLINT
-  CHECK(atan2(one, zero)->is_constant(std::numbers::pi / 2.0));  // NOLINT
-  CHECK(atan2(one, one)->is_constant(std::atan2(1.0, 1.0)));     // NOLINT
+  CHECK(slp::detail::atan2(zero, one)->is_constant(0.0));
+  CHECK(slp::detail::atan2(one, zero)->is_constant(std::numbers::pi / 2.0));
+  CHECK(slp::detail::atan2(one, one)->is_constant(std::atan2(1.0, 1.0)));
 }
 
 TEST_CASE("Expression - Prune cos()", "[Expression]") {
   auto zero = make_expression_ptr<ConstExpression>(0.0);
   auto one = make_expression_ptr<ConstExpression>(1.0);
 
-  CHECK(cos(zero)->is_constant(1.0));           // NOLINT
-  CHECK(cos(one)->is_constant(std::cos(1.0)));  // NOLINT
+  CHECK(slp::detail::cos(zero)->is_constant(1.0));
+  CHECK(slp::detail::cos(one)->is_constant(std::cos(1.0)));
 }
 
 TEST_CASE("Expression - Prune cosh()", "[Expression]") {
   auto zero = make_expression_ptr<ConstExpression>(0.0);
   auto one = make_expression_ptr<ConstExpression>(1.0);
 
-  CHECK(cosh(zero)->is_constant(1.0));            // NOLINT
-  CHECK(cosh(one)->is_constant(std::cosh(1.0)));  // NOLINT
+  CHECK(slp::detail::cosh(zero)->is_constant(1.0));
+  CHECK(slp::detail::cosh(one)->is_constant(std::cosh(1.0)));
 }
 
 TEST_CASE("Expression - Prune erf()", "[Expression]") {
   auto zero = make_expression_ptr<ConstExpression>(0.0);
   auto one = make_expression_ptr<ConstExpression>(1.0);
 
-  CHECK(erf(zero)->is_constant(0.0));           // NOLINT
-  CHECK(erf(one)->is_constant(std::erf(1.0)));  // NOLINT
+  CHECK(slp::detail::erf(zero)->is_constant(0.0));
+  CHECK(slp::detail::erf(one)->is_constant(std::erf(1.0)));
 }
 
 TEST_CASE("Expression - Prune exp()", "[Expression]") {
   auto zero = make_expression_ptr<ConstExpression>(0.0);
   auto one = make_expression_ptr<ConstExpression>(1.0);
 
-  CHECK(exp(zero)->is_constant(1.0));           // NOLINT
-  CHECK(exp(one)->is_constant(std::exp(1.0)));  // NOLINT
+  CHECK(slp::detail::exp(zero)->is_constant(1.0));
+  CHECK(slp::detail::exp(one)->is_constant(std::exp(1.0)));
 }
 
 TEST_CASE("Expression - Prune hypot()", "[Expression]") {
   auto zero = make_expression_ptr<ConstExpression>(0.0);
   auto one = make_expression_ptr<ConstExpression>(1.0);
 
-  CHECK(hypot(zero, zero)->is_constant(0.0));                // NOLINT
-  CHECK(hypot(zero, one) == one);                            // NOLINT
-  CHECK(hypot(one, zero) == one);                            // NOLINT
-  CHECK(hypot(one, one)->is_constant(std::numbers::sqrt2));  // NOLINT
+  CHECK(slp::detail::hypot(zero, zero)->is_constant(0.0));
+  CHECK(slp::detail::hypot(zero, one) == one);
+  CHECK(slp::detail::hypot(one, zero) == one);
+  CHECK(slp::detail::hypot(one, one)->is_constant(std::numbers::sqrt2));
 }
 
 TEST_CASE("Expression - Prune log()", "[Expression]") {
   auto zero = make_expression_ptr<ConstExpression>(0.0);
   auto one = make_expression_ptr<ConstExpression>(1.0);
 
-  CHECK(log(zero)->is_constant(0.0));           // NOLINT
-  CHECK(log(one)->is_constant(std::log(1.0)));  // NOLINT
+  CHECK(slp::detail::log(zero)->is_constant(0.0));
+  CHECK(slp::detail::log(one)->is_constant(std::log(1.0)));
 }
 
 TEST_CASE("Expression - Prune log10()", "[Expression]") {
   auto zero = make_expression_ptr<ConstExpression>(0.0);
   auto one = make_expression_ptr<ConstExpression>(1.0);
 
-  CHECK(log10(zero)->is_constant(0.0));             // NOLINT
-  CHECK(log10(one)->is_constant(std::log10(1.0)));  // NOLINT
+  CHECK(slp::detail::log10(zero)->is_constant(0.0));
+  CHECK(slp::detail::log10(one)->is_constant(std::log10(1.0)));
 }
 
 TEST_CASE("Expression - Prune pow()", "[Expression]") {
@@ -186,39 +186,41 @@ TEST_CASE("Expression - Prune pow()", "[Expression]") {
   auto one = make_expression_ptr<ConstExpression>(1.0);
   auto two = make_expression_ptr<ConstExpression>(2.0);
 
-  CHECK(pow(zero, zero)->is_constant(0.0));  // NOLINT
-  CHECK(pow(zero, one)->is_constant(0.0));   // NOLINT
-  CHECK(pow(zero, two)->is_constant(0.0));   // NOLINT
-  CHECK(pow(one, zero) == one);              // NOLINT
-  CHECK(pow(one, one) == one);               // NOLINT
-  CHECK(pow(one, two) == one);               // NOLINT
-  CHECK(pow(two, zero)->is_constant(1.0));   // NOLINT
-  CHECK(pow(two, one) == two);               // NOLINT
-  CHECK(pow(two, two)->is_constant(4.0));    // NOLINT
+  CHECK(slp::detail::pow(zero, zero)->is_constant(0.0));
+  CHECK(slp::detail::pow(zero, one)->is_constant(0.0));
+  CHECK(slp::detail::pow(zero, two)->is_constant(0.0));
+  CHECK(slp::detail::pow(one, zero) == one);
+  CHECK(slp::detail::pow(one, one) == one);
+  CHECK(slp::detail::pow(one, two) == one);
+  CHECK(slp::detail::pow(two, zero)->is_constant(1.0));
+  CHECK(slp::detail::pow(two, one) == two);
+  CHECK(slp::detail::pow(two, two)->is_constant(4.0));
 }
 
 TEST_CASE("Expression - Prune sign()", "[Expression]") {
   auto zero = make_expression_ptr<ConstExpression>(0.0);
 
-  CHECK(sign(make_expression_ptr<ConstExpression>(-2.0))->is_constant(-1.0));
-  CHECK(sign(zero) == zero);
-  CHECK(sign(make_expression_ptr<ConstExpression>(2.0))->is_constant(1.0));
+  CHECK(slp::detail::sign(make_expression_ptr<ConstExpression>(-2.0))
+            ->is_constant(-1.0));
+  CHECK(slp::detail::sign(zero) == zero);
+  CHECK(slp::detail::sign(make_expression_ptr<ConstExpression>(2.0))
+            ->is_constant(1.0));
 }
 
 TEST_CASE("Expression - Prune sin()", "[Expression]") {
   auto zero = make_expression_ptr<ConstExpression>(0.0);
   auto one = make_expression_ptr<ConstExpression>(1.0);
 
-  CHECK(sin(zero)->is_constant(0.0));           // NOLINT
-  CHECK(sin(one)->is_constant(std::sin(1.0)));  // NOLINT
+  CHECK(slp::detail::sin(zero)->is_constant(0.0));
+  CHECK(slp::detail::sin(one)->is_constant(std::sin(1.0)));
 }
 
 TEST_CASE("Expression - Prune sinh()", "[Expression]") {
   auto zero = make_expression_ptr<ConstExpression>(0.0);
   auto one = make_expression_ptr<ConstExpression>(1.0);
 
-  CHECK(sinh(zero)->is_constant(0.0));
-  CHECK(sinh(one)->is_constant(std::sinh(1.0)));
+  CHECK(slp::detail::sinh(zero)->is_constant(0.0));
+  CHECK(slp::detail::sinh(one)->is_constant(std::sinh(1.0)));
 }
 
 TEST_CASE("Expression - Prune sqrt()", "[Expression]") {
@@ -226,23 +228,23 @@ TEST_CASE("Expression - Prune sqrt()", "[Expression]") {
   auto one = make_expression_ptr<ConstExpression>(1.0);
   auto two = make_expression_ptr<ConstExpression>(2.0);
 
-  CHECK(sqrt(zero)->is_constant(0.0));                 // NOLINT
-  CHECK(sqrt(one) == one);                             // NOLINT
-  CHECK(sqrt(two)->is_constant(std::numbers::sqrt2));  // NOLINT
+  CHECK(slp::detail::sqrt(zero)->is_constant(0.0));
+  CHECK(slp::detail::sqrt(one) == one);
+  CHECK(slp::detail::sqrt(two)->is_constant(std::numbers::sqrt2));
 }
 
 TEST_CASE("Expression - Prune tan()", "[Expression]") {
   auto zero = make_expression_ptr<ConstExpression>(0.0);
   auto one = make_expression_ptr<ConstExpression>(1.0);
 
-  CHECK(tan(zero)->is_constant(0.0));           // NOLINT
-  CHECK(tan(one)->is_constant(std::tan(1.0)));  // NOLINT
+  CHECK(slp::detail::tan(zero)->is_constant(0.0));
+  CHECK(slp::detail::tan(one)->is_constant(std::tan(1.0)));
 }
 
 TEST_CASE("Expression - Prune tanh()", "[Expression]") {
   auto zero = make_expression_ptr<ConstExpression>(0.0);
   auto one = make_expression_ptr<ConstExpression>(1.0);
 
-  CHECK(tanh(zero)->is_constant(0.0));
-  CHECK(tanh(one)->is_constant(std::tanh(1.0)));
+  CHECK(slp::detail::tanh(zero)->is_constant(0.0));
+  CHECK(slp::detail::tanh(one)->is_constant(std::tanh(1.0)));
 }
