@@ -2,8 +2,6 @@
 
 #pragma once
 
-#include <cstddef>
-
 #include <Eigen/Core>
 
 namespace slp {
@@ -14,9 +12,9 @@ namespace slp {
  */
 class Inertia {
  public:
-  size_t positive = 0;
-  size_t negative = 0;
-  size_t zero = 0;
+  int positive = 0;
+  int negative = 0;
+  int zero = 0;
 
   constexpr Inertia() = default;
 
@@ -28,7 +26,7 @@ class Inertia {
    * @param negative The number of negative eigenvalues.
    * @param zero The number of zero eigenvalues.
    */
-  constexpr Inertia(size_t positive, size_t negative, size_t zero)
+  constexpr Inertia(int positive, int negative, int zero)
       : positive{positive}, negative{negative}, zero{zero} {}
 
   /**

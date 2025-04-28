@@ -8,7 +8,6 @@
 #include <functional>
 #include <limits>
 #include <memory>
-#include <ranges>
 
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
@@ -19,15 +18,11 @@
 #include "optimization/solver/util/fraction_to_the_boundary_rule.hpp"
 #include "optimization/solver/util/is_locally_infeasible.hpp"
 #include "optimization/solver/util/kkt_error.hpp"
-#include "sleipnir/autodiff/gradient.hpp"
-#include "sleipnir/autodiff/hessian.hpp"
-#include "sleipnir/autodiff/jacobian.hpp"
-#include "sleipnir/autodiff/variable.hpp"
 #include "sleipnir/optimization/solver/exit_status.hpp"
 #include "sleipnir/optimization/solver/iteration_info.hpp"
 #include "sleipnir/optimization/solver/options.hpp"
+#include "sleipnir/util/assert.hpp"
 #include "sleipnir/util/scoped_profiler.hpp"
-#include "sleipnir/util/setup_profiler.hpp"
 #include "sleipnir/util/small_vector.hpp"
 #include "sleipnir/util/solve_profiler.hpp"
 #include "util/scope_exit.hpp"
@@ -63,115 +58,22 @@ struct Step {
 namespace slp {
 
 ExitStatus interior_point(
-    std::span<Variable> decision_variables,
-    std::span<Variable> equality_constraints,
-    std::span<Variable> inequality_constraints, Variable& f,
-    std::span<std::function<bool(const IterationInfo& info)>> callbacks,
+    const InteriorPointMatrixCallbacks& matrix_callbacks,
+    std::span<std::function<bool(const IterationInfo& info)>>
+        iteration_callbacks,
     const Options& options, Eigen::VectorXd& x) {
   const auto solve_start_time = std::chrono::steady_clock::now();
 
-  small_vector<SetupProfiler> setup_profilers;
-  setup_profilers.emplace_back("setup").start();
+  double f = matrix_callbacks.f(x);
+  Eigen::VectorXd c_e = matrix_callbacks.c_e(x);
+  Eigen::VectorXd c_i = matrix_callbacks.c_i(x);
 
-  VariableMatrix x_ad{decision_variables};
-
-  VariableMatrix c_e_ad{equality_constraints};
-  Eigen::VectorXd c_e = c_e_ad.value();
-
-  VariableMatrix c_i_ad{inequality_constraints};
-  Eigen::VectorXd c_i = c_i_ad.value();
-
-  setup_profilers.emplace_back("  ↳ ∇f(x) setup").start();
-
-  // Gradient of f ∇f
-  Gradient gradient_f{f, x_ad};
-
-  setup_profilers.back().stop();
-  setup_profilers.emplace_back("  ↳ ∇f(x) init solve").start();
-
-  Eigen::SparseVector<double> g = gradient_f.value();
-
-  setup_profilers.back().stop();
-  setup_profilers.emplace_back("  ↳ ∂cₑ/∂x setup").start();
-
-  // Equality constraint Jacobian Aₑ
-  //
-  //         [∇ᵀcₑ₁(xₖ)]
-  // Aₑ(x) = [∇ᵀcₑ₂(xₖ)]
-  //         [    ⋮    ]
-  //         [∇ᵀcₑₘ(xₖ)]
-  Jacobian jacobian_c_e{c_e_ad, x_ad};
-
-  setup_profilers.back().stop();
-  setup_profilers.emplace_back("  ↳ ∂cₑ/∂x init solve").start();
-
-  Eigen::SparseMatrix<double> A_e = jacobian_c_e.value();
-
-  setup_profilers.back().stop();
-  setup_profilers.emplace_back("  ↳ ∂cᵢ/∂x setup").start();
-
-  // Inequality constraint Jacobian Aᵢ
-  //
-  //         [∇ᵀcᵢ₁(xₖ)]
-  // Aᵢ(x) = [∇ᵀcᵢ₂(xₖ)]
-  //         [    ⋮    ]
-  //         [∇ᵀcᵢₘ(xₖ)]
-  Jacobian jacobian_c_i{c_i_ad, x_ad};
-
-  setup_profilers.back().stop();
-  setup_profilers.emplace_back("  ↳ ∂cᵢ/∂x init solve").start();
-
-  Eigen::SparseMatrix<double> A_i = jacobian_c_i.value();
-
-  setup_profilers.back().stop();
-  setup_profilers.emplace_back("  ↳ s,y,z setup").start();
-
-  // Create autodiff variables for s for Lagrangian
-  Eigen::VectorXd s = Eigen::VectorXd::Ones(inequality_constraints.size());
-  VariableMatrix s_ad(inequality_constraints.size());
-  s_ad.set_value(s);
-
-  // Create autodiff variables for y for Lagrangian
-  Eigen::VectorXd y = Eigen::VectorXd::Zero(equality_constraints.size());
-  VariableMatrix y_ad(equality_constraints.size());
-  y_ad.set_value(y);
-
-  // Create autodiff variables for z for Lagrangian
-  Eigen::VectorXd z = Eigen::VectorXd::Ones(inequality_constraints.size());
-  VariableMatrix z_ad(inequality_constraints.size());
-  z_ad.set_value(z);
-
-  setup_profilers.back().stop();
-  setup_profilers.emplace_back("  ↳ L setup").start();
-
-  // Lagrangian L
-  //
-  //   L(xₖ, sₖ, yₖ, zₖ) = f(xₖ) − yₖᵀcₑ(xₖ) − zₖᵀ(cᵢ(xₖ) − sₖ)
-  //
-  // Drop the slack variable term since it won't affect the Hessian and we don't
-  // use the Lagrangian value anywhere.
-  //
-  //   L(xₖ, yₖ, zₖ) = f(xₖ) − yₖᵀcₑ(xₖ) − zₖᵀcᵢ(xₖ)
-  auto L = f - (y_ad.T() * c_e_ad)[0] - (z_ad.T() * c_i_ad)[0];
-
-  setup_profilers.back().stop();
-  setup_profilers.emplace_back("  ↳ ∇²ₓₓL setup").start();
-
-  // Hessian of the Lagrangian H
-  //
-  // Hₖ = ∇²ₓₓL(xₖ, sₖ, yₖ, zₖ)
-  Hessian<Eigen::Lower> hessian_L{L, x_ad};
-
-  setup_profilers.back().stop();
-  setup_profilers.emplace_back("  ↳ ∇²ₓₓL init solve").start();
-
-  Eigen::SparseMatrix<double> H = hessian_L.value();
-
-  setup_profilers.back().stop();
-  setup_profilers.emplace_back("  ↳ precondition ✓").start();
+  int num_decision_variables = x.rows();
+  int num_equality_constraints = c_e.rows();
+  int num_inequality_constraints = c_i.rows();
 
   // Check for overconstrained problem
-  if (equality_constraints.size() > decision_variables.size()) {
+  if (num_equality_constraints > num_decision_variables) {
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     if (options.diagnostics) {
       print_too_many_dofs_error(c_e);
@@ -181,15 +83,30 @@ ExitStatus interior_point(
     return ExitStatus::TOO_FEW_DOFS;
   }
 
+  Eigen::SparseVector<double> g = matrix_callbacks.g(x);
+  Eigen::SparseMatrix<double> A_e = matrix_callbacks.A_e(x);
+  Eigen::SparseMatrix<double> A_i = matrix_callbacks.A_i(x);
+
+  // Ensure matrix callback dimensions are consistent
+  slp_assert(g.rows() == num_decision_variables);
+  slp_assert(A_e.rows() == num_equality_constraints);
+  slp_assert(A_e.cols() == num_decision_variables);
+  slp_assert(A_i.rows() == num_inequality_constraints);
+  slp_assert(A_i.cols() == num_decision_variables);
+
+  Eigen::VectorXd s = Eigen::VectorXd::Ones(num_inequality_constraints);
+  Eigen::VectorXd y = Eigen::VectorXd::Zero(num_equality_constraints);
+  Eigen::VectorXd z = Eigen::VectorXd::Ones(num_inequality_constraints);
+
+  Eigen::SparseMatrix<double> H = matrix_callbacks.H(x, y, z);
+
   // Check whether initial guess has finite f(xₖ), cₑ(xₖ), and cᵢ(xₖ)
-  if (!std::isfinite(f.value()) || !c_e.allFinite() || !c_i.allFinite()) {
+  if (!std::isfinite(f) || !c_e.allFinite() || !c_i.allFinite()) {
     return ExitStatus::NONFINITE_INITIAL_COST_OR_CONSTRAINTS;
   }
 
-  setup_profilers.back().stop();
-
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-  // Sparsity pattern files written when spy flag is set in Config
+  // Sparsity pattern files written when spy flag is set in options
   std::unique_ptr<Spy> H_spy;
   std::unique_ptr<Spy> A_e_spy;
   std::unique_ptr<Spy> A_i_spy;
@@ -256,8 +173,7 @@ ExitStatus interior_point(
   // Kept outside the loop so its storage can be reused
   small_vector<Eigen::Triplet<double>> triplets;
 
-  RegularizedLDLT solver{decision_variables.size(),
-                         equality_constraints.size()};
+  RegularizedLDLT solver{num_decision_variables, num_equality_constraints};
 
   // Variables for determining when a step is acceptable
   constexpr double α_reduction_factor = 0.5;
@@ -269,12 +185,10 @@ ExitStatus interior_point(
   // Error estimate
   double E_0 = std::numeric_limits<double>::infinity();
 
-  setup_profilers[0].stop();
-
   small_vector<SolveProfiler> solve_profilers;
   solve_profilers.emplace_back("solve");
   solve_profilers.emplace_back("  ↳ feasibility ✓");
-  solve_profilers.emplace_back("  ↳ user callbacks");
+  solve_profilers.emplace_back("  ↳ iteration callbacks");
   solve_profilers.emplace_back("  ↳ iter matrix build");
   solve_profilers.emplace_back("  ↳ iter matrix compute");
   solve_profilers.emplace_back("  ↳ iter matrix solve");
@@ -285,7 +199,7 @@ ExitStatus interior_point(
 
   auto& inner_iter_prof = solve_profilers[0];
   auto& feasibility_check_prof = solve_profilers[1];
-  auto& user_callbacks_prof = solve_profilers[2];
+  auto& iteration_callbacks_prof = solve_profilers[2];
   auto& linear_system_build_prof = solve_profilers[3];
   auto& linear_system_compute_prof = solve_profilers[4];
   auto& linear_system_solve_prof = solve_profilers[5];
@@ -295,43 +209,12 @@ ExitStatus interior_point(
   auto& spy_writes_prof = solve_profilers[8];
   auto& next_iter_prep_prof = solve_profilers[9];
 
-  // Prints final diagnostics when the solver exits
+  // Prints final solver diagnostics when the solver exits
   scope_exit exit{[&] {
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     if (options.diagnostics) {
-      // Append gradient profilers
-      solve_profilers.push_back(gradient_f.get_profilers()[0]);
-      solve_profilers.back().name = "  ↳ ∇f(x)";
-      for (const auto& profiler :
-           gradient_f.get_profilers() | std::views::drop(1)) {
-        solve_profilers.push_back(profiler);
-      }
-
-      // Append Hessian profilers
-      solve_profilers.push_back(hessian_L.get_profilers()[0]);
-      solve_profilers.back().name = "  ↳ ∇²ₓₓL";
-      for (const auto& profiler :
-           hessian_L.get_profilers() | std::views::drop(1)) {
-        solve_profilers.push_back(profiler);
-      }
-
-      // Append equality constraint Jacobian profilers
-      solve_profilers.push_back(jacobian_c_e.get_profilers()[0]);
-      solve_profilers.back().name = "  ↳ ∂cₑ/∂x";
-      for (const auto& profiler :
-           jacobian_c_e.get_profilers() | std::views::drop(1)) {
-        solve_profilers.push_back(profiler);
-      }
-
-      // Append inequality constraint Jacobian profilers
-      solve_profilers.push_back(jacobian_c_i.get_profilers()[0]);
-      solve_profilers.back().name = "  ↳ ∂cᵢ/∂x";
-      for (const auto& profiler :
-           jacobian_c_i.get_profilers() | std::views::drop(1)) {
-        solve_profilers.push_back(profiler);
-      }
-
-      print_final_diagnostics(iterations, setup_profilers, solve_profilers);
+      print_bottom_iteration_diagnostics();
+      print_solver_diagnostics(solve_profilers);
     }
 #endif
   }};
@@ -369,16 +252,16 @@ ExitStatus interior_point(
     }
 
     feasibility_check_profiler.stop();
-    ScopedProfiler user_callbacks_profiler{user_callbacks_prof};
+    ScopedProfiler iteration_callbacks_profiler{iteration_callbacks_prof};
 
-    // Call user callbacks
-    for (const auto& callback : callbacks) {
+    // Call iteration callbacks
+    for (const auto& callback : iteration_callbacks) {
       if (callback({iterations, x, g, H, A_e, A_i})) {
         return ExitStatus::CALLBACK_REQUESTED_STOP;
       }
     }
 
-    user_callbacks_profiler.stop();
+    iteration_callbacks_profiler.stop();
     ScopedProfiler linear_system_build_profiler{linear_system_build_prof};
 
     // S = diag(s)
@@ -407,8 +290,8 @@ ExitStatus interior_point(
       }
     }
     Eigen::SparseMatrix<double> lhs(
-        decision_variables.size() + equality_constraints.size(),
-        decision_variables.size() + equality_constraints.size());
+        num_decision_variables + num_equality_constraints,
+        num_decision_variables + num_equality_constraints);
     lhs.setFromSortedTriplets(triplets.begin(), triplets.end(),
                               [](const auto&, const auto& b) { return b; });
 
@@ -474,14 +357,13 @@ ExitStatus interior_point(
       Eigen::VectorXd trial_y = y + α_z * step.p_y;
       Eigen::VectorXd trial_z = z + α_z * step.p_z;
 
-      x_ad.set_value(trial_x);
-
-      Eigen::VectorXd trial_c_e = c_e_ad.value();
-      Eigen::VectorXd trial_c_i = c_i_ad.value();
+      double trial_f = matrix_callbacks.f(trial_x);
+      Eigen::VectorXd trial_c_e = matrix_callbacks.c_e(trial_x);
+      Eigen::VectorXd trial_c_i = matrix_callbacks.c_i(trial_x);
 
       // If f(xₖ + αpₖˣ), cₑ(xₖ + αpₖˣ), or cᵢ(xₖ + αpₖˣ) aren't finite, reduce
       // step size immediately
-      if (!std::isfinite(f.value()) || !trial_c_e.allFinite() ||
+      if (!std::isfinite(trial_f) || !trial_c_e.allFinite() ||
           !trial_c_i.allFinite()) {
         // Reduce step size
         α *= α_reduction_factor;
@@ -504,7 +386,8 @@ ExitStatus interior_point(
       }
 
       // Check whether filter accepts trial iterate
-      if (filter.try_add(FilterEntry{f, trial_s, trial_c_e, trial_c_i, μ}, α)) {
+      if (filter.try_add(FilterEntry{trial_f, trial_s, trial_c_e, trial_c_i, μ},
+                         α)) {
         // Accept step
         break;
       }
@@ -542,7 +425,7 @@ ExitStatus interior_point(
                   iterations,
                   step_acceptable ? IterationType::ACCEPTED_SOC
                                   : IterationType::REJECTED_SOC,
-                  soc_profiler.current_duration(), E, f.value(),
+                  soc_profiler.current_duration(), E, trial_f,
                   trial_c_e.lpNorm<1>() + (trial_c_i - trial_s).lpNorm<1>(),
                   trial_s.dot(trial_z), μ, solver.hessian_regularization(),
                   α_soc, 1.0, α_reduction_factor, α_z_soc);
@@ -572,10 +455,9 @@ ExitStatus interior_point(
           trial_y = y + α_z_soc * soc_step.p_y;
           trial_z = z + α_z_soc * soc_step.p_z;
 
-          x_ad.set_value(trial_x);
-
-          trial_c_e = c_e_ad.value();
-          trial_c_i = c_i_ad.value();
+          trial_f = matrix_callbacks.f(trial_x);
+          trial_c_e = matrix_callbacks.c_e(trial_x);
+          trial_c_i = matrix_callbacks.c_i(trial_x);
 
           // Constraint violation scale factor for second-order corrections
           constexpr double κ_soc = 0.99;
@@ -589,8 +471,8 @@ ExitStatus interior_point(
           }
 
           // Check whether filter accepts trial iterate
-          if (filter.try_add(FilterEntry{f, trial_s, trial_c_e, trial_c_i, μ},
-                             α)) {
+          if (filter.try_add(
+                  FilterEntry{trial_f, trial_s, trial_c_e, trial_c_i, μ}, α)) {
             step = soc_step;
             α = α_soc;
             α_z = α_z_soc;
@@ -637,18 +519,13 @@ ExitStatus interior_point(
         trial_y = y + α_z * step.p_y;
         trial_z = z + α_z * step.p_z;
 
-        // Upate autodiff
-        x_ad.set_value(trial_x);
-        s_ad.set_value(trial_s);
-        y_ad.set_value(trial_y);
-        z_ad.set_value(trial_z);
-
-        trial_c_e = c_e_ad.value();
-        trial_c_i = c_i_ad.value();
+        trial_c_e = matrix_callbacks.c_e(trial_x);
+        trial_c_i = matrix_callbacks.c_i(trial_x);
 
         double next_kkt_error = kkt_error(
-            gradient_f.value(), jacobian_c_e.value(), trial_c_e,
-            jacobian_c_i.value(), trial_c_i, trial_s, trial_y, trial_z, μ);
+            matrix_callbacks.g(trial_x), matrix_callbacks.A_e(trial_x),
+            matrix_callbacks.c_e(trial_x), matrix_callbacks.A_i(trial_x),
+            trial_c_i, trial_s, trial_y, trial_z, μ);
 
         // If the step using αᵐᵃˣ reduced the KKT error, accept it anyway
         if (next_kkt_error <= 0.999 * current_kkt_error) {
@@ -724,19 +601,16 @@ ExitStatus interior_point(
     }
 
     // Update autodiff for Jacobians and Hessian
-    x_ad.set_value(x);
-    s_ad.set_value(s);
-    y_ad.set_value(y);
-    z_ad.set_value(z);
-    A_e = jacobian_c_e.value();
-    A_i = jacobian_c_i.value();
-    g = gradient_f.value();
-    H = hessian_L.value();
+    f = matrix_callbacks.f(x);
+    A_e = matrix_callbacks.A_e(x);
+    A_i = matrix_callbacks.A_i(x);
+    g = matrix_callbacks.g(x);
+    H = matrix_callbacks.H(x, y, z);
 
     ScopedProfiler next_iter_prep_profiler{next_iter_prep_prof};
 
-    c_e = c_e_ad.value();
-    c_i = c_i_ad.value();
+    c_e = matrix_callbacks.c_e(x);
+    c_i = matrix_callbacks.c_i(x);
 
     // Update the error estimate
     E_0 = error_estimate(g, A_e, c_e, A_i, c_i, s, y, z, 0.0);
@@ -760,11 +634,11 @@ ExitStatus interior_point(
 
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     if (options.diagnostics) {
-      print_iteration_diagnostics(
-          iterations, IterationType::NORMAL,
-          inner_iter_profiler.current_duration(), E_0, f.value(),
-          c_e.lpNorm<1>() + (c_i - s).lpNorm<1>(), s.dot(z), μ,
-          solver.hessian_regularization(), α, α_max, α_reduction_factor, α_z);
+      print_iteration_diagnostics(iterations, IterationType::NORMAL,
+                                  inner_iter_profiler.current_duration(), E_0,
+                                  f, c_e.lpNorm<1>() + (c_i - s).lpNorm<1>(),
+                                  s.dot(z), μ, solver.hessian_regularization(),
+                                  α, α_max, α_reduction_factor, α_z);
     }
 #endif
 

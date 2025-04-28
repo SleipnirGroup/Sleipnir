@@ -6,14 +6,84 @@
 #include <span>
 
 #include <Eigen/Core>
+#include <Eigen/SparseCore>
 
-#include "sleipnir/autodiff/variable.hpp"
 #include "sleipnir/optimization/solver/exit_status.hpp"
 #include "sleipnir/optimization/solver/iteration_info.hpp"
 #include "sleipnir/optimization/solver/options.hpp"
 #include "sleipnir/util/symbol_exports.hpp"
 
 namespace slp {
+
+/**
+ * Matrix callbacks for the Newton's method solver.
+ */
+struct SLEIPNIR_DLLEXPORT NewtonMatrixCallbacks {
+  /// Cost function value f(x) getter.
+  ///
+  /// <table>
+  ///   <tr>
+  ///     <th>Variable</th>
+  ///     <th>Rows</th>
+  ///     <th>Columns</th>
+  ///   </tr>
+  ///   <tr>
+  ///     <td>x</td>
+  ///     <td>num_decision_variables</td>
+  ///     <td>1</td>
+  ///   </tr>
+  ///   <tr>
+  ///     <td>f(x)</td>
+  ///     <td>1</td>
+  ///     <td>1</td>
+  ///   </tr>
+  /// </table>
+  std::function<double(const Eigen::VectorXd& x)> f;
+
+  /// Cost function gradient ∇f(x) getter.
+  ///
+  /// <table>
+  ///   <tr>
+  ///     <th>Variable</th>
+  ///     <th>Rows</th>
+  ///     <th>Columns</th>
+  ///   </tr>
+  ///   <tr>
+  ///     <td>x</td>
+  ///     <td>num_decision_variables</td>
+  ///     <td>1</td>
+  ///   </tr>
+  ///   <tr>
+  ///     <td>∇f(x)</td>
+  ///     <td>num_decision_variables</td>
+  ///     <td>1</td>
+  ///   </tr>
+  /// </table>
+  std::function<Eigen::SparseVector<double>(const Eigen::VectorXd& x)> g;
+
+  /// Lagrangian Hessian ∇ₓₓ²L(x) getter.
+  ///
+  /// L(xₖ) = f(xₖ)
+  ///
+  /// <table>
+  ///   <tr>
+  ///     <th>Variable</th>
+  ///     <th>Rows</th>
+  ///     <th>Columns</th>
+  ///   </tr>
+  ///   <tr>
+  ///     <td>x</td>
+  ///     <td>num_decision_variables</td>
+  ///     <td>1</td>
+  ///   </tr>
+  ///   <tr>
+  ///     <td>∇ₓₓ²L(x)</td>
+  ///     <td>num_decision_variables</td>
+  ///     <td>num_decision_variables</td>
+  ///   </tr>
+  /// </table>
+  std::function<Eigen::SparseMatrix<double>(const Eigen::VectorXd& x)> H;
+};
 
 /**
 Finds the optimal solution to a nonlinear program using Newton's method.
@@ -26,17 +96,17 @@ A nonlinear program has the form:
 
 where f(x) is the cost function.
 
-@param[in] decision_variables The list of decision variables.
-@param[in] f The cost function.
-@param[in] callbacks The list of user callbacks.
+@param[in] matrix_callbacks Matrix callbacks.
+@param[in] iteration_callbacks The list of iteration callbacks.
 @param[in] options Solver options.
 @param[in,out] x The initial guess and output location for the decision
   variables.
 @return The exit status.
 */
 SLEIPNIR_DLLEXPORT ExitStatus
-newton(std::span<Variable> decision_variables, Variable& f,
-       std::span<std::function<bool(const IterationInfo& info)>> callbacks,
+newton(const NewtonMatrixCallbacks& matrix_callbacks,
+       std::span<std::function<bool(const IterationInfo& info)>>
+           iteration_callbacks,
        const Options& options, Eigen::VectorXd& x);
 
 }  // namespace slp

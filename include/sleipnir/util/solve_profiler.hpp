@@ -64,27 +64,27 @@ class SolveProfiler {
   int num_solves() const { return m_num_solves; }
 
   /**
-   * Returns the most recent solve duration in milliseconds as a double.
+   * Returns the most recent solve duration in seconds.
    *
-   * @return The most recent solve duration in milliseconds as a double.
+   * @return The most recent solve duration in seconds.
    */
   const std::chrono::duration<double>& current_duration() const {
     return m_current_solve_duration;
   }
 
   /**
-   * Returns the average solve duration in milliseconds as a double.
+   * Returns the average solve duration in seconds.
    *
-   * @return The average solve duration in milliseconds as a double.
+   * @return The average solve duration in seconds.
    */
   const std::chrono::duration<double>& average_duration() const {
     return m_average_solve_duration;
   }
 
   /**
-   * Returns the sum of all solve durations in milliseconds as a double.
+   * Returns the sum of all solve durations in seconds.
    *
-   * @return The sum of all solve durations in milliseconds as a double.
+   * @return The sum of all solve durations in seconds.
    */
   const std::chrono::duration<double>& total_duration() const {
     return m_total_solve_duration;
