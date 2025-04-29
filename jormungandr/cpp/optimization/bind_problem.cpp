@@ -71,6 +71,7 @@ void bind_problem(nb::class_<Problem>& cls) {
         });
 
         Options options;
+        bool spy = false;
 
         for (auto [key, value] : kwargs) {
           // XXX: The keyword arguments are manually copied from the struct
@@ -92,14 +93,14 @@ void bind_problem(nb::class_<Problem>& cls) {
           } else if (key_str == "diagnostics") {
             options.diagnostics = nb::cast<bool>(value);
           } else if (key_str == "spy") {
-            options.spy = nb::cast<bool>(value);
+            spy = nb::cast<bool>(value);
           } else {
             throw nb::key_error(
                 std::format("Invalid keyword argument: {}", key_str).c_str());
           }
         }
 
-        return self.solve(options);
+        return self.solve(options, spy);
       },
       // XXX: The keyword argument docs are manually copied from the struct
       // member docs in include/sleipnir/optimization/solver/options.hpp.
@@ -191,9 +192,7 @@ Parameter ``diagnostics``:
 
 Parameter ``spy``:
     Enables writing sparsity patterns of H, Aₑ, and Aᵢ to files named H.spy,
-    A_e.spy, and A_i.spy respectively during solve.
-
-    Use tools/spy.py to plot them.
+    A_e.spy, and A_i.spy respectively during solve. Use tools/spy.py to plot them.
     (default: False))doc");
   cls.def(
       "add_callback",

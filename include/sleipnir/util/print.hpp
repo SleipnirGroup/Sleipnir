@@ -2,12 +2,17 @@
 
 #pragma once
 
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
 #include <cstdio>
 #include <print>
 #include <system_error>
 #include <utility>
 
+#endif
+
 namespace slp {
+
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
 
 /**
  * Wrapper around std::print() that squelches write failure exceptions.
@@ -52,5 +57,15 @@ inline void println(std::FILE* f, std::format_string<T...> fmt, T&&... args) {
   } catch (const std::system_error&) {
   }
 }
+
+#else
+
+template <typename... Args>
+inline void print([[maybe_unused]] Args&&... args) {}
+
+template <typename... Args>
+inline void println([[maybe_unused]] Args&&... args) {}
+
+#endif
 
 }  // namespace slp

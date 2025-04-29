@@ -3,7 +3,6 @@
 #pragma once
 
 #include <algorithm>
-#include <cmath>
 #include <concepts>
 #include <functional>
 #include <iterator>
@@ -270,9 +269,13 @@ class SLEIPNIR_DLLEXPORT Problem {
    * variables used to construct the problem.
    *
    * @param options Solver options.
+   * @param spy Enables writing sparsity patterns of H, Aₑ, and Aᵢ to files
+   *   named H.spy, A_e.spy, and A_i.spy respectively during solve. Use
+   *   tools/spy.py to plot them.
    * @return The solver status.
    */
-  ExitStatus solve(const Options& options = Options{});
+  ExitStatus solve(const Options& options = Options{},
+                   [[maybe_unused]] bool spy = false);
 
   /**
    * Adds a callback to be called at each solver iteration.
@@ -286,7 +289,7 @@ class SLEIPNIR_DLLEXPORT Problem {
       { callback(info) } -> std::same_as<void>;
     }
   void add_callback(F&& callback) {
-    m_callbacks.emplace_back(
+    m_iteration_callbacks.emplace_back(
         [=, callback = std::forward<F>(callback)](const IterationInfo& info) {
           callback(info);
           return false;
@@ -306,13 +309,13 @@ class SLEIPNIR_DLLEXPORT Problem {
       { callback(info) } -> std::same_as<bool>;
     }
   void add_callback(F&& callback) {
-    m_callbacks.emplace_back(std::forward<F>(callback));
+    m_iteration_callbacks.emplace_back(std::forward<F>(callback));
   }
 
   /**
    * Clears the registered callbacks.
    */
-  void clear_callbacks() { m_callbacks.clear(); }
+  void clear_callbacks() { m_iteration_callbacks.clear(); }
 
  private:
   // The list of decision variables, which are the root of the problem's
@@ -329,7 +332,11 @@ class SLEIPNIR_DLLEXPORT Problem {
   small_vector<Variable> m_inequality_constraints;
 
   // The iteration callbacks
-  small_vector<std::function<bool(const IterationInfo& info)>> m_callbacks;
+  small_vector<std::function<bool(const IterationInfo& info)>>
+      m_iteration_callbacks;
+
+  void print_exit_conditions([[maybe_unused]] const Options& options);
+  void print_problem_analysis();
 };
 
 }  // namespace slp

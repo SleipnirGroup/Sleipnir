@@ -7,7 +7,6 @@
 #include <cmath>
 #include <functional>
 #include <limits>
-#include <memory>
 
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
@@ -22,12 +21,8 @@
 #include "sleipnir/util/assert.hpp"
 #include "sleipnir/util/scoped_profiler.hpp"
 #include "sleipnir/util/solve_profiler.hpp"
-#include "util/scope_exit.hpp"
-
-#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-#include "sleipnir/util/spy.hpp"
 #include "util/print_diagnostics.hpp"
-#endif
+#include "util/scope_exit.hpp"
 
 // See docs/algorithms.md#Works_cited for citation definitions.
 
@@ -38,6 +33,10 @@ ExitStatus newton(const NewtonMatrixCallbacks& matrix_callbacks,
                       iteration_callbacks,
                   const Options& options, Eigen::VectorXd& x) {
   const auto solve_start_time = std::chrono::steady_clock::now();
+
+  small_vector<SolveProfiler> solve_profilers;
+  solve_profilers.emplace_back("solver").start();
+  solve_profilers.emplace_back("  ↳ setup").start();
 
   double f = matrix_callbacks.f(x);
 
@@ -55,19 +54,6 @@ ExitStatus newton(const NewtonMatrixCallbacks& matrix_callbacks,
     return ExitStatus::NONFINITE_INITIAL_COST_OR_CONSTRAINTS;
   }
 
-#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-  // Sparsity pattern files written when spy flag is set in options
-  std::unique_ptr<Spy> H_spy;
-  std::unique_ptr<Spy> lhs_spy;
-  if (options.spy) {
-    H_spy = std::make_unique<Spy>("H.spy", "Hessian", "Decision variables",
-                                  "Decision variables", H.rows(), H.cols());
-    lhs_spy =
-        std::make_unique<Spy>("lhs.spy", "Newton-KKT system left-hand side",
-                              "Rows", "Columns", H.rows(), H.cols());
-  }
-#endif
-
   int iterations = 0;
 
   Filter filter;
@@ -81,34 +67,32 @@ ExitStatus newton(const NewtonMatrixCallbacks& matrix_callbacks,
   // Error estimate
   double E_0 = std::numeric_limits<double>::infinity();
 
-  small_vector<SolveProfiler> solve_profilers;
-  solve_profilers.emplace_back("solve");
-  solve_profilers.emplace_back("  ↳ feasibility ✓");
-  solve_profilers.emplace_back("  ↳ iteration callbacks");
-  solve_profilers.emplace_back("  ↳ iter matrix compute");
-  solve_profilers.emplace_back("  ↳ iter matrix solve");
-  solve_profilers.emplace_back("  ↳ line search");
-  solve_profilers.emplace_back("  ↳ spy writes");
-  solve_profilers.emplace_back("  ↳ next iter prep");
+  solve_profilers.back().stop();
+  solve_profilers.emplace_back("  ↳ iteration");
+  solve_profilers.emplace_back("    ↳ feasibility ✓");
+  solve_profilers.emplace_back("    ↳ iteration callbacks");
+  solve_profilers.emplace_back("    ↳ iter matrix compute");
+  solve_profilers.emplace_back("    ↳ iter matrix solve");
+  solve_profilers.emplace_back("    ↳ line search");
+  solve_profilers.emplace_back("    ↳ next iter prep");
 
-  auto& inner_iter_prof = solve_profilers[0];
-  auto& feasibility_check_prof = solve_profilers[1];
-  auto& iteration_callbacks_prof = solve_profilers[2];
-  auto& linear_system_compute_prof = solve_profilers[3];
-  auto& linear_system_solve_prof = solve_profilers[4];
-  auto& line_search_prof = solve_profilers[5];
-  [[maybe_unused]]
-  auto& spy_writes_prof = solve_profilers[6];
-  auto& next_iter_prep_prof = solve_profilers[7];
+  auto& inner_iter_prof = solve_profilers[2];
+  auto& feasibility_check_prof = solve_profilers[3];
+  auto& iteration_callbacks_prof = solve_profilers[4];
+  auto& linear_system_compute_prof = solve_profilers[5];
+  auto& linear_system_solve_prof = solve_profilers[6];
+  auto& line_search_prof = solve_profilers[7];
+  auto& next_iter_prep_prof = solve_profilers[8];
 
   // Prints final solver diagnostics when the solver exits
   scope_exit exit{[&] {
-#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     if (options.diagnostics) {
-      print_bottom_iteration_diagnostics();
+      solve_profilers[0].stop();
+      if (iterations > 0) {
+        print_bottom_iteration_diagnostics();
+      }
       print_solver_diagnostics(solve_profilers);
     }
-#endif
   }};
 
   while (E_0 > options.tolerance) {
@@ -213,15 +197,6 @@ ExitStatus newton(const NewtonMatrixCallbacks& matrix_callbacks,
 
     line_search_profiler.stop();
 
-#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-    // Write out spy file contents if that's enabled
-    if (options.spy) {
-      ScopedProfiler spy_writes_profiler{spy_writes_prof};
-      H_spy->add(H);
-      lhs_spy->add(H);
-    }
-#endif
-
     // xₖ₊₁ = xₖ + αₖpₖˣ
     x += α * p_x;
 
@@ -238,14 +213,12 @@ ExitStatus newton(const NewtonMatrixCallbacks& matrix_callbacks,
     next_iter_prep_profiler.stop();
     inner_iter_profiler.stop();
 
-#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     if (options.diagnostics) {
       print_iteration_diagnostics(
           iterations, IterationType::NORMAL,
           inner_iter_profiler.current_duration(), E_0, f, 0.0, 0.0, 0.0,
           solver.hessian_regularization(), α, α_max, α_reduction_factor, 1.0);
     }
-#endif
 
     ++iterations;
 

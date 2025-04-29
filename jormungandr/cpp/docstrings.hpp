@@ -154,6 +154,12 @@ static const char *__doc_slp_Gradient_m_g = R"doc()doc";
 
 static const char *__doc_slp_Gradient_m_jacobian = R"doc()doc";
 
+static const char *__doc_slp_Gradient_set_profiler_name =
+R"doc(Sets main profiler name.
+
+Parameter ``name``:
+    Main profiler name.)doc";
+
 static const char *__doc_slp_Gradient_value =
 R"doc(Evaluates the gradient at wrt's value.
 
@@ -212,6 +218,12 @@ static const char *__doc_slp_Hessian_m_profilers = R"doc()doc";
 static const char *__doc_slp_Hessian_m_variables = R"doc()doc";
 
 static const char *__doc_slp_Hessian_m_wrt = R"doc()doc";
+
+static const char *__doc_slp_Hessian_set_profiler_name =
+R"doc(Sets main profiler name.
+
+Parameter ``name``:
+    Main profiler name.)doc";
 
 static const char *__doc_slp_Hessian_value =
 R"doc(Evaluates the Hessian at wrt's value.
@@ -381,6 +393,12 @@ static const char *__doc_slp_Jacobian_m_profilers = R"doc()doc";
 static const char *__doc_slp_Jacobian_m_variables = R"doc()doc";
 
 static const char *__doc_slp_Jacobian_m_wrt = R"doc()doc";
+
+static const char *__doc_slp_Jacobian_set_profiler_name =
+R"doc(Sets main profiler name.
+
+Parameter ``name``:
+    Main profiler name.)doc";
 
 static const char *__doc_slp_Jacobian_value =
 R"doc(Evaluates the Jacobian at wrt's value.
@@ -690,12 +708,6 @@ solution though, so only enable it if necessary.)doc";
 
 static const char *__doc_slp_Options_max_iterations = R"doc(The maximum number of solver iterations before returning a solution.)doc";
 
-static const char *__doc_slp_Options_spy =
-R"doc(Enables writing sparsity patterns of H, Aₑ, and Aᵢ to files named
-H.spy, A_e.spy, and A_i.spy respectively during solve.
-
-Use tools/spy.py to plot them.)doc";
-
 static const char *__doc_slp_Options_timeout = R"doc(The maximum elapsed wall clock time before returning a solution.)doc";
 
 static const char *__doc_slp_Options_tolerance = R"doc(The solver will stop once the error is below this tolerance.)doc";
@@ -775,8 +787,6 @@ R"doc(Returns the type of the highest order inequality constraint.
 Returns:
     The type of the highest order inequality constraint.)doc";
 
-static const char *__doc_slp_Problem_m_callbacks = R"doc()doc";
-
 static const char *__doc_slp_Problem_m_decision_variables = R"doc()doc";
 
 static const char *__doc_slp_Problem_m_equality_constraints = R"doc()doc";
@@ -784,6 +794,8 @@ static const char *__doc_slp_Problem_m_equality_constraints = R"doc()doc";
 static const char *__doc_slp_Problem_m_f = R"doc()doc";
 
 static const char *__doc_slp_Problem_m_inequality_constraints = R"doc()doc";
+
+static const char *__doc_slp_Problem_m_iteration_callbacks = R"doc()doc";
 
 static const char *__doc_slp_Problem_maximize =
 R"doc(Tells the solver to maximize the output of the given objective
@@ -827,12 +839,21 @@ in the feasible set.
 Parameter ``cost``:
     The cost function to minimize.)doc";
 
+static const char *__doc_slp_Problem_print_exit_conditions = R"doc()doc";
+
+static const char *__doc_slp_Problem_print_problem_analysis = R"doc()doc";
+
 static const char *__doc_slp_Problem_solve =
 R"doc(Solve the optimization problem. The solution will be stored in the
 original variables used to construct the problem.
 
 Parameter ``options``:
     Solver options.
+
+Parameter ``spy``:
+    Enables writing sparsity patterns of H, Aₑ, and Aᵢ to files named
+    H.spy, A_e.spy, and A_i.spy respectively during solve. Use
+    tools/spy.py to plot them.
 
 Returns:
     The solver status.)doc";

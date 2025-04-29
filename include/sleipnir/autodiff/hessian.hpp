@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <string_view>
 #include <utility>
 
 #include <Eigen/SparseCore>
@@ -166,6 +167,13 @@ class SLEIPNIR_DLLEXPORT Hessian {
 
     return m_H;
   }
+
+  /**
+   * Sets main profiler name.
+   *
+   * @param name Main profiler name.
+   */
+  void set_profiler_name(std::string_view name) { m_profilers[0].name = name; }
 
   /**
    * Returns the profilers.
