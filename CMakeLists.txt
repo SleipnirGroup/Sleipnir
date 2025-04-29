@@ -110,8 +110,8 @@ if(NOT USE_SYSTEM_EIGEN)
     fetchcontent_declare(
         Eigen3
         GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
-        # master on 2025-04-13
-        GIT_TAG 6266d430ccaa8b0cf826a42e5d1d9686eaa3382a
+        # master on 2025-04-29
+        GIT_TAG d6b23a2256b0c5d77bdc9988b8a82a9e79b5c5af
     )
     fetchcontent_makeavailable(Eigen3)
 else()
