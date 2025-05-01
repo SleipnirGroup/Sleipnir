@@ -2,6 +2,8 @@
 
 #pragma once
 
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
+
 #include <stdint.h>
 
 #include <bit>
@@ -120,3 +122,5 @@ class SLEIPNIR_DLLEXPORT Spy {
 };
 
 }  // namespace slp
+
+#endif

@@ -7,7 +7,6 @@
 #include <cmath>
 #include <functional>
 #include <limits>
-#include <memory>
 
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
@@ -24,12 +23,8 @@
 #include "sleipnir/util/scoped_profiler.hpp"
 #include "sleipnir/util/small_vector.hpp"
 #include "sleipnir/util/solve_profiler.hpp"
-#include "util/scope_exit.hpp"
-
-#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-#include "sleipnir/util/spy.hpp"
 #include "util/print_diagnostics.hpp"
-#endif
+#include "util/scope_exit.hpp"
 
 // See docs/algorithms.md#Works_cited for citation definitions.
 
@@ -55,6 +50,10 @@ ExitStatus sqp(const SQPMatrixCallbacks& matrix_callbacks,
                const Options& options, Eigen::VectorXd& x) {
   const auto solve_start_time = std::chrono::steady_clock::now();
 
+  small_vector<SolveProfiler> solve_profilers;
+  solve_profilers.emplace_back("solver").start();
+  solve_profilers.emplace_back("  ↳ setup").start();
+
   double f = matrix_callbacks.f(x);
   Eigen::VectorXd c_e = matrix_callbacks.c_e(x);
 
@@ -63,11 +62,9 @@ ExitStatus sqp(const SQPMatrixCallbacks& matrix_callbacks,
 
   // Check for overconstrained problem
   if (num_equality_constraints > num_decision_variables) {
-#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     if (options.diagnostics) {
       print_too_many_dofs_error(c_e);
     }
-#endif
 
     return ExitStatus::TOO_FEW_DOFS;
   }
@@ -89,23 +86,6 @@ ExitStatus sqp(const SQPMatrixCallbacks& matrix_callbacks,
     return ExitStatus::NONFINITE_INITIAL_COST_OR_CONSTRAINTS;
   }
 
-#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-  // Sparsity pattern files written when spy flag is set in options
-  std::unique_ptr<Spy> H_spy;
-  std::unique_ptr<Spy> A_e_spy;
-  std::unique_ptr<Spy> lhs_spy;
-  if (options.spy) {
-    H_spy = std::make_unique<Spy>("H.spy", "Hessian", "Decision variables",
-                                  "Decision variables", H.rows(), H.cols());
-    A_e_spy = std::make_unique<Spy>("A_e.spy", "Equality constraint Jacobian",
-                                    "Constraints", "Decision variables",
-                                    A_e.rows(), A_e.cols());
-    lhs_spy = std::make_unique<Spy>(
-        "lhs.spy", "Newton-KKT system left-hand side", "Rows", "Columns",
-        H.rows() + A_e.rows(), H.cols() + A_e.rows());
-  }
-#endif
-
   int iterations = 0;
 
   Filter filter;
@@ -124,38 +104,39 @@ ExitStatus sqp(const SQPMatrixCallbacks& matrix_callbacks,
   // Error estimate
   double E_0 = std::numeric_limits<double>::infinity();
 
-  small_vector<SolveProfiler> solve_profilers;
-  solve_profilers.emplace_back("solve");
-  solve_profilers.emplace_back("  ↳ feasibility ✓");
-  solve_profilers.emplace_back("  ↳ iteration callbacks");
-  solve_profilers.emplace_back("  ↳ iter matrix build");
-  solve_profilers.emplace_back("  ↳ iter matrix compute");
-  solve_profilers.emplace_back("  ↳ iter matrix solve");
-  solve_profilers.emplace_back("  ↳ line search");
-  solve_profilers.emplace_back("    ↳ SOC");
-  solve_profilers.emplace_back("  ↳ spy writes");
-  solve_profilers.emplace_back("  ↳ next iter prep");
+  solve_profilers.back().stop();
+  solve_profilers.emplace_back("  ↳ iteration");
+  solve_profilers.emplace_back("    ↳ feasibility ✓");
+  solve_profilers.emplace_back("    ↳ iteration callbacks");
+  solve_profilers.emplace_back("    ↳ iter matrix build");
+  solve_profilers.emplace_back("    ↳ iter matrix compute");
+  solve_profilers.emplace_back("    ↳ iter matrix solve");
+  solve_profilers.emplace_back("    ↳ line search");
+  solve_profilers.emplace_back("      ↳ SOC");
+  solve_profilers.emplace_back("    ↳ spy writes");
+  solve_profilers.emplace_back("    ↳ next iter prep");
 
-  auto& inner_iter_prof = solve_profilers[0];
-  auto& feasibility_check_prof = solve_profilers[1];
-  auto& iteration_callbacks_prof = solve_profilers[2];
-  auto& linear_system_build_prof = solve_profilers[3];
-  auto& linear_system_compute_prof = solve_profilers[4];
-  auto& linear_system_solve_prof = solve_profilers[5];
-  auto& line_search_prof = solve_profilers[6];
-  auto& soc_prof = solve_profilers[7];
+  auto& inner_iter_prof = solve_profilers[2];
+  auto& feasibility_check_prof = solve_profilers[3];
+  auto& iteration_callbacks_prof = solve_profilers[4];
+  auto& linear_system_build_prof = solve_profilers[5];
+  auto& linear_system_compute_prof = solve_profilers[6];
+  auto& linear_system_solve_prof = solve_profilers[7];
+  auto& line_search_prof = solve_profilers[8];
+  auto& soc_prof = solve_profilers[9];
   [[maybe_unused]]
-  auto& spy_writes_prof = solve_profilers[8];
-  auto& next_iter_prep_prof = solve_profilers[9];
+  auto& spy_writes_prof = solve_profilers[10];
+  auto& next_iter_prep_prof = solve_profilers[11];
 
   // Prints final solver diagnostics when the solver exits
   scope_exit exit{[&] {
-#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     if (options.diagnostics) {
-      print_bottom_iteration_diagnostics();
+      solve_profilers[0].stop();
+      if (iterations > 0) {
+        print_bottom_iteration_diagnostics();
+      }
       print_solver_diagnostics(solve_profilers);
     }
-#endif
   }};
 
   while (E_0 > options.tolerance) {
@@ -164,11 +145,9 @@ ExitStatus sqp(const SQPMatrixCallbacks& matrix_callbacks,
 
     // Check for local equality constraint infeasibility
     if (is_equality_locally_infeasible(A_e, c_e)) {
-#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
       if (options.diagnostics) {
         print_c_e_local_infeasibility_error(c_e);
       }
-#endif
 
       return ExitStatus::LOCALLY_INFEASIBLE;
     }
@@ -300,19 +279,17 @@ ExitStatus sqp(const SQPMatrixCallbacks& matrix_callbacks,
           scope_exit soc_exit{[&] {
             soc_profiler.stop();
 
-#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
             if (options.diagnostics) {
-              double E = error_estimate(g, A_e, trial_c_e, trial_y);
-              print_iteration_diagnostics(iterations,
-                                          step_acceptable
-                                              ? IterationType::ACCEPTED_SOC
-                                              : IterationType::REJECTED_SOC,
-                                          soc_profiler.current_duration(), E,
-                                          trial_f, trial_c_e.lpNorm<1>(), 0.0,
-                                          0.0, solver.hessian_regularization(),
-                                          α_soc, 1.0, α_reduction_factor, 1.0);
+              print_iteration_diagnostics(
+                  iterations,
+                  step_acceptable ? IterationType::ACCEPTED_SOC
+                                  : IterationType::REJECTED_SOC,
+                  soc_profiler.current_duration(),
+                  error_estimate(g, A_e, trial_c_e, trial_y), trial_f,
+                  trial_c_e.lpNorm<1>(), 0.0, 0.0,
+                  solver.hessian_regularization(), α_soc, 1.0,
+                  α_reduction_factor, 1.0);
             }
-#endif
           }};
 
           // Rebuild Newton-KKT rhs with updated constraint values.
@@ -408,16 +385,6 @@ ExitStatus sqp(const SQPMatrixCallbacks& matrix_callbacks,
 
     line_search_profiler.stop();
 
-#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-    // Write out spy file contents if that's enabled
-    if (options.spy) {
-      ScopedProfiler spy_writes_profiler{spy_writes_prof};
-      H_spy->add(H);
-      A_e_spy->add(A_e);
-      lhs_spy->add(lhs);
-    }
-#endif
-
     // If full step was accepted, reset full-step rejected counter
     if (α == α_max) {
       full_step_rejected_counter = 0;
@@ -457,7 +424,6 @@ ExitStatus sqp(const SQPMatrixCallbacks& matrix_callbacks,
     next_iter_prep_profiler.stop();
     inner_iter_profiler.stop();
 
-#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     if (options.diagnostics) {
       print_iteration_diagnostics(iterations, IterationType::NORMAL,
                                   inner_iter_profiler.current_duration(), E_0,
@@ -465,7 +431,6 @@ ExitStatus sqp(const SQPMatrixCallbacks& matrix_callbacks,
                                   solver.hessian_regularization(), α, α_max,
                                   α_reduction_factor, α);
     }
-#endif
 
     ++iterations;
 

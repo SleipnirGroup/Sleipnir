@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <string_view>
 #include <utility>
 
 #include <Eigen/SparseCore>
@@ -63,6 +64,15 @@ class SLEIPNIR_DLLEXPORT Gradient {
     m_g = m_jacobian.value();
 
     return m_g;
+  }
+
+  /**
+   * Sets main profiler name.
+   *
+   * @param name Main profiler name.
+   */
+  void set_profiler_name(std::string_view name) {
+    m_jacobian.set_profiler_name(name);
   }
 
   /**

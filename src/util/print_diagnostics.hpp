@@ -85,6 +85,7 @@ inline std::string power_of_10(double value) {
   }
 }
 
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
 /**
  * Prints error for too many degrees of freedom.
  *
@@ -100,7 +101,11 @@ inline void print_too_many_dofs_error(const Eigen::VectorXd& c_e) {
     }
   }
 }
+#else
+#define print_too_many_dofs_error(...)
+#endif
 
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
 /**
  * Prints equality constraint local infeasibility error.
  *
@@ -118,7 +123,11 @@ inline void print_c_e_local_infeasibility_error(const Eigen::VectorXd& c_e) {
     }
   }
 }
+#else
+#define print_c_e_local_infeasibility_error(...)
+#endif
 
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
 /**
  * Prints inequality constraint local infeasibility error.
  *
@@ -136,7 +145,11 @@ inline void print_c_i_local_infeasibility_error(const Eigen::VectorXd& c_i) {
     }
   }
 }
+#else
+#define print_c_i_local_infeasibility_error(...)
+#endif
 
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
 /**
  * Prints diagnostics for the current iteration.
  *
@@ -210,13 +223,20 @@ void print_iteration_diagnostics(int iterations, IterationType type,
       cost, infeasibility, complementarity, μ, power_of_10(δ), primal_α, dual_α,
       backtracks);
 }
+#else
+#define print_iteration_diagnostics(...)
+#endif
 
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
 /**
  * Prints bottom of iteration diagnostics table.
  */
 inline void print_bottom_iteration_diagnostics() {
   slp::println("└{:─^108}┘", "");
 }
+#else
+#define print_bottom_iteration_diagnostics(...)
+#endif
 
 /**
  * Renders histogram of the given normalized value.
@@ -252,6 +272,7 @@ std::string histogram(double value) {
   return hist;
 }
 
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
 /**
  * Prints solver diagnostics.
  *
@@ -261,80 +282,82 @@ inline void print_solver_diagnostics(
     const small_vector<SolveProfiler>& solve_profilers) {
   auto solve_duration = to_ms(solve_profilers[0].total_duration());
 
-  slp::println("┏{:━^23}┯{:━^18}┯{:━^10}┯{:━^9}┯{:━^4}┓", "", "", "", "", "");
-  slp::println("┃{:^23}│{:^18}│{:^10}│{:^9}│{:^4}┃", "solver trace", "percent",
+  slp::println("┏{:━^25}┯{:━^18}┯{:━^10}┯{:━^9}┯{:━^4}┓", "", "", "", "", "");
+  slp::println("┃{:^25}│{:^18}│{:^10}│{:^9}│{:^4}┃", "solver trace", "percent",
                "total (ms)", "each (ms)", "runs");
-  slp::println("┡{:━^23}┷{:━^18}┷{:━^10}┷{:━^9}┷{:━^4}┩", "", "", "", "", "");
+  slp::println("┡{:━^25}┷{:━^18}┷{:━^10}┷{:━^9}┷{:━^4}┩", "", "", "", "", "");
 
   for (auto& profiler : solve_profilers) {
     double norm = solve_duration == 0.0
                       ? (&profiler == &solve_profilers[0] ? 1.0 : 0.0)
                       : to_ms(profiler.total_duration()) / solve_duration;
-    slp::println("│{:<23} {:>6.2f}%▕{}▏ {:>10.3f} {:>9.3f} {:>4}│",
+    slp::println("│{:<25} {:>6.2f}%▕{}▏ {:>10.3f} {:>9.3f} {:>4}│",
                  profiler.name, norm * 100.0, histogram<9>(norm),
                  to_ms(profiler.total_duration()),
                  to_ms(profiler.average_duration()), profiler.num_solves());
   }
 
-  slp::println("└{:─^68}┘", "");
+  slp::println("└{:─^70}┘", "");
 }
+#else
+#define print_solver_diagnostics(...)
+#endif
 
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
 /**
- * Prints autodiff setup diagnostics.
+ * Prints autodiff diagnostics.
  *
  * @param setup_profilers Autodiff setup profilers.
+ * @param total_solve_profiler Total solve profiler.
+ * @param autodiff_profilers Autodiff solve profilers.
  */
-inline void print_autodiff_setup_diagnostics(
-    const small_vector<SetupProfiler>& setup_profilers) {
+inline void print_autodiff_diagnostics(
+    const small_vector<SetupProfiler>& setup_profilers,
+    const SetupProfiler& total_solve_profiler,
+    const std::ranges::range auto& solve_profilers) {
   auto setup_duration = to_ms(setup_profilers[0].duration());
+  auto solve_duration = to_ms(total_solve_profiler.duration());
 
-  slp::println("┏{:━^23}┯{:━^18}┯{:━^10}┓", "", "", "");
-  slp::println("┃{:^23}│{:^18}│{:^10}┃", "autodiff trace", "percent",
-               "total (ms)");
-  slp::println("┡{:━^23}┷{:━^18}┷{:━^10}┩", "", "", "");
+  // Print heading
+  slp::println("┏{:━^25}┯{:━^18}┯{:━^10}┯{:━^9}┯{:━^4}┓", "", "", "", "", "");
+  slp::println("┃{:^25}│{:^18}│{:^10}│{:^9}│{:^4}┃", "autodiff trace",
+               "percent", "total (ms)", "each (ms)", "runs");
+  slp::println("┡{:━^25}┷{:━^18}┷{:━^10}┷{:━^9}┷{:━^4}┩", "", "", "", "", "");
 
+  // Print setup profilers
   for (auto& profiler : setup_profilers) {
     double norm = setup_duration == 0.0
                       ? (&profiler == &setup_profilers[0] ? 1.0 : 0.0)
                       : to_ms(profiler.duration()) / setup_duration;
-    slp::println("│{:<23} {:>6.2f}%▕{}▏ {:>10.3f}│", profiler.name,
-                 norm * 100.0, histogram<9>(norm), to_ms(profiler.duration()));
+    slp::println("│{:<25} {:>6.2f}%▕{}▏ {:>10.3f} {:>9.3f} {:>4}│",
+                 profiler.name, norm * 100.0, histogram<9>(norm),
+                 to_ms(profiler.duration()), to_ms(profiler.duration()), "1");
   }
 
-  slp::println("└{:─^53}┘", "");
-}
+  // Print seperator
+  slp::println("│{:^70}│", "");
 
-/**
- * Prints autodiff solve diagnostics.
- *
- * @param total_solve_profiler Total solve profiler.
- * @param autodiff_profilers Autodiff solve profilers.
- */
-inline void print_autodiff_solve_diagnostics(
-    const SetupProfiler& solve_profiler,
-    const small_vector<SolveProfiler>& solve_profilers) {
-  auto solve_duration = to_ms(solve_profiler.duration());
+  // Print total solve time
+  slp::println("│{:<25} {:>6.2f}%▕{}▏ {:>10.3f} {:>9.3f} {:>4}│",
+               total_solve_profiler.name, 100.0, histogram<9>(1.0),
+               to_ms(total_solve_profiler.duration()),
+               to_ms(total_solve_profiler.duration()), "1");
 
-  slp::println("┏{:━^23}┯{:━^18}┯{:━^10}┯{:━^9}┯{:━^4}┓", "", "", "", "", "");
-  slp::println("┃{:^23}│{:^18}│{:^10}│{:^9}│{:^4}┃", "autodiff trace",
-               "percent", "total (ms)", "each (ms)", "runs");
-  slp::println("┡{:━^23}┷{:━^18}┷{:━^10}┷{:━^9}┷{:━^4}┩", "", "", "", "", "");
-
-  slp::println("│{:<23} {:>6.2f}%▕{}▏ {:>10.3f} {:>9} {:>4}│",
-               solve_profiler.name, 100.0, histogram<9>(1.0),
-               to_ms(solve_profiler.duration()), "", "");
-
-  for (auto& profiler : solve_profilers) {
+  // Print solve profilers
+  for (const auto& profiler : solve_profilers) {
     double norm = solve_duration == 0.0
                       ? 0.0
                       : to_ms(profiler.total_duration()) / solve_duration;
-    slp::println("│{:<23} {:>6.2f}%▕{}▏ {:>10.3f} {:>9.3f} {:>4}│",
+    slp::println("│{:<25} {:>6.2f}%▕{}▏ {:>10.3f} {:>9.3f} {:>4}│",
                  profiler.name, norm * 100.0, histogram<9>(norm),
                  to_ms(profiler.total_duration()),
                  to_ms(profiler.average_duration()), profiler.num_solves());
   }
 
-  slp::println("└{:─^68}┘", "");
+  slp::println("└{:─^70}┘", "");
 }
+#else
+#define print_autodiff_diagnostics(...)
+#endif
 
 }  // namespace slp
