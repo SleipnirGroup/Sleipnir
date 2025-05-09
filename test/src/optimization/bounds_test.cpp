@@ -1,8 +1,12 @@
 // Copyright (c) Sleipnir contributors
 
+#include <algorithm>
 #include <array>
+#include <limits>
 #include <utility>
 
+#define CATCH_CONFIG_ENABLE_PAIR_STRINGMAKER
+#include <catch2/catch_tostring.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_range_equals.hpp>
@@ -16,21 +20,12 @@
 
 constexpr auto inf = std::numeric_limits<double>::infinity();
 
-template <typename O, typename GettableByType, std::size_t N>
-constexpr auto extract(const std::array<GettableByType, N>& array) {
-  constexpr auto impl = []<std::size_t... I>(
-                            const std::array<GettableByType, N>& array,
-                            std::index_sequence<I...>) -> std::array<O, N> {
-    return {std::get<O>(array[I])...};
-  };
-  return impl(array, std::make_index_sequence<N>{});
-}
-
 TEST_CASE("Bounds - Detection", "[Bounds]") {
   slp::Variable x, y, z, w, v;
   auto decision_variables = std::to_array<slp::Variable>({x, y, z, w, v});
 
-  slp::Variable a = -z + 1e-12;
+  slp::Variable a = -z - 1e-12;
+  // We assume these imply constraints in the form c(x) ≥ 0
   auto inequality_constraint_variables = std::to_array<slp::Variable>({
       x + y - 3,
       x * y,
@@ -41,31 +36,25 @@ TEST_CASE("Bounds - Detection", "[Bounds]") {
       slp::sin(w),
       a,
       -z,
-      -v + 8,
       v - 8,
-      v - 7,
-      v - 6.5,
+      -v + 8,
+      -v + 7,
+      -v + 6.5,
   });
 
   constexpr auto correct_bounds = std::to_array<std::pair<double, double>>({
-      {-inf, 3},
-      {-inf, -1},
-      {1e-12, inf},
+      {4, inf},
+      {-1, inf},
+      {-inf, -1e-12},
       {-inf, inf},
       {8, 6.5},
-  });  // Assumes c(x) ≤ 0.
-  static_assert(correct_bounds.size() == decision_variables.size());
-  constexpr auto correct_bound_constraint_indices = std::to_array<Eigen::Index>({
-      3,
-      4,
-      5,
-      7,
-      8,
-      9,
-      10,
-      11,
-      12,
   });
+  static_assert(correct_bounds.size() == decision_variables.size());
+  const Eigen::Vector<bool, inequality_constraint_variables.size()>
+      correct_bound_constraint_mask{
+          false, false, false, true, true, true, false,
+          true,  true,  true,  true, true, true,
+      };
   constexpr auto correct_conflicting_bounds =
       std::to_array<std::pair<Eigen::Index, Eigen::Index>>({
           {9, 11},
@@ -75,15 +64,16 @@ TEST_CASE("Bounds - Detection", "[Bounds]") {
   slp::VariableMatrix x_ad{decision_variables};
   slp::VariableMatrix c_i_ad{inequality_constraint_variables};
   slp::Jacobian A_i{c_i_ad, x_ad};
-  const auto [boundConstraintIndices, decisionVarToBounds, conflictingBounds] =
-      slp::get_bounds(decision_variables, inequality_constraint_variables, A_i.value());
+  const auto [bound_constraint_mask, decision_var_indices_to_bounds,
+              conflicting_bounds] =
+      slp::get_bounds(decision_variables, inequality_constraint_variables,
+                      A_i.value());
 
-  using Catch::Matchers::UnorderedRangeEquals;
-  CHECK_THAT(decisionVarToBounds, UnorderedRangeEquals(correct_bounds));
-  CHECK_THAT(boundConstraintIndices,
-               UnorderedRangeEquals(correct_bound_constraint_indices));
-  CHECK_THAT(conflictingBounds,
-               UnorderedRangeEquals(correct_conflicting_bounds));
+  using Catch::Matchers::RangeEquals, Catch::Matchers::UnorderedRangeEquals;
+  CHECK_THAT(decision_var_indices_to_bounds, RangeEquals(correct_bounds));
+  CHECK_THAT(bound_constraint_mask, RangeEquals(correct_bound_constraint_mask));
+  CHECK_THAT(conflicting_bounds,
+             UnorderedRangeEquals(correct_conflicting_bounds));
 }
 
 TEST_CASE("Bounds - Projection", "[Bounds]") {
@@ -95,22 +85,22 @@ TEST_CASE("Bounds - Projection", "[Bounds]") {
       {-1, -1e-12},
       {2, inf},
   });
-  Eigen::Vector<double, bounds.size()> x, xCorrect;
+  Eigen::Vector<double, bounds.size()> x, x_correct;
 
   // This tests that we exactly match section 3.6 in [2]
   SECTION("Initial value already mostly in bounds") {
     constexpr double κ_1 = 1e-2, κ_2 = 1e-2;
     x.setZero();
-    xCorrect << 0, 0, 2, 12 + κ_2 * 0.1,
+    x_correct << 0, 0, 2, 12 + κ_2 * 0.1,
         -1e-12 - std::min(κ_1, κ_2 * (1 - 1e-12)), 2 + κ_1 * 2;
     slp::project_onto_bounds(x, bounds, κ_1, κ_2);
-    CHECK(x == xCorrect);
+    CHECK(x == x_correct);
   }
 
   // This tests that we match the spirit of bound projection, without relying on
   // any details of the specific method
-  const auto boundsAreSane = [](auto x, auto bounds, bool stickToLower) {
-    for (std::size_t i = 0; i < bounds.size(); i++) {
+  const auto bounds_are_sane = [](auto x, auto bounds, bool stickToLower) {
+    for (size_t i = 0; i < bounds.size(); i++) {
       const auto& [lower, upper] = bounds[i];
       if (stickToLower && std::isfinite(lower)) {
         CHECK(std::abs(lower - x[i]) <= std::abs(upper - x[i]));
@@ -126,16 +116,16 @@ TEST_CASE("Bounds - Projection", "[Bounds]") {
     }
   };
   SECTION("Initial value below all bounds") {
-    constexpr auto bigNegative = -1000;
-    x.setConstant(bigNegative);
+    constexpr auto big_negative = -1000;
+    x.setConstant(big_negative);
     slp::project_onto_bounds(x, bounds);
-    boundsAreSane(x, bounds, true);
+    bounds_are_sane(x, bounds, true);
   }
   SECTION("Initial value above all bounds") {
-    constexpr auto bigPositive = 1000;
-    x.setConstant(bigPositive);
-    xCorrect << bigPositive, 3, 2, 12.1, -1e-12, bigPositive;
+    constexpr auto big_positive = 1000;
+    x.setConstant(big_positive);
+    x_correct << big_positive, 3, 2, 12.1, -1e-12, big_positive;
     slp::project_onto_bounds(x, bounds);
-    boundsAreSane(x, bounds, false);
+    bounds_are_sane(x, bounds, false);
   }
 }

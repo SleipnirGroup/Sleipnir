@@ -12,6 +12,7 @@
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
 
+#include "optimization/bounds.hpp"
 #include "sleipnir/autodiff/expression_type.hpp"
 #include "sleipnir/autodiff/gradient.hpp"
 #include "sleipnir/autodiff/hessian.hpp"
@@ -252,6 +253,19 @@ ExitStatus Problem::solve(const Options& options, [[maybe_unused]] bool spy) {
     }
 #endif
 
+    const auto [bound_constraint_mask, bounds, conflicting_bound_indices] =
+        get_bounds(m_decision_variables, m_inequality_constraints, A_i.value());
+    if (!conflicting_bound_indices.empty()) {
+      if (options.diagnostics) {
+        print_bound_constraint_global_infeasibility_error(
+            conflicting_bound_indices);
+      }
+      return ExitStatus::GLOBALLY_INFEASIBLE;
+    }
+
+#ifndef SLEIPNIR_DISABLE_BOUND_PROJECTION
+    project_onto_bounds(x, bounds);
+#endif
     // Invoke interior-point method solver
     status = interior_point(
         InteriorPointMatrixCallbacks{
@@ -286,7 +300,11 @@ ExitStatus Problem::solve(const Options& options, [[maybe_unused]] bool spy) {
               x_ad.set_value(x);
               return A_i.value();
             }},
-        m_iteration_callbacks, options, x);
+        m_iteration_callbacks, options,
+#ifndef SLEIPNIR_DISABLE_BOUND_PROJECTION
+        bound_constraint_mask,
+#endif
+        x);
   }
 
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS

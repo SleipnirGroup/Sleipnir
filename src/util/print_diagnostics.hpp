@@ -150,6 +150,25 @@ inline void print_c_i_local_infeasibility_error(const Eigen::VectorXd& c_i) {
 #endif
 
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
+inline void print_bound_constraint_global_infeasibility_error(
+    const std::span<const std::pair<Eigen::Index, Eigen::Index>>
+        conflicting_lower_upper_bound_indices) {
+  slp::println(
+      "The problem is globally infeasible due to conflicting bound "
+      "constraints:");
+  for (const auto& [lower_bound_idx, upper_bound_idx] :
+       conflicting_lower_upper_bound_indices) {
+    slp::println(
+        "  Inequality constraint {} gives a lower bound that is greater than "
+        "the upper bound given by inequality constraint {}",
+        lower_bound_idx, upper_bound_idx);
+  }
+}
+#else
+#define print_bound_constraint_global_infeasibility_error(...)
+#endif
+
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
 /**
  * Prints diagnostics for the current iteration.
  *

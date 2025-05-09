@@ -78,6 +78,10 @@ up.)doc";
 
 static const char *__doc_slp_ExitStatus_FACTORIZATION_FAILED = R"doc(The linear system factorization failed.)doc";
 
+static const char *__doc_slp_ExitStatus_GLOBALLY_INFEASIBLE =
+R"doc(The problem setup frontend determined the problem to have an empty
+feasible region.)doc";
+
 static const char *__doc_slp_ExitStatus_LINE_SEARCH_FAILED =
 R"doc(The backtracking line search failed, and the problem isn't locally
 infeasible.)doc";
@@ -667,6 +671,12 @@ root of a negative value). This can slow or prevent progress toward a
 solution though, so only enable it if necessary.)doc";
 
 static const char *__doc_slp_Options_max_iterations = R"doc(The maximum number of solver iterations before returning a solution.)doc";
+
+static const char *__doc_slp_Options_project_onto_bounds =
+R"doc(Enables projecting the given initial state onto detected "bound"
+inequality constraints if there are any. This projection happens
+during problem setup, so enabling this will have no effect if you call
+the solver directly.)doc";
 
 static const char *__doc_slp_Options_timeout = R"doc(The maximum elapsed wall clock time before returning a solution.)doc";
 

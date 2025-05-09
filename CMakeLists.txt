@@ -71,6 +71,7 @@ option(BUILD_BENCHMARKS "Build CasADi and Sleipnir benchmarks" OFF)
 option(BUILD_EXAMPLES "Build examples" OFF)
 option(BUILD_PYTHON "Build Python module" OFF)
 option(DISABLE_DIAGNOSTICS "Disable diagnostics support at compile-time" OFF)
+option(DISABLE_BOUND_PROJECTION "Disable projecting the state onto bound inequality constraints inside problem setup" ON)
 
 include(CompilerFlags)
 
@@ -102,6 +103,10 @@ endif()
 
 if(DISABLE_DIAGNOSTICS)
     target_compile_definitions(Sleipnir PUBLIC SLEIPNIR_DISABLE_DIAGNOSTICS)
+endif()
+
+if (DISABLE_BOUND_PROJECTION)
+    target_compile_definitions(Sleipnir PUBLIC SLEIPNIR_DISABLE_BOUND_PROJECTION)
 endif()
 
 # Eigen dependency

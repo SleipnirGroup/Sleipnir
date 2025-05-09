@@ -90,6 +90,8 @@ void bind_problem(nb::class_<Problem>& cls) {
                 std::chrono::duration<double>{nb::cast<double>(value)};
           } else if (key_str == "feasible_ipm") {
             options.feasible_ipm = nb::cast<bool>(value);
+          } else if (key_str == "project_onto_bounds") {
+            options.project_onto_bounds = nb::cast<bool>(value);
           } else if (key_str == "diagnostics") {
             options.diagnostics = nb::cast<bool>(value);
           } else if (key_str == "spy") {
@@ -130,6 +132,13 @@ Parameter ``feasible_ipm``:
     negative value). This can slow or prevent progress toward a solution
     though, so only enable it if necessary.
     (default: False)
+
+Parameter ``project_onto_bounds``:
+  Enables projecting the given initial state onto detected "bound"
+  inequality constraints if there are any. This projection happens during
+  problem setup, so enabling this will have no effect if you call the solver
+  directly.
+  (default: false)
 
 Parameter ``diagnostics``:
     Enables diagnostic prints.
