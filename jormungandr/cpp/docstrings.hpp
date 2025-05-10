@@ -693,7 +693,8 @@ mathematical form and it'll be converted for them.)doc";
 static const char *__doc_slp_Problem_Problem = R"doc(Construct the optimization problem.)doc";
 
 static const char *__doc_slp_Problem_add_callback =
-R"doc(Adds a callback to be called at each solver iteration.
+R"doc(Adds a callback to be called at the beginning of each solver
+iteration.
 
 The callback for this overload should return void.
 
@@ -701,7 +702,8 @@ Parameter ``callback``:
     The callback.)doc";
 
 static const char *__doc_slp_Problem_add_callback_2 =
-R"doc(Adds a callback to be called at each solver iteration.
+R"doc(Adds a callback to be called at the beginning of each solver
+iteration.
 
 The callback for this overload should return bool.
 
@@ -3098,7 +3100,7 @@ Parameter ``matrix_callbacks``:
     Matrix callbacks.
 
 Parameter ``iteration_callbacks``:
-    The list of iteration callbacks.
+    The list of callbacks to call at the beginning of each iteration.
 
 Parameter ``options``:
     Solver options.
@@ -3149,7 +3151,7 @@ Parameter ``matrix_callbacks``:
     Matrix callbacks.
 
 Parameter ``iteration_callbacks``:
-    The list of iteration callbacks.
+    The list of callbacks to call at the beginning of each iteration.
 
 Parameter ``options``:
     Solver options.
@@ -3285,7 +3287,7 @@ Parameter ``matrix_callbacks``:
     Matrix callbacks.
 
 Parameter ``iteration_callbacks``:
-    The list of iteration callbacks.
+    The list of callbacks to call at the beginning of each iteration.
 
 Parameter ``options``:
     Solver options.

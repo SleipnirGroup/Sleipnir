@@ -97,7 +97,8 @@ A nonlinear program has the form:
 where f(x) is the cost function.
 
 @param[in] matrix_callbacks Matrix callbacks.
-@param[in] iteration_callbacks The list of iteration callbacks.
+@param[in] iteration_callbacks The list of callbacks to call at the beginning of
+  each iteration.
 @param[in] options Solver options.
 @param[in,out] x The initial guess and output location for the decision
   variables.
