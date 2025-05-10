@@ -15,9 +15,9 @@
 #include <Eigen/Core>
 
 #include "sleipnir/util/print.hpp"
-#include "sleipnir/util/setup_profiler.hpp"
 #include "sleipnir/util/small_vector.hpp"
-#include "sleipnir/util/solve_profiler.hpp"
+#include "util/setup_profiler.hpp"
+#include "util/solve_profiler.hpp"
 
 namespace slp {
 
@@ -292,7 +292,7 @@ inline void print_solver_diagnostics(
                       ? (&profiler == &solve_profilers[0] ? 1.0 : 0.0)
                       : to_ms(profiler.total_duration()) / solve_duration;
     slp::println("│{:<25} {:>6.2f}%▕{}▏ {:>10.3f} {:>9.3f} {:>4}│",
-                 profiler.name, norm * 100.0, histogram<9>(norm),
+                 profiler.name(), norm * 100.0, histogram<9>(norm),
                  to_ms(profiler.total_duration()),
                  to_ms(profiler.average_duration()), profiler.num_solves());
   }
@@ -308,15 +308,10 @@ inline void print_solver_diagnostics(
  * Prints autodiff diagnostics.
  *
  * @param setup_profilers Autodiff setup profilers.
- * @param total_solve_profiler Total solve profiler.
- * @param autodiff_profilers Autodiff solve profilers.
  */
 inline void print_autodiff_diagnostics(
-    const small_vector<SetupProfiler>& setup_profilers,
-    const SetupProfiler& total_solve_profiler,
-    const std::ranges::range auto& solve_profilers) {
+    const small_vector<SetupProfiler>& setup_profilers) {
   auto setup_duration = to_ms(setup_profilers[0].duration());
-  auto solve_duration = to_ms(total_solve_profiler.duration());
 
   // Print heading
   slp::println("┏{:━^25}┯{:━^18}┯{:━^10}┯{:━^9}┯{:━^4}┓", "", "", "", "", "");
@@ -330,28 +325,8 @@ inline void print_autodiff_diagnostics(
                       ? (&profiler == &setup_profilers[0] ? 1.0 : 0.0)
                       : to_ms(profiler.duration()) / setup_duration;
     slp::println("│{:<25} {:>6.2f}%▕{}▏ {:>10.3f} {:>9.3f} {:>4}│",
-                 profiler.name, norm * 100.0, histogram<9>(norm),
+                 profiler.name(), norm * 100.0, histogram<9>(norm),
                  to_ms(profiler.duration()), to_ms(profiler.duration()), "1");
-  }
-
-  // Print seperator
-  slp::println("│{:^70}│", "");
-
-  // Print total solve time
-  slp::println("│{:<25} {:>6.2f}%▕{}▏ {:>10.3f} {:>9.3f} {:>4}│",
-               total_solve_profiler.name, 100.0, histogram<9>(1.0),
-               to_ms(total_solve_profiler.duration()),
-               to_ms(total_solve_profiler.duration()), "1");
-
-  // Print solve profilers
-  for (const auto& profiler : solve_profilers) {
-    double norm = solve_duration == 0.0
-                      ? 0.0
-                      : to_ms(profiler.total_duration()) / solve_duration;
-    slp::println("│{:<25} {:>6.2f}%▕{}▏ {:>10.3f} {:>9.3f} {:>4}│",
-                 profiler.name, norm * 100.0, histogram<9>(norm),
-                 to_ms(profiler.total_duration()),
-                 to_ms(profiler.average_duration()), profiler.num_solves());
   }
 
   slp::println("└{:─^70}┘", "");

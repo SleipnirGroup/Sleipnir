@@ -144,21 +144,9 @@ derivatives in them.
 Returns:
     The gradient as a VariableMatrix.)doc";
 
-static const char *__doc_slp_Gradient_get_profilers =
-R"doc(Returns the profiler.
-
-Returns:
-    The profiler.)doc";
-
 static const char *__doc_slp_Gradient_m_g = R"doc()doc";
 
 static const char *__doc_slp_Gradient_m_jacobian = R"doc()doc";
-
-static const char *__doc_slp_Gradient_set_profiler_name =
-R"doc(Sets main profiler name.
-
-Parameter ``name``:
-    Main profiler name.)doc";
 
 static const char *__doc_slp_Gradient_value =
 R"doc(Evaluates the gradient at wrt's value.
@@ -199,12 +187,6 @@ derivatives in them.
 Returns:
     The Hessian as a VariableMatrix.)doc";
 
-static const char *__doc_slp_Hessian_get_profilers =
-R"doc(Returns the profilers.
-
-Returns:
-    The profilers.)doc";
-
 static const char *__doc_slp_Hessian_m_H = R"doc()doc";
 
 static const char *__doc_slp_Hessian_m_cached_triplets = R"doc()doc";
@@ -213,17 +195,9 @@ static const char *__doc_slp_Hessian_m_graphs = R"doc()doc";
 
 static const char *__doc_slp_Hessian_m_nonlinear_rows = R"doc()doc";
 
-static const char *__doc_slp_Hessian_m_profilers = R"doc()doc";
-
 static const char *__doc_slp_Hessian_m_variables = R"doc()doc";
 
 static const char *__doc_slp_Hessian_m_wrt = R"doc()doc";
-
-static const char *__doc_slp_Hessian_set_profiler_name =
-R"doc(Sets main profiler name.
-
-Parameter ``name``:
-    Main profiler name.)doc";
 
 static const char *__doc_slp_Hessian_value =
 R"doc(Evaluates the Hessian at wrt's value.
@@ -374,12 +348,6 @@ derivatives in them.
 Returns:
     The Jacobian as a VariableMatrix.)doc";
 
-static const char *__doc_slp_Jacobian_get_profilers =
-R"doc(Returns the profilers.
-
-Returns:
-    The profilers.)doc";
-
 static const char *__doc_slp_Jacobian_m_J = R"doc()doc";
 
 static const char *__doc_slp_Jacobian_m_cached_triplets = R"doc()doc";
@@ -388,17 +356,9 @@ static const char *__doc_slp_Jacobian_m_graphs = R"doc()doc";
 
 static const char *__doc_slp_Jacobian_m_nonlinear_rows = R"doc()doc";
 
-static const char *__doc_slp_Jacobian_m_profilers = R"doc()doc";
-
 static const char *__doc_slp_Jacobian_m_variables = R"doc()doc";
 
 static const char *__doc_slp_Jacobian_m_wrt = R"doc()doc";
-
-static const char *__doc_slp_Jacobian_set_profiler_name =
-R"doc(Sets main profiler name.
-
-Parameter ``name``:
-    Main profiler name.)doc";
 
 static const char *__doc_slp_Jacobian_value =
 R"doc(Evaluates the Jacobian at wrt's value.

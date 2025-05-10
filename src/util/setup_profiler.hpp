@@ -14,15 +14,12 @@ namespace slp {
  */
 class SetupProfiler {
  public:
-  /// Name of measurement to show in diagnostics.
-  std::string name;
-
   /**
    * Constructs a SetupProfiler.
    *
    * @param name Name of measurement to show in diagnostics.
    */
-  explicit SetupProfiler(std::string_view name) : name{name} {}
+  explicit SetupProfiler(std::string_view name) : m_name{name} {}
 
   /**
    * Tell the profiler to start measuring setup time.
@@ -44,6 +41,13 @@ class SetupProfiler {
   }
 
   /**
+   * Returns name of measurement to show in diagnostics.
+   *
+   * @return Name of measurement to show in diagnostics.
+   */
+  std::string_view name() const { return m_name; }
+
+  /**
    * Returns the setup duration in milliseconds as a double.
    *
    * @return The setup duration in milliseconds as a double.
@@ -53,6 +57,9 @@ class SetupProfiler {
   }
 
  private:
+  /// Name of measurement to show in diagnostics.
+  std::string m_name;
+
   std::chrono::steady_clock::time_point m_setup_start_time;
   std::chrono::steady_clock::time_point m_setup_stop_time;
   std::chrono::duration<double> m_setup_duration{0.0};

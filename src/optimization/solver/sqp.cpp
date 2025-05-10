@@ -20,11 +20,11 @@
 #include "sleipnir/optimization/solver/iteration_info.hpp"
 #include "sleipnir/optimization/solver/options.hpp"
 #include "sleipnir/util/assert.hpp"
-#include "sleipnir/util/scoped_profiler.hpp"
 #include "sleipnir/util/small_vector.hpp"
-#include "sleipnir/util/solve_profiler.hpp"
 #include "util/print_diagnostics.hpp"
 #include "util/scope_exit.hpp"
+#include "util/scoped_profiler.hpp"
+#include "util/solve_profiler.hpp"
 
 // See docs/algorithms.md#Works_cited for citation definitions.
 
@@ -51,11 +51,74 @@ ExitStatus sqp(const SQPMatrixCallbacks& matrix_callbacks,
   const auto solve_start_time = std::chrono::steady_clock::now();
 
   small_vector<SolveProfiler> solve_profilers;
-  solve_profilers.emplace_back("solver").start();
-  solve_profilers.emplace_back("  ↳ setup").start();
+  solve_profilers.emplace_back("solver");
+  solve_profilers.emplace_back("  ↳ setup");
+  solve_profilers.emplace_back("  ↳ iteration");
+  solve_profilers.emplace_back("    ↳ feasibility ✓");
+  solve_profilers.emplace_back("    ↳ iteration callbacks");
+  solve_profilers.emplace_back("    ↳ iter matrix build");
+  solve_profilers.emplace_back("    ↳ iter matrix compute");
+  solve_profilers.emplace_back("    ↳ iter matrix solve");
+  solve_profilers.emplace_back("    ↳ line search");
+  solve_profilers.emplace_back("      ↳ SOC");
+  solve_profilers.emplace_back("    ↳ next iter prep");
+  solve_profilers.emplace_back("    ↳ f(x)");
+  solve_profilers.emplace_back("    ↳ ∇f(x)");
+  solve_profilers.emplace_back("    ↳ ∇²ₓₓL");
+  solve_profilers.emplace_back("    ↳ cₑ(x)");
+  solve_profilers.emplace_back("    ↳ ∂cₑ/∂x");
 
-  double f = matrix_callbacks.f(x);
-  Eigen::VectorXd c_e = matrix_callbacks.c_e(x);
+  auto& solver_prof = solve_profilers[0];
+  auto& setup_prof = solve_profilers[1];
+  auto& inner_iter_prof = solve_profilers[2];
+  auto& feasibility_check_prof = solve_profilers[3];
+  auto& iteration_callbacks_prof = solve_profilers[4];
+  auto& linear_system_build_prof = solve_profilers[5];
+  auto& linear_system_compute_prof = solve_profilers[6];
+  auto& linear_system_solve_prof = solve_profilers[7];
+  auto& line_search_prof = solve_profilers[8];
+  auto& soc_prof = solve_profilers[9];
+  auto& next_iter_prep_prof = solve_profilers[10];
+
+  // Set up profiled matrix callbacks
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
+  auto& f_prof = solve_profilers[11];
+  auto& g_prof = solve_profilers[12];
+  auto& H_prof = solve_profilers[13];
+  auto& c_e_prof = solve_profilers[14];
+  auto& A_e_prof = solve_profilers[15];
+
+  SQPMatrixCallbacks matrices{
+      [&](const Eigen::VectorXd& x) -> double {
+        ScopedProfiler prof{f_prof};
+        return matrix_callbacks.f(x);
+      },
+      [&](const Eigen::VectorXd& x) -> Eigen::SparseVector<double> {
+        ScopedProfiler prof{g_prof};
+        return matrix_callbacks.g(x);
+      },
+      [&](const Eigen::VectorXd& x,
+          const Eigen::VectorXd& y) -> Eigen::SparseMatrix<double> {
+        ScopedProfiler prof{H_prof};
+        return matrix_callbacks.H(x, y);
+      },
+      [&](const Eigen::VectorXd& x) -> Eigen::VectorXd {
+        ScopedProfiler prof{c_e_prof};
+        return matrix_callbacks.c_e(x);
+      },
+      [&](const Eigen::VectorXd& x) -> Eigen::SparseMatrix<double> {
+        ScopedProfiler prof{A_e_prof};
+        return matrix_callbacks.A_e(x);
+      }};
+#else
+  const auto& matrices = matrix_callbacks;
+#endif
+
+  solver_prof.start();
+  setup_prof.start();
+
+  double f = matrices.f(x);
+  Eigen::VectorXd c_e = matrices.c_e(x);
 
   int num_decision_variables = x.rows();
   int num_equality_constraints = c_e.rows();
@@ -69,12 +132,12 @@ ExitStatus sqp(const SQPMatrixCallbacks& matrix_callbacks,
     return ExitStatus::TOO_FEW_DOFS;
   }
 
-  Eigen::SparseVector<double> g = matrix_callbacks.g(x);
-  Eigen::SparseMatrix<double> A_e = matrix_callbacks.A_e(x);
+  Eigen::SparseVector<double> g = matrices.g(x);
+  Eigen::SparseMatrix<double> A_e = matrices.A_e(x);
 
   Eigen::VectorXd y = Eigen::VectorXd::Zero(num_equality_constraints);
 
-  Eigen::SparseMatrix<double> H = matrix_callbacks.H(x, y);
+  Eigen::SparseMatrix<double> H = matrices.H(x, y);
 
   // Ensure matrix callback dimensions are consistent
   slp_assert(g.rows() == num_decision_variables);
@@ -106,34 +169,12 @@ ExitStatus sqp(const SQPMatrixCallbacks& matrix_callbacks,
   // Error estimate
   double E_0 = std::numeric_limits<double>::infinity();
 
-  solve_profilers.back().stop();
-  solve_profilers.emplace_back("  ↳ iteration");
-  solve_profilers.emplace_back("    ↳ feasibility ✓");
-  solve_profilers.emplace_back("    ↳ iteration callbacks");
-  solve_profilers.emplace_back("    ↳ iter matrix build");
-  solve_profilers.emplace_back("    ↳ iter matrix compute");
-  solve_profilers.emplace_back("    ↳ iter matrix solve");
-  solve_profilers.emplace_back("    ↳ line search");
-  solve_profilers.emplace_back("      ↳ SOC");
-  solve_profilers.emplace_back("    ↳ spy writes");
-  solve_profilers.emplace_back("    ↳ next iter prep");
-
-  auto& inner_iter_prof = solve_profilers[2];
-  auto& feasibility_check_prof = solve_profilers[3];
-  auto& iteration_callbacks_prof = solve_profilers[4];
-  auto& linear_system_build_prof = solve_profilers[5];
-  auto& linear_system_compute_prof = solve_profilers[6];
-  auto& linear_system_solve_prof = solve_profilers[7];
-  auto& line_search_prof = solve_profilers[8];
-  auto& soc_prof = solve_profilers[9];
-  [[maybe_unused]]
-  auto& spy_writes_prof = solve_profilers[10];
-  auto& next_iter_prep_prof = solve_profilers[11];
+  setup_prof.stop();
 
   // Prints final solver diagnostics when the solver exits
   scope_exit exit{[&] {
     if (options.diagnostics) {
-      solve_profilers[0].stop();
+      solver_prof.stop();
       if (iterations > 0) {
         print_bottom_iteration_diagnostics();
       }
@@ -237,8 +278,8 @@ ExitStatus sqp(const SQPMatrixCallbacks& matrix_callbacks,
       Eigen::VectorXd trial_x = x + α * step.p_x;
       Eigen::VectorXd trial_y = y + α * step.p_y;
 
-      double trial_f = matrix_callbacks.f(trial_x);
-      Eigen::VectorXd trial_c_e = matrix_callbacks.c_e(trial_x);
+      double trial_f = matrices.f(trial_x);
+      Eigen::VectorXd trial_c_e = matrices.c_e(trial_x);
 
       // If f(xₖ + αpₖˣ) or cₑ(xₖ + αpₖˣ) aren't finite, reduce step size
       // immediately
@@ -309,8 +350,8 @@ ExitStatus sqp(const SQPMatrixCallbacks& matrix_callbacks,
           trial_x = x + α_soc * soc_step.p_x;
           trial_y = y + α_soc * soc_step.p_y;
 
-          trial_f = matrix_callbacks.f(trial_x);
-          trial_c_e = matrix_callbacks.c_e(trial_x);
+          trial_f = matrices.f(trial_x);
+          trial_c_e = matrices.c_e(trial_x);
 
           // Constraint violation scale factor for second-order corrections
           constexpr double κ_soc = 0.99;
@@ -366,12 +407,11 @@ ExitStatus sqp(const SQPMatrixCallbacks& matrix_callbacks,
         trial_x = x + α_max * step.p_x;
         trial_y = y + α_max * step.p_y;
 
-        trial_f = matrix_callbacks.f(trial_x);
-        trial_c_e = matrix_callbacks.c_e(trial_x);
+        trial_f = matrices.f(trial_x);
+        trial_c_e = matrices.c_e(trial_x);
 
-        double next_kkt_error =
-            kkt_error(matrix_callbacks.g(trial_x),
-                      matrix_callbacks.A_e(trial_x), trial_c_e, trial_y);
+        double next_kkt_error = kkt_error(
+            matrices.g(trial_x), matrices.A_e(trial_x), trial_c_e, trial_y);
 
         // If the step using αᵐᵃˣ reduced the KKT error, accept it anyway
         if (next_kkt_error <= 0.999 * current_kkt_error) {
@@ -411,14 +451,14 @@ ExitStatus sqp(const SQPMatrixCallbacks& matrix_callbacks,
     y += α * step.p_y;
 
     // Update autodiff for Jacobians and Hessian
-    f = matrix_callbacks.f(x);
-    A_e = matrix_callbacks.A_e(x);
-    g = matrix_callbacks.g(x);
-    H = matrix_callbacks.H(x, y);
+    f = matrices.f(x);
+    A_e = matrices.A_e(x);
+    g = matrices.g(x);
+    H = matrices.H(x, y);
 
     ScopedProfiler next_iter_prep_profiler{next_iter_prep_prof};
 
-    c_e = matrix_callbacks.c_e(x);
+    c_e = matrices.c_e(x);
 
     // Update the error estimate
     E_0 = error_estimate(g, A_e, c_e, y);
