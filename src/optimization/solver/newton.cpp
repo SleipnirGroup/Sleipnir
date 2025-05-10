@@ -43,11 +43,12 @@ ExitStatus newton(const NewtonMatrixCallbacks& matrix_callbacks,
   int num_decision_variables = x.rows();
 
   Eigen::SparseVector<double> g = matrix_callbacks.g(x);
+  Eigen::SparseMatrix<double> H = matrix_callbacks.H(x);
 
   // Ensure matrix callback dimensions are consistent
   slp_assert(g.rows() == num_decision_variables);
-
-  Eigen::SparseMatrix<double> H = matrix_callbacks.H(x);
+  slp_assert(H.rows() == num_decision_variables);
+  slp_assert(H.cols() == num_decision_variables);
 
   // Check whether initial guess has finite f(xₖ)
   if (!std::isfinite(f)) {

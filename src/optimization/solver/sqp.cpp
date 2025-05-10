@@ -72,14 +72,16 @@ ExitStatus sqp(const SQPMatrixCallbacks& matrix_callbacks,
   Eigen::SparseVector<double> g = matrix_callbacks.g(x);
   Eigen::SparseMatrix<double> A_e = matrix_callbacks.A_e(x);
 
+  Eigen::VectorXd y = Eigen::VectorXd::Zero(num_equality_constraints);
+
+  Eigen::SparseMatrix<double> H = matrix_callbacks.H(x, y);
+
   // Ensure matrix callback dimensions are consistent
   slp_assert(g.rows() == num_decision_variables);
   slp_assert(A_e.rows() == num_equality_constraints);
   slp_assert(A_e.cols() == num_decision_variables);
-
-  Eigen::VectorXd y = Eigen::VectorXd::Zero(num_equality_constraints);
-
-  Eigen::SparseMatrix<double> H = matrix_callbacks.H(x, y);
+  slp_assert(H.rows() == num_decision_variables);
+  slp_assert(H.cols() == num_decision_variables);
 
   // Check whether initial guess has finite f(xₖ) and cₑ(xₖ)
   if (!std::isfinite(f) || !c_e.allFinite()) {
