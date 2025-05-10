@@ -84,18 +84,20 @@ ExitStatus interior_point(
   Eigen::SparseMatrix<double> A_e = matrix_callbacks.A_e(x);
   Eigen::SparseMatrix<double> A_i = matrix_callbacks.A_i(x);
 
+  Eigen::VectorXd s = Eigen::VectorXd::Ones(num_inequality_constraints);
+  Eigen::VectorXd y = Eigen::VectorXd::Zero(num_equality_constraints);
+  Eigen::VectorXd z = Eigen::VectorXd::Ones(num_inequality_constraints);
+
+  Eigen::SparseMatrix<double> H = matrix_callbacks.H(x, y, z);
+
   // Ensure matrix callback dimensions are consistent
   slp_assert(g.rows() == num_decision_variables);
   slp_assert(A_e.rows() == num_equality_constraints);
   slp_assert(A_e.cols() == num_decision_variables);
   slp_assert(A_i.rows() == num_inequality_constraints);
   slp_assert(A_i.cols() == num_decision_variables);
-
-  Eigen::VectorXd s = Eigen::VectorXd::Ones(num_inequality_constraints);
-  Eigen::VectorXd y = Eigen::VectorXd::Zero(num_equality_constraints);
-  Eigen::VectorXd z = Eigen::VectorXd::Ones(num_inequality_constraints);
-
-  Eigen::SparseMatrix<double> H = matrix_callbacks.H(x, y, z);
+  slp_assert(H.rows() == num_decision_variables);
+  slp_assert(H.cols() == num_decision_variables);
 
   // Check whether initial guess has finite f(xₖ), cₑ(xₖ), and cᵢ(xₖ)
   if (!std::isfinite(f) || !c_e.allFinite() || !c_i.allFinite()) {
