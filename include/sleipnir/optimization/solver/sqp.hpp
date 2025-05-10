@@ -155,7 +155,8 @@ subject to cₑ(x) = 0
 where f(x) is the cost function and cₑ(x) are the equality constraints.
 
 @param[in] matrix_callbacks Matrix callbacks.
-@param[in] iteration_callbacks The list of iteration callbacks.
+@param[in] iteration_callbacks The list of callbacks to call at the beginning of
+  each iteration.
 @param[in] options Solver options.
 @param[in,out] x The initial guess and output location for the decision
   variables.
