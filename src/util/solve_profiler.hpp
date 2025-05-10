@@ -14,20 +14,12 @@ namespace slp {
  */
 class SolveProfiler {
  public:
-  /// Name of measurement to show in diagnostics.
-  std::string name;
-
-  /**
-   * Constructs a SolveProfiler.
-   */
-  SolveProfiler() = default;
-
   /**
    * Constructs a SolveProfiler.
    *
    * @param name Name of measurement to show in diagnostics.
    */
-  explicit SolveProfiler(std::string_view name) : name{name} {}
+  explicit SolveProfiler(std::string_view name) : m_name{name} {}
 
   /**
    * Tell the profiler to start measuring solve time.
@@ -55,6 +47,13 @@ class SolveProfiler {
         1.0 / m_num_solves * m_current_solve_duration;
 #endif
   }
+
+  /**
+   * Returns name of measurement to show in diagnostics.
+   *
+   * @return Name of measurement to show in diagnostics.
+   */
+  std::string_view name() const { return m_name; }
 
   /**
    * Returns the number of solves.
@@ -91,6 +90,9 @@ class SolveProfiler {
   }
 
  private:
+  /// Name of measurement to show in diagnostics.
+  std::string m_name;
+
   std::chrono::steady_clock::time_point m_current_solve_start_time;
   std::chrono::steady_clock::time_point m_current_solve_stop_time;
   std::chrono::duration<double> m_current_solve_duration{0.0};

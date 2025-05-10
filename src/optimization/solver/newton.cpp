@@ -19,10 +19,10 @@
 #include "sleipnir/optimization/solver/iteration_info.hpp"
 #include "sleipnir/optimization/solver/options.hpp"
 #include "sleipnir/util/assert.hpp"
-#include "sleipnir/util/scoped_profiler.hpp"
-#include "sleipnir/util/solve_profiler.hpp"
 #include "util/print_diagnostics.hpp"
 #include "util/scope_exit.hpp"
+#include "util/scoped_profiler.hpp"
+#include "util/solve_profiler.hpp"
 
 // See docs/algorithms.md#Works_cited for citation definitions.
 
@@ -35,15 +35,61 @@ ExitStatus newton(const NewtonMatrixCallbacks& matrix_callbacks,
   const auto solve_start_time = std::chrono::steady_clock::now();
 
   small_vector<SolveProfiler> solve_profilers;
-  solve_profilers.emplace_back("solver").start();
-  solve_profilers.emplace_back("  ↳ setup").start();
+  solve_profilers.emplace_back("solver");
+  solve_profilers.emplace_back("  ↳ setup");
+  solve_profilers.emplace_back("  ↳ iteration");
+  solve_profilers.emplace_back("    ↳ feasibility ✓");
+  solve_profilers.emplace_back("    ↳ iteration callbacks");
+  solve_profilers.emplace_back("    ↳ iter matrix compute");
+  solve_profilers.emplace_back("    ↳ iter matrix solve");
+  solve_profilers.emplace_back("    ↳ line search");
+  solve_profilers.emplace_back("    ↳ next iter prep");
+  solve_profilers.emplace_back("    ↳ f(x)");
+  solve_profilers.emplace_back("    ↳ ∇f(x)");
+  solve_profilers.emplace_back("    ↳ ∇²ₓₓL");
 
-  double f = matrix_callbacks.f(x);
+  auto& solver_prof = solve_profilers[0];
+  auto& setup_prof = solve_profilers[1];
+  auto& inner_iter_prof = solve_profilers[2];
+  auto& feasibility_check_prof = solve_profilers[3];
+  auto& iteration_callbacks_prof = solve_profilers[4];
+  auto& linear_system_compute_prof = solve_profilers[5];
+  auto& linear_system_solve_prof = solve_profilers[6];
+  auto& line_search_prof = solve_profilers[7];
+  auto& next_iter_prep_prof = solve_profilers[8];
+
+  // Set up profiled matrix callbacks
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
+  auto& f_prof = solve_profilers[9];
+  auto& g_prof = solve_profilers[10];
+  auto& H_prof = solve_profilers[11];
+
+  NewtonMatrixCallbacks matrices{
+      [&](const Eigen::VectorXd& x) -> double {
+        ScopedProfiler prof{f_prof};
+        return matrix_callbacks.f(x);
+      },
+      [&](const Eigen::VectorXd& x) -> Eigen::SparseVector<double> {
+        ScopedProfiler prof{g_prof};
+        return matrix_callbacks.g(x);
+      },
+      [&](const Eigen::VectorXd& x) -> Eigen::SparseMatrix<double> {
+        ScopedProfiler prof{H_prof};
+        return matrix_callbacks.H(x);
+      }};
+#else
+  const auto& matrices = matrix_callbacks;
+#endif
+
+  solver_prof.start();
+  setup_prof.start();
+
+  double f = matrices.f(x);
 
   int num_decision_variables = x.rows();
 
-  Eigen::SparseVector<double> g = matrix_callbacks.g(x);
-  Eigen::SparseMatrix<double> H = matrix_callbacks.H(x);
+  Eigen::SparseVector<double> g = matrices.g(x);
+  Eigen::SparseMatrix<double> H = matrices.H(x);
 
   // Ensure matrix callback dimensions are consistent
   slp_assert(g.rows() == num_decision_variables);
@@ -68,27 +114,12 @@ ExitStatus newton(const NewtonMatrixCallbacks& matrix_callbacks,
   // Error estimate
   double E_0 = std::numeric_limits<double>::infinity();
 
-  solve_profilers.back().stop();
-  solve_profilers.emplace_back("  ↳ iteration");
-  solve_profilers.emplace_back("    ↳ feasibility ✓");
-  solve_profilers.emplace_back("    ↳ iteration callbacks");
-  solve_profilers.emplace_back("    ↳ iter matrix compute");
-  solve_profilers.emplace_back("    ↳ iter matrix solve");
-  solve_profilers.emplace_back("    ↳ line search");
-  solve_profilers.emplace_back("    ↳ next iter prep");
-
-  auto& inner_iter_prof = solve_profilers[2];
-  auto& feasibility_check_prof = solve_profilers[3];
-  auto& iteration_callbacks_prof = solve_profilers[4];
-  auto& linear_system_compute_prof = solve_profilers[5];
-  auto& linear_system_solve_prof = solve_profilers[6];
-  auto& line_search_prof = solve_profilers[7];
-  auto& next_iter_prep_prof = solve_profilers[8];
+  setup_prof.stop();
 
   // Prints final solver diagnostics when the solver exits
   scope_exit exit{[&] {
     if (options.diagnostics) {
-      solve_profilers[0].stop();
+      solver_prof.stop();
       if (iterations > 0) {
         print_bottom_iteration_diagnostics();
       }
@@ -140,7 +171,7 @@ ExitStatus newton(const NewtonMatrixCallbacks& matrix_callbacks,
     while (1) {
       Eigen::VectorXd trial_x = x + α * p_x;
 
-      double trial_f = matrix_callbacks.f(trial_x);
+      double trial_f = matrices.f(trial_x);
 
       // If f(xₖ + αpₖˣ) isn't finite, reduce step size immediately
       if (!std::isfinite(trial_f)) {
@@ -169,7 +200,7 @@ ExitStatus newton(const NewtonMatrixCallbacks& matrix_callbacks,
 
         Eigen::VectorXd trial_x = x + α_max * p_x;
 
-        double next_kkt_error = kkt_error(matrix_callbacks.g(trial_x));
+        double next_kkt_error = kkt_error(matrices.g(trial_x));
 
         // If the step using αᵐᵃˣ reduced the KKT error, accept it anyway
         if (next_kkt_error <= 0.999 * current_kkt_error) {
@@ -202,9 +233,9 @@ ExitStatus newton(const NewtonMatrixCallbacks& matrix_callbacks,
     x += α * p_x;
 
     // Update autodiff for Hessian
-    f = matrix_callbacks.f(x);
-    g = matrix_callbacks.g(x);
-    H = matrix_callbacks.H(x);
+    f = matrices.f(x);
+    g = matrices.g(x);
+    H = matrices.H(x);
 
     ScopedProfiler next_iter_prep_profiler{next_iter_prep_prof};
 

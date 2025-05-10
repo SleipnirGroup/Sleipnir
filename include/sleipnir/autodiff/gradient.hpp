@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include <string_view>
 #include <utility>
 
 #include <Eigen/SparseCore>
@@ -11,8 +10,6 @@
 #include "sleipnir/autodiff/variable.hpp"
 #include "sleipnir/autodiff/variable_matrix.hpp"
 #include "sleipnir/util/concepts.hpp"
-#include "sleipnir/util/small_vector.hpp"
-#include "sleipnir/util/solve_profiler.hpp"
 #include "sleipnir/util/symbol_exports.hpp"
 
 namespace slp {
@@ -64,24 +61,6 @@ class SLEIPNIR_DLLEXPORT Gradient {
     m_g = m_jacobian.value();
 
     return m_g;
-  }
-
-  /**
-   * Sets main profiler name.
-   *
-   * @param name Main profiler name.
-   */
-  void set_profiler_name(std::string_view name) {
-    m_jacobian.set_profiler_name(name);
-  }
-
-  /**
-   * Returns the profiler.
-   *
-   * @return The profiler.
-   */
-  const small_vector<SolveProfiler>& get_profilers() const {
-    return m_jacobian.get_profilers();
   }
 
  private:

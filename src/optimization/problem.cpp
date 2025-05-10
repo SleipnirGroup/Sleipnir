@@ -7,7 +7,6 @@
 #include <memory>
 #include <optional>
 #include <ranges>
-#include <string_view>
 #include <utility>
 
 #include <Eigen/Core>
@@ -25,10 +24,10 @@
 #include "sleipnir/optimization/solver/options.hpp"
 #include "sleipnir/optimization/solver/sqp.hpp"
 #include "sleipnir/util/print.hpp"
-#include "sleipnir/util/setup_profiler.hpp"
 #include "sleipnir/util/small_vector.hpp"
 #include "sleipnir/util/spy.hpp"
 #include "util/print_diagnostics.hpp"
+#include "util/setup_profiler.hpp"
 
 namespace slp {
 
@@ -73,7 +72,6 @@ ExitStatus Problem::solve(const Options& options, [[maybe_unused]] bool spy) {
   ad_setup_profilers.emplace_back("  ↳ ∇f(x)").start();
   Gradient g{f, x_ad};
   ad_setup_profilers.back().stop();
-  g.set_profiler_name("  ↳ ∇f(x)");
 
   [[maybe_unused]]
   int num_decision_variables = m_decision_variables.size();
@@ -89,7 +87,6 @@ ExitStatus Problem::solve(const Options& options, [[maybe_unused]] bool spy) {
     ad_setup_profilers.emplace_back("  ↳ ∇²ₓₓL").start();
     Hessian<Eigen::Lower> H{f, x_ad};
     ad_setup_profilers.back().stop();
-    H.set_profiler_name("  ↳ ∇²ₓₓL");
 
     ad_setup_profilers[0].stop();
 
@@ -113,8 +110,6 @@ ExitStatus Problem::solve(const Options& options, [[maybe_unused]] bool spy) {
 #endif
 
     // Invoke Newton solver
-    SetupProfiler total_solve_profiler{"solver"};
-    total_solve_profiler.start();
     status = newton(
         NewtonMatrixCallbacks{
             [&](const Eigen::VectorXd& x) -> double {
@@ -130,7 +125,6 @@ ExitStatus Problem::solve(const Options& options, [[maybe_unused]] bool spy) {
               return H.value();
             }},
         m_iteration_callbacks, options, x);
-    total_solve_profiler.stop();
 
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     if (spy) {
@@ -139,10 +133,7 @@ ExitStatus Problem::solve(const Options& options, [[maybe_unused]] bool spy) {
 #endif
 
     if (options.diagnostics) {
-      print_autodiff_diagnostics(ad_setup_profilers, total_solve_profiler,
-                                 small_vector<small_vector<SolveProfiler>>{
-                                     g.get_profilers(), H.get_profilers()} |
-                                     std::views::join);
+      print_autodiff_diagnostics(ad_setup_profilers);
     }
   } else if (m_inequality_constraints.empty()) {
     VariableMatrix c_e_ad{m_equality_constraints};
@@ -151,7 +142,6 @@ ExitStatus Problem::solve(const Options& options, [[maybe_unused]] bool spy) {
     ad_setup_profilers.emplace_back("  ↳ ∂cₑ/∂x").start();
     Jacobian A_e{c_e_ad, x_ad};
     ad_setup_profilers.back().stop();
-    A_e.set_profiler_name("  ↳ ∂cₑ/∂x");
 
     // Set up Lagrangian
     VariableMatrix y_ad(num_equality_constraints);
@@ -161,7 +151,6 @@ ExitStatus Problem::solve(const Options& options, [[maybe_unused]] bool spy) {
     ad_setup_profilers.emplace_back("  ↳ ∇²ₓₓL").start();
     Hessian<Eigen::Lower> H{L, x_ad};
     ad_setup_profilers.back().stop();
-    H.set_profiler_name("  ↳ ∇²ₓₓL");
 
     ad_setup_profilers[0].stop();
 
@@ -191,8 +180,6 @@ ExitStatus Problem::solve(const Options& options, [[maybe_unused]] bool spy) {
 #endif
 
     // Invoke SQP solver
-    SetupProfiler total_solve_profiler{"solver"};
-    total_solve_profiler.start();
     status =
         sqp(SQPMatrixCallbacks{
                 [&](const Eigen::VectorXd& x) -> double {
@@ -218,7 +205,6 @@ ExitStatus Problem::solve(const Options& options, [[maybe_unused]] bool spy) {
                   return A_e.value();
                 }},
             m_iteration_callbacks, options, x);
-    total_solve_profiler.stop();
 
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     if (spy) {
@@ -227,11 +213,7 @@ ExitStatus Problem::solve(const Options& options, [[maybe_unused]] bool spy) {
 #endif
 
     if (options.diagnostics) {
-      print_autodiff_diagnostics(
-          ad_setup_profilers, total_solve_profiler,
-          small_vector<small_vector<SolveProfiler>>{
-              g.get_profilers(), H.get_profilers(), A_e.get_profilers()} |
-              std::views::join);
+      print_autodiff_diagnostics(ad_setup_profilers);
     }
   } else {
     VariableMatrix c_e_ad{m_equality_constraints};
@@ -241,13 +223,11 @@ ExitStatus Problem::solve(const Options& options, [[maybe_unused]] bool spy) {
     ad_setup_profilers.emplace_back("  ↳ ∂cₑ/∂x").start();
     Jacobian A_e{c_e_ad, x_ad};
     ad_setup_profilers.back().stop();
-    A_e.set_profiler_name("  ↳ ∂cₑ/∂x");
 
     // Set up inequality constraint Jacobian autodiff
     ad_setup_profilers.emplace_back("  ↳ ∂cᵢ/∂x").start();
     Jacobian A_i{c_i_ad, x_ad};
     ad_setup_profilers.back().stop();
-    A_i.set_profiler_name("  ↳ ∂cᵢ/∂x");
 
     // Set up Lagrangian
     VariableMatrix y_ad(num_equality_constraints);
@@ -258,7 +238,6 @@ ExitStatus Problem::solve(const Options& options, [[maybe_unused]] bool spy) {
     ad_setup_profilers.emplace_back("  ↳ ∇²ₓₓL").start();
     Hessian<Eigen::Lower> H{L, x_ad};
     ad_setup_profilers.back().stop();
-    H.set_profiler_name("  ↳ ∇²ₓₓL");
 
     ad_setup_profilers[0].stop();
 
@@ -294,8 +273,6 @@ ExitStatus Problem::solve(const Options& options, [[maybe_unused]] bool spy) {
 #endif
 
     // Invoke interior-point method solver
-    SetupProfiler total_solve_profiler{"solver"};
-    total_solve_profiler.start();
     status = interior_point(
         InteriorPointMatrixCallbacks{
             [&](const Eigen::VectorXd& x) -> double {
@@ -330,7 +307,6 @@ ExitStatus Problem::solve(const Options& options, [[maybe_unused]] bool spy) {
               return A_i.value();
             }},
         m_iteration_callbacks, options, x);
-    total_solve_profiler.stop();
 
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     if (spy) {
@@ -339,11 +315,7 @@ ExitStatus Problem::solve(const Options& options, [[maybe_unused]] bool spy) {
 #endif
 
     if (options.diagnostics) {
-      print_autodiff_diagnostics(ad_setup_profilers, total_solve_profiler,
-                                 small_vector<small_vector<SolveProfiler>>{
-                                     g.get_profilers(), H.get_profilers(),
-                                     A_e.get_profilers(), A_i.get_profilers()} |
-                                     std::views::join);
+      print_autodiff_diagnostics(ad_setup_profilers);
     }
   }
 

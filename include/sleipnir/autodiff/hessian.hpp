@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include <string_view>
 #include <utility>
 
 #include <Eigen/SparseCore>
@@ -11,9 +10,7 @@
 #include "sleipnir/autodiff/variable.hpp"
 #include "sleipnir/autodiff/variable_matrix.hpp"
 #include "sleipnir/util/concepts.hpp"
-#include "sleipnir/util/scoped_profiler.hpp"
 #include "sleipnir/util/small_vector.hpp"
-#include "sleipnir/util/solve_profiler.hpp"
 #include "sleipnir/util/symbol_exports.hpp"
 
 namespace slp {
@@ -88,11 +85,6 @@ class SLEIPNIR_DLLEXPORT Hessian {
         m_H = m_H.triangularView<Eigen::Lower>();
       }
     }
-
-    m_profilers.emplace_back("");
-    m_profilers.emplace_back("    ↳ graph update");
-    m_profilers.emplace_back("    ↳ adjoints");
-    m_profilers.emplace_back("    ↳ matrix build");
   }
 
   /**
@@ -127,20 +119,13 @@ class SLEIPNIR_DLLEXPORT Hessian {
    * @return The Hessian at wrt's value.
    */
   const Eigen::SparseMatrix<double>& value() {
-    ScopedProfiler value_profiler{m_profilers[0]};
-
     if (m_nonlinear_rows.empty()) {
       return m_H;
     }
 
-    ScopedProfiler graph_update_profiler{m_profilers[1]};
-
     for (auto& graph : m_graphs) {
       graph.update_values();
     }
-
-    graph_update_profiler.stop();
-    ScopedProfiler adjoints_profiler{m_profilers[2]};
 
     // Copy the cached triplets so triplets added for the nonlinear rows are
     // thrown away at the end of the function
@@ -150,9 +135,6 @@ class SLEIPNIR_DLLEXPORT Hessian {
     for (int row : m_nonlinear_rows) {
       m_graphs[row].append_adjoint_triplets(triplets, row, m_wrt);
     }
-
-    adjoints_profiler.stop();
-    ScopedProfiler matrix_build_profiler{m_profilers[3]};
 
     if (!triplets.empty()) {
       m_H.setFromTriplets(triplets.begin(), triplets.end());
@@ -166,22 +148,6 @@ class SLEIPNIR_DLLEXPORT Hessian {
     }
 
     return m_H;
-  }
-
-  /**
-   * Sets main profiler name.
-   *
-   * @param name Main profiler name.
-   */
-  void set_profiler_name(std::string_view name) { m_profilers[0].name = name; }
-
-  /**
-   * Returns the profilers.
-   *
-   * @return The profilers.
-   */
-  const small_vector<SolveProfiler>& get_profilers() const {
-    return m_profilers;
   }
 
  private:
@@ -198,8 +164,6 @@ class SLEIPNIR_DLLEXPORT Hessian {
   // List of row indices for nonlinear rows whose graients will be computed in
   // Value()
   small_vector<int> m_nonlinear_rows;
-
-  small_vector<SolveProfiler> m_profilers;
 };
 
 }  // namespace slp
