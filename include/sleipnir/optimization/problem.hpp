@@ -278,7 +278,7 @@ class SLEIPNIR_DLLEXPORT Problem {
                    [[maybe_unused]] bool spy = false);
 
   /**
-   * Adds a callback to be called at each solver iteration.
+   * Adds a callback to be called at the beginning of each solver iteration.
    *
    * The callback for this overload should return void.
    *
@@ -297,7 +297,7 @@ class SLEIPNIR_DLLEXPORT Problem {
   }
 
   /**
-   * Adds a callback to be called at each solver iteration.
+   * Adds a callback to be called at the beginning of each solver iteration.
    *
    * The callback for this overload should return bool.
    *
