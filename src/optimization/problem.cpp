@@ -83,6 +83,10 @@ ExitStatus Problem::solve(const Options& options, [[maybe_unused]] bool spy) {
   // Solve the optimization problem
   ExitStatus status;
   if (m_equality_constraints.empty() && m_inequality_constraints.empty()) {
+    if (options.diagnostics) {
+      slp::println("\nInvoking Newton solver...\n");
+    }
+
     // Set up Lagrangian Hessian autodiff
     ad_setup_profilers.emplace_back("  ↳ ∇²ₓₓL").start();
     Hessian<Eigen::Lower> H{f, x_ad};
@@ -103,10 +107,6 @@ ExitStatus Problem::solve(const Options& options, [[maybe_unused]] bool spy) {
         return false;
       });
     }
-
-    if (options.diagnostics) {
-      slp::println("\nInvoking Newton solver...\n");
-    }
 #endif
 
     // Invoke Newton solver
@@ -125,17 +125,11 @@ ExitStatus Problem::solve(const Options& options, [[maybe_unused]] bool spy) {
               return H.value();
             }},
         m_iteration_callbacks, options, x);
-
-#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-    if (spy) {
-      m_iteration_callbacks.pop_back();
-    }
-#endif
-
-    if (options.diagnostics) {
-      print_autodiff_diagnostics(ad_setup_profilers);
-    }
   } else if (m_inequality_constraints.empty()) {
+    if (options.diagnostics) {
+      slp::println("\nInvoking SQP solver\n");
+    }
+
     VariableMatrix c_e_ad{m_equality_constraints};
 
     // Set up equality constraint Jacobian autodiff
@@ -173,10 +167,6 @@ ExitStatus Problem::solve(const Options& options, [[maybe_unused]] bool spy) {
         return false;
       });
     }
-
-    if (options.diagnostics) {
-      slp::println("\nInvoking SQP solver\n");
-    }
 #endif
 
     // Invoke SQP solver
@@ -205,17 +195,11 @@ ExitStatus Problem::solve(const Options& options, [[maybe_unused]] bool spy) {
                   return A_e.value();
                 }},
             m_iteration_callbacks, options, x);
-
-#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-    if (spy) {
-      m_iteration_callbacks.pop_back();
-    }
-#endif
-
-    if (options.diagnostics) {
-      print_autodiff_diagnostics(ad_setup_profilers);
-    }
   } else {
+    if (options.diagnostics) {
+      slp::println("\nInvoking IPM solver...\n");
+    }
+
     VariableMatrix c_e_ad{m_equality_constraints};
     VariableMatrix c_i_ad{m_inequality_constraints};
 
@@ -266,10 +250,6 @@ ExitStatus Problem::solve(const Options& options, [[maybe_unused]] bool spy) {
         return false;
       });
     }
-
-    if (options.diagnostics) {
-      slp::println("\nInvoking IPM solver...\n");
-    }
 #endif
 
     // Invoke interior-point method solver
@@ -307,23 +287,18 @@ ExitStatus Problem::solve(const Options& options, [[maybe_unused]] bool spy) {
               return A_i.value();
             }},
         m_iteration_callbacks, options, x);
-
-#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-    if (spy) {
-      m_iteration_callbacks.pop_back();
-    }
-#endif
-
-    if (options.diagnostics) {
-      print_autodiff_diagnostics(ad_setup_profilers);
-    }
   }
 
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
+  if (spy) {
+    m_iteration_callbacks.pop_back();
+  }
+#endif
+
   if (options.diagnostics) {
+    print_autodiff_diagnostics(ad_setup_profilers);
     slp::println("\nExit: {}", to_message(status));
   }
-#endif
 
   // Assign the solution to the original Variable instances
   VariableMatrix{m_decision_variables}.set_value(x);
@@ -332,7 +307,6 @@ ExitStatus Problem::solve(const Options& options, [[maybe_unused]] bool spy) {
 }
 
 void Problem::print_exit_conditions([[maybe_unused]] const Options& options) {
-#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
   // Print possible exit conditions
   slp::println("User-configured exit conditions:");
   slp::println("  ↳ error below {}", options.tolerance);
@@ -345,11 +319,9 @@ void Problem::print_exit_conditions([[maybe_unused]] const Options& options) {
   if (std::isfinite(options.timeout.count())) {
     slp::println("  ↳ {} elapsed", options.timeout);
   }
-#endif
 }
 
 void Problem::print_problem_analysis() {
-#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
   constexpr std::array types{"no", "constant", "linear", "quadratic",
                              "nonlinear"};
 
@@ -395,7 +367,6 @@ void Problem::print_problem_analysis() {
     slp::println("{} inequality constraints", m_inequality_constraints.size());
   }
   print_constraint_types(m_inequality_constraints);
-#endif
 }
 
 }  // namespace slp
