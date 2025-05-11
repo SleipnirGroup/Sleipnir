@@ -2,8 +2,6 @@
 
 #pragma once
 
-#include <cmath>
-
 #include <Eigen/Cholesky>
 #include <Eigen/Core>
 #include <Eigen/SparseCholesky>
