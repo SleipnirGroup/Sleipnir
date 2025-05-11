@@ -26,40 +26,6 @@ constexpr double to_ms(const std::chrono::duration<Rep, Period>& duration) {
 }
 
 /**
- * Runs the setup and solve for an optimization problem instance, records the
- * setup time and solve time for each, then writes them to a CSV file.
- *
- * @tparam Problem The optimization problem's type (casadi::Opti or
- *   slp::Problem).
- * @param results The CSV file to which to write the results.
- * @param setup A function that returns an optimization problem instance.
- * @param solve A function that takes an optimization problem instance and
- *   solves it.
- */
-template <typename Problem>
-void run_benchmark(std::ofstream& results, slp::function_ref<Problem()> setup,
-                   slp::function_ref<void(Problem& problem)> solve) {
-  // Record setup time
-  auto setup_start_time = std::chrono::steady_clock::now();
-  auto problem = setup();
-  auto setup_end_time = std::chrono::steady_clock::now();
-
-  results << to_ms(setup_end_time - setup_start_time);
-  std::flush(results);
-
-  results << ",";
-  std::flush(results);
-
-  // Record solve time
-  auto solve_start_time = std::chrono::steady_clock::now();
-  solve(problem);
-  auto solve_end_time = std::chrono::steady_clock::now();
-
-  results << to_ms(solve_end_time - solve_start_time);
-  std::flush(results);
-}
-
-/**
  * Runs scalability benchmarks for CasADi and Sleipnir versions of an
  * optimization problem, records the setup time and solve time for each, then
  * writes them to scalability-results.csv.
@@ -94,34 +60,41 @@ int run_benchmarks_and_log(
   std::flush(results);
 
   for (int N : sample_sizes_to_test) {
-    results << N << ",";
-    std::flush(results);
-
     auto dt = T / N;
 
     std::print(stderr, "N = {}...", N);
-    run_benchmark<Problem>(
-        results, [=] { return setup(dt, N); },
-        [=](Problem& problem) {
-          if constexpr (std::same_as<Problem, casadi::Opti>) {
-            if (diagnostics) {
-              problem.solver("ipopt");
-            } else {
-              problem.solver("ipopt", {{"print_time", 0}},
-                             {{"print_level", 0}, {"sb", "yes"}});
-            }
-            problem.solve();
-          } else {
-            if (problem.solve({.diagnostics = diagnostics}) !=
-                slp::ExitStatus::SUCCESS) {
-              std::print(stderr, " FAIL ");
-            }
-          }
-        });
-    std::println(stderr, " done.");
 
-    results << "\n";
-    std::flush(results);
+    // Record setup time
+    auto setup_start_time = std::chrono::steady_clock::now();
+    auto problem = setup(dt, N);
+    auto setup_end_time = std::chrono::steady_clock::now();
+
+    // Record solve time
+    bool success = true;
+    auto solve_start_time = std::chrono::steady_clock::now();
+    if constexpr (std::same_as<Problem, casadi::Opti>) {
+      if (diagnostics) {
+        problem.solver("ipopt");
+      } else {
+        problem.solver("ipopt", {{"print_time", 0}},
+                       {{"print_level", 0}, {"sb", "yes"}});
+      }
+      problem.solve();
+    } else {
+      success = problem.solve({.diagnostics = diagnostics}) ==
+                slp::ExitStatus::SUCCESS;
+    }
+    auto solve_end_time = std::chrono::steady_clock::now();
+
+    if (success) {
+      results << N << ',' << to_ms(setup_end_time - setup_start_time) << ','
+              << to_ms(solve_end_time - solve_start_time) << '\n';
+      std::flush(results);
+    } else {
+      std::print(stderr, " FAIL");
+    }
+
+    std::println(stderr, " done.");
   }
 
   return 0;
