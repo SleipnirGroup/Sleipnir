@@ -334,7 +334,10 @@ if(BUILD_PYTHON)
         #      |              ^~~~
         target_compile_options(_jormungandr PRIVATE -Wno-pedantic)
     endif()
-    if(${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang")
+    if(
+        ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang"
+        OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang"
+    )
         target_compile_options(nanobind-static PRIVATE -Wno-array-bounds)
         target_compile_options(
             _jormungandr
