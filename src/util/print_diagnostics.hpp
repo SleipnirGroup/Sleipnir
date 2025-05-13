@@ -87,12 +87,12 @@ inline std::string power_of_10(double value) {
 
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
 /**
- * Prints error for too many degrees of freedom.
+ * Prints error for too few degrees of freedom.
  *
  * @param c_e The problem's equality constraints cₑ(x) evaluated at the current
  *   iterate.
  */
-inline void print_too_many_dofs_error(const Eigen::VectorXd& c_e) {
+inline void print_too_few_dofs_error(const Eigen::VectorXd& c_e) {
   slp::println("The problem has too few degrees of freedom.");
   slp::println("Violated constraints (cₑ(x) = 0) in order of declaration:");
   for (int row = 0; row < c_e.rows(); ++row) {
@@ -102,7 +102,7 @@ inline void print_too_many_dofs_error(const Eigen::VectorXd& c_e) {
   }
 }
 #else
-#define print_too_many_dofs_error(...)
+#define print_too_few_dofs_error(...)
 #endif
 
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS

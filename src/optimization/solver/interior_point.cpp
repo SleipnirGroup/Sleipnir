@@ -149,7 +149,7 @@ ExitStatus interior_point(
   // Check for overconstrained problem
   if (num_equality_constraints > num_decision_variables) {
     if (options.diagnostics) {
-      print_too_many_dofs_error(c_e);
+      print_too_few_dofs_error(c_e);
     }
 
     return ExitStatus::TOO_FEW_DOFS;
