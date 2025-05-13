@@ -1,7 +1,28 @@
 function(pybind11_mkdoc target headers)
     find_package(Python3 REQUIRED COMPONENTS Interpreter)
+
     if(UNIX AND NOT APPLE)
-        set(env_vars LLVM_DIR_PATH=/usr/lib LIBCLANG_PATH=/usr/lib/libclang.so)
+        if(EXISTS /usr/lib/libclang.so)
+            set(env_vars
+                LLVM_DIR_PATH=/usr/lib
+                LIBCLANG_PATH=/usr/lib/libclang.so
+            )
+        else()
+            # Get default clang version
+            execute_process(
+                COMMAND
+                    bash -c
+                    "clang++ --version | grep -E -o \'[0-9]+\' | head -1"
+                OUTPUT_VARIABLE CLANG_VERSION
+                OUTPUT_STRIP_TRAILING_WHITESPACE
+                COMMAND_ERROR_IS_FATAL ANY
+            )
+
+            set(env_vars
+                LLVM_DIR_PATH=/usr/lib/llvm-${CLANG_VERSION}
+                LIBCLANG_PATH=/usr/lib/llvm-${CLANG_VERSION}/lib/libclang.so
+            )
+        endif()
     endif()
 
     get_target_property(target_dirs ${target} INCLUDE_DIRECTORIES)

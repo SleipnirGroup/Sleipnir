@@ -7,6 +7,57 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  pybind11_mkdoc:
+    name: "pybind11_mkdoc"
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.13
+
+      - name: Install LLVM 19
+        run: |
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 19 all
+          sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-19 200
+          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-19 200
+          echo "CC=clang" >> $GITHUB_ENV
+          echo "CXX=clang++" >> $GITHUB_ENV
+          echo "CXXFLAGS=-stdlib=libc++" >> $GITHUB_ENV
+
+      - run: pip3 install --user --break-system-packages pybind11_mkdoc clang==19.1.7
+
+      - run: cmake -B build -S . -DBUILD_PYTHON=ON
+
+      # Ensures _jormungandr_docstrings rule runs
+      - run: cmake --build build -t clean
+
+      - run: cmake --build build -t _jormungandr_docstrings
+
+      - name: Check output
+        run: git --no-pager diff --exit-code HEAD
+
+      - name: Generate diff
+        run: git diff HEAD > pybind11_mkdoc-fixes.patch
+        if: ${{ failure() }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pybind11_mkdoc fixes
+          path: pybind11_mkdoc-fixes.patch
+        if: ${{ failure() }}
+
+      - name: Write to job summary
+        run: |
+          echo '```diff' >> $GITHUB_STEP_SUMMARY
+          cat pybind11_mkdoc-fixes.patch >> $GITHUB_STEP_SUMMARY
+          echo '' >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+        if: ${{ failure() }}
+
   wpiformat:
     name: "wpiformat"
     runs-on: ubuntu-24.04
