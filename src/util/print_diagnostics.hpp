@@ -136,7 +136,7 @@ inline void print_c_e_local_infeasibility_error(const Eigen::VectorXd& c_e) {
  */
 inline void print_c_i_local_infeasibility_error(const Eigen::VectorXd& c_i) {
   slp::println(
-      "The problem is infeasible due to violated inequality "
+      "The problem is locally infeasible due to violated inequality "
       "constraints.");
   slp::println("Violated constraints (cᵢ(x) ≥ 0) in order of declaration:");
   for (int row = 0; row < c_i.rows(); ++row) {
