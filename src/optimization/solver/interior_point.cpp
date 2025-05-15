@@ -233,7 +233,6 @@ ExitStatus interior_point(
   constexpr double α_min = 1e-7;
 
   int full_step_rejected_counter = 0;
-  int step_too_small_counter = 0;
 
   // Error estimate
   double E_0 = std::numeric_limits<double>::infinity();
@@ -571,22 +570,6 @@ ExitStatus interior_point(
       full_step_rejected_counter = 0;
     }
 
-    // Handle very small search directions by letting αₖ = αₖᵐᵃˣ when
-    // max(|pₖˣ(i)|/(1 + |xₖ(i)|)) < 10ε_mach.
-    //
-    // See section 3.9 of [2].
-    double max_step_scaled = 0.0;
-    for (int row = 0; row < x.rows(); ++row) {
-      max_step_scaled = std::max(
-          max_step_scaled, std::abs(step.p_x[row]) / (1.0 + std::abs(x[row])));
-    }
-    if (max_step_scaled < 10.0 * std::numeric_limits<double>::epsilon()) {
-      α = α_max;
-      ++step_too_small_counter;
-    } else {
-      step_too_small_counter = 0;
-    }
-
     // xₖ₊₁ = xₖ + αₖpₖˣ
     // sₖ₊₁ = sₖ + αₖpₖˢ
     // yₖ₊₁ = yₖ + αₖᶻpₖʸ
@@ -664,16 +647,6 @@ ExitStatus interior_point(
     // Check for max wall clock time
     if (std::chrono::steady_clock::now() - solve_start_time > options.timeout) {
       return ExitStatus::TIMEOUT;
-    }
-
-    // The search direction has been very small twice, so assume the problem has
-    // been solved as well as possible given finite precision and reduce the
-    // barrier parameter.
-    //
-    // See section 3.9 of [2].
-    if (step_too_small_counter >= 2 && μ > μ_min) {
-      update_barrier_parameter_and_reset_filter();
-      continue;
     }
   }
 
