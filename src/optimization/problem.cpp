@@ -11,6 +11,7 @@
 
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
+#include <gch/small_vector.hpp>
 
 #include "optimization/bounds.hpp"
 #include "sleipnir/autodiff/expression_type.hpp"
@@ -25,7 +26,6 @@
 #include "sleipnir/optimization/solver/options.hpp"
 #include "sleipnir/optimization/solver/sqp.hpp"
 #include "sleipnir/util/print.hpp"
-#include "sleipnir/util/small_vector.hpp"
 #include "sleipnir/util/spy.hpp"
 #include "util/print_diagnostics.hpp"
 #include "util/setup_profiler.hpp"
@@ -61,7 +61,7 @@ ExitStatus Problem::solve(const Options& options, [[maybe_unused]] bool spy) {
     return ExitStatus::SUCCESS;
   }
 
-  small_vector<SetupProfiler> ad_setup_profilers;
+  gch::small_vector<SetupProfiler> ad_setup_profilers;
   ad_setup_profilers.emplace_back("setup").start();
 
   VariableMatrix x_ad{m_decision_variables};
@@ -358,19 +358,20 @@ void Problem::print_problem_analysis() {
     slp::print("\n{} decision variables\n", m_decision_variables.size());
   }
 
-  auto print_constraint_types = [](const small_vector<Variable>& constraints) {
-    std::array<size_t, 5> counts{};
-    for (const auto& constraint : constraints) {
-      ++counts[std::to_underlying(constraint.type())];
-    }
-    for (const auto& [count, name] :
-         std::views::zip(counts, std::array{"empty", "constant", "linear",
-                                            "quadratic", "nonlinear"})) {
-      if (count > 0) {
-        slp::println("  ↳ {} {}", count, name);
-      }
-    }
-  };
+  auto print_constraint_types =
+      [](const gch::small_vector<Variable>& constraints) {
+        std::array<size_t, 5> counts{};
+        for (const auto& constraint : constraints) {
+          ++counts[std::to_underlying(constraint.type())];
+        }
+        for (const auto& [count, name] :
+             std::views::zip(counts, std::array{"empty", "constant", "linear",
+                                                "quadratic", "nonlinear"})) {
+          if (count > 0) {
+            slp::println("  ↳ {} {}", count, name);
+          }
+        }
+      };
 
   // Print constraint types
   if (m_equality_constraints.size() == 1) {

@@ -8,8 +8,7 @@
 #include <utility>
 
 #include <Eigen/Core>
-
-#include "sleipnir/util/small_vector.hpp"
+#include <gch/small_vector.hpp>
 
 // See docs/algorithms.md#Works_cited for citation definitions.
 
@@ -192,7 +191,7 @@ class Filter {
   static constexpr double γ_cost = 1e-8;
   static constexpr double γ_constraint = 1e-5;
 
-  small_vector<FilterEntry> m_filter;
+  gch::small_vector<FilterEntry> m_filter;
 };
 
 }  // namespace slp

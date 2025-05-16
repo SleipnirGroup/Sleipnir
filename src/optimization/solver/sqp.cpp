@@ -10,6 +10,7 @@
 
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
+#include <gch/small_vector.hpp>
 
 #include "optimization/regularized_ldlt.hpp"
 #include "optimization/solver/util/error_estimate.hpp"
@@ -20,7 +21,6 @@
 #include "sleipnir/optimization/solver/iteration_info.hpp"
 #include "sleipnir/optimization/solver/options.hpp"
 #include "sleipnir/util/assert.hpp"
-#include "sleipnir/util/small_vector.hpp"
 #include "util/print_diagnostics.hpp"
 #include "util/scope_exit.hpp"
 #include "util/scoped_profiler.hpp"
@@ -50,7 +50,7 @@ ExitStatus sqp(const SQPMatrixCallbacks& matrix_callbacks,
                const Options& options, Eigen::VectorXd& x) {
   const auto solve_start_time = std::chrono::steady_clock::now();
 
-  small_vector<SolveProfiler> solve_profilers;
+  gch::small_vector<SolveProfiler> solve_profilers;
   solve_profilers.emplace_back("solver");
   solve_profilers.emplace_back("  ↳ setup");
   solve_profilers.emplace_back("  ↳ iteration");
@@ -156,7 +156,7 @@ ExitStatus sqp(const SQPMatrixCallbacks& matrix_callbacks,
   Filter filter;
 
   // Kept outside the loop so its storage can be reused
-  small_vector<Eigen::Triplet<double>> triplets;
+  gch::small_vector<Eigen::Triplet<double>> triplets;
 
   RegularizedLDLT solver{num_decision_variables, num_equality_constraints};
 
@@ -430,19 +430,6 @@ ExitStatus sqp(const SQPMatrixCallbacks& matrix_callbacks,
     // If full step was accepted, reset full-step rejected counter
     if (α == α_max) {
       full_step_rejected_counter = 0;
-    }
-
-    // Handle very small search directions by letting αₖ = αₖᵐᵃˣ when
-    // max(|pₖˣ(i)|/(1 + |xₖ(i)|)) < 10ε_mach.
-    //
-    // See section 3.9 of [2].
-    double max_step_scaled = 0.0;
-    for (int row = 0; row < x.rows(); ++row) {
-      max_step_scaled = std::max(
-          max_step_scaled, std::abs(step.p_x(row)) / (1.0 + std::abs(x(row))));
-    }
-    if (max_step_scaled < 10.0 * std::numeric_limits<double>::epsilon()) {
-      α = α_max;
     }
 
     // xₖ₊₁ = xₖ + αₖpₖˣ

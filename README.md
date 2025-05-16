@@ -165,6 +165,7 @@ See the [examples](https://github.com/SleipnirGroup/Sleipnir/tree/main/examples)
   * On Linux, install via `sudo apt install python`
   * On macOS, install via `brew install python`
 * [Eigen](https://gitlab.com/libeigen/eigen)
+* [small_vector](https://github.com/gharveymn/small_vector)
 * [nanobind](https://github.com/wjakob/nanobind) (build only)
 * [Catch2](https://github.com/catchorg/Catch2) (tests only)
 
@@ -271,7 +272,7 @@ For quadratic problems, we compute the Lagrangian Hessian and constraint Jacobia
 
 #### Use a performant linear algebra library with fast sparse solvers
 
-[Eigen](https://gitlab.com/libeigen/eigen/) provides these. It also has no required dependencies, which makes cross compilation much easier.
+[Eigen](https://gitlab.com/libeigen/eigen) provides these. It also has no required dependencies, which makes cross compilation much easier.
 
 #### Use a pool allocator for autodiff expression nodes
 

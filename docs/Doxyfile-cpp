@@ -1005,7 +1005,6 @@ RECURSIVE              = YES
 EXCLUDE                = benchmarks \
                          build \
                          examples \
-                         include/sleipnir/util/small_vector.hpp \
                          thirdparty \
                          test \
                          tools

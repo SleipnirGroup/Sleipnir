@@ -11,6 +11,7 @@
 #include <utility>
 
 #include <Eigen/Core>
+#include <gch/small_vector.hpp>
 
 #include "sleipnir/autodiff/expression_type.hpp"
 #include "sleipnir/autodiff/variable.hpp"
@@ -18,7 +19,6 @@
 #include "sleipnir/optimization/solver/exit_status.hpp"
 #include "sleipnir/optimization/solver/iteration_info.hpp"
 #include "sleipnir/optimization/solver/options.hpp"
-#include "sleipnir/util/small_vector.hpp"
 #include "sleipnir/util/symbol_exports.hpp"
 
 namespace slp {
@@ -320,19 +320,19 @@ class SLEIPNIR_DLLEXPORT Problem {
  private:
   // The list of decision variables, which are the root of the problem's
   // expression tree
-  small_vector<Variable> m_decision_variables;
+  gch::small_vector<Variable> m_decision_variables;
 
   // The cost function: f(x)
   std::optional<Variable> m_f;
 
   // The list of equality constraints: cₑ(x) = 0
-  small_vector<Variable> m_equality_constraints;
+  gch::small_vector<Variable> m_equality_constraints;
 
   // The list of inequality constraints: cᵢ(x) ≥ 0
-  small_vector<Variable> m_inequality_constraints;
+  gch::small_vector<Variable> m_inequality_constraints;
 
   // The iteration callbacks
-  small_vector<std::function<bool(const IterationInfo& info)>>
+  gch::small_vector<std::function<bool(const IterationInfo& info)>>
       m_iteration_callbacks;
 
   void print_exit_conditions([[maybe_unused]] const Options& options);

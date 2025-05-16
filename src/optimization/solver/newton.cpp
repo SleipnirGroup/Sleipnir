@@ -10,6 +10,7 @@
 
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
+#include <gch/small_vector.hpp>
 
 #include "optimization/regularized_ldlt.hpp"
 #include "optimization/solver/util/error_estimate.hpp"
@@ -34,7 +35,7 @@ ExitStatus newton(const NewtonMatrixCallbacks& matrix_callbacks,
                   const Options& options, Eigen::VectorXd& x) {
   const auto solve_start_time = std::chrono::steady_clock::now();
 
-  small_vector<SolveProfiler> solve_profilers;
+  gch::small_vector<SolveProfiler> solve_profilers;
   solve_profilers.emplace_back("solver");
   solve_profilers.emplace_back("  ↳ setup");
   solve_profilers.emplace_back("  ↳ iteration");
@@ -212,19 +213,6 @@ ExitStatus newton(const NewtonMatrixCallbacks& matrix_callbacks,
 
         return ExitStatus::LINE_SEARCH_FAILED;
       }
-    }
-
-    // Handle very small search directions by letting αₖ = αₖᵐᵃˣ when
-    // max(|pₖˣ(i)|/(1 + |xₖ(i)|)) < 10ε_mach.
-    //
-    // See section 3.9 of [2].
-    double max_step_scaled = 0.0;
-    for (int row = 0; row < x.rows(); ++row) {
-      max_step_scaled = std::max(max_step_scaled,
-                                 std::abs(p_x(row)) / (1.0 + std::abs(x(row))));
-    }
-    if (max_step_scaled < 10.0 * std::numeric_limits<double>::epsilon()) {
-      α = α_max;
     }
 
     line_search_profiler.stop();
