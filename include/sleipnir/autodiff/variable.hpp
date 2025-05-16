@@ -11,12 +11,12 @@
 #include <vector>
 
 #include <Eigen/Core>
+#include <gch/small_vector.hpp>
 
 #include "sleipnir/autodiff/expression.hpp"
 #include "sleipnir/autodiff/expression_graph.hpp"
 #include "sleipnir/util/assert.hpp"
 #include "sleipnir/util/concepts.hpp"
-#include "sleipnir/util/small_vector.hpp"
 #include "sleipnir/util/symbol_exports.hpp"
 
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
@@ -256,7 +256,7 @@ class SLEIPNIR_DLLEXPORT Variable {
 
   /// Used to update the value of this variable based on the values of its
   /// dependent variables
-  small_vector<detail::Expression*> m_graph;
+  gch::small_vector<detail::Expression*> m_graph;
 
   /// Used for lazy initialization of m_graph
   bool m_graph_initialized = false;
@@ -495,8 +495,8 @@ template <typename LHS, typename RHS>
   requires(ScalarLike<LHS> || MatrixLike<LHS>) &&
           (ScalarLike<RHS> || MatrixLike<RHS>) &&
           (SleipnirType<LHS> || SleipnirType<RHS>)
-small_vector<Variable> make_constraints(LHS&& lhs, RHS&& rhs) {
-  small_vector<Variable> constraints;
+gch::small_vector<Variable> make_constraints(LHS&& lhs, RHS&& rhs) {
+  gch::small_vector<Variable> constraints;
 
   if constexpr (ScalarLike<LHS> && ScalarLike<RHS>) {
     constraints.emplace_back(lhs - rhs);
@@ -558,7 +558,7 @@ small_vector<Variable> make_constraints(LHS&& lhs, RHS&& rhs) {
  */
 struct SLEIPNIR_DLLEXPORT EqualityConstraints {
   /// A vector of scalar equality constraints.
-  small_vector<Variable> constraints;
+  gch::small_vector<Variable> constraints;
 
   /**
    * Concatenates multiple equality constraints.
@@ -619,7 +619,7 @@ struct SLEIPNIR_DLLEXPORT EqualityConstraints {
  */
 struct SLEIPNIR_DLLEXPORT InequalityConstraints {
   /// A vector of scalar inequality constraints.
-  small_vector<Variable> constraints;
+  gch::small_vector<Variable> constraints;
 
   /**
    * Concatenates multiple inequality constraints.

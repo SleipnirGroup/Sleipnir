@@ -6,9 +6,10 @@
 #include <future>
 #include <span>
 
+#include <gch/small_vector.hpp>
+
 #include "sleipnir/optimization/solver/exit_status.hpp"
 #include "sleipnir/util/function_ref.hpp"
-#include "sleipnir/util/small_vector.hpp"
 
 namespace slp {
 
@@ -48,14 +49,14 @@ MultistartResult<DecisionVariables> Multistart(
         const DecisionVariables& initial_guess)>
         solve,
     std::span<const DecisionVariables> initial_guesses) {
-  small_vector<std::future<MultistartResult<DecisionVariables>>> futures;
+  gch::small_vector<std::future<MultistartResult<DecisionVariables>>> futures;
   futures.reserve(initial_guesses.size());
 
   for (const auto& initial_guess : initial_guesses) {
     futures.emplace_back(std::async(std::launch::async, solve, initial_guess));
   }
 
-  small_vector<MultistartResult<DecisionVariables>> results;
+  gch::small_vector<MultistartResult<DecisionVariables>> results;
   results.reserve(futures.size());
 
   for (auto& future : futures) {

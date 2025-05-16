@@ -5,12 +5,12 @@
 #include <utility>
 
 #include <Eigen/SparseCore>
+#include <gch/small_vector.hpp>
 
 #include "sleipnir/autodiff/adjoint_expression_graph.hpp"
 #include "sleipnir/autodiff/variable.hpp"
 #include "sleipnir/autodiff/variable_matrix.hpp"
 #include "sleipnir/util/concepts.hpp"
-#include "sleipnir/util/small_vector.hpp"
 #include "sleipnir/util/symbol_exports.hpp"
 
 namespace slp {
@@ -154,16 +154,16 @@ class SLEIPNIR_DLLEXPORT Hessian {
   VariableMatrix m_variables;
   VariableMatrix m_wrt;
 
-  small_vector<detail::AdjointExpressionGraph> m_graphs;
+  gch::small_vector<detail::AdjointExpressionGraph> m_graphs;
 
   Eigen::SparseMatrix<double> m_H{m_variables.rows(), m_wrt.rows()};
 
   // Cached triplets for gradients of linear rows
-  small_vector<Eigen::Triplet<double>> m_cached_triplets;
+  gch::small_vector<Eigen::Triplet<double>> m_cached_triplets;
 
   // List of row indices for nonlinear rows whose graients will be computed in
   // Value()
-  small_vector<int> m_nonlinear_rows;
+  gch::small_vector<int> m_nonlinear_rows;
 };
 
 }  // namespace slp
