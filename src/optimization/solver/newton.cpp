@@ -10,6 +10,7 @@
 
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
+#include <gch/small_vector.hpp>
 
 #include "optimization/regularized_ldlt.hpp"
 #include "optimization/solver/util/error_estimate.hpp"
@@ -34,7 +35,7 @@ ExitStatus newton(const NewtonMatrixCallbacks& matrix_callbacks,
                   const Options& options, Eigen::VectorXd& x) {
   const auto solve_start_time = std::chrono::steady_clock::now();
 
-  small_vector<SolveProfiler> solve_profilers;
+  gch::small_vector<SolveProfiler> solve_profilers;
   solve_profilers.emplace_back("solver");
   solve_profilers.emplace_back("  ↳ setup");
   solve_profilers.emplace_back("  ↳ iteration");

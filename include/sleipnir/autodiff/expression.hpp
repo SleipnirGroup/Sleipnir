@@ -11,10 +11,11 @@
 #include <numbers>
 #include <utility>
 
+#include <gch/small_vector.hpp>
+
 #include "sleipnir/autodiff/expression_type.hpp"
 #include "sleipnir/util/intrusive_shared_ptr.hpp"
 #include "sleipnir/util/pool.hpp"
-#include "sleipnir/util/small_vector.hpp"
 
 namespace slp::detail {
 
@@ -694,7 +695,7 @@ inline constexpr void dec_ref_count(Expression* expr) {
   // Expression destructor when expr's refcount reaches zero can cause a stack
   // overflow. Instead, we iterate over its children to decrement their
   // refcounts and deallocate them.
-  small_vector<Expression*> stack;
+  gch::small_vector<Expression*> stack;
   stack.emplace_back(expr);
 
   while (!stack.empty()) {

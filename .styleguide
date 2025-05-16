@@ -17,6 +17,7 @@ modifiableFileExclude {
 includeOtherLibs {
   ^Eigen/
   ^catch2/
+  ^gch/
   ^nanobind/
   ^sleipnir/
 }

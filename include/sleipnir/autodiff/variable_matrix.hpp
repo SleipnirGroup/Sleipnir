@@ -11,6 +11,7 @@
 #include <vector>
 
 #include <Eigen/Core>
+#include <gch/small_vector.hpp>
 
 #include "sleipnir/autodiff/slice.hpp"
 #include "sleipnir/autodiff/variable.hpp"
@@ -18,7 +19,6 @@
 #include "sleipnir/util/assert.hpp"
 #include "sleipnir/util/concepts.hpp"
 #include "sleipnir/util/function_ref.hpp"
-#include "sleipnir/util/small_vector.hpp"
 #include "sleipnir/util/symbol_exports.hpp"
 
 namespace slp {
@@ -1029,7 +1029,8 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
 
     constexpr iterator() noexcept = default;
 
-    explicit constexpr iterator(small_vector<Variable>::iterator it) noexcept
+    explicit constexpr iterator(
+        gch::small_vector<Variable>::iterator it) noexcept
         : m_it{it} {}
 
     constexpr iterator& operator++() noexcept {
@@ -1048,7 +1049,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
     constexpr reference operator*() const noexcept { return *m_it; }
 
    private:
-    small_vector<Variable>::iterator m_it;
+    gch::small_vector<Variable>::iterator m_it;
   };
 
   class const_iterator {
@@ -1062,7 +1063,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
     constexpr const_iterator() noexcept = default;
 
     explicit constexpr const_iterator(
-        small_vector<Variable>::const_iterator it) noexcept
+        gch::small_vector<Variable>::const_iterator it) noexcept
         : m_it{it} {}
 
     constexpr const_iterator& operator++() noexcept {
@@ -1081,7 +1082,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
     constexpr const_reference operator*() const noexcept { return *m_it; }
 
    private:
-    small_vector<Variable>::const_iterator m_it;
+    gch::small_vector<Variable>::const_iterator m_it;
   };
 
 #endif  // DOXYGEN_SHOULD_SKIP_THIS
@@ -1170,7 +1171,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
   }
 
  private:
-  small_vector<Variable> m_storage;
+  gch::small_vector<Variable> m_storage;
   int m_rows = 0;
   int m_cols = 0;
 };

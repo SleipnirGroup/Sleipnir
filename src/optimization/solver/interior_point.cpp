@@ -10,6 +10,7 @@
 
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
+#include <gch/small_vector.hpp>
 
 #include "optimization/regularized_ldlt.hpp"
 #include "optimization/solver/util/error_estimate.hpp"
@@ -21,7 +22,6 @@
 #include "sleipnir/optimization/solver/iteration_info.hpp"
 #include "sleipnir/optimization/solver/options.hpp"
 #include "sleipnir/util/assert.hpp"
-#include "sleipnir/util/small_vector.hpp"
 #include "util/print_diagnostics.hpp"
 #include "util/scope_exit.hpp"
 #include "util/scoped_profiler.hpp"
@@ -59,7 +59,7 @@ ExitStatus interior_point(
     const Options& options, Eigen::VectorXd& x) {
   const auto solve_start_time = std::chrono::steady_clock::now();
 
-  small_vector<SolveProfiler> solve_profilers;
+  gch::small_vector<SolveProfiler> solve_profilers;
   solve_profilers.emplace_back("solver");
   solve_profilers.emplace_back("  ↳ setup");
   solve_profilers.emplace_back("  ↳ iteration");
@@ -224,7 +224,7 @@ ExitStatus interior_point(
   };
 
   // Kept outside the loop so its storage can be reused
-  small_vector<Eigen::Triplet<double>> triplets;
+  gch::small_vector<Eigen::Triplet<double>> triplets;
 
   RegularizedLDLT solver{num_decision_variables, num_equality_constraints};
 

@@ -13,9 +13,9 @@
 #include <utility>
 
 #include <Eigen/Core>
+#include <gch/small_vector.hpp>
 
 #include "sleipnir/util/print.hpp"
-#include "sleipnir/util/small_vector.hpp"
 #include "util/setup_profiler.hpp"
 #include "util/solve_profiler.hpp"
 
@@ -62,7 +62,7 @@ inline std::string power_of_10(double value) {
     } else {
       // Gather exponent digits
       int n = std::abs(exponent);
-      small_vector<int> digits;
+      gch::small_vector<int> digits;
       do {
         digits.emplace_back(n % 10);
         n /= 10;
@@ -279,7 +279,7 @@ std::string histogram(double value) {
  * @param solve_profilers Solve profilers.
  */
 inline void print_solver_diagnostics(
-    const small_vector<SolveProfiler>& solve_profilers) {
+    const gch::small_vector<SolveProfiler>& solve_profilers) {
   auto solve_duration = to_ms(solve_profilers[0].total_duration());
 
   slp::println("┏{:━^25}┯{:━^18}┯{:━^10}┯{:━^9}┯{:━^4}┓", "", "", "", "", "");
@@ -310,7 +310,7 @@ inline void print_solver_diagnostics(
  * @param setup_profilers Autodiff setup profilers.
  */
 inline void print_autodiff_diagnostics(
-    const small_vector<SetupProfiler>& setup_profilers) {
+    const gch::small_vector<SetupProfiler>& setup_profilers) {
   auto setup_duration = to_ms(setup_profilers[0].duration());
 
   // Print heading

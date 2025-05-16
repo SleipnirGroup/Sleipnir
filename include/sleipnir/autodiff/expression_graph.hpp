@@ -4,8 +4,9 @@
 
 #include <ranges>
 
+#include <gch/small_vector.hpp>
+
 #include "sleipnir/autodiff/expression.hpp"
-#include "sleipnir/util/small_vector.hpp"
 
 namespace slp::detail {
 
@@ -16,8 +17,9 @@ namespace slp::detail {
  *
  * @param root The root node of the expression.
  */
-inline small_vector<Expression*> topological_sort(const ExpressionPtr& root) {
-  small_vector<Expression*> list;
+inline gch::small_vector<Expression*> topological_sort(
+    const ExpressionPtr& root) {
+  gch::small_vector<Expression*> list;
 
   // If the root type is a constant, Update() is a no-op, so there's no work
   // to do
@@ -26,7 +28,7 @@ inline small_vector<Expression*> topological_sort(const ExpressionPtr& root) {
   }
 
   // Stack of nodes to explore
-  small_vector<Expression*> stack;
+  gch::small_vector<Expression*> stack;
 
   // Enumerate incoming edges for each node via depth-first search
   stack.emplace_back(root.get());
@@ -73,7 +75,7 @@ inline small_vector<Expression*> topological_sort(const ExpressionPtr& root) {
  *
  * @param list Topological sort of graph from parent to child.
  */
-inline void update_values(const small_vector<Expression*>& list) {
+inline void update_values(const gch::small_vector<Expression*>& list) {
   // Traverse graph from child to parent and update values
   for (auto& node : list | std::views::reverse) {
     auto& lhs = node->args[0];

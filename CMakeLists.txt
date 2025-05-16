@@ -120,6 +120,17 @@ endif()
 
 target_link_libraries(Sleipnir PUBLIC Eigen3::Eigen)
 
+# small_vector dependency
+fetchcontent_declare(
+    small_vector
+    GIT_REPOSITORY https://github.com/gharveymn/small_vector.git
+    # main on 2025-05-15
+    GIT_TAG b19a9c477cad5e58f8aed59dbe9be1c30e4b9826
+)
+fetchcontent_makeavailable(small_vector)
+
+target_link_libraries(Sleipnir PUBLIC small_vector)
+
 if(BUILD_TESTING AND NOT CMAKE_CROSSCOMPILING)
     # Catch2 dependency
     fetchcontent_declare(
@@ -325,7 +336,10 @@ if(BUILD_PYTHON)
             ${CMAKE_CURRENT_SOURCE_DIR}/include
             ${CMAKE_CURRENT_SOURCE_DIR}/jormungandr/cpp
     )
-    target_link_libraries(_jormungandr PUBLIC Threads::Threads Eigen3::Eigen)
+    target_link_libraries(
+        _jormungandr
+        PUBLIC Threads::Threads Eigen3::Eigen small_vector
+    )
 
     # Suppress compiler warnings in nanobind
     if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
