@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <limits>
 #include <span>
-#include <tuple>
 #include <utility>
 
 #include <Eigen/Core>
@@ -20,11 +19,25 @@
 
 namespace slp {
 
+struct Bounds {
+  /// Which constraints, if any, are bound constraints.
+  Eigen::ArrayX<bool> bound_constraint_mask;
+
+  /// The tightest bounds on each decision variable.
+  gch::small_vector<std::pair<double, double>> bounds;
+
+  /// Whether or not the constraints are feasible (given previously encountered
+  /// bounds).
+  gch::small_vector<std::pair<Eigen::Index, Eigen::Index>>
+      conflicting_bound_indices;
+};
+
 /**
  * A "bound constraint" is any linear constraint in one scalar variable.
- * Computes which constraints, if any, are bound constraints, whether or not
- * they're feasible (given previously encountered bounds), and the tightest
- * bounds on each decision variable.
+ *
+ * Computes which constraints, if any, are bound constraints, the tightest
+ * bounds on each decision variable, and whether or not they're feasible (given
+ * previously encountered bounds),
  *
  * @param decision_variables Decision variables corresponding to each column of
  *   A_i.
@@ -35,12 +48,10 @@ namespace slp {
  *   store Jacobians column-major, the user of this function must perform a
  *   transpose.
  */
-inline std::tuple<Eigen::ArrayX<bool>,
-                  gch::small_vector<std::pair<double, double>>,
-                  gch::small_vector<std::pair<Eigen::Index, Eigen::Index>>>
-get_bounds(std::span<Variable> decision_variables,
-           std::span<Variable> inequality_constraints,
-           const Eigen::SparseMatrix<double, Eigen::RowMajor>& A_i) {
+inline Bounds get_bounds(
+    std::span<Variable> decision_variables,
+    std::span<Variable> inequality_constraints,
+    const Eigen::SparseMatrix<double, Eigen::RowMajor>& A_i) {
   // A blocked, out-of-place transpose should be much faster than traversing row
   // major on a column major matrix unless we have few linear constraints (using
   // a heuristic to choose between this and staying column major based on the
