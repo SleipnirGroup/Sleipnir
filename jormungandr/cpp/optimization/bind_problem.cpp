@@ -131,13 +131,6 @@ Parameter ``feasible_ipm``:
     though, so only enable it if necessary.
     (default: False)
 
-Parameter ``project_onto_bounds``:
-  Enables projecting the given initial state onto detected "bound"
-  inequality constraints if there are any. This projection happens during
-  problem setup, so enabling this will have no effect if you call the solver
-  directly.
-  (default: false)
-
 Parameter ``diagnostics``:
     Enables diagnostic prints.
 

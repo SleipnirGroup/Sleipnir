@@ -89,7 +89,8 @@ TEST_CASE("Bounds - Projection", "[Bounds]") {
 
   // This tests that we exactly match section 3.6 in [2]
   SECTION("Initial value already mostly in bounds") {
-    constexpr double κ_1 = 1e-2, κ_2 = 1e-2;
+    constexpr double κ_1 = 1e-2;
+    constexpr double κ_2 = 1e-2;
     x.setZero();
     x_correct << 0, 0, 2, 12 + κ_2 * 0.1,
         -1e-12 - std::min(κ_1, κ_2 * (1 - 1e-12)), 2 + κ_1 * 2;

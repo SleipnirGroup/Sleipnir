@@ -38,8 +38,8 @@ namespace slp {
 inline std::tuple<Eigen::ArrayX<bool>,
                   gch::small_vector<std::pair<double, double>>,
                   gch::small_vector<std::pair<Eigen::Index, Eigen::Index>>>
-get_bounds(const std::span<Variable> decision_variables,
-           const std::span<Variable> inequality_constraints,
+get_bounds(std::span<Variable> decision_variables,
+           std::span<Variable> inequality_constraints,
            const Eigen::SparseMatrix<double, Eigen::RowMajor>& A_i) {
   // A blocked, out-of-place transpose should be much faster than traversing row
   // major on a column major matrix unless we have few linear constraints (using
@@ -173,8 +173,8 @@ template <typename Derived>
   requires(static_cast<bool>(Eigen::DenseBase<Derived>::IsVectorAtCompileTime))
 inline void project_onto_bounds(
     Eigen::DenseBase<Derived>& x,
-    const std::span<const std::pair<typename Eigen::DenseBase<Derived>::Scalar,
-                                    typename Eigen::DenseBase<Derived>::Scalar>>
+    std::span<const std::pair<typename Eigen::DenseBase<Derived>::Scalar,
+                              typename Eigen::DenseBase<Derived>::Scalar>>
         decision_variable_indices_to_bounds,
     const typename Eigen::DenseBase<Derived>::Scalar κ_1 = 1e-2,
     const typename Eigen::DenseBase<Derived>::Scalar κ_2 = 1e-2) {
