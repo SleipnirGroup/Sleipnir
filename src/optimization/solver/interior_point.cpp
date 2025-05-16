@@ -57,7 +57,7 @@ ExitStatus interior_point(
     std::span<std::function<bool(const IterationInfo& info)>>
         iteration_callbacks,
     const Options& options,
-#ifndef SLEIPNIR_DISABLE_BOUND_PROJECTION
+#ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
     const Eigen::ArrayX<bool>& bound_constraint_mask,
 #endif
     Eigen::VectorXd& x) {
@@ -164,7 +164,7 @@ ExitStatus interior_point(
   Eigen::SparseMatrix<double> A_i = matrices.A_i(x);
 
   Eigen::VectorXd s = Eigen::VectorXd::Ones(num_inequality_constraints);
-#ifndef SLEIPNIR_DISABLE_BOUND_PROJECTION
+#ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
   // We set sʲ = cᵢʲ(x) for each bound inequality constraint index j
   s = bound_constraint_mask.select(c_i, s);
 #endif

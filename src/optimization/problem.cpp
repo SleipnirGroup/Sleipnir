@@ -263,7 +263,7 @@ ExitStatus Problem::solve(const Options& options, [[maybe_unused]] bool spy) {
       return ExitStatus::GLOBALLY_INFEASIBLE;
     }
 
-#ifndef SLEIPNIR_DISABLE_BOUND_PROJECTION
+#ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
     project_onto_bounds(x, bounds);
 #endif
     // Invoke interior-point method solver
@@ -301,7 +301,7 @@ ExitStatus Problem::solve(const Options& options, [[maybe_unused]] bool spy) {
               return A_i.value();
             }},
         m_iteration_callbacks, options,
-#ifndef SLEIPNIR_DISABLE_BOUND_PROJECTION
+#ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
         bound_constraint_mask,
 #endif
         x);
