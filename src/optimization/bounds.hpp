@@ -105,9 +105,9 @@ inline Bounds get_bounds(
       continue;
     }
 
-    // Claim: The bound is given by a bound constraint is the constraint
-    // evaluated at zero divided by the nonzero element of the constraint's
-    // gradient.
+    // Claim: The bound given by a bound constraint is the constraint evaluated
+    // at zero divided by the nonzero element of the constraint's gradient.
+    //
     // Proof: If c(x) is a bound constraint, then by definition c is a linear
     // function in one variable, hence there exist a, b ∈ ℝ s.t. c(x) = axᵢ + b
     // and a ≠ 0. The gradient of c is then aeᵢ (where eᵢ denotes the i-th basis
@@ -130,12 +130,15 @@ inline Bounds get_bounds(
     } else {
       constraint_constant = inequality_constraints[constraint_index].value();
     }
-    slp_assert(constraint_coefficient !=
-               0.0);  // Shouldn't happen since the constraint is
-                      // supposed to be linear and not a constant.
-    // We should always get a finite value when evaluating the constraint at x
-    // := 0 since the constraint is linear.
+
+    // Shouldn't happen since the constraint is supposed to be linear and not a
+    // constant.
+    slp_assert(constraint_coefficient != 0.0);
+
+    // We should always get a finite value when evaluating the constraint at
+    // x = 0 since the constraint is linear.
     slp_assert(std::isfinite(constraint_constant));
+
     // This is possible if the user has provided a starting point at which their
     // problem is ill-defined.
     slp_assert(std::isfinite(constraint_coefficient));
