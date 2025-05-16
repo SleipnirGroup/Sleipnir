@@ -672,12 +672,6 @@ solution though, so only enable it if necessary.)doc";
 
 static const char *__doc_slp_Options_max_iterations = R"doc(The maximum number of solver iterations before returning a solution.)doc";
 
-static const char *__doc_slp_Options_project_onto_bounds =
-R"doc(Enables projecting the given initial state onto detected "bound"
-inequality constraints if there are any. This projection happens
-during problem setup, so enabling this will have no effect if you call
-the solver directly.)doc";
-
 static const char *__doc_slp_Options_timeout = R"doc(The maximum elapsed wall clock time before returning a solution.)doc";
 
 static const char *__doc_slp_Options_tolerance = R"doc(The solver will stop once the error is below this tolerance.)doc";

@@ -90,8 +90,6 @@ void bind_problem(nb::class_<Problem>& cls) {
                 std::chrono::duration<double>{nb::cast<double>(value)};
           } else if (key_str == "feasible_ipm") {
             options.feasible_ipm = nb::cast<bool>(value);
-          } else if (key_str == "project_onto_bounds") {
-            options.project_onto_bounds = nb::cast<bool>(value);
           } else if (key_str == "diagnostics") {
             options.diagnostics = nb::cast<bool>(value);
           } else if (key_str == "spy") {

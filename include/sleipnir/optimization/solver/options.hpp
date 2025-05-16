@@ -31,12 +31,6 @@ struct SLEIPNIR_DLLEXPORT Options {
   /// though, so only enable it if necessary.
   bool feasible_ipm = false;
 
-  /// Enables projecting the given initial state onto detected "bound"
-  /// inequality constraints if there are any. This projection happens during
-  /// problem setup, so enabling this will have no effect if you call the solver
-  /// directly.
-  bool project_onto_bounds = false;
-
   /// Enables diagnostic prints.
   ///
   /// <table>
