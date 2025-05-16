@@ -52,10 +52,11 @@ inline Bounds get_bounds(
     std::span<Variable> decision_variables,
     std::span<Variable> inequality_constraints,
     const Eigen::SparseMatrix<double, Eigen::RowMajor>& A_i) {
-  // A blocked, out-of-place transpose should be much faster than traversing row
-  // major on a column major matrix unless we have few linear constraints (using
-  // a heuristic to choose between this and staying column major based on the
-  // number of constraints would be an easy performance improvement.)
+  // TODO: A blocked, out-of-place transpose should be much faster than
+  // traversing row major on a column major matrix unless we have few linear
+  // constraints (using a heuristic to choose between this and staying column
+  // major based on the number of constraints would be an easy performance
+  // improvement.)
 
   // NB: Casting to long is unspecified if the size of decision_variable.size()
   // is greater than the max long value, but then we wouldn't be able to fill
