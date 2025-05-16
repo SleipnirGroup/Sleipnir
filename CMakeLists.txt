@@ -110,10 +110,7 @@ if(DISABLE_DIAGNOSTICS)
 endif()
 
 if(ENABLE_BOUND_PROJECTION)
-    target_compile_definitions(
-        Sleipnir
-        PUBLIC SLEIPNIR_ENABLE_BOUND_PROJECTION
-    )
+    target_compile_definitions(Sleipnir PUBLIC SLEIPNIR_ENABLE_BOUND_PROJECTION)
 endif()
 
 # Eigen dependency
