@@ -78,7 +78,7 @@ get_bounds(const std::span<Variable> decision_variables,
   bound_constraint_mask.fill(false);
 
   for (decltype(inequality_constraints)::size_type constraint_index = 0;
-       constraint_index < inequality_constraints.size(); constraint_index++) {
+       constraint_index < inequality_constraints.size(); ++constraint_index) {
     // A constraint is a bound iff it is linear and its gradient has a
     // single nonzero value.
     if (inequality_constraints[constraint_index].type() !=
