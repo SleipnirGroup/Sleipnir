@@ -68,7 +68,7 @@ inline Bounds get_bounds(
 
   // Maps each decision variable's index to the indices of its upper and lower
   // bounds if they exist, or NO_BOUND if they do not; used only for bookkeeping
-  // in order to compute conflicting bounds
+  // to compute conflicting bounds
   constexpr Eigen::Index NO_BOUND = -1;
   gch::small_vector<std::pair<Eigen::Index, Eigen::Index>>
       decision_var_indices_to_constraint_indices{decision_variables.size(),
