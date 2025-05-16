@@ -10,11 +10,11 @@
 
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
+#include <gch/small_vector.hpp>
 
 #include "sleipnir/autodiff/expression_type.hpp"
 #include "sleipnir/autodiff/variable.hpp"
 #include "sleipnir/util/assert.hpp"
-#include "sleipnir/util/small_vector.hpp"
 
 // See docs/algorithms.md#Works_cited for citation definitions
 
@@ -35,8 +35,9 @@ namespace slp {
  *   store Jacobians column-major, the user of this function must perform a
  *   transpose.
  */
-inline std::tuple<Eigen::ArrayX<bool>, small_vector<std::pair<double, double>>,
-                  small_vector<std::pair<Eigen::Index, Eigen::Index>>>
+inline std::tuple<Eigen::ArrayX<bool>,
+                  gch::small_vector<std::pair<double, double>>,
+                  gch::small_vector<std::pair<Eigen::Index, Eigen::Index>>>
 get_bounds(const std::span<Variable> decision_variables,
            const std::span<Variable> inequality_constraints,
            const Eigen::SparseMatrix<double, Eigen::RowMajor>& A_i) {
@@ -57,15 +58,16 @@ get_bounds(const std::span<Variable> decision_variables,
   // bounds if they exist, or NO_BOUND if they do not; used only for bookkeeping
   // in order to compute conflicting bounds
   static constexpr Eigen::Index NO_BOUND = -1;
-  small_vector<std::pair<Eigen::Index, Eigen::Index>>
+  gch::small_vector<std::pair<Eigen::Index, Eigen::Index>>
       decision_var_indices_to_constraint_indices{decision_variables.size(),
                                                  {NO_BOUND, NO_BOUND}};
   // Lists pairs of indices of bound constraints in the inequality constraint
   // list that conflict with each other
-  small_vector<std::pair<Eigen::Index, Eigen::Index>> conflicting_bound_indices;
+  gch::small_vector<std::pair<Eigen::Index, Eigen::Index>>
+      conflicting_bound_indices;
 
   // Maps each decision variable's index to its upper and lower bounds
-  small_vector<std::pair<double, double>> decision_var_indices_to_bounds{
+  gch::small_vector<std::pair<double, double>> decision_var_indices_to_bounds{
       decision_variables.size(),
       {-std::numeric_limits<double>::infinity(),
        std::numeric_limits<double>::infinity()}};
