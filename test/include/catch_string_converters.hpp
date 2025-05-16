@@ -46,6 +46,8 @@ struct StringMaker<slp::ExitStatus> {
         return "TOO_FEW_DOFS";
       case LOCALLY_INFEASIBLE:
         return "LOCALLY_INFEASIBLE";
+      case GLOBALLY_INFEASIBLE:
+        return "GLOBALLY_INFEASIBLE";
       case FACTORIZATION_FAILED:
         return "FACTORIZATION_FAILED";
       case LINE_SEARCH_FAILED:

@@ -116,6 +116,25 @@ def test_minimum_2d_distance_with_linear_constraint():
     assert y.value() == pytest.approx(2.5, abs=1e-2)
 
 
+def test_conflicting_bounds():
+    problem = Problem()
+
+    x = problem.decision_variable()
+    y = problem.decision_variable()
+
+    problem.minimize(autodiff.hypot(x, y))
+
+    problem.subject_to(autodiff.hypot(x, y) <= 1)
+    problem.subject_to(x >= 0.5)
+    problem.subject_to(x <= -0.5)
+
+    assert problem.cost_function_type() == ExpressionType.NONLINEAR
+    assert problem.equality_constraint_type() == ExpressionType.NONE
+    assert problem.inequality_constraint_type() == ExpressionType.NONLINEAR
+
+    assert problem.solve(diagnostics=True) == ExitStatus.GLOBALLY_INFEASIBLE
+
+
 def test_wachter_and_biegler_line_search_failure():
     # See example 19.2 of [1]
 

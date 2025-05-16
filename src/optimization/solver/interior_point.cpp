@@ -56,7 +56,11 @@ ExitStatus interior_point(
     const InteriorPointMatrixCallbacks& matrix_callbacks,
     std::span<std::function<bool(const IterationInfo& info)>>
         iteration_callbacks,
-    const Options& options, Eigen::VectorXd& x) {
+    const Options& options,
+#ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
+    const Eigen::ArrayX<bool>& bound_constraint_mask,
+#endif
+    Eigen::VectorXd& x) {
   const auto solve_start_time = std::chrono::steady_clock::now();
 
   gch::small_vector<SolveProfiler> solve_profilers;
@@ -160,6 +164,10 @@ ExitStatus interior_point(
   Eigen::SparseMatrix<double> A_i = matrices.A_i(x);
 
   Eigen::VectorXd s = Eigen::VectorXd::Ones(num_inequality_constraints);
+#ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
+  // We set sʲ = cᵢʲ(x) for each bound inequality constraint index j
+  s = bound_constraint_mask.select(c_i, s);
+#endif
   Eigen::VectorXd y = Eigen::VectorXd::Zero(num_equality_constraints);
   Eigen::VectorXd z = Eigen::VectorXd::Ones(num_inequality_constraints);
 

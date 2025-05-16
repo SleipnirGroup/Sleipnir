@@ -223,6 +223,10 @@ SLEIPNIR_DLLEXPORT ExitStatus
 interior_point(const InteriorPointMatrixCallbacks& matrix_callbacks,
                std::span<std::function<bool(const IterationInfo& info)>>
                    iteration_callbacks,
-               const Options& options, Eigen::VectorXd& x);
+               const Options& options,
+#ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
+               const Eigen::ArrayX<bool>& bound_constraint_mask,
+#endif
+               Eigen::VectorXd& x);
 
 }  // namespace slp

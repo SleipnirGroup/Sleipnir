@@ -133,6 +133,26 @@ TEST_CASE("Problem - Minimum 2D distance with linear constraint", "[Problem]") {
   CHECK(y.value() == Catch::Approx(2.5).margin(1e-2));
 }
 
+TEST_CASE("Problem - Conflicting bounds", "[Problem]") {
+  slp::Problem problem;
+
+  auto x = problem.decision_variable();
+  auto y = problem.decision_variable();
+
+  problem.minimize(slp::hypot(x, y));
+
+  problem.subject_to(slp::hypot(x, y) <= 1);
+  problem.subject_to(x >= 0.5);
+  problem.subject_to(x <= -0.5);
+
+  CHECK(problem.cost_function_type() == slp::ExpressionType::NONLINEAR);
+  CHECK(problem.equality_constraint_type() == slp::ExpressionType::NONE);
+  CHECK(problem.inequality_constraint_type() == slp::ExpressionType::NONLINEAR);
+
+  CHECK(problem.solve({.diagnostics = true}) ==
+        slp::ExitStatus::GLOBALLY_INFEASIBLE);
+}
+
 TEST_CASE("Problem - Wachter and Biegler line search failure", "[Problem]") {
   // See example 19.2 of [1]
 

@@ -78,6 +78,10 @@ up.)doc";
 
 static const char *__doc_slp_ExitStatus_FACTORIZATION_FAILED = R"doc(The linear system factorization failed.)doc";
 
+static const char *__doc_slp_ExitStatus_GLOBALLY_INFEASIBLE =
+R"doc(The problem setup frontend determined the problem to have an empty
+feasible region.)doc";
+
 static const char *__doc_slp_ExitStatus_LINE_SEARCH_FAILED =
 R"doc(The backtracking line search failed, and the problem isn't locally
 infeasible.)doc";
