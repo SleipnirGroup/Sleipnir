@@ -2,7 +2,6 @@
 
 #include "sleipnir/optimization/solver/sqp.hpp"
 
-#include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <functional>
