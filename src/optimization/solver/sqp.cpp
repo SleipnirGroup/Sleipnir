@@ -232,8 +232,7 @@ ExitStatus sqp(const SQPMatrixCallbacks& matrix_callbacks,
     Eigen::SparseMatrix<double> lhs(
         num_decision_variables + num_equality_constraints,
         num_decision_variables + num_equality_constraints);
-    lhs.setFromSortedTriplets(triplets.begin(), triplets.end(),
-                              [](const auto&, const auto& b) { return b; });
+    lhs.setFromSortedTriplets(triplets.begin(), triplets.end());
 
     // rhs = −[∇f − Aₑᵀy]
     //        [   cₑ    ]
