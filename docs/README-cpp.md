@@ -13,7 +13,7 @@ in the minimum time while obeying the velocity limit (-1, 1) and the
 acceleration limit (-1, 1).
 
 The model for our double integrator is ẍ = u where x is the vector [position;
-velocity] and u is the acceleration. The velocity constraints are -1 ≤ x(1) ≤ 1
+velocity] and u is the acceleration. The velocity constraints are -1 ≤ x₁ ≤ 1
 and the acceleration constraints are -1 ≤ u ≤ 1.
 
 ## Importing required libraries
