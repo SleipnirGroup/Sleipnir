@@ -104,8 +104,6 @@ See [benchmark details](https://github.com/SleipnirGroup/Sleipnir/?tab=readme-ov
 
 ### Minimum system requirements
 
-Sleipnir requires somewhat newer operating systems and C++ runtimes for std::print() and multidimensional subscript operator.
-
 * Windows
   * OS: Windows 10
   * Runtime: [Microsoft Visual C++ 2022 redistributable](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170) from Visual Studio 2022 17.13
@@ -128,10 +126,12 @@ fetchcontent_declare(
     Sleipnir
     GIT_REPOSITORY https://github.com/SleipnirGroup/Sleipnir
     GIT_TAG main
+    EXCLUDE_FROM_ALL
+    SYSTEM
 )
 fetchcontent_makeavailable(Sleipnir)
 
-target_link_libraries(MyApp PUBLIC Sleipnir)
+target_link_libraries(MyApp PUBLIC Sleipnir::Sleipnir)
 ```
 
 ### Python library
