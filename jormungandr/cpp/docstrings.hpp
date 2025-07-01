@@ -122,7 +122,7 @@ static const char *__doc_slp_ExpressionType_NONLINEAR = R"doc(The expression is 
 static const char *__doc_slp_ExpressionType_QUADRATIC = R"doc(The expression is composed of quadratic and lower-order operators.)doc";
 
 static const char *__doc_slp_Gradient =
-R"doc(This class calculates the gradient of a a variable with respect to a
+R"doc(This class calculates the gradient of a variable with respect to a
 vector of variables.
 
 The gradient is only recomputed if the variable expression is
