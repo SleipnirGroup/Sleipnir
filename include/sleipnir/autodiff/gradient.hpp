@@ -15,8 +15,8 @@
 namespace slp {
 
 /**
- * This class calculates the gradient of a a variable with respect to a vector
- * of variables.
+ * This class calculates the gradient of a variable with respect to a vector of
+ * variables.
  *
  * The gradient is only recomputed if the variable expression is quadratic or
  * higher order.
