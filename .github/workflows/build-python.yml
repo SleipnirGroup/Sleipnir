@@ -15,10 +15,6 @@ jobs:
         include:
           - name: Windows x86_64
             os: windows-2022
-            version: "3.9"
-            cmake-env:
-          - name: Windows x86_64
-            os: windows-2022
             version: "3.10"
             cmake-env:
           - name: Windows x86_64
@@ -35,10 +31,6 @@ jobs:
             cmake-env:
           - name: Linux x86_64
             os: ubuntu-24.04
-            version: "3.9"
-            cmake-env:
-          - name: Linux x86_64
-            os: ubuntu-24.04
             version: "3.10"
             cmake-env:
           - name: Linux x86_64
@@ -52,10 +44,6 @@ jobs:
           - name: Linux x86_64
             os: ubuntu-24.04
             version: "3.13"
-            cmake-env:
-          - name: Linux aarch64
-            os: ubuntu-24.04-arm
-            version: "3.9"
             cmake-env:
           - name: Linux aarch64
             os: ubuntu-24.04-arm
@@ -111,7 +99,7 @@ jobs:
           python-version: ${{ matrix.version }}
 
       - run: pip install typing_extensions
-        if: matrix.version == '3.9' || matrix.version == '3.10'
+        if: matrix.version == '3.10'
 
       - run: python3 ./tools/update_version.py
       - run: pip3 install build pytest
