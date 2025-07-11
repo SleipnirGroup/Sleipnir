@@ -39,13 +39,13 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Make GCC 14 the default toolchain (Linux)
-        if: startsWith(matrix.os, 'ubuntu')
+        if: runner.os == 'Linux'
         run: |
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 200
           sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14 200
 
       - run: sudo xcode-select -switch /Applications/Xcode_16.2.app
-        if: startsWith(matrix.os, 'macOS')
+        if: runner.os == 'macOS'
 
       - run: cmake -B build -S . -DBUILD_EXAMPLES=ON ${{ matrix.cmake-args }}
       - run: cmake --build build --config RelWithDebInfo --parallel 4

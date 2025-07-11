@@ -86,13 +86,13 @@ jobs:
           fetch-depth: 0
 
       - name: Make GCC 14 the default toolchain (Linux)
-        if: startsWith(matrix.os, 'ubuntu')
+        if: runner.os == 'Linux'
         run: |
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 200
           sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14 200
 
       - run: sudo xcode-select -switch /Applications/Xcode_16.2.app
-        if: startsWith(matrix.os, 'macOS')
+        if: runner.os == 'macOS'
 
       - uses: actions/setup-python@v5
         with:
