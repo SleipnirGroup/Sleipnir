@@ -19,15 +19,19 @@ def main():
         version = "0.0.0"
     else:
         m = re.search(
-            r"^v ([0-9]+\.[0-9]+\.[0-9]+) (- ([0-9]+) )?",
+            r"^v ([0-9]+) \. ([0-9]+) \. ([0-9]+) (- ([0-9]+) )?",
             proc.stdout.rstrip(),
             re.X,
         )
 
-        # Version number: <tag>.dev<# commits since tag>
-        version = m.group(1)
-        if m.group(2):
-            version += f".dev{m.group(3)}"
+        # Version number: <tag> or <tag + 1>.dev<# commits since tag>
+        major = int(m.group(1))
+        minor = int(m.group(2))
+        patch = int(m.group(3))
+        if m.group(4):
+            version = f"{major}.{minor}.{patch + 1}.dev{m.group(5)}"
+        else:
+            version = f"{major}.{minor}.{patch}"
 
     # Update version string in pyproject.toml
     with open("pyproject.toml") as f:
