@@ -405,7 +405,6 @@ ExitStatus sqp(const SQPMatrixCallbacks& matrix_callbacks,
         trial_x = x + α_max * step.p_x;
         trial_y = y + α_max * step.p_y;
 
-        trial_f = matrices.f(trial_x);
         trial_c_e = matrices.c_e(trial_x);
 
         double next_kkt_error = kkt_error(
