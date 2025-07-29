@@ -116,13 +116,13 @@ endif()
 # Eigen dependency
 if(NOT USE_SYSTEM_EIGEN)
     set(EIGEN_BUILD_CMAKE_PACKAGE TRUE)
-    fetchcontent_declare(
+    FetchContent_Declare(
         Eigen3
         GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
         # master on 2025-05-12
         GIT_TAG 6f1a143418d7492850714e4857543b41b4692373
     )
-    fetchcontent_makeavailable(Eigen3)
+    FetchContent_MakeAvailable(Eigen3)
 else()
     find_package(Eigen3 CONFIG REQUIRED)
 endif()
@@ -130,25 +130,25 @@ endif()
 target_link_libraries(Sleipnir PUBLIC Eigen3::Eigen)
 
 # small_vector dependency
-fetchcontent_declare(
+FetchContent_Declare(
     small_vector
     GIT_REPOSITORY https://github.com/gharveymn/small_vector.git
     # main on 2025-05-15
     GIT_TAG b19a9c477cad5e58f8aed59dbe9be1c30e4b9826
 )
-fetchcontent_makeavailable(small_vector)
+FetchContent_MakeAvailable(small_vector)
 
 target_link_libraries(Sleipnir PUBLIC small_vector)
 
 if(BUILD_TESTING AND NOT CMAKE_CROSSCOMPILING)
     # Catch2 dependency
-    fetchcontent_declare(
+    FetchContent_Declare(
         Catch2
         GIT_REPOSITORY https://github.com/catchorg/Catch2.git
         GIT_TAG v3.8.1
         CMAKE_ARGS
     )
-    fetchcontent_makeavailable(Catch2)
+    FetchContent_MakeAvailable(Catch2)
 endif()
 
 target_include_directories(
@@ -162,12 +162,9 @@ install(
     TARGETS Sleipnir
     COMPONENT Sleipnir
     EXPORT SleipnirTargets
-    LIBRARY
-    DESTINATION lib
-    ARCHIVE
-    DESTINATION lib
-    RUNTIME
-    DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    RUNTIME DESTINATION bin
     INCLUDES DESTINATION include
 )
 export(TARGETS Sleipnir FILE Sleipnir.cmake NAMESPACE Sleipnir::)
@@ -321,13 +318,13 @@ if(BUILD_PYTHON)
 
     # nanobind dependency
     if(NOT USE_SYSTEM_NANOBIND)
-        fetchcontent_declare(
+        FetchContent_Declare(
             nanobind
             GIT_REPOSITORY https://github.com/wjakob/nanobind.git
             # master on 2025-07-19
             GIT_TAG 0a059e187d91e7afba692f594b246846d6afd8fb
         )
-        fetchcontent_makeavailable(nanobind)
+        FetchContent_MakeAvailable(nanobind)
     else()
         find_package(nanobind CONFIG REQUIRED)
     endif()
@@ -372,8 +369,7 @@ if(BUILD_PYTHON)
     install(
         TARGETS _jormungandr
         COMPONENT python_modules
-        LIBRARY
-        DESTINATION ${PY_DEST}
+        LIBRARY DESTINATION ${PY_DEST}
     )
 
     nanobind_add_stub(
@@ -408,14 +404,14 @@ if(BUILD_PYTHON)
     # pybind11_mkdoc doesn't support Windows
     if(NOT WIN32 AND NOT CMAKE_CROSSCOMPILING)
         # pybind11_mkdoc dependency
-        fetchcontent_declare(
+        FetchContent_Declare(
             pybind11_mkdoc
             GIT_REPOSITORY https://github.com/pybind/pybind11_mkdoc.git
             # master on 2023-02-08
             GIT_TAG 42fbf377824185e255b06d68fa70f4efcd569e2d
             GIT_SUBMODULES ""
         )
-        fetchcontent_makeavailable(pybind11_mkdoc)
+        FetchContent_MakeAvailable(pybind11_mkdoc)
 
         file(
             GLOB_RECURSE sleipnir_headers
