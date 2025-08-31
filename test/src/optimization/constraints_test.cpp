@@ -242,9 +242,9 @@ TEST_CASE("constraints - Equality constraint concatenation", "[constraints]") {
   CHECK(eqs.constraints[0].value() == eq1.constraints[0].value());
   CHECK(eqs.constraints[1].value() == eq2.constraints[0].value());
 
-  CHECK(eq1);
-  CHECK_FALSE(eq2);
-  CHECK_FALSE(eqs);
+  CHECK(bool{eq1});
+  CHECK_FALSE(bool{eq2});
+  CHECK_FALSE(bool{eqs});
 }
 
 TEST_CASE("constraints - Inequality constraint concatenation",
@@ -263,7 +263,7 @@ TEST_CASE("constraints - Inequality constraint concatenation",
   CHECK(ineqs.constraints[0].value() == ineq1.constraints[0].value());
   CHECK(ineqs.constraints[1].value() == ineq2.constraints[0].value());
 
-  CHECK_FALSE(ineq1);
-  CHECK(ineq2);
-  CHECK_FALSE(ineqs);
+  CHECK_FALSE(bool{ineq1});
+  CHECK(bool{ineq2});
+  CHECK_FALSE(bool{ineqs});
 }
