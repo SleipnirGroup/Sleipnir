@@ -136,15 +136,9 @@ class SLEIPNIR_DLLEXPORT Hessian {
       m_graphs[row].append_adjoint_triplets(triplets, row, m_wrt);
     }
 
-    if (!triplets.empty()) {
-      m_H.setFromTriplets(triplets.begin(), triplets.end());
-      if constexpr (UpLo == Eigen::Lower) {
-        m_H = m_H.triangularView<Eigen::Lower>();
-      }
-    } else {
-      // setFromTriplets() is a no-op on empty triplets, so explicitly zero out
-      // the storage
-      m_H.setZero();
+    m_H.setFromTriplets(triplets.begin(), triplets.end());
+    if constexpr (UpLo == Eigen::Lower) {
+      m_H = m_H.triangularView<Eigen::Lower>();
     }
 
     return m_H;

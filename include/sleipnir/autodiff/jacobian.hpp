@@ -128,13 +128,7 @@ class SLEIPNIR_DLLEXPORT Jacobian {
       m_graphs[row].append_adjoint_triplets(triplets, row, m_wrt);
     }
 
-    if (!triplets.empty()) {
-      m_J.setFromTriplets(triplets.begin(), triplets.end());
-    } else {
-      // setFromTriplets() is a no-op on empty triplets, so explicitly zero out
-      // the storage
-      m_J.setZero();
-    }
+    m_J.setFromTriplets(triplets.begin(), triplets.end());
 
     return m_J;
   }
