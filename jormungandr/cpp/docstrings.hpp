@@ -715,6 +715,18 @@ Parameter ``callback``:
     The callback. Returning true from the callback causes the solver
     to exit early with the solution it has so far.)doc";
 
+static const char *__doc_slp_Problem_add_persistent_callback =
+R"doc(Adds a callback to be called at the beginning of each solver
+iteration.
+
+Language bindings should call this in the Problem constructor to
+register callbacks that shouldn't be removed by clear_callbacks().
+Persistent callbacks run after non-persistent callbacks.
+
+Parameter ``callback``:
+    The callback. Returning true from the callback causes the solver
+    to exit early with the solution it has so far.)doc";
+
 static const char *__doc_slp_Problem_clear_callbacks = R"doc(Clears the registered callbacks.)doc";
 
 static const char *__doc_slp_Problem_cost_function_type =
@@ -762,6 +774,8 @@ static const char *__doc_slp_Problem_m_f = R"doc()doc";
 static const char *__doc_slp_Problem_m_inequality_constraints = R"doc()doc";
 
 static const char *__doc_slp_Problem_m_iteration_callbacks = R"doc()doc";
+
+static const char *__doc_slp_Problem_m_persistent_iteration_callbacks = R"doc()doc";
 
 static const char *__doc_slp_Problem_maximize =
 R"doc(Tells the solver to maximize the output of the given objective

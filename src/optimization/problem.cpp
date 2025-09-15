@@ -81,6 +81,14 @@ ExitStatus Problem::solve(const Options& options, [[maybe_unused]] bool spy) {
   [[maybe_unused]]
   int num_inequality_constraints = m_inequality_constraints.size();
 
+  gch::small_vector<std::function<bool(const IterationInfo& info)>> callbacks;
+  for (const auto& callback : m_iteration_callbacks) {
+    callbacks.emplace_back(callback);
+  }
+  for (const auto& callback : m_persistent_iteration_callbacks) {
+    callbacks.emplace_back(callback);
+  }
+
   // Solve the optimization problem
   ExitStatus status;
   if (m_equality_constraints.empty() && m_inequality_constraints.empty()) {
@@ -103,7 +111,7 @@ ExitStatus Problem::solve(const Options& options, [[maybe_unused]] bool spy) {
       H_spy = std::make_unique<Spy>(
           "H.spy", "Hessian", "Decision variables", "Decision variables",
           num_decision_variables, num_decision_variables);
-      m_iteration_callbacks.push_back([&](const IterationInfo& info) -> bool {
+      callbacks.push_back([&](const IterationInfo& info) -> bool {
         H_spy->add(info.H);
         return false;
       });
@@ -125,7 +133,7 @@ ExitStatus Problem::solve(const Options& options, [[maybe_unused]] bool spy) {
               x_ad.set_value(x);
               return H.value();
             }},
-        m_iteration_callbacks, options, x);
+        callbacks, options, x);
   } else if (m_inequality_constraints.empty()) {
     if (options.diagnostics) {
       slp::println("\nInvoking SQP solver\n");
@@ -162,7 +170,7 @@ ExitStatus Problem::solve(const Options& options, [[maybe_unused]] bool spy) {
                                       "Constraints", "Decision variables",
                                       num_equality_constraints,
                                       num_decision_variables);
-      m_iteration_callbacks.push_back([&](const IterationInfo& info) -> bool {
+      callbacks.push_back([&](const IterationInfo& info) -> bool {
         H_spy->add(info.H);
         A_e_spy->add(info.A_e);
         return false;
@@ -195,7 +203,7 @@ ExitStatus Problem::solve(const Options& options, [[maybe_unused]] bool spy) {
                   x_ad.set_value(x);
                   return A_e.value();
                 }},
-            m_iteration_callbacks, options, x);
+            callbacks, options, x);
   } else {
     if (options.diagnostics) {
       slp::println("\nInvoking IPM solver...\n");
@@ -244,7 +252,7 @@ ExitStatus Problem::solve(const Options& options, [[maybe_unused]] bool spy) {
           "A_i.spy", "Inequality constraint Jacobian", "Constraints",
           "Decision variables", num_inequality_constraints,
           num_decision_variables);
-      m_iteration_callbacks.push_back([&](const IterationInfo& info) -> bool {
+      callbacks.push_back([&](const IterationInfo& info) -> bool {
         H_spy->add(info.H);
         A_e_spy->add(info.A_e);
         A_i_spy->add(info.A_i);
@@ -300,18 +308,12 @@ ExitStatus Problem::solve(const Options& options, [[maybe_unused]] bool spy) {
               x_ad.set_value(x);
               return A_i.value();
             }},
-        m_iteration_callbacks, options,
+        callbacks, options,
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
         bound_constraint_mask,
 #endif
         x);
   }
-
-#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-  if (spy) {
-    m_iteration_callbacks.pop_back();
-  }
-#endif
 
   if (options.diagnostics) {
     print_autodiff_diagnostics(ad_setup_profilers);
@@ -328,7 +330,8 @@ void Problem::print_exit_conditions([[maybe_unused]] const Options& options) {
   // Print possible exit conditions
   slp::println("User-configured exit conditions:");
   slp::println("  ↳ error below {}", options.tolerance);
-  if (!m_iteration_callbacks.empty()) {
+  if (!m_iteration_callbacks.empty() ||
+      !m_persistent_iteration_callbacks.empty()) {
     slp::println("  ↳ iteration callback requested stop");
   }
   if (std::isfinite(options.max_iterations)) {
