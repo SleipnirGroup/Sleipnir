@@ -18,7 +18,20 @@ namespace slp {
 void bind_problem(nb::class_<Problem>& cls) {
   using namespace nb::literals;
 
-  cls.def(nb::init<>(), DOC(slp, Problem, Problem));
+  cls.def(
+      "__init__",
+      [](Problem* self) {
+        new (self) Problem();
+
+        // Make Python signals (e.g., SIGINT from Ctrl-C) abort the solve
+        self->add_persistent_callback([](const IterationInfo&) -> bool {
+          if (PyErr_CheckSignals() != 0) {
+            throw nb::python_error();
+          }
+          return false;
+        });
+      },
+      DOC(slp, Problem, Problem));
   cls.def("decision_variable", nb::overload_cast<>(&Problem::decision_variable),
           DOC(slp, Problem, decision_variable));
   cls.def("decision_variable",
@@ -62,14 +75,6 @@ void bind_problem(nb::class_<Problem>& cls) {
   cls.def(
       "solve",
       [](Problem& self, const nb::kwargs& kwargs) {
-        // Make Python signals (e.g., SIGINT from Ctrl-C) abort the solve
-        self.add_callback([](const IterationInfo&) -> bool {
-          if (PyErr_CheckSignals() != 0) {
-            throw nb::python_error();
-          }
-          return false;
-        });
-
         Options options;
         bool spy = false;
 

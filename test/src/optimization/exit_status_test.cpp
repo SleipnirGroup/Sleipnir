@@ -26,6 +26,13 @@ TEST_CASE("ExitStatus - Callback requested stop", "[ExitStatus]") {
   problem.clear_callbacks();
   problem.add_callback([](const slp::IterationInfo&) { return false; });
   CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
+
+  // Ensure persistent callbacks aren't removed by clear_callbacks()
+  problem.add_persistent_callback(
+      [](const slp::IterationInfo&) { return true; });
+  problem.clear_callbacks();
+  CHECK(problem.solve({.diagnostics = true}) ==
+        slp::ExitStatus::CALLBACK_REQUESTED_STOP);
 }
 
 TEST_CASE("ExitStatus - Too few DOFs", "[ExitStatus]") {
