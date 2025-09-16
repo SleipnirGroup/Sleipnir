@@ -43,9 +43,9 @@ TEST_CASE("OCP - Cart-pole", "[OCP]") {
   // Initial guess
   for (int k = 0; k < N + 1; ++k) {
     X[0, k].set_value(
-        std::lerp(x_initial(0), x_final(0), static_cast<double>(k) / N));
+        std::lerp(x_initial[0], x_final[0], static_cast<double>(k) / N));
     X[1, k].set_value(
-        std::lerp(x_initial(1), x_final(1), static_cast<double>(k) / N));
+        std::lerp(x_initial[1], x_final[1], static_cast<double>(k) / N));
   }
 
   // u = f_x
@@ -83,10 +83,10 @@ TEST_CASE("OCP - Cart-pole", "[OCP]") {
   CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
   // Verify initial state
-  CHECK(X.value(0, 0) == Catch::Approx(x_initial(0)).margin(1e-8));
-  CHECK(X.value(1, 0) == Catch::Approx(x_initial(1)).margin(1e-8));
-  CHECK(X.value(2, 0) == Catch::Approx(x_initial(2)).margin(1e-8));
-  CHECK(X.value(3, 0) == Catch::Approx(x_initial(3)).margin(1e-8));
+  CHECK(X.value(0, 0) == Catch::Approx(x_initial[0]).margin(1e-8));
+  CHECK(X.value(1, 0) == Catch::Approx(x_initial[1]).margin(1e-8));
+  CHECK(X.value(2, 0) == Catch::Approx(x_initial[2]).margin(1e-8));
+  CHECK(X.value(3, 0) == Catch::Approx(x_initial[3]).margin(1e-8));
 
   // FIXME: Replay diverges
   SKIP("Replay diverges");
@@ -104,10 +104,10 @@ TEST_CASE("OCP - Cart-pole", "[OCP]") {
     CHECK(U[0, k] <= u_max);
 
     // Verify state
-    CHECK(X.value(0, k) == Catch::Approx(x(0)).margin(1e-2));
-    CHECK(X.value(1, k) == Catch::Approx(x(1)).margin(1e-2));
-    CHECK(X.value(2, k) == Catch::Approx(x(2)).margin(1e-2));
-    CHECK(X.value(3, k) == Catch::Approx(x(3)).margin(1e-2));
+    CHECK(X.value(0, k) == Catch::Approx(x[0]).margin(1e-2));
+    CHECK(X.value(1, k) == Catch::Approx(x[1]).margin(1e-2));
+    CHECK(X.value(2, k) == Catch::Approx(x[2]).margin(1e-2));
+    CHECK(X.value(3, k) == Catch::Approx(x[3]).margin(1e-2));
     INFO(std::format("  k = {}", k));
 
     // Project state forward
@@ -115,10 +115,10 @@ TEST_CASE("OCP - Cart-pole", "[OCP]") {
   }
 
   // Verify final state
-  CHECK(X.value(0, N - 1) == Catch::Approx(x_final(0)).margin(1e-8));
-  CHECK(X.value(1, N - 1) == Catch::Approx(x_final(1)).margin(1e-8));
-  CHECK(X.value(2, N - 1) == Catch::Approx(x_final(2)).margin(1e-8));
-  CHECK(X.value(3, N - 1) == Catch::Approx(x_final(3)).margin(1e-8));
+  CHECK(X.value(0, N - 1) == Catch::Approx(x_final[0]).margin(1e-8));
+  CHECK(X.value(1, N - 1) == Catch::Approx(x_final[1]).margin(1e-8));
+  CHECK(X.value(2, N - 1) == Catch::Approx(x_final[2]).margin(1e-8));
+  CHECK(X.value(3, N - 1) == Catch::Approx(x_final[3]).margin(1e-8));
 
   // Log states for offline viewing
   std::ofstream states{"OCP Cart-pole states.csv"};

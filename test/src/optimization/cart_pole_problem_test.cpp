@@ -40,9 +40,9 @@ TEST_CASE("Problem - Cart-pole", "[Problem]") {
   // Initial guess
   for (int k = 0; k < N + 1; ++k) {
     X[0, k].set_value(
-        std::lerp(x_initial(0), x_final(0), static_cast<double>(k) / N));
+        std::lerp(x_initial[0], x_final[0], static_cast<double>(k) / N));
     X[1, k].set_value(
-        std::lerp(x_initial(1), x_final(1), static_cast<double>(k) / N));
+        std::lerp(x_initial[1], x_final[1], static_cast<double>(k) / N));
   }
 
   // u = f_x
@@ -84,10 +84,10 @@ TEST_CASE("Problem - Cart-pole", "[Problem]") {
   CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
   // Verify initial state
-  CHECK(X.value(0, 0) == Catch::Approx(x_initial(0)).margin(1e-8));
-  CHECK(X.value(1, 0) == Catch::Approx(x_initial(1)).margin(1e-8));
-  CHECK(X.value(2, 0) == Catch::Approx(x_initial(2)).margin(1e-8));
-  CHECK(X.value(3, 0) == Catch::Approx(x_initial(3)).margin(1e-8));
+  CHECK(X.value(0, 0) == Catch::Approx(x_initial[0]).margin(1e-8));
+  CHECK(X.value(1, 0) == Catch::Approx(x_initial[1]).margin(1e-8));
+  CHECK(X.value(2, 0) == Catch::Approx(x_initial[2]).margin(1e-8));
+  CHECK(X.value(3, 0) == Catch::Approx(x_initial[3]).margin(1e-8));
 
   // Verify solution
   for (int k = 0; k < N; ++k) {
@@ -110,10 +110,10 @@ TEST_CASE("Problem - Cart-pole", "[Problem]") {
   }
 
   // Verify final state
-  CHECK(X.value(0, N) == Catch::Approx(x_final(0)).margin(1e-8));
-  CHECK(X.value(1, N) == Catch::Approx(x_final(1)).margin(1e-8));
-  CHECK(X.value(2, N) == Catch::Approx(x_final(2)).margin(1e-8));
-  CHECK(X.value(3, N) == Catch::Approx(x_final(3)).margin(1e-8));
+  CHECK(X.value(0, N) == Catch::Approx(x_final[0]).margin(1e-8));
+  CHECK(X.value(1, N) == Catch::Approx(x_final[1]).margin(1e-8));
+  CHECK(X.value(2, N) == Catch::Approx(x_final[2]).margin(1e-8));
+  CHECK(X.value(3, N) == Catch::Approx(x_final[3]).margin(1e-8));
 
   // Log states for offline viewing
   std::ofstream states{"Problem Cart-pole states.csv"};
