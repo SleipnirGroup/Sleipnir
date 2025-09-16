@@ -62,11 +62,11 @@ TEST_CASE("OCP - Differential drive", "[OCP]") {
   auto U = problem.U();
 
   // Verify initial state
-  CHECK(X.value(0, 0) == Catch::Approx(x_initial(0)).margin(1e-8));
-  CHECK(X.value(1, 0) == Catch::Approx(x_initial(1)).margin(1e-8));
-  CHECK(X.value(2, 0) == Catch::Approx(x_initial(2)).margin(1e-8));
-  CHECK(X.value(3, 0) == Catch::Approx(x_initial(3)).margin(1e-8));
-  CHECK(X.value(4, 0) == Catch::Approx(x_initial(4)).margin(1e-8));
+  CHECK(X.value(0, 0) == Catch::Approx(x_initial[0]).margin(1e-8));
+  CHECK(X.value(1, 0) == Catch::Approx(x_initial[1]).margin(1e-8));
+  CHECK(X.value(2, 0) == Catch::Approx(x_initial[2]).margin(1e-8));
+  CHECK(X.value(3, 0) == Catch::Approx(x_initial[3]).margin(1e-8));
+  CHECK(X.value(4, 0) == Catch::Approx(x_initial[4]).margin(1e-8));
 
   // FIXME: Replay diverges
   SKIP("Replay diverges");
