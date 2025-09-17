@@ -123,11 +123,13 @@ def test_product_of_sines():
     for i in range(x.rows()):
         for j in range(x.rows()):
             if i == j:
-                expected_H[i, j] = (g.value()[i, 0] / autodiff.tan(x[i])).value() * (
-                    1.0 - 1.0 / (autodiff.cos(x[i]) * autodiff.cos(x[i]))
-                ).value()
+                expected_H[i, j] = (
+                    g.value()[i, 0]
+                    / math.tan(x[i].value())
+                    * (1.0 - 1.0 / math.cos(x[i].value()) ** 2)
+                )
             else:
-                expected_H[i, j] = (g.value()[j, 0] / autodiff.tan(x[i])).value()
+                expected_H[i, j] = g.value()[j, 0] / math.tan(x[i].value())
 
     actual_H = H.get().value()
     for i in range(x.rows()):
@@ -154,11 +156,11 @@ def test_sum_of_squared_residuals():
     g = Gradient(y, x).value()
 
     assert y.value() == 0.0
-    assert g[0, 0] == (2 * x[0] - 2 * x[1]).value()
-    assert g[1, 0] == (-2 * x[0] + 4 * x[1] - 2 * x[2]).value()
-    assert g[2, 0] == (-2 * x[1] + 4 * x[2] - 2 * x[3]).value()
-    assert g[3, 0] == (-2 * x[2] + 4 * x[3] - 2 * x[4]).value()
-    assert g[4, 0] == (-2 * x[3] + 2 * x[4]).value()
+    assert g[0, 0] == 2 * x[0].value() - 2 * x[1].value()
+    assert g[1, 0] == -2 * x[0].value() + 4 * x[1].value() - 2 * x[2].value()
+    assert g[2, 0] == -2 * x[1].value() + 4 * x[2].value() - 2 * x[3].value()
+    assert g[3, 0] == -2 * x[2].value() + 4 * x[3].value() - 2 * x[4].value()
+    assert g[4, 0] == -2 * x[3].value() + 2 * x[4].value()
 
     H = Hessian(y, x)
 

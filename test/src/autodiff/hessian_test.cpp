@@ -141,11 +141,10 @@ TEST_CASE("Hessian - Product of sines", "[Hessian]") {
   for (int i = 0; i < x.rows(); ++i) {
     for (int j = 0; j < x.rows(); ++j) {
       if (i == j) {
-        expected_H(i, j) =
-            (g.value().coeff(i) / slp::tan(x[i])).value() *
-            (1.0 - 1.0 / (slp::cos(x[i]) * slp::cos(x[i]))).value();
+        expected_H(i, j) = g.value().coeff(i) / std::tan(x[i].value()) *
+                           (1.0 - 1.0 / std::pow(std::cos(x[i].value()), 2));
       } else {
-        expected_H(i, j) = (g.value().coeff(j) / slp::tan(x[i])).value();
+        expected_H(i, j) = g.value().coeff(j) / std::tan(x[i].value());
       }
     }
   }
@@ -187,11 +186,11 @@ TEST_CASE("Hessian - Sum of squared residuals", "[Hessian]") {
   g = slp::Gradient(y, x).value();
 
   CHECK(y.value() == 0.0);
-  CHECK(g[0] == (2 * x[0] - 2 * x[1]).value());
-  CHECK(g[1] == (-2 * x[0] + 4 * x[1] - 2 * x[2]).value());
-  CHECK(g[2] == (-2 * x[1] + 4 * x[2] - 2 * x[3]).value());
-  CHECK(g[3] == (-2 * x[2] + 4 * x[3] - 2 * x[4]).value());
-  CHECK(g[4] == (-2 * x[3] + 2 * x[4]).value());
+  CHECK(g[0] == 2 * x[0].value() - 2 * x[1].value());
+  CHECK(g[1] == -2 * x[0].value() + 4 * x[1].value() - 2 * x[2].value());
+  CHECK(g[2] == -2 * x[1].value() + 4 * x[2].value() - 2 * x[3].value());
+  CHECK(g[3] == -2 * x[2].value() + 4 * x[3].value() - 2 * x[4].value());
+  CHECK(g[4] == -2 * x[3].value() + 2 * x[4].value());
 
   H = slp::Hessian(y, x).value();
 

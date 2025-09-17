@@ -284,8 +284,10 @@ def test_power():
     assert autodiff.pow(x, x).value() == math.pow(x.value(), x.value())
 
     g = Gradient(autodiff.pow(x, x), x)
-    assert g.get().value()[0, 0] == ((autodiff.log(x) + 1) * autodiff.pow(x, x)).value()
-    assert g.value()[0, 0] == ((autodiff.log(x) + 1) * autodiff.pow(x, x)).value()
+    assert g.get().value()[0, 0] == (math.log(x.value()) + 1) * math.pow(
+        x.value(), x.value()
+    )
+    assert g.value()[0, 0] == (math.log(x.value()) + 1) * math.pow(x.value(), x.value())
 
     # y(a)
     assert y.value() == 2 * a.value()
@@ -355,9 +357,11 @@ def test_atan2():
 
     g = Gradient(autodiff.atan2(2.0, x), x)
     assert g.get().value()[0, 0] == pytest.approx(
-        (-2.0 / (2 * 2 + x * x)).value(), abs=1e-15
+        -2.0 / (2 * 2 + x.value() * x.value()), abs=1e-15
     )
-    assert g.value()[0, 0] == pytest.approx((-2.0 / (2 * 2 + x * x)).value(), abs=1e-15)
+    assert g.value()[0, 0] == pytest.approx(
+        -2.0 / (2 * 2 + x.value() * x.value()), abs=1e-15
+    )
 
     # Testing atan2 function on (var, double)
     x.set_value(1.0)
@@ -368,7 +372,9 @@ def test_atan2():
     assert g.get().value()[0, 0] == pytest.approx(
         (2.0 / (2 * 2 + x * x)).value(), abs=1e-15
     )
-    assert g.value()[0, 0] == pytest.approx((2.0 / (2 * 2 + x * x)).value(), abs=1e-15)
+    assert g.value()[0, 0] == pytest.approx(
+        2.0 / (2 * 2 + x.value() * x.value()), abs=1e-15
+    )
 
     # Testing atan2 function on (var, var)
     x.set_value(1.1)
@@ -379,56 +385,64 @@ def test_atan2():
     assert g.get().value()[0, 0] == pytest.approx(
         (x / (x * x + y * y)).value(), abs=1e-15
     )
-    assert g.value()[0, 0] == pytest.approx((x / (x * x + y * y)).value(), abs=1e-15)
+    assert g.value()[0, 0] == pytest.approx(
+        x.value() / (x.value() * x.value() + y.value() * y.value()), abs=1e-15
+    )
 
     g = Gradient(autodiff.atan2(y, x), x)
     assert g.get().value()[0, 0] == pytest.approx(
-        (-y / (x * x + y * y)).value(), abs=1e-15
+        -y.value() / (x.value() * x.value() + y.value() * y.value()), abs=1e-15
     )
-    assert g.value()[0, 0] == pytest.approx((-y / (x * x + y * y)).value(), abs=1e-15)
+    assert g.value()[0, 0] == pytest.approx(
+        -y.value() / (x.value() * x.value() + y.value() * y.value()), abs=1e-15
+    )
 
     # Testing atan2 function on (expr, expr)
     assert 3 * autodiff.atan2(autodiff.sin(y), 2 * x + 1).value() == 3 * math.atan2(
-        autodiff.sin(y).value(), 2 * x.value() + 1
+        math.sin(y.value()), 2 * x.value() + 1
     )
 
     g = Gradient(3 * autodiff.atan2(autodiff.sin(y), 2 * x + 1), y)
     assert g.get().value()[0, 0] == pytest.approx(
-        (
-            3
-            * (2 * x + 1)
-            * autodiff.cos(y)
-            / ((2 * x + 1) * (2 * x + 1) + autodiff.sin(y) * autodiff.sin(y))
-        ).value(),
+        3
+        * (2 * x.value() + 1)
+        * math.cos(y.value())
+        / (
+            (2 * x.value() + 1) * (2 * x.value() + 1)
+            + math.sin(y.value()) * math.sin(y.value())
+        ),
         abs=1e-15,
     )
     assert g.value()[0, 0] == pytest.approx(
-        (
-            3
-            * (2 * x + 1)
-            * autodiff.cos(y)
-            / ((2 * x + 1) * (2 * x + 1) + autodiff.sin(y) * autodiff.sin(y))
-        ).value(),
+        3
+        * (2 * x.value() + 1)
+        * math.cos(y.value())
+        / (
+            (2 * x.value() + 1) * (2 * x.value() + 1)
+            + math.sin(y.value()) * math.sin(y.value())
+        ),
         abs=1e-15,
     )
 
     g = Gradient(3 * autodiff.atan2(autodiff.sin(y), 2 * x + 1), x)
     assert g.get().value()[0, 0] == pytest.approx(
-        (
-            3
-            * -2
-            * autodiff.sin(y)
-            / ((2 * x + 1) * (2 * x + 1) + autodiff.sin(y) * autodiff.sin(y))
-        ).value(),
+        3
+        * -2
+        * math.sin(y.value())
+        / (
+            (2 * x.value() + 1) * (2 * x.value() + 1)
+            + math.sin(y.value()) * math.sin(y.value())
+        ),
         abs=1e-15,
     )
     assert g.value()[0, 0] == pytest.approx(
-        (
-            3
-            * -2
-            * autodiff.sin(y)
-            / ((2 * x + 1) * (2 * x + 1) + autodiff.sin(y) * autodiff.sin(y))
-        ).value(),
+        3
+        * -2
+        * math.sin(y.value())
+        / (
+            (2 * x.value() + 1) * (2 * x.value() + 1)
+            + math.sin(y.value()) * math.sin(y.value())
+        ),
         abs=1e-15,
     )
 
@@ -443,15 +457,15 @@ def test_hypot():
     assert autodiff.hypot(x, 2.0).value() == math.hypot(x.value(), 2.0)
 
     g = Gradient(autodiff.hypot(x, 2.0), x)
-    assert g.get().value()[0, 0] == (x / math.hypot(x.value(), 2.0)).value()
-    assert g.value()[0, 0] == (x / math.hypot(x.value(), 2.0)).value()
+    assert g.get().value()[0, 0] == x.value() / math.hypot(x.value(), 2.0)
+    assert g.value()[0, 0] == x.value() / math.hypot(x.value(), 2.0)
 
     # Testing hypot function on (double, var)
     assert autodiff.hypot(2.0, y).value() == math.hypot(2.0, y.value())
 
     g = Gradient(autodiff.hypot(2.0, y), y)
-    assert g.get().value()[0, 0] == (y / math.hypot(2.0, y.value())).value()
-    assert g.value()[0, 0] == (y / math.hypot(2.0, y.value())).value()
+    assert g.get().value()[0, 0] == y.value() / math.hypot(2.0, y.value())
+    assert g.value()[0, 0] == y.value() / math.hypot(2.0, y.value())
 
     # Testing hypot function on (var, var)
     x.set_value(1.3)
@@ -459,12 +473,12 @@ def test_hypot():
     assert autodiff.hypot(x, y).value() == math.hypot(x.value(), y.value())
 
     g = Gradient(autodiff.hypot(x, y), x)
-    assert g.get().value()[0, 0] == (x / math.hypot(x.value(), y.value())).value()
-    assert g.value()[0, 0] == (x / math.hypot(x.value(), y.value())).value()
+    assert g.get().value()[0, 0] == x.value() / math.hypot(x.value(), y.value())
+    assert g.value()[0, 0] == x.value() / math.hypot(x.value(), y.value())
 
     g = Gradient(autodiff.hypot(x, y), y)
-    assert g.get().value()[0, 0] == (y / math.hypot(x.value(), y.value())).value()
-    assert g.value()[0, 0] == (y / math.hypot(x.value(), y.value())).value()
+    assert g.get().value()[0, 0] == y.value() / math.hypot(x.value(), y.value())
+    assert g.value()[0, 0] == y.value() / math.hypot(x.value(), y.value())
 
     # Testing hypot function on (expr, expr)
     x.set_value(1.3)
@@ -474,23 +488,19 @@ def test_hypot():
     )
 
     g = Gradient(autodiff.hypot(2.0 * x, 3.0 * y), x)
-    assert (
-        g.get().value()[0, 0]
-        == (4.0 * x / math.hypot(2.0 * x.value(), 3.0 * y.value())).value()
+    assert g.get().value()[0, 0] == 4.0 * x.value() / math.hypot(
+        2.0 * x.value(), 3.0 * y.value()
     )
-    assert (
-        g.value()[0, 0]
-        == (4.0 * x / math.hypot(2.0 * x.value(), 3.0 * y.value())).value()
+    assert g.value()[0, 0] == 4.0 * x.value() / math.hypot(
+        2.0 * x.value(), 3.0 * y.value()
     )
 
     g = Gradient(autodiff.hypot(2.0 * x, 3.0 * y), y)
-    assert (
-        g.get().value()[0, 0]
-        == (9.0 * y / math.hypot(2.0 * x.value(), 3.0 * y.value())).value()
+    assert g.get().value()[0, 0] == 9.0 * y.value() / math.hypot(
+        2.0 * x.value(), 3.0 * y.value()
     )
-    assert (
-        g.value()[0, 0]
-        == (9.0 * y / math.hypot(2.0 * x.value(), 3.0 * y.value())).value()
+    assert g.value()[0, 0] == 9.0 * y.value() / math.hypot(
+        2.0 * x.value(), 3.0 * y.value()
     )
 
     # Testing hypot function on (var, var, var)
@@ -503,25 +513,22 @@ def test_hypot():
     )
 
     g = Gradient(autodiff.hypot(x, y, z), x)
-    assert (
-        g.get().value()[0, 0]
-        == (x / math.hypot(x.value(), y.value(), z.value())).value()
+    assert g.get().value()[0, 0] == x.value() / math.hypot(
+        x.value(), y.value(), z.value()
     )
-    assert g.value()[0, 0] == (x / math.hypot(x.value(), y.value(), z.value())).value()
+    assert g.value()[0, 0] == x.value() / math.hypot(x.value(), y.value(), z.value())
 
     g = Gradient(autodiff.hypot(x, y, z), y)
-    assert (
-        g.get().value()[0, 0]
-        == (y / math.hypot(x.value(), y.value(), z.value())).value()
+    assert g.get().value()[0, 0] == y.value() / math.hypot(
+        x.value(), y.value(), z.value()
     )
-    assert g.value()[0, 0] == (y / math.hypot(x.value(), y.value(), z.value())).value()
+    assert g.value()[0, 0] == y.value() / math.hypot(x.value(), y.value(), z.value())
 
     g = Gradient(autodiff.hypot(x, y, z), z)
-    assert (
-        g.get().value()[0, 0]
-        == (z / math.hypot(x.value(), y.value(), z.value())).value()
+    assert g.get().value()[0, 0] == z.value() / math.hypot(
+        x.value(), y.value(), z.value()
     )
-    assert g.value()[0, 0] == (z / math.hypot(x.value(), y.value(), z.value())).value()
+    assert g.value()[0, 0] == z.value() / math.hypot(x.value(), y.value(), z.value())
 
 
 def test_miscellaneous():

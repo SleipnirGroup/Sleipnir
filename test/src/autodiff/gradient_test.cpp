@@ -290,8 +290,9 @@ TEST_CASE("Gradient - Power", "[Gradient]") {
 
   g = slp::Gradient(slp::pow(x, x), x);
   CHECK(g.get().value().coeff(0) ==
-        ((slp::log(x) + 1) * slp::pow(x, x)).value());
-  CHECK(g.value().coeff(0) == ((slp::log(x) + 1) * slp::pow(x, x)).value());
+        (std::log(x.value()) + 1) * std::pow(x.value(), x.value()));
+  CHECK(g.value().coeff(0) ==
+        (std::log(x.value()) + 1) * std::pow(x.value(), x.value()));
 
   // y(a)
   CHECK(y.value() == 2 * a.value());
@@ -363,9 +364,9 @@ TEST_CASE("Gradient - std::atan2()", "[Gradient]") {
 
   auto g = slp::Gradient(slp::atan2(2.0, x), x);
   CHECK(g.get().value().coeff(0) ==
-        Catch::Approx((-2.0 / (2 * 2 + x * x)).value()).margin(1e-15));
+        Catch::Approx(-2.0 / (2 * 2 + x.value() * x.value())).margin(1e-15));
   CHECK(g.value().coeff(0) ==
-        Catch::Approx((-2.0 / (2 * 2 + x * x)).value()).margin(1e-15));
+        Catch::Approx(-2.0 / (2 * 2 + x.value() * x.value())).margin(1e-15));
 
   // Testing atan2 function on (var, double)
   x.set_value(1.0);
@@ -374,9 +375,9 @@ TEST_CASE("Gradient - std::atan2()", "[Gradient]") {
 
   g = slp::Gradient(slp::atan2(x, 2.0), x);
   CHECK(g.get().value().coeff(0) ==
-        Catch::Approx((2.0 / (2 * 2 + x * x)).value()).margin(1e-15));
+        Catch::Approx(2.0 / (2 * 2 + x.value() * x.value())).margin(1e-15));
   CHECK(g.value().coeff(0) ==
-        Catch::Approx((2.0 / (2 * 2 + x * x)).value()).margin(1e-15));
+        Catch::Approx(2.0 / (2 * 2 + x.value() * x.value())).margin(1e-15));
 
   // Testing atan2 function on (var, var)
   x.set_value(1.1);
@@ -384,43 +385,50 @@ TEST_CASE("Gradient - std::atan2()", "[Gradient]") {
   CHECK(slp::atan2(y, x).value() == std::atan2(y.value(), x.value()));
 
   g = slp::Gradient(slp::atan2(y, x), y);
-  CHECK(g.get().value().coeff(0) ==
-        Catch::Approx((x / (x * x + y * y)).value()).margin(1e-15));
-  CHECK(g.value().coeff(0) ==
-        Catch::Approx((x / (x * x + y * y)).value()).margin(1e-15));
+  CHECK(
+      g.get().value().coeff(0) ==
+      Catch::Approx(x.value() / (x.value() * x.value() + y.value() * y.value()))
+          .margin(1e-15));
+  CHECK(g.value().coeff(0) == Catch::Approx(x.value() / (x.value() * x.value() +
+                                                         y.value() * y.value()))
+                                  .margin(1e-15));
 
   g = slp::Gradient(slp::atan2(y, x), x);
   CHECK(g.get().value().coeff(0) ==
-        Catch::Approx((-y / (x * x + y * y)).value()).margin(1e-15));
+        Catch::Approx(-y.value() /
+                      (x.value() * x.value() + y.value() * y.value()))
+            .margin(1e-15));
   CHECK(g.value().coeff(0) ==
-        Catch::Approx((-y / (x * x + y * y)).value()).margin(1e-15));
+        Catch::Approx(-y.value() /
+                      (x.value() * x.value() + y.value() * y.value()))
+            .margin(1e-15));
 
   // Testing atan2 function on (expr, expr)
   CHECK(3 * slp::atan2(slp::sin(y), 2 * x + 1).value() ==
-        3 * std::atan2(slp::sin(y).value(), 2 * x.value() + 1));
+        3 * std::atan2(std::sin(y.value()), 2 * x.value() + 1));
 
   g = slp::Gradient(3 * slp::atan2(slp::sin(y), 2 * x + 1), y);
   CHECK(g.get().value().coeff(0) ==
-        Catch::Approx((3 * (2 * x + 1) * slp::cos(y) /
-                       ((2 * x + 1) * (2 * x + 1) + slp::sin(y) * slp::sin(y)))
-                          .value())
+        Catch::Approx(3 * (2 * x.value() + 1) * std::cos(y.value()) /
+                      ((2 * x.value() + 1) * (2 * x.value() + 1) +
+                       std::sin(y.value()) * std::sin(y.value())))
             .margin(1e-15));
   CHECK(g.value().coeff(0) ==
-        Catch::Approx((3 * (2 * x + 1) * slp::cos(y) /
-                       ((2 * x + 1) * (2 * x + 1) + slp::sin(y) * slp::sin(y)))
-                          .value())
+        Catch::Approx(3 * (2 * x.value() + 1) * std::cos(y.value()) /
+                      ((2 * x.value() + 1) * (2 * x.value() + 1) +
+                       std::sin(y.value()) * std::sin(y.value())))
             .margin(1e-15));
 
   g = slp::Gradient(3 * slp::atan2(slp::sin(y), 2 * x + 1), x);
   CHECK(g.get().value().coeff(0) ==
-        Catch::Approx((3 * -2 * slp::sin(y) /
-                       ((2 * x + 1) * (2 * x + 1) + slp::sin(y) * slp::sin(y)))
-                          .value())
+        Catch::Approx(3 * -2 * std::sin(y.value()) /
+                      ((2 * x.value() + 1) * (2 * x.value() + 1) +
+                       std::sin(y.value()) * std::sin(y.value())))
             .margin(1e-15));
   CHECK(g.value().coeff(0) ==
-        Catch::Approx((3 * -2 * slp::sin(y) /
-                       ((2 * x + 1) * (2 * x + 1) + slp::sin(y) * slp::sin(y)))
-                          .value())
+        Catch::Approx(3 * -2 * std::sin(y.value()) /
+                      ((2 * x.value() + 1) * (2 * x.value() + 1) +
+                       std::sin(y.value()) * std::sin(y.value())))
             .margin(1e-15));
 }
 
@@ -434,15 +442,15 @@ TEST_CASE("Gradient - std::hypot()", "[Gradient]") {
   CHECK(slp::hypot(x, 2.0).value() == std::hypot(x.value(), 2.0));
 
   auto g = slp::Gradient(slp::hypot(x, 2.0), x);
-  CHECK(g.get().value().coeff(0) == (x / std::hypot(x.value(), 2.0)).value());
-  CHECK(g.value().coeff(0) == (x / std::hypot(x.value(), 2.0)).value());
+  CHECK(g.get().value().coeff(0) == x.value() / std::hypot(x.value(), 2.0));
+  CHECK(g.value().coeff(0) == x.value() / std::hypot(x.value(), 2.0));
 
   // Testing hypot function on (double, var)
   CHECK(slp::hypot(2.0, y).value() == std::hypot(2.0, y.value()));
 
   g = slp::Gradient(slp::hypot(2.0, y), y);
-  CHECK(g.get().value().coeff(0) == (y / std::hypot(2.0, y.value())).value());
-  CHECK(g.value().coeff(0) == (y / std::hypot(2.0, y.value())).value());
+  CHECK(g.get().value().coeff(0) == y.value() / std::hypot(2.0, y.value()));
+  CHECK(g.value().coeff(0) == y.value() / std::hypot(2.0, y.value()));
 
   // Testing hypot function on (var, var)
   x.set_value(1.3);
@@ -451,13 +459,13 @@ TEST_CASE("Gradient - std::hypot()", "[Gradient]") {
 
   g = slp::Gradient(slp::hypot(x, y), x);
   CHECK(g.get().value().coeff(0) ==
-        (x / std::hypot(x.value(), y.value())).value());
-  CHECK(g.value().coeff(0) == (x / std::hypot(x.value(), y.value())).value());
+        x.value() / std::hypot(x.value(), y.value()));
+  CHECK(g.value().coeff(0) == x.value() / std::hypot(x.value(), y.value()));
 
   g = slp::Gradient(slp::hypot(x, y), y);
   CHECK(g.get().value().coeff(0) ==
-        (y / std::hypot(x.value(), y.value())).value());
-  CHECK(g.value().coeff(0) == (y / std::hypot(x.value(), y.value())).value());
+        y.value() / std::hypot(x.value(), y.value()));
+  CHECK(g.value().coeff(0) == y.value() / std::hypot(x.value(), y.value()));
 
   // Testing hypot function on (expr, expr)
   x.set_value(1.3);
@@ -467,15 +475,15 @@ TEST_CASE("Gradient - std::hypot()", "[Gradient]") {
 
   g = slp::Gradient(slp::hypot(2.0 * x, 3.0 * y), x);
   CHECK(g.get().value().coeff(0) ==
-        (4.0 * x / std::hypot(2.0 * x.value(), 3.0 * y.value())).value());
+        4.0 * x.value() / std::hypot(2.0 * x.value(), 3.0 * y.value()));
   CHECK(g.value().coeff(0) ==
-        (4.0 * x / std::hypot(2.0 * x.value(), 3.0 * y.value())).value());
+        4.0 * x.value() / std::hypot(2.0 * x.value(), 3.0 * y.value()));
 
   g = slp::Gradient(slp::hypot(2.0 * x, 3.0 * y), y);
   CHECK(g.get().value().coeff(0) ==
-        (9.0 * y / std::hypot(2.0 * x.value(), 3.0 * y.value())).value());
+        9.0 * y.value() / std::hypot(2.0 * x.value(), 3.0 * y.value()));
   CHECK(g.value().coeff(0) ==
-        (9.0 * y / std::hypot(2.0 * x.value(), 3.0 * y.value())).value());
+        9.0 * y.value() / std::hypot(2.0 * x.value(), 3.0 * y.value()));
 
   // Testing hypot function on (var, var, var)
   slp::Variable z;
@@ -487,21 +495,21 @@ TEST_CASE("Gradient - std::hypot()", "[Gradient]") {
 
   g = slp::Gradient(slp::hypot(x, y, z), x);
   CHECK(g.get().value().coeff(0) ==
-        (x / std::hypot(x.value(), y.value(), z.value())).value());
+        x.value() / std::hypot(x.value(), y.value(), z.value()));
   CHECK(g.value().coeff(0) ==
-        (x / std::hypot(x.value(), y.value(), z.value())).value());
+        x.value() / std::hypot(x.value(), y.value(), z.value()));
 
   g = slp::Gradient(slp::hypot(x, y, z), y);
   CHECK(g.get().value().coeff(0) ==
-        (y / std::hypot(x.value(), y.value(), z.value())).value());
+        y.value() / std::hypot(x.value(), y.value(), z.value()));
   CHECK(g.value().coeff(0) ==
-        (y / std::hypot(x.value(), y.value(), z.value())).value());
+        y.value() / std::hypot(x.value(), y.value(), z.value()));
 
   g = slp::Gradient(slp::hypot(x, y, z), z);
   CHECK(g.get().value().coeff(0) ==
-        (z / std::hypot(x.value(), y.value(), z.value())).value());
+        z.value() / std::hypot(x.value(), y.value(), z.value()));
   CHECK(g.value().coeff(0) ==
-        (z / std::hypot(x.value(), y.value(), z.value())).value());
+        z.value() / std::hypot(x.value(), y.value(), z.value()));
 }
 
 TEST_CASE("Gradient - Miscellaneous", "[Gradient]") {
