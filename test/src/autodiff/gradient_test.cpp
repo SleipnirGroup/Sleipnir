@@ -271,6 +271,24 @@ TEST_CASE("Gradient - Power", "[Gradient]") {
   CHECK(g.get().value().coeff(0) == 0.5 / std::sqrt(a.value()));
   CHECK(g.value().coeff(0) == 0.5 / std::sqrt(a.value()));
 
+  // std::cbrt(x)
+  CHECK(slp::cbrt(x).value() == std::cbrt(x.value()));
+
+  g = slp::Gradient(slp::cbrt(x), x);
+  CHECK(g.get().value().coeff(0) ==
+        1.0 / (3.0 * std::cbrt(x.value()) * std::cbrt(x.value())));
+  CHECK(g.value().coeff(0) ==
+        1.0 / (3.0 * std::cbrt(x.value()) * std::cbrt(x.value())));
+
+  // std::cbrt(a)
+  CHECK(slp::cbrt(a).value() == std::cbrt(a.value()));
+
+  g = slp::Gradient(slp::cbrt(a), a);
+  CHECK(g.get().value().coeff(0) ==
+        1.0 / (3.0 * std::cbrt(a.value()) * std::cbrt(a.value())));
+  CHECK(g.value().coeff(0) ==
+        1.0 / (3.0 * std::cbrt(a.value()) * std::cbrt(a.value())));
+
   // x²
   CHECK(slp::pow(x, 2.0).value() == std::pow(x.value(), 2.0));
 

@@ -2,6 +2,7 @@
 
 #include <numbers>
 
+#include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <sleipnir/autodiff/expression.hpp>
 
@@ -121,6 +122,21 @@ TEST_CASE("Expression - Prune atan2()", "[Expression]") {
   CHECK(slp::detail::atan2(zero, one)->is_constant(0.0));
   CHECK(slp::detail::atan2(one, zero)->is_constant(std::numbers::pi / 2.0));
   CHECK(slp::detail::atan2(one, one)->is_constant(std::atan2(1.0, 1.0)));
+}
+
+TEST_CASE("Expression - Prune cbrt()", "[Expression]") {
+  auto negative_one = make_expression_ptr<ConstExpression>(-1.0);
+  auto zero = make_expression_ptr<ConstExpression>(0.0);
+  auto one = make_expression_ptr<ConstExpression>(1.0);
+  auto two = make_expression_ptr<ConstExpression>(2.0);
+
+  CHECK(slp::detail::cbrt(negative_one) == negative_one);
+  CHECK(slp::detail::cbrt(zero)->is_constant(0.0));
+  CHECK(slp::detail::cbrt(one) == one);
+
+  auto c = slp::detail::cbrt(two);
+  CHECK(c->type() == slp::ExpressionType::CONSTANT);
+  CHECK(c->val == Catch::Approx(std::cbrt(2.0)).margin(1e-15));
 }
 
 TEST_CASE("Expression - Prune cos()", "[Expression]") {

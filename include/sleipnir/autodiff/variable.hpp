@@ -267,6 +267,7 @@ class SLEIPNIR_DLLEXPORT Variable {
   friend SLEIPNIR_DLLEXPORT Variable atan(const Variable& x);
   friend SLEIPNIR_DLLEXPORT Variable atan2(const Variable& y,
                                            const Variable& x);
+  friend SLEIPNIR_DLLEXPORT Variable cbrt(const Variable& x);
   friend SLEIPNIR_DLLEXPORT Variable cos(const Variable& x);
   friend SLEIPNIR_DLLEXPORT Variable cosh(const Variable& x);
   friend SLEIPNIR_DLLEXPORT Variable erf(const Variable& x);
@@ -337,6 +338,15 @@ SLEIPNIR_DLLEXPORT inline Variable atan(const Variable& x) {
  */
 SLEIPNIR_DLLEXPORT inline Variable atan2(const Variable& y, const Variable& x) {
   return Variable{detail::atan2(y.expr, x.expr)};
+}
+
+/**
+ * std::cbrt() for Variables.
+ *
+ * @param x The argument.
+ */
+SLEIPNIR_DLLEXPORT inline Variable cbrt(const Variable& x) {
+  return Variable{detail::cbrt(x.expr)};
 }
 
 /**
