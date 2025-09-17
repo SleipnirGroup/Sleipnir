@@ -2134,6 +2134,12 @@ This overload is for Python bindings only.
 Parameter ``list``:
     The nested list of blocks.)doc";
 
+static const char *__doc_slp_cbrt =
+R"doc(std::cbrt() for Variables.
+
+Parameter ``x``:
+    The argument.)doc";
+
 static const char *__doc_slp_cos =
 R"doc(std::cos() for Variables.
 
@@ -2357,6 +2363,22 @@ static const char *__doc_slp_detail_BinaryPlusExpression_grad_r = R"doc()doc";
 static const char *__doc_slp_detail_BinaryPlusExpression_type = R"doc()doc";
 
 static const char *__doc_slp_detail_BinaryPlusExpression_value = R"doc()doc";
+
+static const char *__doc_slp_detail_CbrtExpression = R"doc(Derived expression type for std::cbrt().)doc";
+
+static const char *__doc_slp_detail_CbrtExpression_CbrtExpression =
+R"doc(Constructs an unary expression (an operator with one argument).
+
+Parameter ``lhs``:
+    Unary operator's operand.)doc";
+
+static const char *__doc_slp_detail_CbrtExpression_grad_expr_l = R"doc()doc";
+
+static const char *__doc_slp_detail_CbrtExpression_grad_l = R"doc()doc";
+
+static const char *__doc_slp_detail_CbrtExpression_type = R"doc()doc";
+
+static const char *__doc_slp_detail_CbrtExpression_value = R"doc()doc";
 
 static const char *__doc_slp_detail_ConstExpression = R"doc(Derived expression type for constant.)doc";
 
@@ -2887,6 +2909,18 @@ Parameter ``y``:
 
 Parameter ``x``:
     The x argument.)doc";
+
+static const char *__doc_slp_detail_cbrt =
+R"doc(std::cbrt() for Expressions.
+
+Parameter ``x``:
+    The argument.)doc";
+
+static const char *__doc_slp_detail_cbrt_2 =
+R"doc(std::cbrt() for Expressions.
+
+Parameter ``x``:
+    The argument.)doc";
 
 static const char *__doc_slp_detail_cos =
 R"doc(std::cos() for Expressions.

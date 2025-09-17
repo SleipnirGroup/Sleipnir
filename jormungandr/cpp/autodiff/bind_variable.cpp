@@ -104,6 +104,11 @@ void bind_variable(nb::module_& autodiff, nb::class_<Variable>& cls) {
       [](const Variable& y, const Variable& x) { return slp::atan2(y, x); },
       "y"_a, "x"_a, DOC(slp, atan2));
   autodiff.def(
+      "cbrt", [](double x) { return slp::cbrt(Variable{x}); }, "x"_a,
+      DOC(slp, cbrt));
+  autodiff.def("cbrt", static_cast<Variable (*)(const Variable&)>(&cbrt), "x"_a,
+               DOC(slp, cbrt));
+  autodiff.def(
       "cos", [](double x) { return slp::cos(Variable{x}); }, "x"_a,
       DOC(slp, cos));
   autodiff.def("cos", static_cast<Variable (*)(const Variable&)>(&cos), "x"_a,

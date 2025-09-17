@@ -266,6 +266,26 @@ def test_power():
     assert g.get().value()[0, 0] == 0.5 / math.sqrt(a.value())
     assert g.value()[0, 0] == 0.5 / math.sqrt(a.value())
 
+    # cbrt(x)
+    assert autodiff.cbrt(x).value() == math.cbrt(x.value())
+
+    g = Gradient(autodiff.cbrt(x), x)
+    assert autodiff.cbrt(x).value() == math.cbrt(x.value())
+    assert g.get().value()[0, 0] == 1.0 / (
+        3.0 * math.cbrt(x.value()) * math.cbrt(x.value())
+    )
+    assert g.value()[0, 0] == 1.0 / (3.0 * math.cbrt(x.value()) * math.cbrt(x.value()))
+
+    # cbrt(a)
+    assert autodiff.cbrt(a).value() == math.cbrt(a.value())
+
+    g = Gradient(autodiff.cbrt(a), a)
+    assert autodiff.cbrt(a).value() == math.cbrt(a.value())
+    assert g.get().value()[0, 0] == 1.0 / (
+        3.0 * math.cbrt(a.value()) * math.cbrt(a.value())
+    )
+    assert g.value()[0, 0] == 1.0 / (3.0 * math.cbrt(a.value()) * math.cbrt(a.value()))
+
     # x²
     assert autodiff.pow(x, 2.0).value() == math.pow(x.value(), 2.0)
 
