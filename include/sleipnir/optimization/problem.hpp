@@ -73,7 +73,7 @@ class SLEIPNIR_DLLEXPORT Problem {
   VariableMatrix decision_variable(int rows, int cols = 1) {
     m_decision_variables.reserve(m_decision_variables.size() + rows * cols);
 
-    VariableMatrix vars{rows, cols};
+    VariableMatrix vars{VariableMatrix::empty, rows, cols};
 
     for (int row = 0; row < rows; ++row) {
       for (int col = 0; col < cols; ++col) {
@@ -108,7 +108,7 @@ class SLEIPNIR_DLLEXPORT Problem {
     m_decision_variables.reserve(m_decision_variables.size() +
                                  (rows * rows + rows) / 2);
 
-    VariableMatrix vars{rows, rows};
+    VariableMatrix vars{VariableMatrix::empty, rows, rows};
 
     for (int row = 0; row < rows; ++row) {
       for (int col = 0; col <= row; ++col) {
