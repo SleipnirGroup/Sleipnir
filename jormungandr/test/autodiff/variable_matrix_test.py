@@ -231,35 +231,33 @@ def test_block_free_function():
     assert (mat2.value() == expected2).all()
 
 
-def expect_solve(A, B):
+def check_solve(A, B):
     rows = A.shape[0]
     print(f"Solve {rows}x{rows}")
 
     slp_A = VariableMatrix(A)
     slp_B = VariableMatrix(B)
-    actual_X = autodiff.solve(slp_A, slp_B)
+    slp_X = autodiff.solve(slp_A, slp_B)
 
-    expected_X = np.linalg.solve(A, B)
-
-    assert actual_X.shape == expected_X.shape
-    assert np.linalg.norm(slp_A.value() @ actual_X.value() - slp_B.value()) < 1e-12
+    assert slp_X.shape == (A.shape[1], B.shape[1])
+    assert np.linalg.norm(slp_A.value() @ slp_X.value() - slp_B.value()) < 1e-12
 
 
 def test_solve_free_function():
     # 1x1 special case
-    expect_solve(np.array([[2.0]]), np.array([[5.0]]))
+    check_solve(np.array([[2.0]]), np.array([[5.0]]))
 
     # 2x2 special case
-    expect_solve(np.array([[1.0, 2.0], [3.0, 4.0]]), np.array([[5.0], [6.0]]))
+    check_solve(np.array([[1.0, 2.0], [3.0, 4.0]]), np.array([[5.0], [6.0]]))
 
     # 3x3 special case
-    expect_solve(
+    check_solve(
         np.array([[1.0, 2.0, 3.0], [-4.0, -5.0, 6.0], [7.0, 8.0, 9.0]]),
         np.array([[10.0], [11.0], [12.0]]),
     )
 
     # 4x4 special case
-    expect_solve(
+    check_solve(
         np.array(
             [
                 [1.0, 2.0, 3.0, -4.0],
@@ -272,7 +270,7 @@ def test_solve_free_function():
     )
 
     # 5x5 general case
-    expect_solve(
+    check_solve(
         np.array(
             [
                 [1.0, 2.0, 3.0, -4.0, 5.0],

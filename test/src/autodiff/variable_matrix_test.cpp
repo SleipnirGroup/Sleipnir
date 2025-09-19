@@ -5,7 +5,6 @@
 #include <iterator>
 
 #include <Eigen/Core>
-#include <Eigen/QR>
 #include <catch2/catch_test_macros.hpp>
 #include <sleipnir/autodiff/variable_matrix.hpp>
 
@@ -342,45 +341,43 @@ TEST_CASE("VariableMatrix - Block() free function", "[VariableMatrix]") {
 }
 
 template <int Rows>
-void ExpectSolve(const Eigen::Matrix<double, Rows, Rows>& A,
+void check_solve(const Eigen::Matrix<double, Rows, Rows>& A,
                  const Eigen::Matrix<double, Rows, 1>& B) {
   INFO(std::format("Solve {}x{}", Rows, Rows));
 
   slp::VariableMatrix slp_A{A};
   slp::VariableMatrix slp_B{B};
-  auto actual_X = slp::solve(slp_A, slp_B);
+  auto slp_X = slp::solve(slp_A, slp_B);
 
-  Eigen::Matrix<double, Rows, 1> expected_X = A.householderQr().solve(B);
-
-  CHECK(actual_X.rows() == expected_X.rows());
-  CHECK(actual_X.cols() == expected_X.cols());
-  CHECK((slp_A.value() * actual_X.value() - slp_B.value()).norm() < 1e-12);
+  CHECK(slp_X.rows() == A.cols());
+  CHECK(slp_X.cols() == B.cols());
+  CHECK((slp_A.value() * slp_X.value() - slp_B.value()).norm() < 1e-12);
 }
 
 TEST_CASE("VariableMatrix - Solve() free function", "[VariableMatrix]") {
   // 1x1 special case
-  ExpectSolve(Eigen::Matrix<double, 1, 1>{{2.0}},
+  check_solve(Eigen::Matrix<double, 1, 1>{{2.0}},
               Eigen::Matrix<double, 1, 1>{{5.0}});
 
   // 2x2 special case
-  ExpectSolve(Eigen::Matrix<double, 2, 2>{{1.0, 2.0}, {3.0, 4.0}},
+  check_solve(Eigen::Matrix<double, 2, 2>{{1.0, 2.0}, {3.0, 4.0}},
               Eigen::Matrix<double, 2, 1>{{5.0}, {6.0}});
 
   // 3x3 special case
-  ExpectSolve(
+  check_solve(
       Eigen::Matrix<double, 3, 3>{
           {1.0, 2.0, 3.0}, {-4.0, -5.0, 6.0}, {7.0, 8.0, 9.0}},
       Eigen::Matrix<double, 3, 1>{{10.0}, {11.0}, {12.0}});
 
   // 4x4 special case
-  ExpectSolve(Eigen::Matrix<double, 4, 4>{{1.0, 2.0, 3.0, -4.0},
+  check_solve(Eigen::Matrix<double, 4, 4>{{1.0, 2.0, 3.0, -4.0},
                                           {-5.0, 6.0, 7.0, 8.0},
                                           {9.0, 10.0, 11.0, 12.0},
                                           {13.0, 14.0, 15.0, 16.0}},
               Eigen::Matrix<double, 4, 1>{{17.0}, {18.0}, {19.0}, {20.0}});
 
   // 5x5 general case
-  ExpectSolve(
+  check_solve(
       Eigen::Matrix<double, 5, 5>{{1.0, 2.0, 3.0, -4.0, 5.0},
                                   {-5.0, 6.0, 7.0, 8.0, 9.0},
                                   {9.0, 10.0, 11.0, 12.0, 13.0},
