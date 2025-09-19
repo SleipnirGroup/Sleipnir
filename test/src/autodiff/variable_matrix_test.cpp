@@ -142,7 +142,7 @@ TEST_CASE("VariableMatrix - Slicing", "[VariableMatrix]") {
     auto s = mat[_, slp::Slice{_, _, 2}];
     CHECK(s.rows() == 4);
     CHECK(s.cols() == 2);
-    CHECK(s ==
+    CHECK(s.value() ==
           Eigen::MatrixXd{{1.0, 3.0}, {5.0, 7.0}, {9.0, 11.0}, {13.0, 15.0}});
   }
 
@@ -151,7 +151,7 @@ TEST_CASE("VariableMatrix - Slicing", "[VariableMatrix]") {
     auto s = mat[slp::Slice{_, _, -1}, slp::Slice{_, _, -2}];
     CHECK(s.rows() == 4);
     CHECK(s.cols() == 2);
-    CHECK(s ==
+    CHECK(s.value() ==
           Eigen::MatrixXd{{16.0, 14.0}, {12.0, 10.0}, {8.0, 6.0}, {4.0, 2.0}});
   }
 
@@ -160,7 +160,7 @@ TEST_CASE("VariableMatrix - Slicing", "[VariableMatrix]") {
     auto s = mat[slp::Slice{1, _}, -1];
     CHECK(s.rows() == 3);
     CHECK(s.cols() == 1);
-    CHECK(s == Eigen::MatrixXd{{8.0}, {12.0}, {16.0}});
+    CHECK(s.value() == Eigen::MatrixXd{{8.0}, {12.0}, {16.0}});
   }
 
   // Slice from start and column -2
@@ -168,7 +168,7 @@ TEST_CASE("VariableMatrix - Slicing", "[VariableMatrix]") {
     auto s = mat[slp::Slice{1, _}, -2];
     CHECK(s.rows() == 3);
     CHECK(s.cols() == 1);
-    CHECK(s == Eigen::MatrixXd{{7.0}, {11.0}, {15.0}});
+    CHECK(s.value() == Eigen::MatrixXd{{7.0}, {11.0}, {15.0}});
   }
 }
 
@@ -217,15 +217,6 @@ TEST_CASE("VariableMatrix - Iterators", "[VariableMatrix]") {
   // VariableMatrix const_iterator
   CHECK(std::distance(A.cbegin(), A.cend()) == 9);
 
-  // Value() isn't const-qualified
-#if 0
-  i = 1;
-  for (const auto& elem : A) {
-    CHECK(elem.value() == i);
-    ++i;
-  }
-#endif
-
   auto sub_A = A.block(2, 1, 1, 2);
 
   // VariableBlock iterator
@@ -239,15 +230,6 @@ TEST_CASE("VariableMatrix - Iterators", "[VariableMatrix]") {
 
   // VariableBlock const_iterator
   CHECK(std::distance(sub_A.begin(), sub_A.end()) == 2);
-
-  // Value() isn't const-qualified
-#if 0
-  i = 8;
-  for (const auto& elem : sub_A) {
-    CHECK(elem.value() == i);
-    ++i;
-  }
-#endif
 }
 
 TEST_CASE("VariableMatrix - Value", "[VariableMatrix]") {
