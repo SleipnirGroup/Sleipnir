@@ -536,9 +536,9 @@ Shaped (num_states)x(num_steps+1).
 Returns:
     The state variable matrix.)doc";
 
-static const char *__doc_slp_OCP_constrain_direct_collocation = R"doc()doc";
+static const char *__doc_slp_OCP_constrain_direct_collocation = R"doc(Apply direct collocation dynamics constraints.)doc";
 
-static const char *__doc_slp_OCP_constrain_direct_transcription = R"doc()doc";
+static const char *__doc_slp_OCP_constrain_direct_transcription = R"doc(Apply direct transcription dynamics constraints.)doc";
 
 static const char *__doc_slp_OCP_constrain_final_state =
 R"doc(Utility function to constrain the final state.
@@ -552,7 +552,7 @@ R"doc(Utility function to constrain the initial state.
 Parameter ``initial_state``:
     the initial state to constrain to.)doc";
 
-static const char *__doc_slp_OCP_constrain_single_shooting = R"doc()doc";
+static const char *__doc_slp_OCP_constrain_single_shooting = R"doc(Apply single shooting dynamics constraints.)doc";
 
 static const char *__doc_slp_OCP_dt =
 R"doc(Get the timestep variables. After the problem is solved, this will
@@ -615,6 +615,25 @@ static const char *__doc_slp_OCP_m_num_steps = R"doc()doc";
 static const char *__doc_slp_OCP_m_timestep_method = R"doc()doc";
 
 static const char *__doc_slp_OCP_m_transcription_method = R"doc()doc";
+
+static const char *__doc_slp_OCP_rk4 =
+R"doc(Performs 4th order Runge-Kutta integration of dx/dt = f(t, x, u) for
+dt.
+
+Parameter ``f``:
+    The function to integrate. It must take two arguments x and u.
+
+Parameter ``x``:
+    The initial value of x.
+
+Parameter ``u``:
+    The value u held constant over the integration period.
+
+Parameter ``t0``:
+    The initial time.
+
+Parameter ``dt``:
+    The time over which to integrate.)doc";
 
 static const char *__doc_slp_OCP_set_lower_input_bound =
 R"doc(Convenience function to set a lower bound on the input.
@@ -3272,25 +3291,6 @@ Parameter ``base``:
 
 Parameter ``power``:
     The power.)doc";
-
-static const char *__doc_slp_rk4 =
-R"doc(Performs 4th order Runge-Kutta integration of dx/dt = f(t, x, u) for
-dt.
-
-Parameter ``f``:
-    The function to integrate. It must take two arguments x and u.
-
-Parameter ``x``:
-    The initial value of x.
-
-Parameter ``u``:
-    The value u held constant over the integration period.
-
-Parameter ``t0``:
-    The initial time.
-
-Parameter ``dt``:
-    The time over which to integrate.)doc";
 
 static const char *__doc_slp_sign =
 R"doc(sign() for Variables.

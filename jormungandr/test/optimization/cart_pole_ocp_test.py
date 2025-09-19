@@ -4,8 +4,13 @@ import numpy as np
 import pytest
 
 from jormungandr.autodiff import ExpressionType, VariableMatrix
-from jormungandr.control import *
-from jormungandr.optimization import ExitStatus
+from jormungandr.optimization import (
+    OCP,
+    DynamicsType,
+    ExitStatus,
+    TimestepMethod,
+    TranscriptionMethod,
+)
 from jormungandr.test.cart_pole_util import cart_pole_dynamics
 from jormungandr.test.rk4 import rk4
 

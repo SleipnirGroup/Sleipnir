@@ -10,7 +10,10 @@
 #include <sleipnir/autodiff/variable.hpp>
 #include <sleipnir/autodiff/variable_block.hpp>
 #include <sleipnir/autodiff/variable_matrix.hpp>
-#include <sleipnir/control/ocp.hpp>
+#include <sleipnir/optimization/ocp.hpp>
+#include <sleipnir/optimization/ocp/dynamics_type.hpp>
+#include <sleipnir/optimization/ocp/timestep_method.hpp>
+#include <sleipnir/optimization/ocp/transcription_method.hpp>
 #include <sleipnir/optimization/problem.hpp>
 #include <sleipnir/optimization/solver/exit_status.hpp>
 #include <sleipnir/optimization/solver/iteration_info.hpp>
@@ -38,9 +41,10 @@ void bind_iteration_info(nb::class_<IterationInfo>& cls);
 
 void bind_problem(nb::class_<Problem>& cls);
 
-void bind_ocp(nb::enum_<TranscriptionMethod>& transcription_method,
-              nb::enum_<DynamicsType>& dynamics_type,
-              nb::enum_<TimestepMethod>& timestep_method,
-              nb::class_<OCP, Problem>& cls);
+void bind_dynamics_type(nb::enum_<DynamicsType>& e);
+void bind_timestep_method(nb::enum_<TimestepMethod>& e);
+void bind_transcription_method(nb::enum_<TranscriptionMethod>& e);
+
+void bind_ocp(nb::class_<OCP, Problem>& cls);
 
 }  // namespace slp

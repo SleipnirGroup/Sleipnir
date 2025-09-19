@@ -2,8 +2,13 @@ import numpy as np
 import pytest
 
 from jormungandr.autodiff import ExpressionType
-from jormungandr.control import *
-from jormungandr.optimization import ExitStatus
+from jormungandr.optimization import (
+    OCP,
+    DynamicsType,
+    ExitStatus,
+    TimestepMethod,
+    TranscriptionMethod,
+)
 from jormungandr.test.differential_drive_util import (
     differential_drive_dynamics,
     differential_drive_dynamics_double,
