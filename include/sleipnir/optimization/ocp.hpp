@@ -8,6 +8,9 @@
 #include <utility>
 
 #include "sleipnir/autodiff/variable_matrix.hpp"
+#include "sleipnir/optimization/ocp/dynamics_type.hpp"
+#include "sleipnir/optimization/ocp/timestep_method.hpp"
+#include "sleipnir/optimization/ocp/transcription_method.hpp"
 #include "sleipnir/optimization/problem.hpp"
 #include "sleipnir/util/assert.hpp"
 #include "sleipnir/util/concepts.hpp"
@@ -15,64 +18,6 @@
 #include "sleipnir/util/symbol_exports.hpp"
 
 namespace slp {
-
-/**
- * Performs 4th order Runge-Kutta integration of dx/dt = f(t, x, u) for dt.
- *
- * @param f  The function to integrate. It must take two arguments x and u.
- * @param x  The initial value of x.
- * @param u  The value u held constant over the integration period.
- * @param t0 The initial time.
- * @param dt The time over which to integrate.
- */
-template <typename F, typename State, typename Input, typename Time>
-State rk4(F&& f, State x, Input u, Time t0, Time dt) {
-  auto halfdt = dt * 0.5;
-  State k1 = f(t0, x, u, dt);
-  State k2 = f(t0 + halfdt, x + k1 * halfdt, u, dt);
-  State k3 = f(t0 + halfdt, x + k2 * halfdt, u, dt);
-  State k4 = f(t0 + dt, x + k3 * dt, u, dt);
-
-  return x + (k1 + k2 * 2.0 + k3 * 2.0 + k4) * (dt / 6.0);
-}
-
-/**
- * Enum describing an OCP transcription method.
- */
-enum class TranscriptionMethod : uint8_t {
-  /// Each state is a decision variable constrained to the integrated dynamics
-  /// of the previous state.
-  DIRECT_TRANSCRIPTION,
-  /// The trajectory is modeled as a series of cubic polynomials where the
-  /// centerpoint slope is constrained.
-  DIRECT_COLLOCATION,
-  /// States depend explicitly as a function of all previous states and all
-  /// previous inputs.
-  SINGLE_SHOOTING
-};
-
-/**
- * Enum describing a type of system dynamics constraints.
- */
-enum class DynamicsType : uint8_t {
-  /// The dynamics are a function in the form dx/dt = f(t, x, u).
-  EXPLICIT_ODE,
-  /// The dynamics are a function in the form xₖ₊₁ = f(t, xₖ, uₖ).
-  DISCRETE
-};
-
-/**
- * Enum describing the type of system timestep.
- */
-enum class TimestepMethod : uint8_t {
-  /// The timestep is a fixed constant.
-  FIXED,
-  /// The timesteps are allowed to vary as independent decision variables.
-  VARIABLE,
-  /// The timesteps are equal length but allowed to vary as a single decision
-  /// variable.
-  VARIABLE_SINGLE
-};
 
 /**
  * This class allows the user to pose and solve a constrained optimal control
@@ -370,6 +315,47 @@ class SLEIPNIR_DLLEXPORT OCP : public Problem {
   VariableMatrix final_state() { return m_X.col(m_num_steps); }
 
  private:
+  int m_num_states;
+  int m_num_inputs;
+  std::chrono::duration<double> m_dt;
+  int m_num_steps;
+  TranscriptionMethod m_transcription_method;
+
+  DynamicsType m_dynamics_type;
+
+  function_ref<VariableMatrix(const Variable& t, const VariableMatrix& x,
+                              const VariableMatrix& u, const Variable& dt)>
+      m_dynamics_function;
+
+  TimestepMethod m_timestep_method;
+
+  VariableMatrix m_X;
+  VariableMatrix m_U;
+  VariableMatrix m_DT;
+
+  /**
+   * Performs 4th order Runge-Kutta integration of dx/dt = f(t, x, u) for dt.
+   *
+   * @param f  The function to integrate. It must take two arguments x and u.
+   * @param x  The initial value of x.
+   * @param u  The value u held constant over the integration period.
+   * @param t0 The initial time.
+   * @param dt The time over which to integrate.
+   */
+  template <typename F, typename State, typename Input, typename Time>
+  State rk4(F&& f, State x, Input u, Time t0, Time dt) {
+    auto halfdt = dt * 0.5;
+    State k1 = f(t0, x, u, dt);
+    State k2 = f(t0 + halfdt, x + k1 * halfdt, u, dt);
+    State k3 = f(t0 + halfdt, x + k2 * halfdt, u, dt);
+    State k4 = f(t0 + dt, x + k3 * dt, u, dt);
+
+    return x + (k1 + k2 * 2.0 + k3 * 2.0 + k4) * (dt / 6.0);
+  }
+
+  /**
+   * Apply direct collocation dynamics constraints.
+   */
   void constrain_direct_collocation() {
     slp_assert(m_dynamics_type == DynamicsType::EXPLICIT_ODE);
 
@@ -405,6 +391,9 @@ class SLEIPNIR_DLLEXPORT OCP : public Problem {
     }
   }
 
+  /**
+   * Apply direct transcription dynamics constraints.
+   */
   void constrain_direct_transcription() {
     Variable time = 0.0;
 
@@ -426,6 +415,9 @@ class SLEIPNIR_DLLEXPORT OCP : public Problem {
     }
   }
 
+  /**
+   * Apply single shooting dynamics constraints.
+   */
   void constrain_single_shooting() {
     Variable time = 0.0;
 
@@ -446,24 +438,6 @@ class SLEIPNIR_DLLEXPORT OCP : public Problem {
       time += dt;
     }
   }
-
-  int m_num_states;
-  int m_num_inputs;
-  std::chrono::duration<double> m_dt;
-  int m_num_steps;
-  TranscriptionMethod m_transcription_method;
-
-  DynamicsType m_dynamics_type;
-
-  function_ref<VariableMatrix(const Variable& t, const VariableMatrix& x,
-                              const VariableMatrix& u, const Variable& dt)>
-      m_dynamics_function;
-
-  TimestepMethod m_timestep_method;
-
-  VariableMatrix m_X;
-  VariableMatrix m_U;
-  VariableMatrix m_DT;
 };
 
 }  // namespace slp

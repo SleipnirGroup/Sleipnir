@@ -5,7 +5,12 @@ import math
 import numpy as np
 
 from jormungandr.autodiff import VariableMatrix
-from jormungandr.control import *
+from jormungandr.optimization import (
+    OCP,
+    DynamicsType,
+    TimestepMethod,
+    TranscriptionMethod,
+)
 
 
 def main():

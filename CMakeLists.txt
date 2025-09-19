@@ -415,7 +415,6 @@ if(BUILD_PYTHON)
         file(
             GLOB_RECURSE sleipnir_headers
             include/sleipnir/autodiff/*.hpp
-            include/sleipnir/control/*.hpp
             include/sleipnir/optimization/*.hpp
         )
 

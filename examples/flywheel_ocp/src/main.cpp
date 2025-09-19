@@ -5,7 +5,7 @@
 #include <print>
 
 #include <Eigen/Core>
-#include <sleipnir/control/ocp.hpp>
+#include <sleipnir/optimization/ocp.hpp>
 
 #ifndef RUNNING_TESTS
 int main() {

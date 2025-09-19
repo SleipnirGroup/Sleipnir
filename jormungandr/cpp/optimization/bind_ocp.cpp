@@ -5,7 +5,7 @@
 #include <nanobind/stl/chrono.h>
 #include <nanobind/stl/function.h>
 #include <sleipnir/autodiff/variable_matrix.hpp>
-#include <sleipnir/control/ocp.hpp>
+#include <sleipnir/optimization/ocp.hpp>
 
 #include "docstrings.hpp"
 
@@ -13,33 +13,8 @@ namespace nb = nanobind;
 
 namespace slp {
 
-void bind_ocp(nb::enum_<TranscriptionMethod>& transcription_method,
-              nb::enum_<DynamicsType>& dynamics_type,
-              nb::enum_<TimestepMethod>& timestep_method,
-              nb::class_<OCP, Problem>& cls) {
+void bind_ocp(nb::class_<OCP, Problem>& cls) {
   using namespace nb::literals;
-
-  transcription_method.value(
-      "DIRECT_TRANSCRIPTION", TranscriptionMethod::DIRECT_TRANSCRIPTION,
-      DOC(slp, TranscriptionMethod, DIRECT_TRANSCRIPTION));
-  transcription_method.value("DIRECT_COLLOCATION",
-                             TranscriptionMethod::DIRECT_COLLOCATION,
-                             DOC(slp, TranscriptionMethod, DIRECT_COLLOCATION));
-  transcription_method.value("SINGLE_SHOOTING",
-                             TranscriptionMethod::SINGLE_SHOOTING,
-                             DOC(slp, TranscriptionMethod, SINGLE_SHOOTING));
-
-  dynamics_type.value("EXPLICIT_ODE", DynamicsType::EXPLICIT_ODE,
-                      DOC(slp, DynamicsType, EXPLICIT_ODE));
-  dynamics_type.value("DISCRETE", DynamicsType::DISCRETE,
-                      DOC(slp, DynamicsType, DISCRETE));
-
-  timestep_method.value("FIXED", TimestepMethod::FIXED,
-                        DOC(slp, TimestepMethod, FIXED));
-  timestep_method.value("VARIABLE", TimestepMethod::VARIABLE,
-                        DOC(slp, TimestepMethod, VARIABLE));
-  timestep_method.value("VARIABLE_SINGLE", TimestepMethod::VARIABLE_SINGLE,
-                        DOC(slp, TimestepMethod, VARIABLE_SINGLE));
 
   cls.def(nb::init<int, int, std::chrono::duration<double>, int,
                    const std::function<VariableMatrix(

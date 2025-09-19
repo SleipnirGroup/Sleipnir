@@ -4,7 +4,10 @@
 #include <sleipnir/autodiff/variable.hpp>
 #include <sleipnir/autodiff/variable_block.hpp>
 #include <sleipnir/autodiff/variable_matrix.hpp>
-#include <sleipnir/control/ocp.hpp>
+#include <sleipnir/optimization/ocp.hpp>
+#include <sleipnir/optimization/ocp/dynamics_type.hpp>
+#include <sleipnir/optimization/ocp/timestep_method.hpp>
+#include <sleipnir/optimization/ocp/transcription_method.hpp>
 #include <sleipnir/optimization/problem.hpp>
 #include <sleipnir/optimization/solver/exit_status.hpp>
 #include <sleipnir/optimization/solver/iteration_info.hpp>
@@ -23,7 +26,6 @@ NB_MODULE(_jormungandr, m) {
 
   nb::module_ autodiff = m.def_submodule("autodiff");
   nb::module_ optimization = m.def_submodule("optimization");
-  nb::module_ control = m.def_submodule("control");
 
   nb::enum_<ExpressionType> expression_type{autodiff, "ExpressionType",
                                             DOC(slp, ExpressionType)};
@@ -50,13 +52,14 @@ NB_MODULE(_jormungandr, m) {
 
   nb::class_<Problem> problem{optimization, "Problem", DOC(slp, Problem)};
 
-  nb::enum_<TranscriptionMethod> transcription_method{
-      control, "TranscriptionMethod", DOC(slp, TranscriptionMethod)};
-  nb::enum_<DynamicsType> dynamics_type{control, "DynamicsType",
+  nb::enum_<DynamicsType> dynamics_type{optimization, "DynamicsType",
                                         DOC(slp, DynamicsType)};
-  nb::enum_<TimestepMethod> timestep_method{control, "TimestepMethod",
+  nb::enum_<TimestepMethod> timestep_method{optimization, "TimestepMethod",
                                             DOC(slp, TimestepMethod)};
-  nb::class_<OCP, Problem> ocp{control, "OCP", DOC(slp, OCP)};
+  nb::enum_<TranscriptionMethod> transcription_method{
+      optimization, "TranscriptionMethod", DOC(slp, TranscriptionMethod)};
+
+  nb::class_<OCP, Problem> ocp{optimization, "OCP", DOC(slp, OCP)};
 
   bind_expression_type(expression_type);
 
@@ -80,7 +83,11 @@ NB_MODULE(_jormungandr, m) {
 
   bind_problem(problem);
 
-  bind_ocp(transcription_method, dynamics_type, timestep_method, ocp);
+  bind_dynamics_type(dynamics_type);
+  bind_timestep_method(timestep_method);
+  bind_transcription_method(transcription_method);
+
+  bind_ocp(ocp);
 }
 
 }  // namespace slp

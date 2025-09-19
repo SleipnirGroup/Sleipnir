@@ -7,7 +7,7 @@
 #include <Eigen/Core>
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
-#include <sleipnir/control/ocp.hpp>
+#include <sleipnir/optimization/ocp.hpp>
 
 #include "catch_string_converters.hpp"
 #include "differential_drive_util.hpp"

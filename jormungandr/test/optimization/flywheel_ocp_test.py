@@ -5,8 +5,13 @@ import numpy as np
 import pytest
 
 from jormungandr.autodiff import ExpressionType, VariableMatrix
-from jormungandr.control import *
-from jormungandr.optimization import ExitStatus
+from jormungandr.optimization import (
+    OCP,
+    DynamicsType,
+    ExitStatus,
+    TimestepMethod,
+    TranscriptionMethod,
+)
 
 
 def near(expected, actual, tolerance):
