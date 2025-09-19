@@ -483,7 +483,7 @@ Parameter ``dynamics_type``:
 Parameter ``timestep_method``:
     The timestep method.
 
-Parameter ``method``:
+Parameter ``transcription_method``:
     The transcription method.)doc";
 
 static const char *__doc_slp_OCP_OCP_2 =
@@ -514,7 +514,7 @@ Parameter ``dynamics_type``:
 Parameter ``timestep_method``:
     The timestep method.
 
-Parameter ``method``:
+Parameter ``transcription_method``:
     The transcription method.)doc";
 
 static const char *__doc_slp_OCP_U =
