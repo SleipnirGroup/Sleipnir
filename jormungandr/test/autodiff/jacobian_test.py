@@ -139,7 +139,6 @@ def test_nested_products():
 
 
 def test_non_square():
-    y = VariableMatrix(1)
     x = VariableMatrix(3)
     x[0].set_value(1)
     x[1].set_value(2)
@@ -148,6 +147,7 @@ def test_non_square():
     # y = [x₁ + 3x₂ − 5x₃]
     #
     # dy/dx = [1  3  −5]
+    y = VariableMatrix(1)
     y[0] = x[0] + 3 * x[1] - 5 * x[2]
     J = Jacobian(y, x)
 

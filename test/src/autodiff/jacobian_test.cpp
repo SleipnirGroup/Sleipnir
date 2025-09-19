@@ -157,7 +157,6 @@ TEST_CASE("Jacobian - Non-square", "[Jacobian]") {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  slp::VariableMatrix y{1};
   slp::VariableMatrix x{3};
   x[0].set_value(1);
   x[1].set_value(2);
@@ -166,6 +165,7 @@ TEST_CASE("Jacobian - Non-square", "[Jacobian]") {
   // y = [x₁ + 3x₂ − 5x₃]
   //
   // dy/dx = [1  3  −5]
+  slp::VariableMatrix y{1};
   y[0] = x[0] + 3 * x[1] - 5 * x[2];
   auto J = slp::Jacobian(y, x);
 

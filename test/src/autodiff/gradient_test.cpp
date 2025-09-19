@@ -7,6 +7,7 @@
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <sleipnir/autodiff/gradient.hpp>
+#include <sleipnir/autodiff/variable_matrix.hpp>
 
 TEST_CASE("Gradient - Trivial case", "[Gradient]") {
   slp::Variable a;
@@ -607,4 +608,29 @@ TEST_CASE("Gradient - sign()", "[Gradient]") {
   g = slp::Gradient(slp::sign(x), x);
   CHECK(g.get().value().coeff(0) == 0.0);
   CHECK(g.value().coeff(0) == 0.0);
+}
+
+TEST_CASE("Gradient - Non-scalar", "[Gradient]") {
+  slp::VariableMatrix x{3};
+  x[0].set_value(1);
+  x[1].set_value(2);
+  x[2].set_value(3);
+
+  // y = [x₁ + 3x₂ − 5x₃]
+  //
+  // dy/dx = [1  3  −5]
+  auto y = x[0] + 3 * x[1] - 5 * x[2];
+  auto g = slp::Gradient(y, x);
+
+  Eigen::MatrixXd expected_g{{1.0}, {3.0}, {-5.0}};
+
+  auto g_get_value = g.get().value();
+  CHECK(g_get_value.rows() == 3);
+  CHECK(g_get_value.cols() == 1);
+  CHECK(g_get_value == expected_g);
+
+  auto g_value = g.value();
+  CHECK(g_value.rows() == 3);
+  CHECK(g_value.cols() == 1);
+  CHECK(g_value.toDense() == expected_g);
 }

@@ -58,7 +58,7 @@ class SLEIPNIR_DLLEXPORT Gradient {
    * @return The gradient at wrt's value.
    */
   const Eigen::SparseVector<double>& value() {
-    m_g = m_jacobian.value();
+    m_g = m_jacobian.value().transpose();
 
     return m_g;
   }
