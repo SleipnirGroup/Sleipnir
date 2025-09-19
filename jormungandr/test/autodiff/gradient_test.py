@@ -1,9 +1,10 @@
 import math
 
+import numpy as np
 import pytest
 
 import jormungandr.autodiff as autodiff
-from jormungandr.autodiff import Gradient, Variable
+from jormungandr.autodiff import Gradient, Variable, VariableMatrix
 
 
 def test_trivial_case():
@@ -628,3 +629,26 @@ def test_sign():
     g = Gradient(autodiff.sign(x), x)
     assert g.get().value()[0, 0] == 0.0
     assert g.value()[0, 0] == 0.0
+
+
+def test_non_scalar():
+    x = VariableMatrix(3)
+    x[0].set_value(1)
+    x[1].set_value(2)
+    x[2].set_value(3)
+
+    # y = [x₁ + 3x₂ − 5x₃]
+    #
+    # dy/dx = [1  3  −5]
+    y = x[0] + 3 * x[1] - 5 * x[2]
+    g = Gradient(y, x)
+
+    expected_g = np.array([[1.0], [3.0], [-5.0]])
+
+    g_get_value = g.get().value()
+    assert g_get_value.shape == (3, 1)
+    assert (g_get_value == expected_g).all()
+
+    g_value = g.get().value()
+    assert g_value.shape == (3, 1)
+    assert (g_value == expected_g).all()
