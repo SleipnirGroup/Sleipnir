@@ -48,9 +48,6 @@ TEST_CASE("OCP - Cart-pole", "[OCP]") {
         std::lerp(x_initial[1], x_final[1], static_cast<double>(k) / N));
   }
 
-  // u = f_x
-  auto U = problem.U();
-
   // Initial conditions
   problem.constrain_initial_state(x_initial);
 
@@ -68,6 +65,9 @@ TEST_CASE("OCP - Cart-pole", "[OCP]") {
   // Input constraints
   problem.set_lower_input_bound(-u_max);
   problem.set_upper_input_bound(u_max);
+
+  // u = f_x
+  auto U = problem.U();
 
   // Minimize sum squared inputs
   slp::Variable J = 0.0;
