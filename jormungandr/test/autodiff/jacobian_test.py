@@ -4,11 +4,9 @@ from jormungandr.autodiff import Jacobian, VariableMatrix
 
 
 def test_y_eq_x():
-    y = VariableMatrix(3)
     x = VariableMatrix(3)
-    x[0].set_value(1)
-    x[1].set_value(2)
-    x[2].set_value(3)
+    for i in range(3):
+        x[i].set_value(i + 1)
 
     # y = x
     #
@@ -24,11 +22,9 @@ def test_y_eq_x():
 
 
 def test_y_eq_3x():
-    y = VariableMatrix(3)
     x = VariableMatrix(3)
-    x[0].set_value(1)
-    x[1].set_value(2)
-    x[2].set_value(3)
+    for i in range(3):
+        x[i].set_value(i + 1)
 
     # y = 3x
     #
@@ -44,11 +40,9 @@ def test_y_eq_3x():
 
 
 def test_products():
-    y = VariableMatrix(3)
     x = VariableMatrix(3)
-    x[0].set_value(1)
-    x[1].set_value(2)
-    x[2].set_value(3)
+    for i in range(3):
+        x[i].set_value(i + 1)
 
     #     [x₁x₂]
     # y = [x₂x₃]
@@ -61,6 +55,7 @@ def test_products():
     #         [2  1  0]
     # dy/dx = [0  3  2]
     #         [3  0  1]
+    y = VariableMatrix(3)
     y[0] = x[0] * x[1]
     y[1] = x[1] * x[2]
     y[2] = x[0] * x[2]
@@ -140,9 +135,8 @@ def test_nested_products():
 
 def test_non_square():
     x = VariableMatrix(3)
-    x[0].set_value(1)
-    x[1].set_value(2)
-    x[2].set_value(3)
+    for i in range(3):
+        x[i].set_value(i + 1)
 
     # y = [x₁ + 3x₂ − 5x₃]
     #
@@ -163,12 +157,12 @@ def test_non_square():
 
 
 def test_variable_reuse():
-    y = VariableMatrix(1)
     x = VariableMatrix(2)
+    for i in range(2):
+        x[i].set_value(i + 1)
 
     # y = [x₁x₂]
-    x[0].set_value(1)
-    x[1].set_value(2)
+    y = VariableMatrix(1)
     y[0] = x[0] * x[1]
 
     jacobian = Jacobian(y, x)
