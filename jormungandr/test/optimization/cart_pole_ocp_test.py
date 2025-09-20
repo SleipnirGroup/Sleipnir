@@ -49,9 +49,6 @@ def test_cart_pole_ocp():
         X[0, k].set_value(lerp(x_initial[0, 0], x_final[0, 0], k / N))
         X[1, k].set_value(lerp(x_initial[1, 0], x_final[1, 0], k / N))
 
-    # u = f_x
-    U = problem.U()
-
     # Initial conditions
     problem.constrain_initial_state(x_initial)
 
@@ -68,6 +65,9 @@ def test_cart_pole_ocp():
     # Input constraints
     problem.set_lower_input_bound(-u_max)
     problem.set_upper_input_bound(u_max)
+
+    # u = f_x
+    U = problem.U()
 
     # Minimize sum squared inputs
     J = 0.0
