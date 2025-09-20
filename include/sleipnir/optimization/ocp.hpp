@@ -62,7 +62,7 @@ class SLEIPNIR_DLLEXPORT OCP : public Problem {
    *   - State transition: xₖ₊₁ = f(xₖ, uₖ)
    * @param dynamics_type The type of system evolution function.
    * @param timestep_method The timestep method.
-   * @param method The transcription method.
+   * @param transcription_method The transcription method.
    */
   OCP(int num_states, int num_inputs, std::chrono::duration<double> dt,
       int num_steps,
@@ -71,7 +71,8 @@ class SLEIPNIR_DLLEXPORT OCP : public Problem {
           dynamics,
       DynamicsType dynamics_type = DynamicsType::EXPLICIT_ODE,
       TimestepMethod timestep_method = TimestepMethod::FIXED,
-      TranscriptionMethod method = TranscriptionMethod::DIRECT_TRANSCRIPTION)
+      TranscriptionMethod transcription_method =
+          TranscriptionMethod::DIRECT_TRANSCRIPTION)
       : OCP{num_states,
             num_inputs,
             dt,
@@ -84,7 +85,7 @@ class SLEIPNIR_DLLEXPORT OCP : public Problem {
             },
             dynamics_type,
             timestep_method,
-            method} {}
+            transcription_method} {}
 
   /**
    * Build an optimization problem using a system evolution function (explicit
@@ -101,7 +102,7 @@ class SLEIPNIR_DLLEXPORT OCP : public Problem {
    *   - State transition: xₖ₊₁ = f(t, xₖ, uₖ, dt)
    * @param dynamics_type The type of system evolution function.
    * @param timestep_method The timestep method.
-   * @param method The transcription method.
+   * @param transcription_method The transcription method.
    */
   OCP(int num_states, int num_inputs, std::chrono::duration<double> dt,
       int num_steps,
@@ -110,15 +111,16 @@ class SLEIPNIR_DLLEXPORT OCP : public Problem {
           dynamics,
       DynamicsType dynamics_type = DynamicsType::EXPLICIT_ODE,
       TimestepMethod timestep_method = TimestepMethod::FIXED,
-      TranscriptionMethod method = TranscriptionMethod::DIRECT_TRANSCRIPTION)
+      TranscriptionMethod transcription_method =
+          TranscriptionMethod::DIRECT_TRANSCRIPTION)
       : m_num_states{num_states},
         m_num_inputs{num_inputs},
         m_dt{dt},
         m_num_steps{num_steps},
-        m_transcription_method{method},
-        m_dynamics_type{dynamics_type},
         m_dynamics_function{std::move(dynamics)},
-        m_timestep_method{timestep_method} {
+        m_dynamics_type{dynamics_type},
+        m_timestep_method{timestep_method},
+        m_transcription_method{transcription_method} {
     // u is num_steps + 1 so that the final constraint function evaluation works
     m_U = decision_variable(m_num_inputs, m_num_steps + 1);
 
@@ -319,15 +321,14 @@ class SLEIPNIR_DLLEXPORT OCP : public Problem {
   int m_num_inputs;
   std::chrono::duration<double> m_dt;
   int m_num_steps;
-  TranscriptionMethod m_transcription_method;
-
-  DynamicsType m_dynamics_type;
 
   function_ref<VariableMatrix(const Variable& t, const VariableMatrix& x,
                               const VariableMatrix& u, const Variable& dt)>
       m_dynamics_function;
+  DynamicsType m_dynamics_type;
 
   TimestepMethod m_timestep_method;
+  TranscriptionMethod m_transcription_method;
 
   VariableMatrix m_X;
   VariableMatrix m_U;
