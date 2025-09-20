@@ -113,49 +113,44 @@ class SLEIPNIR_DLLEXPORT OCP : public Problem {
       TimestepMethod timestep_method = TimestepMethod::FIXED,
       TranscriptionMethod transcription_method =
           TranscriptionMethod::DIRECT_TRANSCRIPTION)
-      : m_num_states{num_states},
-        m_num_inputs{num_inputs},
-        m_dt{dt},
-        m_num_steps{num_steps},
-        m_dynamics_function{std::move(dynamics)},
-        m_dynamics_type{dynamics_type},
-        m_timestep_method{timestep_method},
-        m_transcription_method{transcription_method} {
+      : m_num_steps{num_steps},
+        m_dynamics{std::move(dynamics)},
+        m_dynamics_type{dynamics_type} {
     // u is num_steps + 1 so that the final constraint function evaluation works
-    m_U = decision_variable(m_num_inputs, m_num_steps + 1);
+    m_U = decision_variable(num_inputs, m_num_steps + 1);
 
-    if (m_timestep_method == TimestepMethod::FIXED) {
+    if (timestep_method == TimestepMethod::FIXED) {
       m_DT = VariableMatrix{1, m_num_steps + 1};
       for (int i = 0; i < num_steps + 1; ++i) {
-        m_DT[0, i] = m_dt.count();
+        m_DT[0, i] = dt.count();
       }
-    } else if (m_timestep_method == TimestepMethod::VARIABLE_SINGLE) {
-      Variable dt = decision_variable();
-      dt.set_value(m_dt.count());
+    } else if (timestep_method == TimestepMethod::VARIABLE_SINGLE) {
+      Variable single_dt = decision_variable();
+      single_dt.set_value(dt.count());
 
       // Set the member variable matrix to track the decision variable
       m_DT = VariableMatrix{1, m_num_steps + 1};
       for (int i = 0; i < num_steps + 1; ++i) {
-        m_DT[0, i] = dt;
+        m_DT[0, i] = single_dt;
       }
-    } else if (m_timestep_method == TimestepMethod::VARIABLE) {
+    } else if (timestep_method == TimestepMethod::VARIABLE) {
       m_DT = decision_variable(1, m_num_steps + 1);
       for (int i = 0; i < num_steps + 1; ++i) {
-        m_DT[0, i].set_value(m_dt.count());
+        m_DT[0, i].set_value(dt.count());
       }
     }
 
-    if (m_transcription_method == TranscriptionMethod::DIRECT_TRANSCRIPTION) {
-      m_X = decision_variable(m_num_states, m_num_steps + 1);
+    if (transcription_method == TranscriptionMethod::DIRECT_TRANSCRIPTION) {
+      m_X = decision_variable(num_states, m_num_steps + 1);
       constrain_direct_transcription();
-    } else if (m_transcription_method ==
+    } else if (transcription_method ==
                TranscriptionMethod::DIRECT_COLLOCATION) {
-      m_X = decision_variable(m_num_states, m_num_steps + 1);
+      m_X = decision_variable(num_states, m_num_steps + 1);
       constrain_direct_collocation();
-    } else if (m_transcription_method == TranscriptionMethod::SINGLE_SHOOTING) {
+    } else if (transcription_method == TranscriptionMethod::SINGLE_SHOOTING) {
       // In single-shooting the states aren't decision variables, but instead
       // depend on the input and previous states
-      m_X = VariableMatrix{m_num_states, m_num_steps + 1};
+      m_X = VariableMatrix{num_states, m_num_steps + 1};
       constrain_single_shooting();
     }
   }
@@ -317,18 +312,12 @@ class SLEIPNIR_DLLEXPORT OCP : public Problem {
   VariableMatrix final_state() { return m_X.col(m_num_steps); }
 
  private:
-  int m_num_states;
-  int m_num_inputs;
-  std::chrono::duration<double> m_dt;
   int m_num_steps;
 
   function_ref<VariableMatrix(const Variable& t, const VariableMatrix& x,
                               const VariableMatrix& u, const Variable& dt)>
-      m_dynamics_function;
+      m_dynamics;
   DynamicsType m_dynamics_type;
-
-  TimestepMethod m_timestep_method;
-  TranscriptionMethod m_transcription_method;
 
   VariableMatrix m_X;
   VariableMatrix m_U;
@@ -366,7 +355,7 @@ class SLEIPNIR_DLLEXPORT OCP : public Problem {
     for (int i = 0; i < m_num_steps; ++i) {
       Variable h = dt()[0, i];
 
-      auto& f = m_dynamics_function;
+      auto& f = m_dynamics;
 
       auto t_begin = time;
       auto t_end = t_begin + h;
@@ -405,11 +394,11 @@ class SLEIPNIR_DLLEXPORT OCP : public Problem {
       Variable dt = this->dt()[0, i];
 
       if (m_dynamics_type == DynamicsType::EXPLICIT_ODE) {
-        subject_to(x_end == rk4<const decltype(m_dynamics_function)&,
-                                VariableMatrix, VariableMatrix, Variable>(
-                                m_dynamics_function, x_begin, u, time, dt));
+        subject_to(x_end == rk4<const decltype(m_dynamics)&, VariableMatrix,
+                                VariableMatrix, Variable>(m_dynamics, x_begin,
+                                                          u, time, dt));
       } else if (m_dynamics_type == DynamicsType::DISCRETE) {
-        subject_to(x_end == m_dynamics_function(time, x_begin, u, dt));
+        subject_to(x_end == m_dynamics(time, x_begin, u, dt));
       }
 
       time += dt;
@@ -429,11 +418,10 @@ class SLEIPNIR_DLLEXPORT OCP : public Problem {
       Variable dt = this->dt()[0, i];
 
       if (m_dynamics_type == DynamicsType::EXPLICIT_ODE) {
-        x_end = rk4<const decltype(m_dynamics_function)&, VariableMatrix,
-                    VariableMatrix, Variable>(m_dynamics_function, x_begin, u,
-                                              time, dt);
+        x_end = rk4<const decltype(m_dynamics)&, VariableMatrix, VariableMatrix,
+                    Variable>(m_dynamics, x_begin, u, time, dt);
       } else if (m_dynamics_type == DynamicsType::DISCRETE) {
-        x_end = m_dynamics_function(time, x_begin, u, dt);
+        x_end = m_dynamics(time, x_begin, u, dt);
       }
 
       time += dt;
