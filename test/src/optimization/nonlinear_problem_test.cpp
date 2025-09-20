@@ -54,16 +54,16 @@ TEST_CASE("Problem - Rosenbrock with cubic and line constraint", "[Problem]") {
 
       CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
-      auto Near = [](double expected, double actual, double tolerance) {
+      auto near = [](double expected, double actual, double tolerance) {
         return std::abs(expected - actual) < tolerance;
       };
 
       // Local minimum at (0.0, 0.0)
       // Global minimum at (1.0, 1.0)
-      CHECK((Near(0.0, x.value(), 1e-2) || Near(1.0, x.value(), 1e-2)));
+      CHECK((near(0.0, x.value(), 1e-2) || near(1.0, x.value(), 1e-2)));
       INFO(std::format("  (x₀, y₀) = ({}, {})", x0, y0));
       INFO(std::format("  (x, y) = ({}, {})", x.value(), y.value()));
-      CHECK((Near(0.0, y.value(), 1e-2) || Near(1.0, y.value(), 1e-2)));
+      CHECK((near(0.0, y.value(), 1e-2) || near(1.0, y.value(), 1e-2)));
       INFO(std::format("  (x₀, y₀) = ({}, {})", x0, y0));
       INFO(std::format("  (x, y) = ({}, {})", x.value(), y.value()));
     }

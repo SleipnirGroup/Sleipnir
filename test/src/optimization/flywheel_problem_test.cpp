@@ -14,7 +14,7 @@
 #include "util/scope_exit.hpp"
 
 namespace {
-bool Near(double expected, double actual, double tolerance) {
+bool near(double expected, double actual, double tolerance) {
   return std::abs(expected - actual) < tolerance;
 }
 }  // namespace
@@ -92,8 +92,8 @@ TEST_CASE("Problem - Flywheel", "[Problem]") {
     }
 
     // Verify input
-    if (k > 0 && k < N - 1 && Near(12.0, U.value(0, k - 1), 1e-2) &&
-        Near(u_ss, U.value(0, k + 1), 1e-2)) {
+    if (k > 0 && k < N - 1 && near(12.0, U.value(0, k - 1), 1e-2) &&
+        near(u_ss, U.value(0, k + 1), 1e-2)) {
       // If control input is transitioning between 12 and u_ss, ensure it's
       // within (u_ss, 12)
       CHECK(U.value(0, k) >= u_ss);
