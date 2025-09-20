@@ -25,8 +25,9 @@ bool near(double expected, double actual, double tolerance) {
 void flywheel_test(
     std::string test_name, double A, double B,
     const slp::function_ref<slp::VariableMatrix(
-        const slp::VariableMatrix& x, const slp::VariableMatrix& u)>& F,
-    slp::DynamicsType dynamics_type, slp::TranscriptionMethod method) {
+        const slp::VariableMatrix& x, const slp::VariableMatrix& u)>& f,
+    slp::DynamicsType dynamics_type,
+    slp::TranscriptionMethod transcription_method) {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
@@ -42,8 +43,8 @@ void flywheel_test(
 
   constexpr double r = 10.0;
 
-  slp::OCP problem(1, 1, dt, N, F, dynamics_type, slp::TimestepMethod::FIXED,
-                   method);
+  slp::OCP problem(1, 1, dt, N, f, dynamics_type, slp::TimestepMethod::FIXED,
+                   transcription_method);
   problem.constrain_initial_state(0.0);
   problem.set_upper_input_bound(12);
   problem.set_lower_input_bound(-12);
@@ -95,7 +96,8 @@ void flywheel_test(
       CHECK(problem.U().value(0, k) >= u_ss);
       CHECK(problem.U().value(0, k) <= 12.0);
     } else {
-      if (method == slp::TranscriptionMethod::DIRECT_COLLOCATION) {
+      if (transcription_method ==
+          slp::TranscriptionMethod::DIRECT_COLLOCATION) {
         // The tolerance is large because the trajectory is represented by a
         // spline, and splines chatter when transitioning quickly between
         // steady-states.

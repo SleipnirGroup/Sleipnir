@@ -22,9 +22,9 @@ def flywheel_test(
     test_name: str,
     A: float,
     B: float,
-    F: Callable[[VariableMatrix, VariableMatrix], VariableMatrix],
+    f: Callable[[VariableMatrix, VariableMatrix], VariableMatrix],
     dynamics_type: DynamicsType,
-    method: TranscriptionMethod,
+    transcription_method: TranscriptionMethod,
 ):
     T = 5.0  # s
     dt = 0.005  # s
@@ -38,7 +38,9 @@ def flywheel_test(
 
     r = 10.0
 
-    problem = OCP(1, 1, dt, N, F, dynamics_type, TimestepMethod.FIXED, method)
+    problem = OCP(
+        1, 1, dt, N, f, dynamics_type, TimestepMethod.FIXED, transcription_method
+    )
     problem.constrain_initial_state(0.0)
     problem.set_upper_input_bound(12)
     problem.set_lower_input_bound(-12)
@@ -92,7 +94,7 @@ def flywheel_test(
             assert problem.U().value(0, k) >= u_ss
             assert problem.U().value(0, k) <= 12.0
         else:
-            if method == TranscriptionMethod.DIRECT_COLLOCATION:
+            if transcription_method == TranscriptionMethod.DIRECT_COLLOCATION:
                 # The tolerance is large because the trajectory is represented by a
                 # spline, and splines chatter when transitioning quickly between
                 # steady-states.
