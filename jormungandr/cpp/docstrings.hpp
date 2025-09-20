@@ -600,21 +600,11 @@ static const char *__doc_slp_OCP_m_U = R"doc()doc";
 
 static const char *__doc_slp_OCP_m_X = R"doc()doc";
 
-static const char *__doc_slp_OCP_m_dt = R"doc()doc";
-
-static const char *__doc_slp_OCP_m_dynamics_function = R"doc()doc";
+static const char *__doc_slp_OCP_m_dynamics = R"doc()doc";
 
 static const char *__doc_slp_OCP_m_dynamics_type = R"doc()doc";
 
-static const char *__doc_slp_OCP_m_num_inputs = R"doc()doc";
-
-static const char *__doc_slp_OCP_m_num_states = R"doc()doc";
-
 static const char *__doc_slp_OCP_m_num_steps = R"doc()doc";
-
-static const char *__doc_slp_OCP_m_timestep_method = R"doc()doc";
-
-static const char *__doc_slp_OCP_m_transcription_method = R"doc()doc";
 
 static const char *__doc_slp_OCP_rk4 =
 R"doc(Performs 4th order Runge-Kutta integration of dx/dt = f(t, x, u) for
