@@ -107,14 +107,14 @@ def flywheel_test(
     assert problem.X().value(0, N) == pytest.approx(r, abs=1e-6)
 
     # Log states for offline viewing
-    with open("Flywheel states.csv", "w") as f:
+    with open(f"{test_name} states.csv", "w") as f:
         f.write("Time (s),Velocity (rad/s)\n")
 
         for k in range(N + 1):
             f.write(f"{k * dt},{problem.X().value(0, k)}\n")
 
     # Log inputs for offline viewing
-    with open("Flywheel inputs.csv", "w") as f:
+    with open(f"{test_name} inputs.csv", "w") as f:
         f.write("Time (s),Voltage (V)\n")
 
         for k in range(N + 1):
