@@ -17,12 +17,12 @@
 using namespace std::chrono_literals;
 
 namespace {
-bool Near(double expected, double actual, double tolerance) {
+bool near(double expected, double actual, double tolerance) {
   return std::abs(expected - actual) < tolerance;
 }
 }  // namespace
 
-void TestFlywheel(
+void flywheel_test(
     std::string test_name, double A, double B,
     const slp::function_ref<slp::VariableMatrix(
         const slp::VariableMatrix& x, const slp::VariableMatrix& u)>& F,
@@ -88,8 +88,8 @@ void TestFlywheel(
     }
 
     // Verify input
-    if (k > 0 && k < N - 1 && Near(12.0, problem.U().value(0, k - 1), 1e-2) &&
-        Near(u_ss, problem.U().value(0, k + 1), 1e-2)) {
+    if (k > 0 && k < N - 1 && near(12.0, problem.U().value(0, k - 1), 1e-2) &&
+        near(u_ss, problem.U().value(0, k + 1), 1e-2)) {
       // If control input is transitioning between 12 and u_ss, ensure it's
       // within (u_ss, 12)
       CHECK(problem.U().value(0, k) >= u_ss);
@@ -148,15 +148,15 @@ TEST_CASE("OCP - Flywheel (explicit)", "[OCP]") {
     return A * x + B * u;
   };
 
-  TestFlywheel("OCP Flywheel Explicit Collocation", A, B, f_ode,
-               slp::DynamicsType::EXPLICIT_ODE,
-               slp::TranscriptionMethod::DIRECT_COLLOCATION);
-  TestFlywheel("OCP Flywheel Explicit Transcription", A, B, f_ode,
-               slp::DynamicsType::EXPLICIT_ODE,
-               slp::TranscriptionMethod::DIRECT_TRANSCRIPTION);
-  TestFlywheel("OCP Flywheel Explicit Single-Shooting", A, B, f_ode,
-               slp::DynamicsType::EXPLICIT_ODE,
-               slp::TranscriptionMethod::SINGLE_SHOOTING);
+  flywheel_test("OCP Flywheel Explicit Collocation", A, B, f_ode,
+                slp::DynamicsType::EXPLICIT_ODE,
+                slp::TranscriptionMethod::DIRECT_COLLOCATION);
+  flywheel_test("OCP Flywheel Explicit Transcription", A, B, f_ode,
+                slp::DynamicsType::EXPLICIT_ODE,
+                slp::TranscriptionMethod::DIRECT_TRANSCRIPTION);
+  flywheel_test("OCP Flywheel Explicit Single-Shooting", A, B, f_ode,
+                slp::DynamicsType::EXPLICIT_ODE,
+                slp::TranscriptionMethod::SINGLE_SHOOTING);
 }
 
 TEST_CASE("OCP - Flywheel (discrete)", "[OCP]") {
@@ -171,10 +171,10 @@ TEST_CASE("OCP - Flywheel (discrete)", "[OCP]") {
     return A_discrete * x + B_discrete * u;
   };
 
-  TestFlywheel("OCP Flywheel Discrete Transcription", A, B, f_discrete,
-               slp::DynamicsType::DISCRETE,
-               slp::TranscriptionMethod::DIRECT_TRANSCRIPTION);
-  TestFlywheel("OCP Flywheel Discrete Single-Shooting", A, B, f_discrete,
-               slp::DynamicsType::DISCRETE,
-               slp::TranscriptionMethod::SINGLE_SHOOTING);
+  flywheel_test("OCP Flywheel Discrete Transcription", A, B, f_discrete,
+                slp::DynamicsType::DISCRETE,
+                slp::TranscriptionMethod::DIRECT_TRANSCRIPTION);
+  flywheel_test("OCP Flywheel Discrete Single-Shooting", A, B, f_discrete,
+                slp::DynamicsType::DISCRETE,
+                slp::TranscriptionMethod::SINGLE_SHOOTING);
 }
