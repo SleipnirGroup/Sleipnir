@@ -9,18 +9,17 @@ TEST_CASE("Jacobian - y = x", "[Jacobian]") {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  slp::VariableMatrix y{3};
   slp::VariableMatrix x{3};
-  x[0].set_value(1);
-  x[1].set_value(2);
-  x[2].set_value(3);
+  for (int i = 0; i < 3; ++i) {
+    x[i].set_value(i + 1);
+  }
 
   // y = x
   //
   //         [1  0  0]
   // dy/dx = [0  1  0]
   //         [0  0  1]
-  y = x;
+  auto y = x;
   auto J = slp::Jacobian(y, x);
 
   Eigen::MatrixXd expected_J{{1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, {0.0, 0.0, 1.0}};
@@ -32,18 +31,17 @@ TEST_CASE("Jacobian - y = 3x", "[Jacobian]") {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  slp::VariableMatrix y{3};
   slp::VariableMatrix x{3};
-  x[0].set_value(1);
-  x[1].set_value(2);
-  x[2].set_value(3);
+  for (int i = 0; i < 3; ++i) {
+    x[i].set_value(i + 1);
+  }
 
   // y = 3x
   //
   //         [3  0  0]
   // dy/dx = [0  3  0]
   //         [0  0  3]
-  y = 3 * x;
+  auto y = 3 * x;
   auto J = slp::Jacobian(y, x);
 
   Eigen::MatrixXd expected_J{{3.0, 0.0, 0.0}, {0.0, 3.0, 0.0}, {0.0, 0.0, 3.0}};
@@ -55,11 +53,10 @@ TEST_CASE("Jacobian - Products", "[Jacobian]") {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  slp::VariableMatrix y{3};
   slp::VariableMatrix x{3};
-  x[0].set_value(1);
-  x[1].set_value(2);
-  x[2].set_value(3);
+  for (int i = 0; i < 3; ++i) {
+    x[i].set_value(i + 1);
+  }
 
   //     [x₁x₂]
   // y = [x₂x₃]
@@ -72,6 +69,7 @@ TEST_CASE("Jacobian - Products", "[Jacobian]") {
   //         [2  1  0]
   // dy/dx = [0  3  2]
   //         [3  0  1]
+  slp::VariableMatrix y{3};
   y[0] = x[0] * x[1];
   y[1] = x[1] * x[2];
   y[2] = x[0] * x[2];
@@ -158,9 +156,9 @@ TEST_CASE("Jacobian - Non-square", "[Jacobian]") {
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
   slp::VariableMatrix x{3};
-  x[0].set_value(1);
-  x[1].set_value(2);
-  x[2].set_value(3);
+  for (int i = 0; i < 3; ++i) {
+    x[i].set_value(i + 1);
+  }
 
   // y = [x₁ + 3x₂ − 5x₃]
   //
@@ -186,12 +184,13 @@ TEST_CASE("Jacobian - Variable reuse", "[Jacobian]") {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  slp::VariableMatrix y{1};
   slp::VariableMatrix x{2};
+  for (int i = 0; i < 2; ++i) {
+    x[i].set_value(i + 1);
+  }
 
   // y = [x₁x₂]
-  x[0].set_value(1);
-  x[1].set_value(2);
+  slp::VariableMatrix y{1};
   y[0] = x[0] * x[1];
 
   slp::Jacobian jacobian{y, x};

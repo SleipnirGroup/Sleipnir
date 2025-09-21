@@ -86,15 +86,13 @@ TEST_CASE("Hessian - Sum of products", "[Hessian]") {
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
   slp::VariableMatrix x{5};
-  x[0].set_value(1);
-  x[1].set_value(2);
-  x[2].set_value(3);
-  x[3].set_value(4);
-  x[4].set_value(5);
+  for (int i = 0; i < 5; ++i) {
+    x[i].set_value(i + 1);
+  }
 
   // y = ||x||²
   slp::Variable y = x.T() * x;
-  CHECK(y.value() == 1 + 2 * 2 + 3 * 3 + 4 * 4 + 5 * 5);
+  CHECK(y.value() == 1 * 1 + 2 * 2 + 3 * 3 + 4 * 4 + 5 * 5);
 
   auto g = slp::Gradient(y, x);
   CHECK(g.get().value() == 2 * x.value());
@@ -113,11 +111,9 @@ TEST_CASE("Hessian - Product of sines", "[Hessian]") {
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
   slp::VariableMatrix x{5};
-  x[0].set_value(1);
-  x[1].set_value(2);
-  x[2].set_value(3);
-  x[3].set_value(4);
-  x[4].set_value(5);
+  for (int i = 0; i < 5; ++i) {
+    x[i].set_value(i + 1);
+  }
 
   // y = prod(sin(x))
   auto temp = x.cwise_transform(slp::sin);
@@ -130,9 +126,9 @@ TEST_CASE("Hessian - Product of sines", "[Hessian]") {
   auto g = slp::Gradient(y, x);
   for (int i = 0; i < x.rows(); ++i) {
     CHECK(g.get().value(i) ==
-          Catch::Approx((y / slp::tan(x[i])).value()).margin(1e-15));
+          Catch::Approx(y.value() / std::tan(x[i].value())).margin(1e-15));
     CHECK(g.value().coeff(i) ==
-          Catch::Approx((y / slp::tan(x[i])).value()).margin(1e-15));
+          Catch::Approx(y.value() / std::tan(x[i].value())).margin(1e-15));
   }
 
   auto H = slp::Hessian(y, x);
@@ -141,10 +137,10 @@ TEST_CASE("Hessian - Product of sines", "[Hessian]") {
   for (int i = 0; i < x.rows(); ++i) {
     for (int j = 0; j < x.rows(); ++j) {
       if (i == j) {
-        expected_H(i, j) = g.value().coeff(i) / std::tan(x[i].value()) *
-                           (1.0 - 1.0 / std::pow(std::cos(x[i].value()), 2));
+        expected_H(i, j) = -y.value();
       } else {
-        expected_H(i, j) = g.value().coeff(j) / std::tan(x[i].value());
+        expected_H(i, j) =
+            y.value() / (std::tan(x[i].value()) * std::tan(x[j].value()));
       }
     }
   }
@@ -168,22 +164,17 @@ TEST_CASE("Hessian - Sum of squared residuals", "[Hessian]") {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  slp::Variable y;
-  Eigen::VectorXd g;
-  Eigen::MatrixXd H;
   slp::VariableMatrix x{5};
-  x[0].set_value(1);
-  x[1].set_value(1);
-  x[2].set_value(1);
-  x[3].set_value(1);
-  x[4].set_value(1);
+  for (int i = 0; i < 5; ++i) {
+    x[i].set_value(1);
+  }
 
   // y = sum(diff(x).^2)
   auto temp = (x.block(0, 0, 4, 1) - x.block(1, 0, 4, 1))
                   .cwise_transform(
                       [](const slp::Variable& x) { return slp::pow(x, 2); });
-  y = std::accumulate(temp.begin(), temp.end(), slp::Variable{0.0});
-  g = slp::Gradient(y, x).value();
+  auto y = std::accumulate(temp.begin(), temp.end(), slp::Variable{0.0});
+  auto g = slp::Gradient(y, x).value().toDense();
 
   CHECK(y.value() == 0.0);
   CHECK(g[0] == 2 * x[0].value() - 2 * x[1].value());
@@ -192,7 +183,7 @@ TEST_CASE("Hessian - Sum of squared residuals", "[Hessian]") {
   CHECK(g[3] == -2 * x[2].value() + 4 * x[3].value() - 2 * x[4].value());
   CHECK(g[4] == -2 * x[3].value() + 2 * x[4].value());
 
-  H = slp::Hessian(y, x).value();
+  auto H = slp::Hessian(y, x).value().toDense();
 
   Eigen::MatrixXd expected_H{{2.0, -2.0, 0.0, 0.0, 0.0},
                              {-2.0, 4.0, -2.0, 0.0, 0.0},
@@ -211,15 +202,12 @@ TEST_CASE("Hessian - Sum of squares", "[Hessian]") {
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
   slp::VariableMatrix r{4};
-  r[0].set_value(25.0);
-  r[1].set_value(10.0);
-  r[2].set_value(5.0);
-  r[3].set_value(0.0);
+  r.set_value(Eigen::Vector<double, 4>{{25.0, 10.0, 5.0, 0.0}});
+
   slp::VariableMatrix x{4};
-  x[0].set_value(0.0);
-  x[1].set_value(0.0);
-  x[2].set_value(0.0);
-  x[3].set_value(0.0);
+  for (int i = 0; i < 4; ++i) {
+    x[i].set_value(0.0);
+  }
 
   slp::Variable J = 0.0;
   for (int i = 0; i < 4; ++i) {

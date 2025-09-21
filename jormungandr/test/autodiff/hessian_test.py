@@ -53,11 +53,8 @@ def test_quartic():
 def test_sum():
     y = Variable()
     x = VariableMatrix(5)
-    x[0].set_value(1)
-    x[1].set_value(2)
-    x[2].set_value(3)
-    x[3].set_value(4)
-    x[4].set_value(5)
+    for i in range(5):
+        x[i].set_value(i + 1)
 
     y = sum(x)
     assert y.value() == 15.0
@@ -73,15 +70,12 @@ def test_sum():
 
 def test_sum_of_products():
     x = VariableMatrix(5)
-    x[0].set_value(1)
-    x[1].set_value(2)
-    x[2].set_value(3)
-    x[3].set_value(4)
-    x[4].set_value(5)
+    for i in range(5):
+        x[i].set_value(i + 1)
 
     # y = ||x||²
     y = (x.T @ x)[0, 0]
-    assert y.value() == 1 + 2 * 2 + 3 * 3 + 4 * 4 + 5 * 5
+    assert y.value() == sum([x * x for x in range(1, 6)])
 
     g = Gradient(y, x)
     assert (g.get().value() == 2 * x.value()).all()
@@ -96,25 +90,20 @@ def test_sum_of_products():
 
 def test_product_of_sines():
     x = VariableMatrix(5)
-    x[0].set_value(1)
-    x[1].set_value(2)
-    x[2].set_value(3)
-    x[3].set_value(4)
-    x[4].set_value(5)
+    for i in range(5):
+        x[i].set_value(i + 1)
 
     # y = prod(sin(x))
     y = prod(x.cwise_transform(autodiff.sin))
-    assert y.value() == pytest.approx(
-        math.sin(1) * math.sin(2) * math.sin(3) * math.sin(4) * math.sin(5), abs=1e-15
-    )
+    assert y.value() == pytest.approx(prod(math.sin(x) for x in range(1, 6)), abs=1e-15)
 
     g = Gradient(y, x)
     for i in range(x.rows()):
         assert g.get().value()[i, 0] == pytest.approx(
-            (y / autodiff.tan(x[i])).value(), abs=1e-15
+            y.value() / math.tan(x[i].value()), abs=1e-15
         )
         assert g.value()[i, 0] == pytest.approx(
-            (y / autodiff.tan(x[i])).value(), abs=1e-15
+            y.value() / math.tan(x[i].value()), abs=1e-15
         )
 
     H = Hessian(y, x)
@@ -123,13 +112,11 @@ def test_product_of_sines():
     for i in range(x.rows()):
         for j in range(x.rows()):
             if i == j:
-                expected_H[i, j] = (
-                    g.value()[i, 0]
-                    / math.tan(x[i].value())
-                    * (1.0 - 1.0 / math.cos(x[i].value()) ** 2)
-                )
+                expected_H[i, j] = -y.value()
             else:
-                expected_H[i, j] = g.value()[j, 0] / math.tan(x[i].value())
+                expected_H[i, j] = y.value() / (
+                    math.tan(x[i].value()) * math.tan(x[j].value())
+                )
 
     actual_H = H.get().value()
     for i in range(x.rows()):
@@ -143,13 +130,9 @@ def test_product_of_sines():
 
 
 def test_sum_of_squared_residuals():
-    y = Variable()
     x = VariableMatrix(5)
-    x[0].set_value(1)
-    x[1].set_value(1)
-    x[2].set_value(1)
-    x[3].set_value(1)
-    x[4].set_value(1)
+    for i in range(5):
+        x[i].set_value(1)
 
     # y = sum(diff(x).^2)
     y = sum((x[:4, :1] - x[1:5, :1]).cwise_transform(lambda x: x**2))
@@ -187,15 +170,11 @@ def test_sum_of_squared_residuals():
 
 def test_sum_of_squares():
     r = VariableMatrix(4)
-    r[0].set_value(25.0)
-    r[1].set_value(10.0)
-    r[2].set_value(5.0)
-    r[3].set_value(0.0)
+    r.set_value(np.array([[25.0], [10.0], [5.0], [0.0]]))
+
     x = VariableMatrix(4)
-    x[0].set_value(0.0)
-    x[1].set_value(0.0)
-    x[2].set_value(0.0)
-    x[3].set_value(0.0)
+    for i in range(4):
+        x[i].set_value(0.0)
 
     J = 0.0
     for i in range(4):
