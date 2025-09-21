@@ -340,48 +340,41 @@ TEST_CASE("VariableMatrix - Block() free function", "[VariableMatrix]") {
   CHECK(mat2.value() == expected2);
 }
 
-template <int Rows>
-void check_solve(const Eigen::Matrix<double, Rows, Rows>& A,
-                 const Eigen::Matrix<double, Rows, 1>& B) {
-  INFO(std::format("Solve {}x{}", Rows, Rows));
+void check_solve(slp::VariableMatrix A, slp::VariableMatrix B) {
+  INFO(std::format("Solve {}x{}", A.rows(), A.cols()));
 
-  slp::VariableMatrix slp_A{A};
-  slp::VariableMatrix slp_B{B};
-  auto slp_X = slp::solve(slp_A, slp_B);
+  auto X = slp::solve(A, B);
 
-  CHECK(slp_X.rows() == A.cols());
-  CHECK(slp_X.cols() == B.cols());
-  CHECK((slp_A.value() * slp_X.value() - slp_B.value()).norm() < 1e-12);
+  CHECK(X.rows() == A.cols());
+  CHECK(X.cols() == B.cols());
+  CHECK((A.value() * X.value() - B.value()).norm() < 1e-12);
 }
 
 TEST_CASE("VariableMatrix - Solve() free function", "[VariableMatrix]") {
   // 1x1 special case
-  check_solve(Eigen::Matrix<double, 1, 1>{{2.0}},
-              Eigen::Matrix<double, 1, 1>{{5.0}});
+  check_solve(slp::VariableMatrix{{2.0}}, slp::VariableMatrix{{5.0}});
 
   // 2x2 special case
-  check_solve(Eigen::Matrix<double, 2, 2>{{1.0, 2.0}, {3.0, 4.0}},
-              Eigen::Matrix<double, 2, 1>{{5.0}, {6.0}});
+  check_solve(slp::VariableMatrix{{1.0, 2.0}, {3.0, 4.0}},
+              slp::VariableMatrix{{5.0}, {6.0}});
 
   // 3x3 special case
   check_solve(
-      Eigen::Matrix<double, 3, 3>{
-          {1.0, 2.0, 3.0}, {-4.0, -5.0, 6.0}, {7.0, 8.0, 9.0}},
-      Eigen::Matrix<double, 3, 1>{{10.0}, {11.0}, {12.0}});
+      slp::VariableMatrix{{1.0, 2.0, 3.0}, {-4.0, -5.0, 6.0}, {7.0, 8.0, 9.0}},
+      slp::VariableMatrix{{10.0}, {11.0}, {12.0}});
 
   // 4x4 special case
-  check_solve(Eigen::Matrix<double, 4, 4>{{1.0, 2.0, 3.0, -4.0},
-                                          {-5.0, 6.0, 7.0, 8.0},
-                                          {9.0, 10.0, 11.0, 12.0},
-                                          {13.0, 14.0, 15.0, 16.0}},
-              Eigen::Matrix<double, 4, 1>{{17.0}, {18.0}, {19.0}, {20.0}});
+  check_solve(slp::VariableMatrix{{1.0, 2.0, 3.0, -4.0},
+                                  {-5.0, 6.0, 7.0, 8.0},
+                                  {9.0, 10.0, 11.0, 12.0},
+                                  {13.0, 14.0, 15.0, 16.0}},
+              slp::VariableMatrix{{17.0}, {18.0}, {19.0}, {20.0}});
 
   // 5x5 general case
-  check_solve(
-      Eigen::Matrix<double, 5, 5>{{1.0, 2.0, 3.0, -4.0, 5.0},
+  check_solve(slp::VariableMatrix{{1.0, 2.0, 3.0, -4.0, 5.0},
                                   {-5.0, 6.0, 7.0, 8.0, 9.0},
                                   {9.0, 10.0, 11.0, 12.0, 13.0},
                                   {13.0, 14.0, 15.0, 16.0, 17.0},
                                   {17.0, 18.0, 19.0, 20.0, 21.0}},
-      Eigen::Matrix<double, 5, 1>{{21.0}, {22.0}, {23.0}, {24.0}, {25.0}});
+              slp::VariableMatrix{{21.0}, {22.0}, {23.0}, {24.0}, {25.0}});
 }
