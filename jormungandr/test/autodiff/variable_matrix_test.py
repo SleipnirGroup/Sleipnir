@@ -231,34 +231,33 @@ def test_block_free_function():
     assert (mat2.value() == expected2).all()
 
 
-def check_solve(A, B):
-    rows = A.shape[0]
-    print(f"Solve {rows}x{rows}")
+def check_solve(A: VariableMatrix, B: VariableMatrix):
+    print(f"Solve {A.shape[0]}x{A.shape[1]}")
 
-    slp_A = VariableMatrix(A)
-    slp_B = VariableMatrix(B)
-    slp_X = autodiff.solve(slp_A, slp_B)
+    X = autodiff.solve(A, B)
 
-    assert slp_X.shape == (A.shape[1], B.shape[1])
-    assert np.linalg.norm(slp_A.value() @ slp_X.value() - slp_B.value()) < 1e-12
+    assert X.shape == (A.shape[1], B.shape[1])
+    assert np.linalg.norm(A.value() @ X.value() - B.value()) < 1e-12
 
 
 def test_solve_free_function():
     # 1x1 special case
-    check_solve(np.array([[2.0]]), np.array([[5.0]]))
+    check_solve(VariableMatrix([[2.0]]), VariableMatrix([[5.0]]))
 
     # 2x2 special case
-    check_solve(np.array([[1.0, 2.0], [3.0, 4.0]]), np.array([[5.0], [6.0]]))
+    check_solve(
+        VariableMatrix([[1.0, 2.0], [3.0, 4.0]]), VariableMatrix([[5.0], [6.0]])
+    )
 
     # 3x3 special case
     check_solve(
-        np.array([[1.0, 2.0, 3.0], [-4.0, -5.0, 6.0], [7.0, 8.0, 9.0]]),
-        np.array([[10.0], [11.0], [12.0]]),
+        VariableMatrix([[1.0, 2.0, 3.0], [-4.0, -5.0, 6.0], [7.0, 8.0, 9.0]]),
+        VariableMatrix([[10.0], [11.0], [12.0]]),
     )
 
     # 4x4 special case
     check_solve(
-        np.array(
+        VariableMatrix(
             [
                 [1.0, 2.0, 3.0, -4.0],
                 [-5.0, 6.0, 7.0, 8.0],
@@ -266,12 +265,12 @@ def test_solve_free_function():
                 [13.0, 14.0, 15.0, 16.0],
             ]
         ),
-        np.array([[17.0], [18.0], [19.0], [20.0]]),
+        VariableMatrix([[17.0], [18.0], [19.0], [20.0]]),
     )
 
     # 5x5 general case
     check_solve(
-        np.array(
+        VariableMatrix(
             [
                 [1.0, 2.0, 3.0, -4.0, 5.0],
                 [-5.0, 6.0, 7.0, 8.0, 9.0],
@@ -280,5 +279,5 @@ def test_solve_free_function():
                 [17.0, 18.0, 19.0, 20.0, 21.0],
             ]
         ),
-        np.array([[21.0], [22.0], [23.0], [24.0], [25.0]]),
+        VariableMatrix([[21.0], [22.0], [23.0], [24.0], [25.0]]),
     )
