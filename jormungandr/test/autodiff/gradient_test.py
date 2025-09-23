@@ -606,7 +606,7 @@ def test_sign():
 
     x = Variable()
 
-    # sgn(1.0)
+    # sign(1.0)
     x.set_value(1.0)
     assert sign(x.value()) == autodiff.sign(x).value()
 
@@ -614,7 +614,7 @@ def test_sign():
     assert g.get().value()[0, 0] == 0.0
     assert g.value()[0, 0] == 0.0
 
-    # sgn(-1.0)
+    # sign(-1.0)
     x.set_value(-1.0)
     assert sign(x.value()) == autodiff.sign(x).value()
 
@@ -622,7 +622,7 @@ def test_sign():
     assert g.get().value()[0, 0] == 0.0
     assert g.value()[0, 0] == 0.0
 
-    # sgn(0.0)
+    # sign(0.0)
     x.set_value(0.0)
     assert sign(x.value()) == autodiff.sign(x).value()
 
