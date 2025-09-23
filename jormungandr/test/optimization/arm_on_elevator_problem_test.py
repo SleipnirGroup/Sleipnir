@@ -80,9 +80,7 @@ def test_arm_on_elevator_problem():
 
     # Height limit
     if 0:
-        heights = elevator[:1, :] + ARM_LENGTH * arm[:1, :].cwise_transform(
-            autodiff.sin
-        )
+        heights = elevator[:1, :] + ARM_LENGTH * arm[:1, :].cwise_map(autodiff.sin)
         problem.subject_to(heights <= END_EFFECTOR_MAX_HEIGHT)
 
     # Cost function

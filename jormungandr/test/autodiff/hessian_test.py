@@ -94,7 +94,7 @@ def test_product_of_sines():
         x[i].set_value(i + 1)
 
     # y = prod(sin(x))
-    y = prod(x.cwise_transform(autodiff.sin))
+    y = prod(x.cwise_map(autodiff.sin))
     assert y.value() == pytest.approx(prod(math.sin(x) for x in range(1, 6)), abs=1e-15)
 
     g = Gradient(y, x)
@@ -135,7 +135,7 @@ def test_sum_of_squared_residuals():
         x[i].set_value(1)
 
     # y = sum(diff(x).^2)
-    y = sum((x[:4, :1] - x[1:5, :1]).cwise_transform(lambda x: x**2))
+    y = sum((x[:4, :1] - x[1:5, :1]).cwise_map(lambda x: x**2))
     g = Gradient(y, x).value()
 
     assert y.value() == 0.0

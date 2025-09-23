@@ -460,7 +460,7 @@ void bind_variable_block(nb::class_<VariableBlock<VariableMatrix>>& cls) {
               &VariableBlock<VariableMatrix>::value),
           DOC(slp, VariableBlock, value, 3));
   cls.def(
-      "cwise_transform",
+      "cwise_map",
       [](const VariableBlock<VariableMatrix>& self,
          const std::function<Variable(const Variable& x)>& unary_op) {
         return self.cwise_transform(unary_op);
