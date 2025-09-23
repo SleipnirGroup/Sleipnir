@@ -585,7 +585,7 @@ TEST_CASE("Gradient - sign()", "[Gradient]") {
 
   slp::Variable x;
 
-  // sgn(1.0)
+  // sign(1.0)
   x.set_value(1.0);
   CHECK(slp::sign(x).value() == sign(x.value()));
 
@@ -593,7 +593,7 @@ TEST_CASE("Gradient - sign()", "[Gradient]") {
   CHECK(g.get().value().coeff(0) == 0.0);
   CHECK(g.value().coeff(0) == 0.0);
 
-  // sgn(-1.0)
+  // sign(-1.0)
   x.set_value(-1.0);
   CHECK(slp::sign(x).value() == sign(x.value()));
 
@@ -601,7 +601,7 @@ TEST_CASE("Gradient - sign()", "[Gradient]") {
   CHECK(g.get().value().coeff(0) == 0.0);
   CHECK(g.value().coeff(0) == 0.0);
 
-  // sgn(0.0)
+  // sign(0.0)
   x.set_value(0.0);
   CHECK(slp::sign(x).value() == sign(x.value()));
 
