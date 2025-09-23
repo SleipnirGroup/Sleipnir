@@ -565,7 +565,7 @@ void bind_variable_matrix(nb::module_& autodiff,
               &VariableMatrix::value),
           DOC(slp, VariableMatrix, value, 3));
   cls.def(
-      "cwise_transform",
+      "cwise_map",
       [](const VariableMatrix& self,
          const std::function<Variable(const Variable& x)>& unary_op) {
         return self.cwise_transform(unary_op);

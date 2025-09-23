@@ -163,11 +163,11 @@ def test_value():
     assert A[1:3, 1:3].T[:, 1:].value(1) == 9.0
 
 
-def test_cwise_transform():
+def test_cwise_map():
     # VariableMatrix CwiseTransform
     A = VariableMatrix([[-2.0, -3.0, -4.0], [-5.0, -6.0, -7.0]])
 
-    result1 = A.cwise_transform(autodiff.abs)
+    result1 = A.cwise_map(autodiff.abs)
     expected1 = np.array([[2.0, 3.0, 4.0], [5.0, 6.0, 7.0]])
 
     # Don't modify original matrix
@@ -178,7 +178,7 @@ def test_cwise_transform():
     # VariableBlock CwiseTransform
     sub_A = A[:2, :2]
 
-    result2 = sub_A.cwise_transform(autodiff.abs)
+    result2 = sub_A.cwise_map(autodiff.abs)
     expected2 = np.array([[2.0, 3.0], [5.0, 6.0]])
 
     # Don't modify original matrix
