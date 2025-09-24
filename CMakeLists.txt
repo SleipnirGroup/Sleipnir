@@ -413,8 +413,21 @@ if(BUILD_PYTHON)
 
         file(
             GLOB_RECURSE sleipnir_headers
-            include/sleipnir/autodiff/*.hpp
-            include/sleipnir/optimization/*.hpp
+            include/sleipnir/autodiff/expression_type.hpp
+            include/sleipnir/autodiff/gradient.hpp
+            include/sleipnir/autodiff/hessian.hpp
+            include/sleipnir/autodiff/jacobian.hpp
+            include/sleipnir/autodiff/variable.hpp
+            include/sleipnir/autodiff/variable_block.hpp
+            include/sleipnir/autodiff/variable_matrix.hpp
+            include/sleipnir/optimization/ocp.hpp
+            include/sleipnir/optimization/ocp/dynamics_type.hpp
+            include/sleipnir/optimization/ocp/timestep_method.hpp
+            include/sleipnir/optimization/ocp/transcription_method.hpp
+            include/sleipnir/optimization/problem.hpp
+            include/sleipnir/optimization/solver/exit_status.hpp
+            include/sleipnir/optimization/solver/iteration_info.hpp
+            include/sleipnir/optimization/solver/options.hpp
         )
 
         # Generate docs for the Python module
