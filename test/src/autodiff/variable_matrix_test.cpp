@@ -169,36 +169,86 @@ TEST_CASE("VariableMatrix - Slicing", "[VariableMatrix]") {
     CHECK(s.cols() == 1);
     CHECK(s.value() == Eigen::MatrixXd{{7.0}, {11.0}, {15.0}});
   }
+
+  // Block assignment
+  {
+    auto s = mat[slp::Slice{_, _, 2}, slp::Slice{_, _, 2}];
+    CHECK(s.rows() == 2);
+    CHECK(s.cols() == 2);
+    s = Eigen::MatrixXd{{17.0, 18.0}, {19.0, 20.0}};
+    CHECK(mat.value() == Eigen::MatrixXd{{17.0, 2.0, 18.0, 4.0},
+                                         {5.0, 6.0, 7.0, 8.0},
+                                         {19.0, 10.0, 20.0, 12.0},
+                                         {13.0, 14.0, 15.0, 16.0}});
+  }
 }
 
 TEST_CASE("VariableMatrix - Subslicing", "[VariableMatrix]") {
   using namespace slp::slicing;
 
-  slp::VariableMatrix A{{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}, {7.0, 8.0, 9.0}};
+  // Block-of-block assignment (row skip forward)
+  {
+    slp::VariableMatrix mat{5, 5};
+    auto s = mat[slp::Slice{_, _, 2}, slp::Slice{_, _, 1}]
+                [slp::Slice{1, 3}, slp::Slice{1, 4}];
+    CHECK(s.rows() == 2);
+    CHECK(s.cols() == 3);
+    s = Eigen::MatrixXd{{1, 2, 3}, {4, 5, 6}};
 
-  // Block assignment
-  CHECK(A[slp::Slice{1, 3}, slp::Slice{1, 3}].rows() == 2);
-  CHECK(A[slp::Slice{1, 3}, slp::Slice{1, 3}].cols() == 2);
-  A[slp::Slice{1, 3}, slp::Slice{1, 3}] =
-      Eigen::MatrixXd{{10.0, 11.0}, {12.0, 13.0}};
+    CHECK(mat.value() == Eigen::MatrixXd{{0, 0, 0, 0, 0},
+                                         {0, 0, 0, 0, 0},
+                                         {0, 1, 2, 3, 0},
+                                         {0, 0, 0, 0, 0},
+                                         {0, 4, 5, 6, 0}});
+  }
 
-  Eigen::MatrixXd expected1{
-      {1.0, 2.0, 3.0}, {4.0, 10.0, 11.0}, {7.0, 12.0, 13.0}};
-  CHECK(expected1 == A.value());
+  // Block-of-block assignment (row skip backward)
+  {
+    slp::VariableMatrix mat{5, 5};
+    auto s = mat[slp::Slice{_, _, -2}, slp::Slice{_, _, -1}]
+                [slp::Slice{1, 3}, slp::Slice{1, 4}];
+    CHECK(s.rows() == 2);
+    CHECK(s.cols() == 3);
+    s = Eigen::MatrixXd{{1, 2, 3}, {4, 5, 6}};
 
-  // Block-of-block assignment
-  CHECK(
-      A[slp::Slice{1, 3}, slp::Slice{1, 3}][slp::Slice{1, _}, slp::Slice{1, _}]
-          .rows() == 1);
-  CHECK(
-      A[slp::Slice{1, 3}, slp::Slice{1, 3}][slp::Slice{1, _}, slp::Slice{1, _}]
-          .cols() == 1);
-  A[slp::Slice{1, 3}, slp::Slice{1, 3}][slp::Slice{1, _}, slp::Slice{1, _}] =
-      14.0;
+    CHECK(mat.value() == Eigen::MatrixXd{{0, 6, 5, 4, 0},
+                                         {0, 0, 0, 0, 0},
+                                         {0, 3, 2, 1, 0},
+                                         {0, 0, 0, 0, 0},
+                                         {0, 0, 0, 0, 0}});
+  }
 
-  Eigen::MatrixXd expected2{
-      {1.0, 2.0, 3.0}, {4.0, 10.0, 11.0}, {7.0, 12.0, 14.0}};
-  CHECK(A.value() == expected2);
+  // Block-of-block assignment (column skip forward)
+  {
+    slp::VariableMatrix mat{5, 5};
+    auto s = mat[slp::Slice{_, _, 1}, slp::Slice{_, _, 2}]
+                [slp::Slice{1, 4}, slp::Slice{1, 3}];
+    CHECK(s.rows() == 3);
+    CHECK(s.cols() == 2);
+    s = Eigen::MatrixXd{{1, 2}, {3, 4}, {5, 6}};
+
+    CHECK(mat.value() == Eigen::MatrixXd{{0, 0, 0, 0, 0},
+                                         {0, 0, 1, 0, 2},
+                                         {0, 0, 3, 0, 4},
+                                         {0, 0, 5, 0, 6},
+                                         {0, 0, 0, 0, 0}});
+  }
+
+  // Block-of-block assignment (column skip backward)
+  {
+    slp::VariableMatrix mat{5, 5};
+    auto s = mat[slp::Slice{_, _, -1}, slp::Slice{_, _, -2}]
+                [slp::Slice{1, 4}, slp::Slice{1, 3}];
+    CHECK(s.rows() == 3);
+    CHECK(s.cols() == 2);
+    s = Eigen::MatrixXd{{1, 2}, {3, 4}, {5, 6}};
+
+    CHECK(mat.value() == Eigen::MatrixXd{{0, 0, 0, 0, 0},
+                                         {6, 0, 5, 0, 0},
+                                         {4, 0, 3, 0, 0},
+                                         {2, 0, 1, 0, 0},
+                                         {0, 0, 0, 0, 0}});
+  }
 }
 
 TEST_CASE("VariableMatrix - Iterators", "[VariableMatrix]") {
