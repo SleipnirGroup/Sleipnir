@@ -49,8 +49,8 @@ TEST_CASE("Gradient - Identical variables", "[Gradient]") {
   CHECK(c.value() == a.value() * a.value() + x.value());
   CHECK(slp::Gradient(c, a).value().coeff(0) ==
         2 * a.value() + slp::Gradient(x, a).value().coeff(0));
-  CHECK(slp::Gradient(c, a).value().coeff(0) ==
-        2 * a.value() * slp::Gradient(x, a).value().coeff(0) + 1);
+  CHECK(slp::Gradient(c, x).value().coeff(0) ==
+        2 * a.value() * slp::Gradient(a, x).value().coeff(0) + 1);
 }
 
 TEST_CASE("Gradient - Elementary", "[Gradient]") {

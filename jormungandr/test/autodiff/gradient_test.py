@@ -47,7 +47,7 @@ def test_identical_variables():
     assert c.value() == a.value() * a.value() + x.value()
     assert Gradient(c, a).value()[0, 0] == 2 * a.value() + Gradient(x, a).value()[0, 0]
     assert (
-        Gradient(c, a).value()[0, 0] == 2 * a.value() * Gradient(x, a).value()[0, 0] + 1
+        Gradient(c, x).value()[0, 0] == 2 * a.value() * Gradient(a, x).value()[0, 0] + 1
     )
 
 
