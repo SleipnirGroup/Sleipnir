@@ -345,10 +345,12 @@ class VariableBlock {
     return VariableBlock{
         *m_mat,
         {m_row_slice.start + row_slice.start * m_row_slice.step,
-         m_row_slice.start + row_slice.stop, m_row_slice.step * row_slice.step},
+         m_row_slice.start + row_slice.stop * m_row_slice.step,
+         row_slice.step * m_row_slice.step},
         row_slice_length,
         {m_col_slice.start + col_slice.start * m_col_slice.step,
-         m_col_slice.start + col_slice.stop, m_col_slice.step * col_slice.step},
+         m_col_slice.start + col_slice.stop * m_col_slice.step,
+         col_slice.step * m_col_slice.step},
         col_slice_length};
   }
 
@@ -366,10 +368,12 @@ class VariableBlock {
     return VariableBlock{
         *m_mat,
         {m_row_slice.start + row_slice.start * m_row_slice.step,
-         m_row_slice.start + row_slice.stop, m_row_slice.step * row_slice.step},
+         m_row_slice.start + row_slice.stop * m_row_slice.step,
+         row_slice.step * m_row_slice.step},
         row_slice_length,
         {m_col_slice.start + col_slice.start * m_col_slice.step,
-         m_col_slice.start + col_slice.stop, m_col_slice.step * col_slice.step},
+         m_col_slice.start + col_slice.stop * m_col_slice.step,
+         col_slice.step * m_col_slice.step},
         col_slice_length};
   }
 
@@ -390,10 +394,12 @@ class VariableBlock {
     return VariableBlock{
         *m_mat,
         {m_row_slice.start + row_slice.start * m_row_slice.step,
-         m_row_slice.start + row_slice.stop, m_row_slice.step * row_slice.step},
+         m_row_slice.start + row_slice.stop * m_row_slice.step,
+         row_slice.step * m_row_slice.step},
         row_slice_length,
         {m_col_slice.start + col_slice.start * m_col_slice.step,
-         m_col_slice.start + col_slice.stop, m_col_slice.step * col_slice.step},
+         m_col_slice.start + col_slice.stop * m_col_slice.step,
+         col_slice.step * m_col_slice.step},
         col_slice_length};
   }
 
@@ -416,10 +422,12 @@ class VariableBlock {
     return VariableBlock{
         *m_mat,
         {m_row_slice.start + row_slice.start * m_row_slice.step,
-         m_row_slice.start + row_slice.stop, m_row_slice.step * row_slice.step},
+         m_row_slice.start + row_slice.stop * m_row_slice.step,
+         row_slice.step * m_row_slice.step},
         row_slice_length,
         {m_col_slice.start + col_slice.start * m_col_slice.step,
-         m_col_slice.start + col_slice.stop, m_col_slice.step * col_slice.step},
+         m_col_slice.start + col_slice.stop * m_col_slice.step,
+         col_slice.step * m_col_slice.step},
         col_slice_length};
   }
 
