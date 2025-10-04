@@ -899,16 +899,16 @@ Returns:
     A block slice of the variable matrix.)doc";
 
 static const char *__doc_slp_VariableBlock_cbegin =
-R"doc(Returns begin iterator.
+R"doc(Returns const begin iterator.
 
 Returns:
-    Begin iterator.)doc";
+    Const begin iterator.)doc";
 
 static const char *__doc_slp_VariableBlock_cend =
-R"doc(Returns end iterator.
+R"doc(Returns const end iterator.
 
 Returns:
-    End iterator.)doc";
+    Const end iterator.)doc";
 
 static const char *__doc_slp_VariableBlock_col =
 R"doc(Returns a column slice of the variable matrix.
@@ -944,6 +944,10 @@ static const char *__doc_slp_VariableBlock_const_iterator_m_index = R"doc()doc";
 
 static const char *__doc_slp_VariableBlock_const_iterator_m_mat = R"doc()doc";
 
+static const char *__doc_slp_VariableBlock_const_iterator_operator_dec = R"doc()doc";
+
+static const char *__doc_slp_VariableBlock_const_iterator_operator_dec_2 = R"doc()doc";
+
 static const char *__doc_slp_VariableBlock_const_iterator_operator_eq = R"doc()doc";
 
 static const char *__doc_slp_VariableBlock_const_iterator_operator_inc = R"doc()doc";
@@ -951,6 +955,18 @@ static const char *__doc_slp_VariableBlock_const_iterator_operator_inc = R"doc()
 static const char *__doc_slp_VariableBlock_const_iterator_operator_inc_2 = R"doc()doc";
 
 static const char *__doc_slp_VariableBlock_const_iterator_operator_mul = R"doc()doc";
+
+static const char *__doc_slp_VariableBlock_crbegin =
+R"doc(Returns const reverse begin iterator.
+
+Returns:
+    Const reverse begin iterator.)doc";
+
+static const char *__doc_slp_VariableBlock_crend =
+R"doc(Returns const reverse end iterator.
+
+Returns:
+    Const reverse end iterator.)doc";
 
 static const char *__doc_slp_VariableBlock_cwise_transform =
 R"doc(Transforms the matrix coefficient-wise with an unary operator.
@@ -982,6 +998,10 @@ static const char *__doc_slp_VariableBlock_iterator_iterator_2 = R"doc()doc";
 static const char *__doc_slp_VariableBlock_iterator_m_index = R"doc()doc";
 
 static const char *__doc_slp_VariableBlock_iterator_m_mat = R"doc()doc";
+
+static const char *__doc_slp_VariableBlock_iterator_operator_dec = R"doc()doc";
+
+static const char *__doc_slp_VariableBlock_iterator_operator_dec_2 = R"doc()doc";
 
 static const char *__doc_slp_VariableBlock_iterator_operator_eq = R"doc()doc";
 
@@ -1173,6 +1193,30 @@ static const char *__doc_slp_VariableBlock_operator_imul_2 = R"doc()doc";
 static const char *__doc_slp_VariableBlock_operator_isub = R"doc()doc";
 
 static const char *__doc_slp_VariableBlock_operator_isub_2 = R"doc()doc";
+
+static const char *__doc_slp_VariableBlock_rbegin =
+R"doc(Returns reverse begin iterator.
+
+Returns:
+    Reverse begin iterator.)doc";
+
+static const char *__doc_slp_VariableBlock_rbegin_2 =
+R"doc(Returns const reverse begin iterator.
+
+Returns:
+    Const reverse begin iterator.)doc";
+
+static const char *__doc_slp_VariableBlock_rend =
+R"doc(Returns reverse end iterator.
+
+Returns:
+    Reverse end iterator.)doc";
+
+static const char *__doc_slp_VariableBlock_rend_2 =
+R"doc(Returns const reverse end iterator.
+
+Returns:
+    Const reverse end iterator.)doc";
 
 static const char *__doc_slp_VariableBlock_row =
 R"doc(Returns a row slice of the variable matrix.
@@ -1387,10 +1431,10 @@ Returns:
     Begin iterator.)doc";
 
 static const char *__doc_slp_VariableMatrix_begin_2 =
-R"doc(Returns begin iterator.
+R"doc(Returns const begin iterator.
 
 Returns:
-    Begin iterator.)doc";
+    Const begin iterator.)doc";
 
 static const char *__doc_slp_VariableMatrix_block =
 R"doc(Returns a block of the variable matrix.
@@ -1429,16 +1473,16 @@ Returns:
     A block of the variable matrix.)doc";
 
 static const char *__doc_slp_VariableMatrix_cbegin =
-R"doc(Returns begin iterator.
+R"doc(Returns const begin iterator.
 
 Returns:
-    Begin iterator.)doc";
+    Const begin iterator.)doc";
 
 static const char *__doc_slp_VariableMatrix_cend =
-R"doc(Returns end iterator.
+R"doc(Returns const end iterator.
 
 Returns:
-    End iterator.)doc";
+    Const end iterator.)doc";
 
 static const char *__doc_slp_VariableMatrix_col =
 R"doc(Returns a column slice of the variable matrix.
@@ -1472,6 +1516,10 @@ static const char *__doc_slp_VariableMatrix_const_iterator_const_iterator_2 = R"
 
 static const char *__doc_slp_VariableMatrix_const_iterator_m_it = R"doc()doc";
 
+static const char *__doc_slp_VariableMatrix_const_iterator_operator_dec = R"doc()doc";
+
+static const char *__doc_slp_VariableMatrix_const_iterator_operator_dec_2 = R"doc()doc";
+
 static const char *__doc_slp_VariableMatrix_const_iterator_operator_eq = R"doc()doc";
 
 static const char *__doc_slp_VariableMatrix_const_iterator_operator_inc = R"doc()doc";
@@ -1479,6 +1527,18 @@ static const char *__doc_slp_VariableMatrix_const_iterator_operator_inc = R"doc(
 static const char *__doc_slp_VariableMatrix_const_iterator_operator_inc_2 = R"doc()doc";
 
 static const char *__doc_slp_VariableMatrix_const_iterator_operator_mul = R"doc()doc";
+
+static const char *__doc_slp_VariableMatrix_crbegin =
+R"doc(Returns const reverse begin iterator.
+
+Returns:
+    Const reverse begin iterator.)doc";
+
+static const char *__doc_slp_VariableMatrix_crend =
+R"doc(Returns const reverse end iterator.
+
+Returns:
+    Const reverse end iterator.)doc";
 
 static const char *__doc_slp_VariableMatrix_cwise_transform =
 R"doc(Transforms the matrix coefficient-wise with an unary operator.
@@ -1498,10 +1558,10 @@ Returns:
     End iterator.)doc";
 
 static const char *__doc_slp_VariableMatrix_end_2 =
-R"doc(Returns end iterator.
+R"doc(Returns const end iterator.
 
 Returns:
-    End iterator.)doc";
+    Const end iterator.)doc";
 
 static const char *__doc_slp_VariableMatrix_iterator = R"doc()doc";
 
@@ -1510,6 +1570,10 @@ static const char *__doc_slp_VariableMatrix_iterator_iterator = R"doc()doc";
 static const char *__doc_slp_VariableMatrix_iterator_iterator_2 = R"doc()doc";
 
 static const char *__doc_slp_VariableMatrix_iterator_m_it = R"doc()doc";
+
+static const char *__doc_slp_VariableMatrix_iterator_operator_dec = R"doc()doc";
+
+static const char *__doc_slp_VariableMatrix_iterator_operator_dec_2 = R"doc()doc";
 
 static const char *__doc_slp_VariableMatrix_iterator_operator_eq = R"doc()doc";
 
@@ -1671,6 +1735,30 @@ static const char *__doc_slp_VariableMatrix_operator_imul_2 = R"doc()doc";
 static const char *__doc_slp_VariableMatrix_operator_isub = R"doc()doc";
 
 static const char *__doc_slp_VariableMatrix_operator_isub_2 = R"doc()doc";
+
+static const char *__doc_slp_VariableMatrix_rbegin =
+R"doc(Returns reverse begin iterator.
+
+Returns:
+    Reverse begin iterator.)doc";
+
+static const char *__doc_slp_VariableMatrix_rbegin_2 =
+R"doc(Returns const reverse begin iterator.
+
+Returns:
+    Const reverse begin iterator.)doc";
+
+static const char *__doc_slp_VariableMatrix_rend =
+R"doc(Returns reverse end iterator.
+
+Returns:
+    Reverse end iterator.)doc";
+
+static const char *__doc_slp_VariableMatrix_rend_2 =
+R"doc(Returns const reverse end iterator.
+
+Returns:
+    Const reverse end iterator.)doc";
 
 static const char *__doc_slp_VariableMatrix_row =
 R"doc(Returns a row slice of the variable matrix.

@@ -253,9 +253,16 @@ TEST_CASE("VariableMatrix - Subslicing", "[VariableMatrix]") {
 
 TEST_CASE("VariableMatrix - Iterators", "[VariableMatrix]") {
   slp::VariableMatrix A{{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}, {7.0, 8.0, 9.0}};
+  auto sub_A = A.block(2, 1, 1, 2);
 
-  // VariableMatrix iterator
   CHECK(std::distance(A.begin(), A.end()) == 9);
+  CHECK(std::distance(A.cbegin(), A.cend()) == 9);
+  CHECK(std::distance(A.rbegin(), A.rend()) == 9);
+  CHECK(std::distance(A.crbegin(), A.crend()) == 9);
+  CHECK(std::distance(sub_A.begin(), sub_A.end()) == 2);
+  CHECK(std::distance(sub_A.cbegin(), sub_A.cend()) == 2);
+  CHECK(std::distance(sub_A.rbegin(), sub_A.rend()) == 2);
+  CHECK(std::distance(sub_A.crbegin(), sub_A.crend()) == 2);
 
   int i = 1;
   for (auto& elem : A) {
@@ -263,13 +270,11 @@ TEST_CASE("VariableMatrix - Iterators", "[VariableMatrix]") {
     ++i;
   }
 
-  // VariableMatrix const_iterator
-  CHECK(std::distance(A.cbegin(), A.cend()) == 9);
-
-  auto sub_A = A.block(2, 1, 1, 2);
-
-  // VariableBlock iterator
-  CHECK(std::distance(sub_A.begin(), sub_A.end()) == 2);
+  i = 9;
+  for (auto& elem : A | std::views::reverse) {
+    CHECK(elem.value() == i);
+    --i;
+  }
 
   i = 8;
   for (auto& elem : sub_A) {
@@ -277,8 +282,11 @@ TEST_CASE("VariableMatrix - Iterators", "[VariableMatrix]") {
     ++i;
   }
 
-  // VariableBlock const_iterator
-  CHECK(std::distance(sub_A.begin(), sub_A.end()) == 2);
+  i = 9;
+  for (auto& elem : sub_A | std::views::reverse) {
+    CHECK(elem.value() == i);
+    --i;
+  }
 }
 
 TEST_CASE("VariableMatrix - Value", "[VariableMatrix]") {
