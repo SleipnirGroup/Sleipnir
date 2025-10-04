@@ -102,23 +102,94 @@ def test_slicing():
     assert s.shape == (3, 1)
     assert (s.value() == np.array([[7.0], [11.0], [15.0]])).all()
 
+    # Block assignment
+    assert mat[::2, ::2].shape == (2, 2)
+    mat[::2, ::2] = np.array([[17.0, 18.0], [19.0, 20.0]])
+    assert (
+        mat.value()
+        == np.array(
+            [
+                [17.0, 2.0, 18.0, 4.0],
+                [5.0, 6.0, 7.0, 8.0],
+                [19.0, 10.0, 20.0, 12.0],
+                [13.0, 14.0, 15.0, 16.0],
+            ]
+        )
+    ).all()
+
 
 def test_subslicing():
-    A = VariableMatrix([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]])
+    # Block-of-block assignment (row skip forward)
+    mat = VariableMatrix(5, 5)
+    assert mat[::2, ::1][1:3, 1:4].shape == (2, 3)
+    mat[::2, ::1][1:3, 1:4] = np.array([[1, 2, 3], [4, 5, 6]])
 
-    # Block assignment
-    assert A[1:3, 1:3].shape == (2, 2)
-    A[1:3, 1:3] = np.array([[10.0, 11.0], [12.0, 13.0]])
+    assert (
+        mat.value()
+        == np.array(
+            [
+                [0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0],
+                [0, 1, 2, 3, 0],
+                [0, 0, 0, 0, 0],
+                [0, 4, 5, 6, 0],
+            ]
+        )
+    ).all()
 
-    expected1 = np.array([[1.0, 2.0, 3.0], [4.0, 10.0, 11.0], [7.0, 12.0, 13.0]])
-    assert (expected1 == A.value()).all()
+    # Block-of-block assignment (row skip backward)
+    mat = VariableMatrix(5, 5)
+    assert mat[::-2, ::-1][1:3, 1:4].shape == (2, 3)
+    mat[::-2, ::-1][1:3, 1:4] = np.array([[1, 2, 3], [4, 5, 6]])
 
-    # Block-of-block assignment
-    assert A[1:3, 1:3][1:, 1:].shape == (1, 1)
-    A[1:3, 1:3][1:, 1:] = 14.0
+    assert (
+        mat.value()
+        == np.array(
+            [
+                [0, 6, 5, 4, 0],
+                [0, 0, 0, 0, 0],
+                [0, 3, 2, 1, 0],
+                [0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0],
+            ]
+        )
+    ).all()
 
-    expected2 = np.array([[1.0, 2.0, 3.0], [4.0, 10.0, 11.0], [7.0, 12.0, 14.0]])
-    assert (A.value() == expected2).all()
+    # Block-of-block assignment (column skip forward)
+    mat = VariableMatrix(5, 5)
+    assert mat[::1, ::2][1:4, 1:3].shape == (3, 2)
+    mat[::1, ::2][1:4, 1:3] = np.array([[1, 2], [3, 4], [5, 6]])
+
+    assert (
+        mat.value()
+        == np.array(
+            [
+                [0, 0, 0, 0, 0],
+                [0, 0, 1, 0, 2],
+                [0, 0, 3, 0, 4],
+                [0, 0, 5, 0, 6],
+                [0, 0, 0, 0, 0],
+            ]
+        )
+    ).all()
+
+    # Block-of-block assignment (column skip backward)
+    mat = VariableMatrix(5, 5)
+    assert mat[::-1, ::-2][1:4, 1:3].shape == (3, 2)
+    mat[::-1, ::-2][1:4, 1:3] = np.array([[1, 2], [3, 4], [5, 6]])
+
+    assert (
+        mat.value()
+        == np.array(
+            [
+                [0, 0, 0, 0, 0],
+                [6, 0, 5, 0, 0],
+                [4, 0, 3, 0, 0],
+                [2, 0, 1, 0, 0],
+                [0, 0, 0, 0, 0],
+            ]
+        )
+    ).all()
 
 
 def test_iterators():
