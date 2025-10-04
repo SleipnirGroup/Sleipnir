@@ -114,6 +114,29 @@ class SLEIPNIR_DLLEXPORT Variable {
   }
 
   /**
+   * Returns the value of this variable.
+   *
+   * @return The value of this variable.
+   */
+  double value() {
+    if (!m_graph_initialized) {
+      m_graph = detail::topological_sort(expr);
+      m_graph_initialized = true;
+    }
+    detail::update_values(m_graph);
+
+    return expr->val;
+  }
+
+  /**
+   * Returns the type of this expression (constant, linear, quadratic, or
+   * nonlinear).
+   *
+   * @return The type of this expression.
+   */
+  ExpressionType type() const { return expr->type(); }
+
+  /**
    * Variable-Variable multiplication operator.
    *
    * @param lhs Operator left-hand side.
@@ -222,29 +245,6 @@ class SLEIPNIR_DLLEXPORT Variable {
   friend SLEIPNIR_DLLEXPORT Variable operator+(const Variable& lhs) {
     return Variable{+lhs.expr};
   }
-
-  /**
-   * Returns the value of this variable.
-   *
-   * @return The value of this variable.
-   */
-  double value() {
-    if (!m_graph_initialized) {
-      m_graph = detail::topological_sort(expr);
-      m_graph_initialized = true;
-    }
-    detail::update_values(m_graph);
-
-    return expr->val;
-  }
-
-  /**
-   * Returns the type of this expression (constant, linear, quadratic, or
-   * nonlinear).
-   *
-   * @return The type of this expression.
-   */
-  ExpressionType type() const { return expr->type(); }
 
  private:
   /// The expression node
