@@ -194,19 +194,15 @@ def test_subslicing():
 
 def test_iterators():
     A = VariableMatrix([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]])
+    sub_A = A[2:3, 1:3]
 
-    # VariableMatrix iterator
-    assert sum(1 for e in A) == 9
+    assert sum(1 for _ in A) == 9
+    assert sum(1 for _ in sub_A) == 2
 
     i = 1
     for elem in A:
         assert elem.value() == i
         i += 1
-
-    sub_A = A[2:3, 1:3]
-
-    # VariableBlock iterator
-    assert sum(1 for e in sub_A) == 2
 
     i = 8
     for elem in sub_A:

@@ -1021,7 +1021,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
 
   class iterator {
    public:
-    using iterator_category = std::forward_iterator_tag;
+    using iterator_category = std::bidirectional_iterator_tag;
     using value_type = Variable;
     using difference_type = std::ptrdiff_t;
     using pointer = Variable*;
@@ -1044,6 +1044,17 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
       return retval;
     }
 
+    constexpr iterator& operator--() noexcept {
+      --m_it;
+      return *this;
+    }
+
+    constexpr iterator operator--(int) noexcept {
+      iterator retval = *this;
+      --(*this);
+      return retval;
+    }
+
     constexpr bool operator==(const iterator&) const noexcept = default;
 
     constexpr reference operator*() const noexcept { return *m_it; }
@@ -1054,7 +1065,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
 
   class const_iterator {
    public:
-    using iterator_category = std::forward_iterator_tag;
+    using iterator_category = std::bidirectional_iterator_tag;
     using value_type = Variable;
     using difference_type = std::ptrdiff_t;
     using pointer = Variable*;
@@ -1077,6 +1088,17 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
       return retval;
     }
 
+    constexpr const_iterator& operator--() noexcept {
+      --m_it;
+      return *this;
+    }
+
+    constexpr const_iterator operator--(int) noexcept {
+      const_iterator retval = *this;
+      --(*this);
+      return retval;
+    }
+
     constexpr bool operator==(const const_iterator&) const noexcept = default;
 
     constexpr const_reference operator*() const noexcept { return *m_it; }
@@ -1084,6 +1106,9 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    private:
     gch::small_vector<Variable>::const_iterator m_it;
   };
+
+  using reverse_iterator = std::reverse_iterator<iterator>;
+  using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
 #endif  // DOXYGEN_SHOULD_SKIP_THIS
 
@@ -1102,32 +1127,82 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
   iterator end() { return iterator{m_storage.end()}; }
 
   /**
-   * Returns begin iterator.
+   * Returns const begin iterator.
    *
-   * @return Begin iterator.
+   * @return Const begin iterator.
    */
   const_iterator begin() const { return const_iterator{m_storage.begin()}; }
 
   /**
-   * Returns end iterator.
+   * Returns const end iterator.
    *
-   * @return End iterator.
+   * @return Const end iterator.
    */
   const_iterator end() const { return const_iterator{m_storage.end()}; }
 
   /**
-   * Returns begin iterator.
+   * Returns const begin iterator.
    *
-   * @return Begin iterator.
+   * @return Const begin iterator.
    */
   const_iterator cbegin() const { return const_iterator{m_storage.cbegin()}; }
 
   /**
-   * Returns end iterator.
+   * Returns const end iterator.
    *
-   * @return End iterator.
+   * @return Const end iterator.
    */
   const_iterator cend() const { return const_iterator{m_storage.cend()}; }
+
+  /**
+   * Returns reverse begin iterator.
+   *
+   * @return Reverse begin iterator.
+   */
+  constexpr reverse_iterator rbegin() { return reverse_iterator{end()}; }
+
+  /**
+   * Returns reverse end iterator.
+   *
+   * @return Reverse end iterator.
+   */
+  constexpr reverse_iterator rend() { return reverse_iterator{begin()}; }
+
+  /**
+   * Returns const reverse begin iterator.
+   *
+   * @return Const reverse begin iterator.
+   */
+  const_reverse_iterator rbegin() const {
+    return const_reverse_iterator{end()};
+  }
+
+  /**
+   * Returns const reverse end iterator.
+   *
+   * @return Const reverse end iterator.
+   */
+  const_reverse_iterator rend() const {
+    return const_reverse_iterator{begin()};
+  }
+
+  /**
+   * Returns const reverse begin iterator.
+   *
+   * @return Const reverse begin iterator.
+   */
+  const_reverse_iterator crbegin() const {
+    return const_reverse_iterator{cend()};
+  }
+
+  /**
+   * Returns const reverse end iterator.
+   *
+   * @return Const reverse end iterator.
+   */
+  const_reverse_iterator crend() const {
+    return const_reverse_iterator{cbegin()};
+  }
 
   /**
    * Returns number of elements in matrix.
