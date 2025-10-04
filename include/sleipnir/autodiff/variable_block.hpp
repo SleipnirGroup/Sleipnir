@@ -99,11 +99,7 @@ class VariableBlock {
    * @param mat The matrix to which to point.
    */
   VariableBlock(Mat& mat)  // NOLINT
-      : m_mat{&mat},
-        m_row_slice{0, mat.rows(), 1},
-        m_row_slice_length{m_row_slice.adjust(mat.rows())},
-        m_col_slice{0, mat.cols(), 1},
-        m_col_slice_length{m_col_slice.adjust(mat.cols())} {}
+      : VariableBlock{mat, 0, 0, mat.rows(), mat.cols()} {}
 
   /**
    * Constructs a Variable block pointing to a subset of the given matrix.
@@ -142,7 +138,7 @@ class VariableBlock {
         m_col_slice_length{col_slice_length} {}
 
   /**
-   * Assigns a double to the block.
+   * Assigns a scalar to the block.
    *
    * This only works for blocks with one row and one column.
    *
@@ -271,27 +267,27 @@ class VariableBlock {
   }
 
   /**
-   * Returns a scalar subblock at the given row.
+   * Returns a scalar subblock at the given index.
    *
-   * @param row The scalar subblock's row.
-   * @return A scalar subblock at the given row.
+   * @param index The scalar subblock's index.
+   * @return A scalar subblock at the given index.
    */
-  Variable& operator[](int row)
+  Variable& operator[](int index)
     requires(!std::is_const_v<Mat>)
   {
-    slp_assert(row >= 0 && row < rows() * cols());
-    return (*this)[row / cols(), row % cols()];
+    slp_assert(index >= 0 && index < rows() * cols());
+    return (*this)[index / cols(), index % cols()];
   }
 
   /**
-   * Returns a scalar subblock at the given row.
+   * Returns a scalar subblock at the given index.
    *
-   * @param row The scalar subblock's row.
-   * @return A scalar subblock at the given row.
+   * @param index The scalar subblock's index.
+   * @return A scalar subblock at the given index.
    */
-  const Variable& operator[](int row) const {
-    slp_assert(row >= 0 && row < rows() * cols());
-    return (*this)[row / cols(), row % cols()];
+  const Variable& operator[](int index) const {
+    slp_assert(index >= 0 && index < rows() * cols());
+    return (*this)[index / cols(), index % cols()];
   }
 
   /**
@@ -342,16 +338,7 @@ class VariableBlock {
   VariableBlock<Mat> operator[](Slice row_slice, Slice col_slice) {
     int row_slice_length = row_slice.adjust(m_row_slice_length);
     int col_slice_length = col_slice.adjust(m_col_slice_length);
-    return VariableBlock{
-        *m_mat,
-        {m_row_slice.start + row_slice.start * m_row_slice.step,
-         m_row_slice.start + row_slice.stop * m_row_slice.step,
-         row_slice.step * m_row_slice.step},
-        row_slice_length,
-        {m_col_slice.start + col_slice.start * m_col_slice.step,
-         m_col_slice.start + col_slice.stop * m_col_slice.step,
-         col_slice.step * m_col_slice.step},
-        col_slice_length};
+    return (*this)[row_slice, row_slice_length, col_slice, col_slice_length];
   }
 
   /**
@@ -365,16 +352,7 @@ class VariableBlock {
                                             Slice col_slice) const {
     int row_slice_length = row_slice.adjust(m_row_slice_length);
     int col_slice_length = col_slice.adjust(m_col_slice_length);
-    return VariableBlock{
-        *m_mat,
-        {m_row_slice.start + row_slice.start * m_row_slice.step,
-         m_row_slice.start + row_slice.stop * m_row_slice.step,
-         row_slice.step * m_row_slice.step},
-        row_slice_length,
-        {m_col_slice.start + col_slice.start * m_col_slice.step,
-         m_col_slice.start + col_slice.stop * m_col_slice.step,
-         col_slice.step * m_col_slice.step},
-        col_slice_length};
+    return (*this)[row_slice, row_slice_length, col_slice, col_slice_length];
   }
 
   /**
@@ -439,8 +417,9 @@ class VariableBlock {
    * @return A segment of the variable vector.
    */
   VariableBlock<Mat> segment(int offset, int length) {
-    slp_assert(offset >= 0 && offset < rows() * cols());
-    slp_assert(length >= 0 && length <= rows() * cols() - offset);
+    slp_assert(cols() == 1);
+    slp_assert(offset >= 0 && offset < rows());
+    slp_assert(length >= 0 && length <= rows() - offset);
     return block(offset, 0, length, 1);
   }
 
@@ -452,8 +431,9 @@ class VariableBlock {
    * @return A segment of the variable vector.
    */
   const VariableBlock<Mat> segment(int offset, int length) const {
-    slp_assert(offset >= 0 && offset < rows() * cols());
-    slp_assert(length >= 0 && length <= rows() * cols() - offset);
+    slp_assert(cols() == 1);
+    slp_assert(offset >= 0 && offset < rows());
+    slp_assert(length >= 0 && length <= rows() - offset);
     return block(offset, 0, length, 1);
   }
 
@@ -691,19 +671,13 @@ class VariableBlock {
    * @param col The column of the element to return.
    * @return An element of the variable matrix.
    */
-  double value(int row, int col) {
-    slp_assert(row >= 0 && row < rows());
-    slp_assert(col >= 0 && col < cols());
-    return (*m_mat)[m_row_slice.start + row * m_row_slice.step,
-                    m_col_slice.start + col * m_col_slice.step]
-        .value();
-  }
+  double value(int row, int col) { return (*this)[row, col].value(); }
 
   /**
-   * Returns a row of the variable column vector.
+   * Returns an element of the variable block.
    *
    * @param index The index of the element to return.
-   * @return A row of the variable column vector.
+   * @return An element of the variable block.
    */
   double value(int index) {
     slp_assert(index >= 0 && index < rows() * cols());
