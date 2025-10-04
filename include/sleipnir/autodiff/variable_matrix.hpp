@@ -1159,14 +1159,14 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    *
    * @return Reverse begin iterator.
    */
-  constexpr reverse_iterator rbegin() { return reverse_iterator{end()}; }
+  reverse_iterator rbegin() { return reverse_iterator{end()}; }
 
   /**
    * Returns reverse end iterator.
    *
    * @return Reverse end iterator.
    */
-  constexpr reverse_iterator rend() { return reverse_iterator{begin()}; }
+  reverse_iterator rend() { return reverse_iterator{begin()}; }
 
   /**
    * Returns const reverse begin iterator.
