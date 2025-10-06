@@ -29,6 +29,8 @@ void bind_variable(nb::module_& autodiff, nb::class_<Variable>& cls) {
           "value"_a, DOC(slp, Variable, set_value));
   cls.def("set_value", nb::overload_cast<double>(&Variable::set_value),
           "value"_a, DOC(slp, Variable, set_value));
+  cls.def("value", &Variable::value, DOC(slp, Variable, value));
+  cls.def("type", &Variable::type, DOC(slp, Variable, type));
   cls.def(double() * nb::self, "lhs"_a);
   cls.def(nb::self * double(), "rhs"_a);
   cls.def(nb::self * nb::self, "rhs"_a);
@@ -55,8 +57,6 @@ void bind_variable(nb::module_& autodiff, nb::class_<Variable>& cls) {
       nb::is_operator(), "power"_a);
   cls.def(-nb::self);
   cls.def(+nb::self);
-  cls.def("value", &Variable::value, DOC(slp, Variable, value));
-  cls.def("type", &Variable::type, DOC(slp, Variable, type));
   cls.def(nb::self == nb::self, "rhs"_a, DOC(slp, operator, eq));
   cls.def(nb::self < nb::self, "rhs"_a, DOC(slp, operator, lt));
   cls.def(nb::self <= nb::self, "rhs"_a, DOC(slp, operator, le));
