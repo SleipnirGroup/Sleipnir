@@ -38,6 +38,16 @@ class SLEIPNIR_DLLEXPORT Jacobian {
   /**
    * Constructs a Jacobian object.
    *
+   * @param variable Variable of which to compute the Jacobian.
+   * @param wrt Vector of variables with respect to which to compute the
+   *   Jacobian.
+   */
+  Jacobian(Variable variable, SleipnirMatrixLike auto wrt)
+      : Jacobian{VariableMatrix{std::move(variable)}, std::move(wrt)} {}
+
+  /**
+   * Constructs a Jacobian object.
+   *
    * @param variables Vector of variables of which to compute the Jacobian.
    * @param wrt Vector of variables with respect to which to compute the
    *   Jacobian.
