@@ -31,41 +31,47 @@ def test_linear():
 
 def test_quadratic():
     # y = x²
-    # y = x * x
     x = VariableMatrix(1)
     x[0].set_value(3)
     y = x[0] * x[0]
 
-    # dy/dx = x (rhs) + x (lhs)
-    #       = (3) + (3)
-    #       = 6
+    # dy/dx = 2x = 6
     g = Gradient(y, x[0]).value()[0, 0]
     assert g == 6.0
 
-    # d²y/dx² = d/dx(x (rhs) + x (lhs))
-    #         = 1 + 1
-    #         = 2
+    # d²y/dx² = 2
     H = Hessian(y, x)
     assert H.get().value()[0, 0] == 2.0
     assert H.value()[0, 0] == 2.0
 
 
+def test_cubic():
+    # y = x³
+    x = VariableMatrix(1)
+    x[0].set_value(3)
+    y = x[0] * x[0] * x[0]
+
+    # dy/dx = 3x² = 27
+    g = Gradient(y, x[0]).value()[0, 0]
+    assert g == 27.0
+
+    # d²y/dx² = 6x = 18
+    H = Hessian(y, x)
+    assert H.get().value()[0, 0] == 18.0
+    assert H.value()[0, 0] == 18.0
+
+
 def test_quartic():
     # y = x⁴
-    # y = x * x * x * x
     x = VariableMatrix(1)
     x[0].set_value(3)
     y = x[0] * x[0] * x[0] * x[0]
 
-    # dy/dx = 4x³
-    #       = 4(3)³
-    #       = 108
+    # dy/dx = 4x³ = 108
     g = Gradient(y, x[0]).value()[0, 0]
     assert g == 108.0
 
-    # d²y/dx² = 12x²
-    #         = 12(3)²
-    #         = 108
+    # d²y/dx² = 12x² = 108
     H = Hessian(y, x)
     assert H.get().value()[0, 0] == 108.0
     assert H.value()[0, 0] == 108.0
