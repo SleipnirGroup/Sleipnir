@@ -38,23 +38,37 @@ TEST_CASE("Hessian - Quadratic", "[Hessian]") {
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
   // y = x²
-  // y = x * x
   slp::VariableMatrix x{1};
   x[0].set_value(3);
   slp::Variable y = x[0] * x[0];
 
-  // dy/dx = x (rhs) + x (lhs)
-  //       = (3) + (3)
-  //       = 6
+  // dy/dx = 2x = 6
   double g = slp::Gradient(y, x[0]).value().coeff(0);
   CHECK(g == 6.0);
 
-  // d²y/dx² = d/dx(x (rhs) + x (lhs))
-  //         = 1 + 1
-  //         = 2
+  // d²y/dx² = 2
   auto H = slp::Hessian(y, x);
   CHECK(H.get().value(0, 0) == 2.0);
   CHECK(H.value().coeff(0, 0) == 2.0);
+}
+
+TEST_CASE("Hessian - Cubic", "[Hessian]") {
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
+
+  // y = x³
+  slp::VariableMatrix x{1};
+  x[0].set_value(3);
+  slp::Variable y = x[0] * x[0] * x[0];
+
+  // dy/dx = 3x² = 27
+  double g = slp::Gradient(y, x[0]).value().coeff(0);
+  CHECK(g == 27.0);
+
+  // d²y/dx² = 6x = 18
+  auto H = slp::Hessian(y, x);
+  CHECK(H.get().value(0, 0) == 18.0);
+  CHECK(H.value().coeff(0, 0) == 18.0);
 }
 
 TEST_CASE("Hessian - Quartic", "[Hessian]") {
@@ -62,20 +76,15 @@ TEST_CASE("Hessian - Quartic", "[Hessian]") {
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
   // y = x⁴
-  // y = x * x * x * x
   slp::VariableMatrix x{1};
   x[0].set_value(3);
   slp::Variable y = x[0] * x[0] * x[0] * x[0];
 
-  // dy/dx = 4x³
-  //       = 4(3)³
-  //       = 108
+  // dy/dx = 4x³ = 108
   double g = slp::Gradient(y, x[0]).value().coeff(0);
   CHECK(g == 108.0);
 
-  // d²y/dx² = 12x²
-  //         = 12(3)²
-  //         = 108
+  // d²y/dx² = 12x² = 108
   auto H = slp::Hessian(y, x);
   CHECK(H.get().value(0, 0) == 108.0);
   CHECK(H.value().coeff(0, 0) == 108.0);
