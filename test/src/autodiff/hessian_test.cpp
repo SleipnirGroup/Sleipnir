@@ -57,6 +57,30 @@ TEST_CASE("Hessian - Quadratic", "[Hessian]") {
   CHECK(H.value().coeff(0, 0) == 2.0);
 }
 
+TEST_CASE("Hessian - Quartic", "[Hessian]") {
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
+
+  // y = x⁴
+  // y = x * x * x * x
+  slp::VariableMatrix x{1};
+  x[0].set_value(3);
+  slp::Variable y = x[0] * x[0] * x[0] * x[0];
+
+  // dy/dx = 4x³
+  //       = 4(3)³
+  //       = 108
+  double g = slp::Gradient(y, x[0]).value().coeff(0);
+  CHECK(g == 108.0);
+
+  // d²y/dx² = 12x²
+  //         = 12(3)²
+  //         = 108
+  auto H = slp::Hessian(y, x);
+  CHECK(H.get().value(0, 0) == 108.0);
+  CHECK(H.value().coeff(0, 0) == 108.0);
+}
+
 TEST_CASE("Hessian - Sum", "[Hessian]") {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
