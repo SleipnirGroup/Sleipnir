@@ -29,7 +29,7 @@ def test_linear():
     assert H.value()[0, 0] == 0.0
 
 
-def test_quartic():
+def test_quadratic():
     # y = x²
     # y = x * x
     x = VariableMatrix(1)
@@ -48,6 +48,27 @@ def test_quartic():
     H = Hessian(y, x)
     assert H.get().value()[0, 0] == 2.0
     assert H.value()[0, 0] == 2.0
+
+
+def test_quartic():
+    # y = x⁴
+    # y = x * x * x * x
+    x = VariableMatrix(1)
+    x[0].set_value(3)
+    y = x[0] * x[0] * x[0] * x[0]
+
+    # dy/dx = 4x³
+    #       = 4(3)³
+    #       = 108
+    g = Gradient(y, x[0]).value()[0, 0]
+    assert g == 108.0
+
+    # d²y/dx² = 12x²
+    #         = 12(3)²
+    #         = 108
+    H = Hessian(y, x)
+    assert H.get().value()[0, 0] == 108.0
+    assert H.value()[0, 0] == 108.0
 
 
 def test_sum():
