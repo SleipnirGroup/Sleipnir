@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 import jormungandr.autodiff as autodiff
-from jormungandr.autodiff import Gradient, Hessian, Variable, VariableMatrix
+from jormungandr.autodiff import Gradient, Hessian, Jacobian, Variable, VariableMatrix
 
 
 def prod(iterable):
@@ -232,6 +232,37 @@ def test_rosenbrock():
             assert H[0, 1] == -400 * x0
             assert H[1, 0] == -400 * x0
             assert H[1, 1] == 200
+
+
+def test_edge_pushing_example_1():
+    x = VariableMatrix(2)
+    x[0].set_value(3)
+    x[1].set_value(4)
+
+    # y = (x₀sin(x₁)) x₀
+    y = (x[0] * autodiff.sin(x[1])) * x[0]
+
+    # dy/dx = [2x₀sin(x₁)  x₀²cos(x₁)]
+    # dy/dx = [ 6sin(4)     9cos(4)  ]
+    J = Jacobian(y, x)
+    expected_J = np.array([[6.0 * math.sin(4.0), 9.0 * math.cos(4.0)]])
+    assert (J.get().value() == expected_J).all()
+    assert (J.value() == expected_J).all()
+
+    #           [ 2sin(x₁)    2x₀cos(x₁)]
+    # d²y/dx² = [2x₀cos(x₁)  −x₀²sin(x₁)]
+    #
+    #           [2sin(4)   6cos(4)]
+    # d²y/dx² = [6cos(4)  −9sin(4)]
+    H = Hessian(y, x)
+    expected_H = np.array(
+        [
+            [2.0 * math.sin(4.0), 6.0 * math.cos(4.0)],
+            [6.0 * math.cos(4.0), -9.0 * math.sin(4.0)],
+        ]
+    )
+    assert (H.get().value() == expected_H).all()
+    assert (H.value() == expected_H).all()
 
 
 def test_variable_reuse():

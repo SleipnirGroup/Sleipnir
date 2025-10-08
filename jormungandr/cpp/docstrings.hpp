@@ -276,6 +276,8 @@ Parameter ``wrt``:
 
 static const char *__doc_slp_Jacobian_Jacobian_2 = R"doc()doc";
 
+static const char *__doc_slp_Jacobian_Jacobian_3 = R"doc()doc";
+
 static const char *__doc_slp_Jacobian_get =
 R"doc(Returns the Jacobian as a VariableMatrix.
 

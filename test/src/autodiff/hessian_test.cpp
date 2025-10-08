@@ -9,6 +9,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <sleipnir/autodiff/gradient.hpp>
 #include <sleipnir/autodiff/hessian.hpp>
+#include <sleipnir/autodiff/jacobian.hpp>
 #include <sleipnir/autodiff/variable.hpp>
 
 #include "range.hpp"
@@ -277,6 +278,36 @@ TEST_CASE("Hessian - Rosenbrock", "[Hessian]") {
       CHECK(H(1, 1) == 200);
     }
   }
+}
+
+TEST_CASE("Hessian - Edge_Pushing example 1") {
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
+
+  slp::VariableMatrix x{2};
+  x[0].set_value(3);
+  x[1].set_value(4);
+
+  // y = (x₀sin(x₁)) x₀
+  auto y = (x[0] * slp::sin(x[1])) * x[0];
+
+  // dy/dx = [2x₀sin(x₁)  x₀²cos(x₁)]
+  // dy/dx = [ 6sin(4)     9cos(4)  ]
+  auto J = slp::Jacobian(y, x);
+  Eigen::MatrixXd expected_J{{6.0 * std::sin(4.0), 9.0 * std::cos(4.0)}};
+  CHECK(J.get().value() == expected_J);
+  CHECK(J.value().toDense() == expected_J);
+
+  //           [ 2sin(x₁)    2x₀cos(x₁)]
+  // d²y/dx² = [2x₀cos(x₁)  −x₀²sin(x₁)]
+  //
+  //           [2sin(4)   6cos(4)]
+  // d²y/dx² = [6cos(4)  −9sin(4)]
+  auto H = slp::Hessian(y, x);
+  Eigen::MatrixXd expected_H{{2.0 * std::sin(4.0), 6.0 * std::cos(4.0)},
+                             {6.0 * std::cos(4.0), -9.0 * std::sin(4.0)}};
+  CHECK(H.get().value() == expected_H);
+  CHECK(H.value().toDense() == expected_H);
 }
 
 TEST_CASE("Hessian - Variable reuse", "[Hessian]") {
