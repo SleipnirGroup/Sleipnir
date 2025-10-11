@@ -256,6 +256,24 @@ TEST_CASE("Hessian - Sum of squares", "[Hessian]") {
   CHECK(H.value().toDense() == expected_H);
 }
 
+TEST_CASE("Hessian - Nested powers", "[Hessian]") {
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
+
+  constexpr double x0 = 3.0;
+
+  slp::Variable x;
+  x.set_value(x0);
+
+  auto y = slp::pow(slp::pow(x, 2), 2);
+
+  Eigen::MatrixXd J = slp::Jacobian(y, x).value();
+  CHECK(J(0, 0) == Catch::Approx(4 * x0 * x0 * x0).margin(1e-12));
+
+  Eigen::MatrixXd H = slp::Hessian(y, x).value();
+  CHECK(H(0, 0) == Catch::Approx(12 * x0 * x0).margin(1e-12));
+}
+
 TEST_CASE("Hessian - Rosenbrock", "[Hessian]") {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};

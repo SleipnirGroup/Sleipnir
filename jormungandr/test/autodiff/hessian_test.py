@@ -214,6 +214,21 @@ def test_sum_of_squares():
     assert (H.value() == expected_H).all()
 
 
+def test_nested_powers():
+    x0 = 3.0
+
+    x = Variable()
+    x.set_value(x0)
+
+    y = (x**2) ** 2
+
+    J = Jacobian(y, x).value()
+    assert J[0, 0] == pytest.approx(4 * x0 * x0 * x0, abs=1e-12)
+
+    H = Hessian(y, x).value()
+    assert H[0, 0] == pytest.approx(12 * x0 * x0, abs=1e-12)
+
+
 def test_rosenbrock():
     input = VariableMatrix(2)
     x = input[0]
