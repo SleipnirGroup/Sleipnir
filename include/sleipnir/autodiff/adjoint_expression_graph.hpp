@@ -61,7 +61,7 @@ class AdjointExpressionGraph {
     }
 
     // Set root node's adjoint to 1 since df/df is 1
-    m_top_list[0]->adjoint_expr = make_expression_ptr<ConstExpression>(1.0);
+    m_top_list[0]->adjoint_expr = constant_ptr(1.0);
 
     // df/dx = (df/dy)(dy/dx). The adjoint of x is equal to the adjoint of y
     // multiplied by dy/dx. If there are multiple "paths" from the root node to
