@@ -78,7 +78,7 @@ struct Expression {
   /// The value of the expression node.
   double val = 0.0;
 
-  /// The adjoint of the expression node used during autodiff.
+  /// The adjoint of the expression node, used during autodiff.
   double adjoint = 0.0;
 
   /// Counts incoming edges for this node.
@@ -87,7 +87,7 @@ struct Expression {
   /// This expression's column in a Jacobian, or -1 otherwise.
   int32_t col = -1;
 
-  /// The adjoint of the expression node used during gradient expression tree
+  /// The adjoint of the expression node, used during gradient expression tree
   /// generation.
   ExpressionPtr adjoint_expr;
 
@@ -364,12 +364,12 @@ struct Expression {
   virtual ExpressionType type() const = 0;
 
   /**
-   * Returns double adjoint of the left child expression.
+   * Returns ∂/∂l as a double.
    *
    * @param lhs Left argument to binary operator.
    * @param rhs Right argument to binary operator.
    * @param parent_adjoint Adjoint of parent expression.
-   * @return The double adjoint of the left child expression.
+   * @return ∂/∂l as a double.
    */
   virtual double grad_l([[maybe_unused]] double lhs,
                         [[maybe_unused]] double rhs,
@@ -378,12 +378,12 @@ struct Expression {
   }
 
   /**
-   * Returns double adjoint of the right child expression.
+   * Returns ∂/∂r as a double.
    *
    * @param lhs Left argument to binary operator.
    * @param rhs Right argument to binary operator.
    * @param parent_adjoint Adjoint of parent expression.
-   * @return The double adjoint of the right child expression.
+   * @return ∂/∂r as a double.
    */
   virtual double grad_r([[maybe_unused]] double lhs,
                         [[maybe_unused]] double rhs,
@@ -392,12 +392,12 @@ struct Expression {
   }
 
   /**
-   * Returns Expression adjoint of the left child expression.
+   * Returns ∂/∂l as an Expression.
    *
    * @param lhs Left argument to binary operator.
    * @param rhs Right argument to binary operator.
    * @param parent_adjoint Adjoint of parent expression.
-   * @return The Expression adjoint of the left child expression.
+   * @return ∂/∂l as an Expression.
    */
   virtual ExpressionPtr grad_expr_l(
       [[maybe_unused]] const ExpressionPtr& lhs,
@@ -407,12 +407,12 @@ struct Expression {
   }
 
   /**
-   * Returns Expression adjoint of the right child expression.
+   * Returns ∂/∂r as an Expression.
    *
    * @param lhs Left argument to binary operator.
    * @param rhs Right argument to binary operator.
    * @param parent_adjoint Adjoint of parent expression.
-   * @return The Expression adjoint of the right child expression.
+   * @return ∂/∂r as an Expression.
    */
   virtual ExpressionPtr grad_expr_r(
       [[maybe_unused]] const ExpressionPtr& lhs,
