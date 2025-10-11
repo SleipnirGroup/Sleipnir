@@ -1058,7 +1058,7 @@ struct CosExpression final : Expression {
   ExpressionType type() const override { return ExpressionType::NONLINEAR; }
 
   double grad_l(double x, double, double parent_adjoint) const override {
-    return -parent_adjoint * std::sin(x);
+    return parent_adjoint * -std::sin(x);
   }
 
   ExpressionPtr grad_expr_l(
@@ -1435,7 +1435,7 @@ struct PowExpression final : Expression {
     if (base == 0.0) {
       return 0.0;
     } else {
-      return parent_adjoint * std::pow(base, power - 1) * base * std::log(base);
+      return parent_adjoint * std::pow(base, power) * std::log(base);
     }
   }
 
@@ -1456,10 +1456,8 @@ struct PowExpression final : Expression {
       // Return zero
       return base;
     } else {
-      return parent_adjoint *
-             slp::detail::pow(
-                 base, power - make_expression_ptr<ConstExpression>(1.0)) *
-             base * slp::detail::log(base);
+      return parent_adjoint * slp::detail::pow(base, power) *
+             slp::detail::log(base);
     }
   }
 };
@@ -1727,13 +1725,15 @@ struct TanExpression final : Expression {
   ExpressionType type() const override { return ExpressionType::NONLINEAR; }
 
   double grad_l(double x, double, double parent_adjoint) const override {
-    return parent_adjoint / (std::cos(x) * std::cos(x));
+    auto c = std::cos(x);
+    return parent_adjoint / (c * c);
   }
 
   ExpressionPtr grad_expr_l(
       const ExpressionPtr& x, const ExpressionPtr&,
       const ExpressionPtr& parent_adjoint) const override {
-    return parent_adjoint / (slp::detail::cos(x) * slp::detail::cos(x));
+    auto c = slp::detail::cos(x);
+    return parent_adjoint / (c * c);
   }
 };
 
@@ -1776,13 +1776,15 @@ struct TanhExpression final : Expression {
   ExpressionType type() const override { return ExpressionType::NONLINEAR; }
 
   double grad_l(double x, double, double parent_adjoint) const override {
-    return parent_adjoint / (std::cosh(x) * std::cosh(x));
+    auto c = std::cosh(x);
+    return parent_adjoint / (c * c);
   }
 
   ExpressionPtr grad_expr_l(
       const ExpressionPtr& x, const ExpressionPtr&,
       const ExpressionPtr& parent_adjoint) const override {
-    return parent_adjoint / (slp::detail::cosh(x) * slp::detail::cosh(x));
+    auto c = slp::detail::cosh(x);
+    return parent_adjoint / (c * c);
   }
 };
 
