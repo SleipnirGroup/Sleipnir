@@ -144,16 +144,8 @@ def test_product_of_sines():
                 expected_H[i, j] = y.value() / (
                     math.tan(x[i].value()) * math.tan(x[j].value())
                 )
-
-    actual_H = H.get().value()
-    for i in range(x.rows()):
-        for j in range(x.rows()):
-            assert actual_H[i, j] == pytest.approx(expected_H[i, j], abs=1e-15)
-
-    actual_H = H.value()
-    for i in range(x.rows()):
-        for j in range(x.rows()):
-            assert actual_H[i, j] == pytest.approx(expected_H[i, j], abs=1e-15)
+    np.testing.assert_allclose(H.get().value(), expected_H)
+    np.testing.assert_allclose(H.value().todense(), expected_H)
 
 
 def test_sum_of_squared_residuals():
@@ -183,16 +175,8 @@ def test_sum_of_squared_residuals():
             [0.0, 0.0, 0.0, -2.0, 2.0],
         ]
     )
-
-    actual_H = H.get().value()
-    for i in range(x.rows()):
-        for j in range(x.rows()):
-            assert actual_H[i, j] == expected_H[i, j]
-
-    actual_H = H.value()
-    for i in range(x.rows()):
-        for j in range(x.rows()):
-            assert actual_H[i, j] == expected_H[i, j]
+    assert (H.get().value() == expected_H).all()
+    assert (H.value().todense() == expected_H).all()
 
 
 def test_sum_of_squares():

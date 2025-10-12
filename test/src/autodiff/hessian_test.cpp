@@ -12,6 +12,7 @@
 #include <sleipnir/autodiff/jacobian.hpp>
 #include <sleipnir/autodiff/variable.hpp>
 
+#include "catch_matchers.hpp"
 #include "range.hpp"
 #include "util/scope_exit.hpp"
 
@@ -178,20 +179,8 @@ TEST_CASE("Hessian - Product of sines", "[Hessian]") {
       }
     }
   }
-
-  auto actual_H = H.get().value();
-  for (int i = 0; i < x.rows(); ++i) {
-    for (int j = 0; j < x.rows(); ++j) {
-      CHECK(actual_H(i, j) == Catch::Approx(expected_H(i, j)).margin(1e-15));
-    }
-  }
-
-  actual_H = H.value();
-  for (int i = 0; i < x.rows(); ++i) {
-    for (int j = 0; j < x.rows(); ++j) {
-      CHECK(actual_H(i, j) == Catch::Approx(expected_H(i, j)).margin(1e-15));
-    }
-  }
+  CHECK_THAT(H.get().value(), ApproxMatrix(expected_H, 1e-15));
+  CHECK_THAT(H.value().toDense(), ApproxMatrix(expected_H, 1e-15));
 }
 
 TEST_CASE("Hessian - Sum of squared residuals", "[Hessian]") {
@@ -217,18 +206,15 @@ TEST_CASE("Hessian - Sum of squared residuals", "[Hessian]") {
   CHECK(g[3] == -2 * x[2].value() + 4 * x[3].value() - 2 * x[4].value());
   CHECK(g[4] == -2 * x[3].value() + 2 * x[4].value());
 
-  auto H = slp::Hessian(y, x).value().toDense();
+  auto H = slp::Hessian(y, x);
 
   Eigen::MatrixXd expected_H{{2.0, -2.0, 0.0, 0.0, 0.0},
                              {-2.0, 4.0, -2.0, 0.0, 0.0},
                              {0.0, -2.0, 4.0, -2.0, 0.0},
                              {0.0, 0.0, -2.0, 4.0, -2.0},
                              {0.0, 0.0, 0.0, -2.0, 2.0}};
-  for (int i = 0; i < x.rows(); ++i) {
-    for (int j = 0; j < x.rows(); ++j) {
-      CHECK(H(i, j) == expected_H(i, j));
-    }
-  }
+  CHECK(H.get().value() == expected_H);
+  CHECK(H.value().toDense() == expected_H);
 }
 
 TEST_CASE("Hessian - Sum of squares", "[Hessian]") {
