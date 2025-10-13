@@ -19,5 +19,4 @@ includeOtherLibs {
   ^catch2/
   ^gch/
   ^nanobind/
-  ^sleipnir/
 }
