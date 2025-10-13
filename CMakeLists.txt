@@ -1,54 +1,12 @@
-# Disable in-source builds to prevent source tree corruption
-if("${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}")
-    message(
-        FATAL_ERROR
-        "
-FATAL: In-source builds are not allowed.
-       You should create a separate directory for build files.
-"
-    )
-endif()
-
 cmake_minimum_required(VERSION 3.21)
-set(CMAKE_MODULE_PATH
-    ${CMAKE_MODULE_PATH}
-    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules"
-)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-# Make `GIT_SUBMODULES ""` initialize no submodules
-cmake_policy(SET CMP0097 NEW)
-
-# Set default build type to release with debug info (i.e. release mode
-# optimizations are performed, but debug info still exists).
+# Set default build type to release with debug info
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "" FORCE)
 endif()
 
 project(Sleipnir LANGUAGES CXX)
-
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-
-# Use, i.e. don't skip the full RPATH for the build tree
-set(CMAKE_SKIP_BUILD_RPATH FALSE)
-
-# When building, don't use the install RPATH already (but later on when
-# installing)
-set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-
-# Add the automatically determined parts of the RPATH which point to directories
-# outside the build tree to the install RPATH
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-
-# The RPATH to be used when installing, but only if it's not a system directory
-list(
-    FIND
-    CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES
-    "${CMAKE_INSTALL_PREFIX}/lib"
-    isSystemDir
-)
-if("${isSystemDir}" STREQUAL "-1")
-    list(APPEND CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-endif()
 
 # Generate compile_commands.json by default
 if(NOT CMAKE_EXPORT_COMPILE_COMMANDS)
@@ -56,6 +14,10 @@ if(NOT CMAKE_EXPORT_COMPILE_COMMANDS)
 endif()
 
 include(BuildTypes)
+include(CMakePackageConfigHelpers)
+include(CTest)
+include(CompilerFlags)
+include(FetchContent)
 
 # Control where the static and shared libraries are built so that on Windows,
 # we don't need to tinker with the path to run the executable
@@ -63,13 +25,10 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
 
-option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
-
-set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS FALSE)
-
 option(BUILD_BENCHMARKS "Build CasADi and Sleipnir benchmarks" OFF)
 option(BUILD_EXAMPLES "Build examples" OFF)
 option(BUILD_PYTHON "Build Python module" OFF)
+option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 option(DISABLE_DIAGNOSTICS "Disable diagnostics support at compile-time" OFF)
 option(
     ENABLE_BOUND_PROJECTION
@@ -77,27 +36,26 @@ option(
     OFF
 )
 
-include(CompilerFlags)
-
-file(GLOB_RECURSE Sleipnir_src src/*.cpp)
-add_library(Sleipnir ${Sleipnir_src})
-add_library(Sleipnir::Sleipnir ALIAS Sleipnir)
-compiler_flags(Sleipnir)
-target_include_directories(Sleipnir PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
-
-set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
-
-set_target_properties(Sleipnir PROPERTIES DEBUG_POSTFIX "d")
-
-set_property(TARGET Sleipnir PROPERTY FOLDER "libraries")
-target_compile_definitions(Sleipnir PRIVATE SLEIPNIR_EXPORTS)
-
-include(CTest)
-include(FetchContent)
-
 # Options for using a package manager (e.g., vcpkg) for certain dependencies
 option(USE_SYSTEM_EIGEN "Use system eigen" OFF)
 option(USE_SYSTEM_NANOBIND "Use system nanobind" OFF)
+
+file(GLOB_RECURSE Sleipnir_src src/*.cpp)
+
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS FALSE)
+add_library(Sleipnir ${Sleipnir_src})
+add_library(Sleipnir::Sleipnir ALIAS Sleipnir)
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+
+compiler_flags(Sleipnir)
+target_include_directories(Sleipnir PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_compile_definitions(Sleipnir PRIVATE SLEIPNIR_EXPORTS)
+target_include_directories(
+    Sleipnir
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+)
 
 # Required for std::async()
 find_package(Threads)
@@ -150,13 +108,6 @@ if(BUILD_TESTING AND NOT CMAKE_CROSSCOMPILING)
     FetchContent_MakeAvailable(Catch2)
 endif()
 
-target_include_directories(
-    Sleipnir
-    PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:include>
-)
-
 install(
     TARGETS Sleipnir
     COMPONENT Sleipnir
@@ -174,8 +125,6 @@ install(
     NAMESPACE Sleipnir::
     DESTINATION lib/cmake/Sleipnir
 )
-
-include(CMakePackageConfigHelpers)
 
 # Generate the config file that includes the exports
 configure_package_config_file(
@@ -431,7 +380,7 @@ if(BUILD_PYTHON)
         )
 
         # Generate docs for the Python module
-        include(cmake/modules/Pybind11Mkdoc.cmake)
+        include(Pybind11Mkdoc)
         pybind11_mkdoc(_jormungandr "${sleipnir_headers}")
         add_dependencies(_jormungandr _jormungandr_docstrings)
     endif()
