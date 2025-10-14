@@ -6,12 +6,9 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "" FORCE)
 endif()
 
-project(Sleipnir LANGUAGES CXX)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# Generate compile_commands.json by default
-if(NOT CMAKE_EXPORT_COMPILE_COMMANDS)
-    set(CMAKE_EXPORT_COMPILE_COMMANDS "YES" CACHE STRING "" FORCE)
-endif()
+project(Sleipnir LANGUAGES CXX)
 
 include(BuildTypes)
 include(CMakePackageConfigHelpers)
@@ -77,7 +74,8 @@ if(NOT USE_SYSTEM_EIGEN)
     FetchContent_Declare(
         Eigen3
         GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
-        GIT_TAG 5.0.0
+        # master on 2025-10-14
+        GIT_TAG da55dd1471db1fb4a6fa0c385d5db40a2c9949ef
     )
     FetchContent_MakeAvailable(Eigen3)
 else()
