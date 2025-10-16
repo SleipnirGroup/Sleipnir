@@ -72,9 +72,13 @@ class AdjointExpressionGraph {
       auto& rhs = node->args[1];
 
       if (lhs != nullptr) {
-        lhs->adjoint_expr += node->grad_expr_l(lhs, rhs, node->adjoint_expr);
         if (rhs != nullptr) {
+          // Binary operator
+          lhs->adjoint_expr += node->grad_expr_l(lhs, rhs, node->adjoint_expr);
           rhs->adjoint_expr += node->grad_expr_r(lhs, rhs, node->adjoint_expr);
+        } else {
+          // Unary operator
+          lhs->adjoint_expr += node->grad_expr_l(lhs, rhs, node->adjoint_expr);
         }
       }
     }
@@ -139,9 +143,11 @@ class AdjointExpressionGraph {
 
       if (lhs != nullptr) {
         if (rhs != nullptr) {
+          // Binary operator
           lhs->adjoint += node->grad_l(lhs->val, rhs->val, node->adjoint);
           rhs->adjoint += node->grad_r(lhs->val, rhs->val, node->adjoint);
         } else {
+          // Unary operator
           lhs->adjoint += node->grad_l(lhs->val, 0.0, node->adjoint);
         }
       }
