@@ -38,7 +38,7 @@ struct ApproxMatrix : Catch::Matchers::MatcherGenericBase {
   }
 
   std::string describe() const override {
-    return (std::stringstream{} << "\n==\n" << mat).str();
+    return (std::ostringstream{} << "\n==\n" << mat).str();
   }
 
  private:
