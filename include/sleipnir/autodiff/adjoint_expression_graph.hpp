@@ -111,6 +111,8 @@ class AdjointExpressionGraph {
   void append_gradient_triplets(
       gch::small_vector<Eigen::Triplet<double>>& triplets, int row,
       const VariableMatrix& wrt) const {
+    slp_assert(wrt.cols() == 1);
+
     // Read docs/algorithms.md#Reverse_accumulation_automatic_differentiation
     // for background on reverse accumulation automatic differentiation.
 
