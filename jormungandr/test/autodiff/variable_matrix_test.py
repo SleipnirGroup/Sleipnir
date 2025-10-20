@@ -16,20 +16,20 @@ def test_assignment_to_default():
     assert mat.rows() == 2
     assert mat.cols() == 2
     assert mat.shape == (2, 2)
-    assert mat[0, 0] == 0.0
-    assert mat[0, 1] == 0.0
-    assert mat[1, 0] == 0.0
-    assert mat[1, 1] == 0.0
+    assert mat[0, 0].value() == 0.0
+    assert mat[0, 1].value() == 0.0
+    assert mat[1, 0].value() == 0.0
+    assert mat[1, 1].value() == 0.0
 
     mat[0, 0].set_value(1.0)
     mat[0, 1].set_value(2.0)
     mat[1, 0].set_value(3.0)
     mat[1, 1].set_value(4.0)
 
-    assert mat[0, 0] == 1.0
-    assert mat[0, 1] == 2.0
-    assert mat[1, 0] == 3.0
-    assert mat[1, 1] == 4.0
+    assert mat[0, 0].value() == 1.0
+    assert mat[0, 1].value() == 2.0
+    assert mat[1, 0].value() == 3.0
+    assert mat[1, 1].value() == 4.0
 
 
 def test_slicing():
