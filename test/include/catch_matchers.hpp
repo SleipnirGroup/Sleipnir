@@ -15,7 +15,7 @@ template <typename Derived>
   requires std::derived_from<Derived, Eigen::DenseBase<Derived>> ||
            std::derived_from<Derived, Eigen::SparseCompressedBase<Derived>>
 struct ApproxMatrix : Catch::Matchers::MatcherGenericBase {
-  ApproxMatrix(const Derived& mat, double abs_error)
+  ApproxMatrix(const Derived& mat, typename Derived::Scalar abs_error)
       : mat{mat}, abs_error{abs_error} {}
 
   template <typename OtherDerived>
@@ -23,13 +23,15 @@ struct ApproxMatrix : Catch::Matchers::MatcherGenericBase {
              std::derived_from<OtherDerived,
                                Eigen::SparseCompressedBase<OtherDerived>>
   bool match(const OtherDerived& other) const {
+    using std::abs;
+
     if (mat.rows() != other.rows() || mat.cols() != other.cols()) {
       return false;
     }
 
     for (Eigen::Index row = 0; row < mat.rows(); ++row) {
       for (Eigen::Index col = 0; col < mat.cols(); ++col) {
-        if (std::abs(mat.coeff(row, col) - other.coeff(row, col)) > abs_error) {
+        if (abs(mat.coeff(row, col) - other.coeff(row, col)) > abs_error) {
           return false;
         }
       }
@@ -44,5 +46,5 @@ struct ApproxMatrix : Catch::Matchers::MatcherGenericBase {
 
  private:
   const Derived& mat;
-  double abs_error;
+  typename Derived::Scalar abs_error;
 };

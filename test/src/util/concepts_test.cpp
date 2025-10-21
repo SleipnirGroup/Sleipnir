@@ -8,9 +8,9 @@
 using EigBlk = Eigen::Block<Eigen::MatrixXd>;
 using EigMat = Eigen::MatrixXd;
 
-using SlpBlk = slp::VariableBlock<slp::VariableMatrix>;
-using SlpMat = slp::VariableMatrix;
-using SlpVar = slp::Variable;
+using SlpBlk = slp::VariableBlock<slp::VariableMatrix<double>>;
+using SlpMat = slp::VariableMatrix<double>;
+using SlpVar = slp::Variable<double>;
 
 // SleipnirType
 static_assert(!slp::SleipnirType<EigBlk>);
@@ -49,19 +49,19 @@ static_assert(!slp::EigenMatrixLike<SlpMat>);
 static_assert(!slp::EigenMatrixLike<SlpVar>);
 
 // SleipnirMatrixLike
-static_assert(!slp::SleipnirMatrixLike<EigBlk>);
-static_assert(!slp::SleipnirMatrixLike<EigMat>);
-static_assert(!slp::SleipnirMatrixLike<double>);
-static_assert(!slp::SleipnirMatrixLike<int>);
-static_assert(slp::SleipnirMatrixLike<SlpBlk>);
-static_assert(slp::SleipnirMatrixLike<SlpMat>);
-static_assert(!slp::SleipnirMatrixLike<SlpVar>);
+static_assert(!slp::SleipnirMatrixLike<EigBlk, double>);
+static_assert(!slp::SleipnirMatrixLike<EigMat, double>);
+static_assert(!slp::SleipnirMatrixLike<double, double>);
+static_assert(!slp::SleipnirMatrixLike<int, double>);
+static_assert(slp::SleipnirMatrixLike<SlpBlk, double>);
+static_assert(slp::SleipnirMatrixLike<SlpMat, double>);
+static_assert(!slp::SleipnirMatrixLike<SlpVar, double>);
 
 // SleipnirScalarLike
-static_assert(!slp::SleipnirScalarLike<EigBlk>);
-static_assert(!slp::SleipnirScalarLike<EigMat>);
-static_assert(!slp::SleipnirScalarLike<double>);
-static_assert(!slp::SleipnirScalarLike<int>);
-static_assert(!slp::SleipnirScalarLike<SlpBlk>);
-static_assert(!slp::SleipnirScalarLike<SlpMat>);
-static_assert(slp::SleipnirScalarLike<SlpVar>);
+static_assert(!slp::SleipnirScalarLike<EigBlk, double>);
+static_assert(!slp::SleipnirScalarLike<EigMat, double>);
+static_assert(!slp::SleipnirScalarLike<double, double>);
+static_assert(!slp::SleipnirScalarLike<int, double>);
+static_assert(!slp::SleipnirScalarLike<SlpBlk, double>);
+static_assert(!slp::SleipnirScalarLike<SlpMat, double>);
+static_assert(slp::SleipnirScalarLike<SlpVar, double>);

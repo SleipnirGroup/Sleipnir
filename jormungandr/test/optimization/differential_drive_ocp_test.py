@@ -10,8 +10,8 @@ from jormungandr.optimization import (
     TranscriptionMethod,
 )
 from jormungandr.test.differential_drive_util import (
-    differential_drive_dynamics,
     differential_drive_dynamics_double,
+    differential_drive_dynamics_variable,
 )
 from jormungandr.test.rk4 import rk4
 
@@ -30,7 +30,7 @@ def test_differential_drive_ocp():
         2,
         min_timestep,
         N,
-        differential_drive_dynamics,
+        differential_drive_dynamics_variable,
         DynamicsType.EXPLICIT_ODE,
         TimestepMethod.VARIABLE_SINGLE,
         TranscriptionMethod.DIRECT_TRANSCRIPTION,

@@ -45,7 +45,6 @@ add_library(Sleipnir::Sleipnir ALIAS Sleipnir)
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 
 compiler_flags(Sleipnir)
-target_include_directories(Sleipnir PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_compile_definitions(Sleipnir PRIVATE SLEIPNIR_EXPORTS)
 target_include_directories(
     Sleipnir
@@ -74,8 +73,8 @@ if(NOT USE_SYSTEM_EIGEN)
     FetchContent_Declare(
         Eigen3
         GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
-        # master on 2025-10-14
-        GIT_TAG da55dd1471db1fb4a6fa0c385d5db40a2c9949ef
+        # master on 2025-10-27
+        GIT_TAG 9234883914cc84dd412a3f600d3bfc09e364388c
     )
     FetchContent_MakeAvailable(Eigen3)
 else()
@@ -202,9 +201,7 @@ if(BUILD_TESTING AND NOT CMAKE_CROSSCOMPILING)
     compiler_flags(sleipnir_test)
     target_include_directories(
         sleipnir_test
-        PRIVATE
-            ${CMAKE_CURRENT_SOURCE_DIR}/src
-            ${CMAKE_CURRENT_SOURCE_DIR}/test/include
+        PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/test/include
     )
     target_link_libraries(sleipnir_test Sleipnir Catch2::Catch2WithMain)
     if(NOT CMAKE_TOOLCHAIN_FILE)

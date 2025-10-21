@@ -19,7 +19,7 @@ Named after Odin's eight-legged horse from Norse mythology, Sleipnir is a linear
 
 int main() {
   // Find the x, y pair with the largest product for which x + 3y = 36
-  slp::Problem problem;
+  slp::Problem<double> problem;
 
   auto x = problem.decision_variable();
   auto y = problem.decision_variable();
@@ -116,6 +116,8 @@ Invoking SQP solver
 Exit: success
 x = 17.99999999999167, y = 6.0000000000027764
 ```
+
+The C++ API also supports arbitrary scalar types, so users can specify higher precision floating-point types at the cost of speed.
 
 Sleipnir's internals are intended to be readable by those who aren't domain experts with links to explanatory material for its algorithms.
 

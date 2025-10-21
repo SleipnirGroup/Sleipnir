@@ -6,8 +6,8 @@ import pytest
 from jormungandr.autodiff import ExpressionType
 from jormungandr.optimization import ExitStatus, Problem
 from jormungandr.test.cart_pole_util import (
-    cart_pole_dynamics,
     cart_pole_dynamics_double,
+    cart_pole_dynamics_variable,
 )
 from jormungandr.test.rk4 import rk4
 
@@ -58,7 +58,7 @@ def test_cart_pole_problem():
     for k in range(N):
         problem.subject_to(
             X[:, k + 1 : k + 2]
-            == rk4(cart_pole_dynamics, X[:, k : k + 1], U[:, k : k + 1], dt)
+            == rk4(cart_pole_dynamics_variable, X[:, k : k + 1], U[:, k : k + 1], dt)
         )
 
     # Minimize sum squared inputs

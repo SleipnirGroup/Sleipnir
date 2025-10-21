@@ -4,8 +4,8 @@ import pytest
 from jormungandr.autodiff import ExpressionType
 from jormungandr.optimization import ExitStatus, Problem
 from jormungandr.test.differential_drive_util import (
-    differential_drive_dynamics,
     differential_drive_dynamics_double,
+    differential_drive_dynamics_variable,
 )
 from jormungandr.test.rk4 import rk4
 
@@ -51,7 +51,12 @@ def test_differential_drive_problem():
     for k in range(N):
         problem.subject_to(
             X[:, k + 1 : k + 2]
-            == rk4(differential_drive_dynamics, X[:, k : k + 1], U[:, k : k + 1], dt)
+            == rk4(
+                differential_drive_dynamics_variable,
+                X[:, k : k + 1],
+                U[:, k : k + 1],
+                dt,
+            )
         )
 
     # Minimize sum squared states and inputs
