@@ -10,19 +10,6 @@
 namespace slp {
 
 template <typename T>
-concept ScalarLike = requires(std::decay_t<T> t) {
-  t + 1.0;
-  t = 1.0;
-};
-
-template <typename T>
-concept SleipnirScalarLike = requires(std::decay_t<T> t) {
-  t + 1.0;
-  t = 1.0;
-  { t.value() } -> std::same_as<double>;
-};
-
-template <typename T>
 concept EigenMatrixLike =
     std::derived_from<std::decay_t<T>, Eigen::MatrixBase<std::decay_t<T>>>;
 
@@ -34,9 +21,22 @@ concept SleipnirMatrixLike = requires(std::decay_t<T> t) {
 } && !EigenMatrixLike<T>;
 
 template <typename T>
-concept SleipnirType = SleipnirScalarLike<T> || SleipnirMatrixLike<T>;
+concept MatrixLike = EigenMatrixLike<T> || SleipnirMatrixLike<T>;
 
 template <typename T>
-concept MatrixLike = SleipnirMatrixLike<T> || EigenMatrixLike<T>;
+concept SleipnirScalarLike = requires(std::decay_t<T> t) {
+  t + 1.0;
+  t = 1.0;
+  { t.value() } -> std::same_as<double>;
+};
+
+template <typename T>
+concept ScalarLike = requires(std::decay_t<T> t) {
+  t + 1.0;
+  t = 1.0;
+};
+
+template <typename T>
+concept SleipnirType = SleipnirScalarLike<T> || SleipnirMatrixLike<T>;
 
 }  // namespace slp
