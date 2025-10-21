@@ -27,7 +27,7 @@ concept EigenMatrixLike =
     std::derived_from<std::decay_t<T>, Eigen::MatrixBase<std::decay_t<T>>>;
 
 template <typename T>
-concept SleipnirMatrixLike = requires(std::decay_t<T> t, int rows, int cols) {
+concept SleipnirMatrixLike = requires(std::decay_t<T> t) {
   t.rows();
   t.cols();
   { t.value() } -> std::same_as<Eigen::MatrixXd>;
