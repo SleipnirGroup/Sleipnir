@@ -1405,7 +1405,7 @@ inline ExpressionPtr pow(const ExpressionPtr& base, const ExpressionPtr& power);
 /**
  * Derived expression type for std::pow().
  *
- * @tparam Expression type.
+ * @tparam T Expression type.
  */
 template <ExpressionType T>
 struct PowExpression final : Expression {
