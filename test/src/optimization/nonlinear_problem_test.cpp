@@ -155,6 +155,9 @@ TEST_CASE("Problem - Conflicting bounds", "[Problem]") {
 
 TEST_CASE("Problem - Wachter and Biegler line search failure", "[Problem]") {
   // See example 19.2 of [1]
+  //
+  // [1] Nocedal, J. and Wright, S. "Numerical Optimization", 2nd. ed., Ch. 19.
+  //     Springer, 2006.
 
   slp::Problem problem;
 
