@@ -432,12 +432,6 @@ void bind_variable_block(nb::class_<VariableBlock<VariableMatrix>>& cls) {
       },
       nb::is_operator(), "rhs"_a);
   cls.def(-nb::self);
-  cls.def(
-      "__pow__",
-      [](const VariableBlock<VariableMatrix>& self, int power) {
-        return slp::pow(VariableMatrix{self}, power);
-      },
-      nb::is_operator(), "power"_a);
   cls.def_prop_ro("T", &VariableBlock<VariableMatrix>::T,
                   DOC(slp, VariableBlock, T));
   cls.def("rows", &VariableBlock<VariableMatrix>::rows,
