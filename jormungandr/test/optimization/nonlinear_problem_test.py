@@ -137,6 +137,9 @@ def test_conflicting_bounds():
 
 def test_wachter_and_biegler_line_search_failure():
     # See example 19.2 of [1]
+    #
+    # [1] Nocedal, J. and Wright, S. "Numerical Optimization", 2nd. ed., Ch. 19.
+    #     Springer, 2006.
 
     problem = Problem()
 
@@ -161,8 +164,7 @@ def test_wachter_and_biegler_line_search_failure():
 
     # FIXME: Fails with "line search failed"
     assert problem.solve(diagnostics=True) == ExitStatus.LINE_SEARCH_FAILED
-    return
 
-    assert x.value() == 1.0
-    assert s1.value() == 0.0
-    assert s2.value() == 0.5
+    # assert x.value() == 1.0
+    # assert s1.value() == 0.0
+    # assert s2.value() == 0.5
