@@ -54,21 +54,22 @@ TEST_CASE("VariableMatrix - Assignment aliasing", "[VariableMatrix]") {
   slp::VariableMatrix A{{1.0, 2.0}, {3.0, 4.0}};
   slp::VariableMatrix B{{5.0, 6.0}, {7.0, 8.0}};
 
+  // A and B initially contain different values
   Eigen::MatrixXd expected_A{{1.0, 2.0}, {3.0, 4.0}};
   Eigen::MatrixXd expected_B{{5.0, 6.0}, {7.0, 8.0}};
-  CHECK(A == expected_A);
-  CHECK(B == expected_B);
+  CHECK(A.value() == expected_A);
+  CHECK(B.value() == expected_B);
 
+  // Make A point to B's storage
   A = B;
+  CHECK(A.value() == expected_B);
+  CHECK(B.value() == expected_B);
 
-  CHECK(A == expected_B);
-  CHECK(B == expected_B);
-
+  // Changes to B should be reflected in A
   B[0, 0].set_value(2.0);
   expected_B(0, 0) = 2.0;
-
-  CHECK(A == expected_B);
-  CHECK(B == expected_B);
+  CHECK(A.value() == expected_B);
+  CHECK(B.value() == expected_B);
 }
 
 TEST_CASE("VariableMatrix - Block() member function", "[VariableMatrix]") {
