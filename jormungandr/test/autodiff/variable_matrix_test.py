@@ -32,6 +32,28 @@ def test_assignment_to_default():
     assert mat[1, 1].value() == 4.0
 
 
+def test_assignment_aliasing():
+    A = VariableMatrix([[1.0, 2.0], [3.0, 4.0]])
+    B = VariableMatrix([[5.0, 6.0], [7.0, 8.0]])
+
+    # A and B initially contain different values
+    expected_A = np.array([[1.0, 2.0], [3.0, 4.0]])
+    expected_B = np.array([[5.0, 6.0], [7.0, 8.0]])
+    assert (A.value() == expected_A).all()
+    assert (B.value() == expected_B).all()
+
+    # Make A point to B's storage
+    A = B
+    assert (A.value() == expected_B).all()
+    assert (B.value() == expected_B).all()
+
+    # Changes to B should be reflected in A
+    B[0, 0].set_value(2.0)
+    expected_B[0, 0] = 2.0
+    assert (A.value() == expected_B).all()
+    assert (B.value() == expected_B).all()
+
+
 def test_slicing():
     mat = VariableMatrix(
         [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]]
