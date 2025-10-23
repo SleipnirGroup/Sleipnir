@@ -284,7 +284,7 @@ TEST_CASE("Hessian - Rosenbrock", "[Hessian]") {
   }
 }
 
-TEST_CASE("Hessian - Edge Pushing example 1") {
+TEST_CASE("Hessian - Edge Pushing example 1", "[Hessian]") {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
