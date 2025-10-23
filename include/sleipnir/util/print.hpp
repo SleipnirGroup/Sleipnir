@@ -18,7 +18,7 @@ namespace slp {
  * Wrapper around std::print() that squelches write failure exceptions.
  */
 template <typename... T>
-inline void print(std::format_string<T...> fmt, T&&... args) {
+void print(std::format_string<T...> fmt, T&&... args) {
   try {
     std::print(fmt, std::forward<T>(args)...);
   } catch (const std::system_error&) {
@@ -29,7 +29,7 @@ inline void print(std::format_string<T...> fmt, T&&... args) {
  * Wrapper around std::print() that squelches write failure exceptions.
  */
 template <typename... T>
-inline void print(std::FILE* f, std::format_string<T...> fmt, T&&... args) {
+void print(std::FILE* f, std::format_string<T...> fmt, T&&... args) {
   try {
     std::print(f, fmt, std::forward<T>(args)...);
   } catch (const std::system_error&) {
@@ -40,7 +40,7 @@ inline void print(std::FILE* f, std::format_string<T...> fmt, T&&... args) {
  * Wrapper around std::println() that squelches write failure exceptions.
  */
 template <typename... T>
-inline void println(std::format_string<T...> fmt, T&&... args) {
+void println(std::format_string<T...> fmt, T&&... args) {
   try {
     std::println(fmt, std::forward<T>(args)...);
   } catch (const std::system_error&) {
@@ -51,7 +51,7 @@ inline void println(std::format_string<T...> fmt, T&&... args) {
  * Wrapper around std::println() that squelches write failure exceptions.
  */
 template <typename... T>
-inline void println(std::FILE* f, std::format_string<T...> fmt, T&&... args) {
+void println(std::FILE* f, std::format_string<T...> fmt, T&&... args) {
   try {
     std::println(f, fmt, std::forward<T>(args)...);
   } catch (const std::system_error&) {
@@ -61,10 +61,10 @@ inline void println(std::FILE* f, std::format_string<T...> fmt, T&&... args) {
 #else
 
 template <typename... Args>
-inline void print([[maybe_unused]] Args&&... args) {}
+void print([[maybe_unused]] Args&&... args) {}
 
 template <typename... Args>
-inline void println([[maybe_unused]] Args&&... args) {}
+void println([[maybe_unused]] Args&&... args) {}
 
 #endif
 
