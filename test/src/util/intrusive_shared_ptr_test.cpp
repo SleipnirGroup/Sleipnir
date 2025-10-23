@@ -14,11 +14,11 @@ struct Mock {
   uint32_t ref_count = 0;
 };
 
-inline void inc_ref_count(Mock* obj) {
+void inc_ref_count(Mock* obj) {
   ++obj->ref_count;
 }
 
-inline void dec_ref_count(Mock* obj) {
+void dec_ref_count(Mock* obj) {
   if (--obj->ref_count == 0) {
     delete obj;
   }

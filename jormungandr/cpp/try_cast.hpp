@@ -16,7 +16,7 @@ namespace slp {
  * Converts the given nb::object to a C++ type.
  */
 template <typename T>
-inline std::optional<T> try_cast(const nb::object& obj) {
+std::optional<T> try_cast(const nb::object& obj) {
   if (nb::isinstance<T>(obj)) {
     return nb::cast<T>(obj);
   } else {
@@ -28,7 +28,7 @@ inline std::optional<T> try_cast(const nb::object& obj) {
  * Converts the given nb::ndarray to an Eigen matrix.
  */
 template <typename T>
-inline std::optional<Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>>
+std::optional<Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>>
 try_cast_to_eigen(const nb::object& obj) {
   if (nb::isinstance<nb::ndarray<T>>(obj)) {
     auto input = nb::cast<nb::ndarray<T>>(obj);
