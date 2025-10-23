@@ -34,7 +34,7 @@ def test_no_cost_unconstrained_2():
     problem = Problem()
 
     X = problem.decision_variable(2, 3)
-    X.set_value(np.array([[1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]))
+    X.set_value(np.ones((2, 3)))
 
     assert problem.cost_function_type() == ExpressionType.NONE
     assert problem.equality_constraint_type() == ExpressionType.NONE
