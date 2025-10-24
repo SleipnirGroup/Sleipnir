@@ -38,7 +38,7 @@ TEST_CASE("Problem - No cost, unconstrained", "[Problem]") {
     slp::Problem problem;
 
     auto X = problem.decision_variable(2, 3);
-    X.set_value(Eigen::Matrix<double, 2, 3>{{1.0, 1.0, 1.0}, {1.0, 1.0, 1.0}});
+    X.set_value(Eigen::Matrix<double, 2, 3>::Ones());
 
     CHECK(problem.cost_function_type() == slp::ExpressionType::NONE);
     CHECK(problem.equality_constraint_type() == slp::ExpressionType::NONE);
