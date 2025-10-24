@@ -104,8 +104,7 @@ TEST_CASE("decision_variable - Dynamic matrix init assign",
 
   // Matrix assignment; element comparison
   {
-    Eigen::MatrixXd expected{3, 2};
-    expected << 1.0, 2.0, 3.0, 4.0, 5.0, 6.0;
+    Eigen::Matrix<double, 3, 2> expected{{1.0, 2.0}, {3.0, 4.0}, {5.0, 6.0}};
     z.set_value(expected);
     CHECK(z.value(0, 0) == 1.0);
     CHECK(z.value(0, 1) == 2.0);
@@ -117,31 +116,28 @@ TEST_CASE("decision_variable - Dynamic matrix init assign",
 
   // Matrix assignment; matrix comparison
   {
-    Eigen::MatrixXd expected{3, 2};
-    expected << 7.0, 8.0, 9.0, 10.0, 11.0, 12.0;
+    Eigen::Matrix<double, 3, 2> expected{{7.0, 8.0}, {9.0, 10.0}, {11.0, 12.0}};
     z.set_value(expected);
     CHECK(z.value() == expected);
   }
 
   // Block assignment
   {
-    Eigen::MatrixXd expected_block{2, 1};
-    expected_block << 1.0, 1.0;
+    Eigen::Matrix<double, 2, 1> expected_block{{1.0}, {1.0}};
     z.block(0, 0, 2, 1).set_value(expected_block);
 
-    Eigen::MatrixXd expected_result{3, 2};
-    expected_result << 1.0, 8.0, 1.0, 10.0, 11.0, 12.0;
+    Eigen::Matrix<double, 3, 2> expected_result{
+        {1.0, 8.0}, {1.0, 10.0}, {11.0, 12.0}};
     CHECK(z.value() == expected_result);
   }
 
   // Segment assignment
   {
-    Eigen::MatrixXd expected_block{2, 1};
-    expected_block << 1.0, 1.0;
+    Eigen::Matrix<double, 2, 1> expected_block{{1.0}, {1.0}};
     z.segment(0, 2).set_value(expected_block);
 
-    Eigen::MatrixXd expected_result{3, 2};
-    expected_result << 1.0, 8.0, 1.0, 10.0, 11.0, 12.0;
+    Eigen::Matrix<double, 3, 2> expected_result{
+        {1.0, 8.0}, {1.0, 10.0}, {11.0, 12.0}};
     CHECK(z.value() == expected_result);
   }
 }
