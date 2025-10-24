@@ -132,7 +132,7 @@ TEST_CASE("Problem - Equality-constrained", "[Problem]") {
 
     problem.minimize(x.T() * x);
 
-    problem.subject_to(x == Eigen::Matrix<double, 2, 1>{{3.0, 3.0}});
+    problem.subject_to(x == Eigen::Vector<double, 2>{{3.0}, {3.0}});
 
     CHECK(problem.cost_function_type() == slp::ExpressionType::QUADRATIC);
     CHECK(problem.equality_constraint_type() == slp::ExpressionType::LINEAR);
