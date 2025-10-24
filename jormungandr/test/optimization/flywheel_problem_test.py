@@ -12,9 +12,9 @@ def near(expected, actual, tolerance):
 
 
 def test_flywheel_problem():
-    T = 5.0
+    TOTAL_TIME = 5.0
     dt = 0.005
-    N = int(T / dt)
+    N = int(TOTAL_TIME / dt)
 
     # Flywheel model:
     # States: [velocity]

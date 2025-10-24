@@ -17,9 +17,9 @@ def lerp(a, b, t):
 
 
 def test_cart_pole_problem():
-    T = 5.0  # s
+    TOTAL_TIME = 5.0  # s
     dt = 0.05  # s
-    N = int(T / dt)
+    N = int(TOTAL_TIME / dt)
 
     u_max = 20.0  # N
     d_max = 2.0  # m

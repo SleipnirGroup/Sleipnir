@@ -26,9 +26,9 @@ def flywheel_test(
     dynamics_type: DynamicsType,
     transcription_method: TranscriptionMethod,
 ):
-    T = 5.0  # s
+    TOTAL_TIME = 5.0  # s
     dt = 0.005  # s
-    N = int(T / dt)
+    N = int(TOTAL_TIME / dt)
 
     # Flywheel model:
     # States: [velocity]

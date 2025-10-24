@@ -31,9 +31,9 @@ void flywheel_test(
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  constexpr std::chrono::duration<double> T = 5s;
+  constexpr std::chrono::duration<double> TOTAL_TIME = 5s;
   constexpr std::chrono::duration<double> dt = 5ms;
-  constexpr int N = T / dt;
+  constexpr int N = TOTAL_TIME / dt;
 
   // Flywheel model:
   // States: [velocity]
