@@ -20,9 +20,9 @@ def lerp(a, b, t):
 
 
 def test_cart_pole_ocp():
-    T = 5  # s
+    TOTAL_TIME = 5  # s
     dt = 0.05  # s
-    N = int(T / dt)
+    N = int(TOTAL_TIME / dt)
 
     u_max = 20.0  # N
     d_max = 2.0  # m

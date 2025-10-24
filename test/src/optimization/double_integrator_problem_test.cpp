@@ -19,9 +19,9 @@ TEST_CASE("Problem - Double integrator", "[Problem]") {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  constexpr std::chrono::duration<double> T = 3.5s;
+  constexpr std::chrono::duration<double> TOTAL_TIME = 3.5s;
   constexpr std::chrono::duration<double> dt = 5ms;
-  constexpr int N = T / dt;
+  constexpr int N = TOTAL_TIME / dt;
 
   constexpr double r = 2.0;  // m
 

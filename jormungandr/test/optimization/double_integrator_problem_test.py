@@ -6,9 +6,9 @@ from jormungandr.optimization import ExitStatus, Problem
 
 
 def test_double_integrator_problem():
-    T = 3.5
+    TOTAL_TIME = 3.5
     dt = 0.005
-    N = int(T / dt)
+    N = int(TOTAL_TIME / dt)
 
     r = 2.0
 

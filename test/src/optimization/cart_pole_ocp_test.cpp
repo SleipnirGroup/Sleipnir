@@ -22,9 +22,9 @@ TEST_CASE("OCP - Cart-pole", "[OCP]") {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  constexpr std::chrono::duration<double> T = 5s;
+  constexpr std::chrono::duration<double> TOTAL_TIME = 5s;
   constexpr std::chrono::duration<double> dt = 50ms;
-  constexpr int N = T / dt;
+  constexpr int N = TOTAL_TIME / dt;
 
   constexpr double u_max = 20.0;  // N
   constexpr double d_max = 2.0;   // m
