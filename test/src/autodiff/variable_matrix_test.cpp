@@ -10,17 +10,20 @@
 
 TEST_CASE("VariableMatrix - Construct from Eigen::MatrixBase",
           "[VariableMatrix]") {
-  slp::VariableMatrix mat{Eigen::MatrixXd{{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}}};
+  slp::VariableMatrix mat{
+      Eigen::Matrix<double, 2, 3>{{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}}};
 
-  Eigen::MatrixXd expected{{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}};
+  Eigen::Matrix<double, 2, 3> expected{{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}};
   CHECK(mat.value() == expected);
 }
 
 TEST_CASE("VariableMatrix - Construct from Eigen::DiagonalBase",
           "[VariableMatrix]") {
-  slp::VariableMatrix mat{Eigen::VectorXd{{1.0, 2.0, 3.0}}.asDiagonal()};
+  slp::VariableMatrix mat{
+      Eigen::Vector<double, 3>{{1.0, 2.0, 3.0}}.asDiagonal()};
 
-  Eigen::MatrixXd expected{{1.0, 0.0, 0.0}, {0.0, 2.0, 0.0}, {0.0, 0.0, 3.0}};
+  Eigen::Matrix<double, 3, 3> expected{
+      {1.0, 0.0, 0.0}, {0.0, 2.0, 0.0}, {0.0, 0.0, 3.0}};
   CHECK(mat.value() == expected);
 }
 
@@ -55,8 +58,8 @@ TEST_CASE("VariableMatrix - Assignment aliasing", "[VariableMatrix]") {
   slp::VariableMatrix B{{5.0, 6.0}, {7.0, 8.0}};
 
   // A and B initially contain different values
-  Eigen::MatrixXd expected_A{{1.0, 2.0}, {3.0, 4.0}};
-  Eigen::MatrixXd expected_B{{5.0, 6.0}, {7.0, 8.0}};
+  Eigen::Matrix2d expected_A{{1.0, 2.0}, {3.0, 4.0}};
+  Eigen::Matrix2d expected_B{{5.0, 6.0}, {7.0, 8.0}};
   CHECK(A.value() == expected_A);
   CHECK(B.value() == expected_B);
 
@@ -142,8 +145,8 @@ TEST_CASE("VariableMatrix - Slicing", "[VariableMatrix]") {
     auto s = mat[_, slp::Slice{_, _, 2}];
     CHECK(s.rows() == 4);
     CHECK(s.cols() == 2);
-    CHECK(s.value() ==
-          Eigen::MatrixXd{{1.0, 3.0}, {5.0, 7.0}, {9.0, 11.0}, {13.0, 15.0}});
+    CHECK(s.value() == Eigen::Matrix<double, 4, 2>{
+                           {1.0, 3.0}, {5.0, 7.0}, {9.0, 11.0}, {13.0, 15.0}});
   }
 
   // Slice from end with negative step for row and column
@@ -151,8 +154,8 @@ TEST_CASE("VariableMatrix - Slicing", "[VariableMatrix]") {
     auto s = mat[slp::Slice{_, _, -1}, slp::Slice{_, _, -2}];
     CHECK(s.rows() == 4);
     CHECK(s.cols() == 2);
-    CHECK(s.value() ==
-          Eigen::MatrixXd{{16.0, 14.0}, {12.0, 10.0}, {8.0, 6.0}, {4.0, 2.0}});
+    CHECK(s.value() == Eigen::Matrix<double, 4, 2>{
+                           {16.0, 14.0}, {12.0, 10.0}, {8.0, 6.0}, {4.0, 2.0}});
   }
 
   // Slice from start and column -1
@@ -160,7 +163,7 @@ TEST_CASE("VariableMatrix - Slicing", "[VariableMatrix]") {
     auto s = mat[slp::Slice{1, _}, -1];
     CHECK(s.rows() == 3);
     CHECK(s.cols() == 1);
-    CHECK(s.value() == Eigen::MatrixXd{{8.0}, {12.0}, {16.0}});
+    CHECK(s.value() == Eigen::Matrix<double, 3, 1>{{8.0}, {12.0}, {16.0}});
   }
 
   // Slice from start and column -2
@@ -168,7 +171,7 @@ TEST_CASE("VariableMatrix - Slicing", "[VariableMatrix]") {
     auto s = mat[slp::Slice{1, _}, -2];
     CHECK(s.rows() == 3);
     CHECK(s.cols() == 1);
-    CHECK(s.value() == Eigen::MatrixXd{{7.0}, {11.0}, {15.0}});
+    CHECK(s.value() == Eigen::Matrix<double, 3, 1>{{7.0}, {11.0}, {15.0}});
   }
 
   // Block assignment
@@ -176,8 +179,8 @@ TEST_CASE("VariableMatrix - Slicing", "[VariableMatrix]") {
     auto s = mat[slp::Slice{_, _, 2}, slp::Slice{_, _, 2}];
     CHECK(s.rows() == 2);
     CHECK(s.cols() == 2);
-    s = Eigen::MatrixXd{{17.0, 18.0}, {19.0, 20.0}};
-    CHECK(mat.value() == Eigen::MatrixXd{{17.0, 2.0, 18.0, 4.0},
+    s = Eigen::Matrix2d{{17.0, 18.0}, {19.0, 20.0}};
+    CHECK(mat.value() == Eigen::Matrix4d{{17.0, 2.0, 18.0, 4.0},
                                          {5.0, 6.0, 7.0, 8.0},
                                          {19.0, 10.0, 20.0, 12.0},
                                          {13.0, 14.0, 15.0, 16.0}});
@@ -194,13 +197,13 @@ TEST_CASE("VariableMatrix - Subslicing", "[VariableMatrix]") {
                 [slp::Slice{1, 3}, slp::Slice{1, 4}];
     CHECK(s.rows() == 2);
     CHECK(s.cols() == 3);
-    s = Eigen::MatrixXd{{1, 2, 3}, {4, 5, 6}};
+    s = Eigen::Matrix<double, 2, 3>{{1, 2, 3}, {4, 5, 6}};
 
-    CHECK(mat.value() == Eigen::MatrixXd{{0, 0, 0, 0, 0},
-                                         {0, 0, 0, 0, 0},
-                                         {0, 1, 2, 3, 0},
-                                         {0, 0, 0, 0, 0},
-                                         {0, 4, 5, 6, 0}});
+    CHECK(mat.value() == Eigen::Matrix<double, 5, 5>{{0, 0, 0, 0, 0},
+                                                     {0, 0, 0, 0, 0},
+                                                     {0, 1, 2, 3, 0},
+                                                     {0, 0, 0, 0, 0},
+                                                     {0, 4, 5, 6, 0}});
   }
 
   // Block-of-block assignment (row skip backward)
@@ -210,13 +213,13 @@ TEST_CASE("VariableMatrix - Subslicing", "[VariableMatrix]") {
                 [slp::Slice{1, 3}, slp::Slice{1, 4}];
     CHECK(s.rows() == 2);
     CHECK(s.cols() == 3);
-    s = Eigen::MatrixXd{{1, 2, 3}, {4, 5, 6}};
+    s = Eigen::Matrix<double, 2, 3>{{1, 2, 3}, {4, 5, 6}};
 
-    CHECK(mat.value() == Eigen::MatrixXd{{0, 6, 5, 4, 0},
-                                         {0, 0, 0, 0, 0},
-                                         {0, 3, 2, 1, 0},
-                                         {0, 0, 0, 0, 0},
-                                         {0, 0, 0, 0, 0}});
+    CHECK(mat.value() == Eigen::Matrix<double, 5, 5>{{0, 6, 5, 4, 0},
+                                                     {0, 0, 0, 0, 0},
+                                                     {0, 3, 2, 1, 0},
+                                                     {0, 0, 0, 0, 0},
+                                                     {0, 0, 0, 0, 0}});
   }
 
   // Block-of-block assignment (column skip forward)
@@ -226,13 +229,13 @@ TEST_CASE("VariableMatrix - Subslicing", "[VariableMatrix]") {
                 [slp::Slice{1, 4}, slp::Slice{1, 3}];
     CHECK(s.rows() == 3);
     CHECK(s.cols() == 2);
-    s = Eigen::MatrixXd{{1, 2}, {3, 4}, {5, 6}};
+    s = Eigen::Matrix<double, 3, 2>{{1, 2}, {3, 4}, {5, 6}};
 
-    CHECK(mat.value() == Eigen::MatrixXd{{0, 0, 0, 0, 0},
-                                         {0, 0, 1, 0, 2},
-                                         {0, 0, 3, 0, 4},
-                                         {0, 0, 5, 0, 6},
-                                         {0, 0, 0, 0, 0}});
+    CHECK(mat.value() == Eigen::Matrix<double, 5, 5>{{0, 0, 0, 0, 0},
+                                                     {0, 0, 1, 0, 2},
+                                                     {0, 0, 3, 0, 4},
+                                                     {0, 0, 5, 0, 6},
+                                                     {0, 0, 0, 0, 0}});
   }
 
   // Block-of-block assignment (column skip backward)
@@ -242,13 +245,13 @@ TEST_CASE("VariableMatrix - Subslicing", "[VariableMatrix]") {
                 [slp::Slice{1, 4}, slp::Slice{1, 3}];
     CHECK(s.rows() == 3);
     CHECK(s.cols() == 2);
-    s = Eigen::MatrixXd{{1, 2}, {3, 4}, {5, 6}};
+    s = Eigen::Matrix<double, 3, 2>{{1, 2}, {3, 4}, {5, 6}};
 
-    CHECK(mat.value() == Eigen::MatrixXd{{0, 0, 0, 0, 0},
-                                         {6, 0, 5, 0, 0},
-                                         {4, 0, 3, 0, 0},
-                                         {2, 0, 1, 0, 0},
-                                         {0, 0, 0, 0, 0}});
+    CHECK(mat.value() == Eigen::Matrix<double, 5, 5>{{0, 0, 0, 0, 0},
+                                                     {6, 0, 5, 0, 0},
+                                                     {4, 0, 3, 0, 0},
+                                                     {2, 0, 1, 0, 0},
+                                                     {0, 0, 0, 0, 0}});
   }
 }
 

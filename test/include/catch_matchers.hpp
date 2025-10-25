@@ -18,9 +18,9 @@ struct ApproxMatrix : Catch::Matchers::MatcherGenericBase {
   ApproxMatrix(const Derived& mat, double abs) : mat{mat}, abs{abs} {}
 
   template <typename OtherDerived>
-    requires std::derived_from<OtherDerived, Eigen::DenseBase<Derived>> ||
+    requires std::derived_from<OtherDerived, Eigen::DenseBase<OtherDerived>> ||
              std::derived_from<OtherDerived,
-                               Eigen::SparseCompressedBase<Derived>>
+                               Eigen::SparseCompressedBase<OtherDerived>>
   bool match(const OtherDerived& other) const {
     if (mat.rows() != other.rows() || mat.cols() != other.cols()) {
       return false;
