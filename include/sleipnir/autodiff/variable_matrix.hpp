@@ -18,6 +18,7 @@
 #include "sleipnir/autodiff/variable_block.hpp"
 #include "sleipnir/util/assert.hpp"
 #include "sleipnir/util/concepts.hpp"
+#include "sleipnir/util/empty.hpp"
 #include "sleipnir/util/function_ref.hpp"
 #include "sleipnir/util/symbol_exports.hpp"
 
@@ -28,16 +29,6 @@ namespace slp {
  */
 class SLEIPNIR_DLLEXPORT VariableMatrix {
  public:
-  /**
-   * Type tag used to designate an uninitialized VariableMatrix.
-   */
-  struct empty_t {};
-
-  /**
-   * Designates an uninitialized VariableMatrix.
-   */
-  static constexpr empty_t empty{};
-
   /**
    * Constructs an empty VariableMatrix.
    */
@@ -70,7 +61,8 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @param rows The number of matrix rows.
    * @param cols The number of matrix columns.
    */
-  VariableMatrix(empty_t, int rows, int cols) : m_rows{rows}, m_cols{cols} {
+  VariableMatrix(detail::empty_t, int rows, int cols)
+      : m_rows{rows}, m_cols{cols} {
     m_storage.reserve(rows * cols);
     for (int index = 0; index < rows * cols; ++index) {
       m_storage.emplace_back(nullptr);
@@ -569,7 +561,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
                                                      const RHS& rhs) {
     slp_assert(lhs.cols() == rhs.rows());
 
-    VariableMatrix result(VariableMatrix::empty, lhs.rows(), rhs.cols());
+    VariableMatrix result(detail::empty, lhs.rows(), rhs.cols());
 
     for (int i = 0; i < lhs.rows(); ++i) {
       for (int j = 0; j < rhs.cols(); ++j) {
@@ -600,7 +592,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    */
   friend SLEIPNIR_DLLEXPORT VariableMatrix
   operator*(const SleipnirMatrixLike auto& lhs, const ScalarLike auto& rhs) {
-    VariableMatrix result{VariableMatrix::empty, lhs.rows(), lhs.cols()};
+    VariableMatrix result{detail::empty, lhs.rows(), lhs.cols()};
 
     for (int row = 0; row < result.rows(); ++row) {
       for (int col = 0; col < result.cols(); ++col) {
@@ -619,7 +611,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    */
   friend SLEIPNIR_DLLEXPORT VariableMatrix operator*(const MatrixLike auto& lhs,
                                                      const Variable& rhs) {
-    VariableMatrix result(VariableMatrix::empty, lhs.rows(), lhs.cols());
+    VariableMatrix result(detail::empty, lhs.rows(), lhs.cols());
 
     for (int row = 0; row < result.rows(); ++row) {
       for (int col = 0; col < result.cols(); ++col) {
@@ -642,7 +634,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    */
   friend SLEIPNIR_DLLEXPORT VariableMatrix
   operator*(const ScalarLike auto& lhs, const SleipnirMatrixLike auto& rhs) {
-    VariableMatrix result{VariableMatrix::empty, rhs.rows(), rhs.cols()};
+    VariableMatrix result{detail::empty, rhs.rows(), rhs.cols()};
 
     for (int row = 0; row < result.rows(); ++row) {
       for (int col = 0; col < result.cols(); ++col) {
@@ -661,7 +653,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    */
   friend SLEIPNIR_DLLEXPORT VariableMatrix
   operator*(const Variable& lhs, const MatrixLike auto& rhs) {
-    VariableMatrix result(VariableMatrix::empty, rhs.rows(), rhs.cols());
+    VariableMatrix result(detail::empty, rhs.rows(), rhs.cols());
 
     for (int row = 0; row < result.rows(); ++row) {
       for (int col = 0; col < result.cols(); ++col) {
@@ -727,7 +719,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    */
   friend SLEIPNIR_DLLEXPORT VariableMatrix
   operator/(const MatrixLike auto& lhs, const ScalarLike auto& rhs) {
-    VariableMatrix result(VariableMatrix::empty, lhs.rows(), lhs.cols());
+    VariableMatrix result(detail::empty, lhs.rows(), lhs.cols());
 
     for (int row = 0; row < result.rows(); ++row) {
       for (int col = 0; col < result.cols(); ++col) {
@@ -771,7 +763,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
                                                      const RHS& rhs) {
     slp_assert(lhs.rows() == rhs.rows() && lhs.cols() == rhs.cols());
 
-    VariableMatrix result(VariableMatrix::empty, lhs.rows(), lhs.cols());
+    VariableMatrix result(detail::empty, lhs.rows(), lhs.cols());
 
     for (int row = 0; row < result.rows(); ++row) {
       for (int col = 0; col < result.cols(); ++col) {
@@ -841,7 +833,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
                                                      const RHS& rhs) {
     slp_assert(lhs.rows() == rhs.rows() && lhs.cols() == rhs.cols());
 
-    VariableMatrix result(VariableMatrix::empty, lhs.rows(), lhs.cols());
+    VariableMatrix result(detail::empty, lhs.rows(), lhs.cols());
 
     for (int row = 0; row < result.rows(); ++row) {
       for (int col = 0; col < result.cols(); ++col) {
@@ -905,7 +897,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    */
   friend SLEIPNIR_DLLEXPORT VariableMatrix
   operator-(const SleipnirMatrixLike auto& lhs) {
-    VariableMatrix result{VariableMatrix::empty, lhs.rows(), lhs.cols()};
+    VariableMatrix result{detail::empty, lhs.rows(), lhs.cols()};
 
     for (int row = 0; row < result.rows(); ++row) {
       for (int col = 0; col < result.cols(); ++col) {
@@ -930,7 +922,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @return The transpose of the variable matrix.
    */
   VariableMatrix T() const {
-    VariableMatrix result{VariableMatrix::empty, cols(), rows()};
+    VariableMatrix result{detail::empty, cols(), rows()};
 
     for (int row = 0; row < rows(); ++row) {
       for (int col = 0; col < cols(); ++col) {
@@ -997,7 +989,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    */
   VariableMatrix cwise_transform(
       function_ref<Variable(const Variable& x)> unary_op) const {
-    VariableMatrix result{VariableMatrix::empty, rows(), cols()};
+    VariableMatrix result{detail::empty, rows(), cols()};
 
     for (int row = 0; row < rows(); ++row) {
       for (int col = 0; col < cols(); ++col) {
@@ -1210,7 +1202,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @return A variable matrix filled with zeroes.
    */
   static VariableMatrix zero(int rows, int cols) {
-    VariableMatrix result{VariableMatrix::empty, rows, cols};
+    VariableMatrix result{detail::empty, rows, cols};
 
     for (auto& elem : result) {
       elem = 0.0;
@@ -1227,7 +1219,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix {
    * @return A variable matrix filled with ones.
    */
   static VariableMatrix ones(int rows, int cols) {
-    VariableMatrix result{VariableMatrix::empty, rows, cols};
+    VariableMatrix result{detail::empty, rows, cols};
 
     for (auto& elem : result) {
       elem = 1.0;
@@ -1254,7 +1246,7 @@ SLEIPNIR_DLLEXPORT inline VariableMatrix cwise_reduce(
     function_ref<Variable(const Variable& x, const Variable& y)> binary_op) {
   slp_assert(lhs.rows() == rhs.rows() && lhs.cols() == rhs.cols());
 
-  VariableMatrix result{VariableMatrix::empty, lhs.rows(), lhs.cols()};
+  VariableMatrix result{detail::empty, lhs.rows(), lhs.cols()};
 
   for (int row = 0; row < lhs.rows(); ++row) {
     for (int col = 0; col < lhs.cols(); ++col) {
@@ -1303,7 +1295,7 @@ SLEIPNIR_DLLEXPORT inline VariableMatrix block(
     }
   }
 
-  VariableMatrix result{VariableMatrix::empty, rows, cols};
+  VariableMatrix result{detail::empty, rows, cols};
 
   int row_offset = 0;
   for (const auto& row : list) {
@@ -1360,7 +1352,7 @@ SLEIPNIR_DLLEXPORT inline VariableMatrix block(
     }
   }
 
-  VariableMatrix result{VariableMatrix::empty, rows, cols};
+  VariableMatrix result{detail::empty, rows, cols};
 
   int row_offset = 0;
   for (const auto& row : list) {

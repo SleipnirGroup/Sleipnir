@@ -12,6 +12,7 @@
 #include "sleipnir/autodiff/variable.hpp"
 #include "sleipnir/autodiff/variable_matrix.hpp"
 #include "sleipnir/util/assert.hpp"
+#include "sleipnir/util/empty.hpp"
 
 namespace slp::detail {
 
@@ -57,7 +58,7 @@ class AdjointExpressionGraph {
     // for background on reverse accumulation automatic differentiation.
 
     if (m_top_list.empty()) {
-      return VariableMatrix{VariableMatrix::empty, wrt.rows(), 1};
+      return VariableMatrix{detail::empty, wrt.rows(), 1};
     }
 
     // Set root node's adjoint to 1 since df/df is 1
@@ -84,7 +85,7 @@ class AdjointExpressionGraph {
     }
 
     // Move gradient tree to return value
-    VariableMatrix grad{VariableMatrix::empty, wrt.rows(), 1};
+    VariableMatrix grad{detail::empty, wrt.rows(), 1};
     for (int row = 0; row < grad.rows(); ++row) {
       grad[row] = Variable{std::move(wrt[row].expr->adjoint_expr)};
     }

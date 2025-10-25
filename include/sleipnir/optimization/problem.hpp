@@ -19,6 +19,7 @@
 #include "sleipnir/optimization/solver/exit_status.hpp"
 #include "sleipnir/optimization/solver/iteration_info.hpp"
 #include "sleipnir/optimization/solver/options.hpp"
+#include "sleipnir/util/empty.hpp"
 #include "sleipnir/util/symbol_exports.hpp"
 
 namespace slp {
@@ -73,7 +74,7 @@ class SLEIPNIR_DLLEXPORT Problem {
   VariableMatrix decision_variable(int rows, int cols = 1) {
     m_decision_variables.reserve(m_decision_variables.size() + rows * cols);
 
-    VariableMatrix vars{VariableMatrix::empty, rows, cols};
+    VariableMatrix vars{detail::empty, rows, cols};
 
     for (int row = 0; row < rows; ++row) {
       for (int col = 0; col < cols; ++col) {
@@ -108,7 +109,7 @@ class SLEIPNIR_DLLEXPORT Problem {
     m_decision_variables.reserve(m_decision_variables.size() +
                                  (rows * rows + rows) / 2);
 
-    VariableMatrix vars{VariableMatrix::empty, rows, rows};
+    VariableMatrix vars{detail::empty, rows, rows};
 
     for (int row = 0; row < rows; ++row) {
       for (int col = 0; col <= row; ++col) {

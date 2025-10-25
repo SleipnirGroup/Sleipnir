@@ -99,8 +99,7 @@ class SLEIPNIR_DLLEXPORT Hessian {
    * @return The Hessian as a VariableMatrix.
    */
   VariableMatrix get() const {
-    VariableMatrix result{VariableMatrix::empty, m_variables.rows(),
-                          m_wrt.rows()};
+    VariableMatrix result{detail::empty, m_variables.rows(), m_wrt.rows()};
 
     for (int row = 0; row < m_variables.rows(); ++row) {
       auto grad = m_graphs[row].generate_gradient_tree(m_wrt);

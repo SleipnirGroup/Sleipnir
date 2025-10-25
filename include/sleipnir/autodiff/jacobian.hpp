@@ -12,6 +12,7 @@
 #include "sleipnir/autodiff/variable_matrix.hpp"
 #include "sleipnir/util/assert.hpp"
 #include "sleipnir/util/concepts.hpp"
+#include "sleipnir/util/empty.hpp"
 #include "sleipnir/util/symbol_exports.hpp"
 
 namespace slp {
@@ -102,8 +103,7 @@ class SLEIPNIR_DLLEXPORT Jacobian {
    * @return The Jacobian as a VariableMatrix.
    */
   VariableMatrix get() const {
-    VariableMatrix result{VariableMatrix::empty, m_variables.rows(),
-                          m_wrt.rows()};
+    VariableMatrix result{detail::empty, m_variables.rows(), m_wrt.rows()};
 
     for (int row = 0; row < m_variables.rows(); ++row) {
       auto grad = m_graphs[row].generate_gradient_tree(m_wrt);

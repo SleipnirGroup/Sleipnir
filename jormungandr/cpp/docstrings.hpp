@@ -1552,8 +1552,6 @@ Parameter ``unary_op``:
 Returns:
     Result of the unary operator.)doc";
 
-static const char *__doc_slp_VariableMatrix_empty_t = R"doc(Type tag used to designate an uninitialized VariableMatrix.)doc";
-
 static const char *__doc_slp_VariableMatrix_end =
 R"doc(Returns end iterator.
 
