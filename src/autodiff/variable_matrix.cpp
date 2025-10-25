@@ -4,6 +4,8 @@
 
 #include <Eigen/QR>
 
+#include "sleipnir/util/empty.hpp"
+
 namespace slp {
 
 VariableMatrix solve(const VariableMatrix& A, const VariableMatrix& B) {
@@ -245,7 +247,7 @@ VariableMatrix solve(const VariableMatrix& A, const VariableMatrix& B) {
 
     MatrixXv eigen_X = eigen_A.householderQr().solve(eigen_B);
 
-    VariableMatrix X{VariableMatrix::empty, A.cols(), B.cols()};
+    VariableMatrix X{detail::empty, A.cols(), B.cols()};
     for (int row = 0; row < X.rows(); ++row) {
       for (int col = 0; col < X.cols(); ++col) {
         X[row, col] = eigen_X(row, col);

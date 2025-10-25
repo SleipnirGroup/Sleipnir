@@ -11,6 +11,7 @@
 #include "sleipnir/autodiff/slice.hpp"
 #include "sleipnir/autodiff/variable.hpp"
 #include "sleipnir/util/assert.hpp"
+#include "sleipnir/util/empty.hpp"
 #include "sleipnir/util/function_ref.hpp"
 
 namespace slp {
@@ -639,7 +640,7 @@ class VariableBlock {
    * @return The transpose of the variable matrix.
    */
   std::remove_cv_t<Mat> T() const {
-    std::remove_cv_t<Mat> result{Mat::empty, cols(), rows()};
+    std::remove_cv_t<Mat> result{detail::empty, cols(), rows()};
 
     for (int row = 0; row < rows(); ++row) {
       for (int col = 0; col < cols(); ++col) {
@@ -709,7 +710,7 @@ class VariableBlock {
    */
   std::remove_cv_t<Mat> cwise_transform(
       function_ref<Variable(const Variable& x)> unary_op) const {
-    std::remove_cv_t<Mat> result{Mat::empty, rows(), cols()};
+    std::remove_cv_t<Mat> result{detail::empty, rows(), cols()};
 
     for (int row = 0; row < rows(); ++row) {
       for (int col = 0; col < cols(); ++col) {
