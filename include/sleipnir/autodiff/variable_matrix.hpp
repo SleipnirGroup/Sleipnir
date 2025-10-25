@@ -13,6 +13,7 @@
 #include <Eigen/Core>
 #include <gch/small_vector.hpp>
 
+#include "sleipnir/autodiff/sleipnir_base.hpp"
 #include "sleipnir/autodiff/slice.hpp"
 #include "sleipnir/autodiff/variable.hpp"
 #include "sleipnir/autodiff/variable_block.hpp"
@@ -27,7 +28,7 @@ namespace slp {
 /**
  * A matrix of autodiff variables.
  */
-class SLEIPNIR_DLLEXPORT VariableMatrix {
+class SLEIPNIR_DLLEXPORT VariableMatrix : public SleipnirBase {
  public:
   /**
    * Constructs an empty VariableMatrix.
