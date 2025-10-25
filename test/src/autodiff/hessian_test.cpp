@@ -108,12 +108,12 @@ TEST_CASE("Hessian - Sum", "[Hessian]") {
   CHECK(y.value() == 15.0);
 
   auto g = slp::Gradient(y, x);
-  CHECK(g.get().value() == Eigen::MatrixXd::Constant(5, 1, 1.0));
-  CHECK(g.value().toDense() == Eigen::MatrixXd::Constant(5, 1, 1.0));
+  CHECK(g.get().value() == Eigen::Matrix<double, 5, 1>::Constant(1.0));
+  CHECK(g.value().toDense() == Eigen::Matrix<double, 5, 1>::Constant(1.0));
 
   auto H = slp::Hessian(y, x);
-  CHECK(H.get().value() == Eigen::MatrixXd::Zero(5, 5));
-  CHECK(H.value().toDense() == Eigen::MatrixXd::Zero(5, 5));
+  CHECK(H.get().value() == Eigen::Matrix<double, 5, 5>::Zero());
+  CHECK(H.value().toDense() == Eigen::Matrix<double, 5, 5>::Zero());
 }
 
 TEST_CASE("Hessian - Sum of products", "[Hessian]") {
@@ -135,8 +135,8 @@ TEST_CASE("Hessian - Sum of products", "[Hessian]") {
 
   auto H = slp::Hessian(y, x);
 
-  Eigen::MatrixXd expected_H =
-      Eigen::VectorXd::Constant(5, 1, 2.0).asDiagonal();
+  Eigen::Matrix<double, 5, 5> expected_H =
+      Eigen::Vector<double, 5>::Constant(2.0).asDiagonal();
   CHECK(H.get().value() == expected_H);
   CHECK(H.value().toDense() == expected_H);
 }
@@ -168,7 +168,7 @@ TEST_CASE("Hessian - Product of sines", "[Hessian]") {
 
   auto H = slp::Hessian(y, x);
 
-  Eigen::MatrixXd expected_H{5, 5};
+  Eigen::Matrix<double, 5, 5> expected_H;
   for (int i = 0; i < x.rows(); ++i) {
     for (int j = 0; j < x.rows(); ++j) {
       if (i == j) {
@@ -208,11 +208,11 @@ TEST_CASE("Hessian - Sum of squared residuals", "[Hessian]") {
 
   auto H = slp::Hessian(y, x);
 
-  Eigen::MatrixXd expected_H{{2.0, -2.0, 0.0, 0.0, 0.0},
-                             {-2.0, 4.0, -2.0, 0.0, 0.0},
-                             {0.0, -2.0, 4.0, -2.0, 0.0},
-                             {0.0, 0.0, -2.0, 4.0, -2.0},
-                             {0.0, 0.0, 0.0, -2.0, 2.0}};
+  Eigen::Matrix<double, 5, 5> expected_H{{2.0, -2.0, 0.0, 0.0, 0.0},
+                                         {-2.0, 4.0, -2.0, 0.0, 0.0},
+                                         {0.0, -2.0, 4.0, -2.0, 0.0},
+                                         {0.0, 0.0, -2.0, 4.0, -2.0},
+                                         {0.0, 0.0, 0.0, -2.0, 2.0}};
   CHECK(H.get().value() == expected_H);
   CHECK(H.value().toDense() == expected_H);
 }
@@ -236,8 +236,8 @@ TEST_CASE("Hessian - Sum of squares", "[Hessian]") {
 
   auto H = slp::Hessian(J, x);
 
-  Eigen::MatrixXd expected_H =
-      Eigen::VectorXd::Constant(4, 1, 2.0).asDiagonal();
+  Eigen::Matrix4d expected_H =
+      Eigen::Vector<double, 4>::Constant(2.0).asDiagonal();
   CHECK(H.get().value() == expected_H);
   CHECK(H.value().toDense() == expected_H);
 }
@@ -253,10 +253,10 @@ TEST_CASE("Hessian - Nested powers", "[Hessian]") {
 
   auto y = slp::pow(slp::pow(x, 2), 2);
 
-  Eigen::MatrixXd J = slp::Jacobian(y, x).value();
+  auto J = slp::Jacobian(y, x).value().toDense();
   CHECK(J(0, 0) == Catch::Approx(4 * x0 * x0 * x0).margin(1e-12));
 
-  Eigen::MatrixXd H = slp::Hessian(y, x).value();
+  auto H = slp::Hessian(y, x).value().toDense();
   CHECK(H(0, 0) == Catch::Approx(12 * x0 * x0).margin(1e-12));
 }
 
@@ -274,7 +274,7 @@ TEST_CASE("Hessian - Rosenbrock", "[Hessian]") {
       y.set_value(y0);
       auto z = slp::pow(1 - x, 2) + 100 * slp::pow(y - slp::pow(x, 2), 2);
 
-      Eigen::MatrixXd H = slp::Hessian(z, input).value();
+      auto H = slp::Hessian(z, input).value().toDense();
       CHECK(H(0, 0) == Catch::Approx(-400 * (y0 - x0 * x0) + 800 * x0 * x0 + 2)
                            .margin(1e-12));
       CHECK(H(0, 1) == -400 * x0);
@@ -298,7 +298,8 @@ TEST_CASE("Hessian - Edge Pushing example 1", "[Hessian]") {
   // dy/dx = [2x₀sin(x₁)  x₀²cos(x₁)]
   // dy/dx = [ 6sin(4)     9cos(4)  ]
   auto J = slp::Jacobian(y, x);
-  Eigen::MatrixXd expected_J{{6.0 * std::sin(4.0), 9.0 * std::cos(4.0)}};
+  Eigen::Matrix<double, 1, 2> expected_J{
+      {6.0 * std::sin(4.0), 9.0 * std::cos(4.0)}};
   CHECK(J.get().value() == expected_J);
   CHECK(J.value().toDense() == expected_J);
 
@@ -308,7 +309,7 @@ TEST_CASE("Hessian - Edge Pushing example 1", "[Hessian]") {
   //           [2sin(4)   6cos(4)]
   // d²y/dx² = [6cos(4)  −9sin(4)]
   auto H = slp::Hessian(y, x);
-  Eigen::MatrixXd expected_H{{2.0 * std::sin(4.0), 6.0 * std::cos(4.0)},
+  Eigen::Matrix2d expected_H{{2.0 * std::sin(4.0), 6.0 * std::cos(4.0)},
                              {6.0 * std::cos(4.0), -9.0 * std::sin(4.0)}};
   CHECK(H.get().value() == expected_H);
   CHECK(H.value().toDense() == expected_H);
@@ -329,7 +330,7 @@ TEST_CASE("Hessian - Variable reuse", "[Hessian]") {
 
   // d²y/dx² = 6x
   // H = 6
-  Eigen::MatrixXd H = hessian.value();
+  auto H = hessian.value().toDense();
 
   CHECK(H.rows() == 1);
   CHECK(H.cols() == 1);

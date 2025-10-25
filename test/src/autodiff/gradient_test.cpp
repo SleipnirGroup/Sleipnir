@@ -620,7 +620,7 @@ TEST_CASE("Gradient - Non-scalar", "[Gradient]") {
   auto y = x[0] + 3 * x[1] - 5 * x[2];
   auto g = slp::Gradient(y, x);
 
-  Eigen::MatrixXd expected_g{{1.0}, {3.0}, {-5.0}};
+  Eigen::Matrix<double, 3, 1> expected_g{{1.0}, {3.0}, {-5.0}};
 
   auto g_get_value = g.get().value();
   CHECK(g_get_value.rows() == 3);
