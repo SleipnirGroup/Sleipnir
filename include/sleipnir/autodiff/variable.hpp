@@ -15,6 +15,7 @@
 
 #include "sleipnir/autodiff/expression.hpp"
 #include "sleipnir/autodiff/expression_graph.hpp"
+#include "sleipnir/autodiff/sleipnir_base.hpp"
 #include "sleipnir/util/assert.hpp"
 #include "sleipnir/util/concepts.hpp"
 #include "sleipnir/util/symbol_exports.hpp"
@@ -37,7 +38,7 @@ class SLEIPNIR_DLLEXPORT Jacobian;
 /**
  * An autodiff variable pointing to an expression node.
  */
-class SLEIPNIR_DLLEXPORT Variable {
+class SLEIPNIR_DLLEXPORT Variable : public SleipnirBase {
  public:
   /**
    * Constructs a linear Variable with a value of zero.

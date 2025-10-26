@@ -8,6 +8,7 @@
 
 #include <Eigen/Core>
 
+#include "sleipnir/autodiff/sleipnir_base.hpp"
 #include "sleipnir/autodiff/slice.hpp"
 #include "sleipnir/autodiff/variable.hpp"
 #include "sleipnir/util/assert.hpp"
@@ -22,7 +23,7 @@ namespace slp {
  * @tparam Mat The type of the matrix whose storage this class points to.
  */
 template <typename Mat>
-class VariableBlock {
+class VariableBlock : public SleipnirBase {
  public:
   /**
    * Copy constructor.
