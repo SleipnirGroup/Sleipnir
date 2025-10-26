@@ -11,7 +11,7 @@ jobs:
     name: Wasm
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: numworks/setup-emscripten@latest
 
@@ -19,7 +19,7 @@ jobs:
       - run: cmake --build build --config Release --parallel $(nproc)
       - run: cmake --install build --config Release --prefix pkg
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: Wasm
           path: pkg
