@@ -81,7 +81,7 @@ jobs:
     name: ${{ matrix.version }} ${{ matrix.name }} wheel
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -94,7 +94,7 @@ jobs:
       - run: sudo xcode-select -switch /Applications/Xcode_16.2.app
         if: runner.os == 'macOS'
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.version }}
 
@@ -106,7 +106,7 @@ jobs:
       - run: pytest
         shell: bash
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: ${{ matrix.version }} ${{ matrix.name }} wheel
           path: dist
@@ -117,11 +117,11 @@ jobs:
     name: sdist
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: 3.14
 
@@ -129,7 +129,7 @@ jobs:
       - run: pip3 install build
       - run: python3 -m build --sdist
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: sdist
           path: dist
@@ -145,12 +145,12 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v6
         with:
           path: dist
           pattern: '* wheel'
           merge-multiple: true
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v6
         with:
           path: dist
           pattern: 'sdist'
