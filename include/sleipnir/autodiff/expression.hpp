@@ -522,7 +522,7 @@ struct BinaryPlusExpression final : Expression {
 };
 
 /**
- * Derived expression type for std::cbrt().
+ * Derived expression type for cbrt().
  */
 struct CbrtExpression final : Expression {
   /**
@@ -775,7 +775,7 @@ inline constexpr void dec_ref_count(Expression* expr) {
 }
 
 /**
- * Derived expression type for std::abs().
+ * Derived expression type for abs().
  */
 struct AbsExpression final : Expression {
   /**
@@ -836,7 +836,7 @@ inline ExpressionPtr abs(const ExpressionPtr& x) {
 }
 
 /**
- * Derived expression type for std::acos().
+ * Derived expression type for acos().
  */
 struct AcosExpression final : Expression {
   /**
@@ -884,7 +884,7 @@ inline ExpressionPtr acos(const ExpressionPtr& x) {
 }
 
 /**
- * Derived expression type for std::asin().
+ * Derived expression type for asin().
  */
 struct AsinExpression final : Expression {
   /**
@@ -933,7 +933,7 @@ inline ExpressionPtr asin(const ExpressionPtr& x) {
 }
 
 /**
- * Derived expression type for std::atan().
+ * Derived expression type for atan().
  */
 struct AtanExpression final : Expression {
   /**
@@ -982,7 +982,7 @@ inline ExpressionPtr atan(const ExpressionPtr& x) {
 }
 
 /**
- * Derived expression type for std::atan2().
+ * Derived expression type for atan2().
  */
 struct Atan2Expression final : Expression {
   /**
@@ -1045,7 +1045,7 @@ inline ExpressionPtr atan2(const ExpressionPtr& y, const ExpressionPtr& x) {
 }
 
 /**
- * Derived expression type for std::cos().
+ * Derived expression type for cos().
  */
 struct CosExpression final : Expression {
   /**
@@ -1093,7 +1093,7 @@ inline ExpressionPtr cos(const ExpressionPtr& x) {
 }
 
 /**
- * Derived expression type for std::cosh().
+ * Derived expression type for cosh().
  */
 struct CoshExpression final : Expression {
   /**
@@ -1141,7 +1141,7 @@ inline ExpressionPtr cosh(const ExpressionPtr& x) {
 }
 
 /**
- * Derived expression type for std::erf().
+ * Derived expression type for erf().
  */
 struct ErfExpression final : Expression {
   /**
@@ -1191,7 +1191,7 @@ inline ExpressionPtr erf(const ExpressionPtr& x) {
 }
 
 /**
- * Derived expression type for std::exp().
+ * Derived expression type for exp().
  */
 struct ExpExpression final : Expression {
   /**
@@ -1241,7 +1241,7 @@ inline ExpressionPtr exp(const ExpressionPtr& x) {
 inline ExpressionPtr hypot(const ExpressionPtr& x, const ExpressionPtr& y);
 
 /**
- * Derived expression type for std::hypot().
+ * Derived expression type for hypot().
  */
 struct HypotExpression final : Expression {
   /**
@@ -1303,7 +1303,7 @@ inline ExpressionPtr hypot(const ExpressionPtr& x, const ExpressionPtr& y) {
 }
 
 /**
- * Derived expression type for std::log().
+ * Derived expression type for log().
  */
 struct LogExpression final : Expression {
   /**
@@ -1352,7 +1352,7 @@ inline ExpressionPtr log(const ExpressionPtr& x) {
 }
 
 /**
- * Derived expression type for std::log10().
+ * Derived expression type for log10().
  */
 struct Log10Expression final : Expression {
   /**
@@ -1403,7 +1403,7 @@ inline ExpressionPtr log10(const ExpressionPtr& x) {
 inline ExpressionPtr pow(const ExpressionPtr& base, const ExpressionPtr& power);
 
 /**
- * Derived expression type for std::pow().
+ * Derived expression type for pow().
  *
  * @tparam T Expression type.
  */
@@ -1549,7 +1549,7 @@ inline ExpressionPtr sign(const ExpressionPtr& x) {
 }
 
 /**
- * Derived expression type for std::sin().
+ * Derived expression type for sin().
  */
 struct SinExpression final : Expression {
   /**
@@ -1598,7 +1598,7 @@ inline ExpressionPtr sin(const ExpressionPtr& x) {
 }
 
 /**
- * Derived expression type for std::sinh().
+ * Derived expression type for sinh().
  */
 struct SinhExpression final : Expression {
   /**
@@ -1647,7 +1647,7 @@ inline ExpressionPtr sinh(const ExpressionPtr& x) {
 }
 
 /**
- * Derived expression type for std::sqrt().
+ * Derived expression type for sqrt().
  */
 struct SqrtExpression final : Expression {
   /**
@@ -1697,7 +1697,7 @@ inline ExpressionPtr sqrt(const ExpressionPtr& x) {
 }
 
 /**
- * Derived expression type for std::tan().
+ * Derived expression type for tan().
  */
 struct TanExpression final : Expression {
   /**
@@ -1748,7 +1748,7 @@ inline ExpressionPtr tan(const ExpressionPtr& x) {
 }
 
 /**
- * Derived expression type for std::tanh().
+ * Derived expression type for tanh().
  */
 struct TanhExpression final : Expression {
   /**
