@@ -490,72 +490,79 @@ SLEIPNIR_DLLEXPORT inline Variable hypot(const Variable& x, const Variable& y,
   return Variable{slp::sqrt(slp::pow(x, 2) + slp::pow(y, 2) + slp::pow(z, 2))};
 }
 
-/**
- * Make a list of constraints.
- *
- * The standard form for equality constraints is c(x) = 0, and the standard form
- * for inequality constraints is c(x) ≥ 0. This function takes constraints of
- * the form lhs = rhs or lhs ≥ rhs and converts them to lhs - rhs = 0 or
- * lhs - rhs ≥ 0.
- *
- * @param lhs Left-hand side.
- * @param rhs Right-hand side.
- */
-template <typename LHS, typename RHS>
-  requires(ScalarLike<LHS> || MatrixLike<LHS>) &&
-          (ScalarLike<RHS> || MatrixLike<RHS>) &&
-          (SleipnirType<LHS> || SleipnirType<RHS>)
-gch::small_vector<Variable> make_constraints(LHS&& lhs, RHS&& rhs) {
+// The standard form for equality constraints is c(x) = 0, and the standard form
+// for inequality constraints is c(x) ≥ 0. make_constraints() takes constraints
+// of the form lhs = rhs or lhs ≥ rhs and converts them to lhs - rhs = 0 or
+// lhs - rhs ≥ 0.
+
+template <ScalarLike LHS, ScalarLike RHS>
+  requires SleipnirScalarLike<LHS> || SleipnirScalarLike<RHS>
+auto make_constraints(LHS&& lhs, RHS&& rhs) {
   gch::small_vector<Variable> constraints;
+  constraints.emplace_back(lhs - rhs);
 
-  if constexpr (ScalarLike<LHS> && ScalarLike<RHS>) {
-    constraints.emplace_back(lhs - rhs);
-  } else if constexpr (ScalarLike<LHS> && MatrixLike<RHS>) {
-    constraints.reserve(rhs.rows() * rhs.cols());
+  return constraints;
+}
 
-    for (int row = 0; row < rhs.rows(); ++row) {
-      for (int col = 0; col < rhs.cols(); ++col) {
-        // Make right-hand side zero
-        if constexpr (EigenMatrixLike<std::decay_t<RHS>>) {
-          constraints.emplace_back(lhs - rhs(row, col));
-        } else {
-          constraints.emplace_back(lhs - rhs[row, col]);
-        }
+template <ScalarLike LHS, MatrixLike RHS>
+  requires SleipnirScalarLike<LHS> || SleipnirMatrixLike<RHS>
+auto make_constraints(LHS&& lhs, RHS&& rhs) {
+  gch::small_vector<Variable> constraints;
+  constraints.reserve(rhs.rows() * rhs.cols());
+
+  for (int row = 0; row < rhs.rows(); ++row) {
+    for (int col = 0; col < rhs.cols(); ++col) {
+      // Make right-hand side zero
+      if constexpr (EigenMatrixLike<decltype(rhs)>) {
+        constraints.emplace_back(lhs - rhs(row, col));
+      } else {
+        constraints.emplace_back(lhs - rhs[row, col]);
       }
     }
-  } else if constexpr (MatrixLike<LHS> && ScalarLike<RHS>) {
-    constraints.reserve(lhs.rows() * lhs.cols());
+  }
 
-    for (int row = 0; row < lhs.rows(); ++row) {
-      for (int col = 0; col < lhs.cols(); ++col) {
-        // Make right-hand side zero
-        if constexpr (EigenMatrixLike<std::decay_t<LHS>>) {
-          constraints.emplace_back(lhs(row, col) - rhs);
-        } else {
-          constraints.emplace_back(lhs[row, col] - rhs);
-        }
+  return constraints;
+}
+
+template <MatrixLike LHS, ScalarLike RHS>
+  requires SleipnirMatrixLike<LHS> || SleipnirScalarLike<RHS>
+auto make_constraints(LHS&& lhs, RHS&& rhs) {
+  gch::small_vector<Variable> constraints;
+  constraints.reserve(lhs.rows() * lhs.cols());
+
+  for (int row = 0; row < lhs.rows(); ++row) {
+    for (int col = 0; col < lhs.cols(); ++col) {
+      // Make right-hand side zero
+      if constexpr (EigenMatrixLike<decltype(lhs)>) {
+        constraints.emplace_back(lhs(row, col) - rhs);
+      } else {
+        constraints.emplace_back(lhs[row, col] - rhs);
       }
     }
-  } else if constexpr (MatrixLike<LHS> && MatrixLike<RHS>) {
-    slp_assert(lhs.rows() == rhs.rows() && lhs.cols() == rhs.cols());
-    constraints.reserve(lhs.rows() * lhs.cols());
+  }
 
-    for (int row = 0; row < lhs.rows(); ++row) {
-      for (int col = 0; col < lhs.cols(); ++col) {
-        // Make right-hand side zero
-        if constexpr (EigenMatrixLike<std::decay_t<LHS>> &&
-                      EigenMatrixLike<std::decay_t<RHS>>) {
-          constraints.emplace_back(lhs(row, col) - rhs(row, col));
-        } else if constexpr (EigenMatrixLike<std::decay_t<LHS>> &&
-                             SleipnirMatrixLike<std::decay_t<RHS>>) {
-          constraints.emplace_back(lhs(row, col) - rhs[row, col]);
-        } else if constexpr (SleipnirMatrixLike<std::decay_t<LHS>> &&
-                             EigenMatrixLike<std::decay_t<RHS>>) {
-          constraints.emplace_back(lhs[row, col] - rhs(row, col));
-        } else if constexpr (SleipnirMatrixLike<std::decay_t<LHS>> &&
-                             SleipnirMatrixLike<std::decay_t<RHS>>) {
-          constraints.emplace_back(lhs[row, col] - rhs[row, col]);
-        }
+  return constraints;
+}
+
+template <MatrixLike LHS, MatrixLike RHS>
+  requires SleipnirMatrixLike<LHS> || SleipnirMatrixLike<RHS>
+auto make_constraints(LHS&& lhs, RHS&& rhs) {
+  slp_assert(lhs.rows() == rhs.rows() && lhs.cols() == rhs.cols());
+
+  gch::small_vector<Variable> constraints;
+  constraints.reserve(lhs.rows() * lhs.cols());
+
+  for (int row = 0; row < lhs.rows(); ++row) {
+    for (int col = 0; col < lhs.cols(); ++col) {
+      // Make right-hand side zero
+      if constexpr (EigenMatrixLike<LHS> && EigenMatrixLike<RHS>) {
+        constraints.emplace_back(lhs(row, col) - rhs(row, col));
+      } else if constexpr (EigenMatrixLike<LHS> && SleipnirMatrixLike<RHS>) {
+        constraints.emplace_back(lhs(row, col) - rhs[row, col]);
+      } else if constexpr (SleipnirMatrixLike<LHS> && EigenMatrixLike<RHS>) {
+        constraints.emplace_back(lhs[row, col] - rhs(row, col));
+      } else if constexpr (SleipnirMatrixLike<LHS> && SleipnirMatrixLike<RHS>) {
+        constraints.emplace_back(lhs[row, col] - rhs[row, col]);
       }
     }
   }
@@ -699,7 +706,7 @@ template <typename LHS, typename RHS>
   requires(ScalarLike<LHS> || MatrixLike<LHS>) &&
           (ScalarLike<RHS> || MatrixLike<RHS>) &&
           (SleipnirType<LHS> || SleipnirType<RHS>)
-EqualityConstraints operator==(LHS&& lhs, RHS&& rhs) {
+auto operator==(LHS&& lhs, RHS&& rhs) {
   return EqualityConstraints{lhs, rhs};
 }
 
@@ -714,7 +721,7 @@ template <typename LHS, typename RHS>
   requires(ScalarLike<LHS> || MatrixLike<LHS>) &&
           (ScalarLike<RHS> || MatrixLike<RHS>) &&
           (SleipnirType<LHS> || SleipnirType<RHS>)
-InequalityConstraints operator<(LHS&& lhs, RHS&& rhs) {
+auto operator<(LHS&& lhs, RHS&& rhs) {
   return rhs >= lhs;
 }
 
@@ -729,7 +736,7 @@ template <typename LHS, typename RHS>
   requires(ScalarLike<LHS> || MatrixLike<LHS>) &&
           (ScalarLike<RHS> || MatrixLike<RHS>) &&
           (SleipnirType<LHS> || SleipnirType<RHS>)
-InequalityConstraints operator<=(LHS&& lhs, RHS&& rhs) {
+auto operator<=(LHS&& lhs, RHS&& rhs) {
   return rhs >= lhs;
 }
 
@@ -744,7 +751,7 @@ template <typename LHS, typename RHS>
   requires(ScalarLike<LHS> || MatrixLike<LHS>) &&
           (ScalarLike<RHS> || MatrixLike<RHS>) &&
           (SleipnirType<LHS> || SleipnirType<RHS>)
-InequalityConstraints operator>(LHS&& lhs, RHS&& rhs) {
+auto operator>(LHS&& lhs, RHS&& rhs) {
   return lhs >= rhs;
 }
 
@@ -759,7 +766,7 @@ template <typename LHS, typename RHS>
   requires(ScalarLike<LHS> || MatrixLike<LHS>) &&
           (ScalarLike<RHS> || MatrixLike<RHS>) &&
           (SleipnirType<LHS> || SleipnirType<RHS>)
-InequalityConstraints operator>=(LHS&& lhs, RHS&& rhs) {
+auto operator>=(LHS&& lhs, RHS&& rhs) {
   return InequalityConstraints{lhs, rhs};
 }
 

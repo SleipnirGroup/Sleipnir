@@ -2086,19 +2086,13 @@ R"doc(log10() for Variables.
 Parameter ``x``:
     The argument.)doc";
 
-static const char *__doc_slp_make_constraints =
-R"doc(Make a list of constraints.
+static const char *__doc_slp_make_constraints = R"doc()doc";
 
-The standard form for equality constraints is c(x) = 0, and the
-standard form for inequality constraints is c(x) ≥ 0. This function
-takes constraints of the form lhs = rhs or lhs ≥ rhs and converts them
-to lhs - rhs = 0 or lhs - rhs ≥ 0.
+static const char *__doc_slp_make_constraints_2 = R"doc()doc";
 
-Parameter ``lhs``:
-    Left-hand side.
+static const char *__doc_slp_make_constraints_3 = R"doc()doc";
 
-Parameter ``rhs``:
-    Right-hand side.)doc";
+static const char *__doc_slp_make_constraints_4 = R"doc()doc";
 
 static const char *__doc_slp_operator_eq =
 R"doc(Equality operator that returns an equality constraint for two
