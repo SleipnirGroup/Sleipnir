@@ -100,8 +100,8 @@ class VariableBlock : public SleipnirBase {
    *
    * @param mat The matrix to which to point.
    */
-  VariableBlock(Mat& mat)  // NOLINT
-      : VariableBlock{mat, 0, 0, mat.rows(), mat.cols()} {}
+  // NOLINTNEXTLINE (google-explicit-constructor)
+  VariableBlock(Mat& mat) : VariableBlock{mat, 0, 0, mat.rows(), mat.cols()} {}
 
   /**
    * Constructs a Variable block pointing to a subset of the given matrix.
@@ -630,7 +630,8 @@ class VariableBlock : public SleipnirBase {
   /**
    * Implicit conversion operator from 1x1 VariableBlock to Variable.
    */
-  operator Variable() const {  // NOLINT
+  // NOLINTNEXTLINE (google-explicit-constructor)
+  operator Variable() const {
     slp_assert(rows() == 1 && cols() == 1);
     return (*this)(0, 0);
   }

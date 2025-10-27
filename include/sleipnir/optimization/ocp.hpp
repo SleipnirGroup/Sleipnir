@@ -79,8 +79,7 @@ class SLEIPNIR_DLLEXPORT OCP : public Problem {
             num_steps,
             [=]([[maybe_unused]] const VariableMatrix& t,
                 const VariableMatrix& x, const VariableMatrix& u,
-                [[maybe_unused]]
-                const VariableMatrix& dt) -> VariableMatrix {
+                [[maybe_unused]] const VariableMatrix& dt) -> VariableMatrix {
               return dynamics(x, u);
             },
             dynamics_type,

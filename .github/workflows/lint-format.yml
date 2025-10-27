@@ -75,7 +75,7 @@ jobs:
         with:
           python-version: 3.14
 
-      - run: pip3 install wpiformat==2025.34
+      - run: pip3 install wpiformat==2025.36
 
       - run: wpiformat
 
@@ -129,7 +129,7 @@ jobs:
           echo "CXX=clang++" >> $GITHUB_ENV
           echo "CXXFLAGS=-stdlib=libc++" >> $GITHUB_ENV
 
-      - run: pip3 install wpiformat==2025.34
+      - run: pip3 install wpiformat==2025.36
 
       - name: Create compile_commands.json
         run: cmake -B build -S . -DCMAKE_EXPORT_COMPILE_COMMANDS=YES

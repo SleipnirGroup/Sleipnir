@@ -48,6 +48,7 @@ Checks:
   -clang-analyzer-core.uninitialized.UndefReturn,
   -clang-analyzer-optin.cplusplus.UninitializedObject,
   -clang-analyzer-optin.portability.UnixAPI,
+  -clang-analyzer-security.ArrayBound,
   -clang-analyzer-unix.Malloc,
   -cppcoreguidelines-slicing,
   google-build-namespaces,
