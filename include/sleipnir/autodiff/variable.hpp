@@ -396,17 +396,6 @@ SLEIPNIR_DLLEXPORT inline Variable hypot(const Variable& x, const Variable& y) {
 }
 
 /**
- * pow() for Variables.
- *
- * @param base The base.
- * @param power The power.
- */
-SLEIPNIR_DLLEXPORT inline Variable pow(const Variable& base,
-                                       const Variable& power) {
-  return Variable{detail::pow(base.expr, power.expr)};
-}
-
-/**
  * log() for Variables.
  *
  * @param x The argument.
@@ -422,6 +411,17 @@ SLEIPNIR_DLLEXPORT inline Variable log(const Variable& x) {
  */
 SLEIPNIR_DLLEXPORT inline Variable log10(const Variable& x) {
   return Variable{detail::log10(x.expr)};
+}
+
+/**
+ * pow() for Variables.
+ *
+ * @param base The base.
+ * @param power The power.
+ */
+SLEIPNIR_DLLEXPORT inline Variable pow(const Variable& base,
+                                       const Variable& power) {
+  return Variable{detail::pow(base.expr, power.expr)};
 }
 
 /**
