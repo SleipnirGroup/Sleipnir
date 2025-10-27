@@ -9,7 +9,7 @@
 #include <sleipnir/optimization/solver/exit_status.hpp>
 
 #include "catch_string_converters.hpp"
-#include "float_range.hpp"
+#include "range.hpp"
 
 TEST_CASE("Problem - Quartic", "[Problem]") {
   slp::Problem problem;
@@ -32,8 +32,8 @@ TEST_CASE("Problem - Quartic", "[Problem]") {
 
 TEST_CASE("Problem - Rosenbrock with cubic and line constraint", "[Problem]") {
   // https://en.wikipedia.org/wiki/Test_functions_for_optimization#Test_functions_for_constrained_optimization
-  for (auto x0 : float_range(-1.5, 1.5, 0.1)) {
-    for (auto y0 : float_range(-0.5, 2.5, 0.1)) {
+  for (auto x0 : range(-1.5, 1.5, 0.1)) {
+    for (auto y0 : range(-0.5, 2.5, 0.1)) {
       slp::Problem problem;
 
       auto x = problem.decision_variable();
@@ -72,8 +72,8 @@ TEST_CASE("Problem - Rosenbrock with cubic and line constraint", "[Problem]") {
 
 TEST_CASE("Problem - Rosenbrock with disk constraint", "[Problem]") {
   // https://en.wikipedia.org/wiki/Test_functions_for_optimization#Test_functions_for_constrained_optimization
-  for (auto x0 : float_range(-1.5, 1.5, 0.1)) {
-    for (auto y0 : float_range(-1.5, 1.5, 0.1)) {
+  for (auto x0 : range(-1.5, 1.5, 0.1)) {
+    for (auto y0 : range(-1.5, 1.5, 0.1)) {
       slp::Problem problem;
 
       auto x = problem.decision_variable();
