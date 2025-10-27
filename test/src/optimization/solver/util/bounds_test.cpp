@@ -16,7 +16,7 @@
 #include <sleipnir/autodiff/variable_matrix.hpp>
 #include <sleipnir/autodiff/jacobian.hpp>
 
-#include "optimization/bounds.hpp"
+#include "optimization/solver/util/bounds.hpp"
 
 constexpr auto inf = std::numeric_limits<double>::infinity();
 
