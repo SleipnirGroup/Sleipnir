@@ -55,7 +55,8 @@ class SLEIPNIR_DLLEXPORT Variable : public SleipnirBase {
    *
    * @param value The value of the Variable.
    */
-  Variable(std::floating_point auto value)  // NOLINT
+  // NOLINTNEXTLINE (google-explicit-constructor)
+  Variable(std::floating_point auto value)
       : expr{detail::make_expression_ptr<detail::ConstExpression>(value)} {}
 
   /**
@@ -63,7 +64,8 @@ class SLEIPNIR_DLLEXPORT Variable : public SleipnirBase {
    *
    * @param value The value of the Variable.
    */
-  Variable(std::integral auto value)  // NOLINT
+  // NOLINTNEXTLINE (google-explicit-constructor)
+  Variable(std::integral auto value)
       : expr{detail::make_expression_ptr<detail::ConstExpression>(value)} {}
 
   /**
@@ -293,7 +295,7 @@ class SLEIPNIR_DLLEXPORT Variable : public SleipnirBase {
 };
 
 /**
- * std::abs() for Variables.
+ * abs() for Variables.
  *
  * @param x The argument.
  */
@@ -302,7 +304,7 @@ SLEIPNIR_DLLEXPORT inline Variable abs(const Variable& x) {
 }
 
 /**
- * std::acos() for Variables.
+ * acos() for Variables.
  *
  * @param x The argument.
  */
@@ -311,7 +313,7 @@ SLEIPNIR_DLLEXPORT inline Variable acos(const Variable& x) {
 }
 
 /**
- * std::asin() for Variables.
+ * asin() for Variables.
  *
  * @param x The argument.
  */
@@ -320,7 +322,7 @@ SLEIPNIR_DLLEXPORT inline Variable asin(const Variable& x) {
 }
 
 /**
- * std::atan() for Variables.
+ * atan() for Variables.
  *
  * @param x The argument.
  */
@@ -329,7 +331,7 @@ SLEIPNIR_DLLEXPORT inline Variable atan(const Variable& x) {
 }
 
 /**
- * std::atan2() for Variables.
+ * atan2() for Variables.
  *
  * @param y The y argument.
  * @param x The x argument.
@@ -339,7 +341,7 @@ SLEIPNIR_DLLEXPORT inline Variable atan2(const Variable& y, const Variable& x) {
 }
 
 /**
- * std::cbrt() for Variables.
+ * cbrt() for Variables.
  *
  * @param x The argument.
  */
@@ -348,7 +350,7 @@ SLEIPNIR_DLLEXPORT inline Variable cbrt(const Variable& x) {
 }
 
 /**
- * std::cos() for Variables.
+ * cos() for Variables.
  *
  * @param x The argument.
  */
@@ -357,7 +359,7 @@ SLEIPNIR_DLLEXPORT inline Variable cos(const Variable& x) {
 }
 
 /**
- * std::cosh() for Variables.
+ * cosh() for Variables.
  *
  * @param x The argument.
  */
@@ -366,7 +368,7 @@ SLEIPNIR_DLLEXPORT inline Variable cosh(const Variable& x) {
 }
 
 /**
- * std::erf() for Variables.
+ * erf() for Variables.
  *
  * @param x The argument.
  */
@@ -375,7 +377,7 @@ SLEIPNIR_DLLEXPORT inline Variable erf(const Variable& x) {
 }
 
 /**
- * std::exp() for Variables.
+ * exp() for Variables.
  *
  * @param x The argument.
  */
@@ -384,7 +386,7 @@ SLEIPNIR_DLLEXPORT inline Variable exp(const Variable& x) {
 }
 
 /**
- * std::hypot() for Variables.
+ * hypot() for Variables.
  *
  * @param x The x argument.
  * @param y The y argument.
@@ -394,7 +396,7 @@ SLEIPNIR_DLLEXPORT inline Variable hypot(const Variable& x, const Variable& y) {
 }
 
 /**
- * std::pow() for Variables.
+ * pow() for Variables.
  *
  * @param base The base.
  * @param power The power.
@@ -405,7 +407,7 @@ SLEIPNIR_DLLEXPORT inline Variable pow(const Variable& base,
 }
 
 /**
- * std::log() for Variables.
+ * log() for Variables.
  *
  * @param x The argument.
  */
@@ -414,7 +416,7 @@ SLEIPNIR_DLLEXPORT inline Variable log(const Variable& x) {
 }
 
 /**
- * std::log10() for Variables.
+ * log10() for Variables.
  *
  * @param x The argument.
  */
@@ -432,7 +434,7 @@ SLEIPNIR_DLLEXPORT inline Variable sign(const Variable& x) {
 }
 
 /**
- * std::sin() for Variables.
+ * sin() for Variables.
  *
  * @param x The argument.
  */
@@ -441,7 +443,7 @@ SLEIPNIR_DLLEXPORT inline Variable sin(const Variable& x) {
 }
 
 /**
- * std::sinh() for Variables.
+ * sinh() for Variables.
  *
  * @param x The argument.
  */
@@ -450,7 +452,7 @@ SLEIPNIR_DLLEXPORT inline Variable sinh(const Variable& x) {
 }
 
 /**
- * std::sqrt() for Variables.
+ * sqrt() for Variables.
  *
  * @param x The argument.
  */
@@ -459,7 +461,7 @@ SLEIPNIR_DLLEXPORT inline Variable sqrt(const Variable& x) {
 }
 
 /**
- * std::tan() for Variables.
+ * tan() for Variables.
  *
  * @param x The argument.
  */
@@ -468,7 +470,7 @@ SLEIPNIR_DLLEXPORT inline Variable tan(const Variable& x) {
 }
 
 /**
- * std::tanh() for Variables.
+ * tanh() for Variables.
  *
  * @param x The argument.
  */
@@ -477,7 +479,7 @@ SLEIPNIR_DLLEXPORT inline Variable tanh(const Variable& x) {
 }
 
 /**
- * std::hypot() for Variables.
+ * hypot() for Variables.
  *
  * @param x The x argument.
  * @param y The y argument.
@@ -615,7 +617,8 @@ struct SLEIPNIR_DLLEXPORT EqualityConstraints {
   /**
    * Implicit conversion operator to bool.
    */
-  operator bool() {  // NOLINT
+  // NOLINTNEXTLINE (google-explicit-constructor)
+  operator bool() {
     return std::ranges::all_of(constraints, [](auto& constraint) {
       return constraint.value() == 0.0;
     });
@@ -678,7 +681,8 @@ struct SLEIPNIR_DLLEXPORT InequalityConstraints {
   /**
    * Implicit conversion operator to bool.
    */
-  operator bool() {  // NOLINT
+  // NOLINTNEXTLINE (google-explicit-constructor)
+  operator bool() {
     return std::ranges::all_of(constraints, [](auto& constraint) {
       return constraint.value() >= 0.0;
     });

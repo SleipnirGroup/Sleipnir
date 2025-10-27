@@ -149,21 +149,21 @@ TEST_CASE("Gradient - Trigonometry", "[Gradient]") {
   slp::Variable x;
   x.set_value(0.5);
 
-  // std::sin(x)
+  // sin(x)
   CHECK(slp::sin(x).value() == std::sin(x.value()));
 
   auto g = slp::Gradient(slp::sin(x), x);
   CHECK(g.get().value().coeff(0) == std::cos(x.value()));
   CHECK(g.value().coeff(0) == std::cos(x.value()));
 
-  // std::cos(x)
+  // cos(x)
   CHECK(slp::cos(x).value() == std::cos(x.value()));
 
   g = slp::Gradient(slp::cos(x), x);
   CHECK(g.get().value().coeff(0) == -std::sin(x.value()));
   CHECK(g.value().coeff(0) == -std::sin(x.value()));
 
-  // std::tan(x)
+  // tan(x)
   CHECK(slp::tan(x).value() == std::tan(x.value()));
 
   g = slp::Gradient(slp::tan(x), x);
@@ -172,14 +172,14 @@ TEST_CASE("Gradient - Trigonometry", "[Gradient]") {
   CHECK(g.value().coeff(0) ==
         1.0 / (std::cos(x.value()) * std::cos(x.value())));
 
-  // std::asin(x)
+  // asin(x)
   CHECK(slp::asin(x).value() == std::asin(x.value()));
 
   g = slp::Gradient(slp::asin(x), x);
   CHECK(g.get().value().coeff(0) == 1.0 / std::sqrt(1 - x.value() * x.value()));
   CHECK(g.value().coeff(0) == 1.0 / std::sqrt(1 - x.value() * x.value()));
 
-  // std::acos(x)
+  // acos(x)
   CHECK(slp::acos(x).value() == std::acos(x.value()));
 
   g = slp::Gradient(slp::acos(x), x);
@@ -187,7 +187,7 @@ TEST_CASE("Gradient - Trigonometry", "[Gradient]") {
         -1.0 / std::sqrt(1 - x.value() * x.value()));
   CHECK(g.value().coeff(0) == -1.0 / std::sqrt(1 - x.value() * x.value()));
 
-  // std::atan(x)
+  // atan(x)
   CHECK(slp::atan(x).value() == std::atan(x.value()));
 
   g = slp::Gradient(slp::atan(x), x);
@@ -206,7 +206,7 @@ TEST_CASE("Gradient - Hyperbolic", "[Gradient]") {
   CHECK(g.get().value().coeff(0) == std::cosh(x.value()));
   CHECK(g.value().coeff(0) == std::cosh(x.value()));
 
-  // std::cosh(x)
+  // cosh(x)
   CHECK(slp::cosh(x).value() == std::cosh(x.value()));
 
   g = slp::Gradient(slp::cosh(x), x);
@@ -227,21 +227,21 @@ TEST_CASE("Gradient - Exponential", "[Gradient]") {
   slp::Variable x;
   x.set_value(1.0);
 
-  // std::log(x)
+  // log(x)
   CHECK(slp::log(x).value() == std::log(x.value()));
 
   auto g = slp::Gradient(slp::log(x), x);
   CHECK(g.get().value().coeff(0) == 1.0 / x.value());
   CHECK(g.value().coeff(0) == 1.0 / x.value());
 
-  // std::log10(x)
+  // log10(x)
   CHECK(slp::log10(x).value() == std::log10(x.value()));
 
   g = slp::Gradient(slp::log10(x), x);
   CHECK(g.get().value().coeff(0) == 1.0 / (std::log(10.0) * x.value()));
   CHECK(g.value().coeff(0) == 1.0 / (std::log(10.0) * x.value()));
 
-  // std::exp(x)
+  // exp(x)
   CHECK(slp::exp(x).value() == std::exp(x.value()));
 
   g = slp::Gradient(slp::exp(x), x);
@@ -256,21 +256,21 @@ TEST_CASE("Gradient - Power", "[Gradient]") {
   a.set_value(2.0);
   slp::Variable y = 2 * a;
 
-  // std::sqrt(x)
+  // sqrt(x)
   CHECK(slp::sqrt(x).value() == std::sqrt(x.value()));
 
   auto g = slp::Gradient(slp::sqrt(x), x);
   CHECK(g.get().value().coeff(0) == 0.5 / std::sqrt(x.value()));
   CHECK(g.value().coeff(0) == 0.5 / std::sqrt(x.value()));
 
-  // std::sqrt(a)
+  // sqrt(a)
   CHECK(slp::sqrt(a).value() == std::sqrt(a.value()));
 
   g = slp::Gradient(slp::sqrt(a), a);
   CHECK(g.get().value().coeff(0) == 0.5 / std::sqrt(a.value()));
   CHECK(g.value().coeff(0) == 0.5 / std::sqrt(a.value()));
 
-  // std::cbrt(x)
+  // cbrt(x)
   CHECK(slp::cbrt(x).value() == std::cbrt(x.value()));
 
   g = slp::Gradient(slp::cbrt(x), x);
@@ -279,7 +279,7 @@ TEST_CASE("Gradient - Power", "[Gradient]") {
   CHECK(g.value().coeff(0) ==
         1.0 / (3.0 * std::cbrt(x.value()) * std::cbrt(x.value())));
 
-  // std::cbrt(a)
+  // cbrt(a)
   CHECK(slp::cbrt(a).value() == std::cbrt(a.value()));
 
   g = slp::Gradient(slp::cbrt(a), a);
@@ -350,7 +350,7 @@ TEST_CASE("Gradient - Power", "[Gradient]") {
         std::log(x.value()) * std::pow(x.value(), y.value()));
 }
 
-TEST_CASE("Gradient - std::abs()", "[Gradient]") {
+TEST_CASE("Gradient - abs()", "[Gradient]") {
   slp::Variable x;
   auto g = slp::Gradient(slp::abs(x), x);
 
@@ -370,7 +370,7 @@ TEST_CASE("Gradient - std::abs()", "[Gradient]") {
   CHECK(g.value().coeff(0) == 0.0);
 }
 
-TEST_CASE("Gradient - std::atan2()", "[Gradient]") {
+TEST_CASE("Gradient - atan2()", "[Gradient]") {
   slp::Variable x;
   slp::Variable y;
 
@@ -449,7 +449,7 @@ TEST_CASE("Gradient - std::atan2()", "[Gradient]") {
             .margin(1e-15));
 }
 
-TEST_CASE("Gradient - std::hypot()", "[Gradient]") {
+TEST_CASE("Gradient - hypot()", "[Gradient]") {
   slp::Variable x;
   slp::Variable y;
 
@@ -540,7 +540,7 @@ TEST_CASE("Gradient - Miscellaneous", "[Gradient]") {
   CHECK(g.get().value().coeff(0) == 1.0);
   CHECK(g.value().coeff(0) == 1.0);
 
-  // std::erf(x)
+  // erf(x)
   x.set_value(0.5);
   CHECK(slp::erf(x).value() == std::erf(x.value()));
 

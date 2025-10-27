@@ -551,7 +551,7 @@ struct CbrtExpression final : Expression {
 };
 
 /**
- * std::cbrt() for Expressions.
+ * cbrt() for Expressions.
  *
  * @param x The argument.
  */
@@ -814,7 +814,7 @@ struct AbsExpression final : Expression {
 };
 
 /**
- * std::abs() for Expressions.
+ * abs() for Expressions.
  *
  * @param x The argument.
  */
@@ -863,7 +863,7 @@ struct AcosExpression final : Expression {
 };
 
 /**
- * std::acos() for Expressions.
+ * acos() for Expressions.
  *
  * @param x The argument.
  */
@@ -911,7 +911,7 @@ struct AsinExpression final : Expression {
 };
 
 /**
- * std::asin() for Expressions.
+ * asin() for Expressions.
  *
  * @param x The argument.
  */
@@ -960,7 +960,7 @@ struct AtanExpression final : Expression {
 };
 
 /**
- * std::atan() for Expressions.
+ * atan() for Expressions.
  *
  * @param x The argument.
  */
@@ -1020,7 +1020,7 @@ struct Atan2Expression final : Expression {
 };
 
 /**
- * std::atan2() for Expressions.
+ * atan2() for Expressions.
  *
  * @param y The y argument.
  * @param x The x argument.
@@ -1072,7 +1072,7 @@ struct CosExpression final : Expression {
 };
 
 /**
- * std::cos() for Expressions.
+ * cos() for Expressions.
  *
  * @param x The argument.
  */
@@ -1120,7 +1120,7 @@ struct CoshExpression final : Expression {
 };
 
 /**
- * std::cosh() for Expressions.
+ * cosh() for Expressions.
  *
  * @param x The argument.
  */
@@ -1169,7 +1169,7 @@ struct ErfExpression final : Expression {
 };
 
 /**
- * std::erf() for Expressions.
+ * erf() for Expressions.
  *
  * @param x The argument.
  */
@@ -1218,7 +1218,7 @@ struct ExpExpression final : Expression {
 };
 
 /**
- * std::exp() for Expressions.
+ * exp() for Expressions.
  *
  * @param x The argument.
  */
@@ -1279,7 +1279,7 @@ struct HypotExpression final : Expression {
 };
 
 /**
- * std::hypot() for Expressions.
+ * hypot() for Expressions.
  *
  * @param x The x argument.
  * @param y The y argument.
@@ -1330,7 +1330,7 @@ struct LogExpression final : Expression {
 };
 
 /**
- * std::log() for Expressions.
+ * log() for Expressions.
  *
  * @param x The argument.
  */
@@ -1379,7 +1379,7 @@ struct Log10Expression final : Expression {
 };
 
 /**
- * std::log10() for Expressions.
+ * log10() for Expressions.
  *
  * @param x The argument.
  */
@@ -1461,7 +1461,7 @@ struct PowExpression final : Expression {
 };
 
 /**
- * std::pow() for Expressions.
+ * pow() for Expressions.
  *
  * @param base The base.
  * @param power The power.
@@ -1576,7 +1576,7 @@ struct SinExpression final : Expression {
 };
 
 /**
- * std::sin() for Expressions.
+ * sin() for Expressions.
  *
  * @param x The argument.
  */
@@ -1625,7 +1625,7 @@ struct SinhExpression final : Expression {
 };
 
 /**
- * std::sinh() for Expressions.
+ * sinh() for Expressions.
  *
  * @param x The argument.
  */
@@ -1674,7 +1674,7 @@ struct SqrtExpression final : Expression {
 };
 
 /**
- * std::sqrt() for Expressions.
+ * sqrt() for Expressions.
  *
  * @param x The argument.
  */
@@ -1726,7 +1726,7 @@ struct TanExpression final : Expression {
 };
 
 /**
- * std::tan() for Expressions.
+ * tan() for Expressions.
  *
  * @param x The argument.
  */
@@ -1777,7 +1777,7 @@ struct TanhExpression final : Expression {
 };
 
 /**
- * std::tanh() for Expressions.
+ * tanh() for Expressions.
  *
  * @param x The argument.
  */

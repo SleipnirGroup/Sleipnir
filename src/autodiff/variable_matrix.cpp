@@ -217,7 +217,7 @@ VariableMatrix solve(const VariableMatrix& A, const VariableMatrix& B) {
     auto adj_A22 = afp - ahn - bep + bhm + den - dfm;
     auto adj_A23 = -afl + ahj + bel - bhi - dej + dfi;
     auto adj_A30 = -ejo + ekn + fio - fkm - gin + gjm;
-    // NOLINTNEXTLINE
+    // NOLINTNEXTLINE(build/include_what_you_use)
     auto adj_A31 = ajo - akn - bio + bkm + cin - cjm;
     auto adj_A32 = -afo + agn + beo - bgm - cen + cfm;
     auto adj_A33 = afk - agj - bek + bgi + cej - cfi;

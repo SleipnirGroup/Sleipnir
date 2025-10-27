@@ -75,8 +75,7 @@ class SLEIPNIR_DLLEXPORT VariableMatrix : public SleipnirBase {
    *
    * @param list The nested list of Variables.
    */
-  VariableMatrix(  // NOLINT
-      std::initializer_list<std::initializer_list<Variable>> list) {
+  VariableMatrix(std::initializer_list<std::initializer_list<Variable>> list) {
     // Get row and column counts for destination matrix
     m_rows = list.size();
     m_cols = 0;
@@ -103,7 +102,8 @@ class SLEIPNIR_DLLEXPORT VariableMatrix : public SleipnirBase {
    *
    * @param list The nested list of Variables.
    */
-  VariableMatrix(const std::vector<std::vector<double>>& list) {  // NOLINT
+  // NOLINTNEXTLINE (google-explicit-constructor)
+  VariableMatrix(const std::vector<std::vector<double>>& list) {
     // Get row and column counts for destination matrix
     m_rows = list.size();
     m_cols = 0;
@@ -130,7 +130,8 @@ class SLEIPNIR_DLLEXPORT VariableMatrix : public SleipnirBase {
    *
    * @param list The nested list of Variables.
    */
-  VariableMatrix(const std::vector<std::vector<Variable>>& list) {  // NOLINT
+  // NOLINTNEXTLINE (google-explicit-constructor)
+  VariableMatrix(const std::vector<std::vector<Variable>>& list) {
     // Get row and column counts for destination matrix
     m_rows = list.size();
     m_cols = 0;
@@ -156,7 +157,8 @@ class SLEIPNIR_DLLEXPORT VariableMatrix : public SleipnirBase {
    * @param values Eigen matrix of values.
    */
   template <typename Derived>
-  VariableMatrix(const Eigen::MatrixBase<Derived>& values)  // NOLINT
+  // NOLINTNEXTLINE (google-explicit-constructor)
+  VariableMatrix(const Eigen::MatrixBase<Derived>& values)
       : m_rows{static_cast<int>(values.rows())},
         m_cols{static_cast<int>(values.cols())} {
     m_storage.reserve(values.rows() * values.cols());
@@ -173,7 +175,8 @@ class SLEIPNIR_DLLEXPORT VariableMatrix : public SleipnirBase {
    * @param values Diagonal matrix of values.
    */
   template <typename Derived>
-  VariableMatrix(const Eigen::DiagonalBase<Derived>& values)  // NOLINT
+  // NOLINTNEXTLINE (google-explicit-constructor)
+  VariableMatrix(const Eigen::DiagonalBase<Derived>& values)
       : m_rows{static_cast<int>(values.rows())},
         m_cols{static_cast<int>(values.cols())} {
     m_storage.reserve(values.rows() * values.cols());
@@ -193,8 +196,8 @@ class SLEIPNIR_DLLEXPORT VariableMatrix : public SleipnirBase {
    *
    * @param variable Variable.
    */
-  VariableMatrix(const Variable& variable)  // NOLINT
-      : m_rows{1}, m_cols{1} {
+  // NOLINTNEXTLINE (google-explicit-constructor)
+  VariableMatrix(const Variable& variable) : m_rows{1}, m_cols{1} {
     m_storage.emplace_back(variable);
   }
 
@@ -203,7 +206,8 @@ class SLEIPNIR_DLLEXPORT VariableMatrix : public SleipnirBase {
    *
    * @param variable Variable.
    */
-  VariableMatrix(Variable&& variable) : m_rows{1}, m_cols{1} {  // NOLINT
+  // NOLINTNEXTLINE (google-explicit-constructor)
+  VariableMatrix(Variable&& variable) : m_rows{1}, m_cols{1} {
     m_storage.emplace_back(std::move(variable));
   }
 
@@ -212,7 +216,8 @@ class SLEIPNIR_DLLEXPORT VariableMatrix : public SleipnirBase {
    *
    * @param values VariableBlock of values.
    */
-  VariableMatrix(const VariableBlock<VariableMatrix>& values)  // NOLINT
+  // NOLINTNEXTLINE (google-explicit-constructor)
+  VariableMatrix(const VariableBlock<VariableMatrix>& values)
       : m_rows{values.rows()}, m_cols{values.cols()} {
     m_storage.reserve(rows() * cols());
     for (int row = 0; row < rows(); ++row) {
@@ -227,7 +232,8 @@ class SLEIPNIR_DLLEXPORT VariableMatrix : public SleipnirBase {
    *
    * @param values VariableBlock of values.
    */
-  VariableMatrix(const VariableBlock<const VariableMatrix>& values)  // NOLINT
+  // NOLINTNEXTLINE (google-explicit-constructor)
+  VariableMatrix(const VariableBlock<const VariableMatrix>& values)
       : m_rows{values.rows()}, m_cols{values.cols()} {
     m_storage.reserve(rows() * cols());
     for (int row = 0; row < rows(); ++row) {
@@ -912,7 +918,8 @@ class SLEIPNIR_DLLEXPORT VariableMatrix : public SleipnirBase {
   /**
    * Implicit conversion operator from 1x1 VariableMatrix to Variable.
    */
-  operator Variable() const {  // NOLINT
+  // NOLINTNEXTLINE (google-explicit-constructor)
+  operator Variable() const {
     slp_assert(rows() == 1 && cols() == 1);
     return (*this)[0, 0];
   }

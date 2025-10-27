@@ -1953,31 +1953,31 @@ Returns:
     The value of this variable.)doc";
 
 static const char *__doc_slp_abs =
-R"doc(std::abs() for Variables.
+R"doc(abs() for Variables.
 
 Parameter ``x``:
     The argument.)doc";
 
 static const char *__doc_slp_acos =
-R"doc(std::acos() for Variables.
+R"doc(acos() for Variables.
 
 Parameter ``x``:
     The argument.)doc";
 
 static const char *__doc_slp_asin =
-R"doc(std::asin() for Variables.
+R"doc(asin() for Variables.
 
 Parameter ``x``:
     The argument.)doc";
 
 static const char *__doc_slp_atan =
-R"doc(std::atan() for Variables.
+R"doc(atan() for Variables.
 
 Parameter ``x``:
     The argument.)doc";
 
 static const char *__doc_slp_atan2 =
-R"doc(std::atan2() for Variables.
+R"doc(atan2() for Variables.
 
 Parameter ``y``:
     The y argument.
@@ -2010,19 +2010,19 @@ Parameter ``list``:
     The nested list of blocks.)doc";
 
 static const char *__doc_slp_cbrt =
-R"doc(std::cbrt() for Variables.
+R"doc(cbrt() for Variables.
 
 Parameter ``x``:
     The argument.)doc";
 
 static const char *__doc_slp_cos =
-R"doc(std::cos() for Variables.
+R"doc(cos() for Variables.
 
 Parameter ``x``:
     The argument.)doc";
 
 static const char *__doc_slp_cosh =
-R"doc(std::cosh() for Variables.
+R"doc(cosh() for Variables.
 
 Parameter ``x``:
     The argument.)doc";
@@ -2042,19 +2042,19 @@ Parameter ``binary_op``:
 static const char *__doc_slp_detail_AdjointExpressionGraph = R"doc()doc";
 
 static const char *__doc_slp_erf =
-R"doc(std::erf() for Variables.
+R"doc(erf() for Variables.
 
 Parameter ``x``:
     The argument.)doc";
 
 static const char *__doc_slp_exp =
-R"doc(std::exp() for Variables.
+R"doc(exp() for Variables.
 
 Parameter ``x``:
     The argument.)doc";
 
 static const char *__doc_slp_hypot =
-R"doc(std::hypot() for Variables.
+R"doc(hypot() for Variables.
 
 Parameter ``x``:
     The x argument.
@@ -2063,7 +2063,7 @@ Parameter ``y``:
     The y argument.)doc";
 
 static const char *__doc_slp_hypot_2 =
-R"doc(std::hypot() for Variables.
+R"doc(hypot() for Variables.
 
 Parameter ``x``:
     The x argument.
@@ -2075,13 +2075,13 @@ Parameter ``z``:
     The z argument.)doc";
 
 static const char *__doc_slp_log =
-R"doc(std::log() for Variables.
+R"doc(log() for Variables.
 
 Parameter ``x``:
     The argument.)doc";
 
 static const char *__doc_slp_log10 =
-R"doc(std::log10() for Variables.
+R"doc(log10() for Variables.
 
 Parameter ``x``:
     The argument.)doc";
@@ -2151,7 +2151,7 @@ Parameter ``rhs``:
     Left-hand side.)doc";
 
 static const char *__doc_slp_pow =
-R"doc(std::pow() for Variables.
+R"doc(pow() for Variables.
 
 Parameter ``base``:
     The base.
@@ -2166,13 +2166,13 @@ Parameter ``x``:
     The argument.)doc";
 
 static const char *__doc_slp_sin =
-R"doc(std::sin() for Variables.
+R"doc(sin() for Variables.
 
 Parameter ``x``:
     The argument.)doc";
 
 static const char *__doc_slp_sinh =
-R"doc(std::sinh() for Variables.
+R"doc(sinh() for Variables.
 
 Parameter ``x``:
     The argument.)doc";
@@ -2190,19 +2190,19 @@ Returns:
     The solution X.)doc";
 
 static const char *__doc_slp_sqrt =
-R"doc(std::sqrt() for Variables.
+R"doc(sqrt() for Variables.
 
 Parameter ``x``:
     The argument.)doc";
 
 static const char *__doc_slp_tan =
-R"doc(std::tan() for Variables.
+R"doc(tan() for Variables.
 
 Parameter ``x``:
     The argument.)doc";
 
 static const char *__doc_slp_tanh =
-R"doc(std::tanh() for Variables.
+R"doc(tanh() for Variables.
 
 Parameter ``x``:
     The argument.)doc";
