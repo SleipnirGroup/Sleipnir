@@ -7,7 +7,7 @@
 #include <Eigen/SparseCholesky>
 #include <Eigen/SparseCore>
 
-#include "optimization/inertia.hpp"
+#include "optimization/solver/util/inertia.hpp"
 
 // See docs/algorithms.md#Works_cited for citation definitions
 

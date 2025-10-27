@@ -13,7 +13,7 @@
 #include <Eigen/SparseCore>
 #include <gch/small_vector.hpp>
 
-#include "optimization/bounds.hpp"
+#include "optimization/solver/util/bounds.hpp"
 #include "sleipnir/autodiff/expression_type.hpp"
 #include "sleipnir/autodiff/gradient.hpp"
 #include "sleipnir/autodiff/hessian.hpp"

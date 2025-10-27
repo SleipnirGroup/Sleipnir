@@ -11,11 +11,11 @@
 #include <Eigen/SparseCore>
 #include <gch/small_vector.hpp>
 
-#include "optimization/regularized_ldlt.hpp"
 #include "optimization/solver/util/error_estimate.hpp"
 #include "optimization/solver/util/filter.hpp"
 #include "optimization/solver/util/is_locally_infeasible.hpp"
 #include "optimization/solver/util/kkt_error.hpp"
+#include "optimization/solver/util/regularized_ldlt.hpp"
 #include "sleipnir/optimization/solver/exit_status.hpp"
 #include "sleipnir/optimization/solver/iteration_info.hpp"
 #include "sleipnir/optimization/solver/options.hpp"
