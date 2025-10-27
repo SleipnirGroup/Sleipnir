@@ -105,7 +105,7 @@ TEST_CASE("OCP - Differential drive", "[OCP]") {
   CHECK(X.value(4, N) == Catch::Approx(x_final[4]).margin(1e-8));
 
   // Log states for offline viewing
-  std::ofstream states{"OCP Differential drive states.csv"};
+  std::ofstream states{"OCP - Differential drive states.csv"};
   if (states.is_open()) {
     states << "Time (s),X position (m),Y position (m),Heading (rad),Left "
               "velocity (m/s),Right velocity (m/s)\n";
@@ -122,7 +122,7 @@ TEST_CASE("OCP - Differential drive", "[OCP]") {
   }
 
   // Log inputs for offline viewing
-  std::ofstream inputs{"OCP Differential drive inputs.csv"};
+  std::ofstream inputs{"OCP - Differential drive inputs.csv"};
   if (inputs.is_open()) {
     inputs << "Time (s),Left voltage (V),Right voltage (V)\n";
 

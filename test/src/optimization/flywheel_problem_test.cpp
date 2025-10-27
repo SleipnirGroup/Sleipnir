@@ -112,7 +112,7 @@ TEST_CASE("Problem - Flywheel", "[Problem]") {
   CHECK(X.value(0, N) == Catch::Approx(r(0)).margin(1e-7));
 
   // Log states for offline viewing
-  std::ofstream states{"Problem Flywheel states.csv"};
+  std::ofstream states{"Problem - Flywheel states.csv"};
   if (states.is_open()) {
     states << "Time (s),Velocity (rad/s)\n";
 
@@ -122,7 +122,7 @@ TEST_CASE("Problem - Flywheel", "[Problem]") {
   }
 
   // Log inputs for offline viewing
-  std::ofstream inputs{"Problem Flywheel inputs.csv"};
+  std::ofstream inputs{"Problem - Flywheel inputs.csv"};
   if (inputs.is_open()) {
     inputs << "Time (s),Voltage (V)\n";
 

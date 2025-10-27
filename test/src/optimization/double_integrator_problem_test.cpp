@@ -126,7 +126,7 @@ TEST_CASE("Problem - Double integrator", "[Problem]") {
   CHECK(X.value(1, N) == Catch::Approx(0.0).margin(1e-8));
 
   // Log states for offline viewing
-  std::ofstream states{"Problem Double Integrator states.csv"};
+  std::ofstream states{"Problem - Double integrator states.csv"};
   if (states.is_open()) {
     states << "Time (s),Position (m),Velocity (m/s)\n";
 
@@ -137,7 +137,7 @@ TEST_CASE("Problem - Double integrator", "[Problem]") {
   }
 
   // Log inputs for offline viewing
-  std::ofstream inputs{"Problem Double Integrator inputs.csv"};
+  std::ofstream inputs{"Problem - Double integrator inputs.csv"};
   if (inputs.is_open()) {
     inputs << "Time (s),Acceleration (m/s²)\n";
 
