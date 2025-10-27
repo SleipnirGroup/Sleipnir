@@ -116,7 +116,7 @@ TEST_CASE("Problem - Cart-pole", "[Problem]") {
   CHECK(X.value(3, N) == Catch::Approx(x_final[3]).margin(1e-8));
 
   // Log states for offline viewing
-  std::ofstream states{"Problem Cart-pole states.csv"};
+  std::ofstream states{"Problem - Cart-pole states.csv"};
   if (states.is_open()) {
     states << "Time (s),Cart position (m),Pole angle (rad),Cart velocity (m/s),"
               "Pole angular velocity (rad/s)\n";
@@ -128,7 +128,7 @@ TEST_CASE("Problem - Cart-pole", "[Problem]") {
   }
 
   // Log inputs for offline viewing
-  std::ofstream inputs{"Problem Cart-pole inputs.csv"};
+  std::ofstream inputs{"Problem - Cart-pole inputs.csv"};
   if (inputs.is_open()) {
     inputs << "Time (s),Cart force (N)\n";
 
