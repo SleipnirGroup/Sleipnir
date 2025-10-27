@@ -13,7 +13,7 @@
 #include <sleipnir/autodiff/variable.hpp>
 
 #include "catch_matchers.hpp"
-#include "float_range.hpp"
+#include "range.hpp"
 #include "util/scope_exit.hpp"
 
 TEST_CASE("Hessian - Linear", "[Hessian]") {
@@ -268,8 +268,8 @@ TEST_CASE("Hessian - Rosenbrock", "[Hessian]") {
   auto& x = input[0];
   auto& y = input[1];
 
-  for (auto x0 : float_range(-2.5, 2.5, 0.1)) {
-    for (auto y0 : float_range(-2.5, 2.5, 0.1)) {
+  for (auto x0 : range(-2.5, 2.5, 0.1)) {
+    for (auto y0 : range(-2.5, 2.5, 0.1)) {
       x.set_value(x0);
       y.set_value(y0);
       auto z = slp::pow(1 - x, 2) + 100 * slp::pow(y - slp::pow(x, 2), 2);
