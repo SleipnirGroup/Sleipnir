@@ -51,7 +51,7 @@ class SLEIPNIR_DLLEXPORT Variable : public SleipnirBase {
   explicit constexpr Variable(std::nullptr_t) : expr{nullptr} {}
 
   /**
-   * Constructs a Variable from a floating point type.
+   * Constructs a Variable from a floating-point type.
    *
    * @param value The value of the Variable.
    */
