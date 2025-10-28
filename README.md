@@ -10,7 +10,7 @@
 
 > Sparsity and Linearity-Exploiting Interior-Point solver - Now Internally Readable
 
-Named after Odin's eight-legged horse from Norse mythology, Sleipnir is a linearity-exploiting sparse nonlinear constrained optimization problem solver that uses the interior-point method.
+Named after Odin's eight-legged horse from Norse mythology, Sleipnir is a linearity-exploiting reverse mode autodiff library, interior-point method, and nonlinear program solver DSL for C++23 and Python. The DSL automatically chooses the best solver based on the problem structure.
 
 ```cpp
 #include <print>
@@ -56,6 +56,65 @@ def main():
 
 if __name__ == "__main__":
     main()
+```
+
+Here's the Python output with `problem.solve(diagnostics=True)`.
+```bash
+User-configured exit conditions:
+  ↳ error below 1e-08
+  ↳ iteration callback requested stop
+  ↳ executed 5000 iterations
+
+Problem structure:
+  ↳ quadratic cost function
+  ↳ linear equality constraints
+  ↳ no inequality constraints
+
+2 decision variables
+1 equality constraint
+  ↳ 1 linear
+0 inequality constraints
+
+Invoking SQP solver
+
+┏━━━━┯━━━━┯━━━━━━━━━┯━━━━━━━━━━━━┯━━━━━━━━━━━━━┯━━━━━━━━━━━━┯━━━━━━━━━━━━┯━━━━━━━━┯━━━━━┯━━━━━━━━┯━━━━━━━━┯━━┓
+┃iter│type│time (ms)│   error    │    cost     │  infeas.   │complement. │   μ    │ reg │primal α│ dual α │↩ ┃
+┡━━━━┷━━━━┷━━━━━━━━━┷━━━━━━━━━━━━┷━━━━━━━━━━━━━┷━━━━━━━━━━━━┷━━━━━━━━━━━━┷━━━━━━━━┷━━━━━┷━━━━━━━━┷━━━━━━━━┷━━┩
+│   0 norm     0.006 1.799760e-03 -1.080000e+02 6.016734e-10 0.000000e+00 0.00e+00 10⁻⁴  1.00e+00 1.00e+00  0│
+│   1 norm     0.008 1.199700e-07 -1.080000e+02 9.947598e-14 0.000000e+00 0.00e+00 10⁻⁴  1.00e+00 1.00e+00  0│
+│   2 norm     0.002 4.998668e-12 -1.080000e+02 0.000000e+00 0.000000e+00 0.00e+00 10⁻⁴  1.00e+00 1.00e+00  0│
+└────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+┏━━━━━━━━━━━━━━━━━━━━━━━┯━━━━━━━━━━━━━━━━━━┯━━━━━━━━━━┯━━━━━━━━━┯━━━━┓
+┃     solver trace      │     percent      │total (ms)│each (ms)│runs┃
+┡━━━━━━━━━━━━━━━━━━━━━━━┷━━━━━━━━━━━━━━━━━━┷━━━━━━━━━━┷━━━━━━━━━┷━━━━┩
+│solver                  100.00%▕█████████▏      0.056     0.056    1│
+│  ↳ setup                 5.36%▕▍        ▏      0.003     0.003    1│
+│  ↳ iteration            30.36%▕██▋      ▏      0.017     0.005    3│
+│    ↳ feasibility ✓       0.00%▕         ▏      0.000     0.000    3│
+│    ↳ iter callbacks      0.00%▕         ▏      0.000     0.000    3│
+│    ↳ KKT matrix build    1.79%▕▏        ▏      0.001     0.000    3│
+│    ↳ KKT matrix decomp  14.29%▕█▎       ▏      0.008     0.002    3│
+│    ↳ KKT system solve    1.79%▕▏        ▏      0.001     0.000    3│
+│    ↳ line search         1.79%▕▏        ▏      0.001     0.000    3│
+│      ↳ SOC               0.00%▕         ▏      0.000     0.000    0│
+│    ↳ next iter prep      0.00%▕         ▏      0.000     0.000    3│
+│    ↳ f(x)                0.00%▕         ▏      0.000     0.000    7│
+│    ↳ ∇f(x)               1.79%▕▏        ▏      0.001     0.000    4│
+│    ↳ ∇²ₓₓL               0.00%▕         ▏      0.000     0.000    4│
+│    ↳ cₑ(x)               1.79%▕▏        ▏      0.001     0.000    7│
+│    ↳ ∂cₑ/∂x              0.00%▕         ▏      0.000     0.000    4│
+└────────────────────────────────────────────────────────────────────┘
+┏━━━━━━━━━━━━━━━━━━━━━━━┯━━━━━━━━━━━━━━━━━━┯━━━━━━━━━━┯━━━━━━━━━┯━━━━┓
+┃    autodiff trace     │     percent      │total (ms)│each (ms)│runs┃
+┡━━━━━━━━━━━━━━━━━━━━━━━┷━━━━━━━━━━━━━━━━━━┷━━━━━━━━━━┷━━━━━━━━━┷━━━━┩
+│setup                   100.00%▕█████████▏      0.013     0.013    1│
+│  ↳ ∇f(x)                 7.69%▕▋        ▏      0.001     0.001    1│
+│  ↳ ∂cₑ/∂x                7.69%▕▋        ▏      0.001     0.001    1│
+│  ↳ ∇²ₓₓL                38.46%▕███▍     ▏      0.005     0.005    1│
+└────────────────────────────────────────────────────────────────────┘
+
+Exit: success
+x = 17.99999999999167, y = 6.0000000000027764
 ```
 
 Sleipnir's internals are intended to be readable by those who aren't domain experts with links to explanatory material for its algorithms.
@@ -122,14 +181,14 @@ To use Sleipnir within a CMake project, add the following to your CMakeLists.txt
 ```cmake
 include(FetchContent)
 
-fetchcontent_declare(
+FetchContent_Declare(
     Sleipnir
-    GIT_REPOSITORY https://github.com/SleipnirGroup/Sleipnir
+    GIT_REPOSITORY https://github.com/SleipnirGroup/Sleipnir.git
     GIT_TAG main
     EXCLUDE_FROM_ALL
     SYSTEM
 )
-fetchcontent_makeavailable(Sleipnir)
+FetchContent_MakeAvailable(Sleipnir)
 
 target_link_libraries(MyApp PUBLIC Sleipnir::Sleipnir)
 ```
