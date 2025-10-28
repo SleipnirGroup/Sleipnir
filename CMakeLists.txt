@@ -101,7 +101,6 @@ if(BUILD_TESTING AND NOT CMAKE_CROSSCOMPILING)
         Catch2
         GIT_REPOSITORY https://github.com/catchorg/Catch2.git
         GIT_TAG v3.11.0
-        CMAKE_ARGS
     )
     FetchContent_MakeAvailable(Catch2)
 endif()
