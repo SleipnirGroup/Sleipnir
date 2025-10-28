@@ -1431,7 +1431,7 @@ struct PowExpression final : Expression {
 
   double grad_r(double base, double power,
                 double parent_adjoint) const override {
-    // Since x * std::log(x) -> 0 as x -> 0
+    // Since x log(x) -> 0 as x -> 0
     if (base == 0.0) {
       return 0.0;
     } else {
@@ -1449,7 +1449,7 @@ struct PowExpression final : Expression {
   ExpressionPtr grad_expr_r(
       const ExpressionPtr& base, const ExpressionPtr& power,
       const ExpressionPtr& parent_adjoint) const override {
-    // Since x * std::log(x) -> 0 as x -> 0
+    // Since x log(x) -> 0 as x -> 0
     if (base->val == 0.0) {
       // Return zero
       return base;
