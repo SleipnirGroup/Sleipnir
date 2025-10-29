@@ -25,9 +25,9 @@ Eigen::Vector<double, 5> differential_drive_dynamics_double(
   Eigen::Vector<double, 5> xdot;
 
   auto v = (x[3] + x[4]) / 2.0;
-  xdot(0) = v * std::cos(x[2]);
-  xdot(1) = v * std::sin(x[2]);
-  xdot(2) = (x[4] - x[3]) / trackwidth;
+  xdot[0] = v * std::cos(x[2]);
+  xdot[1] = v * std::sin(x[2]);
+  xdot[2] = (x[4] - x[3]) / trackwidth;
   xdot.segment(3, 2) = A * x.segment(3, 2) + B * u;
 
   return xdot;
