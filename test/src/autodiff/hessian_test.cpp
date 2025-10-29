@@ -5,9 +5,9 @@
 #include <numeric>
 
 #include <Eigen/Core>
-#include <catch2/catch_approx.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <sleipnir/autodiff/gradient.hpp>
 #include <sleipnir/autodiff/hessian.hpp>
 #include <sleipnir/autodiff/jacobian.hpp>
@@ -175,15 +175,16 @@ TEMPLATE_TEST_CASE("Hessian - Product of sines", "[Hessian]",
   auto temp = x.cwise_transform(slp::sin<T>);
   auto y = std::accumulate(temp.begin(), temp.end(), slp::Variable{T(1)},
                            std::multiplies{});
-  CHECK(y.value() == Catch::Approx(sin(1) * sin(2) * sin(3) * sin(4) * sin(5))
-                         .margin(T(1e-15)));
+  CHECK_THAT(y.value(), WithinAbs(sin(T(1)) * sin(T(2)) * sin(T(3)) *
+                                      sin(T(4)) * sin(T(5)),
+                                  T(1e-15)));
 
   auto g = slp::Gradient(y, x);
   for (int i = 0; i < x.rows(); ++i) {
-    CHECK(g.get().value(i) ==
-          Catch::Approx(y.value() / tan(x[i].value())).margin(T(1e-15)));
-    CHECK(g.value().coeff(i) ==
-          Catch::Approx(y.value() / tan(x[i].value())).margin(T(1e-15)));
+    CHECK_THAT(g.get().value(i),
+               WithinAbs(y.value() / tan(x[i].value()), T(1e-15)));
+    CHECK_THAT(g.value().coeff(i),
+               WithinAbs(y.value() / tan(x[i].value()), T(1e-15)));
   }
 
   auto H = slp::Hessian(y, x);
@@ -198,8 +199,8 @@ TEMPLATE_TEST_CASE("Hessian - Product of sines", "[Hessian]",
       }
     }
   }
-  CHECK_THAT(H.get().value(), ApproxMatrix(expected_H, T(1e-15)));
-  CHECK_THAT(H.value().toDense(), ApproxMatrix(expected_H, T(1e-15)));
+  CHECK_THAT(H.get().value(), MatrixWithinAbs(expected_H, T(1e-15)));
+  CHECK_THAT(H.value().toDense(), MatrixWithinAbs(expected_H, T(1e-15)));
 }
 
 TEMPLATE_TEST_CASE("Hessian - Sum of squared residuals", "[Hessian]",
@@ -286,10 +287,10 @@ TEMPLATE_TEST_CASE("Hessian - Nested powers", "[Hessian]",
   auto y = slp::pow(slp::pow(x, T(2)), T(2));
 
   auto J = slp::Jacobian(y, x).value().toDense();
-  CHECK(J(0, 0) == Catch::Approx(T(4) * x0 * x0 * x0).margin(T(1e-12)));
+  CHECK_THAT(J(0, 0), WithinAbs(T(4) * x0 * x0 * x0, T(1e-12)));
 
   auto H = slp::Hessian(y, x).value().toDense();
-  CHECK(H(0, 0) == Catch::Approx(T(12) * x0 * x0).margin(T(1e-12)));
+  CHECK_THAT(H(0, 0), WithinAbs(T(12) * x0 * x0, T(1e-12)));
 }
 
 TEMPLATE_TEST_CASE("Hessian - Rosenbrock", "[Hessian]",
@@ -311,9 +312,9 @@ TEMPLATE_TEST_CASE("Hessian - Rosenbrock", "[Hessian]",
                T(100) * slp::pow(y - slp::pow(x, T(2)), T(2));
 
       auto H = slp::Hessian(z, input).value().toDense();
-      CHECK(H(0, 0) ==
-            Catch::Approx(T(-400) * (y0 - x0 * x0) + T(800) * x0 * x0 + T(2))
-                .margin(T(1e-12)));
+      CHECK_THAT(H(0, 0),
+                 WithinAbs(T(-400) * (y0 - x0 * x0) + T(800) * x0 * x0 + T(2),
+                           T(1e-11)));
       CHECK(H(0, 1) == T(-400) * x0);
       CHECK(H(1, 0) == T(-400) * x0);
       CHECK(H(1, 1) == T(200));

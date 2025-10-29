@@ -4,12 +4,12 @@
 #include <numbers>
 
 #include <Eigen/Core>
-#include <catch2/catch_approx.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <sleipnir/autodiff/gradient.hpp>
 #include <sleipnir/autodiff/variable_matrix.hpp>
 
+#include "catch_matchers.hpp"
 #include "scalar_types_under_test.hpp"
 
 TEMPLATE_TEST_CASE("Gradient - Trivial case", "[Gradient]",
@@ -431,12 +431,12 @@ TEMPLATE_TEST_CASE("Gradient - atan2()", "[Gradient]",
   CHECK(slp::atan2(2.0, x).value() == atan2(T(2), x.value()));
 
   auto g = slp::Gradient(slp::atan2(T(2), x), x);
-  CHECK(g.get().value().coeff(0) ==
-        Catch::Approx(T(-2) / (T(2) * T(2) + x.value() * x.value()))
-            .margin(T(1e-15)));
-  CHECK(g.value().coeff(0) ==
-        Catch::Approx(T(-2) / (T(2) * T(2) + x.value() * x.value()))
-            .margin(T(1e-15)));
+  CHECK_THAT(
+      g.get().value().coeff(0),
+      WithinAbs(T(-2) / (T(2) * T(2) + x.value() * x.value()), T(1e-15)));
+  CHECK_THAT(
+      g.value().coeff(0),
+      WithinAbs(T(-2) / (T(2) * T(2) + x.value() * x.value()), T(1e-15)));
 
   // Testing atan2 function on (var, T)
   x.set_value(T(1));
@@ -444,12 +444,10 @@ TEMPLATE_TEST_CASE("Gradient - atan2()", "[Gradient]",
   CHECK(slp::atan2(x, T(2)).value() == atan2(x.value(), T(2)));
 
   g = slp::Gradient(slp::atan2(x, T(2)), x);
-  CHECK(g.get().value().coeff(0) ==
-        Catch::Approx(T(2) / (T(2) * T(2) + x.value() * x.value()))
-            .margin(T(1e-15)));
-  CHECK(g.value().coeff(0) ==
-        Catch::Approx(T(2) / (T(2) * T(2) + x.value() * x.value()))
-            .margin(T(1e-15)));
+  CHECK_THAT(g.get().value().coeff(0),
+             WithinAbs(T(2) / (T(2) * T(2) + x.value() * x.value()), T(1e-15)));
+  CHECK_THAT(g.value().coeff(0),
+             WithinAbs(T(2) / (T(2) * T(2) + x.value() * x.value()), T(1e-15)));
 
   // Testing atan2 function on (var, var)
   x.set_value(T(1.1));
@@ -457,51 +455,54 @@ TEMPLATE_TEST_CASE("Gradient - atan2()", "[Gradient]",
   CHECK(slp::atan2(y, x).value() == atan2(y.value(), x.value()));
 
   g = slp::Gradient(slp::atan2(y, x), y);
-  CHECK(
-      g.get().value().coeff(0) ==
-      Catch::Approx(x.value() / (x.value() * x.value() + y.value() * y.value()))
-          .margin(T(1e-15)));
-  CHECK(g.value().coeff(0) == Catch::Approx(x.value() / (x.value() * x.value() +
-                                                         y.value() * y.value()))
-                                  .margin(T(1e-15)));
+  CHECK_THAT(
+      g.get().value().coeff(0),
+      WithinAbs(x.value() / (x.value() * x.value() + y.value() * y.value()),
+                T(1e-15)));
+  CHECK_THAT(g.value().coeff(0), WithinAbs(x.value() / (x.value() * x.value() +
+                                                        y.value() * y.value()),
+                                           T(1e-15)));
 
   g = slp::Gradient(slp::atan2(y, x), x);
-  CHECK(g.get().value().coeff(0) ==
-        Catch::Approx(-y.value() /
-                      (x.value() * x.value() + y.value() * y.value()))
-            .margin(T(1e-15)));
-  CHECK(g.value().coeff(0) ==
-        Catch::Approx(-y.value() /
-                      (x.value() * x.value() + y.value() * y.value()))
-            .margin(T(1e-15)));
+  CHECK_THAT(
+      g.get().value().coeff(0),
+      WithinAbs(-y.value() / (x.value() * x.value() + y.value() * y.value()),
+                T(1e-15)));
+  CHECK_THAT(g.value().coeff(0), WithinAbs(-y.value() / (x.value() * x.value() +
+                                                         y.value() * y.value()),
+                                           T(1e-15)));
 
   // Testing atan2 function on (expr, expr)
   CHECK(T(3) * slp::atan2(slp::sin(y), T(2) * x + T(1)).value() ==
         T(3) * atan2(sin(y.value()), T(2) * x.value() + T(1)));
 
   g = slp::Gradient(T(3) * slp::atan2(slp::sin(y), T(2) * x + T(1)), y);
-  CHECK(g.get().value().coeff(0) ==
-        Catch::Approx(T(3) * (T(2) * x.value() + T(1)) * cos(y.value()) /
-                      ((T(2) * x.value() + T(1)) * (T(2) * x.value() + T(1)) +
-                       sin(y.value()) * sin(y.value())))
-            .margin(T(1e-15)));
-  CHECK(g.value().coeff(0) ==
-        Catch::Approx(T(3) * (T(2) * x.value() + T(1)) * cos(y.value()) /
-                      ((T(2) * x.value() + T(1)) * (T(2) * x.value() + T(1)) +
-                       sin(y.value()) * sin(y.value())))
-            .margin(T(1e-15)));
+  CHECK_THAT(
+      g.get().value().coeff(0),
+      WithinAbs(T(3) * (T(2) * x.value() + T(1)) * cos(y.value()) /
+                    ((T(2) * x.value() + T(1)) * (T(2) * x.value() + T(1)) +
+                     sin(y.value()) * sin(y.value())),
+                T(1e-15)));
+  CHECK_THAT(
+      g.value().coeff(0),
+      WithinAbs(T(3) * (T(2) * x.value() + T(1)) * cos(y.value()) /
+                    ((T(2) * x.value() + T(1)) * (T(2) * x.value() + T(1)) +
+                     sin(y.value()) * sin(y.value())),
+                T(1e-15)));
 
   g = slp::Gradient(T(3) * slp::atan2(slp::sin(y), T(2) * x + T(1)), x);
-  CHECK(g.get().value().coeff(0) ==
-        Catch::Approx(T(3) * T(-2) * sin(y.value()) /
-                      ((T(2) * x.value() + T(1)) * (T(2) * x.value() + T(1)) +
-                       sin(y.value()) * sin(y.value())))
-            .margin(T(1e-15)));
-  CHECK(g.value().coeff(0) ==
-        Catch::Approx(T(3) * T(-2) * sin(y.value()) /
-                      ((T(2) * x.value() + T(1)) * (T(2) * x.value() + T(1)) +
-                       sin(y.value()) * sin(y.value())))
-            .margin(T(1e-15)));
+  CHECK_THAT(
+      g.get().value().coeff(0),
+      WithinAbs(T(3) * T(-2) * sin(y.value()) /
+                    ((T(2) * x.value() + T(1)) * (T(2) * x.value() + T(1)) +
+                     sin(y.value()) * sin(y.value())),
+                T(1e-15)));
+  CHECK_THAT(
+      g.value().coeff(0),
+      WithinAbs(T(3) * T(-2) * sin(y.value()) /
+                    ((T(2) * x.value() + T(1)) * (T(2) * x.value() + T(1)) +
+                     sin(y.value()) * sin(y.value())),
+                T(1e-15)));
 }
 
 TEMPLATE_TEST_CASE("Gradient - hypot()", "[Gradient]",

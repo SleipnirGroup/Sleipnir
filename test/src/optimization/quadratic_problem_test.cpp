@@ -1,10 +1,10 @@
 // Copyright (c) Sleipnir contributors
 
-#include <catch2/catch_approx.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <sleipnir/optimization/problem.hpp>
 
+#include "catch_matchers.hpp"
 #include "catch_string_converters.hpp"
 #include "scalar_types_under_test.hpp"
 
@@ -25,7 +25,7 @@ TEMPLATE_TEST_CASE("Problem - Unconstrained 1D", "[Problem]",
 
   CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
-  CHECK(x.value() == Catch::Approx(T(3)).margin(T(1e-6)));
+  CHECK_THAT(x.value(), WithinAbs(T(3), T(1e-6)));
 }
 
 TEMPLATE_TEST_CASE("Problem - Unconstrained 2D", "[Problem]",
@@ -48,8 +48,8 @@ TEMPLATE_TEST_CASE("Problem - Unconstrained 2D", "[Problem]",
 
     CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
-    CHECK(x.value() == Catch::Approx(T(0)).margin(T(1e-6)));
-    CHECK(y.value() == Catch::Approx(T(0)).margin(T(1e-6)));
+    CHECK_THAT(x.value(), WithinAbs(T(0), T(1e-6)));
+    CHECK_THAT(y.value(), WithinAbs(T(0), T(1e-6)));
   }
 
   {
@@ -67,8 +67,8 @@ TEMPLATE_TEST_CASE("Problem - Unconstrained 2D", "[Problem]",
 
     CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
-    CHECK(x.value(0) == Catch::Approx(T(0)).margin(T(1e-6)));
-    CHECK(x.value(1) == Catch::Approx(T(0)).margin(T(1e-6)));
+    CHECK_THAT(x.value(0), WithinAbs(T(0), T(1e-6)));
+    CHECK_THAT(x.value(1), WithinAbs(T(0), T(1e-6)));
   }
 }
 
@@ -130,8 +130,8 @@ TEMPLATE_TEST_CASE("Problem - Equality-constrained", "[Problem]",
 
     CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
-    CHECK(x.value() == Catch::Approx(T(18)).margin(T(1e-5)));
-    CHECK(y.value() == Catch::Approx(T(6)).margin(T(1e-5)));
+    CHECK_THAT(x.value(), WithinAbs(T(18), T(1e-5)));
+    CHECK_THAT(y.value(), WithinAbs(T(6), T(1e-5)));
   }
 
   {
@@ -151,8 +151,8 @@ TEMPLATE_TEST_CASE("Problem - Equality-constrained", "[Problem]",
 
     CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
-    CHECK(x.value(0) == Catch::Approx(T(3)).margin(T(1e-5)));
-    CHECK(x.value(1) == Catch::Approx(T(3)).margin(T(1e-5)));
+    CHECK_THAT(x.value(0), WithinAbs(T(3), T(1e-5)));
+    CHECK_THAT(x.value(1), WithinAbs(T(3), T(1e-5)));
   }
 }
 
@@ -176,6 +176,6 @@ TEMPLATE_TEST_CASE("Problem - Inequality-constrained 2D", "[Problem]",
 
   CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
-  CHECK(x.value() == Catch::Approx(T(3) + T(1.0 / 3.0)).margin(T(1e-6)));
-  CHECK(y.value() == Catch::Approx(T(1) + T(2.0 / 3.0)).margin(T(1e-6)));
+  CHECK_THAT(x.value(), WithinAbs(T(3) + T(1.0 / 3.0), T(1e-6)));
+  CHECK_THAT(y.value(), WithinAbs(T(1) + T(2.0 / 3.0), T(1e-6)));
 }

@@ -3,13 +3,13 @@
 #include <concepts>
 #include <format>
 
-#include <catch2/catch_approx.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <sleipnir/autodiff/expression_type.hpp>
 #include <sleipnir/optimization/problem.hpp>
 #include <sleipnir/optimization/solver/exit_status.hpp>
 
+#include "catch_matchers.hpp"
 #include "catch_string_converters.hpp"
 #include "range.hpp"
 #include "scalar_types_under_test.hpp"
@@ -32,7 +32,7 @@ TEMPLATE_TEST_CASE("Problem - Quartic", "[Problem]", SCALAR_TYPES_UNDER_TEST) {
 
   CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
-  CHECK(x.value() == Catch::Approx(T(1)).margin(T(1e-6)));
+  CHECK_THAT(x.value(), WithinAbs(T(1), T(1e-6)));
 }
 
 TEMPLATE_TEST_CASE("Problem - Rosenbrock with cubic and line constraint",
@@ -105,10 +105,10 @@ TEMPLATE_TEST_CASE("Problem - Rosenbrock with disk constraint", "[Problem]",
 
       CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
-      CHECK(x.value() == Catch::Approx(T(1)).margin(T(1e-3)));
+      CHECK_THAT(x.value(), WithinAbs(T(1), T(1e-3)));
       INFO(std::format("  (x₀, y₀) = ({}, {})", x0, y0));
       INFO(std::format("  (x, y) = ({}, {})", x.value(), y.value()));
-      CHECK(y.value() == Catch::Approx(T(1)).margin(T(1e-3)));
+      CHECK_THAT(y.value(), WithinAbs(T(1), T(1e-3)));
       INFO(std::format("  (x₀, y₀) = ({}, {})", x0, y0));
       INFO(std::format("  (x, y) = ({}, {})", x.value(), y.value()));
     }
@@ -144,8 +144,8 @@ TEMPLATE_TEST_CASE("Problem - Minimum 2D distance with linear constraint",
   CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 #endif
 
-  CHECK(x.value() == Catch::Approx(T(2.5)).margin(T(1e-2)));
-  CHECK(y.value() == Catch::Approx(T(2.5)).margin(T(1e-2)));
+  CHECK_THAT(x.value(), WithinAbs(T(2.5), T(1e-2)));
+  CHECK_THAT(y.value(), WithinAbs(T(2.5), T(1e-2)));
 }
 
 TEMPLATE_TEST_CASE("Problem - Conflicting bounds", "[Problem]",
