@@ -69,7 +69,7 @@ TEST_CASE("Problem - Flywheel", "[Problem]") {
   // uₖ = B⁺(rₖ₊₁ − Arₖ)
   // uₖ = B⁺(rₖ − Arₖ)
   // uₖ = B⁺(I − A)rₖ
-  double u_ss = 1.0 / B * (1.0 - A) * r(0);
+  double u_ss = 1.0 / B * (1.0 - A) * r[0];
 
   // Verify initial state
   CHECK(X.value(0, 0) == Catch::Approx(0.0).margin(1e-8));
@@ -82,7 +82,7 @@ TEST_CASE("Problem - Flywheel", "[Problem]") {
     CHECK(X.value(0, k) == Catch::Approx(x).margin(1e-2));
 
     // Determine expected input for this timestep
-    double error = r(0) - x;
+    double error = r[0] - x;
     if (error > 1e-2) {
       // Max control input until the reference is reached
       u = 12.0;
@@ -109,7 +109,7 @@ TEST_CASE("Problem - Flywheel", "[Problem]") {
   }
 
   // Verify final state
-  CHECK(X.value(0, N) == Catch::Approx(r(0)).margin(1e-7));
+  CHECK(X.value(0, N) == Catch::Approx(r[0]).margin(1e-7));
 
   // Log states for offline viewing
   std::ofstream states{"Problem - Flywheel states.csv"};
