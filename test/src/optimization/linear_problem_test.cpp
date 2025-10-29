@@ -1,10 +1,10 @@
 // Copyright (c) Sleipnir contributors
 
-#include <catch2/catch_approx.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <sleipnir/optimization/problem.hpp>
 
+#include "catch_matchers.hpp"
 #include "catch_string_converters.hpp"
 #include "scalar_types_under_test.hpp"
 
@@ -33,8 +33,8 @@ TEMPLATE_TEST_CASE("Problem - Maximize", "[Problem]", SCALAR_TYPES_UNDER_TEST) {
 
   CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
-  CHECK(x.value() == Catch::Approx(T(375)).margin(T(1e-6)));
-  CHECK(y.value() == Catch::Approx(T(250)).margin(T(1e-6)));
+  CHECK_THAT(x.value(), WithinAbs(T(375), T(1e-6)));
+  CHECK_THAT(y.value(), WithinAbs(T(250), T(1e-6)));
 }
 
 TEMPLATE_TEST_CASE("Problem - Free variable", "[Problem]",
@@ -55,6 +55,6 @@ TEMPLATE_TEST_CASE("Problem - Free variable", "[Problem]",
 
   CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
-  CHECK(x[0].value() == Catch::Approx(T(0)).margin(T(1e-6)));
-  CHECK(x[1].value() == Catch::Approx(T(2)).margin(T(1e-6)));
+  CHECK_THAT(x[0].value(), WithinAbs(T(0), T(1e-6)));
+  CHECK_THAT(x[1].value(), WithinAbs(T(2), T(1e-6)));
 }

@@ -6,12 +6,12 @@
 #include <fstream>
 
 #include <Eigen/Core>
-#include <catch2/catch_approx.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <sleipnir/optimization/problem.hpp>
 #include <sleipnir/util/scope_exit.hpp>
 
+#include "catch_matchers.hpp"
 #include "catch_string_converters.hpp"
 #include "scalar_types_under_test.hpp"
 
@@ -77,14 +77,14 @@ TEMPLATE_TEST_CASE("Problem - Flywheel", "[Problem]", SCALAR_TYPES_UNDER_TEST) {
   T u_ss = T(1) / B * (T(1) - A) * r[0];
 
   // Verify initial state
-  CHECK(X.value(0, 0) == Catch::Approx(T(0)).margin(T(1e-8)));
+  CHECK_THAT(X.value(0, 0), WithinAbs(T(0), T(1e-8)));
 
   // Verify solution
   T x(0);
   T u(0);
   for (int k = 0; k < N; ++k) {
     // Verify state
-    CHECK(X.value(0, k) == Catch::Approx(x).margin(T(1e-2)));
+    CHECK_THAT(X.value(0, k), WithinAbs(x, T(1e-2)));
 
     // Determine expected input for this timestep
     T error = r[0] - x;
@@ -104,7 +104,7 @@ TEMPLATE_TEST_CASE("Problem - Flywheel", "[Problem]", SCALAR_TYPES_UNDER_TEST) {
       CHECK(U.value(0, k) >= u_ss);
       CHECK(U.value(0, k) <= T(12));
     } else {
-      CHECK(U.value(0, k) == Catch::Approx(u).margin(T(1e-4)));
+      CHECK_THAT(U.value(0, k), WithinAbs(u, T(1e-4)));
     }
 
     INFO(std::format("  k = {}", k));
@@ -114,7 +114,7 @@ TEMPLATE_TEST_CASE("Problem - Flywheel", "[Problem]", SCALAR_TYPES_UNDER_TEST) {
   }
 
   // Verify final state
-  CHECK(X.value(0, N) == Catch::Approx(r[0]).margin(T(1e-7)));
+  CHECK_THAT(X.value(0, N), WithinAbs(r[0], T(1e-7)));
 
   // Log states for offline viewing
   std::ofstream states{"Problem - Flywheel states.csv"};

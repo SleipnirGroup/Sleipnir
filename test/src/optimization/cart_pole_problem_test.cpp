@@ -6,13 +6,13 @@
 #include <numbers>
 
 #include <Eigen/Core>
-#include <catch2/catch_approx.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <sleipnir/optimization/problem.hpp>
 #include <sleipnir/util/scope_exit.hpp>
 
 #include "cart_pole_util.hpp"
+#include "catch_matchers.hpp"
 #include "catch_string_converters.hpp"
 #include "explicit_double.hpp"
 #include "math_util.hpp"
@@ -98,10 +98,10 @@ TEMPLATE_TEST_CASE("Problem - Cart-pole", "[Problem]",
 #endif
 
   // Verify initial state
-  CHECK(X.value(0, 0) == Catch::Approx(x_initial[0]).margin(T(1e-8)));
-  CHECK(X.value(1, 0) == Catch::Approx(x_initial[1]).margin(T(1e-8)));
-  CHECK(X.value(2, 0) == Catch::Approx(x_initial[2]).margin(T(1e-8)));
-  CHECK(X.value(3, 0) == Catch::Approx(x_initial[3]).margin(T(1e-8)));
+  CHECK_THAT(X.value(0, 0), WithinAbs(x_initial[0], T(1e-8)));
+  CHECK_THAT(X.value(1, 0), WithinAbs(x_initial[1], T(1e-8)));
+  CHECK_THAT(X.value(2, 0), WithinAbs(x_initial[2], T(1e-8)));
+  CHECK_THAT(X.value(3, 0), WithinAbs(x_initial[3], T(1e-8)));
 
   // Verify solution
   for (int k = 0; k < N; ++k) {
@@ -119,17 +119,16 @@ TEMPLATE_TEST_CASE("Problem - Cart-pole", "[Problem]",
                U.col(k).value(), dt);
     Eigen::Vector<T, Eigen::Dynamic> actual_x_k1 = X.col(k + 1).value();
     for (int row = 0; row < actual_x_k1.rows(); ++row) {
-      CHECK(actual_x_k1[row] ==
-            Catch::Approx(expected_x_k1[row]).margin(T(1e-8)));
+      CHECK_THAT(actual_x_k1[row], WithinAbs(expected_x_k1[row], T(1e-8)));
       INFO(std::format("  x({} @ k = {}", row, k));
     }
   }
 
   // Verify final state
-  CHECK(X.value(0, N) == Catch::Approx(x_final[0]).margin(T(1e-8)));
-  CHECK(X.value(1, N) == Catch::Approx(x_final[1]).margin(T(1e-8)));
-  CHECK(X.value(2, N) == Catch::Approx(x_final[2]).margin(T(1e-8)));
-  CHECK(X.value(3, N) == Catch::Approx(x_final[3]).margin(T(1e-8)));
+  CHECK_THAT(X.value(0, N), WithinAbs(x_final[0], T(1e-8)));
+  CHECK_THAT(X.value(1, N), WithinAbs(x_final[1], T(1e-8)));
+  CHECK_THAT(X.value(2, N), WithinAbs(x_final[2], T(1e-8)));
+  CHECK_THAT(X.value(3, N), WithinAbs(x_final[3], T(1e-8)));
 
   // Log states for offline viewing
   std::ofstream states{"Problem - Cart-pole states.csv"};

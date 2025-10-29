@@ -2,12 +2,12 @@
 
 #include <vector>
 
-#include <catch2/catch_approx.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <sleipnir/optimization/multistart.hpp>
 #include <sleipnir/optimization/problem.hpp>
 
+#include "catch_matchers.hpp"
 #include "catch_string_converters.hpp"
 #include "scalar_types_under_test.hpp"
 
@@ -49,6 +49,6 @@ TEMPLATE_TEST_CASE("multistart - Mishra's Bird function", "[nonlinear_problem]",
 
   CHECK(status == slp::ExitStatus::SUCCESS);
 
-  CHECK(variables.x == Catch::Approx(T(-3.130246803458174)).margin(T(1e-15)));
-  CHECK(variables.y == Catch::Approx(T(-1.5821421769364057)).margin(T(1e-15)));
+  CHECK_THAT(variables.x, WithinAbs(T(-3.130246803458174), T(1e-15)));
+  CHECK_THAT(variables.y, WithinAbs(T(-1.5821421769364057), T(1e-15)));
 }

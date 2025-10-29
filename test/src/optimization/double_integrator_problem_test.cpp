@@ -6,12 +6,12 @@
 #include <fstream>
 
 #include <Eigen/Core>
-#include <catch2/catch_approx.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <sleipnir/optimization/problem.hpp>
 #include <sleipnir/util/scope_exit.hpp>
 
+#include "catch_matchers.hpp"
 #include "catch_string_converters.hpp"
 #include "scalar_types_under_test.hpp"
 
@@ -82,16 +82,16 @@ TEMPLATE_TEST_CASE("Problem - Double integrator", "[Problem]",
   Eigen::Matrix<T, 2, 1> B{T(0.5) * dt.count() * dt.count(), dt.count()};
 
   // Verify initial state
-  CHECK(X.value(0, 0) == Catch::Approx(T(0)).margin(T(1e-8)));
-  CHECK(X.value(1, 0) == Catch::Approx(T(0)).margin(T(1e-8)));
+  CHECK_THAT(X.value(0, 0), WithinAbs(T(0), T(1e-8)));
+  CHECK_THAT(X.value(1, 0), WithinAbs(T(0), T(1e-8)));
 
   // Verify solution
   Eigen::Matrix<T, 2, 1> x{T(0), T(0)};
   Eigen::Matrix<T, 1, 1> u{T(0)};
   for (int k = 0; k < N; ++k) {
     // Verify state
-    CHECK(X.value(0, k) == Catch::Approx(x[0]).margin(T(1e-2)));
-    CHECK(X.value(1, k) == Catch::Approx(x[1]).margin(T(1e-2)));
+    CHECK_THAT(X.value(0, k), WithinAbs(x[0], T(1e-2)));
+    CHECK_THAT(X.value(1, k), WithinAbs(x[1], T(1e-2)));
 
     // Determine expected input for this timestep
     if (T(k) * dt < std::chrono::duration<T>{T(1)}) {
@@ -116,7 +116,7 @@ TEMPLATE_TEST_CASE("Problem - Double integrator", "[Problem]",
       CHECK(U.value(0, k) >= T(-1));
       CHECK(U.value(0, k) <= T(1));
     } else {
-      CHECK(U.value(0, k) == Catch::Approx(u[0]).margin(T(1e-4)));
+      CHECK_THAT(U.value(0, k), WithinAbs(u[0], T(1e-4)));
     }
 
     INFO(std::format("  k = {}", k));
@@ -126,8 +126,8 @@ TEMPLATE_TEST_CASE("Problem - Double integrator", "[Problem]",
   }
 
   // Verify final state
-  CHECK(X.value(0, N) == Catch::Approx(r).margin(T(1e-8)));
-  CHECK(X.value(1, N) == Catch::Approx(T(0)).margin(T(1e-8)));
+  CHECK_THAT(X.value(0, N), WithinAbs(r, T(1e-8)));
+  CHECK_THAT(X.value(1, N), WithinAbs(T(0), T(1e-8)));
 
   // Log states for offline viewing
   std::ofstream states{"Problem - Double integrator states.csv"};

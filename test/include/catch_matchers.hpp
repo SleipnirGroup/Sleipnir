@@ -4,6 +4,7 @@
 
 #include <cmath>
 #include <concepts>
+#include <format>
 #include <sstream>
 #include <string>
 
@@ -11,27 +12,45 @@
 #include <Eigen/SparseCore>
 #include <catch2/matchers/catch_matchers_templated.hpp>
 
+template <typename T>
+struct WithinAbs : Catch::Matchers::MatcherGenericBase {
+  WithinAbs(T target, T margin) : target{target}, margin{margin} {}
+
+  bool match(const T& matchee) const {
+    using std::abs;
+    return abs(target - matchee) <= margin;
+  }
+
+  std::string describe() const override {
+    return std::format("\n==\n{}", target);
+  }
+
+ private:
+  T target;
+  T margin;
+};
+
 template <typename Derived>
   requires std::derived_from<Derived, Eigen::DenseBase<Derived>> ||
            std::derived_from<Derived, Eigen::SparseCompressedBase<Derived>>
-struct ApproxMatrix : Catch::Matchers::MatcherGenericBase {
-  ApproxMatrix(const Derived& mat, typename Derived::Scalar abs_error)
-      : mat{mat}, abs_error{abs_error} {}
+struct MatrixWithinAbs : Catch::Matchers::MatcherGenericBase {
+  MatrixWithinAbs(const Derived& target, typename Derived::Scalar margin)
+      : target{target}, margin{margin} {}
 
   template <typename OtherDerived>
     requires std::derived_from<OtherDerived, Eigen::DenseBase<OtherDerived>> ||
              std::derived_from<OtherDerived,
                                Eigen::SparseCompressedBase<OtherDerived>>
-  bool match(const OtherDerived& other) const {
+  bool match(const OtherDerived& matchee) const {
     using std::abs;
 
-    if (mat.rows() != other.rows() || mat.cols() != other.cols()) {
+    if (target.rows() != matchee.rows() || target.cols() != matchee.cols()) {
       return false;
     }
 
-    for (Eigen::Index row = 0; row < mat.rows(); ++row) {
-      for (Eigen::Index col = 0; col < mat.cols(); ++col) {
-        if (abs(mat.coeff(row, col) - other.coeff(row, col)) > abs_error) {
+    for (Eigen::Index row = 0; row < target.rows(); ++row) {
+      for (Eigen::Index col = 0; col < target.cols(); ++col) {
+        if (abs(target.coeff(row, col) - matchee.coeff(row, col)) > margin) {
           return false;
         }
       }
@@ -41,10 +60,10 @@ struct ApproxMatrix : Catch::Matchers::MatcherGenericBase {
   }
 
   std::string describe() const override {
-    return (std::ostringstream{} << "\n==\n" << mat).str();
+    return (std::ostringstream{} << "\n==\n" << target).str();
   }
 
  private:
-  const Derived& mat;
-  typename Derived::Scalar abs_error;
+  const Derived& target;
+  typename Derived::Scalar margin;
 };

@@ -5,12 +5,12 @@
 #include <fstream>
 
 #include <Eigen/Core>
-#include <catch2/catch_approx.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <sleipnir/optimization/ocp.hpp>
 #include <sleipnir/util/scope_exit.hpp>
 
+#include "catch_matchers.hpp"
 #include "catch_string_converters.hpp"
 #include "differential_drive_util.hpp"
 #include "rk4.hpp"
@@ -65,11 +65,11 @@ TEMPLATE_TEST_CASE("OCP - Differential drive", "[OCP]",
   auto U = problem.U();
 
   // Verify initial state
-  CHECK(X.value(0, 0) == Catch::Approx(x_initial[0]).margin(T(1e-8)));
-  CHECK(X.value(1, 0) == Catch::Approx(x_initial[1]).margin(T(1e-8)));
-  CHECK(X.value(2, 0) == Catch::Approx(x_initial[2]).margin(T(1e-8)));
-  CHECK(X.value(3, 0) == Catch::Approx(x_initial[3]).margin(T(1e-8)));
-  CHECK(X.value(4, 0) == Catch::Approx(x_initial[4]).margin(T(1e-8)));
+  CHECK_THAT(X.value(0, 0), WithinAbs(x_initial[0], T(1e-8)));
+  CHECK_THAT(X.value(1, 0), WithinAbs(x_initial[1], T(1e-8)));
+  CHECK_THAT(X.value(2, 0), WithinAbs(x_initial[2], T(1e-8)));
+  CHECK_THAT(X.value(3, 0), WithinAbs(x_initial[3], T(1e-8)));
+  CHECK_THAT(X.value(4, 0), WithinAbs(x_initial[4], T(1e-8)));
 
   // FIXME: Replay diverges
   SKIP("Replay diverges");
@@ -87,11 +87,11 @@ TEMPLATE_TEST_CASE("OCP - Differential drive", "[OCP]",
     CHECK(U[1, k].value() <= u_max[1]);
 
     // Verify state
-    CHECK(X.value(0, k) == Catch::Approx(x[0]).margin(T(1e-8)));
-    CHECK(X.value(1, k) == Catch::Approx(x[1]).margin(T(1e-8)));
-    CHECK(X.value(2, k) == Catch::Approx(x[2]).margin(T(1e-8)));
-    CHECK(X.value(3, k) == Catch::Approx(x[3]).margin(T(1e-8)));
-    CHECK(X.value(4, k) == Catch::Approx(x[4]).margin(T(1e-8)));
+    CHECK_THAT(X.value(0, k), WithinAbs(x[0], T(1e-8)));
+    CHECK_THAT(X.value(1, k), WithinAbs(x[1], T(1e-8)));
+    CHECK_THAT(X.value(2, k), WithinAbs(x[2], T(1e-8)));
+    CHECK_THAT(X.value(3, k), WithinAbs(x[3], T(1e-8)));
+    CHECK_THAT(X.value(4, k), WithinAbs(x[4], T(1e-8)));
 
     INFO(std::format("  k = {}", k));
 
@@ -101,11 +101,11 @@ TEMPLATE_TEST_CASE("OCP - Differential drive", "[OCP]",
   }
 
   // Verify final state
-  CHECK(X.value(0, N) == Catch::Approx(x_final[0]).margin(T(1e-8)));
-  CHECK(X.value(1, N) == Catch::Approx(x_final[1]).margin(T(1e-8)));
-  CHECK(X.value(2, N) == Catch::Approx(x_final[2]).margin(T(1e-8)));
-  CHECK(X.value(3, N) == Catch::Approx(x_final[3]).margin(T(1e-8)));
-  CHECK(X.value(4, N) == Catch::Approx(x_final[4]).margin(T(1e-8)));
+  CHECK_THAT(X.value(0, N), WithinAbs(x_final[0], T(1e-8)));
+  CHECK_THAT(X.value(1, N), WithinAbs(x_final[1], T(1e-8)));
+  CHECK_THAT(X.value(2, N), WithinAbs(x_final[2], T(1e-8)));
+  CHECK_THAT(X.value(3, N), WithinAbs(x_final[3], T(1e-8)));
+  CHECK_THAT(X.value(4, N), WithinAbs(x_final[4], T(1e-8)));
 
   // Log states for offline viewing
   std::ofstream states{"OCP - Differential drive states.csv"};

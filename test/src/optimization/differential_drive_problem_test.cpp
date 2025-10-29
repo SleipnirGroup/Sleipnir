@@ -5,12 +5,12 @@
 #include <fstream>
 
 #include <Eigen/Core>
-#include <catch2/catch_approx.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <sleipnir/optimization/problem.hpp>
 #include <sleipnir/util/scope_exit.hpp>
 
+#include "catch_matchers.hpp"
 #include "catch_string_converters.hpp"
 #include "differential_drive_util.hpp"
 #include "math_util.hpp"
@@ -81,11 +81,11 @@ TEMPLATE_TEST_CASE("Problem - Differential drive", "[Problem]",
   CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
   // Verify initial state
-  CHECK(X.value(0, 0) == Catch::Approx(x_initial[0]).margin(T(1e-8)));
-  CHECK(X.value(1, 0) == Catch::Approx(x_initial[1]).margin(T(1e-8)));
-  CHECK(X.value(2, 0) == Catch::Approx(x_initial[2]).margin(T(1e-8)));
-  CHECK(X.value(3, 0) == Catch::Approx(x_initial[3]).margin(T(1e-8)));
-  CHECK(X.value(4, 0) == Catch::Approx(x_initial[4]).margin(T(1e-8)));
+  CHECK_THAT(X.value(0, 0), WithinAbs(x_initial[0], T(1e-8)));
+  CHECK_THAT(X.value(1, 0), WithinAbs(x_initial[1], T(1e-8)));
+  CHECK_THAT(X.value(2, 0), WithinAbs(x_initial[2], T(1e-8)));
+  CHECK_THAT(X.value(3, 0), WithinAbs(x_initial[3], T(1e-8)));
+  CHECK_THAT(X.value(4, 0), WithinAbs(x_initial[4], T(1e-8)));
 
   // Verify solution
   Eigen::Vector<T, 5> x{T(0), T(0), T(0), T(0), T(0)};
@@ -100,11 +100,11 @@ TEMPLATE_TEST_CASE("Problem - Differential drive", "[Problem]",
     CHECK(U[1, k].value() <= u_max);
 
     // Verify state
-    CHECK(X.value(0, k) == Catch::Approx(x[0]).margin(T(1e-8)));
-    CHECK(X.value(1, k) == Catch::Approx(x[1]).margin(T(1e-8)));
-    CHECK(X.value(2, k) == Catch::Approx(x[2]).margin(T(1e-8)));
-    CHECK(X.value(3, k) == Catch::Approx(x[3]).margin(T(1e-8)));
-    CHECK(X.value(4, k) == Catch::Approx(x[4]).margin(T(1e-8)));
+    CHECK_THAT(X.value(0, k), WithinAbs(x[0], T(1e-8)));
+    CHECK_THAT(X.value(1, k), WithinAbs(x[1], T(1e-8)));
+    CHECK_THAT(X.value(2, k), WithinAbs(x[2], T(1e-8)));
+    CHECK_THAT(X.value(3, k), WithinAbs(x[3], T(1e-8)));
+    CHECK_THAT(X.value(4, k), WithinAbs(x[4], T(1e-8)));
     INFO(std::format("  k = {}", k));
 
     // Project state forward
@@ -112,11 +112,11 @@ TEMPLATE_TEST_CASE("Problem - Differential drive", "[Problem]",
   }
 
   // Verify final state
-  CHECK(X.value(0, N) == Catch::Approx(x_final[0]).margin(T(1e-8)));
-  CHECK(X.value(1, N) == Catch::Approx(x_final[1]).margin(T(1e-8)));
-  CHECK(X.value(2, N) == Catch::Approx(x_final[2]).margin(T(1e-8)));
-  CHECK(X.value(3, N) == Catch::Approx(x_final[3]).margin(T(1e-8)));
-  CHECK(X.value(4, N) == Catch::Approx(x_final[4]).margin(T(1e-8)));
+  CHECK_THAT(X.value(0, N), WithinAbs(x_final[0], T(1e-8)));
+  CHECK_THAT(X.value(1, N), WithinAbs(x_final[1], T(1e-8)));
+  CHECK_THAT(X.value(2, N), WithinAbs(x_final[2], T(1e-8)));
+  CHECK_THAT(X.value(3, N), WithinAbs(x_final[3], T(1e-8)));
+  CHECK_THAT(X.value(4, N), WithinAbs(x_final[4], T(1e-8)));
 
   // Log states for offline viewing
   std::ofstream states{"Problem - Differential drive states.csv"};

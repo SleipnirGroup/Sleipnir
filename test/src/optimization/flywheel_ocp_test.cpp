@@ -8,12 +8,12 @@
 #include <string>
 
 #include <Eigen/Core>
-#include <catch2/catch_approx.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <sleipnir/optimization/ocp.hpp>
 #include <sleipnir/util/scope_exit.hpp>
 
+#include "catch_matchers.hpp"
 #include "catch_string_converters.hpp"
 #include "scalar_types_under_test.hpp"
 
@@ -73,14 +73,14 @@ void flywheel_test(
   T u_ss = T(1) / B_discrete * (T(1) - A_discrete) * r;
 
   // Verify initial state
-  CHECK(problem.X().value(0, 0) == Catch::Approx(T(0)).margin(T(1e-8)));
+  CHECK_THAT(problem.X().value(0, 0), WithinAbs(T(0), T(1e-8)));
 
   // Verify solution
   T x(0);
   T u(0);
   for (int k = 0; k < N; ++k) {
     // Verify state
-    CHECK(problem.X().value(0, k) == Catch::Approx(x).margin(T(1e-2)));
+    CHECK_THAT(problem.X().value(0, k), WithinAbs(x, T(1e-2)));
 
     // Determine expected input for this timestep
     T error = r - x;
@@ -106,9 +106,9 @@ void flywheel_test(
         // The tolerance is large because the trajectory is represented by a
         // spline, and splines chatter when transitioning quickly between
         // steady-states.
-        CHECK(problem.U().value(0, k) == Catch::Approx(u).margin(T(2)));
+        CHECK_THAT(problem.U().value(0, k), WithinAbs(u, T(2)));
       } else {
-        CHECK(problem.U().value(0, k) == Catch::Approx(u).margin(T(1e-4)));
+        CHECK_THAT(problem.U().value(0, k), WithinAbs(u, T(1e-4)));
       }
     }
 
@@ -119,7 +119,7 @@ void flywheel_test(
   }
 
   // Verify final state
-  CHECK(problem.X().value(0, N) == Catch::Approx(r).margin(T(1e-7)));
+  CHECK_THAT(problem.X().value(0, N), WithinAbs(r, T(1e-6)));
 
   // Log states for offline viewing
   std::ofstream states{std::format("{} states.csv", test_name)};
