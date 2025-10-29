@@ -33,7 +33,7 @@ def differential_drive_dynamics_double(x, u):
     return xdot
 
 
-def differential_drive_dynamics(x, u):
+def differential_drive_dynamics_variable(x, u):
     xdot = VariableMatrix(5, 1)
 
     v = (x[3, 0] + x[4, 0]) / 2.0

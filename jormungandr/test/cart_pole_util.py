@@ -69,7 +69,7 @@ def cart_pole_dynamics_double(x, u):
     return qddot
 
 
-def cart_pole_dynamics(x, u):
+def cart_pole_dynamics_variable(x, u):
     q = x[:2, :]
     qdot = x[2:, :]
     theta = q[1, 0]

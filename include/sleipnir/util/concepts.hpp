@@ -29,10 +29,14 @@ concept EigenMatrixLike =
     std::derived_from<std::decay_t<T>, Eigen::MatrixBase<std::decay_t<T>>> &&
     MatrixLike<T>;
 
-template <typename T>
-concept SleipnirMatrixLike = SleipnirType<T> && MatrixLike<T>;
+template <typename T, typename Scalar>
+concept SleipnirMatrixLike =
+    SleipnirType<T> && MatrixLike<T> &&
+    std::same_as<typename std::decay_t<T>::Scalar, Scalar>;
 
-template <typename T>
-concept SleipnirScalarLike = SleipnirType<T> && ScalarLike<T>;
+template <typename T, typename Scalar>
+concept SleipnirScalarLike =
+    SleipnirType<T> && ScalarLike<T> &&
+    std::same_as<typename std::decay_t<T>::Scalar, Scalar>;
 
 }  // namespace slp

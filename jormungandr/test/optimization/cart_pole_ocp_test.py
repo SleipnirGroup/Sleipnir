@@ -11,7 +11,10 @@ from jormungandr.optimization import (
     TimestepMethod,
     TranscriptionMethod,
 )
-from jormungandr.test.cart_pole_util import cart_pole_dynamics
+from jormungandr.test.cart_pole_util import (
+    cart_pole_dynamics_double,
+    cart_pole_dynamics_variable,
+)
 from jormungandr.test.rk4 import rk4
 
 
@@ -35,7 +38,7 @@ def test_cart_pole_ocp():
         1,
         dt,
         N,
-        cart_pole_dynamics,
+        cart_pole_dynamics_variable,
         DynamicsType.EXPLICIT_ODE,
         TimestepMethod.VARIABLE_SINGLE,
         TranscriptionMethod.DIRECT_COLLOCATION,

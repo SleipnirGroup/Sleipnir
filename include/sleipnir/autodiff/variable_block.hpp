@@ -26,6 +26,11 @@ template <typename Mat>
 class VariableBlock : public SleipnirBase {
  public:
   /**
+   * Scalar type alias.
+   */
+  using Scalar = typename Mat::Scalar;
+
+  /**
    * Copy constructor.
    */
   VariableBlock(const VariableBlock<Mat>&) = default;
@@ -156,13 +161,13 @@ class VariableBlock : public SleipnirBase {
   }
 
   /**
-   * Assigns a double to the block.
+   * Assigns a scalar to the block.
    *
    * This only works for blocks with one row and one column.
    *
    * @param value Value to assign.
    */
-  void set_value(double value) {
+  void set_value(Scalar value) {
     slp_assert(rows() == 1 && cols() == 1);
 
     (*this)[0, 0].set_value(value);
@@ -193,7 +198,7 @@ class VariableBlock : public SleipnirBase {
    * @param values Eigen matrix of values.
    */
   template <typename Derived>
-    requires std::same_as<typename Derived::Scalar, double>
+    requires std::same_as<typename Derived::Scalar, Scalar>
   void set_value(const Eigen::MatrixBase<Derived>& values) {
     slp_assert(rows() == values.rows() && cols() == values.cols());
 
@@ -245,7 +250,7 @@ class VariableBlock : public SleipnirBase {
    * @param col The scalar subblock's column.
    * @return A scalar subblock at the given row and column.
    */
-  Variable& operator[](int row, int col)
+  Variable<Scalar>& operator[](int row, int col)
     requires(!std::is_const_v<Mat>)
   {
     slp_assert(row >= 0 && row < rows());
@@ -261,7 +266,7 @@ class VariableBlock : public SleipnirBase {
    * @param col The scalar subblock's column.
    * @return A scalar subblock at the given row and column.
    */
-  const Variable& operator[](int row, int col) const {
+  const Variable<Scalar>& operator[](int row, int col) const {
     slp_assert(row >= 0 && row < rows());
     slp_assert(col >= 0 && col < cols());
     return (*m_mat)[m_row_slice.start + row * m_row_slice.step,
@@ -274,7 +279,7 @@ class VariableBlock : public SleipnirBase {
    * @param index The scalar subblock's index.
    * @return A scalar subblock at the given index.
    */
-  Variable& operator[](int index)
+  Variable<Scalar>& operator[](int index)
     requires(!std::is_const_v<Mat>)
   {
     slp_assert(index >= 0 && index < rows() * cols());
@@ -287,7 +292,7 @@ class VariableBlock : public SleipnirBase {
    * @param index The scalar subblock's index.
    * @return A scalar subblock at the given index.
    */
-  const Variable& operator[](int index) const {
+  const Variable<Scalar>& operator[](int index) const {
     slp_assert(index >= 0 && index < rows() * cols());
     return (*this)[index / cols(), index % cols()];
   }
@@ -494,7 +499,7 @@ class VariableBlock : public SleipnirBase {
 
     for (int i = 0; i < rows(); ++i) {
       for (int j = 0; j < rhs.cols(); ++j) {
-        Variable sum{0.0};
+        Variable sum{Scalar(0)};
         for (int k = 0; k < cols(); ++k) {
           sum += (*this)(i, k) * rhs(k, j);
         }
@@ -631,7 +636,7 @@ class VariableBlock : public SleipnirBase {
    * Implicit conversion operator from 1x1 VariableBlock to Variable.
    */
   // NOLINTNEXTLINE (google-explicit-constructor)
-  operator Variable() const {
+  operator Variable<Scalar>() const {
     slp_assert(rows() == 1 && cols() == 1);
     return (*this)(0, 0);
   }
@@ -674,7 +679,7 @@ class VariableBlock : public SleipnirBase {
    * @param col The column of the element to return.
    * @return An element of the variable matrix.
    */
-  double value(int row, int col) { return (*this)[row, col].value(); }
+  Scalar value(int row, int col) { return (*this)[row, col].value(); }
 
   /**
    * Returns an element of the variable block.
@@ -682,7 +687,7 @@ class VariableBlock : public SleipnirBase {
    * @param index The index of the element to return.
    * @return An element of the variable block.
    */
-  double value(int index) {
+  Scalar value(int index) {
     slp_assert(index >= 0 && index < rows() * cols());
     return value(index / cols(), index % cols());
   }
@@ -692,8 +697,9 @@ class VariableBlock : public SleipnirBase {
    *
    * @return The contents of the variable matrix.
    */
-  Eigen::MatrixXd value() {
-    Eigen::MatrixXd result{rows(), cols()};
+  Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> value() {
+    Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> result{rows(),
+                                                                 cols()};
 
     for (int row = 0; row < rows(); ++row) {
       for (int col = 0; col < cols(); ++col) {
@@ -711,7 +717,8 @@ class VariableBlock : public SleipnirBase {
    * @return Result of the unary operator.
    */
   std::remove_cv_t<Mat> cwise_transform(
-      function_ref<Variable(const Variable& x)> unary_op) const {
+      function_ref<Variable<Scalar>(const Variable<Scalar>& x)> unary_op)
+      const {
     std::remove_cv_t<Mat> result{detail::empty, rows(), cols()};
 
     for (int row = 0; row < rows(); ++row) {
@@ -728,10 +735,10 @@ class VariableBlock : public SleipnirBase {
   class iterator {
    public:
     using iterator_category = std::bidirectional_iterator_tag;
-    using value_type = Variable;
+    using value_type = Variable<Scalar>;
     using difference_type = std::ptrdiff_t;
-    using pointer = Variable*;
-    using reference = Variable&;
+    using pointer = Variable<Scalar>*;
+    using reference = Variable<Scalar>&;
 
     constexpr iterator() noexcept = default;
 
@@ -772,10 +779,10 @@ class VariableBlock : public SleipnirBase {
   class const_iterator {
    public:
     using iterator_category = std::bidirectional_iterator_tag;
-    using value_type = Variable;
+    using value_type = Variable<Scalar>;
     using difference_type = std::ptrdiff_t;
-    using pointer = Variable*;
-    using const_reference = const Variable&;
+    using pointer = Variable<Scalar>*;
+    using const_reference = const Variable<Scalar>&;
 
     constexpr const_iterator() noexcept = default;
 

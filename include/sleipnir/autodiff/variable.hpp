@@ -6,7 +6,6 @@
 #include <concepts>
 #include <initializer_list>
 #include <source_location>
-#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -18,7 +17,6 @@
 #include "sleipnir/autodiff/sleipnir_base.hpp"
 #include "sleipnir/util/assert.hpp"
 #include "sleipnir/util/concepts.hpp"
-#include "sleipnir/util/symbol_exports.hpp"
 
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
 #include "sleipnir/util/print.hpp"
@@ -27,19 +25,34 @@
 namespace slp {
 
 // Forward declarations for friend declarations in Variable
+
 namespace detail {
+
+template <typename Scalar>
 class AdjointExpressionGraph;
+
 }  // namespace detail
-template <int UpLo = Eigen::Lower | Eigen::Upper>
+
+template <typename Scalar, int UpLo = Eigen::Lower | Eigen::Upper>
   requires(UpLo == Eigen::Lower) || (UpLo == (Eigen::Lower | Eigen::Upper))
-class SLEIPNIR_DLLEXPORT Hessian;
-class SLEIPNIR_DLLEXPORT Jacobian;
+class Hessian;
+
+template <typename Scalar>
+class Jacobian;
 
 /**
  * An autodiff variable pointing to an expression node.
+ *
+ * @tparam Scalar_ Scalar type.
  */
-class SLEIPNIR_DLLEXPORT Variable : public SleipnirBase {
+template <typename Scalar_>
+class Variable : public SleipnirBase {
  public:
+  /**
+   * Scalar type alias.
+   */
+  using Scalar = Scalar_;
+
   /**
    * Constructs a linear Variable with a value of zero.
    */
@@ -51,13 +64,35 @@ class SLEIPNIR_DLLEXPORT Variable : public SleipnirBase {
   explicit constexpr Variable(std::nullptr_t) : expr{nullptr} {}
 
   /**
+   * Constructs a Variable from a scalar type.
+   *
+   * @param value The value of the Variable.
+   */
+  // NOLINTNEXTLINE (google-explicit-constructor)
+  Variable(Scalar value)
+    requires(!MatrixLike<Scalar>)
+      : expr{detail::make_expression_ptr<detail::ConstExpression<Scalar>>(
+            value)} {}
+
+  /**
+   * Constructs a Variable from a scalar type.
+   *
+   * @param value The value of the Variable.
+   */
+  // NOLINTNEXTLINE (google-explicit-constructor)
+  Variable(SleipnirMatrixLike<Scalar> auto value) : expr{value[0, 0].expr} {
+    slp_assert(value.rows() == 1 && value.cols() == 1);
+  }
+
+  /**
    * Constructs a Variable from a floating-point type.
    *
    * @param value The value of the Variable.
    */
   // NOLINTNEXTLINE (google-explicit-constructor)
   Variable(std::floating_point auto value)
-      : expr{detail::make_expression_ptr<detail::ConstExpression>(value)} {}
+      : expr{detail::make_expression_ptr<detail::ConstExpression<Scalar>>(
+            Scalar(value))} {}
 
   /**
    * Constructs a Variable from an integral type.
@@ -66,31 +101,32 @@ class SLEIPNIR_DLLEXPORT Variable : public SleipnirBase {
    */
   // NOLINTNEXTLINE (google-explicit-constructor)
   Variable(std::integral auto value)
-      : expr{detail::make_expression_ptr<detail::ConstExpression>(value)} {}
+      : expr{detail::make_expression_ptr<detail::ConstExpression<Scalar>>(
+            Scalar(value))} {}
 
   /**
    * Constructs a Variable pointing to the specified expression.
    *
    * @param expr The autodiff variable.
    */
-  explicit Variable(const detail::ExpressionPtr& expr) : expr{expr} {}
+  explicit Variable(const detail::ExpressionPtr<Scalar>& expr) : expr{expr} {}
 
   /**
    * Constructs a Variable pointing to the specified expression.
    *
    * @param expr The autodiff variable.
    */
-  explicit constexpr Variable(detail::ExpressionPtr&& expr)
+  explicit constexpr Variable(detail::ExpressionPtr<Scalar>&& expr)
       : expr{std::move(expr)} {}
 
   /**
-   * Assignment operator for double.
+   * Assignment operator for scalar.
    *
    * @param value The value of the Variable.
    * @return This variable.
    */
-  Variable& operator=(double value) {
-    expr = detail::make_expression_ptr<detail::ConstExpression>(value);
+  Variable<Scalar>& operator=(ScalarLike auto value) {
+    expr = detail::make_expression_ptr<detail::ConstExpression<Scalar>>(value);
     m_graph_initialized = false;
 
     return *this;
@@ -101,7 +137,7 @@ class SLEIPNIR_DLLEXPORT Variable : public SleipnirBase {
    *
    * @param value The value of the Variable.
    */
-  void set_value(double value) {
+  void set_value(Scalar value) {
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     // We only need to check the first argument since unary and binary operators
     // both use it
@@ -113,7 +149,7 @@ class SLEIPNIR_DLLEXPORT Variable : public SleipnirBase {
           location.file_name(), location.line(), location.function_name());
     }
 #endif
-    expr->val = value;
+    expr->val = Scalar(value);
   }
 
   /**
@@ -121,14 +157,14 @@ class SLEIPNIR_DLLEXPORT Variable : public SleipnirBase {
    *
    * @return The value of this variable.
    */
-  double value() {
+  Scalar value() {
     if (!m_graph_initialized) {
       m_graph = detail::topological_sort(expr);
       m_graph_initialized = true;
     }
     detail::update_values(m_graph);
 
-    return expr->val;
+    return Scalar(expr->val);
   }
 
   /**
@@ -140,14 +176,38 @@ class SLEIPNIR_DLLEXPORT Variable : public SleipnirBase {
   ExpressionType type() const { return expr->type(); }
 
   /**
-   * Variable-Variable multiplication operator.
+   * Variable-scalar multiplication operator.
    *
    * @param lhs Operator left-hand side.
    * @param rhs Operator right-hand side.
    * @return Result of multiplication.
    */
-  friend SLEIPNIR_DLLEXPORT Variable operator*(const Variable& lhs,
-                                               const Variable& rhs) {
+  template <ScalarLike LHS, SleipnirScalarLike<Scalar> RHS>
+  friend Variable<Scalar> operator*(const LHS& lhs, const RHS& rhs) {
+    return Variable{Variable<Scalar>{lhs}.expr * rhs.expr};
+  }
+
+  /**
+   * Variable-scalar multiplication operator.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   * @return Result of multiplication.
+   */
+  template <SleipnirScalarLike<Scalar> LHS, ScalarLike RHS>
+  friend Variable<Scalar> operator*(const LHS& lhs, const RHS& rhs) {
+    return Variable{lhs.expr * Variable<Scalar>{rhs}.expr};
+  }
+
+  /**
+   * Variable-scalar multiplication operator.
+   *
+   * @param lhs Operator left-hand side.
+   * @param rhs Operator right-hand side.
+   * @return Result of multiplication.
+   */
+  friend Variable<Scalar> operator*(const Variable<Scalar>& lhs,
+                                    const Variable<Scalar>& rhs) {
     return Variable{lhs.expr * rhs.expr};
   }
 
@@ -157,7 +217,7 @@ class SLEIPNIR_DLLEXPORT Variable : public SleipnirBase {
    * @param rhs Operator right-hand side.
    * @return Result of multiplication.
    */
-  Variable& operator*=(const Variable& rhs) {
+  Variable<Scalar>& operator*=(const Variable<Scalar>& rhs) {
     *this = *this * rhs;
     return *this;
   }
@@ -169,8 +229,8 @@ class SLEIPNIR_DLLEXPORT Variable : public SleipnirBase {
    * @param rhs Operator right-hand side.
    * @return Result of division.
    */
-  friend SLEIPNIR_DLLEXPORT Variable operator/(const Variable& lhs,
-                                               const Variable& rhs) {
+  friend Variable<Scalar> operator/(const Variable<Scalar>& lhs,
+                                    const Variable<Scalar>& rhs) {
     return Variable{lhs.expr / rhs.expr};
   }
 
@@ -180,7 +240,7 @@ class SLEIPNIR_DLLEXPORT Variable : public SleipnirBase {
    * @param rhs Operator right-hand side.
    * @return Result of division.
    */
-  Variable& operator/=(const Variable& rhs) {
+  Variable<Scalar>& operator/=(const Variable<Scalar>& rhs) {
     *this = *this / rhs;
     return *this;
   }
@@ -192,8 +252,8 @@ class SLEIPNIR_DLLEXPORT Variable : public SleipnirBase {
    * @param rhs Operator right-hand side.
    * @return Result of addition.
    */
-  friend SLEIPNIR_DLLEXPORT Variable operator+(const Variable& lhs,
-                                               const Variable& rhs) {
+  friend Variable<Scalar> operator+(const Variable<Scalar>& lhs,
+                                    const Variable<Scalar>& rhs) {
     return Variable{lhs.expr + rhs.expr};
   }
 
@@ -203,7 +263,7 @@ class SLEIPNIR_DLLEXPORT Variable : public SleipnirBase {
    * @param rhs Operator right-hand side.
    * @return Result of addition.
    */
-  Variable& operator+=(const Variable& rhs) {
+  Variable<Scalar>& operator+=(const Variable<Scalar>& rhs) {
     *this = *this + rhs;
     return *this;
   }
@@ -215,8 +275,8 @@ class SLEIPNIR_DLLEXPORT Variable : public SleipnirBase {
    * @param rhs Operator right-hand side.
    * @return Result of subtraction.
    */
-  friend SLEIPNIR_DLLEXPORT Variable operator-(const Variable& lhs,
-                                               const Variable& rhs) {
+  friend Variable<Scalar> operator-(const Variable<Scalar>& lhs,
+                                    const Variable<Scalar>& rhs) {
     return Variable{lhs.expr - rhs.expr};
   }
 
@@ -226,7 +286,7 @@ class SLEIPNIR_DLLEXPORT Variable : public SleipnirBase {
    * @param rhs Operator right-hand side.
    * @return Result of subtraction.
    */
-  Variable& operator-=(const Variable& rhs) {
+  Variable<Scalar>& operator-=(const Variable<Scalar>& rhs) {
     *this = *this - rhs;
     return *this;
   }
@@ -236,7 +296,7 @@ class SLEIPNIR_DLLEXPORT Variable : public SleipnirBase {
    *
    * @param lhs Operand for unary minus.
    */
-  friend SLEIPNIR_DLLEXPORT Variable operator-(const Variable& lhs) {
+  friend Variable<Scalar> operator-(const Variable<Scalar>& lhs) {
     return Variable{-lhs.expr};
   }
 
@@ -245,248 +305,415 @@ class SLEIPNIR_DLLEXPORT Variable : public SleipnirBase {
    *
    * @param lhs Operand for unary plus.
    */
-  friend SLEIPNIR_DLLEXPORT Variable operator+(const Variable& lhs) {
+  friend Variable<Scalar> operator+(const Variable<Scalar>& lhs) {
     return Variable{+lhs.expr};
   }
 
  private:
   /// The expression node
-  detail::ExpressionPtr expr =
-      detail::make_expression_ptr<detail::DecisionVariableExpression>();
+  detail::ExpressionPtr<Scalar> expr =
+      detail::make_expression_ptr<detail::DecisionVariableExpression<Scalar>>();
 
   /// Used to update the value of this variable based on the values of its
   /// dependent variables
-  gch::small_vector<detail::Expression*> m_graph;
+  gch::small_vector<detail::Expression<Scalar>*> m_graph;
 
   /// Used for lazy initialization of m_graph
   bool m_graph_initialized = false;
 
-  friend SLEIPNIR_DLLEXPORT Variable abs(const Variable& x);
-  friend SLEIPNIR_DLLEXPORT Variable acos(const Variable& x);
-  friend SLEIPNIR_DLLEXPORT Variable asin(const Variable& x);
-  friend SLEIPNIR_DLLEXPORT Variable atan(const Variable& x);
-  friend SLEIPNIR_DLLEXPORT Variable atan2(const Variable& y,
-                                           const Variable& x);
-  friend SLEIPNIR_DLLEXPORT Variable cbrt(const Variable& x);
-  friend SLEIPNIR_DLLEXPORT Variable cos(const Variable& x);
-  friend SLEIPNIR_DLLEXPORT Variable cosh(const Variable& x);
-  friend SLEIPNIR_DLLEXPORT Variable erf(const Variable& x);
-  friend SLEIPNIR_DLLEXPORT Variable exp(const Variable& x);
-  friend SLEIPNIR_DLLEXPORT Variable hypot(const Variable& x,
-                                           const Variable& y);
-  friend SLEIPNIR_DLLEXPORT Variable log(const Variable& x);
-  friend SLEIPNIR_DLLEXPORT Variable log10(const Variable& x);
-  friend SLEIPNIR_DLLEXPORT Variable pow(const Variable& base,
-                                         const Variable& power);
-  friend SLEIPNIR_DLLEXPORT Variable sign(const Variable& x);
-  friend SLEIPNIR_DLLEXPORT Variable sin(const Variable& x);
-  friend SLEIPNIR_DLLEXPORT Variable sinh(const Variable& x);
-  friend SLEIPNIR_DLLEXPORT Variable sqrt(const Variable& x);
-  friend SLEIPNIR_DLLEXPORT Variable tan(const Variable& x);
-  friend SLEIPNIR_DLLEXPORT Variable tanh(const Variable& x);
-  friend SLEIPNIR_DLLEXPORT Variable hypot(const Variable& x, const Variable& y,
-                                           const Variable& z);
+  template <typename Scalar>
+  friend Variable<Scalar> abs(const Variable<Scalar>& x);
+  template <typename Scalar>
+  friend Variable<Scalar> acos(const Variable<Scalar>& x);
+  template <typename Scalar>
+  friend Variable<Scalar> asin(const Variable<Scalar>& x);
+  template <typename Scalar>
+  friend Variable<Scalar> atan(const Variable<Scalar>& x);
+  template <typename Scalar>
+  friend Variable<Scalar> atan2(const ScalarLike auto& y,
+                                const Variable<Scalar>& x);
+  template <typename Scalar>
+  friend Variable<Scalar> atan2(const Variable<Scalar>& y,
+                                const ScalarLike auto& x);
+  template <typename Scalar>
+  friend Variable<Scalar> atan2(const Variable<Scalar>& y,
+                                const Variable<Scalar>& x);
+  template <typename Scalar>
+  friend Variable<Scalar> cbrt(const Variable<Scalar>& x);
+  template <typename Scalar>
+  friend Variable<Scalar> cos(const Variable<Scalar>& x);
+  template <typename Scalar>
+  friend Variable<Scalar> cosh(const Variable<Scalar>& x);
+  template <typename Scalar>
+  friend Variable<Scalar> erf(const Variable<Scalar>& x);
+  template <typename Scalar>
+  friend Variable<Scalar> exp(const Variable<Scalar>& x);
+  template <typename Scalar>
+  friend Variable<Scalar> hypot(const ScalarLike auto& x,
+                                const Variable<Scalar>& y);
+  template <typename Scalar>
+  friend Variable<Scalar> hypot(const Variable<Scalar>& x,
+                                const ScalarLike auto& y);
+  template <typename Scalar>
+  friend Variable<Scalar> hypot(const Variable<Scalar>& x,
+                                const Variable<Scalar>& y);
+  template <typename Scalar>
+  friend Variable<Scalar> log(const Variable<Scalar>& x);
+  template <typename Scalar>
+  friend Variable<Scalar> log10(const Variable<Scalar>& x);
+  template <typename Scalar>
+  friend Variable<Scalar> pow(const ScalarLike auto& base,
+                              const Variable<Scalar>& power);
+  template <typename Scalar>
+  friend Variable<Scalar> pow(const Variable<Scalar>& base,
+                              const ScalarLike auto& power);
+  template <typename Scalar>
+  friend Variable<Scalar> pow(const Variable<Scalar>& base,
+                              const Variable<Scalar>& power);
+  template <typename Scalar>
+  friend Variable<Scalar> sign(const Variable<Scalar>& x);
+  template <typename Scalar>
+  friend Variable<Scalar> sin(const Variable<Scalar>& x);
+  template <typename Scalar>
+  friend Variable<Scalar> sinh(const Variable<Scalar>& x);
+  template <typename Scalar>
+  friend Variable<Scalar> sqrt(const Variable<Scalar>& x);
+  template <typename Scalar>
+  friend Variable<Scalar> tan(const Variable<Scalar>& x);
+  template <typename Scalar>
+  friend Variable<Scalar> tanh(const Variable<Scalar>& x);
+  template <typename Scalar>
+  friend Variable<Scalar> hypot(const Variable<Scalar>& x,
+                                const Variable<Scalar>& y,
+                                const Variable<Scalar>& z);
 
-  friend class detail::AdjointExpressionGraph;
-  template <int UpLo>
+  friend class detail::AdjointExpressionGraph<Scalar>;
+  template <typename Scalar, int UpLo>
     requires(UpLo == Eigen::Lower) || (UpLo == (Eigen::Lower | Eigen::Upper))
-  friend class SLEIPNIR_DLLEXPORT Hessian;
-  friend class SLEIPNIR_DLLEXPORT Jacobian;
+  friend class Hessian;
+  template <typename Scalar>
+  friend class Jacobian;
 };
+
+template <template <typename> typename T, typename Scalar>
+  requires SleipnirMatrixLike<T<Scalar>, Scalar>
+Variable(T<Scalar>) -> Variable<Scalar>;
+
+template <std::floating_point T>
+Variable(T) -> Variable<T>;
+
+template <std::integral T>
+Variable(T) -> Variable<T>;
 
 /**
  * abs() for Variables.
  *
+ * @tparam Scalar Scalar type.
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT inline Variable abs(const Variable& x) {
+template <typename Scalar>
+Variable<Scalar> abs(const Variable<Scalar>& x) {
   return Variable{detail::abs(x.expr)};
 }
 
 /**
  * acos() for Variables.
  *
+ * @tparam Scalar Scalar type.
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT inline Variable acos(const Variable& x) {
+template <typename Scalar>
+Variable<Scalar> acos(const Variable<Scalar>& x) {
   return Variable{detail::acos(x.expr)};
 }
 
 /**
  * asin() for Variables.
  *
+ * @tparam Scalar Scalar type.
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT inline Variable asin(const Variable& x) {
+template <typename Scalar>
+Variable<Scalar> asin(const Variable<Scalar>& x) {
   return Variable{detail::asin(x.expr)};
 }
 
 /**
  * atan() for Variables.
  *
+ * @tparam Scalar Scalar type.
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT inline Variable atan(const Variable& x) {
+template <typename Scalar>
+Variable<Scalar> atan(const Variable<Scalar>& x) {
   return Variable{detail::atan(x.expr)};
 }
 
 /**
  * atan2() for Variables.
  *
+ * @tparam Scalar Scalar type.
  * @param y The y argument.
  * @param x The x argument.
  */
-SLEIPNIR_DLLEXPORT inline Variable atan2(const Variable& y, const Variable& x) {
+template <typename Scalar>
+Variable<Scalar> atan2(const ScalarLike auto& y, const Variable<Scalar>& x) {
+  return Variable{detail::atan2(Variable<Scalar>(y).expr, x.expr)};
+}
+
+/**
+ * std::atan2() for Variables.
+ *
+ * @tparam Scalar Scalar type.
+ * @param y The y argument.
+ * @param x The x argument.
+ */
+template <typename Scalar>
+Variable<Scalar> atan2(const Variable<Scalar>& y, const ScalarLike auto& x) {
+  return Variable{detail::atan2(y.expr, Variable<Scalar>(x).expr)};
+}
+
+/**
+ * std::atan2() for Variables.
+ *
+ * @tparam Scalar Scalar type.
+ * @param y The y argument.
+ * @param x The x argument.
+ */
+template <typename Scalar>
+Variable<Scalar> atan2(const Variable<Scalar>& y, const Variable<Scalar>& x) {
   return Variable{detail::atan2(y.expr, x.expr)};
 }
 
 /**
  * cbrt() for Variables.
  *
+ * @tparam Scalar Scalar type.
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT inline Variable cbrt(const Variable& x) {
+template <typename Scalar>
+Variable<Scalar> cbrt(const Variable<Scalar>& x) {
   return Variable{detail::cbrt(x.expr)};
 }
 
 /**
  * cos() for Variables.
  *
+ * @tparam Scalar Scalar type.
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT inline Variable cos(const Variable& x) {
+template <typename Scalar>
+Variable<Scalar> cos(const Variable<Scalar>& x) {
   return Variable{detail::cos(x.expr)};
 }
 
 /**
  * cosh() for Variables.
  *
+ * @tparam Scalar Scalar type.
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT inline Variable cosh(const Variable& x) {
+template <typename Scalar>
+Variable<Scalar> cosh(const Variable<Scalar>& x) {
   return Variable{detail::cosh(x.expr)};
 }
 
 /**
  * erf() for Variables.
  *
+ * @tparam Scalar Scalar type.
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT inline Variable erf(const Variable& x) {
+template <typename Scalar>
+Variable<Scalar> erf(const Variable<Scalar>& x) {
   return Variable{detail::erf(x.expr)};
 }
 
 /**
  * exp() for Variables.
  *
+ * @tparam Scalar Scalar type.
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT inline Variable exp(const Variable& x) {
+template <typename Scalar>
+Variable<Scalar> exp(const Variable<Scalar>& x) {
   return Variable{detail::exp(x.expr)};
 }
 
 /**
  * hypot() for Variables.
  *
+ * @tparam Scalar Scalar type.
  * @param x The x argument.
  * @param y The y argument.
  */
-SLEIPNIR_DLLEXPORT inline Variable hypot(const Variable& x, const Variable& y) {
+template <typename Scalar>
+Variable<Scalar> hypot(const ScalarLike auto& x, const Variable<Scalar>& y) {
+  return Variable{detail::hypot(Variable<Scalar>(x).expr, y.expr)};
+}
+
+/**
+ * hypot() for Variables.
+ *
+ * @tparam Scalar Scalar type.
+ * @param x The x argument.
+ * @param y The y argument.
+ */
+template <typename Scalar>
+Variable<Scalar> hypot(const Variable<Scalar>& x, const ScalarLike auto& y) {
+  return Variable{detail::hypot(x.expr, Variable<Scalar>(y).expr)};
+}
+
+/**
+ * hypot() for Variables.
+ *
+ * @tparam Scalar Scalar type.
+ * @param x The x argument.
+ * @param y The y argument.
+ */
+template <typename Scalar>
+Variable<Scalar> hypot(const Variable<Scalar>& x, const Variable<Scalar>& y) {
   return Variable{detail::hypot(x.expr, y.expr)};
 }
 
 /**
  * log() for Variables.
  *
+ * @tparam Scalar Scalar type.
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT inline Variable log(const Variable& x) {
+template <typename Scalar>
+Variable<Scalar> log(const Variable<Scalar>& x) {
   return Variable{detail::log(x.expr)};
 }
 
 /**
  * log10() for Variables.
  *
+ * @tparam Scalar Scalar type.
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT inline Variable log10(const Variable& x) {
+template <typename Scalar>
+Variable<Scalar> log10(const Variable<Scalar>& x) {
   return Variable{detail::log10(x.expr)};
 }
 
 /**
  * pow() for Variables.
  *
+ * @tparam Scalar Scalar type.
  * @param base The base.
  * @param power The power.
  */
-SLEIPNIR_DLLEXPORT inline Variable pow(const Variable& base,
-                                       const Variable& power) {
+template <typename Scalar>
+Variable<Scalar> pow(const ScalarLike auto& base,
+                     const Variable<Scalar>& power) {
+  return Variable{detail::pow(Variable<Scalar>(base).expr, power.expr)};
+}
+
+/**
+ * std::pow() for Variables.
+ *
+ * @tparam Scalar Scalar type.
+ * @param base The base.
+ * @param power The power.
+ */
+template <typename Scalar>
+Variable<Scalar> pow(const Variable<Scalar>& base,
+                     const ScalarLike auto& power) {
+  return Variable{detail::pow(base.expr, Variable<Scalar>(power).expr)};
+}
+
+/**
+ * std::pow() for Variables.
+ *
+ * @tparam Scalar Scalar type.
+ * @param base The base.
+ * @param power The power.
+ */
+template <typename Scalar>
+Variable<Scalar> pow(const Variable<Scalar>& base,
+                     const Variable<Scalar>& power) {
   return Variable{detail::pow(base.expr, power.expr)};
 }
 
 /**
  * sign() for Variables.
  *
+ * @tparam Scalar Scalar type.
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT inline Variable sign(const Variable& x) {
+template <typename Scalar>
+Variable<Scalar> sign(const Variable<Scalar>& x) {
   return Variable{detail::sign(x.expr)};
 }
 
 /**
  * sin() for Variables.
  *
+ * @tparam Scalar Scalar type.
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT inline Variable sin(const Variable& x) {
+template <typename Scalar>
+Variable<Scalar> sin(const Variable<Scalar>& x) {
   return Variable{detail::sin(x.expr)};
 }
 
 /**
  * sinh() for Variables.
  *
+ * @tparam Scalar Scalar type.
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT inline Variable sinh(const Variable& x) {
+template <typename Scalar>
+Variable<Scalar> sinh(const Variable<Scalar>& x) {
   return Variable{detail::sinh(x.expr)};
 }
 
 /**
  * sqrt() for Variables.
  *
+ * @tparam Scalar Scalar type.
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT inline Variable sqrt(const Variable& x) {
+template <typename Scalar>
+Variable<Scalar> sqrt(const Variable<Scalar>& x) {
   return Variable{detail::sqrt(x.expr)};
 }
 
 /**
  * tan() for Variables.
  *
+ * @tparam Scalar Scalar type.
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT inline Variable tan(const Variable& x) {
+template <typename Scalar>
+Variable<Scalar> tan(const Variable<Scalar>& x) {
   return Variable{detail::tan(x.expr)};
 }
 
 /**
  * tanh() for Variables.
  *
+ * @tparam Scalar Scalar type.
  * @param x The argument.
  */
-SLEIPNIR_DLLEXPORT inline Variable tanh(const Variable& x) {
+template <typename Scalar>
+Variable<Scalar> tanh(const Variable<Scalar>& x) {
   return Variable{detail::tanh(x.expr)};
 }
 
 /**
  * hypot() for Variables.
  *
+ * @tparam Scalar Scalar type.
  * @param x The x argument.
  * @param y The y argument.
  * @param z The z argument.
  */
-SLEIPNIR_DLLEXPORT inline Variable hypot(const Variable& x, const Variable& y,
-                                         const Variable& z) {
+template <typename Scalar>
+Variable<Scalar> hypot(const Variable<Scalar>& x, const Variable<Scalar>& y,
+                       const Variable<Scalar>& z) {
   return Variable{slp::sqrt(slp::pow(x, 2) + slp::pow(y, 2) + slp::pow(z, 2))};
 }
 
@@ -495,19 +722,19 @@ SLEIPNIR_DLLEXPORT inline Variable hypot(const Variable& x, const Variable& y,
 // of the form lhs = rhs or lhs ≥ rhs and converts them to lhs - rhs = 0 or
 // lhs - rhs ≥ 0.
 
-template <ScalarLike LHS, ScalarLike RHS>
-  requires SleipnirScalarLike<LHS> || SleipnirScalarLike<RHS>
+template <typename Scalar, ScalarLike LHS, ScalarLike RHS>
+  requires SleipnirScalarLike<LHS, Scalar> || SleipnirScalarLike<RHS, Scalar>
 auto make_constraints(LHS&& lhs, RHS&& rhs) {
-  gch::small_vector<Variable> constraints;
+  gch::small_vector<Variable<Scalar>> constraints;
   constraints.emplace_back(lhs - rhs);
 
   return constraints;
 }
 
-template <ScalarLike LHS, MatrixLike RHS>
-  requires SleipnirScalarLike<LHS> || SleipnirMatrixLike<RHS>
+template <typename Scalar, ScalarLike LHS, MatrixLike RHS>
+  requires SleipnirScalarLike<LHS, Scalar> || SleipnirMatrixLike<RHS, Scalar>
 auto make_constraints(LHS&& lhs, RHS&& rhs) {
-  gch::small_vector<Variable> constraints;
+  gch::small_vector<Variable<Scalar>> constraints;
   constraints.reserve(rhs.rows() * rhs.cols());
 
   for (int row = 0; row < rhs.rows(); ++row) {
@@ -524,10 +751,10 @@ auto make_constraints(LHS&& lhs, RHS&& rhs) {
   return constraints;
 }
 
-template <MatrixLike LHS, ScalarLike RHS>
-  requires SleipnirMatrixLike<LHS> || SleipnirScalarLike<RHS>
+template <typename Scalar, MatrixLike LHS, ScalarLike RHS>
+  requires SleipnirMatrixLike<LHS, Scalar> || SleipnirScalarLike<RHS, Scalar>
 auto make_constraints(LHS&& lhs, RHS&& rhs) {
-  gch::small_vector<Variable> constraints;
+  gch::small_vector<Variable<Scalar>> constraints;
   constraints.reserve(lhs.rows() * lhs.cols());
 
   for (int row = 0; row < lhs.rows(); ++row) {
@@ -544,12 +771,12 @@ auto make_constraints(LHS&& lhs, RHS&& rhs) {
   return constraints;
 }
 
-template <MatrixLike LHS, MatrixLike RHS>
-  requires SleipnirMatrixLike<LHS> || SleipnirMatrixLike<RHS>
+template <typename Scalar, MatrixLike LHS, MatrixLike RHS>
+  requires SleipnirMatrixLike<LHS, Scalar> || SleipnirMatrixLike<RHS, Scalar>
 auto make_constraints(LHS&& lhs, RHS&& rhs) {
   slp_assert(lhs.rows() == rhs.rows() && lhs.cols() == rhs.cols());
 
-  gch::small_vector<Variable> constraints;
+  gch::small_vector<Variable<Scalar>> constraints;
   constraints.reserve(lhs.rows() * lhs.cols());
 
   for (int row = 0; row < lhs.rows(); ++row) {
@@ -557,11 +784,14 @@ auto make_constraints(LHS&& lhs, RHS&& rhs) {
       // Make right-hand side zero
       if constexpr (EigenMatrixLike<LHS> && EigenMatrixLike<RHS>) {
         constraints.emplace_back(lhs(row, col) - rhs(row, col));
-      } else if constexpr (EigenMatrixLike<LHS> && SleipnirMatrixLike<RHS>) {
+      } else if constexpr (EigenMatrixLike<LHS> &&
+                           SleipnirMatrixLike<RHS, Scalar>) {
         constraints.emplace_back(lhs(row, col) - rhs[row, col]);
-      } else if constexpr (SleipnirMatrixLike<LHS> && EigenMatrixLike<RHS>) {
+      } else if constexpr (SleipnirMatrixLike<LHS, Scalar> &&
+                           EigenMatrixLike<RHS>) {
         constraints.emplace_back(lhs[row, col] - rhs(row, col));
-      } else if constexpr (SleipnirMatrixLike<LHS> && SleipnirMatrixLike<RHS>) {
+      } else if constexpr (SleipnirMatrixLike<LHS, Scalar> &&
+                           SleipnirMatrixLike<RHS, Scalar>) {
         constraints.emplace_back(lhs[row, col] - rhs[row, col]);
       }
     }
@@ -572,10 +802,13 @@ auto make_constraints(LHS&& lhs, RHS&& rhs) {
 
 /**
  * A vector of equality constraints of the form cₑ(x) = 0.
+ *
+ * @tparam Scalar Scalar type.
  */
-struct SLEIPNIR_DLLEXPORT EqualityConstraints {
+template <typename Scalar>
+struct EqualityConstraints {
   /// A vector of scalar equality constraints.
-  gch::small_vector<Variable> constraints;
+  gch::small_vector<Variable<Scalar>> constraints;
 
   /**
    * Concatenates multiple equality constraints.
@@ -619,7 +852,7 @@ struct SLEIPNIR_DLLEXPORT EqualityConstraints {
             (ScalarLike<RHS> || MatrixLike<RHS>) &&
             (SleipnirType<LHS> || SleipnirType<RHS>)
   EqualityConstraints(LHS&& lhs, RHS&& rhs)
-      : constraints{make_constraints(lhs, rhs)} {}
+      : constraints{make_constraints<Scalar>(lhs, rhs)} {}
 
   /**
    * Implicit conversion operator to bool.
@@ -627,17 +860,20 @@ struct SLEIPNIR_DLLEXPORT EqualityConstraints {
   // NOLINTNEXTLINE (google-explicit-constructor)
   operator bool() {
     return std::ranges::all_of(constraints, [](auto& constraint) {
-      return constraint.value() == 0.0;
+      return constraint.value() == Scalar(0);
     });
   }
 };
 
 /**
  * A vector of inequality constraints of the form cᵢ(x) ≥ 0.
+ *
+ * @tparam Scalar Scalar type.
  */
-struct SLEIPNIR_DLLEXPORT InequalityConstraints {
+template <typename Scalar>
+struct InequalityConstraints {
   /// A vector of scalar inequality constraints.
-  gch::small_vector<Variable> constraints;
+  gch::small_vector<Variable<Scalar>> constraints;
 
   /**
    * Concatenates multiple inequality constraints.
@@ -683,7 +919,7 @@ struct SLEIPNIR_DLLEXPORT InequalityConstraints {
             (ScalarLike<RHS> || MatrixLike<RHS>) &&
             (SleipnirType<LHS> || SleipnirType<RHS>)
   InequalityConstraints(LHS&& lhs, RHS&& rhs)
-      : constraints{make_constraints(lhs, rhs)} {}
+      : constraints{make_constraints<Scalar>(lhs, rhs)} {}
 
   /**
    * Implicit conversion operator to bool.
@@ -691,7 +927,7 @@ struct SLEIPNIR_DLLEXPORT InequalityConstraints {
   // NOLINTNEXTLINE (google-explicit-constructor)
   operator bool() {
     return std::ranges::all_of(constraints, [](auto& constraint) {
-      return constraint.value() >= 0.0;
+      return constraint.value() >= Scalar(0);
     });
   }
 };
@@ -703,11 +939,36 @@ struct SLEIPNIR_DLLEXPORT InequalityConstraints {
  * @param rhs Left-hand side.
  */
 template <typename LHS, typename RHS>
-  requires(ScalarLike<LHS> || MatrixLike<LHS>) &&
-          (ScalarLike<RHS> || MatrixLike<RHS>) &&
-          (SleipnirType<LHS> || SleipnirType<RHS>)
+  requires(ScalarLike<LHS> || MatrixLike<LHS>) && SleipnirType<LHS> &&
+          (ScalarLike<RHS> || MatrixLike<RHS>) && (!SleipnirType<RHS>)
 auto operator==(LHS&& lhs, RHS&& rhs) {
-  return EqualityConstraints{lhs, rhs};
+  return EqualityConstraints<typename std::decay_t<LHS>::Scalar>{lhs, rhs};
+}
+
+/**
+ * Equality operator that returns an equality constraint for two Variables.
+ *
+ * @param lhs Left-hand side.
+ * @param rhs Left-hand side.
+ */
+template <typename LHS, typename RHS>
+  requires(ScalarLike<LHS> || MatrixLike<LHS>) && (!SleipnirType<LHS>) &&
+          (ScalarLike<RHS> || MatrixLike<RHS>) && SleipnirType<RHS>
+auto operator==(LHS&& lhs, RHS&& rhs) {
+  return EqualityConstraints<typename std::decay_t<RHS>::Scalar>{lhs, rhs};
+}
+
+/**
+ * Equality operator that returns an equality constraint for two Variables.
+ *
+ * @param lhs Left-hand side.
+ * @param rhs Left-hand side.
+ */
+template <typename LHS, typename RHS>
+  requires(ScalarLike<LHS> || MatrixLike<LHS>) && SleipnirType<LHS> &&
+          (ScalarLike<RHS> || MatrixLike<RHS>) && SleipnirType<RHS>
+auto operator==(LHS&& lhs, RHS&& rhs) {
+  return EqualityConstraints<typename std::decay_t<LHS>::Scalar>{lhs, rhs};
 }
 
 /**
@@ -763,11 +1024,38 @@ auto operator>(LHS&& lhs, RHS&& rhs) {
  * @param rhs Left-hand side.
  */
 template <typename LHS, typename RHS>
-  requires(ScalarLike<LHS> || MatrixLike<LHS>) &&
-          (ScalarLike<RHS> || MatrixLike<RHS>) &&
-          (SleipnirType<LHS> || SleipnirType<RHS>)
+  requires(ScalarLike<LHS> || MatrixLike<LHS>) && SleipnirType<LHS> &&
+          (ScalarLike<RHS> || MatrixLike<RHS>) && (!SleipnirType<RHS>)
 auto operator>=(LHS&& lhs, RHS&& rhs) {
-  return InequalityConstraints{lhs, rhs};
+  return InequalityConstraints<typename std::decay_t<LHS>::Scalar>{lhs, rhs};
+}
+
+/**
+ * Greater-than-or-equal-to comparison operator that returns an inequality
+ * constraint for two Variables.
+ *
+ * @param lhs Left-hand side.
+ * @param rhs Left-hand side.
+ */
+template <typename LHS, typename RHS>
+  requires(ScalarLike<LHS> || MatrixLike<LHS>) && (!SleipnirType<LHS>) &&
+          (ScalarLike<RHS> || MatrixLike<RHS>) && SleipnirType<RHS>
+auto operator>=(LHS&& lhs, RHS&& rhs) {
+  return InequalityConstraints<typename std::decay_t<RHS>::Scalar>{lhs, rhs};
+}
+
+/**
+ * Greater-than-or-equal-to comparison operator that returns an inequality
+ * constraint for two Variables.
+ *
+ * @param lhs Left-hand side.
+ * @param rhs Left-hand side.
+ */
+template <typename LHS, typename RHS>
+  requires(ScalarLike<LHS> || MatrixLike<LHS>) && SleipnirType<LHS> &&
+          (ScalarLike<RHS> || MatrixLike<RHS>) && SleipnirType<RHS>
+auto operator>=(LHS&& lhs, RHS&& rhs) {
+  return InequalityConstraints<typename std::decay_t<LHS>::Scalar>{lhs, rhs};
 }
 
 }  // namespace slp
@@ -776,15 +1064,17 @@ namespace Eigen {
 
 /**
  * NumTraits specialization that allows instantiating Eigen types with Variable.
+ *
+ * @tparam Scalar Scalar type.
  */
-template <>
-struct NumTraits<slp::Variable> : NumTraits<double> {
+template <typename Scalar>
+struct NumTraits<slp::Variable<Scalar>> : NumTraits<Scalar> {
   /// Real type.
-  using Real = slp::Variable;
+  using Real = slp::Variable<Scalar>;
   /// Non-integer type.
-  using NonInteger = slp::Variable;
+  using NonInteger = slp::Variable<Scalar>;
   /// Nested type.
-  using Nested = slp::Variable;
+  using Nested = slp::Variable<Scalar>;
 
   /// Is complex.
   static constexpr int IsComplex = 0;
