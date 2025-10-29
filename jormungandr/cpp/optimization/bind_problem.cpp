@@ -82,7 +82,7 @@ void bind_problem(nb::class_<Problem>& cls) {
           // XXX: The keyword arguments are manually copied from the struct
           // members in include/sleipnir/optimization/solver/options.hpp.
           //
-          // C++'s Problem::Solve() takes an Options object instead of keyword
+          // C++'s Problem::solve() takes an Options object instead of keyword
           // arguments, so there's no compile-time checking that the arguments
           // match.
           auto key_str = nb::cast<std::string>(key);
@@ -110,7 +110,7 @@ void bind_problem(nb::class_<Problem>& cls) {
       // XXX: The keyword argument docs are manually copied from the struct
       // member docs in include/sleipnir/optimization/solver/options.hpp.
       //
-      // C++'s Problem::Solve() takes an Options object instead of keyword
+      // C++'s Problem::solve() takes an Options object instead of keyword
       // arguments, so pybind11_mkdoc generates the wrong docs.
       R"doc(Solve the optimization problem. The solution will be stored in the
 original variables used to construct the problem.
