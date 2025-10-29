@@ -86,22 +86,22 @@ TEST_CASE("Problem - Double integrator", "[Problem]") {
   Eigen::Matrix<double, 1, 1> u{0.0};
   for (int k = 0; k < N; ++k) {
     // Verify state
-    CHECK(X.value(0, k) == Catch::Approx(x(0)).margin(1e-2));
-    CHECK(X.value(1, k) == Catch::Approx(x(1)).margin(1e-2));
+    CHECK(X.value(0, k) == Catch::Approx(x[0]).margin(1e-2));
+    CHECK(X.value(1, k) == Catch::Approx(x[1]).margin(1e-2));
 
     // Determine expected input for this timestep
     if (k * dt < 1s) {
       // Accelerate
-      u(0) = 1.0;
+      u[0] = 1.0;
     } else if (k * dt < 2.05s) {
       // Maintain speed
-      u(0) = 0.0;
+      u[0] = 0.0;
     } else if (k * dt < 3.275s) {
       // Decelerate
-      u(0) = -1.0;
+      u[0] = -1.0;
     } else {
       // Accelerate
-      u(0) = 1.0;
+      u[0] = 1.0;
     }
 
     // Verify input
@@ -112,7 +112,7 @@ TEST_CASE("Problem - Double integrator", "[Problem]") {
       CHECK(U.value(0, k) >= -1.0);
       CHECK(U.value(0, k) <= 1.0);
     } else {
-      CHECK(U.value(0, k) == Catch::Approx(u(0)).margin(1e-4));
+      CHECK(U.value(0, k) == Catch::Approx(u[0]).margin(1e-4));
     }
 
     INFO(std::format("  k = {}", k));
