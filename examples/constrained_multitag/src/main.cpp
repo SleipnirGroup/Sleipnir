@@ -29,8 +29,8 @@ int main() {
   auto robot_θ = problem.decision_variable();
 
   // cache autodiff variables
-  auto sinθ = slp::sin(robot_θ);
-  auto cosθ = slp::cos(robot_θ);
+  auto sinθ = sin(robot_θ);
+  auto cosθ = cos(robot_θ);
 
   slp::VariableMatrix<double> field2robot{
       {cosθ, -sinθ, 0, robot_x},
@@ -65,8 +65,7 @@ int main() {
   robot_θ.set_value(0.2);
 
   // field2camera * field2camera⁻¹ = I
-  auto camera2field =
-      slp::solve<double>(field2camera, Eigen::Matrix4d::Identity());
+  auto camera2field = solve<double>(field2camera, Eigen::Matrix4d::Identity());
 
   // Cost
   slp::Variable J = 0.0;

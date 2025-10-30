@@ -36,7 +36,7 @@ TEMPLATE_TEST_CASE("Bounds - Detection", "[Bounds]", SCALAR_TYPES_UNDER_TEST) {
       x - T(3),
       x - T(4),
       (T(3) + T(4) * y - y) * T(4),
-      slp::sin(w),
+      sin(w),
       a,
       -z,
       v - T(8),

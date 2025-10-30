@@ -30,14 +30,11 @@ TEMPLATE_TEST_CASE("multistart - Mishra's Bird function", "[nonlinear_problem]",
     y.set_value(input.y);
 
     // https://en.wikipedia.org/wiki/Test_functions_for_optimization#Test_functions_for_constrained_optimization
-    slp::Variable J =
-        slp::sin(y) * slp::exp(slp::pow(T(1) - slp::cos(x), T(2))) +
-        slp::cos(x) * slp::exp(slp::pow(T(1) - slp::sin(y), T(2))) +
-        slp::pow(x - y, T(2));
+    slp::Variable J = sin(y) * exp(pow(T(1) - cos(x), T(2))) +
+                      cos(x) * exp(pow(T(1) - sin(y), T(2))) + pow(x - y, T(2));
     problem.minimize(J);
 
-    problem.subject_to(slp::pow(x + T(5), T(2)) + slp::pow(y + T(5), T(2)) <
-                       T(25));
+    problem.subject_to(pow(x + T(5), T(2)) + pow(y + T(5), T(2)) < T(25));
 
     return {problem.solve(), J.value(),
             DecisionVariables{x.value(), y.value()}};

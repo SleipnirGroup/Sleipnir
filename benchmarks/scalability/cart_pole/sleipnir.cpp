@@ -49,15 +49,15 @@ slp::VariableMatrix<double> cart_pole_dynamics(
   // M(q) = [m_p l cosθ    m_p l²  ]
   slp::VariableMatrix<double> M{2, 2};
   M[0, 0] = m_c + m_p;
-  M[0, 1] = m_p * l * slp::cos(theta);
-  M[1, 0] = m_p * l * slp::cos(theta);
+  M[0, 1] = m_p * l * cos(theta);
+  M[1, 0] = m_p * l * cos(theta);
   M[1, 1] = m_p * std::pow(l, 2);
 
   //           [0  −m_p lθ̇ sinθ]
   // C(q, q̇) = [0       0      ]
   slp::VariableMatrix<double> C{2, 2};
   C[0, 0] = 0;
-  C[0, 1] = -m_p * l * thetadot * slp::sin(theta);
+  C[0, 1] = -m_p * l * thetadot * sin(theta);
   C[1, 0] = 0;
   C[1, 1] = 0;
 
@@ -65,7 +65,7 @@ slp::VariableMatrix<double> cart_pole_dynamics(
   // τ_g(q) = [-m_p gl sinθ]
   slp::VariableMatrix<double> tau_g{2, 1};
   tau_g[0] = 0;
-  tau_g[1] = -m_p * g * l * slp::sin(theta);
+  tau_g[1] = -m_p * g * l * sin(theta);
 
   //     [1]
   // B = [0]
@@ -74,7 +74,7 @@ slp::VariableMatrix<double> cart_pole_dynamics(
   // q̈ = M⁻¹(q)(τ_g(q) − C(q, q̇)q̇ + Bu)
   slp::VariableMatrix<double> qddot{4, 1};
   qddot.segment(0, 2) = qdot;
-  qddot.segment(2, 2) = slp::solve(M, tau_g - C * qdot + B * u);
+  qddot.segment(2, 2) = solve(M, tau_g - C * qdot + B * u);
   return qddot;
 }
 
