@@ -75,7 +75,7 @@ slp::VariableMatrix<double> cart_pole_dynamics(
   // q̈ = M⁻¹(q)(τ_g(q) − C(q, q̇)q̇ + Bu)
   slp::VariableMatrix<double> qddot{4, 1};
   qddot.segment(0, 2) = qdot;
-  qddot.segment(2, 2) = slp::solve(M, tau_g - C * qdot + B * u);
+  qddot.segment(2, 2) = solve(M, tau_g - C * qdot + B * u);
   return qddot;
 }
 

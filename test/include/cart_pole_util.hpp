@@ -90,19 +90,17 @@ class CartPoleUtil {
     //        [ m_c + m_p  m_p l cosθ]
     // M(q) = [m_p l cosθ    m_p l²  ]
     slp::VariableMatrix<Scalar> M{
-        {m_c + m_p, m_p * l * slp::cos(theta)},
-        {m_p * l * slp::cos(theta), m_p * pow(l, Scalar(2))}};
+        {m_c + m_p, m_p * l * cos(theta)},
+        {m_p * l * cos(theta), m_p * pow(l, Scalar(2))}};
 
     //           [0  −m_p lθ̇ sinθ]
     // C(q, q̇) = [0       0      ]
-    slp::VariableMatrix<Scalar> C{
-        {Scalar(0), -m_p * l * thetadot * slp::sin(theta)},
-        {Scalar(0), Scalar(0)}};
+    slp::VariableMatrix<Scalar> C{{Scalar(0), -m_p * l * thetadot * sin(theta)},
+                                  {Scalar(0), Scalar(0)}};
 
     //          [     0      ]
     // τ_g(q) = [-m_p gl sinθ]
-    slp::VariableMatrix<Scalar> tau_g{{Scalar(0)},
-                                      {-m_p * g * l * slp::sin(theta)}};
+    slp::VariableMatrix<Scalar> tau_g{{Scalar(0)}, {-m_p * g * l * sin(theta)}};
 
     //     [1]
     // B = [0]
@@ -111,7 +109,7 @@ class CartPoleUtil {
     // q̈ = M⁻¹(q)(τ_g(q) − C(q, q̇)q̇ + Bu)
     slp::VariableMatrix<Scalar> qddot{4};
     qddot.segment(0, 2) = qdot;
-    qddot.segment(2, 2) = slp::solve(M, tau_g - C * qdot + B * u);
+    qddot.segment(2, 2) = solve(M, tau_g - C * qdot + B * u);
     return qddot;
   }
 };

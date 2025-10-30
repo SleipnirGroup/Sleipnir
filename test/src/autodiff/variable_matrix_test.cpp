@@ -457,7 +457,7 @@ template <typename T>
 void check_solve(slp::VariableMatrix<T> A, slp::VariableMatrix<T> B) {
   INFO(std::format("Solve {}x{}", A.rows(), A.cols()));
 
-  auto X = slp::solve(A, B);
+  auto X = solve(A, B);
 
   CHECK(X.rows() == A.cols());
   CHECK(X.cols() == B.cols());
