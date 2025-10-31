@@ -84,12 +84,13 @@ def test_arm_on_elevator_problem():
         problem.subject_to(heights <= END_EFFECTOR_MAX_HEIGHT)
 
     # Cost function
-    J = 0.0
-    for k in range(N + 1):
-        J += (ELEVATOR_END_HEIGHT - elevator[0, k]) ** 2 + (
-            ARM_END_ANGLE - arm[0, k]
-        ) ** 2
-    problem.minimize(J)
+    problem.minimize(
+        sum(
+            (ELEVATOR_END_HEIGHT - elevator[0, k]) ** 2
+            + (ARM_END_ANGLE - arm[0, k]) ** 2
+            for k in range(N + 1)
+        )
+    )
 
     assert problem.cost_function_type() == ExpressionType.QUADRATIC
     assert problem.equality_constraint_type() == ExpressionType.LINEAR

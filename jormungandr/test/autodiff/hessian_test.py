@@ -187,10 +187,7 @@ def test_sum_of_squares():
     for i in range(4):
         x[i].set_value(0.0)
 
-    J = 0.0
-    for i in range(4):
-        J += (r[i] - x[i]) * (r[i] - x[i])
-
+    J = sum((r[i] - x[i]) * (r[i] - x[i]) for i in range(4))
     H = Hessian(J, x)
 
     expected_H = np.diag([2.0] * 4)

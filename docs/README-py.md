@@ -94,10 +94,7 @@ Next, we'll create a cost function for minimizing position error.
 
 ```py
 # Cost function - minimize position error
-J = 0.0
-for k in range(N + 1):
-    J += (r - X[0, k]) ** 2
-problem.minimize(J)
+problem.minimize(sum((r - X[0, k]) ** 2 for k in range(N + 1)))
 ```
 
 The cost function passed to minimize() should produce a scalar output.
