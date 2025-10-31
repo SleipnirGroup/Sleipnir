@@ -60,10 +60,12 @@ def test_differential_drive_problem():
         )
 
     # Minimize sum squared states and inputs
-    J = 0.0
-    for k in range(N):
-        J += X[:, k : k + 1].T @ X[:, k : k + 1] + U[:, k : k + 1].T @ U[:, k : k + 1]
-    problem.minimize(J)
+    problem.minimize(
+        sum(
+            X[:, k : k + 1].T @ X[:, k : k + 1] + U[:, k : k + 1].T @ U[:, k : k + 1]
+            for k in range(N)
+        )
+    )
 
     assert problem.cost_function_type() == ExpressionType.QUADRATIC
     assert problem.equality_constraint_type() == ExpressionType.NONLINEAR

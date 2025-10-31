@@ -39,10 +39,9 @@ def test_flywheel_problem():
 
     # Cost function - minimize error
     r = np.array([[10.0]])
-    J = 0.0
-    for k in range(N + 1):
-        J += (r - X[:, k : k + 1]).T @ (r - X[:, k : k + 1])
-    problem.minimize(J)
+    problem.minimize(
+        sum((r - X[:, k : k + 1]).T @ (r - X[:, k : k + 1]) for k in range(N + 1))
+    )
 
     assert problem.cost_function_type() == ExpressionType.QUADRATIC
     assert problem.equality_constraint_type() == ExpressionType.LINEAR
