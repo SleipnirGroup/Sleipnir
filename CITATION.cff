@@ -1,18 +1,17 @@
 cff-version: 1.2.0
 title: Sleipnir
-message: >-
-  If you use this software, please cite it using the
-  metadata from this file.
+message: 'If you use this software, please cite it as below.'
 type: software
 authors:
   - name: Sleipnir contributors
 repository-code: 'https://github.com/SleipnirGroup/Sleipnir'
 url: 'https://github.com/SleipnirGroup/Sleipnir'
 abstract: >-
-  A linearity-exploiting sparse nonlinear constrained
-  optimization problem solver that uses the interior-point
-  method.
+  Linearity-exploiting reverse mode autodiff library,
+  interior-point method, and NLP solver DSL for C++23 and
+  Python.
 keywords:
+  - autodiff
+  - interior-point-method
   - optimization
-  - solver
 license: BSD-3-Clause
