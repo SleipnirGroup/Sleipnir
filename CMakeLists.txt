@@ -253,7 +253,11 @@ if(BUILD_EXAMPLES)
 endif()
 
 if(BUILD_PYTHON)
-    find_package(Python REQUIRED COMPONENTS Interpreter Development)
+    find_package(
+        Python
+        REQUIRED
+        COMPONENTS Interpreter Development.Module Development.SABIModule
+    )
     if(DEFINED PY_BUILD_CMAKE_MODULE_NAME)
         set(PY_DEST ${PY_BUILD_CMAKE_MODULE_NAME})
     else()
@@ -276,7 +280,7 @@ if(BUILD_PYTHON)
 
     # Build Sleipnir dependency directly into the wheel to avoid having to
     # configure RPATHs
-    nanobind_add_module(_jormungandr ${jormungandr_src} ${Sleipnir_src})
+    nanobind_add_module(_jormungandr STABLE_ABI ${jormungandr_src} ${Sleipnir_src})
     compiler_flags(_jormungandr)
     target_compile_definitions(_jormungandr PRIVATE JORMUNGANDR=1)
     target_include_directories(
@@ -302,7 +306,7 @@ if(BUILD_PYTHON)
         ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang"
         OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang"
     )
-        target_compile_options(nanobind-static PRIVATE -Wno-array-bounds)
+        target_compile_options(nanobind-static-abi3 PRIVATE -Wno-array-bounds)
         target_compile_options(
             _jormungandr
             PRIVATE -Wno-nested-anon-types -Wno-zero-length-array

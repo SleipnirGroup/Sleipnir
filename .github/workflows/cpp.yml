@@ -1,4 +1,4 @@
-name: Build C++
+name: C++
 
 on: [pull_request, push]
 
@@ -7,7 +7,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  native:
     timeout-minutes: 20
     strategy:
       fail-fast: false
@@ -53,4 +53,21 @@ jobs:
       - uses: actions/upload-artifact@v5
         with:
           name: ${{ matrix.name }}
+          path: pkg
+
+  wasm:
+    name: Wasm
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: numworks/setup-emscripten@latest
+
+      - run: emcmake cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTING=OFF
+      - run: cmake --build build --config Release --parallel $(nproc)
+      - run: cmake --install build --config Release --prefix pkg
+
+      - uses: actions/upload-artifact@v5
+        with:
+          name: Wasm
           path: pkg
