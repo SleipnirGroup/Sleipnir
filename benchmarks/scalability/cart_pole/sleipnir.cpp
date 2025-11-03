@@ -47,25 +47,16 @@ slp::VariableMatrix<double> cart_pole_dynamics(
 
   //        [ m_c + m_p  m_p l cosθ]
   // M(q) = [m_p l cosθ    m_p l²  ]
-  slp::VariableMatrix<double> M{2, 2};
-  M[0, 0] = m_c + m_p;
-  M[0, 1] = m_p * l * cos(theta);
-  M[1, 0] = m_p * l * cos(theta);
-  M[1, 1] = m_p * std::pow(l, 2);
+  slp::VariableMatrix<double> M{{m_c + m_p, m_p * l * cos(theta)},
+                                {m_p * l * cos(theta), m_p * std::pow(l, 2)}};
 
   //           [0  −m_p lθ̇ sinθ]
   // C(q, q̇) = [0       0      ]
-  slp::VariableMatrix<double> C{2, 2};
-  C[0, 0] = 0;
-  C[0, 1] = -m_p * l * thetadot * sin(theta);
-  C[1, 0] = 0;
-  C[1, 1] = 0;
+  slp::VariableMatrix<double> C{{0, -m_p * l * thetadot * sin(theta)}, {0, 0}};
 
   //          [     0      ]
   // τ_g(q) = [-m_p gl sinθ]
-  slp::VariableMatrix<double> tau_g{2, 1};
-  tau_g[0] = 0;
-  tau_g[1] = -m_p * g * l * sin(theta);
+  slp::VariableMatrix<double> tau_g{{0}, {-m_p * g * l * sin(theta)}};
 
   //     [1]
   // B = [0]
