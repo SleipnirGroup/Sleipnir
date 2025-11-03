@@ -14,19 +14,19 @@ jobs:
       matrix:
         include:
           - name: Windows x86_64
-            os: windows-2022
+            os: windows-2025
             version: "3.11"
             cmake-env:
           - name: Windows x86_64
-            os: windows-2022
+            os: windows-2025
             version: "3.12"
             cmake-env:
           - name: Windows x86_64
-            os: windows-2022
+            os: windows-2025
             version: "3.13"
             cmake-env:
           - name: Windows x86_64
-            os: windows-2022
+            os: windows-2025
             version: "3.14"
             cmake-env:
           - name: Linux x86_64
@@ -62,19 +62,19 @@ jobs:
             version: "3.14"
             cmake-env:
           - name: macOS universal
-            os: macOS-14
+            os: macos-15
             version: "3.11"
             cmake-env: _PYTHON_HOST_PLATFORM=macosx_14_0_universal2 ARCHFLAGS="-arch x86_64 -arch arm64" MACOSX_DEPLOYMENT_TARGET=14.0
           - name: macOS universal
-            os: macOS-14
+            os: macos-15
             version: "3.12"
             cmake-env: _PYTHON_HOST_PLATFORM=macosx_14_0_universal2 ARCHFLAGS="-arch x86_64 -arch arm64" MACOSX_DEPLOYMENT_TARGET=14.0
           - name: macOS universal
-            os: macOS-14
+            os: macos-15
             version: "3.13"
             cmake-env: _PYTHON_HOST_PLATFORM=macosx_14_0_universal2 ARCHFLAGS="-arch x86_64 -arch arm64" MACOSX_DEPLOYMENT_TARGET=14.0
           - name: macOS universal
-            os: macOS-14
+            os: macos-15
             version: "3.14"
             cmake-env: _PYTHON_HOST_PLATFORM=macosx_14_0_universal2 ARCHFLAGS="-arch x86_64 -arch arm64" MACOSX_DEPLOYMENT_TARGET=14.0
 

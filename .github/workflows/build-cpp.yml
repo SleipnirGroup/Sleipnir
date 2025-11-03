@@ -14,7 +14,7 @@ jobs:
       matrix:
         include:
           - name: Windows x86_64
-            os: windows-2022
+            os: windows-2025
             cmake-args:
           - name: Linux x86_64
             os: ubuntu-24.04
@@ -23,7 +23,7 @@ jobs:
             os: ubuntu-24.04-arm
             cmake-args:
           - name: macOS universal
-            os: macOS-14
+            os: macos-15
             cmake-args: -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
           - name: Linux x86_64 (enable bound projection)
             os: ubuntu-24.04
