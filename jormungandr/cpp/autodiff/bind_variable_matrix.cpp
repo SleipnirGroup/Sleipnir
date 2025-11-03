@@ -548,6 +548,13 @@ void bind_variable_matrix(nb::module_& autodiff,
       nb::is_operator(), "lhs"_a);
 
   cls.def(-nb::self);
+  cls.def(
+      "__pow__",
+      [](const VariableMatrix<double>& self, int power) {
+        return self.cwise_transform(
+            [=](const auto& elem) { return pow(elem, power); });
+      },
+      nb::is_operator(), "power"_a);
   cls.def_prop_ro("T", &VariableMatrix<double>::T, DOC(slp, VariableMatrix, T));
   cls.def("rows", &VariableMatrix<double>::rows,
           DOC(slp, VariableMatrix, rows));

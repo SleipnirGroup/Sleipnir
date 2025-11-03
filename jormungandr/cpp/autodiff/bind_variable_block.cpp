@@ -444,6 +444,13 @@ void bind_variable_block(
           -> VariableMatrix<double> { return lhs - rhs; },
       nb::is_operator(), "rhs"_a);
   cls.def(-nb::self);
+  cls.def(
+      "__pow__",
+      [](const VariableBlock<VariableMatrix<double>>& self, int power) {
+        return self.cwise_transform(
+            [=](const auto& elem) { return pow(elem, power); });
+      },
+      nb::is_operator(), "power"_a);
   cls.def_prop_ro("T", &VariableBlock<VariableMatrix<double>>::T,
                   DOC(slp, VariableBlock, T));
   cls.def("rows", &VariableBlock<VariableMatrix<double>>::rows,

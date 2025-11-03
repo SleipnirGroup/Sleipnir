@@ -101,7 +101,7 @@ def test_sum_of_products():
         x[i].set_value(i + 1)
 
     # y = ||x||²
-    y = (x.T @ x)[0, 0]
+    y = x.T @ x
     assert y.value() == sum([x * x for x in range(1, 6)])
 
     g = Gradient(y, x)
