@@ -252,8 +252,20 @@ def test_value():
     assert A[1:3, 1:3].T[:, 1:].value(1) == 9.0
 
 
+def test_pow():
+    # VariableMatrix coefficient-wise power
+    A = VariableMatrix([[-2.0, -3.0, -4.0], [-5.0, -6.0, -7.0]])
+    assert A**2 == np.array([[4.0, 9.0, 16.0], [25.0, 36.0, 49.0]])
+    assert A**3 == np.array([[-8.0, -27.0, -64.0], [-125.0, -216.0, -343.0]])
+
+    # VariableBlock coefficient-wise power
+    sub_A = A[:2, :2]
+    assert sub_A**2 == np.array([[4.0, 9.0], [25.0, 36.0]])
+    assert sub_A**3 == np.array([[-8.0, -27.0], [-125.0, -216.0]])
+
+
 def test_cwise_map():
-    # VariableMatrix CwiseTransform
+    # VariableMatrix cwise_map
     A = VariableMatrix([[-2.0, -3.0, -4.0], [-5.0, -6.0, -7.0]])
 
     result1 = A.cwise_map(autodiff.abs)
@@ -264,7 +276,7 @@ def test_cwise_map():
 
     assert (result1.value() == expected1).all()
 
-    # VariableBlock CwiseTransform
+    # VariableBlock cwise_map
     sub_A = A[:2, :2]
 
     result2 = sub_A.cwise_map(autodiff.abs)
