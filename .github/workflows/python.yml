@@ -50,8 +50,6 @@ jobs:
         shell: bash
       - run: pytest
         shell: bash
-      - run: python3 ./.github/workflows/copy_wheel.py dist/sleipnirgroup_jormungandr-*.whl 3.13 3.14
-        shell: bash
 
       - uses: actions/upload-artifact@v5
         with:

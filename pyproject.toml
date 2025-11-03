@@ -1,7 +1,7 @@
 [project]
 name = "sleipnirgroup-jormungandr"
-description = "A linearity-exploiting sparse nonlinear constrained optimization problem solver that uses the interior-point method."
-version = "0.1.1.dev3"
+description = "A linearity-exploiting reverse mode autodiff library and nonlinear program solver DSL."
+version = "0.1.1.dev118"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [ "matplotlib", "numpy", "scipy" ]
@@ -49,6 +49,8 @@ exclude = [ ]
 
 [tool.py-build-cmake.wheel]
 platform_tag = "guess"
+python_abi = "abi3"
+abi3_minimum_cpython_version = 312
 
 [tool.pytest.ini_options]
 minversion = "6.0"
