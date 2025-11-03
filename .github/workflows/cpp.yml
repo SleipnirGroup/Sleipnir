@@ -16,6 +16,9 @@ jobs:
           - name: Windows x86_64
             os: windows-2025
             cmake-args:
+          - name: Windows aarch64
+            os: windows-11-arm
+            cmake-args:
           - name: Linux x86_64
             os: ubuntu-24.04
             cmake-args:
