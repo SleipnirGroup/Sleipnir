@@ -27,7 +27,7 @@ jobs:
             cmake-env:
           - name: macOS universal
             os: macos-15
-            cmake-env: _PYTHON_HOST_PLATFORM=macosx_14_0_universal2 ARCHFLAGS="-arch x86_64 -arch arm64" MACOSX_DEPLOYMENT_TARGET=14.0
+            cmake-env: ARCHFLAGS="-arch arm64 -arch x86_64" MACOSX_DEPLOYMENT_TARGET=14.0
 
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}

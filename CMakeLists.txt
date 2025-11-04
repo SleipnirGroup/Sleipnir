@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.21)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-# Set default build type to release with debug info
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "" FORCE)
-endif()
-
+set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+# Build macOS universal libraries by default
+set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "")
+set(CMAKE_OSX_DEPLOYMENT_TARGET "14.0" CACHE STRING "")
 
 project(Sleipnir LANGUAGES CXX)
 
