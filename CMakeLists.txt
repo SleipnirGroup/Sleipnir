@@ -237,7 +237,6 @@ if(BUILD_EXAMPLES)
                 ${example}_test
                 PRIVATE
                     ${CMAKE_CURRENT_SOURCE_DIR}/examples/${example}/include
-                    ${CMAKE_CURRENT_SOURCE_DIR}/examples/${example}/src
                     ${CMAKE_CURRENT_SOURCE_DIR}/examples/${example}/test/include
             )
             target_link_libraries(
@@ -286,7 +285,6 @@ if(BUILD_PYTHON)
     target_include_directories(
         _jormungandr
         PRIVATE
-            ${CMAKE_CURRENT_SOURCE_DIR}/src
             ${CMAKE_CURRENT_SOURCE_DIR}/include
             ${CMAKE_CURRENT_SOURCE_DIR}/jormungandr/cpp
     )
