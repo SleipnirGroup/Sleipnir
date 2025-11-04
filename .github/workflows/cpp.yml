@@ -27,7 +27,7 @@ jobs:
             cmake-args:
           - name: macOS universal
             os: macos-15
-            cmake-args: -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
+            cmake-args:
           - name: Linux x86_64 (enable bound projection)
             os: ubuntu-24.04
             cmake-args: -DDISABLE_BOUND_PROJECTION=OFF
