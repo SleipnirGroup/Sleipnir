@@ -714,7 +714,7 @@ Variable<Scalar> tanh(const Variable<Scalar>& x) {
 template <typename Scalar>
 Variable<Scalar> hypot(const Variable<Scalar>& x, const Variable<Scalar>& y,
                        const Variable<Scalar>& z) {
-  return Variable{slp::sqrt(slp::pow(x, 2) + slp::pow(y, 2) + slp::pow(z, 2))};
+  return Variable{sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2))};
 }
 
 // The standard form for equality constraints is c(x) = 0, and the standard form
