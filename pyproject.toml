@@ -4,7 +4,7 @@ description = "A linearity-exploiting reverse mode autodiff library and nonlinea
 version = "0.2.0"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = [ "matplotlib", "numpy", "scipy" ]
+dependencies = ["matplotlib", "numpy", "scipy"]
 
   [project.license]
   file = "LICENSE.txt"
@@ -15,7 +15,7 @@ dependencies = [ "matplotlib", "numpy", "scipy" ]
 [build-system]
 requires = [
   "nanobind",
-  "py-build-cmake~=0.4.3",
+  "py-build-cmake~=0.5.0",
   "pybind11-mkdoc",
 ]
 build-backend = "py_build_cmake.build"
@@ -23,9 +23,9 @@ build-backend = "py_build_cmake.build"
 [tool.py-build-cmake.cmake]
 build_type = "Release"
 source_path = "."
-build_args = [ "--target", "_jormungandr" ]
-install_components = [ "python_modules" ]
-install_args = [ ]
+build_args = ["--target", "_jormungandr"]
+install_components = ["python_modules"]
+install_args = []
 
   [tool.py-build-cmake.cmake.options]
   BUILD_TESTING = "OFF"
@@ -33,19 +33,18 @@ install_args = [ ]
 
 [tool.py-build-cmake.module]
 name = "jormungandr"
-directory = "."
+directory = "jormungandr/src"
 
 [tool.py-build-cmake.sdist]
 include = [
   "CMakeLists.txt",
   "SleipnirConfig.cmake.in",
-  "cmake/modules/*.cmake",
-  "cmake/*.py",
-  "jormungandr/*",
-  "include/*",
-  "src/*"
+  "cmake/*.cmake",
+  "include",
+  "jormungandr",
+  "src"
 ]
-exclude = [ ]
+exclude = []
 
 [tool.py-build-cmake.wheel]
 platform_tag = "guess"
@@ -54,4 +53,4 @@ abi3_minimum_cpython_version = 312
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-testpaths = [ "jormungandr/test", "examples/CurrentManager/test" ]
+testpaths = ["jormungandr/test", "examples/CurrentManager/test"]

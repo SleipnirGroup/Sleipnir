@@ -1,6 +1,5 @@
-import pytest
-
 import jormungandr.autodiff as autodiff
+import pytest
 from jormungandr.optimization import ExitStatus, Problem, multistart
 
 

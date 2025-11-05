@@ -7,7 +7,6 @@ The robot pose is constrained to be on the floor (z = 0).
 """
 
 import numpy as np
-
 from jormungandr.autodiff import Variable, VariableMatrix, cos, sin, solve
 from jormungandr.optimization import Problem
 
