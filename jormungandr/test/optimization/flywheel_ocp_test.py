@@ -3,7 +3,6 @@ from typing import Callable
 
 import numpy as np
 import pytest
-
 from jormungandr.autodiff import ExpressionType, VariableMatrix
 from jormungandr.optimization import (
     OCP,

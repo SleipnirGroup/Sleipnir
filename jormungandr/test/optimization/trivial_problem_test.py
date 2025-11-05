@@ -1,5 +1,4 @@
 import numpy as np
-
 from jormungandr.autodiff import ExpressionType
 from jormungandr.optimization import ExitStatus, Problem
 

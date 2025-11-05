@@ -1,5 +1,4 @@
 import numpy as np
-
 from jormungandr.autodiff import Jacobian, VariableMatrix
 
 

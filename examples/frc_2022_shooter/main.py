@@ -11,10 +11,9 @@ import math
 
 import matplotlib.pyplot as plt
 import numpy as np
-from numpy.linalg import norm
-
 from jormungandr.autodiff import VariableMatrix
 from jormungandr.optimization import Problem
+from numpy.linalg import norm
 
 field_width = 8.2296  # 27 ft -> m
 field_length = 16.4592  # 54 ft -> m

@@ -1,6 +1,5 @@
-import numpy as np
-
 import jormungandr.autodiff as autodiff
+import numpy as np
 from jormungandr.autodiff import VariableMatrix
 
 

@@ -1,6 +1,9 @@
 import numpy as np
 import pytest
-
+from differential_drive_util import (
+    differential_drive_dynamics_double,
+    differential_drive_dynamics_variable,
+)
 from jormungandr.autodiff import ExpressionType
 from jormungandr.optimization import (
     OCP,
@@ -9,11 +12,7 @@ from jormungandr.optimization import (
     TimestepMethod,
     TranscriptionMethod,
 )
-from jormungandr.test.differential_drive_util import (
-    differential_drive_dynamics_double,
-    differential_drive_dynamics_variable,
-)
-from jormungandr.test.rk4 import rk4
+from rk4 import rk4
 
 
 def test_differential_drive_ocp():

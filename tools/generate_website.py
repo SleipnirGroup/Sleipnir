@@ -12,8 +12,8 @@ def clear_python_workspace():
         [
             "git",
             "restore",
-            "jormungandr/autodiff/__init__.py",
-            "jormungandr/optimization/__init__.py",
+            "jormungandr/src/jormungandr/autodiff/__init__.py",
+            "jormungandr/src/jormungandr/optimization/__init__.py",
         ],
         check=True,
     )
@@ -60,9 +60,14 @@ def prep_python_api_docs():
             ).replace("_jormungandr.autodiff.", "")
 
         # Replace _jormungandr.package import with contents
-        with open(os.path.join("jormungandr", package, "__init__.py")) as f:
+        with open(
+            os.path.join("jormungandr/src/jormungandr", package, "__init__.py")
+        ) as f:
             init_content = f.read()
-        with open(os.path.join("jormungandr", package, "__init__.py"), mode="w") as f:
+        with open(
+            os.path.join("jormungandr/src/jormungandr", package, "__init__.py"),
+            mode="w",
+        ) as f:
             f.write(
                 init_content.replace(
                     f"from .._jormungandr.{package} import *", package_content

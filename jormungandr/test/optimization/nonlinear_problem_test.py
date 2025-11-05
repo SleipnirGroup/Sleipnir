@@ -1,9 +1,8 @@
 import platform
 
+import jormungandr.autodiff as autodiff
 import numpy as np
 import pytest
-
-import jormungandr.autodiff as autodiff
 from jormungandr.autodiff import ExpressionType
 from jormungandr.optimization import ExitStatus, Problem
 

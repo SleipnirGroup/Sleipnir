@@ -1,8 +1,7 @@
 import math
 
-import numpy as np
-
 import jormungandr.autodiff as autodiff
+import numpy as np
 from jormungandr.autodiff import VariableMatrix
 
 # x = [x, y, heading, left velocity, right velocity]ᵀ

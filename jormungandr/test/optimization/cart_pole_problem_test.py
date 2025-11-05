@@ -2,14 +2,13 @@ import math
 
 import numpy as np
 import pytest
-
-from jormungandr.autodiff import ExpressionType
-from jormungandr.optimization import ExitStatus, Problem
-from jormungandr.test.cart_pole_util import (
+from cart_pole_util import (
     cart_pole_dynamics_double,
     cart_pole_dynamics_variable,
 )
-from jormungandr.test.rk4 import rk4
+from jormungandr.autodiff import ExpressionType
+from jormungandr.optimization import ExitStatus, Problem
+from rk4 import rk4
 
 
 def lerp(a, b, t):

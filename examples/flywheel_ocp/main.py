@@ -3,7 +3,6 @@
 import math
 
 import numpy as np
-
 from jormungandr.autodiff import VariableMatrix
 from jormungandr.optimization import (
     OCP,

@@ -1,13 +1,12 @@
 import numpy as np
 import pytest
-
-from jormungandr.autodiff import ExpressionType
-from jormungandr.optimization import ExitStatus, Problem
-from jormungandr.test.differential_drive_util import (
+from differential_drive_util import (
     differential_drive_dynamics_double,
     differential_drive_dynamics_variable,
 )
-from jormungandr.test.rk4 import rk4
+from jormungandr.autodiff import ExpressionType
+from jormungandr.optimization import ExitStatus, Problem
+from rk4 import rk4
 
 
 def lerp(a, b, t):

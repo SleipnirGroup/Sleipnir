@@ -3,7 +3,6 @@
 import math
 
 import numpy as np
-
 from jormungandr.optimization import Problem
 
 
