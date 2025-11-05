@@ -415,7 +415,7 @@ class Problem {
 
       // Set up Lagrangian
       VariableMatrix<Scalar> y_ad(num_equality_constraints);
-      Variable L = f - (y_ad.T() * c_e_ad)[0];
+      Variable L = f - y_ad.T() * c_e_ad;
 
       // Set up Lagrangian Hessian autodiff
       ad_setup_profilers.emplace_back("  ↳ ∇²ₓₓL").start();
@@ -496,7 +496,7 @@ class Problem {
       // Set up Lagrangian
       VariableMatrix<Scalar> y_ad(num_equality_constraints);
       VariableMatrix<Scalar> z_ad(num_inequality_constraints);
-      Variable L = f - (y_ad.T() * c_e_ad)[0] - (z_ad.T() * c_i_ad)[0];
+      Variable L = f - y_ad.T() * c_e_ad - z_ad.T() * c_i_ad;
 
       // Set up Lagrangian Hessian autodiff
       ad_setup_profilers.emplace_back("  ↳ ∇²ₓₓL").start();
