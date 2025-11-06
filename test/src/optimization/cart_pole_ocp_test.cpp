@@ -15,7 +15,7 @@
 #include "cart_pole_util.hpp"
 #include "catch_matchers.hpp"
 #include "catch_string_converters.hpp"
-#include "math_util.hpp"
+#include "lerp.hpp"
 #include "rk4.hpp"
 #include "scalar_types_under_test.hpp"
 

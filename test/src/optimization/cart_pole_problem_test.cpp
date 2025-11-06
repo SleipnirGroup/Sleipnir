@@ -15,7 +15,7 @@
 #include "catch_matchers.hpp"
 #include "catch_string_converters.hpp"
 #include "explicit_double.hpp"
-#include "math_util.hpp"
+#include "lerp.hpp"
 #include "rk4.hpp"
 #include "scalar_types_under_test.hpp"
 
