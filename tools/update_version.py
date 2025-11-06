@@ -7,37 +7,24 @@ import subprocess
 
 
 def main():
-    proc = subprocess.run(
-        [
-            "git",
-            "describe",
-        ],
-        encoding="utf-8",
-        stdout=subprocess.PIPE,
-    )
-    if proc.returncode:
-        version = "0.0.0"
+    output = subprocess.check_output(["git", "describe"], encoding="utf-8").rstrip()
+    print(f"git describe: {output}")
+
+    m = re.search(r"^v(\d+)\.(\d+)\.(\d+)(-(\d+))?", output)
+    major = m.group(1)
+    minor = m.group(2)
+    patch = m.group(3)
+    commits_since_tag = m.group(5)
+    if commits_since_tag:
+        version = f"{major}.{minor}.{int(patch) + 1}.dev{commits_since_tag}"
     else:
-        m = re.search(
-            r"^v ([0-9]+) \. ([0-9]+) \. ([0-9]+) (- ([0-9]+) )?",
-            proc.stdout.rstrip(),
-            re.X,
-        )
+        version = f"{major}.{minor}.{patch}"
+    print(f'__version__ = "{version}"')
 
-        # Version number: <tag> or <tag + 1>.dev<# commits since tag>
-        major = int(m.group(1))
-        minor = int(m.group(2))
-        patch = int(m.group(3))
-        if m.group(4):
-            version = f"{major}.{minor}.{patch + 1}.dev{m.group(5)}"
-        else:
-            version = f"{major}.{minor}.{patch}"
-
-    # Update version string in pyproject.toml
-    with open("pyproject.toml") as f:
+    with open("jormungandr/src/jormungandr/__init__.py") as f:
         content = f.read()
-    content = re.sub(r"\b(version\s*=\s*)\".*?\"", r"\g<1>" + f'"{version}"', content)
-    with open("pyproject.toml", "w") as f:
+    content = re.sub(r"(__version__\s*=\s*)\".*?\"", f'\\g<1>"{version}"', content)
+    with open("jormungandr/src/jormungandr/__init__.py", "w") as f:
         f.write(content)
 
 

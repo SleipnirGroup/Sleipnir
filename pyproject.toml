@@ -1,10 +1,10 @@
 [project]
 name = "sleipnirgroup-jormungandr"
 description = "A linearity-exploiting reverse mode autodiff library and nonlinear program solver DSL."
-version = "0.2.0"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = ["matplotlib", "numpy", "scipy"]
+dynamic = ["version"]
 
   [project.license]
   file = "LICENSE.txt"
