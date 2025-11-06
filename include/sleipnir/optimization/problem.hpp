@@ -751,7 +751,7 @@ class Problem {
   }
 };
 
-extern template class EXPORT_TEMPLATE_DECLARE(
-    SLEIPNIR_DLLEXPORT) Problem<double>;
+extern template class EXPORT_TEMPLATE_DECLARE(SLEIPNIR_DLLEXPORT)
+Problem<double>;
 
 }  // namespace slp

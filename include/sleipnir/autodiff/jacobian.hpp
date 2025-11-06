@@ -168,7 +168,7 @@ class Jacobian {
   gch::small_vector<int> m_nonlinear_rows;
 };
 
-extern template class EXPORT_TEMPLATE_DECLARE(
-    SLEIPNIR_DLLEXPORT) Jacobian<double>;
+extern template class EXPORT_TEMPLATE_DECLARE(SLEIPNIR_DLLEXPORT)
+Jacobian<double>;
 
 }  // namespace slp

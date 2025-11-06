@@ -72,7 +72,7 @@ class Gradient {
   Jacobian<Scalar> m_jacobian;
 };
 
-extern template class EXPORT_TEMPLATE_DECLARE(
-    SLEIPNIR_DLLEXPORT) Gradient<double>;
+extern template class EXPORT_TEMPLATE_DECLARE(SLEIPNIR_DLLEXPORT)
+Gradient<double>;
 
 }  // namespace slp

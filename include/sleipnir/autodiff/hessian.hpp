@@ -163,4 +163,9 @@ class Hessian {
   gch::small_vector<int> m_nonlinear_rows;
 };
 
+// @cond Suppress Doxygen
+extern template class EXPORT_TEMPLATE_DECLARE(SLEIPNIR_DLLEXPORT)
+Hessian<double, Eigen::Lower | Eigen::Upper>;
+// @endcond
+
 }  // namespace slp
