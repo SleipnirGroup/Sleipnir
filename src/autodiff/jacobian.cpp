@@ -2,8 +2,4 @@
 
 #include "sleipnir/autodiff/jacobian.hpp"
 
-namespace slp {
-
-template class EXPORT_TEMPLATE_DEFINE(SLEIPNIR_DLLEXPORT) Jacobian<double>;
-
-}  // namespace slp
+template class EXPORT_TEMPLATE_DEFINE(SLEIPNIR_DLLEXPORT) slp::Jacobian<double>;

@@ -2,9 +2,5 @@
 
 #include "sleipnir/autodiff/variable_matrix.hpp"
 
-namespace slp {
-
-template VariableMatrix<double> solve(const VariableMatrix<double>& A,
-                                      const VariableMatrix<double>& B);
-
-}  // namespace slp
+template slp::VariableMatrix<double> slp::solve(
+    const slp::VariableMatrix<double>& A, const slp::VariableMatrix<double>& B);

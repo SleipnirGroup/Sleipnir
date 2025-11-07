@@ -189,6 +189,8 @@ Template parameter ``UpLo``:
 
 static const char *__doc_slp_Hessian_2 = R"doc()doc";
 
+static const char *__doc_slp_Hessian_3 = R"doc()doc";
+
 static const char *__doc_slp_Hessian_Hessian =
 R"doc(Constructs a Hessian object.
 

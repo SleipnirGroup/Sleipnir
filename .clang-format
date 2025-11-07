@@ -51,6 +51,9 @@ AlwaysBreakAfterDefinitionReturnType: None
 AlwaysBreakAfterReturnType: None
 AlwaysBreakBeforeMultilineStrings: true
 AlwaysBreakTemplateDeclarations: Yes
+AttributeMacros:
+  - EXPORT_TEMPLATE_DECLARE
+  - EXPORT_TEMPLATE_DEFINE
 BinPackArguments: true
 BinPackParameters: true
 BitFieldColonSpacing: Both
