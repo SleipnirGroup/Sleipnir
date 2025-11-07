@@ -21,8 +21,8 @@ namespace slp {
 
 NB_MODULE(_jormungandr, m) {
   m.doc() =
-      "A linearity-exploiting sparse nonlinear constrained optimization "
-      "problem solver that uses the interior-point method.";
+      "A linearity-exploiting reverse mode autodiff library and nonlinear "
+      "program solver DSL.";
 
   nb::module_ autodiff = m.def_submodule("autodiff");
   nb::module_ optimization = m.def_submodule("optimization");
