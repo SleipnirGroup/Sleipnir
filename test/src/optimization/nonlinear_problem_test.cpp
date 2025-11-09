@@ -22,7 +22,7 @@ TEMPLATE_TEST_CASE("Problem - Quartic", "[Problem]", SCALAR_TYPES_UNDER_TEST) {
   auto x = problem.decision_variable();
   x.set_value(T(20));
 
-  problem.minimize(slp::pow(x, T(4)));
+  problem.minimize(pow(x, T(4)));
 
   problem.subject_to(x >= T(1));
 
@@ -49,10 +49,9 @@ TEMPLATE_TEST_CASE("Problem - Rosenbrock with cubic and line constraint",
       auto y = problem.decision_variable();
       y.set_value(y0);
 
-      problem.minimize(100 * slp::pow(y - slp::pow(x, 2), 2) +
-                       slp::pow(1 - x, 2));
+      problem.minimize(100 * pow(y - pow(x, 2), 2) + pow(1 - x, 2));
 
-      problem.subject_to(y >= slp::pow(x - 1, 3) + 1);
+      problem.subject_to(y >= pow(x - 1, 3) + 1);
       problem.subject_to(y <= -x + 2);
 
       CHECK(problem.cost_function_type() == slp::ExpressionType::NONLINEAR);
@@ -93,10 +92,10 @@ TEMPLATE_TEST_CASE("Problem - Rosenbrock with disk constraint", "[Problem]",
       auto y = problem.decision_variable();
       y.set_value(y0);
 
-      problem.minimize(slp::pow(T(1) - x, T(2)) +
-                       T(100) * slp::pow(y - slp::pow(x, T(2)), T(2)));
+      problem.minimize(pow(T(1) - x, T(2)) +
+                       T(100) * pow(y - pow(x, T(2)), T(2)));
 
-      problem.subject_to(slp::pow(x, T(2)) + slp::pow(y, T(2)) <= T(2));
+      problem.subject_to(pow(x, T(2)) + pow(y, T(2)) <= T(2));
 
       CHECK(problem.cost_function_type() == slp::ExpressionType::NONLINEAR);
       CHECK(problem.equality_constraint_type() == slp::ExpressionType::NONE);
@@ -127,7 +126,7 @@ TEMPLATE_TEST_CASE("Problem - Minimum 2D distance with linear constraint",
   auto y = problem.decision_variable();
   y.set_value(T(50));
 
-  problem.minimize(slp::sqrt(x * x + y * y));
+  problem.minimize(sqrt(x * x + y * y));
 
   problem.subject_to(y == -x + T(5));
 
@@ -157,9 +156,9 @@ TEMPLATE_TEST_CASE("Problem - Conflicting bounds", "[Problem]",
   auto x = problem.decision_variable();
   auto y = problem.decision_variable();
 
-  problem.minimize(slp::hypot(x, y));
+  problem.minimize(hypot(x, y));
 
-  problem.subject_to(slp::hypot(x, y) <= T(1));
+  problem.subject_to(hypot(x, y) <= T(1));
   problem.subject_to(x >= T(0.5));
   problem.subject_to(x <= T(-0.5));
 
@@ -192,7 +191,7 @@ TEMPLATE_TEST_CASE("Problem - Wachter and Biegler line search failure",
 
   problem.minimize(x);
 
-  problem.subject_to(slp::pow(x, T(2)) - s1 - T(1) == T(0));
+  problem.subject_to(pow(x, T(2)) - s1 - T(1) == T(0));
   problem.subject_to(x - s2 - T(0.5) == T(0));
   problem.subject_to(s1 >= T(0));
   problem.subject_to(s2 >= T(0));

@@ -115,7 +115,7 @@ TEMPLATE_TEST_CASE("ExitStatus - Nonfinite initial cost or constraints",
 
   auto x = problem.decision_variable();
   x.set_value(T(-1));
-  problem.minimize(slp::sqrt(x));
+  problem.minimize(sqrt(x));
 
   CHECK(problem.cost_function_type() == slp::ExpressionType::NONLINEAR);
   CHECK(problem.equality_constraint_type() == slp::ExpressionType::NONE);
