@@ -68,7 +68,7 @@ TEMPLATE_TEST_CASE("Problem - Double integrator", "[Problem]",
   // Cost function - minimize position error
   slp::Variable J = T(0);
   for (int k = 0; k < N + 1; ++k) {
-    J += slp::pow(r - X[0, k], 2);
+    J += pow(r - X[0, k], 2);
   }
   problem.minimize(J);
 

@@ -101,8 +101,8 @@ TEMPLATE_TEST_CASE("Problem - Arm on elevator", "[Problem]",
   // Cost function
   slp::Variable J = T(0);
   for (int k = 0; k < N + 1; ++k) {
-    J += slp::pow(ELEVATOR_END_HEIGHT - elevator[0, k], T(2)) +
-         slp::pow(ARM_END_ANGLE - arm[0, k], T(2));
+    J += pow(ELEVATOR_END_HEIGHT - elevator[0, k], T(2)) +
+         pow(ARM_END_ANGLE - arm[0, k], T(2));
   }
   problem.minimize(J);
 
