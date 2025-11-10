@@ -5,9 +5,8 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = ["matplotlib", "numpy", "scipy"]
 dynamic = ["version"]
-
-  [project.license]
-  file = "LICENSE.txt"
+license = "BSD-3-Clause"
+license-files = ["LICENSE.txt"]
 
   [project.urls]
   Documentation = "https://sleipnirgroup.github.io/Sleipnir/"
