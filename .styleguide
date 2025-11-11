@@ -12,10 +12,3 @@ modifiableFileExclude {
   \.svg$
   jormungandr/cpp/docstrings\.hpp$
 }
-
-includeOtherLibs {
-  ^Eigen/
-  ^catch2/
-  ^gch/
-  ^nanobind/
-}

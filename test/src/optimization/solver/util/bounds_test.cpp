@@ -6,17 +6,17 @@
 #include <utility>
 
 #define CATCH_CONFIG_ENABLE_PAIR_STRINGMAKER
-#include <catch2/catch_tostring.hpp>
-#include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_template_test_macros.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/catch_tostring.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
-#include <catch2/matchers/catch_matchers_range_equals.hpp>
 #include <catch2/matchers/catch_matchers_quantifiers.hpp>
-
+#include <catch2/matchers/catch_matchers_range_equals.hpp>
+#include <sleipnir/autodiff/jacobian.hpp>
 #include <sleipnir/autodiff/variable.hpp>
 #include <sleipnir/autodiff/variable_matrix.hpp>
-#include <sleipnir/autodiff/jacobian.hpp>
 #include <sleipnir/optimization/solver/util/bounds.hpp>
+
 #include "scalar_types_under_test.hpp"
 
 TEMPLATE_TEST_CASE("Bounds - Detection", "[Bounds]", SCALAR_TYPES_UNDER_TEST) {
