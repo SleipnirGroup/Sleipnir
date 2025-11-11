@@ -23,6 +23,8 @@ namespace slp {
 void bind_variable_block(
     nb::class_<VariableBlock<VariableMatrix<double>>>& cls) {
   using namespace nb::literals;
+  using MatrixXi64 = Eigen::Matrix<int64_t, Eigen::Dynamic, Eigen::Dynamic>;
+  using MatrixXi32 = Eigen::Matrix<int32_t, Eigen::Dynamic, Eigen::Dynamic>;
 
   // VariableBlock-VariableMatrix overloads
   cls.def(nb::self * VariableMatrix<double>(), "rhs"_a);
@@ -58,14 +60,16 @@ void bind_variable_block(
   cls.def(
       "set_value",
       [](VariableBlock<VariableMatrix<double>>& self,
-         nb::DRef<Eigen::Matrix<int64_t, Eigen::Dynamic, Eigen::Dynamic>>
-             values) { self.set_value(values.cast<double>()); },
+         nb::DRef<MatrixXi64> values) {
+        self.set_value(values.cast<double>());
+      },
       "values"_a, DOC(slp, VariableBlock, set_value, 2));
   cls.def(
       "set_value",
       [](VariableBlock<VariableMatrix<double>>& self,
-         nb::DRef<Eigen::Matrix<int32_t, Eigen::Dynamic, Eigen::Dynamic>>
-             values) { self.set_value(values.cast<double>()); },
+         nb::DRef<MatrixXi32> values) {
+        self.set_value(values.cast<double>());
+      },
       "values"_a, DOC(slp, VariableBlock, set_value, 2));
   cls.def(
       "__setitem__",

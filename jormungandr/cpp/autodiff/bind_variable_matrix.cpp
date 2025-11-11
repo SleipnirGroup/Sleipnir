@@ -23,6 +23,8 @@ namespace slp {
 void bind_variable_matrix(nb::module_& autodiff,
                           nb::class_<VariableMatrix<double>>& cls) {
   using namespace nb::literals;
+  using MatrixXi64 = Eigen::Matrix<int64_t, Eigen::Dynamic, Eigen::Dynamic>;
+  using MatrixXi32 = Eigen::Matrix<int32_t, Eigen::Dynamic, Eigen::Dynamic>;
 
   cls.def(nb::init<>(), DOC(slp, VariableMatrix, VariableMatrix));
   cls.def(nb::init<int>(), "rows"_a,
@@ -55,15 +57,15 @@ void bind_variable_matrix(nb::module_& autodiff,
       "values"_a, DOC(slp, VariableMatrix, set_value));
   cls.def(
       "set_value",
-      [](VariableMatrix<double>& self,
-         nb::DRef<Eigen::Matrix<int64_t, Eigen::Dynamic, Eigen::Dynamic>>
-             values) { self.set_value(values.cast<double>()); },
+      [](VariableMatrix<double>& self, nb::DRef<MatrixXi64> values) {
+        self.set_value(values.cast<double>());
+      },
       "values"_a, DOC(slp, VariableMatrix, set_value));
   cls.def(
       "set_value",
-      [](VariableMatrix<double>& self,
-         nb::DRef<Eigen::Matrix<int32_t, Eigen::Dynamic, Eigen::Dynamic>>
-             values) { self.set_value(values.cast<double>()); },
+      [](VariableMatrix<double>& self, nb::DRef<MatrixXi32> values) {
+        self.set_value(values.cast<double>());
+      },
       "values"_a, DOC(slp, VariableMatrix, set_value));
   cls.def(
       "__setitem__",
