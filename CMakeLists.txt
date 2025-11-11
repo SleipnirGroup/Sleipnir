@@ -75,6 +75,8 @@ if(NOT USE_SYSTEM_EIGEN)
         GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
         # master on 2025-11-04
         GIT_TAG 06f5cb4878f01cd5acbf7285df79f96ab2d68ac0
+        EXCLUDE_FROM_ALL
+        SYSTEM
     )
     FetchContent_MakeAvailable(Eigen3)
 else()
@@ -89,6 +91,8 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/gharveymn/small_vector.git
     # main on 2025-05-15
     GIT_TAG b19a9c477cad5e58f8aed59dbe9be1c30e4b9826
+    EXCLUDE_FROM_ALL
+    SYSTEM
 )
 FetchContent_MakeAvailable(small_vector)
 
@@ -100,6 +104,9 @@ if(BUILD_TESTING AND NOT CMAKE_CROSSCOMPILING)
         Catch2
         GIT_REPOSITORY https://github.com/catchorg/Catch2.git
         GIT_TAG v3.11.0
+        GIT_SHALLOW ON
+        EXCLUDE_FROM_ALL
+        SYSTEM
     )
     FetchContent_MakeAvailable(Catch2)
 endif()
@@ -269,6 +276,9 @@ if(BUILD_PYTHON)
             nanobind
             GIT_REPOSITORY https://github.com/wjakob/nanobind.git
             GIT_TAG v2.9.2
+            GIT_SHALLOW ON
+            EXCLUDE_FROM_ALL
+            SYSTEM
         )
         FetchContent_MakeAvailable(nanobind)
     else()
@@ -355,6 +365,8 @@ if(BUILD_PYTHON)
             # master on 2023-02-08
             GIT_TAG 42fbf377824185e255b06d68fa70f4efcd569e2d
             GIT_SUBMODULES ""
+            EXCLUDE_FROM_ALL
+            SYSTEM
         )
         FetchContent_MakeAvailable(pybind11_mkdoc)
 
