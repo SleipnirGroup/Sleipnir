@@ -3,9 +3,11 @@
 #pragma once
 
 #ifdef SLEIPNIR_PYTHON
+
 #include <format>
 #include <source_location>
 #include <stdexcept>
+
 /**
  * Throw an exception in Python.
  */
@@ -18,10 +20,14 @@
           location.line(), location.function_name(), #condition));   \
     }                                                                \
   } while (0)
+
 #else
+
 #include <cassert>
+
 /**
  * Abort in C++.
  */
 #define slp_assert(condition) assert(condition)
+
 #endif
