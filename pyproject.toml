@@ -22,7 +22,7 @@ build-backend = "py_build_cmake.build"
 [tool.py-build-cmake.cmake]
 build_type = "Release"
 source_path = "."
-build_args = ["--target", "_jormungandr"]
+build_args = ["--target", "_sleipnir"]
 install_components = ["python_modules"]
 install_args = []
 
@@ -31,8 +31,8 @@ install_args = []
   BUILD_PYTHON = "ON"
 
 [tool.py-build-cmake.module]
-name = "jormungandr"
-directory = "jormungandr/src"
+name = "sleipnir"
+directory = "python/src"
 
 [tool.py-build-cmake.sdist]
 include = [
@@ -40,7 +40,7 @@ include = [
   "SleipnirConfig.cmake.in",
   "cmake/*.cmake",
   "include",
-  "jormungandr",
+  "python",
   "src"
 ]
 exclude = []
@@ -52,4 +52,4 @@ abi3_minimum_cpython_version = 312
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-testpaths = ["jormungandr/test", "examples/CurrentManager/test"]
+testpaths = ["python/test", "examples/CurrentManager/test"]

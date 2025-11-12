@@ -12,8 +12,8 @@ def clear_python_workspace():
         [
             "git",
             "restore",
-            "jormungandr/src/jormungandr/autodiff/__init__.py",
-            "jormungandr/src/jormungandr/optimization/__init__.py",
+            "python/src/sleipnir/autodiff/__init__.py",
+            "python/src/sleipnir/optimization/__init__.py",
         ],
         check=True,
     )
@@ -25,7 +25,7 @@ def prep_python_api_docs():
         ["cmake", "-B", "build-stubs", "-S", ".", "-DBUILD_PYTHON=ON"], check=True
     )
     subprocess.run(
-        ["cmake", "--build", "build-stubs", "--target", "_jormungandr"], check=True
+        ["cmake", "--build", "build-stubs", "--target", "_sleipnir"], check=True
     )
     subprocess.run(
         [
@@ -43,34 +43,30 @@ def prep_python_api_docs():
     for package in ["autodiff", "optimization"]:
         # Read .pyi
         with open(
-            os.path.join(
-                "build-stubs", "install", "jormungandr", package, "__init__.pyi"
-            )
+            os.path.join("build-stubs", "install", "sleipnir", package, "__init__.pyi")
         ) as f:
             package_content = f.read()
 
         # Remove redundant prefixes for documentation
         if package == "autodiff":
             package_content = package_content.replace(
-                "import _jormungandr.optimization\n", ""
-            ).replace("_jormungandr.optimization.", "")
+                "import _sleipnir.optimization\n", ""
+            ).replace("_sleipnir.optimization.", "")
         elif package == "optimization":
             package_content = package_content.replace(
-                "import _jormungandr.autodiff\n", ""
-            ).replace("_jormungandr.autodiff.", "")
+                "import _sleipnir.autodiff\n", ""
+            ).replace("_sleipnir.autodiff.", "")
 
-        # Replace _jormungandr.package import with contents
-        with open(
-            os.path.join("jormungandr/src/jormungandr", package, "__init__.py")
-        ) as f:
+        # Replace _sleipnir.package import with contents
+        with open(os.path.join("python/src/sleipnir", package, "__init__.py")) as f:
             init_content = f.read()
         with open(
-            os.path.join("jormungandr/src/jormungandr", package, "__init__.py"),
+            os.path.join("python/src/sleipnir", package, "__init__.py"),
             mode="w",
         ) as f:
             f.write(
                 init_content.replace(
-                    f"from .._jormungandr.{package} import *", package_content
+                    f"from .._sleipnir.{package} import *", package_content
                 )
             )
 
