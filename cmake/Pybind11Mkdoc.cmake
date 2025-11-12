@@ -41,10 +41,10 @@ function(pybind11_mkdoc target headers)
     list(TRANSFORM small_vector_dirs PREPEND "-I")
 
     add_custom_command(
-        OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/jormungandr/cpp/docstrings.hpp
+        OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/python/cpp/docstrings.hpp
         COMMAND
             ${env_vars} ${Python3_EXECUTABLE} -m pybind11_mkdoc ${headers} -o
-            ${CMAKE_CURRENT_SOURCE_DIR}/jormungandr/cpp/docstrings.hpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/python/cpp/docstrings.hpp
             -I/usr/lib/clang/`clang++ --version | grep -E -o '[0-9]+' | head
             -1`/include ${target_dirs} ${eigen_dirs} ${small_vector_dirs}
             -std=c++23
@@ -53,6 +53,6 @@ function(pybind11_mkdoc target headers)
     )
     add_custom_target(
         ${target}_docstrings
-        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/jormungandr/cpp/docstrings.hpp
+        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/python/cpp/docstrings.hpp
     )
 endfunction()

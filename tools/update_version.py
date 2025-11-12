@@ -21,10 +21,10 @@ def main():
         version = f"{major}.{minor}.{patch}"
     print(f'__version__ = "{version}"')
 
-    with open("jormungandr/src/jormungandr/__init__.py") as f:
+    with open("python/src/sleipnir/__init__.py") as f:
         content = f.read()
     content = re.sub(r"(__version__\s*=\s*)\".*?\"", f'\\g<1>"{version}"', content)
-    with open("jormungandr/src/jormungandr/__init__.py", "w") as f:
+    with open("python/src/sleipnir/__init__.py", "w") as f:
         f.write(content)
 
 

@@ -2,7 +2,7 @@
 
 #pragma once
 
-#ifdef JORMUNGANDR
+#ifdef SLEIPNIR_PYTHON
 #include <format>
 #include <source_location>
 #include <stdexcept>

@@ -10,5 +10,5 @@ modifiableFileExclude {
   \.patch$
   \.png$
   \.svg$
-  jormungandr/cpp/docstrings\.hpp$
+  python/cpp/docstrings\.hpp$
 }

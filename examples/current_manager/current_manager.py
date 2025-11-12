@@ -1,5 +1,5 @@
-from jormungandr.autodiff import Variable, VariableMatrix
-from jormungandr.optimization import Problem
+from sleipnir.autodiff import Variable, VariableMatrix
+from sleipnir.optimization import Problem
 
 
 class CurrentManager:

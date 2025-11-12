@@ -36,7 +36,7 @@ int main() {
 ```python
 #!/usr/bin/env python3
 
-from jormungandr.optimization import Problem
+from sleipnir.optimization import Problem
 
 
 def main():
@@ -207,7 +207,7 @@ See the [C++ API docs](https://sleipnirgroup.github.io/Sleipnir/docs/cpp) and [P
 
 ## Examples
 
-See the [examples](https://github.com/SleipnirGroup/Sleipnir/tree/main/examples), [C++ optimization unit tests](https://github.com/SleipnirGroup/Sleipnir/tree/main/test/optimization), and [Python optimization unit tests](https://github.com/SleipnirGroup/Sleipnir/tree/main/jormungandr/test/optimization).
+See the [examples](https://github.com/SleipnirGroup/Sleipnir/tree/main/examples), [C++ optimization unit tests](https://github.com/SleipnirGroup/Sleipnir/tree/main/test/optimization), and [Python optimization unit tests](https://github.com/SleipnirGroup/Sleipnir/tree/main/python/test/optimization).
 
 ## Build
 

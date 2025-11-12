@@ -3,8 +3,8 @@
 import math
 
 import numpy as np
-from jormungandr.autodiff import VariableMatrix
-from jormungandr.optimization import (
+from sleipnir.autodiff import VariableMatrix
+from sleipnir.optimization import (
     OCP,
     DynamicsType,
     TimestepMethod,

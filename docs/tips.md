@@ -58,12 +58,12 @@ the expression tree are only traversed and updated once.
 The obvious problem formulation for minimum-time problems uses one dt shared
 across all timesteps.
 ```python
-import jormungandr as jmg
+import sleipnir as slp
 
 N = 100
 T_max = 5.0
 
-problem = jmg.optimization.Problem()
+problem = slp.optimization.Problem()
 
 x = problem.decision_variable(N + 1)
 v = problem.decision_variable(N)
@@ -88,12 +88,12 @@ This formulation can have feasibility issues though per section 15.3
 recommend using a separate dt for each timestep, with them all
 equality-constrained.
 ```python
-import jormungandr as jmg
+import sleipnir as slp
 
 N = 100
 T_max = 5.0
 
-problem = jmg.optimization.Problem()
+problem = slp.optimization.Problem()
 
 x = problem.decision_variable(N + 1)
 v = problem.decision_variable(N)

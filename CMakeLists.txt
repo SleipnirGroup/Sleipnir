@@ -285,21 +285,21 @@ if(BUILD_PYTHON)
         find_package(nanobind CONFIG REQUIRED)
     endif()
 
-    file(GLOB_RECURSE jormungandr_src jormungandr/cpp/*.cpp)
+    file(GLOB_RECURSE python_ext_src python/cpp/*.cpp)
 
     # Build Sleipnir dependency directly into the wheel to avoid having to
     # configure RPATHs
-    nanobind_add_module(_jormungandr STABLE_ABI ${jormungandr_src} ${Sleipnir_src})
-    compiler_flags(_jormungandr)
-    target_compile_definitions(_jormungandr PRIVATE JORMUNGANDR=1)
+    nanobind_add_module(_sleipnir STABLE_ABI ${python_ext_src} ${Sleipnir_src})
+    compiler_flags(_sleipnir)
+    target_compile_definitions(_sleipnir PRIVATE SLEIPNIR_PYTHON=1)
     target_include_directories(
-        _jormungandr
+        _sleipnir
         PRIVATE
             ${CMAKE_CURRENT_SOURCE_DIR}/include
-            ${CMAKE_CURRENT_SOURCE_DIR}/jormungandr/cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/python/cpp
     )
     target_link_libraries(
-        _jormungandr
+        _sleipnir
         PUBLIC Threads::Threads Eigen3::Eigen small_vector
     )
 
@@ -308,7 +308,7 @@ if(BUILD_PYTHON)
         # nanobind/include/nanobind/nb_attr.h:212:14: warning: ISO C++ forbids zero-size array
         #  212 |     arg_data args[Size];
         #      |              ^~~~
-        target_compile_options(_jormungandr PRIVATE -Wno-pedantic)
+        target_compile_options(_sleipnir PRIVATE -Wno-pedantic)
     endif()
     if(
         ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang"
@@ -316,43 +316,43 @@ if(BUILD_PYTHON)
     )
         target_compile_options(nanobind-static-abi3 PRIVATE -Wno-array-bounds)
         target_compile_options(
-            _jormungandr
+            _sleipnir
             PRIVATE -Wno-nested-anon-types -Wno-zero-length-array
         )
     endif()
 
     install(
-        TARGETS _jormungandr
+        TARGETS _sleipnir
         COMPONENT python_modules
         LIBRARY DESTINATION ${PY_DEST}
     )
 
     nanobind_add_stub(
-        _jormungandr_stub
+        _sleipnir_stub
         INSTALL_TIME
-        MARKER_FILE jormungandr/py.typed
-        MODULE _jormungandr
-        OUTPUT jormungandr/__init__.pyi
-        PYTHON_PATH $<TARGET_FILE_DIR:_jormungandr>
-        DEPENDS _jormungandr
+        MARKER_FILE sleipnir/py.typed
+        MODULE _sleipnir
+        OUTPUT sleipnir/__init__.pyi
+        PYTHON_PATH $<TARGET_FILE_DIR:_sleipnir>
+        DEPENDS _sleipnir
         COMPONENT python_modules
     )
     nanobind_add_stub(
-        _jormungandr_autodiff_stub
+        _sleipnir_autodiff_stub
         INSTALL_TIME
-        MODULE _jormungandr.autodiff
-        OUTPUT jormungandr/autodiff/__init__.pyi
-        PYTHON_PATH $<TARGET_FILE_DIR:_jormungandr>
-        DEPENDS _jormungandr
+        MODULE _sleipnir.autodiff
+        OUTPUT sleipnir/autodiff/__init__.pyi
+        PYTHON_PATH $<TARGET_FILE_DIR:_sleipnir>
+        DEPENDS _sleipnir
         COMPONENT python_modules
     )
     nanobind_add_stub(
-        _jormungandr_optimization_stub
+        _sleipnir_optimization_stub
         INSTALL_TIME
-        MODULE _jormungandr.optimization
-        OUTPUT jormungandr/optimization/__init__.pyi
-        PYTHON_PATH $<TARGET_FILE_DIR:_jormungandr>
-        DEPENDS _jormungandr
+        MODULE _sleipnir.optimization
+        OUTPUT sleipnir/optimization/__init__.pyi
+        PYTHON_PATH $<TARGET_FILE_DIR:_sleipnir>
+        DEPENDS _sleipnir
         COMPONENT python_modules
     )
 
@@ -391,7 +391,7 @@ if(BUILD_PYTHON)
 
         # Generate docs for the Python module
         include(Pybind11Mkdoc)
-        pybind11_mkdoc(_jormungandr "${sleipnir_headers}")
-        add_dependencies(_jormungandr _jormungandr_docstrings)
+        pybind11_mkdoc(_sleipnir "${sleipnir_headers}")
+        add_dependencies(_sleipnir _sleipnir_docstrings)
     endif()
 endif()

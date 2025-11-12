@@ -19,7 +19,7 @@ and the acceleration constraints are -1 ≤ u ≤ 1.
 ## Importing required libraries
 
 ```py
-from jormungandr.optimization import Problem
+from sleipnir.optimization import Problem
 import numpy as np
 ```
 
