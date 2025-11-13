@@ -75,7 +75,6 @@ if(NOT USE_SYSTEM_EIGEN)
         GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
         # master on 2025-11-04
         GIT_TAG 06f5cb4878f01cd5acbf7285df79f96ab2d68ac0
-        EXCLUDE_FROM_ALL
         SYSTEM
     )
     FetchContent_MakeAvailable(Eigen3)
@@ -91,7 +90,6 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/gharveymn/small_vector.git
     # main on 2025-05-15
     GIT_TAG b19a9c477cad5e58f8aed59dbe9be1c30e4b9826
-    EXCLUDE_FROM_ALL
     SYSTEM
 )
 FetchContent_MakeAvailable(small_vector)
