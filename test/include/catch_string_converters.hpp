@@ -2,11 +2,14 @@
 
 #pragma once
 
+#include <format>
 #include <string>
 
 #include <catch2/catch_tostring.hpp>
 #include <sleipnir/autodiff/expression_type.hpp>
 #include <sleipnir/optimization/solver/exit_status.hpp>
+
+#include "coord.hpp"
 
 namespace Catch {
 
@@ -63,6 +66,18 @@ struct StringMaker<slp::ExitStatus> {
     }
 
     return "";
+  }
+};
+
+template <>
+struct StringMaker<Coord> {
+  static std::string convert(const Coord& coord) {
+    if (coord.sign == '+' || coord.sign == '-' || coord.sign == '0') {
+      return std::format("{{{}, {}, '{}'}}", coord.row, coord.col, coord.sign);
+    } else {
+      return std::format("{{{}, {}, char({})}}", coord.row, coord.col,
+                         static_cast<int>(coord.sign));
+    }
   }
 };
 
