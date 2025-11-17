@@ -14,13 +14,13 @@ jobs:
       matrix:
         include:
           - name: asan
-            cmake-flags: -DCMAKE_BUILD_TYPE=Asan -DBUILD_PYTHON=OFF
+            cmake-flags: -DCMAKE_BUILD_TYPE=Asan
             ctest-env:
           - name: tsan
-            cmake-flags: -DCMAKE_BUILD_TYPE=Tsan -DBUILD_PYTHON=OFF
+            cmake-flags: -DCMAKE_BUILD_TYPE=Tsan
             ctest-env: TSAN_OPTIONS=second_deadlock_stack=1
           - name: ubsan
-            cmake-flags: -DCMAKE_BUILD_TYPE=Ubsan -DBUILD_PYTHON=OFF
+            cmake-flags: -DCMAKE_BUILD_TYPE=Ubsan
             ctest-env:
     name: "${{ matrix.name }}"
     runs-on: ubuntu-24.04
@@ -38,6 +38,6 @@ jobs:
           echo "CXX=clang++" >> $GITHUB_ENV
           echo "CXXFLAGS=-stdlib=libc++" >> $GITHUB_ENV
 
-      - run: cmake -B build -S . ${{ matrix.cmake-flags }} -DBUILD_EXAMPLES=ON
+      - run: cmake -B build -S . ${{ matrix.cmake-flags }} -DBUILD_EXAMPLES=ON -DBUILD_PYTHON=OFF
       - run: cmake --build build --target all --config RelWithDebInfo --parallel $(nproc)
       - run: ${{ matrix.ctest-env }} ctest --test-dir build -C RelWithDebInfo --output-on-failure
