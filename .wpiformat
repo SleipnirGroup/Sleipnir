@@ -1,13 +1,4 @@
-cppHeaderFileInclude {
-  \.hpp$
-}
-
-cppSrcFileInclude {
-  \.cpp$
-}
-
 modifiableFileExclude {
-  \.patch$
   \.png$
   \.svg$
   python/cpp/docstrings\.hpp$
