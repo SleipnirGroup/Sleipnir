@@ -166,7 +166,7 @@ See [benchmark details](https://github.com/SleipnirGroup/Sleipnir/?tab=readme-ov
 ### Minimum system requirements
 
 * Windows
-  * OS: Windows 10
+  * OS: Windows 11
   * Runtime: [Microsoft Visual C++ 2022 redistributable](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170) from Visual Studio 2022 17.13
 * Linux
   * OS: Ubuntu 24.04
@@ -214,7 +214,7 @@ See the [examples](https://github.com/SleipnirGroup/Sleipnir/tree/main/examples)
 ### Dependencies
 
 * C++23 compiler
-  * On Windows 10 or greater, install [Visual Studio Community 2022](https://visualstudio.microsoft.com/vs/community/) and select the C++ programming language during installation
+  * On Windows 11 or greater, install [Visual Studio Community 2022](https://visualstudio.microsoft.com/vs/community/) and select the C++ programming language during installation
   * On Ubuntu 24.04 or greater, install GCC 14 via `sudo apt install g++-14`
   * On macOS 14.5 or greater, install the Xcode 16.2 command-line build tools via `xcode-select --install`
 * [CMake](https://cmake.org/download/) 3.21 or greater
