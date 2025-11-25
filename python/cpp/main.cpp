@@ -73,7 +73,6 @@ NB_MODULE(_sleipnir, m) {
   bind_variable_block(variable_block);
 
   // Implicit conversions
-  variable.def(nb::init_implicit<VariableMatrix<double>>());
   variable_matrix.def(
       nb::init_implicit<VariableBlock<VariableMatrix<double>>>());
 

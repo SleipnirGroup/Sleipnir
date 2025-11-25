@@ -231,6 +231,8 @@ void bind_variable_matrix(nb::module_& autodiff,
           DOC(slp, VariableMatrix, row));
   cls.def("col", nb::overload_cast<int>(&VariableMatrix<double>::col), "col"_a,
           DOC(slp, VariableMatrix, col));
+
+  // Matrix-matrix multiplication
   cls.def(
       "__mul__",
       [](const VariableMatrix<double>& lhs, const VariableMatrix<double>& rhs) {
@@ -477,11 +479,15 @@ void bind_variable_matrix(nb::module_& autodiff,
       },
       "ufunc"_a, "method"_a, "inputs"_a, "kwargs"_a);
 
+  // Matrix-scalar multiplication
   cls.def(nb::self * Variable<double>(), "rhs"_a);
   cls.def(nb::self * double(), "rhs"_a);
+
+  // Scalar-matrix multiplication
   cls.def(Variable<double>() * nb::self, "lhs"_a);
   cls.def(double() * nb::self, "lhs"_a);
 
+  // Matrix-scalar division
   cls.def(nb::self / Variable<double>(), "rhs"_a);
   cls.def(nb::self / double(), "rhs"_a);
   cls.def(nb::self /= Variable<double>(), "rhs"_a,
@@ -587,6 +593,8 @@ void bind_variable_matrix(nb::module_& autodiff,
                  DOC(slp, VariableMatrix, zero));
   cls.def_static("ones", &VariableMatrix<double>::ones, "rows"_a, "cols"_a,
                  DOC(slp, VariableMatrix, ones));
+
+  // Comparison operators
   cls.def(nb::self == nb::self, "rhs"_a, DOC(slp, operator, eq));
   cls.def(nb::self == Variable<double>(), "rhs"_a, DOC(slp, operator, eq));
   cls.def(nb::self == double(), "rhs"_a, DOC(slp, operator, eq));

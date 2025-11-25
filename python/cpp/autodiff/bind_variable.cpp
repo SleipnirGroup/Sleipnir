@@ -32,32 +32,43 @@ void bind_variable(nb::module_& autodiff, nb::class_<Variable<double>>& cls) {
           "value"_a, DOC(slp, Variable, set_value));
   cls.def("value", &Variable<double>::value, DOC(slp, Variable, value));
   cls.def("type", &Variable<double>::type, DOC(slp, Variable, type));
+
+  // Scalar-scalar multiplication
   cls.def(double() * nb::self, "lhs"_a);
   cls.def(nb::self * double(), "rhs"_a);
   cls.def(nb::self * nb::self, "rhs"_a);
   cls.def(nb::self *= double(), "rhs"_a, DOC(slp, Variable, operator, imul));
   cls.def(nb::self *= nb::self, "rhs"_a, DOC(slp, Variable, operator, imul));
+
+  // Scalar-scalar division
   cls.def(double() / nb::self, "lhs"_a);
   cls.def(nb::self / double(), "rhs"_a);
   cls.def(nb::self / nb::self, "rhs"_a);
   cls.def(nb::self /= double(), "rhs"_a, DOC(slp, Variable, operator, idiv));
   cls.def(nb::self /= nb::self, "rhs"_a, DOC(slp, Variable, operator, idiv));
+
+  // Scalar-scalar addition
   cls.def(double() + nb::self, "lhs"_a);
   cls.def(nb::self + double(), "rhs"_a);
   cls.def(nb::self + nb::self, "rhs"_a);
   cls.def(nb::self += double(), "rhs"_a, DOC(slp, Variable, operator, iadd));
   cls.def(nb::self += nb::self, "rhs"_a, DOC(slp, Variable, operator, iadd));
+
+  // Scalar-scalar subtraction
   cls.def(double() - nb::self, "lhs"_a);
   cls.def(nb::self - double(), "rhs"_a);
   cls.def(nb::self - nb::self, "rhs"_a);
   cls.def(nb::self -= double(), "rhs"_a, DOC(slp, Variable, operator, isub));
   cls.def(nb::self -= nb::self, "rhs"_a, DOC(slp, Variable, operator, isub));
+
   cls.def(
       "__pow__",
       [](const Variable<double>& self, int power) { return pow(self, power); },
       nb::is_operator(), "power"_a);
   cls.def(-nb::self);
   cls.def(+nb::self);
+
+  // Comparison operators
   cls.def(nb::self == nb::self, "rhs"_a, DOC(slp, operator, eq));
   cls.def(nb::self < nb::self, "rhs"_a, DOC(slp, operator, lt));
   cls.def(nb::self <= nb::self, "rhs"_a, DOC(slp, operator, le));
@@ -74,6 +85,7 @@ void bind_variable(nb::module_& autodiff, nb::class_<Variable<double>>& cls) {
   cls.def(double() > nb::self, "lhs"_a, DOC(slp, operator, gt));
   cls.def(double() >= nb::self, "lhs"_a, DOC(slp, operator, ge));
 
+  // Math functions
   autodiff.def(
       "abs", [](double x) { return abs(Variable<double>{x}); }, "x"_a,
       DOC(slp, abs));
