@@ -485,6 +485,8 @@ void bind_variable_block(
          const std::function<Variable<double>(const Variable<double>& x)>&
              unary_op) { return self.cwise_transform(unary_op); },
       "func"_a, DOC(slp, VariableBlock, cwise_transform));
+
+  // Comparison operators
   cls.def(nb::self == nb::self, "rhs"_a, DOC(slp, operator, eq));
   cls.def(nb::self == Variable<double>(), "rhs"_a, DOC(slp, operator, eq));
   cls.def(nb::self == double(), "rhs"_a, DOC(slp, operator, eq));
