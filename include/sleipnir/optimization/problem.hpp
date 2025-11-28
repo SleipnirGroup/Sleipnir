@@ -297,8 +297,12 @@ class Problem {
    */
   ExitStatus solve(const Options& options = Options{},
                    [[maybe_unused]] bool spy = false) {
+    using DenseVector = Eigen::Vector<Scalar, Eigen::Dynamic>;
+    using SparseMatrix = Eigen::SparseMatrix<Scalar>;
+    using SparseVector = Eigen::SparseVector<Scalar>;
+
     // Create the initial value column vector
-    Eigen::Vector<Scalar, Eigen::Dynamic> x{m_decision_variables.size()};
+    DenseVector x{m_decision_variables.size()};
     for (size_t i = 0; i < m_decision_variables.size(); ++i) {
       x[i] = m_decision_variables[i].value();
     }
@@ -384,23 +388,20 @@ class Problem {
 #endif
 
       // Invoke Newton solver
-      status = newton<Scalar>(
-          NewtonMatrixCallbacks<Scalar>{
-              [&](const Eigen::Vector<Scalar, Eigen::Dynamic>& x) -> Scalar {
-                x_ad.set_value(x);
-                return f.value();
-              },
-              [&](const Eigen::Vector<Scalar, Eigen::Dynamic>& x)
-                  -> Eigen::SparseVector<Scalar> {
-                x_ad.set_value(x);
-                return g.value();
-              },
-              [&](const Eigen::Vector<Scalar, Eigen::Dynamic>& x)
-                  -> Eigen::SparseMatrix<Scalar> {
-                x_ad.set_value(x);
-                return H.value();
-              }},
-          callbacks, options, x);
+      status = newton<Scalar>(NewtonMatrixCallbacks<Scalar>{
+                                  [&](const DenseVector& x) -> Scalar {
+                                    x_ad.set_value(x);
+                                    return f.value();
+                                  },
+                                  [&](const DenseVector& x) -> SparseVector {
+                                    x_ad.set_value(x);
+                                    return g.value();
+                                  },
+                                  [&](const DenseVector& x) -> SparseMatrix {
+                                    x_ad.set_value(x);
+                                    return H.value();
+                                  }},
+                              callbacks, options, x);
     } else if (m_inequality_constraints.empty()) {
       if (options.diagnostics) {
         slp::println("\nInvoking SQP solver\n");
@@ -448,29 +449,24 @@ class Problem {
       // Invoke SQP solver
       status = sqp<Scalar>(
           SQPMatrixCallbacks<Scalar>{
-              [&](const Eigen::Vector<Scalar, Eigen::Dynamic>& x) -> Scalar {
+              [&](const DenseVector& x) -> Scalar {
                 x_ad.set_value(x);
                 return f.value();
               },
-              [&](const Eigen::Vector<Scalar, Eigen::Dynamic>& x)
-                  -> Eigen::SparseVector<Scalar> {
+              [&](const DenseVector& x) -> SparseVector {
                 x_ad.set_value(x);
                 return g.value();
               },
-              [&](const Eigen::Vector<Scalar, Eigen::Dynamic>& x,
-                  const Eigen::Vector<Scalar, Eigen::Dynamic>& y)
-                  -> Eigen::SparseMatrix<Scalar> {
+              [&](const DenseVector& x, const DenseVector& y) -> SparseMatrix {
                 x_ad.set_value(x);
                 y_ad.set_value(y);
                 return H.value();
               },
-              [&](const Eigen::Vector<Scalar, Eigen::Dynamic>& x)
-                  -> Eigen::Vector<Scalar, Eigen::Dynamic> {
+              [&](const DenseVector& x) -> DenseVector {
                 x_ad.set_value(x);
                 return c_e_ad.value();
               },
-              [&](const Eigen::Vector<Scalar, Eigen::Dynamic>& x)
-                  -> Eigen::SparseMatrix<Scalar> {
+              [&](const DenseVector& x) -> SparseMatrix {
                 x_ad.set_value(x);
                 return A_e.value();
               }},
@@ -549,41 +545,34 @@ class Problem {
       // Invoke interior-point method solver
       status = interior_point<Scalar>(
           InteriorPointMatrixCallbacks<Scalar>{
-              [&](const Eigen::Vector<Scalar, Eigen::Dynamic>& x) -> Scalar {
+              [&](const DenseVector& x) -> Scalar {
                 x_ad.set_value(x);
                 return f.value();
               },
-              [&](const Eigen::Vector<Scalar, Eigen::Dynamic>& x)
-                  -> Eigen::SparseVector<Scalar> {
+              [&](const DenseVector& x) -> SparseVector {
                 x_ad.set_value(x);
                 return g.value();
               },
-              [&](const Eigen::Vector<Scalar, Eigen::Dynamic>& x,
-                  const Eigen::Vector<Scalar, Eigen::Dynamic>& y,
-                  const Eigen::Vector<Scalar, Eigen::Dynamic>& z)
-                  -> Eigen::SparseMatrix<Scalar> {
+              [&](const DenseVector& x, const DenseVector& y,
+                  const DenseVector& z) -> SparseMatrix {
                 x_ad.set_value(x);
                 y_ad.set_value(y);
                 z_ad.set_value(z);
                 return H.value();
               },
-              [&](const Eigen::Vector<Scalar, Eigen::Dynamic>& x)
-                  -> Eigen::Vector<Scalar, Eigen::Dynamic> {
+              [&](const DenseVector& x) -> DenseVector {
                 x_ad.set_value(x);
                 return c_e_ad.value();
               },
-              [&](const Eigen::Vector<Scalar, Eigen::Dynamic>& x)
-                  -> Eigen::SparseMatrix<Scalar> {
+              [&](const DenseVector& x) -> SparseMatrix {
                 x_ad.set_value(x);
                 return A_e.value();
               },
-              [&](const Eigen::Vector<Scalar, Eigen::Dynamic>& x)
-                  -> Eigen::Vector<Scalar, Eigen::Dynamic> {
+              [&](const DenseVector& x) -> DenseVector {
                 x_ad.set_value(x);
                 return c_i_ad.value();
               },
-              [&](const Eigen::Vector<Scalar, Eigen::Dynamic>& x)
-                  -> Eigen::SparseMatrix<Scalar> {
+              [&](const DenseVector& x) -> SparseMatrix {
                 x_ad.set_value(x);
                 return A_i.value();
               }},

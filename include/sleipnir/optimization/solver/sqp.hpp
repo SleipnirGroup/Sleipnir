@@ -60,14 +60,18 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
                    iteration_callbacks,
                const Options& options,
                Eigen::Vector<Scalar, Eigen::Dynamic>& x) {
+  using DenseVector = Eigen::Vector<Scalar, Eigen::Dynamic>;
+  using SparseMatrix = Eigen::SparseMatrix<Scalar>;
+  using SparseVector = Eigen::SparseVector<Scalar>;
+
   /**
    * SQP step direction.
    */
   struct Step {
     /// Primal step.
-    Eigen::Vector<Scalar, Eigen::Dynamic> p_x;
+    DenseVector p_x;
     /// Dual step.
-    Eigen::Vector<Scalar, Eigen::Dynamic> p_y;
+    DenseVector p_y;
   };
 
   using std::isfinite;
@@ -113,28 +117,23 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
   auto& A_e_prof = solve_profilers[15];
 
   SQPMatrixCallbacks<Scalar> matrices{
-      [&](const Eigen::Vector<Scalar, Eigen::Dynamic>& x) -> Scalar {
+      [&](const DenseVector& x) -> Scalar {
         ScopedProfiler prof{f_prof};
         return matrix_callbacks.f(x);
       },
-      [&](const Eigen::Vector<Scalar, Eigen::Dynamic>& x)
-          -> Eigen::SparseVector<Scalar> {
+      [&](const DenseVector& x) -> SparseVector {
         ScopedProfiler prof{g_prof};
         return matrix_callbacks.g(x);
       },
-      [&](const Eigen::Vector<Scalar, Eigen::Dynamic>& x,
-          const Eigen::Vector<Scalar, Eigen::Dynamic>& y)
-          -> Eigen::SparseMatrix<Scalar> {
+      [&](const DenseVector& x, const DenseVector& y) -> SparseMatrix {
         ScopedProfiler prof{H_prof};
         return matrix_callbacks.H(x, y);
       },
-      [&](const Eigen::Vector<Scalar, Eigen::Dynamic>& x)
-          -> Eigen::Vector<Scalar, Eigen::Dynamic> {
+      [&](const DenseVector& x) -> DenseVector {
         ScopedProfiler prof{c_e_prof};
         return matrix_callbacks.c_e(x);
       },
-      [&](const Eigen::Vector<Scalar, Eigen::Dynamic>& x)
-          -> Eigen::SparseMatrix<Scalar> {
+      [&](const DenseVector& x) -> SparseMatrix {
         ScopedProfiler prof{A_e_prof};
         return matrix_callbacks.A_e(x);
       }};
@@ -146,7 +145,7 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
   setup_prof.start();
 
   Scalar f = matrices.f(x);
-  Eigen::Vector<Scalar, Eigen::Dynamic> c_e = matrices.c_e(x);
+  DenseVector c_e = matrices.c_e(x);
 
   int num_decision_variables = x.rows();
   int num_equality_constraints = c_e.rows();
@@ -160,13 +159,12 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
     return ExitStatus::TOO_FEW_DOFS;
   }
 
-  Eigen::SparseVector<Scalar> g = matrices.g(x);
-  Eigen::SparseMatrix<Scalar> A_e = matrices.A_e(x);
+  SparseVector g = matrices.g(x);
+  SparseMatrix A_e = matrices.A_e(x);
 
-  Eigen::Vector<Scalar, Eigen::Dynamic> y =
-      Eigen::Vector<Scalar, Eigen::Dynamic>::Zero(num_equality_constraints);
+  DenseVector y = DenseVector::Zero(num_equality_constraints);
 
-  Eigen::SparseMatrix<Scalar> H = matrices.H(x, y);
+  SparseMatrix H = matrices.H(x, y);
 
   // Ensure matrix callback dimensions are consistent
   slp_assert(g.rows() == num_decision_variables);
@@ -235,7 +233,7 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
 
     // Call iteration callbacks
     for (const auto& callback : iteration_callbacks) {
-      if (callback({iterations, x, g, H, A_e, Eigen::SparseMatrix<Scalar>{}})) {
+      if (callback({iterations, x, g, H, A_e, SparseMatrix{}})) {
         return ExitStatus::CALLBACK_REQUESTED_STOP;
       }
     }
@@ -251,24 +249,21 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
     triplets.reserve(H.nonZeros() + A_e.nonZeros());
     for (int col = 0; col < H.cols(); ++col) {
       // Append column of H lower triangle in top-left quadrant
-      for (typename Eigen::SparseMatrix<Scalar>::InnerIterator it{H, col}; it;
-           ++it) {
+      for (typename SparseMatrix::InnerIterator it{H, col}; it; ++it) {
         triplets.emplace_back(it.row(), it.col(), it.value());
       }
       // Append column of Aₑ in bottom-left quadrant
-      for (typename Eigen::SparseMatrix<Scalar>::InnerIterator it{A_e, col}; it;
-           ++it) {
+      for (typename SparseMatrix::InnerIterator it{A_e, col}; it; ++it) {
         triplets.emplace_back(H.rows() + it.row(), it.col(), it.value());
       }
     }
-    Eigen::SparseMatrix<Scalar> lhs(
-        num_decision_variables + num_equality_constraints,
-        num_decision_variables + num_equality_constraints);
+    SparseMatrix lhs(num_decision_variables + num_equality_constraints,
+                     num_decision_variables + num_equality_constraints);
     lhs.setFromSortedTriplets(triplets.begin(), triplets.end());
 
     // rhs = −[∇f − Aₑᵀy]
     //        [   cₑ    ]
-    Eigen::Vector<Scalar, Eigen::Dynamic> rhs{x.rows() + y.rows()};
+    DenseVector rhs{x.rows() + y.rows()};
     rhs.segment(0, x.rows()) = -g + A_e.transpose() * y;
     rhs.segment(x.rows(), y.rows()) = -c_e;
 
@@ -293,7 +288,7 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
     auto compute_step = [&](Step& step) {
       // p = [ pˣ]
       //     [−pʸ]
-      Eigen::Vector<Scalar, Eigen::Dynamic> p = solver.solve(rhs);
+      DenseVector p = solver.solve(rhs);
       step.p_x = p.segment(0, x.rows());
       step.p_y = -p.segment(x.rows(), y.rows());
     };
@@ -306,11 +301,11 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
 
     // Loop until a step is accepted
     while (1) {
-      Eigen::Vector<Scalar, Eigen::Dynamic> trial_x = x + α * step.p_x;
-      Eigen::Vector<Scalar, Eigen::Dynamic> trial_y = y + α * step.p_y;
+      DenseVector trial_x = x + α * step.p_x;
+      DenseVector trial_y = y + α * step.p_y;
 
       Scalar trial_f = matrices.f(trial_x);
-      Eigen::Vector<Scalar, Eigen::Dynamic> trial_c_e = matrices.c_e(trial_x);
+      DenseVector trial_c_e = matrices.c_e(trial_x);
 
       // If f(xₖ + αpₖˣ) or cₑ(xₖ + αpₖˣ) aren't finite, reduce step size
       // immediately
@@ -343,7 +338,7 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
         auto soc_step = step;
 
         Scalar α_soc = α;
-        Eigen::Vector<Scalar, Eigen::Dynamic> c_e_soc = c_e;
+        DenseVector c_e_soc = c_e;
 
         bool step_acceptable = false;
         for (int soc_iteration = 0; soc_iteration < 5 && !step_acceptable;
