@@ -20,9 +20,8 @@ namespace slp {
  */
 template <typename Scalar>
 Scalar fraction_to_the_boundary_rule(
-    const Eigen::Ref<const Eigen::Vector<Scalar, Eigen::Dynamic>>& x,
-    const Eigen::Ref<const Eigen::Vector<Scalar, Eigen::Dynamic>>& p,
-    Scalar τ) {
+    const Eigen::Vector<Scalar, Eigen::Dynamic>& x,
+    const Eigen::Vector<Scalar, Eigen::Dynamic>& p, Scalar τ) {
   // α = max(α ∈ (0, 1] : x + αp ≥ (1 − τ)x)
   //
   // where x and τ are positive.

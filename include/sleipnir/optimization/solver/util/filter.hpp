@@ -21,6 +21,9 @@ namespace slp {
  */
 template <typename Scalar>
 struct FilterEntry {
+  /// Type alias for dense vector.
+  using DenseVector = Eigen::Vector<Scalar, Eigen::Dynamic>;
+
   /// The cost function's value
   Scalar cost{0};
 
@@ -51,7 +54,7 @@ struct FilterEntry {
    * @param f The cost function value.
    * @param c_e The equality constraint values (nonzero means violation).
    */
-  FilterEntry(Scalar f, const Eigen::Vector<Scalar, Eigen::Dynamic>& c_e)
+  FilterEntry(Scalar f, const DenseVector& c_e)
       : FilterEntry{f, c_e.template lpNorm<1>()} {}
 
   /**
@@ -63,9 +66,8 @@ struct FilterEntry {
    * @param c_i The inequality constraint values (negative means violation).
    * @param μ The barrier parameter.
    */
-  FilterEntry(Scalar f, Eigen::Vector<Scalar, Eigen::Dynamic>& s,
-              const Eigen::Vector<Scalar, Eigen::Dynamic>& c_e,
-              const Eigen::Vector<Scalar, Eigen::Dynamic>& c_i, Scalar μ)
+  FilterEntry(Scalar f, DenseVector& s, const DenseVector& c_e,
+              const DenseVector& c_i, Scalar μ)
       : FilterEntry{f - μ * s.array().log().sum(),
                     c_e.template lpNorm<1>() + (c_i - s).template lpNorm<1>()} {
   }
