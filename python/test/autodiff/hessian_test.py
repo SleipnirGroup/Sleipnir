@@ -213,20 +213,20 @@ def test_rosenbrock():
     input = VariableMatrix(2)
     x = input[0]
     y = input[1]
+    H = Hessian((1 - x) ** 2 + 100 * (y - x**2) ** 2, input)
 
     for x0 in np.arange(-2.5, 2.5, 0.1):
         for y0 in np.arange(-2.5, 2.5, 0.1):
             x.set_value(x0)
             y.set_value(y0)
-            z = (1 - x) ** 2 + 100 * (y - x**2) ** 2
 
-            H = Hessian(z, input).value()
-            assert H[0, 0] == pytest.approx(
+            H_value = H.value().todense()
+            assert H_value[0, 0] == pytest.approx(
                 -400 * (y0 - x0 * x0) + 800 * x0 * x0 + 2, abs=1e-11
             )
-            assert H[0, 1] == -400 * x0
-            assert H[1, 0] == -400 * x0
-            assert H[1, 1] == 200
+            assert H_value[0, 1] == -400 * x0
+            assert H_value[1, 0] == -400 * x0
+            assert H_value[1, 1] == 200
 
 
 def test_edge_pushing_example_1():
