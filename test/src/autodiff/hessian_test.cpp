@@ -294,6 +294,19 @@ TEMPLATE_TEST_CASE("Hessian - Nested powers", "[Hessian]",
 
 TEMPLATE_TEST_CASE("Hessian - Rosenbrock", "[Hessian]",
                    SCALAR_TYPES_UNDER_TEST) {
+  // z = (1 − x)² + 100(y − x²)²
+  //   = 100(−x² + y)² + (−x + 1)²
+  //
+  // ∂z/∂x = 200(−x² + y)⋅−2x + 2(−x + 1)⋅−1
+  //       = −400x(−x² + y) − 2(−x + 1)
+  //       = 400x³ − 400xy + 2x − 2
+  //
+  // ∂z/∂y = 200(−x² + y)
+  //
+  // ∂²z/∂x² = 1200x² − 400y + 2
+  // ∂²z/∂xy = −400x
+  // ∂²z/∂y² = 200
+
   using T = TestType;
 
   slp::scope_exit exit{
@@ -312,8 +325,7 @@ TEMPLATE_TEST_CASE("Hessian - Rosenbrock", "[Hessian]",
 
       auto H_value = H.value().toDense();
       CHECK_THAT(H_value(0, 0),
-                 WithinAbs(T(-400) * (y0 - x0 * x0) + T(800) * x0 * x0 + T(2),
-                           T(1e-11)));
+                 WithinAbs(T(1200) * x0 * x0 - T(400) * y0 + T(2), T(1e-11)));
       CHECK(H_value(0, 1) == T(-400) * x0);
       CHECK(H_value(1, 0) == T(-400) * x0);
       CHECK(H_value(1, 1) == T(200));
