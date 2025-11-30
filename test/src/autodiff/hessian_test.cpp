@@ -302,21 +302,21 @@ TEMPLATE_TEST_CASE("Hessian - Rosenbrock", "[Hessian]",
   slp::VariableMatrix<T> input{2};
   auto& x = input[0];
   auto& y = input[1];
+  auto H = slp::Hessian(
+      pow(T(1) - x, T(2)) + T(100) * pow(y - pow(x, T(2)), T(2)), input);
 
   for (auto x0 : range(T(-2.5), T(2.5), T(0.1))) {
     for (auto y0 : range(T(-2.5), T(2.5), T(0.1))) {
       x.set_value(x0);
       y.set_value(y0);
-      auto z = slp::pow(T(1) - x, T(2)) +
-               T(100) * slp::pow(y - slp::pow(x, T(2)), T(2));
 
-      auto H = slp::Hessian(z, input).value().toDense();
-      CHECK_THAT(H(0, 0),
+      auto H_value = H.value().toDense();
+      CHECK_THAT(H_value(0, 0),
                  WithinAbs(T(-400) * (y0 - x0 * x0) + T(800) * x0 * x0 + T(2),
                            T(1e-11)));
-      CHECK(H(0, 1) == T(-400) * x0);
-      CHECK(H(1, 0) == T(-400) * x0);
-      CHECK(H(1, 1) == T(200));
+      CHECK(H_value(0, 1) == T(-400) * x0);
+      CHECK(H_value(1, 0) == T(-400) * x0);
+      CHECK(H_value(1, 1) == T(200));
     }
   }
 }

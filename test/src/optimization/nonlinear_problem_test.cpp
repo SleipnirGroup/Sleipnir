@@ -37,27 +37,28 @@ TEMPLATE_TEST_CASE("Problem - Quartic", "[Problem]", SCALAR_TYPES_UNDER_TEST) {
 
 TEMPLATE_TEST_CASE("Problem - Rosenbrock with cubic and line constraint",
                    "[Problem]", SCALAR_TYPES_UNDER_TEST) {
+  // https://en.wikipedia.org/wiki/Test_functions_for_optimization#Test_functions_for_constrained_optimization
+
   using T = TestType;
 
-  // https://en.wikipedia.org/wiki/Test_functions_for_optimization#Test_functions_for_constrained_optimization
+  slp::Problem<T> problem;
+
+  auto x = problem.decision_variable();
+  auto y = problem.decision_variable();
+
+  problem.minimize(100 * pow(y - pow(x, 2), 2) + pow(1 - x, 2));
+
+  problem.subject_to(y >= pow(x - 1, 3) + 1);
+  problem.subject_to(y <= -x + 2);
+
+  CHECK(problem.cost_function_type() == slp::ExpressionType::NONLINEAR);
+  CHECK(problem.equality_constraint_type() == slp::ExpressionType::NONE);
+  CHECK(problem.inequality_constraint_type() == slp::ExpressionType::NONLINEAR);
+
   for (auto x0 : range(T(-1.5), T(1.5), T(0.1))) {
     for (auto y0 : range(T(-0.5), T(2.5), T(0.1))) {
-      slp::Problem<T> problem;
-
-      auto x = problem.decision_variable();
       x.set_value(x0);
-      auto y = problem.decision_variable();
       y.set_value(y0);
-
-      problem.minimize(100 * pow(y - pow(x, 2), 2) + pow(1 - x, 2));
-
-      problem.subject_to(y >= pow(x - 1, 3) + 1);
-      problem.subject_to(y <= -x + 2);
-
-      CHECK(problem.cost_function_type() == slp::ExpressionType::NONLINEAR);
-      CHECK(problem.equality_constraint_type() == slp::ExpressionType::NONE);
-      CHECK(problem.inequality_constraint_type() ==
-            slp::ExpressionType::NONLINEAR);
 
       CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
@@ -80,27 +81,27 @@ TEMPLATE_TEST_CASE("Problem - Rosenbrock with cubic and line constraint",
 
 TEMPLATE_TEST_CASE("Problem - Rosenbrock with disk constraint", "[Problem]",
                    SCALAR_TYPES_UNDER_TEST) {
+  // https://en.wikipedia.org/wiki/Test_functions_for_optimization#Test_functions_for_constrained_optimization
+
   using T = TestType;
 
-  // https://en.wikipedia.org/wiki/Test_functions_for_optimization#Test_functions_for_constrained_optimization
+  slp::Problem<T> problem;
+
+  auto x = problem.decision_variable();
+  auto y = problem.decision_variable();
+
+  problem.minimize(pow(T(1) - x, T(2)) + T(100) * pow(y - pow(x, T(2)), T(2)));
+
+  problem.subject_to(pow(x, T(2)) + pow(y, T(2)) <= T(2));
+
+  CHECK(problem.cost_function_type() == slp::ExpressionType::NONLINEAR);
+  CHECK(problem.equality_constraint_type() == slp::ExpressionType::NONE);
+  CHECK(problem.inequality_constraint_type() == slp::ExpressionType::QUADRATIC);
+
   for (auto x0 : range(T(-1.5), T(1.5), T(0.1))) {
     for (auto y0 : range(T(-1.5), T(1.5), T(0.1))) {
-      slp::Problem<T> problem;
-
-      auto x = problem.decision_variable();
       x.set_value(x0);
-      auto y = problem.decision_variable();
       y.set_value(y0);
-
-      problem.minimize(pow(T(1) - x, T(2)) +
-                       T(100) * pow(y - pow(x, T(2)), T(2)));
-
-      problem.subject_to(pow(x, T(2)) + pow(y, T(2)) <= T(2));
-
-      CHECK(problem.cost_function_type() == slp::ExpressionType::NONLINEAR);
-      CHECK(problem.equality_constraint_type() == slp::ExpressionType::NONE);
-      CHECK(problem.inequality_constraint_type() ==
-            slp::ExpressionType::QUADRATIC);
 
       CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
