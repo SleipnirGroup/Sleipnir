@@ -210,6 +210,19 @@ def test_nested_powers():
 
 
 def test_rosenbrock():
+    # z = (1 − x)² + 100(y − x²)²
+    #   = 100(−x² + y)² + (−x + 1)²
+    #
+    # ∂z/∂x = 200(−x² + y)⋅−2x + 2(−x + 1)⋅−1
+    #       = −400x(−x² + y) − 2(−x + 1)
+    #       = 400x³ − 400xy + 2x − 2
+    #
+    # ∂z/∂y = 200(−x² + y)
+    #
+    # ∂²z/∂x² = 1200x² − 400y + 2
+    # ∂²z/∂xy = −400x
+    # ∂²z/∂y² = 200
+
     input = VariableMatrix(2)
     x = input[0]
     y = input[1]
@@ -222,7 +235,7 @@ def test_rosenbrock():
 
             H_value = H.value().todense()
             assert H_value[0, 0] == pytest.approx(
-                -400 * (y0 - x0 * x0) + 800 * x0 * x0 + 2, abs=1e-11
+                1200 * x0**2 - 400 * y0 + 2, abs=1e-11
             )
             assert H_value[0, 1] == -400 * x0
             assert H_value[1, 0] == -400 * x0
