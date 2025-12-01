@@ -315,7 +315,7 @@ TEMPLATE_TEST_CASE("Hessian - Rosenbrock", "[Hessian]",
   slp::VariableMatrix<T> input{2};
   auto& x = input[0];
   auto& y = input[1];
-  auto H = slp::Hessian(
+  auto hessian = slp::Hessian(
       pow(T(1) - x, T(2)) + T(100) * pow(y - pow(x, T(2)), T(2)), input);
 
   for (auto x0 : range(T(-2.5), T(2.5), T(0.1))) {
@@ -323,18 +323,24 @@ TEMPLATE_TEST_CASE("Hessian - Rosenbrock", "[Hessian]",
       x.set_value(x0);
       y.set_value(y0);
 
-      auto H_value = H.value().toDense();
-      CHECK_THAT(H_value(0, 0),
+      auto H = hessian.value().toDense();
+      CHECK_THAT(H(0, 0),
                  WithinAbs(T(1200) * x0 * x0 - T(400) * y0 + T(2), T(1e-11)));
-      CHECK(H_value(0, 1) == T(-400) * x0);
-      CHECK(H_value(1, 0) == T(-400) * x0);
-      CHECK(H_value(1, 1) == T(200));
+      CHECK(H(0, 1) == T(-400) * x0);
+      CHECK(H(1, 0) == T(-400) * x0);
+      CHECK(H(1, 1) == T(200));
     }
   }
 }
 
-TEMPLATE_TEST_CASE("Hessian - Edge Pushing example 1", "[Hessian]",
+TEMPLATE_TEST_CASE("Hessian - Edge pushing (Wang) example 1", "[Hessian]",
                    SCALAR_TYPES_UNDER_TEST) {
+  // See example 1 of [1]
+  //
+  // [1] Wang, M., et al. "Capitalizing on live variables: new algorithms for
+  //     efficient Hessian computation via automatic differentiation", 2016.
+  //     https://sci-hub.st/10.1007/s12532-016-0100-3
+
   using T = TestType;
   using std::cos;
   using std::sin;
@@ -364,6 +370,36 @@ TEMPLATE_TEST_CASE("Hessian - Edge Pushing example 1", "[Hessian]",
   auto H = slp::Hessian(y, x);
   Eigen::Matrix<T, 2, 2> expected_H{{T(2) * sin(T(4)), T(6) * cos(T(4))},
                                     {T(6) * cos(T(4)), T(-9) * sin(T(4))}};
+  CHECK(H.get().value() == expected_H);
+  CHECK(H.value().toDense() == expected_H);
+}
+
+TEMPLATE_TEST_CASE("Hessian - Edge pushing (Petro) figure 1", "[Hessian]",
+                   SCALAR_TYPES_UNDER_TEST) {
+  // See figure 1 of [1]
+  //
+  // [1] Petro, C. G., et al. "On efficient Hessian computation using the edge
+  //     pushing algorithm in Julia", 2017.
+  //     https://mlubin.github.io/pdf/edge_pushing_julia.pdf
+
+  using T = TestType;
+
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
+
+  // y = p₁ log(x₁x₂)
+  slp::Variable<T> p_1 = 2.0;
+  slp::VariableMatrix<T> x{2};
+  x[0].set_value(T(2));
+  x[1].set_value(T(3));
+  slp::Variable<T> y = p_1 * slp::log(x[0] * x[1]);
+
+  // d²y/dx² = [−p₁/x₁²     0   ]
+  //           [   0     −p₁/x₂²]
+  slp::Hessian H{y, x};
+  Eigen::Matrix<T, 2, 2> expected_H{
+      {-p_1.value() / (x[0].value() * x[0].value()), T(0)},
+      {T(0), -p_1.value() / (x[1].value() * x[1].value())}};
   CHECK(H.get().value() == expected_H);
   CHECK(H.value().toDense() == expected_H);
 }
