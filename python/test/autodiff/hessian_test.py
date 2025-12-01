@@ -226,23 +226,27 @@ def test_rosenbrock():
     input = VariableMatrix(2)
     x = input[0]
     y = input[1]
-    H = Hessian((1 - x) ** 2 + 100 * (y - x**2) ** 2, input)
+    hessian = Hessian((1 - x) ** 2 + 100 * (y - x**2) ** 2, input)
 
     for x0 in np.arange(-2.5, 2.5, 0.1):
         for y0 in np.arange(-2.5, 2.5, 0.1):
             x.set_value(x0)
             y.set_value(y0)
 
-            H_value = H.value().todense()
-            assert H_value[0, 0] == pytest.approx(
-                1200 * x0**2 - 400 * y0 + 2, abs=1e-11
-            )
-            assert H_value[0, 1] == -400 * x0
-            assert H_value[1, 0] == -400 * x0
-            assert H_value[1, 1] == 200
+            H = hessian.value().todense()
+            assert H[0, 0] == pytest.approx(1200 * x0**2 - 400 * y0 + 2, abs=1e-11)
+            assert H[0, 1] == -400 * x0
+            assert H[1, 0] == -400 * x0
+            assert H[1, 1] == 200
 
 
-def test_edge_pushing_example_1():
+def test_edge_pushing_wang_example_1():
+    # See example 1 of [1]
+    #
+    # [1] Wang, M., et al. "Capitalizing on live variables: new algorithms for
+    #     efficient Hessian computation via automatic differentiation", 2016.
+    #     https://sci-hub.st/10.1007/s12532-016-0100-3
+
     x = VariableMatrix(2)
     x[0].set_value(3)
     x[1].set_value(4)
@@ -268,6 +272,30 @@ def test_edge_pushing_example_1():
             [2.0 * math.sin(4.0), 6.0 * math.cos(4.0)],
             [6.0 * math.cos(4.0), -9.0 * math.sin(4.0)],
         ]
+    )
+    assert (H.get().value() == expected_H).all()
+    assert (H.value() == expected_H).all()
+
+
+def test_edge_pushing_petro_figure_1():
+    # See figure 1 of [1]
+    #
+    # [1] Petro, C. G., et al. "On efficient Hessian computation using the edge
+    #     pushing algorithm in Julia", 2017.
+    #     https://mlubin.github.io/pdf/edge_pushing_julia.pdf
+
+    # y = p₁ log(x₁x₂)
+    p_1 = Variable(2.0)
+    x = VariableMatrix(2)
+    x[0].set_value(2)
+    x[1].set_value(3)
+    y = p_1 * autodiff.log(x[0] * x[1])
+
+    # d²y/dx² = [−p₁/x₁²     0   ]
+    #           [   0     −p₁/x₂²]
+    H = Hessian(y, x)
+    expected_H = np.diag(
+        [-p_1.value() / x[0].value() ** 2, -p_1.value() / x[1].value() ** 2]
     )
     assert (H.get().value() == expected_H).all()
     assert (H.value() == expected_H).all()
