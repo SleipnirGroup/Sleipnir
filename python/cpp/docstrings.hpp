@@ -2148,7 +2148,7 @@ Parameter ``rhs``:
 Parameter ``binary_op``:
     The binary operator to use for the reduce operation.)doc";
 
-static const char *__doc_slp_detail_AdjointExpressionGraph = R"doc()doc";
+static const char *__doc_slp_detail_GradientExpressionGraph = R"doc()doc";
 
 static const char *__doc_slp_erf =
 R"doc(erf() for Variables.
