@@ -76,7 +76,7 @@ TEMPLATE_TEST_CASE("Problem - Double integrator", "[Problem]",
   CHECK(problem.equality_constraint_type() == slp::ExpressionType::LINEAR);
   CHECK(problem.inequality_constraint_type() == slp::ExpressionType::LINEAR);
 
-  CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
+  REQUIRE(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
   Eigen::Matrix<T, 2, 2> A{{T(1), dt.count()}, {T(0), T(1)}};
   Eigen::Matrix<T, 2, 1> B{T(0.5) * dt.count() * dt.count(), dt.count()};
