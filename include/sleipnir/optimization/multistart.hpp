@@ -46,7 +46,7 @@ struct MultistartResult {
  * @param initial_guesses A list of decision variable initial guesses to try.
  */
 template <typename Scalar, typename DecisionVariables>
-MultistartResult<Scalar, DecisionVariables> Multistart(
+MultistartResult<Scalar, DecisionVariables> multistart(
     function_ref<MultistartResult<Scalar, DecisionVariables>(
         const DecisionVariables& initial_guess)>
         solve,
