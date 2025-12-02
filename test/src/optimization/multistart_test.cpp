@@ -11,7 +11,7 @@
 #include "catch_string_converters.hpp"
 #include "scalar_types_under_test.hpp"
 
-TEMPLATE_TEST_CASE("multistart - Mishra's Bird function", "[nonlinear_problem]",
+TEMPLATE_TEST_CASE("multistart - Mishra's Bird function", "[multistart]",
                    SCALAR_TYPES_UNDER_TEST) {
   using T = TestType;
 
@@ -20,7 +20,7 @@ TEMPLATE_TEST_CASE("multistart - Mishra's Bird function", "[nonlinear_problem]",
     T y;
   };
 
-  auto Solve = [](const DecisionVariables& input)
+  auto solve = [](const DecisionVariables& input)
       -> slp::MultistartResult<T, DecisionVariables> {
     slp::Problem<T> problem;
 
@@ -40,8 +40,8 @@ TEMPLATE_TEST_CASE("multistart - Mishra's Bird function", "[nonlinear_problem]",
             DecisionVariables{x.value(), y.value()}};
   };
 
-  auto [status, cost, variables] = slp::Multistart<T, DecisionVariables>(
-      Solve, std::vector{DecisionVariables{T(-3), T(-8)},
+  auto [status, cost, variables] = slp::multistart<T, DecisionVariables>(
+      solve, std::vector{DecisionVariables{T(-3), T(-8)},
                          DecisionVariables{T(-3), T(-1.5)}});
 
   CHECK(status == slp::ExitStatus::SUCCESS);
