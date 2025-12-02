@@ -29,7 +29,7 @@ namespace slp {
 namespace detail {
 
 template <typename Scalar>
-class AdjointExpressionGraph;
+class GradientExpressionGraph;
 
 }  // namespace detail
 
@@ -387,7 +387,7 @@ class Variable : public SleipnirBase {
                                 const Variable<Scalar>& y,
                                 const Variable<Scalar>& z);
 
-  friend class detail::AdjointExpressionGraph<Scalar>;
+  friend class detail::GradientExpressionGraph<Scalar>;
   template <typename Scalar, int UpLo>
     requires(UpLo == Eigen::Lower) || (UpLo == (Eigen::Lower | Eigen::Upper))
   friend class Hessian;
