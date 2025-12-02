@@ -78,7 +78,7 @@ TEMPLATE_TEST_CASE("Problem - Differential drive", "[Problem]",
   CHECK(problem.equality_constraint_type() == slp::ExpressionType::NONLINEAR);
   CHECK(problem.inequality_constraint_type() == slp::ExpressionType::LINEAR);
 
-  CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
+  REQUIRE(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
   // Verify initial state
   CHECK_THAT(X.value(0, 0), WithinAbs(x_initial[0], T(1e-8)));

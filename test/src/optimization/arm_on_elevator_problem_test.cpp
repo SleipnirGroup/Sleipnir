@@ -110,5 +110,5 @@ TEMPLATE_TEST_CASE("Problem - Arm on elevator", "[Problem]",
   CHECK(problem.equality_constraint_type() == slp::ExpressionType::LINEAR);
   CHECK(problem.inequality_constraint_type() == slp::ExpressionType::LINEAR);
 
-  CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
+  REQUIRE(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 }

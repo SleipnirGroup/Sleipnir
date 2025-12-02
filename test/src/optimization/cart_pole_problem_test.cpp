@@ -87,14 +87,14 @@ TEMPLATE_TEST_CASE("Problem - Cart-pole", "[Problem]",
 
 #if defined(__APPLE__) && defined(__aarch64__)
   if constexpr (std::same_as<T, ExplicitDouble>) {
-    CHECK(problem.solve({.diagnostics = true}) ==
-          slp::ExitStatus::LINE_SEARCH_FAILED);
+    REQUIRE(problem.solve({.diagnostics = true}) ==
+            slp::ExitStatus::LINE_SEARCH_FAILED);
     SKIP("Fails with \"line search failed\"");
   } else {
-    CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
+    REQUIRE(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
   }
 #else
-  CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
+  REQUIRE(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 #endif
 
   // Verify initial state

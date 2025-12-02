@@ -58,8 +58,8 @@ TEMPLATE_TEST_CASE("OCP - Differential drive", "[OCP]",
   CHECK(problem.equality_constraint_type() == slp::ExpressionType::NONLINEAR);
   CHECK(problem.inequality_constraint_type() == slp::ExpressionType::LINEAR);
 
-  CHECK(problem.solve({.max_iterations = 1000, .diagnostics = true}) ==
-        slp::ExitStatus::SUCCESS);
+  REQUIRE(problem.solve({.max_iterations = 1000, .diagnostics = true}) ==
+          slp::ExitStatus::SUCCESS);
 
   auto X = problem.X();
   auto U = problem.U();
