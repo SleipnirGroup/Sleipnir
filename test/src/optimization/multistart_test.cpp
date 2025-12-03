@@ -25,8 +25,8 @@ TEMPLATE_TEST_CASE("multistart - Mishra's Bird function", "[multistart]",
     slp::Problem<T> problem;
 
     auto x = problem.decision_variable();
-    x.set_value(input.x);
     auto y = problem.decision_variable();
+    x.set_value(input.x);
     y.set_value(input.y);
 
     // https://en.wikipedia.org/wiki/Test_functions_for_optimization#Test_functions_for_constrained_optimization

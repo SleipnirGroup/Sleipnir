@@ -115,6 +115,7 @@ TEMPLATE_TEST_CASE("ExitStatus - Nonfinite initial cost or constraints",
 
   auto x = problem.decision_variable();
   x.set_value(T(-1));
+
   problem.minimize(sqrt(x));
 
   CHECK(problem.cost_function_type() == slp::ExpressionType::NONLINEAR);
@@ -132,6 +133,7 @@ TEMPLATE_TEST_CASE("ExitStatus - Diverging iterates", "[ExitStatus]",
   slp::Problem<T> problem;
 
   auto x = problem.decision_variable();
+
   problem.minimize(x);
 
   CHECK(problem.cost_function_type() == slp::ExpressionType::LINEAR);
@@ -149,6 +151,7 @@ TEMPLATE_TEST_CASE("ExitStatus - Max iterations exceeded", "[ExitStatus]",
   slp::Problem<T> problem;
 
   auto x = problem.decision_variable();
+
   problem.minimize(x * x);
 
   CHECK(problem.cost_function_type() == slp::ExpressionType::QUADRATIC);
@@ -168,6 +171,7 @@ TEMPLATE_TEST_CASE("ExitStatus - Timeout", "[ExitStatus]",
   slp::Problem<T> problem;
 
   auto x = problem.decision_variable();
+
   problem.minimize(x * x);
 
   CHECK(problem.cost_function_type() == slp::ExpressionType::QUADRATIC);

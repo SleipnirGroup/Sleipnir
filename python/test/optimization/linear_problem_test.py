@@ -6,10 +6,8 @@ from sleipnir.optimization import ExitStatus, Problem
 def test_maximize():
     problem = Problem()
 
-    x = problem.decision_variable()
+    x, y = problem.decision_variable(2)
     x.set_value(1.0)
-
-    y = problem.decision_variable()
     y.set_value(1.0)
 
     problem.maximize(50 * x + 40 * y)

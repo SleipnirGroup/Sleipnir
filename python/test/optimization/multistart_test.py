@@ -12,9 +12,8 @@ class DecisionVariables:
 def mishras_bird_function_solve(input: DecisionVariables):
     problem = Problem()
 
-    x = problem.decision_variable()
+    x, y = problem.decision_variable(2)
     x.set_value(input.x)
-    y = problem.decision_variable()
     y.set_value(input.y)
 
     # https://en.wikipedia.org/wiki/Test_functions_for_optimization#Test_functions_for_constrained_optimization

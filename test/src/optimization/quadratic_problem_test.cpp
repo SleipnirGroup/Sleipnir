@@ -36,8 +36,8 @@ TEMPLATE_TEST_CASE("Problem - Unconstrained 2D", "[Problem]",
     slp::Problem<T> problem;
 
     auto x = problem.decision_variable();
-    x.set_value(T(1));
     auto y = problem.decision_variable();
+    x.set_value(T(1));
     y.set_value(T(2));
 
     problem.minimize(x * x + y * y);
@@ -163,8 +163,8 @@ TEMPLATE_TEST_CASE("Problem - Inequality-constrained 2D", "[Problem]",
   slp::Problem<T> problem;
 
   auto x = problem.decision_variable();
-  x.set_value(T(5));
   auto y = problem.decision_variable();
+  x.set_value(T(5));
   y.set_value(T(5));
 
   problem.minimize(x * x + y * T(2) * y);

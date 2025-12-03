@@ -14,9 +14,8 @@ TEMPLATE_TEST_CASE("Problem - Maximize", "[Problem]", SCALAR_TYPES_UNDER_TEST) {
   slp::Problem<T> problem;
 
   auto x = problem.decision_variable();
-  x.set_value(T(1));
-
   auto y = problem.decision_variable();
+  x.set_value(T(1));
   y.set_value(T(1));
 
   problem.maximize(T(50) * x + T(40) * y);

@@ -122,9 +122,8 @@ TEMPLATE_TEST_CASE("Problem - Minimum 2D distance with linear constraint",
   slp::Problem<T> problem;
 
   auto x = problem.decision_variable();
-  x.set_value(T(20));
-
   auto y = problem.decision_variable();
+  x.set_value(T(20));
   y.set_value(T(50));
 
   problem.minimize(sqrt(x * x + y * y));
@@ -185,7 +184,6 @@ TEMPLATE_TEST_CASE("Problem - Wachter and Biegler line search failure",
   auto x = problem.decision_variable();
   auto s1 = problem.decision_variable();
   auto s2 = problem.decision_variable();
-
   x.set_value(T(-2));
   s1.set_value(T(3));
   s2.set_value(T(1));
