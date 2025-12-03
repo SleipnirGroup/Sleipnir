@@ -13,9 +13,7 @@ namespace slp {
 
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
 
-/**
- * Wrapper around std::print() that squelches write failure exceptions.
- */
+/// Wrapper around std::print() that squelches write failure exceptions.
 template <typename... T>
 void print(std::format_string<T...> fmt, T&&... args) {
   try {
@@ -24,9 +22,7 @@ void print(std::format_string<T...> fmt, T&&... args) {
   }
 }
 
-/**
- * Wrapper around std::print() that squelches write failure exceptions.
- */
+/// Wrapper around std::print() that squelches write failure exceptions.
 template <typename... T>
 void print(std::FILE* f, std::format_string<T...> fmt, T&&... args) {
   try {
@@ -35,9 +31,7 @@ void print(std::FILE* f, std::format_string<T...> fmt, T&&... args) {
   }
 }
 
-/**
- * Wrapper around std::println() that squelches write failure exceptions.
- */
+/// Wrapper around std::println() that squelches write failure exceptions.
 template <typename... T>
 void println(std::format_string<T...> fmt, T&&... args) {
   try {
@@ -46,9 +40,7 @@ void println(std::format_string<T...> fmt, T&&... args) {
   }
 }
 
-/**
- * Wrapper around std::println() that squelches write failure exceptions.
- */
+/// Wrapper around std::println() that squelches write failure exceptions.
 template <typename... T>
 void println(std::FILE* f, std::format_string<T...> fmt, T&&... args) {
   try {

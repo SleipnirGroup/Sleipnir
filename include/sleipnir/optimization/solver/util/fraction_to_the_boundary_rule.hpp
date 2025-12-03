@@ -8,16 +8,14 @@
 
 namespace slp {
 
-/**
- * Applies fraction-to-the-boundary rule to a variable and its iterate, then
- * returns a fraction of the iterate step size within (0, 1].
- *
- * @tparam Scalar Scalar type.
- * @param x The variable.
- * @param p The iterate on the variable.
- * @param τ Fraction-to-the-boundary rule scaling factor within (0, 1].
- * @return Fraction of the iterate step size within (0, 1].
- */
+/// Applies fraction-to-the-boundary rule to a variable and its iterate, then
+/// returns a fraction of the iterate step size within (0, 1].
+///
+/// @tparam Scalar Scalar type.
+/// @param x The variable.
+/// @param p The iterate on the variable.
+/// @param τ Fraction-to-the-boundary rule scaling factor within (0, 1].
+/// @return Fraction of the iterate step size within (0, 1].
 template <typename Scalar>
 Scalar fraction_to_the_boundary_rule(
     const Eigen::Vector<Scalar, Eigen::Dynamic>& x,

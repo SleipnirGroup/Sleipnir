@@ -12,9 +12,7 @@ namespace nb = nanobind;
 
 namespace slp {
 
-/**
- * Converts the given nb::object to a C++ type.
- */
+/// Converts the given nb::object to a C++ type.
 template <typename T>
 std::optional<T> try_cast(const nb::object& obj) {
   if (nb::isinstance<T>(obj)) {
@@ -24,9 +22,7 @@ std::optional<T> try_cast(const nb::object& obj) {
   }
 }
 
-/**
- * Converts the given nb::ndarray to an Eigen matrix.
- */
+/// Converts the given nb::ndarray to an Eigen matrix.
 template <typename T>
 std::optional<Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>>
 try_cast_to_eigen(const nb::object& obj) {

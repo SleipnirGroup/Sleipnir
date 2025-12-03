@@ -14,11 +14,9 @@
 
 namespace slp {
 
-/**
- * Filter entry consisting of cost and constraint violation.
- *
- * @tparam Scalar Scalar type.
- */
+/// Filter entry consisting of cost and constraint violation.
+///
+/// @tparam Scalar Scalar type.
 template <typename Scalar>
 struct FilterEntry {
   /// Type alias for dense vector.
@@ -32,40 +30,32 @@ struct FilterEntry {
 
   constexpr FilterEntry() = default;
 
-  /**
-   * Constructs a FilterEntry.
-   *
-   * @param cost The cost function's value.
-   * @param constraint_violation The constraint violation.
-   */
+  /// Constructs a FilterEntry.
+  ///
+  /// @param cost The cost function's value.
+  /// @param constraint_violation The constraint violation.
   constexpr FilterEntry(Scalar cost, Scalar constraint_violation)
       : cost{cost}, constraint_violation{constraint_violation} {}
 
-  /**
-   * Constructs a Newton's method filter entry.
-   *
-   * @param f The cost function value.
-   */
+  /// Constructs a Newton's method filter entry.
+  ///
+  /// @param f The cost function value.
   explicit FilterEntry(Scalar f) : FilterEntry{f, Scalar(0)} {}
 
-  /**
-   * Constructs a Sequential Quadratic Programming filter entry.
-   *
-   * @param f The cost function value.
-   * @param c_e The equality constraint values (nonzero means violation).
-   */
+  /// Constructs a Sequential Quadratic Programming filter entry.
+  ///
+  /// @param f The cost function value.
+  /// @param c_e The equality constraint values (nonzero means violation).
   FilterEntry(Scalar f, const DenseVector& c_e)
       : FilterEntry{f, c_e.template lpNorm<1>()} {}
 
-  /**
-   * Constructs an interior-point method filter entry.
-   *
-   * @param f The cost function value.
-   * @param s The inequality constraint slack variables.
-   * @param c_e The equality constraint values (nonzero means violation).
-   * @param c_i The inequality constraint values (negative means violation).
-   * @param μ The barrier parameter.
-   */
+  /// Constructs an interior-point method filter entry.
+  ///
+  /// @param f The cost function value.
+  /// @param s The inequality constraint slack variables.
+  /// @param c_e The equality constraint values (nonzero means violation).
+  /// @param c_i The inequality constraint values (negative means violation).
+  /// @param μ The barrier parameter.
   FilterEntry(Scalar f, DenseVector& s, const DenseVector& c_e,
               const DenseVector& c_i, Scalar μ)
       : FilterEntry{f - μ * s.array().log().sum(),
@@ -73,31 +63,25 @@ struct FilterEntry {
   }
 };
 
-/**
- * Step filter.
- *
- * See the section on filters in chapter 15 of [1].
- *
- * @tparam Scalar Scalar type.
- */
+/// Step filter.
+///
+/// See the section on filters in chapter 15 of [1].
+///
+/// @tparam Scalar Scalar type.
 template <typename Scalar>
 class Filter {
  public:
   /// The maximum constraint violation
   Scalar max_constraint_violation{1e4};
 
-  /**
-   * Constructs an empty filter.
-   */
+  /// Constructs an empty filter.
   Filter() {
     // Initial filter entry rejects constraint violations above max
     m_filter.emplace_back(std::numeric_limits<Scalar>::infinity(),
                           max_constraint_violation);
   }
 
-  /**
-   * Resets the filter.
-   */
+  /// Resets the filter.
   void reset() {
     m_filter.clear();
 
@@ -106,11 +90,9 @@ class Filter {
                           max_constraint_violation);
   }
 
-  /**
-   * Adds a new entry to the filter.
-   *
-   * @param entry The entry to add to the filter.
-   */
+  /// Adds a new entry to the filter.
+  ///
+  /// @param entry The entry to add to the filter.
   void add(const FilterEntry<Scalar>& entry) {
     // Remove dominated entries
     erase_if(m_filter, [&](const auto& elem) {
@@ -121,11 +103,9 @@ class Filter {
     m_filter.push_back(entry);
   }
 
-  /**
-   * Adds a new entry to the filter.
-   *
-   * @param entry The entry to add to the filter.
-   */
+  /// Adds a new entry to the filter.
+  ///
+  /// @param entry The entry to add to the filter.
   void add(FilterEntry<Scalar>&& entry) {
     // Remove dominated entries
     erase_if(m_filter, [&](const auto& elem) {
@@ -136,13 +116,11 @@ class Filter {
     m_filter.push_back(entry);
   }
 
-  /**
-   * Returns true if the given iterate is accepted by the filter.
-   *
-   * @param entry The entry to attempt adding to the filter.
-   * @param α The step size (0, 1].
-   * @return True if the given iterate is accepted by the filter.
-   */
+  /// Returns true if the given iterate is accepted by the filter.
+  ///
+  /// @param entry The entry to attempt adding to the filter.
+  /// @param α The step size (0, 1].
+  /// @return True if the given iterate is accepted by the filter.
   bool try_add(const FilterEntry<Scalar>& entry, Scalar α) {
     if (is_acceptable(entry, α)) {
       add(entry);
@@ -152,13 +130,11 @@ class Filter {
     }
   }
 
-  /**
-   * Returns true if the given iterate is accepted by the filter.
-   *
-   * @param entry The entry to attempt adding to the filter.
-   * @param α The step size (0, 1].
-   * @return True if the given iterate is accepted by the filter.
-   */
+  /// Returns true if the given iterate is accepted by the filter.
+  ///
+  /// @param entry The entry to attempt adding to the filter.
+  /// @param α The step size (0, 1].
+  /// @return True if the given iterate is accepted by the filter.
   bool try_add(FilterEntry<Scalar>&& entry, Scalar α) {
     if (is_acceptable(entry, α)) {
       add(std::move(entry));
@@ -168,13 +144,11 @@ class Filter {
     }
   }
 
-  /**
-   * Returns true if the given entry is acceptable to the filter.
-   *
-   * @param entry The entry to check.
-   * @param α The step size (0, 1].
-   * @return True if the given entry is acceptable to the filter.
-   */
+  /// Returns true if the given entry is acceptable to the filter.
+  ///
+  /// @param entry The entry to check.
+  /// @param α The step size (0, 1].
+  /// @return True if the given entry is acceptable to the filter.
   bool is_acceptable(const FilterEntry<Scalar>& entry, Scalar α) {
     using std::isfinite;
     using std::pow;
@@ -196,11 +170,9 @@ class Filter {
     });
   }
 
-  /**
-   * Returns the most recently added filter entry.
-   *
-   * @return The most recently added filter entry.
-   */
+  /// Returns the most recently added filter entry.
+  ///
+  /// @return The most recently added filter entry.
   const FilterEntry<Scalar>& back() const { return m_filter.back(); }
 
  private:

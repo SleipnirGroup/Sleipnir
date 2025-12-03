@@ -15,36 +15,30 @@
 
 namespace slp {
 
-/**
- * This class calculates the Hessian of a variable with respect to a vector of
- * variables.
- *
- * The gradient tree is cached so subsequent Hessian calculations are faster,
- * and the Hessian is only recomputed if the variable expression is nonlinear.
- *
- * @tparam Scalar Scalar type.
- * @tparam UpLo Which part of the Hessian to compute (Lower or Lower | Upper).
- */
+/// This class calculates the Hessian of a variable with respect to a vector of
+/// variables.
+///
+/// The gradient tree is cached so subsequent Hessian calculations are faster,
+/// and the Hessian is only recomputed if the variable expression is nonlinear.
+///
+/// @tparam Scalar Scalar type.
+/// @tparam UpLo Which part of the Hessian to compute (Lower or Lower | Upper).
 template <typename Scalar, int UpLo>
   requires(UpLo == Eigen::Lower) || (UpLo == (Eigen::Lower | Eigen::Upper))
 class Hessian {
  public:
-  /**
-   * Constructs a Hessian object.
-   *
-   * @param variable Variable of which to compute the Hessian.
-   * @param wrt Variable with respect to which to compute the Hessian.
-   */
+  /// Constructs a Hessian object.
+  ///
+  /// @param variable Variable of which to compute the Hessian.
+  /// @param wrt Variable with respect to which to compute the Hessian.
   Hessian(Variable<Scalar> variable, Variable<Scalar> wrt)
       : Hessian{std::move(variable), VariableMatrix<Scalar>{std::move(wrt)}} {}
 
-  /**
-   * Constructs a Hessian object.
-   *
-   * @param variable Variable of which to compute the Hessian.
-   * @param wrt Vector of variables with respect to which to compute the
-   *   Hessian.
-   */
+  /// Constructs a Hessian object.
+  ///
+  /// @param variable Variable of which to compute the Hessian.
+  /// @param wrt Vector of variables with respect to which to compute the
+  ///     Hessian.
   Hessian(Variable<Scalar> variable, SleipnirMatrixLike<Scalar> auto wrt)
       : m_variables{detail::GradientExpressionGraph<Scalar>{variable}
                         .generate_tree(wrt)},
@@ -90,14 +84,12 @@ class Hessian {
     }
   }
 
-  /**
-   * Returns the Hessian as a VariableMatrix.
-   *
-   * This is useful when constructing optimization problems with derivatives in
-   * them.
-   *
-   * @return The Hessian as a VariableMatrix.
-   */
+  /// Returns the Hessian as a VariableMatrix.
+  ///
+  /// This is useful when constructing optimization problems with derivatives in
+  /// them.
+  ///
+  /// @return The Hessian as a VariableMatrix.
   VariableMatrix<Scalar> get() const {
     VariableMatrix<Scalar> result{detail::empty, m_variables.rows(),
                                   m_wrt.rows()};
@@ -116,11 +108,9 @@ class Hessian {
     return result;
   }
 
-  /**
-   * Evaluates the Hessian at wrt's value.
-   *
-   * @return The Hessian at wrt's value.
-   */
+  /// Evaluates the Hessian at wrt's value.
+  ///
+  /// @return The Hessian at wrt's value.
   const Eigen::SparseMatrix<Scalar>& value() {
     if (m_nonlinear_rows.empty()) {
       return m_H;

@@ -4,9 +4,7 @@
 
 #include <stdint.h>
 
-/**
- * Sparse matrix coordinate sparsity.
- */
+/// Sparse matrix coordinate sparsity.
 struct Coord {
   int32_t row = 0;
   int32_t col = 0;

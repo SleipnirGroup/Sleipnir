@@ -57,6 +57,7 @@ the expression tree are only traversed and updated once.
 
 The obvious problem formulation for minimum-time problems uses one dt shared
 across all timesteps.
+
 ```python
 import sleipnir as slp
 
@@ -87,6 +88,7 @@ This formulation can have feasibility issues though per section 15.3
 "Elimination of variables" of "Numerical Optimization, 2nd Ed.". Instead, we
 recommend using a separate dt for each timestep, with them all
 equality-constrained.
+
 ```python
 import sleipnir as slp
 

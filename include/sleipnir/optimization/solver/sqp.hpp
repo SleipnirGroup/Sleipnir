@@ -32,28 +32,26 @@
 
 namespace slp {
 
-/**
-Finds the optimal solution to a nonlinear program using Sequential Quadratic
-Programming (SQP).
-
-A nonlinear program has the form:
-
-@verbatim
-     min_x f(x)
-subject to cₑ(x) = 0
-@endverbatim
-
-where f(x) is the cost function and cₑ(x) are the equality constraints.
-
-@tparam Scalar Scalar type.
-@param[in] matrix_callbacks Matrix callbacks.
-@param[in] iteration_callbacks The list of callbacks to call at the beginning of
-  each iteration.
-@param[in] options Solver options.
-@param[in,out] x The initial guess and output location for the decision
-  variables.
-@return The exit status.
-*/
+/// Finds the optimal solution to a nonlinear program using Sequential Quadratic
+/// Programming (SQP).
+///
+/// A nonlinear program has the form:
+///
+/// ```
+///      min_x f(x)
+/// subject to cₑ(x) = 0
+/// ```
+///
+/// where f(x) is the cost function and cₑ(x) are the equality constraints.
+///
+/// @tparam Scalar Scalar type.
+/// @param[in] matrix_callbacks Matrix callbacks.
+/// @param[in] iteration_callbacks The list of callbacks to call at the
+///     beginning of each iteration.
+/// @param[in] options Solver options.
+/// @param[in,out] x The initial guess and output location for the decision
+///     variables.
+/// @return The exit status.
 template <typename Scalar>
 ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
                std::span<std::function<bool(const IterationInfo<Scalar>& info)>>
@@ -64,9 +62,7 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
   using SparseMatrix = Eigen::SparseMatrix<Scalar>;
   using SparseVector = Eigen::SparseVector<Scalar>;
 
-  /**
-   * SQP step direction.
-   */
+  /// SQP step direction.
   struct Step {
     /// Primal step.
     DenseVector p_x;

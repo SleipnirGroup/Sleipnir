@@ -9,11 +9,9 @@
 
 namespace slp {
 
-/**
- * Matrix callbacks for the Newton's method solver.
- *
- * @tparam Scalar Scalar type.
- */
+/// Matrix callbacks for the Newton's method solver.
+///
+/// @tparam Scalar Scalar type.
 template <typename Scalar>
 struct NewtonMatrixCallbacks {
   /// Type alias for dense vector.

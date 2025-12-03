@@ -37,30 +37,28 @@
 
 namespace slp {
 
-/**
-Finds the optimal solution to a nonlinear program using the interior-point
-method.
-
-A nonlinear program has the form:
-
-@verbatim
-     min_x f(x)
-subject to cₑ(x) = 0
-           cᵢ(x) ≥ 0
-@endverbatim
-
-where f(x) is the cost function, cₑ(x) are the equality constraints, and cᵢ(x)
-are the inequality constraints.
-
-@tparam Scalar Scalar type.
-@param[in] matrix_callbacks Matrix callbacks.
-@param[in] iteration_callbacks The list of callbacks to call at the beginning of
-  each iteration.
-@param[in] options Solver options.
-@param[in,out] x The initial guess and output location for the decision
-  variables.
-@return The exit status.
-*/
+/// Finds the optimal solution to a nonlinear program using the interior-point
+/// method.
+///
+/// A nonlinear program has the form:
+///
+/// ```
+///      min_x f(x)
+/// subject to cₑ(x) = 0
+///            cᵢ(x) ≥ 0
+/// ```
+///
+/// where f(x) is the cost function, cₑ(x) are the equality constraints, and
+/// cᵢ(x) are the inequality constraints.
+///
+/// @tparam Scalar Scalar type.
+/// @param[in] matrix_callbacks Matrix callbacks.
+/// @param[in] iteration_callbacks The list of callbacks to call at the
+///     beginning of each iteration.
+/// @param[in] options Solver options.
+/// @param[in,out] x The initial guess and output location for the decision
+///     variables.
+/// @return The exit status.
 template <typename Scalar>
 ExitStatus interior_point(
     const InteriorPointMatrixCallbacks<Scalar>& matrix_callbacks,
@@ -75,9 +73,7 @@ ExitStatus interior_point(
   using SparseMatrix = Eigen::SparseMatrix<Scalar>;
   using SparseVector = Eigen::SparseVector<Scalar>;
 
-  /**
-   * Interior-point method step direction.
-   */
+  /// Interior-point method step direction.
   struct Step {
     /// Primal step.
     DenseVector p_x;

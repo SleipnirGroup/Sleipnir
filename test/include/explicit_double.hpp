@@ -11,14 +11,12 @@
 
 #include <Eigen/Core>
 
-/**
- * A scalar type not implicitly convertible from/to floating-point or integral
- * types.
- *
- * Instantiating Sleipnir with this scalar type ensures casts are used in the
- * appropriate places. It's a wrapper around double, so it has the same
- * performance characteristics and accuracy as double.
- */
+/// A scalar type not implicitly convertible from/to floating-point or integral
+/// types.
+///
+/// Instantiating Sleipnir with this scalar type ensures casts are used in the
+/// appropriate places. It's a wrapper around double, so it has the same
+/// performance characteristics and accuracy as double.
 class ExplicitDouble {
  public:
   // Construction
@@ -271,10 +269,8 @@ struct numeric_limits<ExplicitDouble> {
 
 namespace Eigen {
 
-/**
- * NumTraits specialization that allows instantiating Eigen types with
- * ExplicitDouble.
- */
+/// NumTraits specialization that allows instantiating Eigen types with
+/// ExplicitDouble.
 template <>
 struct NumTraits<ExplicitDouble> : GenericNumTraits<ExplicitDouble> {
   /// Is complex.
