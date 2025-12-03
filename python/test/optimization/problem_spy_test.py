@@ -41,9 +41,8 @@ iterations = 0
 def test_problem_spy():
     problem = Problem()
 
-    x = problem.decision_variable()
+    x, y = problem.decision_variable(2)
     x.set_value(20.0)
-    y = problem.decision_variable()
     y.set_value(20.0)
 
     problem.minimize(x**4 + y**4)

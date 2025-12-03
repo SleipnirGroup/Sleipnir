@@ -1,6 +1,6 @@
 """These tests ensure coverage of the off-nominal exit statuses"""
 
-from sleipnir.autodiff import ExpressionType
+from sleipnir.autodiff import ExpressionType, sqrt
 from sleipnir.optimization import ExitStatus, Problem
 
 
@@ -8,6 +8,7 @@ def test_callback_requested_stop():
     problem = Problem()
 
     x = problem.decision_variable()
+
     problem.minimize(x * x)
 
     problem.add_callback(lambda info: False)
@@ -24,9 +25,7 @@ def test_callback_requested_stop():
 def test_too_few_dofs():
     problem = Problem()
 
-    x = problem.decision_variable()
-    y = problem.decision_variable()
-    z = problem.decision_variable()
+    x, y, z = problem.decision_variable(3)
 
     problem.subject_to(x == 1)
     problem.subject_to(x == 2)
@@ -43,9 +42,7 @@ def test_too_few_dofs():
 def test_locally_infeasible_equality_constraints():
     problem = Problem()
 
-    x = problem.decision_variable()
-    y = problem.decision_variable()
-    z = problem.decision_variable()
+    x, y, z = problem.decision_variable(3)
 
     problem.subject_to(x == y + 1)
     problem.subject_to(y == z + 1)
@@ -61,9 +58,7 @@ def test_locally_infeasible_equality_constraints():
 def test_locally_infeasible_inequality_constraints():
     problem = Problem()
 
-    x = problem.decision_variable()
-    y = problem.decision_variable()
-    z = problem.decision_variable()
+    x, y, z = problem.decision_variable(3)
 
     problem.subject_to(x >= y + 1)
     problem.subject_to(y >= z + 1)
@@ -76,10 +71,29 @@ def test_locally_infeasible_inequality_constraints():
     assert problem.solve(diagnostics=True) == ExitStatus.LOCALLY_INFEASIBLE
 
 
+def test_nonfinite_initial_cost_or_constraints():
+    problem = Problem()
+
+    x = problem.decision_variable()
+    x.set_value(-1)
+
+    problem.minimize(sqrt(x))
+
+    assert problem.cost_function_type() == ExpressionType.NONLINEAR
+    assert problem.equality_constraint_type() == ExpressionType.NONE
+    assert problem.inequality_constraint_type() == ExpressionType.NONE
+
+    assert (
+        problem.solve(diagnostics=True)
+        == ExitStatus.NONFINITE_INITIAL_COST_OR_CONSTRAINTS
+    )
+
+
 def test_diverging_iterates():
     problem = Problem()
 
     x = problem.decision_variable()
+
     problem.minimize(x)
 
     assert problem.cost_function_type() == ExpressionType.LINEAR
@@ -93,6 +107,7 @@ def test_max_iterations_exceeded():
     problem = Problem()
 
     x = problem.decision_variable()
+
     problem.minimize(x * x)
 
     assert problem.cost_function_type() == ExpressionType.QUADRATIC
@@ -109,6 +124,7 @@ def test_timeout():
     problem = Problem()
 
     x = problem.decision_variable()
+
     problem.minimize(x * x)
 
     assert problem.cost_function_type() == ExpressionType.QUADRATIC

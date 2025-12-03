@@ -43,8 +43,7 @@ def main():
     # Find the x, y pair with the largest product for which x + 3y = 36
     problem = Problem()
 
-    x = problem.decision_variable()
-    y = problem.decision_variable()
+    x, y = problem.decision_variable(2)
 
     problem.maximize(x * y)
     problem.subject_to(x + 3 * y == 36)

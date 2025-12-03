@@ -24,9 +24,8 @@ def test_unconstrained1d():
 def test_unconstrained2d_1():
     problem = Problem()
 
-    x = problem.decision_variable()
+    x, y = problem.decision_variable(2)
     x.set_value(1.0)
-    y = problem.decision_variable()
     y.set_value(2.0)
 
     problem.minimize(x * x + y * y)
@@ -101,8 +100,7 @@ def test_unconstrained2d_2():
 def test_equality_constrained_1():
     problem = Problem()
 
-    x = problem.decision_variable()
-    y = problem.decision_variable()
+    x, y = problem.decision_variable(2)
 
     problem.maximize(x * y)
 
@@ -142,9 +140,8 @@ def test_equality_constrained_2():
 def test_inequality_constrained_2d():
     problem = Problem()
 
-    x = problem.decision_variable()
+    x, y = problem.decision_variable(2)
     x.set_value(5.0)
-    y = problem.decision_variable()
     y.set_value(5.0)
 
     problem.minimize(x * x + y * 2 * y)

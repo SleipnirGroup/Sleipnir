@@ -59,8 +59,8 @@ TEMPLATE_TEST_CASE("Problem - Spy", "[Problem]", SCALAR_TYPES_UNDER_TEST) {
   slp::Problem<T> problem;
 
   auto x = problem.decision_variable();
-  x.set_value(T(20));
   auto y = problem.decision_variable();
+  x.set_value(T(20));
   y.set_value(T(20));
 
   problem.minimize(pow(x, T(4)) + pow(y, T(4)));
