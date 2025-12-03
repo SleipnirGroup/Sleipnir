@@ -103,6 +103,7 @@ TEMPLATE_TEST_CASE("Problem - Equality-constrained", "[Problem]",
   // [-1 -3  0][λ]   [-36]
   //
   // Solve with:
+  //
   // ```python
   //   np.linalg.solve(
   //     np.array([[0,1,-1],

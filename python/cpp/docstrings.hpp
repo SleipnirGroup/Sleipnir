@@ -388,9 +388,13 @@ Parameter ``num_steps``:
 
 Parameter ``dynamics``:
     Function representing an explicit or implicit ODE, or a discrete
-    state transition function. - Explicit: dx/dt = f(x, u, *) -
-    Implicit: f([x dx/dt]', u, *) = 0 - State transition: xₖ₊₁ = f(xₖ,
-    uₖ)
+    state transition function.
+
+* Explicit: dx/dt = f(x, u, *)
+
+* Implicit: f([x dx/dt]', u, *) = 0
+
+* State transition: xₖ₊₁ = f(xₖ, uₖ)
 
 Parameter ``dynamics_type``:
     The type of system evolution function.
@@ -419,9 +423,13 @@ Parameter ``num_steps``:
 
 Parameter ``dynamics``:
     Function representing an explicit or implicit ODE, or a discrete
-    state transition function. - Explicit: dx/dt = f(t, x, u, *) -
-    Implicit: f(t, [x dx/dt]', u, *) = 0 - State transition: xₖ₊₁ =
-    f(t, xₖ, uₖ, dt)
+    state transition function.
+
+* Explicit: dx/dt = f(t, x, u, *)
+
+* Implicit: f(t, [x dx/dt]', u, *) = 0
+
+* State transition: xₖ₊₁ = f(t, xₖ, uₖ, dt)
 
 Parameter ``dynamics_type``:
     The type of system evolution function.
@@ -604,8 +612,13 @@ static const char *__doc_slp_Problem =
 R"doc(This class allows the user to pose a constrained nonlinear
 optimization problem in natural mathematical notation and solve it.
 
-This class supports problems of the form: @verbatim minₓ f(x) subject
-to cₑ(x) = 0 cᵢ(x) ≥ 0 @endverbatim
+This class supports problems of the form:
+
+```
+minₓ f(x)
+subject to cₑ(x) = 0
+           cᵢ(x) ≥ 0
+```
 
 where f(x) is the scalar cost function, x is the vector of decision
 variables (variables the solver can tweak to minimize the cost
@@ -2053,7 +2066,7 @@ Parameter ``x``:
     The x argument.)doc";
 
 static const char *__doc_slp_atan2_2 =
-R"doc(std::atan2() for Variables.
+R"doc(atan2() for Variables.
 
 Template parameter ``Scalar``:
     Scalar type.
@@ -2065,7 +2078,7 @@ Parameter ``x``:
     The x argument.)doc";
 
 static const char *__doc_slp_atan2_3 =
-R"doc(std::atan2() for Variables.
+R"doc(atan2() for Variables.
 
 Template parameter ``Scalar``:
     Scalar type.
@@ -2348,7 +2361,7 @@ Parameter ``power``:
     The power.)doc";
 
 static const char *__doc_slp_pow_2 =
-R"doc(std::pow() for Variables.
+R"doc(pow() for Variables.
 
 Template parameter ``Scalar``:
     Scalar type.
@@ -2360,7 +2373,7 @@ Parameter ``power``:
     The power.)doc";
 
 static const char *__doc_slp_pow_3 =
-R"doc(std::pow() for Variables.
+R"doc(pow() for Variables.
 
 Template parameter ``Scalar``:
     Scalar type.

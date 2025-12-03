@@ -9,11 +9,9 @@
 
 namespace slp {
 
-/**
- * Matrix callbacks for the Sequential Quadratic Programming (SQP) solver.
- *
- * @tparam Scalar Scalar type.
- */
+/// Matrix callbacks for the Sequential Quadratic Programming (SQP) solver.
+///
+/// @tparam Scalar Scalar type.
 template <typename Scalar>
 struct SQPMatrixCallbacks {
   /// Type alias for dense vector.
@@ -116,12 +114,12 @@ struct SQPMatrixCallbacks {
 
   /// Equality constraint Jacobian ∂cₑ/∂x getter.
   ///
-  /// @verbatim
+  /// ```
   ///         [∇ᵀcₑ₁(xₖ)]
   /// Aₑ(x) = [∇ᵀcₑ₂(xₖ)]
   ///         [    ⋮    ]
   ///         [∇ᵀcₑₘ(xₖ)]
-  /// @endverbatim
+  /// ```
   ///
   /// <table>
   ///   <tr>

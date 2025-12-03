@@ -10,11 +10,9 @@
 
 namespace slp {
 
-/**
- * Expression type.
- *
- * Used for autodiff caching.
- */
+/// Expression type.
+///
+/// Used for autodiff caching.
 enum class ExpressionType : uint8_t {
   /// There is no expression.
   NONE,
@@ -28,11 +26,9 @@ enum class ExpressionType : uint8_t {
   NONLINEAR
 };
 
-/**
- * Returns user-readable message corresponding to the expression type.
- *
- * @param type Expression type.
- */
+/// Returns user-readable message corresponding to the expression type.
+///
+/// @param type Expression type.
 SLEIPNIR_DLLEXPORT constexpr std::string_view to_message(
     const ExpressionType& type) {
   using enum ExpressionType;

@@ -17,45 +17,37 @@
 
 namespace slp {
 
-/**
- * This class calculates the Jacobian of a vector of variables with respect to a
- * vector of variables.
- *
- * The Jacobian is only recomputed if the variable expression is quadratic or
- * higher order.
- *
- * @tparam Scalar Scalar type.
- */
+/// This class calculates the Jacobian of a vector of variables with respect to
+/// a vector of variables.
+///
+/// The Jacobian is only recomputed if the variable expression is quadratic or
+/// higher order.
+///
+/// @tparam Scalar Scalar type.
 template <typename Scalar>
 class Jacobian {
  public:
-  /**
-   * Constructs a Jacobian object.
-   *
-   * @param variable Variable of which to compute the Jacobian.
-   * @param wrt Variable with respect to which to compute the Jacobian.
-   */
+  /// Constructs a Jacobian object.
+  ///
+  /// @param variable Variable of which to compute the Jacobian.
+  /// @param wrt Variable with respect to which to compute the Jacobian.
   Jacobian(Variable<Scalar> variable, Variable<Scalar> wrt)
       : Jacobian{VariableMatrix<Scalar>{std::move(variable)},
                  VariableMatrix<Scalar>{std::move(wrt)}} {}
 
-  /**
-   * Constructs a Jacobian object.
-   *
-   * @param variable Variable of which to compute the Jacobian.
-   * @param wrt Vector of variables with respect to which to compute the
-   *   Jacobian.
-   */
+  /// Constructs a Jacobian object.
+  ///
+  /// @param variable Variable of which to compute the Jacobian.
+  /// @param wrt Vector of variables with respect to which to compute the
+  ///     Jacobian.
   Jacobian(Variable<Scalar> variable, SleipnirMatrixLike<Scalar> auto wrt)
       : Jacobian{VariableMatrix<Scalar>{std::move(variable)}, std::move(wrt)} {}
 
-  /**
-   * Constructs a Jacobian object.
-   *
-   * @param variables Vector of variables of which to compute the Jacobian.
-   * @param wrt Vector of variables with respect to which to compute the
-   *   Jacobian.
-   */
+  /// Constructs a Jacobian object.
+  ///
+  /// @param variables Vector of variables of which to compute the Jacobian.
+  /// @param wrt Vector of variables with respect to which to compute the
+  ///     Jacobian.
   Jacobian(VariableMatrix<Scalar> variables,
            SleipnirMatrixLike<Scalar> auto wrt)
       : m_variables{std::move(variables)}, m_wrt{std::move(wrt)} {
@@ -98,14 +90,12 @@ class Jacobian {
     }
   }
 
-  /**
-   * Returns the Jacobian as a VariableMatrix.
-   *
-   * This is useful when constructing optimization problems with derivatives in
-   * them.
-   *
-   * @return The Jacobian as a VariableMatrix.
-   */
+  /// Returns the Jacobian as a VariableMatrix.
+  ///
+  /// This is useful when constructing optimization problems with derivatives in
+  /// them.
+  ///
+  /// @return The Jacobian as a VariableMatrix.
   VariableMatrix<Scalar> get() const {
     VariableMatrix<Scalar> result{detail::empty, m_variables.rows(),
                                   m_wrt.rows()};
@@ -124,11 +114,9 @@ class Jacobian {
     return result;
   }
 
-  /**
-   * Evaluates the Jacobian at wrt's value.
-   *
-   * @return The Jacobian at wrt's value.
-   */
+  /// Evaluates the Jacobian at wrt's value.
+  ///
+  /// @return The Jacobian at wrt's value.
   const Eigen::SparseMatrix<Scalar>& value() {
     if (m_nonlinear_rows.empty()) {
       return m_J;

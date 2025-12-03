@@ -9,11 +9,9 @@
 
 namespace slp {
 
-/**
- * Matrix callbacks for the interior-point method solver.
- *
- * @tparam Scalar Scalar type.
- */
+/// Matrix callbacks for the interior-point method solver.
+///
+/// @tparam Scalar Scalar type.
 template <typename Scalar>
 struct InteriorPointMatrixCallbacks {
   /// Type alias for dense vector.
@@ -123,12 +121,12 @@ struct InteriorPointMatrixCallbacks {
 
   /// Equality constraint Jacobian ∂cₑ/∂x getter.
   ///
-  /// @verbatim
+  /// ```
   ///         [∇ᵀcₑ₁(xₖ)]
   /// Aₑ(x) = [∇ᵀcₑ₂(xₖ)]
   ///         [    ⋮    ]
   ///         [∇ᵀcₑₘ(xₖ)]
-  /// @endverbatim
+  /// ```
   ///
   /// <table>
   ///   <tr>
@@ -172,12 +170,12 @@ struct InteriorPointMatrixCallbacks {
 
   /// Inequality constraint Jacobian ∂cᵢ/∂x getter.
   ///
-  /// @verbatim
+  /// ```
   ///         [∇ᵀcᵢ₁(xₖ)]
   /// Aᵢ(x) = [∇ᵀcᵢ₂(xₖ)]
   ///         [    ⋮    ]
   ///         [∇ᵀcᵢₘ(xₖ)]
-  /// @endverbatim
+  /// ```
   ///
   /// <table>
   ///   <tr>

@@ -35,21 +35,17 @@ constexpr void inc_ref_count(Expression<Scalar>* expr);
 template <typename Scalar>
 constexpr void dec_ref_count(Expression<Scalar>* expr);
 
-/**
- * Typedef for intrusive shared pointer to Expression.
- *
- * @tparam Scalar Scalar type.
- */
+/// Typedef for intrusive shared pointer to Expression.
+///
+/// @tparam Scalar Scalar type.
 template <typename Scalar>
 using ExpressionPtr = IntrusiveSharedPtr<Expression<Scalar>>;
 
-/**
- * Creates an intrusive shared pointer to an expression from the global pool
- * allocator.
- *
- * @tparam T The derived expression type.
- * @param args Constructor arguments for Expression.
- */
+/// Creates an intrusive shared pointer to an expression from the global pool
+/// allocator.
+///
+/// @tparam T The derived expression type.
+/// @param args Constructor arguments for Expression.
 template <typename T, typename... Args>
 static ExpressionPtr<typename T::Scalar> make_expression_ptr(Args&&... args) {
   if constexpr (USE_POOL_ALLOCATOR) {
@@ -78,25 +74,19 @@ struct MultExpression;
 template <typename Scalar, ExpressionType T>
 struct UnaryMinusExpression;
 
-/**
- * Creates an intrusive shared pointer to a constant expression.
- *
- * @tparam Scalar Scalar type.
- * @param value The expression value.
- */
+/// Creates an intrusive shared pointer to a constant expression.
+///
+/// @tparam Scalar Scalar type.
+/// @param value The expression value.
 template <typename Scalar>
 ExpressionPtr<Scalar> constant_ptr(Scalar value);
 
-/**
- * An autodiff expression node.
- *
- * @tparam Scalar Scalar type.
- */
+/// An autodiff expression node.
+///
+/// @tparam Scalar Scalar type.
 template <typename Scalar_>
 struct Expression {
-  /**
-   * Scalar type alias.
-   */
+  /// Scalar type alias.
   using Scalar = Scalar_;
 
   /// The value of the expression node.
@@ -121,54 +111,41 @@ struct Expression {
   /// Expression arguments.
   std::array<ExpressionPtr<Scalar>, 2> args{nullptr, nullptr};
 
-  /**
-   * Constructs a constant expression with a value of zero.
-   */
+  /// Constructs a constant expression with a value of zero.
   constexpr Expression() = default;
 
-  /**
-   * Constructs a nullary expression (an operator with no arguments).
-   *
-   * @param value The expression value.
-   */
+  /// Constructs a nullary expression (an operator with no arguments).
+  ///
+  /// @param value The expression value.
   explicit constexpr Expression(Scalar value) : val{value} {}
 
-  /**
-   * Constructs an unary expression (an operator with one argument).
-   *
-   * @param lhs Unary operator's operand.
-   */
+  /// Constructs an unary expression (an operator with one argument).
+  ///
+  /// @param lhs Unary operator's operand.
   explicit constexpr Expression(ExpressionPtr<Scalar> lhs)
       : args{std::move(lhs), nullptr} {}
 
-  /**
-   * Constructs a binary expression (an operator with two arguments).
-   *
-   * @param lhs Binary operator's left operand.
-   * @param rhs Binary operator's right operand.
-   */
+  /// Constructs a binary expression (an operator with two arguments).
+  ///
+  /// @param lhs Binary operator's left operand.
+  /// @param rhs Binary operator's right operand.
   constexpr Expression(ExpressionPtr<Scalar> lhs, ExpressionPtr<Scalar> rhs)
       : args{std::move(lhs), std::move(rhs)} {}
 
   virtual ~Expression() = default;
 
-  /**
-   * Returns true if the expression is the given constant.
-   *
-   * @param constant The constant.
-   *
-   * @return True if the expression is the given constant.
-   */
+  /// Returns true if the expression is the given constant.
+  ///
+  /// @param constant The constant.
+  /// @return True if the expression is the given constant.
   constexpr bool is_constant(Scalar constant) const {
     return type() == ExpressionType::CONSTANT && val == constant;
   }
 
-  /**
-   * Expression-Expression multiplication operator.
-   *
-   * @param lhs Operator left-hand side.
-   * @param rhs Operator right-hand side.
-   */
+  /// Expression-Expression multiplication operator.
+  ///
+  /// @param lhs Operator left-hand side.
+  /// @param rhs Operator right-hand side.
   friend ExpressionPtr<Scalar> operator*(const ExpressionPtr<Scalar>& lhs,
                                          const ExpressionPtr<Scalar>& rhs) {
     using enum ExpressionType;
@@ -215,12 +192,10 @@ struct Expression {
     }
   }
 
-  /**
-   * Expression-Expression division operator.
-   *
-   * @param lhs Operator left-hand side.
-   * @param rhs Operator right-hand side.
-   */
+  /// Expression-Expression division operator.
+  ///
+  /// @param lhs Operator left-hand side.
+  /// @param rhs Operator right-hand side.
   friend ExpressionPtr<Scalar> operator/(const ExpressionPtr<Scalar>& lhs,
                                          const ExpressionPtr<Scalar>& rhs) {
     using enum ExpressionType;
@@ -252,12 +227,10 @@ struct Expression {
     }
   }
 
-  /**
-   * Expression-Expression addition operator.
-   *
-   * @param lhs Operator left-hand side.
-   * @param rhs Operator right-hand side.
-   */
+  /// Expression-Expression addition operator.
+  ///
+  /// @param lhs Operator left-hand side.
+  /// @param rhs Operator right-hand side.
   friend ExpressionPtr<Scalar> operator+(const ExpressionPtr<Scalar>& lhs,
                                          const ExpressionPtr<Scalar>& rhs) {
     using enum ExpressionType;
@@ -287,23 +260,19 @@ struct Expression {
     }
   }
 
-  /**
-   * Expression-Expression compound addition operator.
-   *
-   * @param lhs Operator left-hand side.
-   * @param rhs Operator right-hand side.
-   */
+  /// Expression-Expression compound addition operator.
+  ///
+  /// @param lhs Operator left-hand side.
+  /// @param rhs Operator right-hand side.
   friend ExpressionPtr<Scalar> operator+=(ExpressionPtr<Scalar>& lhs,
                                           const ExpressionPtr<Scalar>& rhs) {
     return lhs = lhs + rhs;
   }
 
-  /**
-   * Expression-Expression subtraction operator.
-   *
-   * @param lhs Operator left-hand side.
-   * @param rhs Operator right-hand side.
-   */
+  /// Expression-Expression subtraction operator.
+  ///
+  /// @param lhs Operator left-hand side.
+  /// @param rhs Operator right-hand side.
   friend ExpressionPtr<Scalar> operator-(const ExpressionPtr<Scalar>& lhs,
                                          const ExpressionPtr<Scalar>& rhs) {
     using enum ExpressionType;
@@ -338,11 +307,9 @@ struct Expression {
     }
   }
 
-  /**
-   * Unary minus operator.
-   *
-   * @param lhs Operand of unary minus.
-   */
+  /// Unary minus operator.
+  ///
+  /// @param lhs Operand of unary minus.
   friend ExpressionPtr<Scalar> operator-(const ExpressionPtr<Scalar>& lhs) {
     using enum ExpressionType;
 
@@ -366,71 +333,59 @@ struct Expression {
     }
   }
 
-  /**
-   * Unary plus operator.
-   *
-   * @param lhs Operand of unary plus.
-   */
+  /// Unary plus operator.
+  ///
+  /// @param lhs Operand of unary plus.
   friend ExpressionPtr<Scalar> operator+(const ExpressionPtr<Scalar>& lhs) {
     return lhs;
   }
 
-  /**
-   * Either nullary operator with no arguments, unary operator with one
-   * argument, or binary operator with two arguments. This operator is used to
-   * update the node's value.
-   *
-   * @param lhs Left argument to binary operator.
-   * @param rhs Right argument to binary operator.
-   * @return The node's value.
-   */
+  /// Either nullary operator with no arguments, unary operator with one
+  /// argument, or binary operator with two arguments. This operator is used to
+  /// update the node's value.
+  ///
+  /// @param lhs Left argument to binary operator.
+  /// @param rhs Right argument to binary operator.
+  /// @return The node's value.
   virtual Scalar value([[maybe_unused]] Scalar lhs,
                        [[maybe_unused]] Scalar rhs) const = 0;
 
-  /**
-   * Returns the type of this expression (constant, linear, quadratic, or
-   * nonlinear).
-   *
-   * @return The type of this expression.
-   */
+  /// Returns the type of this expression (constant, linear, quadratic, or
+  /// nonlinear).
+  ///
+  /// @return The type of this expression.
   virtual ExpressionType type() const = 0;
 
-  /**
-   * Returns ∂/∂l as a Scalar.
-   *
-   * @param lhs Left argument to binary operator.
-   * @param rhs Right argument to binary operator.
-   * @param parent_adjoint Adjoint of parent expression.
-   * @return ∂/∂l as a Scalar.
-   */
+  /// Returns ∂/∂l as a Scalar.
+  ///
+  /// @param lhs Left argument to binary operator.
+  /// @param rhs Right argument to binary operator.
+  /// @param parent_adjoint Adjoint of parent expression.
+  /// @return ∂/∂l as a Scalar.
   virtual Scalar grad_l([[maybe_unused]] Scalar lhs,
                         [[maybe_unused]] Scalar rhs,
                         [[maybe_unused]] Scalar parent_adjoint) const {
     return Scalar(0);
   }
 
-  /**
-   * Returns ∂/∂r as a Scalar.
-   *
-   * @param lhs Left argument to binary operator.
-   * @param rhs Right argument to binary operator.
-   * @param parent_adjoint Adjoint of parent expression.
-   * @return ∂/∂r as a Scalar.
-   */
+  /// Returns ∂/∂r as a Scalar.
+  ///
+  /// @param lhs Left argument to binary operator.
+  /// @param rhs Right argument to binary operator.
+  /// @param parent_adjoint Adjoint of parent expression.
+  /// @return ∂/∂r as a Scalar.
   virtual Scalar grad_r([[maybe_unused]] Scalar lhs,
                         [[maybe_unused]] Scalar rhs,
                         [[maybe_unused]] Scalar parent_adjoint) const {
     return Scalar(0);
   }
 
-  /**
-   * Returns ∂/∂l as an Expression.
-   *
-   * @param lhs Left argument to binary operator.
-   * @param rhs Right argument to binary operator.
-   * @param parent_adjoint Adjoint of parent expression.
-   * @return ∂/∂l as an Expression.
-   */
+  /// Returns ∂/∂l as an Expression.
+  ///
+  /// @param lhs Left argument to binary operator.
+  /// @param rhs Right argument to binary operator.
+  /// @param parent_adjoint Adjoint of parent expression.
+  /// @return ∂/∂l as an Expression.
   virtual ExpressionPtr<Scalar> grad_expr_l(
       [[maybe_unused]] const ExpressionPtr<Scalar>& lhs,
       [[maybe_unused]] const ExpressionPtr<Scalar>& rhs,
@@ -438,14 +393,12 @@ struct Expression {
     return constant_ptr(Scalar(0));
   }
 
-  /**
-   * Returns ∂/∂r as an Expression.
-   *
-   * @param lhs Left argument to binary operator.
-   * @param rhs Right argument to binary operator.
-   * @param parent_adjoint Adjoint of parent expression.
-   * @return ∂/∂r as an Expression.
-   */
+  /// Returns ∂/∂r as an Expression.
+  ///
+  /// @param lhs Left argument to binary operator.
+  /// @param rhs Right argument to binary operator.
+  /// @param parent_adjoint Adjoint of parent expression.
+  /// @return ∂/∂r as an Expression.
   virtual ExpressionPtr<Scalar> grad_expr_r(
       [[maybe_unused]] const ExpressionPtr<Scalar>& lhs,
       [[maybe_unused]] const ExpressionPtr<Scalar>& rhs,
@@ -470,20 +423,16 @@ ExpressionPtr<Scalar> sinh(const ExpressionPtr<Scalar>& x);
 template <typename Scalar>
 ExpressionPtr<Scalar> sqrt(const ExpressionPtr<Scalar>& x);
 
-/**
- * Derived expression type for binary minus operator.
- *
- * @tparam Scalar Scalar type.
- * @tparam T Expression type.
- */
+/// Derived expression type for binary minus operator.
+///
+/// @tparam Scalar Scalar type.
+/// @tparam T Expression type.
 template <typename Scalar, ExpressionType T>
 struct BinaryMinusExpression final : Expression<Scalar> {
-  /**
-   * Constructs a binary expression (an operator with two arguments).
-   *
-   * @param lhs Binary operator's left operand.
-   * @param rhs Binary operator's right operand.
-   */
+  /// Constructs a binary expression (an operator with two arguments).
+  ///
+  /// @param lhs Binary operator's left operand.
+  /// @param rhs Binary operator's right operand.
   constexpr BinaryMinusExpression(ExpressionPtr<Scalar> lhs,
                                   ExpressionPtr<Scalar> rhs)
       : Expression<Scalar>{std::move(lhs), std::move(rhs)} {}
@@ -513,20 +462,16 @@ struct BinaryMinusExpression final : Expression<Scalar> {
   }
 };
 
-/**
- * Derived expression type for binary plus operator.
- *
- * @tparam Scalar Scalar type.
- * @tparam T Expression type.
- */
+/// Derived expression type for binary plus operator.
+///
+/// @tparam Scalar Scalar type.
+/// @tparam T Expression type.
 template <typename Scalar, ExpressionType T>
 struct BinaryPlusExpression final : Expression<Scalar> {
-  /**
-   * Constructs a binary expression (an operator with two arguments).
-   *
-   * @param lhs Binary operator's left operand.
-   * @param rhs Binary operator's right operand.
-   */
+  /// Constructs a binary expression (an operator with two arguments).
+  ///
+  /// @param lhs Binary operator's left operand.
+  /// @param rhs Binary operator's right operand.
   constexpr BinaryPlusExpression(ExpressionPtr<Scalar> lhs,
                                  ExpressionPtr<Scalar> rhs)
       : Expression<Scalar>{std::move(lhs), std::move(rhs)} {}
@@ -556,18 +501,14 @@ struct BinaryPlusExpression final : Expression<Scalar> {
   }
 };
 
-/**
- * Derived expression type for cbrt().
- *
- * @tparam Scalar Scalar type.
- */
+/// Derived expression type for cbrt().
+///
+/// @tparam Scalar Scalar type.
 template <typename Scalar>
 struct CbrtExpression final : Expression<Scalar> {
-  /**
-   * Constructs an unary expression (an operator with one argument).
-   *
-   * @param lhs Unary operator's operand.
-   */
+  /// Constructs an unary expression (an operator with one argument).
+  ///
+  /// @param lhs Unary operator's operand.
   explicit constexpr CbrtExpression(ExpressionPtr<Scalar> lhs)
       : Expression<Scalar>{std::move(lhs)} {}
 
@@ -593,12 +534,10 @@ struct CbrtExpression final : Expression<Scalar> {
   }
 };
 
-/**
- * cbrt() for Expressions.
- *
- * @tparam Scalar Scalar type.
- * @param x The argument.
- */
+/// cbrt() for Expressions.
+///
+/// @tparam Scalar Scalar type.
+/// @param x The argument.
 template <typename Scalar>
 ExpressionPtr<Scalar> cbrt(const ExpressionPtr<Scalar>& x) {
   using enum ExpressionType;
@@ -619,18 +558,14 @@ ExpressionPtr<Scalar> cbrt(const ExpressionPtr<Scalar>& x) {
   return make_expression_ptr<CbrtExpression<Scalar>>(x);
 }
 
-/**
- * Derived expression type for constant.
- *
- * @tparam Scalar Scalar type.
- */
+/// Derived expression type for constant.
+///
+/// @tparam Scalar Scalar type.
 template <typename Scalar>
 struct ConstExpression final : Expression<Scalar> {
-  /**
-   * Constructs a nullary expression (an operator with no arguments).
-   *
-   * @param value The expression value.
-   */
+  /// Constructs a nullary expression (an operator with no arguments).
+  ///
+  /// @param value The expression value.
   explicit constexpr ConstExpression(Scalar value)
       : Expression<Scalar>{value} {}
 
@@ -639,23 +574,17 @@ struct ConstExpression final : Expression<Scalar> {
   ExpressionType type() const override { return ExpressionType::CONSTANT; }
 };
 
-/**
- * Derived expression type for decision variable.
- *
- * @tparam Scalar Scalar type.
- */
+/// Derived expression type for decision variable.
+///
+/// @tparam Scalar Scalar type.
 template <typename Scalar>
 struct DecisionVariableExpression final : Expression<Scalar> {
-  /**
-   * Constructs a decision variable expression with a value of zero.
-   */
+  /// Constructs a decision variable expression with a value of zero.
   constexpr DecisionVariableExpression() = default;
 
-  /**
-   * Constructs a nullary expression (an operator with no arguments).
-   *
-   * @param value The expression value.
-   */
+  /// Constructs a nullary expression (an operator with no arguments).
+  ///
+  /// @param value The expression value.
   explicit constexpr DecisionVariableExpression(Scalar value)
       : Expression<Scalar>{value} {}
 
@@ -664,20 +593,16 @@ struct DecisionVariableExpression final : Expression<Scalar> {
   ExpressionType type() const override { return ExpressionType::LINEAR; }
 };
 
-/**
- * Derived expression type for binary division operator.
- *
- * @tparam Scalar Scalar type.
- * @tparam T Expression type.
- */
+/// Derived expression type for binary division operator.
+///
+/// @tparam Scalar Scalar type.
+/// @tparam T Expression type.
 template <typename Scalar, ExpressionType T>
 struct DivExpression final : Expression<Scalar> {
-  /**
-   * Constructs a binary expression (an operator with two arguments).
-   *
-   * @param lhs Binary operator's left operand.
-   * @param rhs Binary operator's right operand.
-   */
+  /// Constructs a binary expression (an operator with two arguments).
+  ///
+  /// @param lhs Binary operator's left operand.
+  /// @param rhs Binary operator's right operand.
   constexpr DivExpression(ExpressionPtr<Scalar> lhs, ExpressionPtr<Scalar> rhs)
       : Expression<Scalar>{std::move(lhs), std::move(rhs)} {}
 
@@ -706,20 +631,16 @@ struct DivExpression final : Expression<Scalar> {
   }
 };
 
-/**
- * Derived expression type for binary multiplication operator.
- *
- * @tparam Scalar Scalar type.
- * @tparam T Expression type.
- */
+/// Derived expression type for binary multiplication operator.
+///
+/// @tparam Scalar Scalar type.
+/// @tparam T Expression type.
 template <typename Scalar, ExpressionType T>
 struct MultExpression final : Expression<Scalar> {
-  /**
-   * Constructs a binary expression (an operator with two arguments).
-   *
-   * @param lhs Binary operator's left operand.
-   * @param rhs Binary operator's right operand.
-   */
+  /// Constructs a binary expression (an operator with two arguments).
+  ///
+  /// @param lhs Binary operator's left operand.
+  /// @param rhs Binary operator's right operand.
   constexpr MultExpression(ExpressionPtr<Scalar> lhs, ExpressionPtr<Scalar> rhs)
       : Expression<Scalar>{std::move(lhs), std::move(rhs)} {}
 
@@ -752,19 +673,15 @@ struct MultExpression final : Expression<Scalar> {
   }
 };
 
-/**
- * Derived expression type for unary minus operator.
- *
- * @tparam Scalar Scalar type.
- * @tparam T Expression type.
- */
+/// Derived expression type for unary minus operator.
+///
+/// @tparam Scalar Scalar type.
+/// @tparam T Expression type.
 template <typename Scalar, ExpressionType T>
 struct UnaryMinusExpression final : Expression<Scalar> {
-  /**
-   * Constructs an unary expression (an operator with one argument).
-   *
-   * @param lhs Unary operator's operand.
-   */
+  /// Constructs an unary expression (an operator with one argument).
+  ///
+  /// @param lhs Unary operator's operand.
   explicit constexpr UnaryMinusExpression(ExpressionPtr<Scalar> lhs)
       : Expression<Scalar>{std::move(lhs)} {}
 
@@ -783,23 +700,19 @@ struct UnaryMinusExpression final : Expression<Scalar> {
   }
 };
 
-/**
- * Refcount increment for intrusive shared pointer.
- *
- * @tparam Scalar Scalar type.
- * @param expr The shared pointer's managed object.
- */
+/// Refcount increment for intrusive shared pointer.
+///
+/// @tparam Scalar Scalar type.
+/// @param expr The shared pointer's managed object.
 template <typename Scalar>
 constexpr void inc_ref_count(Expression<Scalar>* expr) {
   ++expr->ref_count;
 }
 
-/**
- * Refcount decrement for intrusive shared pointer.
- *
- * @tparam Scalar Scalar type.
- * @param expr The shared pointer's managed object.
- */
+/// Refcount decrement for intrusive shared pointer.
+///
+/// @tparam Scalar Scalar type.
+/// @param expr The shared pointer's managed object.
 template <typename Scalar>
 constexpr void dec_ref_count(Expression<Scalar>* expr) {
   // If a deeply nested tree is being deallocated all at once, calling the
@@ -836,18 +749,14 @@ constexpr void dec_ref_count(Expression<Scalar>* expr) {
   }
 }
 
-/**
- * Derived expression type for abs().
- *
- * @tparam Scalar Scalar type.
- */
+/// Derived expression type for abs().
+///
+/// @tparam Scalar Scalar type.
 template <typename Scalar>
 struct AbsExpression final : Expression<Scalar> {
-  /**
-   * Constructs an unary expression (an operator with one argument).
-   *
-   * @param lhs Unary operator's operand.
-   */
+  /// Constructs an unary expression (an operator with one argument).
+  ///
+  /// @param lhs Unary operator's operand.
   explicit constexpr AbsExpression(ExpressionPtr<Scalar> lhs)
       : Expression<Scalar>{std::move(lhs)} {}
 
@@ -881,12 +790,10 @@ struct AbsExpression final : Expression<Scalar> {
   }
 };
 
-/**
- * abs() for Expressions.
- *
- * @tparam Scalar Scalar type.
- * @param x The argument.
- */
+/// abs() for Expressions.
+///
+/// @tparam Scalar Scalar type.
+/// @param x The argument.
 template <typename Scalar>
 ExpressionPtr<Scalar> abs(const ExpressionPtr<Scalar>& x) {
   using enum ExpressionType;
@@ -906,18 +813,14 @@ ExpressionPtr<Scalar> abs(const ExpressionPtr<Scalar>& x) {
   return make_expression_ptr<AbsExpression<Scalar>>(x);
 }
 
-/**
- * Derived expression type for acos().
- *
- * @tparam Scalar Scalar type.
- */
+/// Derived expression type for acos().
+///
+/// @tparam Scalar Scalar type.
 template <typename Scalar>
 struct AcosExpression final : Expression<Scalar> {
-  /**
-   * Constructs an unary expression (an operator with one argument).
-   *
-   * @param lhs Unary operator's operand.
-   */
+  /// Constructs an unary expression (an operator with one argument).
+  ///
+  /// @param lhs Unary operator's operand.
   explicit constexpr AcosExpression(ExpressionPtr<Scalar> lhs)
       : Expression<Scalar>{std::move(lhs)} {}
 
@@ -940,12 +843,10 @@ struct AcosExpression final : Expression<Scalar> {
   }
 };
 
-/**
- * acos() for Expressions.
- *
- * @tparam Scalar Scalar type.
- * @param x The argument.
- */
+/// acos() for Expressions.
+///
+/// @tparam Scalar Scalar type.
+/// @param x The argument.
 template <typename Scalar>
 ExpressionPtr<Scalar> acos(const ExpressionPtr<Scalar>& x) {
   using enum ExpressionType;
@@ -964,18 +865,14 @@ ExpressionPtr<Scalar> acos(const ExpressionPtr<Scalar>& x) {
   return make_expression_ptr<AcosExpression<Scalar>>(x);
 }
 
-/**
- * Derived expression type for asin().
- *
- * @tparam Scalar Scalar type.
- */
+/// Derived expression type for asin().
+///
+/// @tparam Scalar Scalar type.
 template <typename Scalar>
 struct AsinExpression final : Expression<Scalar> {
-  /**
-   * Constructs an unary expression (an operator with one argument).
-   *
-   * @param lhs Unary operator's operand.
-   */
+  /// Constructs an unary expression (an operator with one argument).
+  ///
+  /// @param lhs Unary operator's operand.
   explicit constexpr AsinExpression(ExpressionPtr<Scalar> lhs)
       : Expression<Scalar>{std::move(lhs)} {}
 
@@ -998,12 +895,10 @@ struct AsinExpression final : Expression<Scalar> {
   }
 };
 
-/**
- * asin() for Expressions.
- *
- * @tparam Scalar Scalar type.
- * @param x The argument.
- */
+/// asin() for Expressions.
+///
+/// @tparam Scalar Scalar type.
+/// @param x The argument.
 template <typename Scalar>
 ExpressionPtr<Scalar> asin(const ExpressionPtr<Scalar>& x) {
   using enum ExpressionType;
@@ -1023,18 +918,14 @@ ExpressionPtr<Scalar> asin(const ExpressionPtr<Scalar>& x) {
   return make_expression_ptr<AsinExpression<Scalar>>(x);
 }
 
-/**
- * Derived expression type for atan().
- *
- * @tparam Scalar Scalar type.
- */
+/// Derived expression type for atan().
+///
+/// @tparam Scalar Scalar type.
 template <typename Scalar>
 struct AtanExpression final : Expression<Scalar> {
-  /**
-   * Constructs an unary expression (an operator with one argument).
-   *
-   * @param lhs Unary operator's operand.
-   */
+  /// Constructs an unary expression (an operator with one argument).
+  ///
+  /// @param lhs Unary operator's operand.
   explicit constexpr AtanExpression(ExpressionPtr<Scalar> lhs)
       : Expression<Scalar>{std::move(lhs)} {}
 
@@ -1056,12 +947,10 @@ struct AtanExpression final : Expression<Scalar> {
   }
 };
 
-/**
- * atan() for Expressions.
- *
- * @tparam Scalar Scalar type.
- * @param x The argument.
- */
+/// atan() for Expressions.
+///
+/// @tparam Scalar Scalar type.
+/// @param x The argument.
 template <typename Scalar>
 ExpressionPtr<Scalar> atan(const ExpressionPtr<Scalar>& x) {
   using enum ExpressionType;
@@ -1081,19 +970,15 @@ ExpressionPtr<Scalar> atan(const ExpressionPtr<Scalar>& x) {
   return make_expression_ptr<AtanExpression<Scalar>>(x);
 }
 
-/**
- * Derived expression type for atan2().
- *
- * @tparam Scalar Scalar type.
- */
+/// Derived expression type for atan2().
+///
+/// @tparam Scalar Scalar type.
 template <typename Scalar>
 struct Atan2Expression final : Expression<Scalar> {
-  /**
-   * Constructs a binary expression (an operator with two arguments).
-   *
-   * @param lhs Binary operator's left operand.
-   * @param rhs Binary operator's right operand.
-   */
+  /// Constructs a binary expression (an operator with two arguments).
+  ///
+  /// @param lhs Binary operator's left operand.
+  /// @param rhs Binary operator's right operand.
   constexpr Atan2Expression(ExpressionPtr<Scalar> lhs,
                             ExpressionPtr<Scalar> rhs)
       : Expression<Scalar>{std::move(lhs), std::move(rhs)} {}
@@ -1126,13 +1011,11 @@ struct Atan2Expression final : Expression<Scalar> {
   }
 };
 
-/**
- * atan2() for Expressions.
- *
- * @tparam Scalar Scalar type.
- * @param y The y argument.
- * @param x The x argument.
- */
+/// atan2() for Expressions.
+///
+/// @tparam Scalar Scalar type.
+/// @param y The y argument.
+/// @param x The x argument.
 template <typename Scalar>
 ExpressionPtr<Scalar> atan2(const ExpressionPtr<Scalar>& y,
                             const ExpressionPtr<Scalar>& x) {
@@ -1155,18 +1038,14 @@ ExpressionPtr<Scalar> atan2(const ExpressionPtr<Scalar>& y,
   return make_expression_ptr<Atan2Expression<Scalar>>(y, x);
 }
 
-/**
- * Derived expression type for cos().
- *
- * @tparam Scalar Scalar type.
- */
+/// Derived expression type for cos().
+///
+/// @tparam Scalar Scalar type.
 template <typename Scalar>
 struct CosExpression final : Expression<Scalar> {
-  /**
-   * Constructs an unary expression (an operator with one argument).
-   *
-   * @param lhs Unary operator's operand.
-   */
+  /// Constructs an unary expression (an operator with one argument).
+  ///
+  /// @param lhs Unary operator's operand.
   explicit constexpr CosExpression(ExpressionPtr<Scalar> lhs)
       : Expression<Scalar>{std::move(lhs)} {}
 
@@ -1189,12 +1068,10 @@ struct CosExpression final : Expression<Scalar> {
   }
 };
 
-/**
- * cos() for Expressions.
- *
- * @tparam Scalar Scalar type.
- * @param x The argument.
- */
+/// cos() for Expressions.
+///
+/// @tparam Scalar Scalar type.
+/// @param x The argument.
 template <typename Scalar>
 ExpressionPtr<Scalar> cos(const ExpressionPtr<Scalar>& x) {
   using enum ExpressionType;
@@ -1213,18 +1090,14 @@ ExpressionPtr<Scalar> cos(const ExpressionPtr<Scalar>& x) {
   return make_expression_ptr<CosExpression<Scalar>>(x);
 }
 
-/**
- * Derived expression type for cosh().
- *
- * @tparam Scalar Scalar type.
- */
+/// Derived expression type for cosh().
+///
+/// @tparam Scalar Scalar type.
 template <typename Scalar>
 struct CoshExpression final : Expression<Scalar> {
-  /**
-   * Constructs an unary expression (an operator with one argument).
-   *
-   * @param lhs Unary operator's operand.
-   */
+  /// Constructs an unary expression (an operator with one argument).
+  ///
+  /// @param lhs Unary operator's operand.
   explicit constexpr CoshExpression(ExpressionPtr<Scalar> lhs)
       : Expression<Scalar>{std::move(lhs)} {}
 
@@ -1247,12 +1120,10 @@ struct CoshExpression final : Expression<Scalar> {
   }
 };
 
-/**
- * cosh() for Expressions.
- *
- * @tparam Scalar Scalar type.
- * @param x The argument.
- */
+/// cosh() for Expressions.
+///
+/// @tparam Scalar Scalar type.
+/// @param x The argument.
 template <typename Scalar>
 ExpressionPtr<Scalar> cosh(const ExpressionPtr<Scalar>& x) {
   using enum ExpressionType;
@@ -1271,18 +1142,14 @@ ExpressionPtr<Scalar> cosh(const ExpressionPtr<Scalar>& x) {
   return make_expression_ptr<CoshExpression<Scalar>>(x);
 }
 
-/**
- * Derived expression type for erf().
- *
- * @tparam Scalar Scalar type.
- */
+/// Derived expression type for erf().
+///
+/// @tparam Scalar Scalar type.
 template <typename Scalar>
 struct ErfExpression final : Expression<Scalar> {
-  /**
-   * Constructs an unary expression (an operator with one argument).
-   *
-   * @param lhs Unary operator's operand.
-   */
+  /// Constructs an unary expression (an operator with one argument).
+  ///
+  /// @param lhs Unary operator's operand.
   explicit constexpr ErfExpression(ExpressionPtr<Scalar> lhs)
       : Expression<Scalar>{std::move(lhs)} {}
 
@@ -1307,12 +1174,10 @@ struct ErfExpression final : Expression<Scalar> {
   }
 };
 
-/**
- * erf() for Expressions.
- *
- * @tparam Scalar Scalar type.
- * @param x The argument.
- */
+/// erf() for Expressions.
+///
+/// @tparam Scalar Scalar type.
+/// @param x The argument.
 template <typename Scalar>
 ExpressionPtr<Scalar> erf(const ExpressionPtr<Scalar>& x) {
   using enum ExpressionType;
@@ -1332,18 +1197,14 @@ ExpressionPtr<Scalar> erf(const ExpressionPtr<Scalar>& x) {
   return make_expression_ptr<ErfExpression<Scalar>>(x);
 }
 
-/**
- * Derived expression type for exp().
- *
- * @tparam Scalar Scalar type.
- */
+/// Derived expression type for exp().
+///
+/// @tparam Scalar Scalar type.
 template <typename Scalar>
 struct ExpExpression final : Expression<Scalar> {
-  /**
-   * Constructs an unary expression (an operator with one argument).
-   *
-   * @param lhs Unary operator's operand.
-   */
+  /// Constructs an unary expression (an operator with one argument).
+  ///
+  /// @param lhs Unary operator's operand.
   explicit constexpr ExpExpression(ExpressionPtr<Scalar> lhs)
       : Expression<Scalar>{std::move(lhs)} {}
 
@@ -1366,12 +1227,10 @@ struct ExpExpression final : Expression<Scalar> {
   }
 };
 
-/**
- * exp() for Expressions.
- *
- * @tparam Scalar Scalar type.
- * @param x The argument.
- */
+/// exp() for Expressions.
+///
+/// @tparam Scalar Scalar type.
+/// @param x The argument.
 template <typename Scalar>
 ExpressionPtr<Scalar> exp(const ExpressionPtr<Scalar>& x) {
   using enum ExpressionType;
@@ -1394,19 +1253,15 @@ template <typename Scalar>
 ExpressionPtr<Scalar> hypot(const ExpressionPtr<Scalar>& x,
                             const ExpressionPtr<Scalar>& y);
 
-/**
- * Derived expression type for hypot().
- *
- * @tparam Scalar Scalar type.
- */
+/// Derived expression type for hypot().
+///
+/// @tparam Scalar Scalar type.
 template <typename Scalar>
 struct HypotExpression final : Expression<Scalar> {
-  /**
-   * Constructs a binary expression (an operator with two arguments).
-   *
-   * @param lhs Binary operator's left operand.
-   * @param rhs Binary operator's right operand.
-   */
+  /// Constructs a binary expression (an operator with two arguments).
+  ///
+  /// @param lhs Binary operator's left operand.
+  /// @param rhs Binary operator's right operand.
   constexpr HypotExpression(ExpressionPtr<Scalar> lhs,
                             ExpressionPtr<Scalar> rhs)
       : Expression<Scalar>{std::move(lhs), std::move(rhs)} {}
@@ -1441,13 +1296,11 @@ struct HypotExpression final : Expression<Scalar> {
   }
 };
 
-/**
- * hypot() for Expressions.
- *
- * @tparam Scalar Scalar type.
- * @param x The x argument.
- * @param y The y argument.
- */
+/// hypot() for Expressions.
+///
+/// @tparam Scalar Scalar type.
+/// @param x The x argument.
+/// @param y The y argument.
 template <typename Scalar>
 ExpressionPtr<Scalar> hypot(const ExpressionPtr<Scalar>& x,
                             const ExpressionPtr<Scalar>& y) {
@@ -1469,18 +1322,14 @@ ExpressionPtr<Scalar> hypot(const ExpressionPtr<Scalar>& x,
   return make_expression_ptr<HypotExpression<Scalar>>(x, y);
 }
 
-/**
- * Derived expression type for log().
- *
- * @tparam Scalar Scalar type.
- */
+/// Derived expression type for log().
+///
+/// @tparam Scalar Scalar type.
 template <typename Scalar>
 struct LogExpression final : Expression<Scalar> {
-  /**
-   * Constructs an unary expression (an operator with one argument).
-   *
-   * @param lhs Unary operator's operand.
-   */
+  /// Constructs an unary expression (an operator with one argument).
+  ///
+  /// @param lhs Unary operator's operand.
   explicit constexpr LogExpression(ExpressionPtr<Scalar> lhs)
       : Expression<Scalar>{std::move(lhs)} {}
 
@@ -1502,12 +1351,10 @@ struct LogExpression final : Expression<Scalar> {
   }
 };
 
-/**
- * log() for Expressions.
- *
- * @tparam Scalar Scalar type.
- * @param x The argument.
- */
+/// log() for Expressions.
+///
+/// @tparam Scalar Scalar type.
+/// @param x The argument.
 template <typename Scalar>
 ExpressionPtr<Scalar> log(const ExpressionPtr<Scalar>& x) {
   using enum ExpressionType;
@@ -1527,18 +1374,14 @@ ExpressionPtr<Scalar> log(const ExpressionPtr<Scalar>& x) {
   return make_expression_ptr<LogExpression<Scalar>>(x);
 }
 
-/**
- * Derived expression type for log10().
- *
- * @tparam Scalar Scalar type.
- */
+/// Derived expression type for log10().
+///
+/// @tparam Scalar Scalar type.
 template <typename Scalar>
 struct Log10Expression final : Expression<Scalar> {
-  /**
-   * Constructs an unary expression (an operator with one argument).
-   *
-   * @param lhs Unary operator's operand.
-   */
+  /// Constructs an unary expression (an operator with one argument).
+  ///
+  /// @param lhs Unary operator's operand.
   explicit constexpr Log10Expression(ExpressionPtr<Scalar> lhs)
       : Expression<Scalar>{std::move(lhs)} {}
 
@@ -1560,12 +1403,10 @@ struct Log10Expression final : Expression<Scalar> {
   }
 };
 
-/**
- * log10() for Expressions.
- *
- * @tparam Scalar Scalar type.
- * @param x The argument.
- */
+/// log10() for Expressions.
+///
+/// @tparam Scalar Scalar type.
+/// @param x The argument.
 template <typename Scalar>
 ExpressionPtr<Scalar> log10(const ExpressionPtr<Scalar>& x) {
   using enum ExpressionType;
@@ -1589,20 +1430,16 @@ template <typename Scalar>
 ExpressionPtr<Scalar> pow(const ExpressionPtr<Scalar>& base,
                           const ExpressionPtr<Scalar>& power);
 
-/**
- * Derived expression type for pow().
- *
- * @tparam Scalar Scalar type.
- * @tparam T Expression type.
- */
+/// Derived expression type for pow().
+///
+/// @tparam Scalar Scalar type.
+/// @tparam T Expression type.
 template <typename Scalar, ExpressionType T>
 struct PowExpression final : Expression<Scalar> {
-  /**
-   * Constructs a binary expression (an operator with two arguments).
-   *
-   * @param lhs Binary operator's left operand.
-   * @param rhs Binary operator's right operand.
-   */
+  /// Constructs a binary expression (an operator with two arguments).
+  ///
+  /// @param lhs Binary operator's left operand.
+  /// @param rhs Binary operator's right operand.
   constexpr PowExpression(ExpressionPtr<Scalar> lhs, ExpressionPtr<Scalar> rhs)
       : Expression<Scalar>{std::move(lhs), std::move(rhs)} {}
 
@@ -1651,13 +1488,11 @@ struct PowExpression final : Expression<Scalar> {
   }
 };
 
-/**
- * pow() for Expressions.
- *
- * @tparam Scalar Scalar type.
- * @param base The base.
- * @param power The power.
- */
+/// pow() for Expressions.
+///
+/// @tparam Scalar Scalar type.
+/// @param base The base.
+/// @param power The power.
 template <typename Scalar>
 ExpressionPtr<Scalar> pow(const ExpressionPtr<Scalar>& base,
                           const ExpressionPtr<Scalar>& power) {
@@ -1694,18 +1529,14 @@ ExpressionPtr<Scalar> pow(const ExpressionPtr<Scalar>& base,
   return make_expression_ptr<PowExpression<Scalar, NONLINEAR>>(base, power);
 }
 
-/**
- * Derived expression type for sign().
- *
- * @tparam Scalar Scalar type.
- */
+/// Derived expression type for sign().
+///
+/// @tparam Scalar Scalar type.
 template <typename Scalar>
 struct SignExpression final : Expression<Scalar> {
-  /**
-   * Constructs an unary expression (an operator with one argument).
-   *
-   * @param lhs Unary operator's operand.
-   */
+  /// Constructs an unary expression (an operator with one argument).
+  ///
+  /// @param lhs Unary operator's operand.
   explicit constexpr SignExpression(ExpressionPtr<Scalar> lhs)
       : Expression<Scalar>{std::move(lhs)} {}
 
@@ -1722,12 +1553,10 @@ struct SignExpression final : Expression<Scalar> {
   ExpressionType type() const override { return ExpressionType::NONLINEAR; }
 };
 
-/**
- * sign() for Expressions.
- *
- * @tparam Scalar Scalar type.
- * @param x The argument.
- */
+/// sign() for Expressions.
+///
+/// @tparam Scalar Scalar type.
+/// @param x The argument.
 template <typename Scalar>
 ExpressionPtr<Scalar> sign(const ExpressionPtr<Scalar>& x) {
   using enum ExpressionType;
@@ -1747,18 +1576,14 @@ ExpressionPtr<Scalar> sign(const ExpressionPtr<Scalar>& x) {
   return make_expression_ptr<SignExpression<Scalar>>(x);
 }
 
-/**
- * Derived expression type for sin().
- *
- * @tparam Scalar Scalar type.
- */
+/// Derived expression type for sin().
+///
+/// @tparam Scalar Scalar type.
 template <typename Scalar>
 struct SinExpression final : Expression<Scalar> {
-  /**
-   * Constructs an unary expression (an operator with one argument).
-   *
-   * @param lhs Unary operator's operand.
-   */
+  /// Constructs an unary expression (an operator with one argument).
+  ///
+  /// @param lhs Unary operator's operand.
   explicit constexpr SinExpression(ExpressionPtr<Scalar> lhs)
       : Expression<Scalar>{std::move(lhs)} {}
 
@@ -1781,12 +1606,10 @@ struct SinExpression final : Expression<Scalar> {
   }
 };
 
-/**
- * sin() for Expressions.
- *
- * @tparam Scalar Scalar type.
- * @param x The argument.
- */
+/// sin() for Expressions.
+///
+/// @tparam Scalar Scalar type.
+/// @param x The argument.
 template <typename Scalar>
 ExpressionPtr<Scalar> sin(const ExpressionPtr<Scalar>& x) {
   using enum ExpressionType;
@@ -1806,18 +1629,14 @@ ExpressionPtr<Scalar> sin(const ExpressionPtr<Scalar>& x) {
   return make_expression_ptr<SinExpression<Scalar>>(x);
 }
 
-/**
- * Derived expression type for sinh().
- *
- * @tparam Scalar Scalar type.
- */
+/// Derived expression type for sinh().
+///
+/// @tparam Scalar Scalar type.
 template <typename Scalar>
 struct SinhExpression final : Expression<Scalar> {
-  /**
-   * Constructs an unary expression (an operator with one argument).
-   *
-   * @param lhs Unary operator's operand.
-   */
+  /// Constructs an unary expression (an operator with one argument).
+  ///
+  /// @param lhs Unary operator's operand.
   explicit constexpr SinhExpression(ExpressionPtr<Scalar> lhs)
       : Expression<Scalar>{std::move(lhs)} {}
 
@@ -1840,12 +1659,10 @@ struct SinhExpression final : Expression<Scalar> {
   }
 };
 
-/**
- * sinh() for Expressions.
- *
- * @tparam Scalar Scalar type.
- * @param x The argument.
- */
+/// sinh() for Expressions.
+///
+/// @tparam Scalar Scalar type.
+/// @param x The argument.
 template <typename Scalar>
 ExpressionPtr<Scalar> sinh(const ExpressionPtr<Scalar>& x) {
   using enum ExpressionType;
@@ -1865,18 +1682,14 @@ ExpressionPtr<Scalar> sinh(const ExpressionPtr<Scalar>& x) {
   return make_expression_ptr<SinhExpression<Scalar>>(x);
 }
 
-/**
- * Derived expression type for sqrt().
- *
- * @tparam Scalar Scalar type.
- */
+/// Derived expression type for sqrt().
+///
+/// @tparam Scalar Scalar type.
 template <typename Scalar>
 struct SqrtExpression final : Expression<Scalar> {
-  /**
-   * Constructs an unary expression (an operator with one argument).
-   *
-   * @param lhs Unary operator's operand.
-   */
+  /// Constructs an unary expression (an operator with one argument).
+  ///
+  /// @param lhs Unary operator's operand.
   explicit constexpr SqrtExpression(ExpressionPtr<Scalar> lhs)
       : Expression<Scalar>{std::move(lhs)} {}
 
@@ -1899,12 +1712,10 @@ struct SqrtExpression final : Expression<Scalar> {
   }
 };
 
-/**
- * sqrt() for Expressions.
- *
- * @tparam Scalar Scalar type.
- * @param x The argument.
- */
+/// sqrt() for Expressions.
+///
+/// @tparam Scalar Scalar type.
+/// @param x The argument.
 template <typename Scalar>
 ExpressionPtr<Scalar> sqrt(const ExpressionPtr<Scalar>& x) {
   using enum ExpressionType;
@@ -1925,18 +1736,14 @@ ExpressionPtr<Scalar> sqrt(const ExpressionPtr<Scalar>& x) {
   return make_expression_ptr<SqrtExpression<Scalar>>(x);
 }
 
-/**
- * Derived expression type for tan().
- *
- * @tparam Scalar Scalar type.
- */
+/// Derived expression type for tan().
+///
+/// @tparam Scalar Scalar type.
 template <typename Scalar>
 struct TanExpression final : Expression<Scalar> {
-  /**
-   * Constructs an unary expression (an operator with one argument).
-   *
-   * @param lhs Unary operator's operand.
-   */
+  /// Constructs an unary expression (an operator with one argument).
+  ///
+  /// @param lhs Unary operator's operand.
   explicit constexpr TanExpression(ExpressionPtr<Scalar> lhs)
       : Expression<Scalar>{std::move(lhs)} {}
 
@@ -1962,12 +1769,10 @@ struct TanExpression final : Expression<Scalar> {
   }
 };
 
-/**
- * tan() for Expressions.
- *
- * @tparam Scalar Scalar type.
- * @param x The argument.
- */
+/// tan() for Expressions.
+///
+/// @tparam Scalar Scalar type.
+/// @param x The argument.
 template <typename Scalar>
 ExpressionPtr<Scalar> tan(const ExpressionPtr<Scalar>& x) {
   using enum ExpressionType;
@@ -1987,18 +1792,14 @@ ExpressionPtr<Scalar> tan(const ExpressionPtr<Scalar>& x) {
   return make_expression_ptr<TanExpression<Scalar>>(x);
 }
 
-/**
- * Derived expression type for tanh().
- *
- * @tparam Scalar Scalar type.
- */
+/// Derived expression type for tanh().
+///
+/// @tparam Scalar Scalar type.
 template <typename Scalar>
 struct TanhExpression final : Expression<Scalar> {
-  /**
-   * Constructs an unary expression (an operator with one argument).
-   *
-   * @param lhs Unary operator's operand.
-   */
+  /// Constructs an unary expression (an operator with one argument).
+  ///
+  /// @param lhs Unary operator's operand.
   explicit constexpr TanhExpression(ExpressionPtr<Scalar> lhs)
       : Expression<Scalar>{std::move(lhs)} {}
 
@@ -2024,12 +1825,10 @@ struct TanhExpression final : Expression<Scalar> {
   }
 };
 
-/**
- * tanh() for Expressions.
- *
- * @tparam Scalar Scalar type.
- * @param x The argument.
- */
+/// tanh() for Expressions.
+///
+/// @tparam Scalar Scalar type.
+/// @param x The argument.
 template <typename Scalar>
 ExpressionPtr<Scalar> tanh(const ExpressionPtr<Scalar>& x) {
   using enum ExpressionType;

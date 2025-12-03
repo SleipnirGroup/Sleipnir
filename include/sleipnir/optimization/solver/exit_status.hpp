@@ -10,9 +10,7 @@
 
 namespace slp {
 
-/**
- * Solver exit status. Negative values indicate failure.
- */
+/// Solver exit status. Negative values indicate failure.
 enum class ExitStatus : int8_t {
   /// Solved the problem to the desired tolerance.
   SUCCESS = 0,
@@ -42,11 +40,9 @@ enum class ExitStatus : int8_t {
   TIMEOUT = -9,
 };
 
-/**
- * Returns user-readable message corresponding to the solver exit status.
- *
- * @param exit_status Solver exit status.
- */
+/// Returns user-readable message corresponding to the solver exit status.
+///
+/// @param exit_status Solver exit status.
 SLEIPNIR_DLLEXPORT constexpr std::string_view to_message(
     const ExitStatus& exit_status) {
   using enum ExitStatus;

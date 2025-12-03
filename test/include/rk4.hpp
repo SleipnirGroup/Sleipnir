@@ -4,14 +4,12 @@
 
 #include <chrono>
 
-/**
- * Performs 4th order Runge-Kutta integration of dx/dt = f(x, u) for dt.
- *
- * @param f  The function to integrate. It must take two arguments x and u.
- * @param x  The initial value of x.
- * @param u  The value u held constant over the integration period.
- * @param dt The time over which to integrate.
- */
+/// Performs 4th order Runge-Kutta integration of dx/dt = f(x, u) for dt.
+///
+/// @param f The function to integrate. It must take two arguments x and u.
+/// @param x The initial value of x.
+/// @param u The value u held constant over the integration period.
+/// @param dt The time over which to integrate.
 template <typename Scalar, typename F, typename T, typename U>
 T rk4(F&& f, T x, U u, std::chrono::duration<Scalar> dt) {
   const auto h = dt.count();

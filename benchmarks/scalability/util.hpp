@@ -14,10 +14,8 @@
 #include <sleipnir/optimization/problem.hpp>
 #include <sleipnir/util/function_ref.hpp>
 
-/**
- * Converts std::chrono::duration to a number of milliseconds rounded to three
- * decimals.
- */
+/// Converts std::chrono::duration to a number of milliseconds rounded to three
+/// decimals.
 template <typename Rep, typename Period = std::ratio<1>>
 constexpr double to_ms(const std::chrono::duration<Rep, Period>& duration) {
   using std::chrono::duration_cast;
@@ -25,27 +23,26 @@ constexpr double to_ms(const std::chrono::duration<Rep, Period>& duration) {
   return duration_cast<microseconds>(duration).count() / 1e3;
 }
 
-/**
- * Runs scalability benchmarks for CasADi and Sleipnir versions of an
- * optimization problem, records the setup time and solve time for each, then
- * writes them to scalability-results.csv.
- *
- * The scale of the problem is iteratively increased by increasing the number of
- * timesteps within the time horizon.
- *
- * @tparam Problem The optimization problem's type (casadi::Opti or
- *   slp::Problem).
- * @param filename Results CSV filename.
- * @param diagnostics Whether to enable diagnostic prints.
- * @param T The time horizon of the optimization problem.
- * @param sample_sizes_to_test List of sample sizes for which to record results.
- * @param min_power The minimum power of 10 for the number of samples in the
- *   problem.
- * @param max_power The maximum power of 10 for the number of samples in the
- *   problem.
- * @param setup A function that takes a time horizon and number of samples and
- *   returns an optimization problem instance.
- */
+/// Runs scalability benchmarks for CasADi and Sleipnir versions of an
+/// optimization problem, records the setup time and solve time for each, then
+/// writes them to scalability-results.csv.
+///
+/// The scale of the problem is iteratively increased by increasing the number
+/// of timesteps within the time horizon.
+///
+/// @tparam Problem The optimization problem's type (casadi::Opti or
+///     slp::Problem).
+/// @param filename Results CSV filename.
+/// @param diagnostics Whether to enable diagnostic prints.
+/// @param T The time horizon of the optimization problem.
+/// @param sample_sizes_to_test List of sample sizes for which to record
+///     results.
+/// @param min_power The minimum power of 10 for the number of samples in the
+///     problem.
+/// @param max_power The maximum power of 10 for the number of samples in the
+///     problem.
+/// @param setup A function that takes a time horizon and number of samples and
+///     returns an optimization problem instance.
 template <typename Problem>
 int run_benchmarks_and_log(
     std::string_view filename, bool diagnostics,
