@@ -63,7 +63,7 @@ template <typename Scalar, ExpressionType T>
 struct BinaryPlusExpression;
 
 template <typename Scalar>
-struct ConstExpression;
+struct ConstantExpression;
 
 template <typename Scalar, ExpressionType T>
 struct DivExpression;
@@ -409,7 +409,7 @@ struct Expression {
 
 template <typename Scalar>
 ExpressionPtr<Scalar> constant_ptr(Scalar value) {
-  return make_expression_ptr<ConstExpression<Scalar>>(value);
+  return make_expression_ptr<ConstantExpression<Scalar>>(value);
 }
 
 template <typename Scalar>
@@ -562,11 +562,11 @@ ExpressionPtr<Scalar> cbrt(const ExpressionPtr<Scalar>& x) {
 ///
 /// @tparam Scalar Scalar type.
 template <typename Scalar>
-struct ConstExpression final : Expression<Scalar> {
+struct ConstantExpression final : Expression<Scalar> {
   /// Constructs a nullary expression (an operator with no arguments).
   ///
   /// @param value The expression value.
-  explicit constexpr ConstExpression(Scalar value)
+  explicit constexpr ConstantExpression(Scalar value)
       : Expression<Scalar>{value} {}
 
   Scalar value(Scalar, Scalar) const override { return this->val; }

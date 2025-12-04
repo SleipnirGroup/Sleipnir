@@ -11,7 +11,6 @@
 #include "scalar_types_under_test.hpp"
 
 using slp::detail::constant_ptr;
-using slp::detail::ConstExpression;
 using slp::detail::DecisionVariableExpression;
 using slp::detail::make_expression_ptr;
 
