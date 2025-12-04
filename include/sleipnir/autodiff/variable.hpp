@@ -61,7 +61,7 @@ class Variable : public SleipnirBase {
   // NOLINTNEXTLINE (google-explicit-constructor)
   Variable(Scalar value)
     requires(!MatrixLike<Scalar>)
-      : expr{detail::make_expression_ptr<detail::ConstExpression<Scalar>>(
+      : expr{detail::make_expression_ptr<detail::ConstantExpression<Scalar>>(
             value)} {}
 
   /// Constructs a Variable from a scalar type.
@@ -77,7 +77,7 @@ class Variable : public SleipnirBase {
   /// @param value The value of the Variable.
   // NOLINTNEXTLINE (google-explicit-constructor)
   Variable(std::floating_point auto value)
-      : expr{detail::make_expression_ptr<detail::ConstExpression<Scalar>>(
+      : expr{detail::make_expression_ptr<detail::ConstantExpression<Scalar>>(
             Scalar(value))} {}
 
   /// Constructs a Variable from an integral type.
@@ -85,7 +85,7 @@ class Variable : public SleipnirBase {
   /// @param value The value of the Variable.
   // NOLINTNEXTLINE (google-explicit-constructor)
   Variable(std::integral auto value)
-      : expr{detail::make_expression_ptr<detail::ConstExpression<Scalar>>(
+      : expr{detail::make_expression_ptr<detail::ConstantExpression<Scalar>>(
             Scalar(value))} {}
 
   /// Constructs a Variable pointing to the specified expression.
@@ -104,7 +104,8 @@ class Variable : public SleipnirBase {
   /// @param value The value of the Variable.
   /// @return This variable.
   Variable<Scalar>& operator=(ScalarLike auto value) {
-    expr = detail::make_expression_ptr<detail::ConstExpression<Scalar>>(value);
+    expr =
+        detail::make_expression_ptr<detail::ConstantExpression<Scalar>>(value);
     m_graph_initialized = false;
 
     return *this;
