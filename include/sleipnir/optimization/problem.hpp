@@ -553,7 +553,7 @@ class Problem {
 
     if (options.diagnostics) {
       print_autodiff_diagnostics(ad_setup_profilers);
-      slp::println("\nExit: {}", to_message(status));
+      slp::println("\nExit: {}", status);
     }
 
     // Assign the solution to the original Variable instances

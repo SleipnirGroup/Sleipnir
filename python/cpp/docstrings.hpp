@@ -23,6 +23,62 @@
 #endif
 
 
+static const char *__doc_formatter = R"doc(Formatter for ExpressionType.)doc";
+
+static const char *__doc_formatter_2 = R"doc(Formatter for ExitStatus.)doc";
+
+static const char *__doc_formatter_format =
+R"doc(Format ExpressionType.
+
+Template parameter ``FmtContext``:
+    Format context type.
+
+Parameter ``type``:
+    Expression type.
+
+Parameter ``ctx``:
+    Format context.
+
+Returns:
+    Format context iterator.)doc";
+
+static const char *__doc_formatter_format_2 =
+R"doc(Format ExitStatus.
+
+Template parameter ``FmtContext``:
+    Format context type.
+
+Parameter ``exit_status``:
+    Exit status.
+
+Parameter ``ctx``:
+    Format context.
+
+Returns:
+    Format context iterator.)doc";
+
+static const char *__doc_formatter_m_underlying = R"doc()doc";
+
+static const char *__doc_formatter_m_underlying_2 = R"doc()doc";
+
+static const char *__doc_formatter_parse =
+R"doc(Parse format string.
+
+Parameter ``ctx``:
+    Format parse context.
+
+Returns:
+    Format parse context iterator.)doc";
+
+static const char *__doc_formatter_parse_2 =
+R"doc(Parse format string.
+
+Parameter ``ctx``:
+    Format parse context.
+
+Returns:
+    Format parse context iterator.)doc";
+
 static const char *__doc_slp = R"doc()doc";
 
 static const char *__doc_slp_2 = R"doc()doc";
@@ -2452,18 +2508,6 @@ Template parameter ``Scalar``:
 
 Parameter ``x``:
     The argument.)doc";
-
-static const char *__doc_slp_to_message =
-R"doc(Returns user-readable message corresponding to the expression type.
-
-Parameter ``type``:
-    Expression type.)doc";
-
-static const char *__doc_slp_to_message_2 =
-R"doc(Returns user-readable message corresponding to the solver exit status.
-
-Parameter ``exit_status``:
-    Solver exit status.)doc";
 
 #if defined(__GNUG__)
 #pragma GCC diagnostic pop
