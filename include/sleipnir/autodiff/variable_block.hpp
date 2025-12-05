@@ -558,7 +558,7 @@ class VariableBlock : public SleipnirBase {
   // NOLINTNEXTLINE (google-explicit-constructor)
   operator Variable<Scalar>() const {
     slp_assert(rows() == 1 && cols() == 1);
-    return (*this)(0, 0);
+    return (*this)[0, 0];
   }
 
   /// Returns the transpose of the variable matrix.
