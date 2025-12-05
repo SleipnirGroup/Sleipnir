@@ -2,7 +2,7 @@ import math
 
 import numpy as np
 import pytest
-from sleipnir.autodiff import ExpressionType
+from sleipnir.autodiff import ExpressionType, bounds
 from sleipnir.optimization import ExitStatus, Problem
 
 
@@ -33,8 +33,7 @@ def test_flywheel_problem():
 
     # State and input constraints
     problem.subject_to(X[0, 0] == 0.0)
-    problem.subject_to(-12 <= U)
-    problem.subject_to(U <= 12)
+    problem.subject_to(bounds(-12, U, 12))
 
     # Cost function - minimize error
     r = np.array([[10.0]])

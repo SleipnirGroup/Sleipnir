@@ -899,6 +899,18 @@ auto operator>=(LHS&& lhs, RHS&& rhs) {
   return InequalityConstraints<typename std::decay_t<LHS>::Scalar>{lhs, rhs};
 }
 
+/// Helper function for creating bound constraints.
+///
+/// @param l Lower bound.
+/// @param x Variable to bound.
+/// @param u Upper bound.
+template <typename L, typename X, typename U>
+  requires(ScalarLike<L> || MatrixLike<L>) && SleipnirType<X> &&
+          (ScalarLike<U> || MatrixLike<U>)
+auto bounds(L&& l, X&& x, U&& u) {
+  return InequalityConstraints{l <= x, x <= u};
+}
+
 }  // namespace slp
 
 namespace Eigen {

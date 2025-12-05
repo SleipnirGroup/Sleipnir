@@ -58,12 +58,10 @@ TEMPLATE_TEST_CASE("Problem - Double integrator", "[Problem]",
   problem.subject_to(X.col(N) == Eigen::Matrix<T, 2, 1>{{r}, {T(0)}});
 
   // Limit velocity
-  problem.subject_to(T(-1) <= X.row(1));
-  problem.subject_to(X.row(1) <= T(1));
+  problem.subject_to(slp::bounds(T(-1), X.row(1), T(1)));
 
   // Limit acceleration
-  problem.subject_to(T(-1) <= U);
-  problem.subject_to(U <= T(1));
+  problem.subject_to(slp::bounds(T(-1), U, T(1)));
 
   // Cost function - minimize position error
   slp::Variable J = T(0);

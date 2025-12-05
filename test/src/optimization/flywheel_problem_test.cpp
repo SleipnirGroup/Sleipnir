@@ -51,8 +51,7 @@ TEMPLATE_TEST_CASE("Problem - Flywheel", "[Problem]", SCALAR_TYPES_UNDER_TEST) {
 
   // State and input constraints
   problem.subject_to(X.col(0) == T(0));
-  problem.subject_to(T(-12) <= U);
-  problem.subject_to(U <= T(12));
+  problem.subject_to(slp::bounds(T(-12), U, T(12)));
 
   // Cost function - minimize error
   constexpr Eigen::Matrix<T, 1, 1> r{{T(10)}};

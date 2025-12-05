@@ -488,6 +488,23 @@ void bind_variable_matrix(nb::module_& autodiff,
         nb::is_operator(), "rhs"_a, DOC(slp, operator, ge));
   });
 
+  // Bounds function
+  for_each_type<double, int, const Variable<double>&,
+                const VariableMatrix<double>&,
+                const VariableBlock<VariableMatrix<double>>&>([&]<typename L> {
+    for_each_type<const Variable<double>&, const VariableMatrix<double>&,
+                  const VariableBlock<VariableMatrix<double>>&>(
+        [&]<typename X> {
+          for_each_type<double, int, const Variable<double>&,
+                        const VariableMatrix<double>&,
+                        const VariableBlock<VariableMatrix<double>>&>(
+              [&]<typename U> {
+                autodiff.def("bounds", &bounds<L&&, X&&, U&&>, "l"_a, "x"_a,
+                             "u"_a, DOC(slp, bounds));
+              });
+        });
+  });
+
   cls.def("__len__", &VariableMatrix<double>::rows,
           DOC(slp, VariableMatrix, rows));
 

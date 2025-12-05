@@ -58,12 +58,10 @@ TEMPLATE_TEST_CASE("Problem - Cart-pole", "[Problem]",
   problem.subject_to(X.col(N) == x_final);
 
   // Cart position constraints
-  problem.subject_to(X.row(0) >= T(0));
-  problem.subject_to(X.row(0) <= d_max);
+  problem.subject_to(slp::bounds(T(0), X.row(0), d_max));
 
   // Input constraints
-  problem.subject_to(U >= -u_max);
-  problem.subject_to(U <= u_max);
+  problem.subject_to(slp::bounds(-u_max, U, u_max));
 
   // Dynamics constraints - RK4 integration
   for (int k = 0; k < N; ++k) {

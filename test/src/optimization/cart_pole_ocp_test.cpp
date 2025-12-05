@@ -60,8 +60,7 @@ TEMPLATE_TEST_CASE("OCP - Cart-pole", "[OCP]", SCALAR_TYPES_UNDER_TEST) {
   problem.for_each_step([&](const slp::VariableMatrix<T>& x,
                             [[maybe_unused]]
                             const slp::VariableMatrix<T>& u) {
-    problem.subject_to(x[0] >= T(0));
-    problem.subject_to(x[0] <= d_max);
+    problem.subject_to(slp::bounds(T(0), x[0], d_max));
   });
 
   // Input constraints
