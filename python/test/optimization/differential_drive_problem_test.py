@@ -5,7 +5,7 @@ from differential_drive_util import (
     differential_drive_dynamics_variable,
 )
 from rk4 import rk4
-from sleipnir.autodiff import ExpressionType
+from sleipnir.autodiff import ExpressionType, bounds
 from sleipnir.optimization import ExitStatus, Problem
 
 
@@ -43,8 +43,7 @@ def test_differential_drive_problem():
     problem.subject_to(X[:, N : N + 1] == x_final)
 
     # Input constraints
-    problem.subject_to(U >= -u_max)
-    problem.subject_to(U <= u_max)
+    problem.subject_to(bounds(-u_max, U, u_max))
 
     # Dynamics constraints - RK4 integration
     for k in range(N):

@@ -4,7 +4,7 @@ import math
 
 import numpy as np
 import sleipnir.autodiff as autodiff
-from sleipnir.autodiff import ExpressionType
+from sleipnir.autodiff import ExpressionType, bounds
 from sleipnir.optimization import ExitStatus, Problem
 
 
@@ -62,20 +62,20 @@ def test_arm_on_elevator_problem():
     problem.subject_to(arm[:, N : N + 1] == np.array([[ARM_END_ANGLE], [0.0]]))
 
     # Elevator velocity limits
-    problem.subject_to(-ELEVATOR_MAX_VELOCITY <= elevator[1:2, :])
-    problem.subject_to(elevator[1:2, :] <= ELEVATOR_MAX_VELOCITY)
+    problem.subject_to(
+        bounds(-ELEVATOR_MAX_VELOCITY, elevator[1:2, :], ELEVATOR_MAX_VELOCITY)
+    )
 
     # Elevator acceleration limits
-    problem.subject_to(-ELEVATOR_MAX_ACCELERATION <= elevator_accel)
-    problem.subject_to(elevator_accel <= ELEVATOR_MAX_ACCELERATION)
+    problem.subject_to(
+        bounds(-ELEVATOR_MAX_ACCELERATION, elevator_accel, ELEVATOR_MAX_ACCELERATION)
+    )
 
     # Arm velocity limits
-    problem.subject_to(-ARM_MAX_VELOCITY <= arm[1:2, :])
-    problem.subject_to(arm[1:2, :] <= ARM_MAX_VELOCITY)
+    problem.subject_to(bounds(-ARM_MAX_VELOCITY, arm[1:2, :], ARM_MAX_VELOCITY))
 
     # Arm acceleration limits
-    problem.subject_to(-ARM_MAX_ACCELERATION <= arm_accel)
-    problem.subject_to(arm_accel <= ARM_MAX_ACCELERATION)
+    problem.subject_to(bounds(-ARM_MAX_ACCELERATION, arm_accel, ARM_MAX_ACCELERATION))
 
     # Height limit
     if 0:

@@ -2175,6 +2175,18 @@ Template parameter ``Scalar``:
 Parameter ``list``:
     The nested list of blocks.)doc";
 
+static const char *__doc_slp_bounds =
+R"doc(Helper function for creating bound constraints.
+
+Parameter ``l``:
+    Lower bound.
+
+Parameter ``x``:
+    Variable to bound.
+
+Parameter ``u``:
+    Upper bound.)doc";
+
 static const char *__doc_slp_cbrt =
 R"doc(cbrt() for Variables.
 
