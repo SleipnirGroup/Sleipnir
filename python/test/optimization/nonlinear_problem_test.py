@@ -3,7 +3,7 @@ import platform
 import numpy as np
 import pytest
 import sleipnir.autodiff as autodiff
-from sleipnir.autodiff import ExpressionType
+from sleipnir.autodiff import ExpressionType, bounds
 from sleipnir.optimization import ExitStatus, Problem
 
 
@@ -123,8 +123,7 @@ def test_conflicting_bounds():
     problem.minimize(autodiff.hypot(x, y))
 
     problem.subject_to(autodiff.hypot(x, y) <= 1)
-    problem.subject_to(x >= 0.5)
-    problem.subject_to(x <= -0.5)
+    problem.subject_to(bounds(0.5, x, -0.5))
 
     assert problem.cost_function_type() == ExpressionType.NONLINEAR
     assert problem.equality_constraint_type() == ExpressionType.NONE

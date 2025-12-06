@@ -14,6 +14,7 @@
 #include <sleipnir/autodiff/variable_matrix.hpp>
 
 #include "docstrings.hpp"
+#include "for_each_type.hpp"
 #include "try_cast.hpp"
 
 namespace nb = nanobind;
@@ -630,6 +631,29 @@ void bind_variable_matrix(nb::module_& autodiff,
   cls.def(Variable<double>() >= nb::self, "lhs"_a, DOC(slp, operator, ge));
   cls.def(double() >= nb::self, "lhs"_a, DOC(slp, operator, ge));
   cls.def(int() >= nb::self, "lhs"_a, DOC(slp, operator, ge));
+
+  // Bounds function
+  for_each_type<const slp::Variable<double>&, double, int,
+                const slp::VariableMatrix<double>&,
+                const VariableBlock<slp::VariableMatrix<double>>&>(
+      [&]<typename L> {
+        for_each_type<const slp::Variable<double>&, double, int,
+                      const slp::VariableMatrix<double>&,
+                      const VariableBlock<slp::VariableMatrix<double>>&>(
+            [&]<typename U> {
+              for_each_type<const slp::Variable<double>&,
+                            const slp::VariableMatrix<double>&,
+                            const VariableBlock<slp::VariableMatrix<double>>&>(
+                  [&]<typename X> {
+                    autodiff.def(
+                        "bounds",
+                        [](L&& l, X&& x, U&& u) {
+                          return slp::bounds(l, x, u);
+                        },
+                        "l"_a, "x"_a, "u"_a, DOC(slp, bounds));
+                  });
+            });
+      });
 
   // VariableMatrix-VariableBlock overloads
   cls.def(

@@ -159,8 +159,7 @@ TEMPLATE_TEST_CASE("Problem - Conflicting bounds", "[Problem]",
   problem.minimize(hypot(x, y));
 
   problem.subject_to(hypot(x, y) <= T(1));
-  problem.subject_to(x >= T(0.5));
-  problem.subject_to(x <= T(-0.5));
+  problem.subject_to(slp::bounds(T(0.5), x, T(-0.5)));
 
   CHECK(problem.cost_function_type() == slp::ExpressionType::NONLINEAR);
   CHECK(problem.equality_constraint_type() == slp::ExpressionType::NONE);
