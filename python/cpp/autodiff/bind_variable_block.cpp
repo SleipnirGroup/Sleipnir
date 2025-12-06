@@ -266,6 +266,8 @@ void bind_variable_block(
               return nb::cast(lhs.value() * self);
             } else if (auto rhs = try_cast_to_eigen<double>(inputs[1])) {
               return nb::cast(self * rhs.value());
+            } else if (auto rhs = try_cast_to_eigen<float>(inputs[1])) {
+              return nb::cast(self * rhs.value());
             } else if (auto rhs = try_cast_to_eigen<int64_t>(inputs[1])) {
               return nb::cast(self * rhs.value());
             } else if (auto rhs = try_cast_to_eigen<int32_t>(inputs[1])) {
