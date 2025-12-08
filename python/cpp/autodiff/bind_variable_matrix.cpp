@@ -359,13 +359,13 @@ void bind_variable_matrix(nb::module_& autodiff,
   cls.def(-nb::self);
 
   // Matrix-scalar/scalar-matrix operations
-  for_each_type<Variable<double>, double, int>([&]<typename T> {
+  for_each_type<double, int, Variable<double>>([&]<typename T> {
     cls.def(nb::self * T(), "rhs"_a);
     cls.def(T() * nb::self, "lhs"_a);
     cls.def(nb::self / T(), "rhs"_a);
     cls.def(nb::self /= T(), "rhs"_a, DOC(slp, VariableMatrix, operator, idiv));
   });
-  for_each_type<const Variable<double>&, double, int,
+  for_each_type<double, int, const Variable<double>&,
                 const VariableBlock<VariableMatrix<double>>,
                 nb::DRef<Eigen::MatrixXd>>([&]<typename T> {
     cls.def(
@@ -449,7 +449,7 @@ void bind_variable_matrix(nb::module_& autodiff,
                  DOC(slp, VariableMatrix, ones));
 
   // Comparison operators
-  for_each_type<nb::detail::self_t, Variable<double>, double, int>(
+  for_each_type<nb::detail::self_t, double, int, Variable<double>>(
       [&]<typename T> {
         cls.def(nb::self == T(), "rhs"_a, DOC(slp, operator, eq));
         cls.def(nb::self < T(), "rhs"_a, DOC(slp, operator, lt));
