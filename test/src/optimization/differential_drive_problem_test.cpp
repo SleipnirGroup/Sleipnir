@@ -54,8 +54,7 @@ TEMPLATE_TEST_CASE("Problem - Differential drive", "[Problem]",
   problem.subject_to(X.col(N) == x_final);
 
   // Input constraints
-  problem.subject_to(U >= -u_max);
-  problem.subject_to(U <= u_max);
+  problem.subject_to(slp::bounds(-u_max, U, u_max));
 
   // Dynamics constraints - RK4 integration
   for (int k = 0; k < N; ++k) {

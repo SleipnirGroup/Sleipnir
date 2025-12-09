@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from sleipnir.autodiff import ExpressionType
+from sleipnir.autodiff import ExpressionType, bounds
 from sleipnir.optimization import ExitStatus, Problem
 
 
@@ -39,12 +39,10 @@ def test_double_integrator_problem():
     problem.subject_to(X[:, N : N + 1] == np.array([[r], [0.0]]))
 
     # Limit velocity
-    problem.subject_to(-1 <= X[1:2, :])
-    problem.subject_to(X[1:2, :] <= 1)
+    problem.subject_to(bounds(-1, X[1:2, :], 1))
 
     # Limit acceleration
-    problem.subject_to(-1 <= U)
-    problem.subject_to(U <= 1)
+    problem.subject_to(bounds(-1, U, 1))
 
     # Cost function - minimize position error
     problem.minimize(sum((r - X[0, k]) ** 2 for k in range(N + 1)))

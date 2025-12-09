@@ -76,20 +76,20 @@ TEMPLATE_TEST_CASE("Problem - Arm on elevator", "[Problem]",
   problem.subject_to(arm.col(N) == Eigen::Vector<T, 2>({ARM_END_ANGLE, T(0)}));
 
   // Elevator velocity limits
-  problem.subject_to(-ELEVATOR_MAX_VELOCITY <= elevator.row(1));
-  problem.subject_to(elevator.row(1) <= ELEVATOR_MAX_VELOCITY);
+  problem.subject_to(slp::bounds(-ELEVATOR_MAX_VELOCITY, elevator.row(1),
+                                 ELEVATOR_MAX_VELOCITY));
 
   // Elevator acceleration limits
-  problem.subject_to(-ELEVATOR_MAX_ACCELERATION <= elevator_accel);
-  problem.subject_to(elevator_accel <= ELEVATOR_MAX_ACCELERATION);
+  problem.subject_to(slp::bounds(-ELEVATOR_MAX_ACCELERATION, elevator_accel,
+                                 ELEVATOR_MAX_ACCELERATION));
 
   // Arm velocity limits
-  problem.subject_to(-ARM_MAX_VELOCITY <= arm.row(1));
-  problem.subject_to(arm.row(1) <= ARM_MAX_VELOCITY);
+  problem.subject_to(
+      slp::bounds(-ARM_MAX_VELOCITY, arm.row(1), ARM_MAX_VELOCITY));
 
   // Arm acceleration limits
-  problem.subject_to(-ARM_MAX_ACCELERATION <= arm_accel);
-  problem.subject_to(arm_accel <= ARM_MAX_ACCELERATION);
+  problem.subject_to(
+      slp::bounds(-ARM_MAX_ACCELERATION, arm_accel, ARM_MAX_ACCELERATION));
 
   // Height limit
 #if 0

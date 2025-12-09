@@ -7,7 +7,7 @@ from cart_pole_util import (
     cart_pole_dynamics_variable,
 )
 from rk4 import rk4
-from sleipnir.autodiff import ExpressionType
+from sleipnir.autodiff import ExpressionType, bounds
 from sleipnir.optimization import ExitStatus, Problem
 
 
@@ -46,12 +46,10 @@ def test_cart_pole_problem():
     problem.subject_to(X[:, N : N + 1] == x_final)
 
     # Cart position constraints
-    problem.subject_to(X[:1, :] >= 0.0)
-    problem.subject_to(X[:1, :] <= d_max)
+    problem.subject_to(bounds(0.0, X[:1, :], d_max))
 
     # Input constraints
-    problem.subject_to(U >= -u_max)
-    problem.subject_to(U <= u_max)
+    problem.subject_to(bounds(-u_max, U, u_max))
 
     # Dynamics constraints - RK4 integration
     for k in range(N):
