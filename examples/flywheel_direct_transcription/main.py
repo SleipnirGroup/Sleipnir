@@ -3,7 +3,7 @@
 import math
 
 import numpy as np
-from sleipnir.optimization import Problem
+from sleipnir.optimization import Problem, bounds
 
 
 def main():
@@ -29,8 +29,7 @@ def main():
 
     # State and input constraints
     problem.subject_to(X[0, 0] == 0.0)
-    problem.subject_to(-12 <= U)
-    problem.subject_to(U <= 12)
+    problem.subject_to(bounds(-12, U, 12))
 
     # Cost function - minimize error
     r = np.array([[10.0]])
