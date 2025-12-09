@@ -7,13 +7,14 @@ from cart_pole_util import (
     cart_pole_dynamics_variable,
 )
 from rk4 import rk4
-from sleipnir.autodiff import ExpressionType, VariableMatrix, bounds
+from sleipnir.autodiff import ExpressionType, VariableMatrix
 from sleipnir.optimization import (
     OCP,
     DynamicsType,
     ExitStatus,
     TimestepMethod,
     TranscriptionMethod,
+    bounds,
 )
 
 

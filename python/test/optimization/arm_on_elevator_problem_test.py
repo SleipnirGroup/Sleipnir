@@ -4,8 +4,8 @@ import math
 
 import numpy as np
 import sleipnir.autodiff as autodiff
-from sleipnir.autodiff import ExpressionType, bounds
-from sleipnir.optimization import ExitStatus, Problem
+from sleipnir.autodiff import ExpressionType
+from sleipnir.optimization import ExitStatus, Problem, bounds
 
 
 def test_arm_on_elevator_problem():
