@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
-from sleipnir.autodiff import ExpressionType, bounds
-from sleipnir.optimization import ExitStatus, Problem
+from sleipnir.autodiff import ExpressionType
+from sleipnir.optimization import ExitStatus, Problem, bounds
 
 
 def test_double_integrator_problem():

@@ -5,8 +5,8 @@ from differential_drive_util import (
     differential_drive_dynamics_variable,
 )
 from rk4 import rk4
-from sleipnir.autodiff import ExpressionType, bounds
-from sleipnir.optimization import ExitStatus, Problem
+from sleipnir.autodiff import ExpressionType
+from sleipnir.optimization import ExitStatus, Problem, bounds
 
 
 def lerp(a, b, t):

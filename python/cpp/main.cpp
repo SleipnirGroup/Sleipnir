@@ -14,12 +14,15 @@
 
 #include "binders.hpp"
 #include "docstrings.hpp"
+#include "for_each_type.hpp"
 
 namespace nb = nanobind;
 
 namespace slp {
 
 NB_MODULE(_sleipnir, m) {
+  using namespace nb::literals;
+
   m.doc() =
       "A linearity-exploiting reverse mode autodiff library and nonlinear "
       "program solver DSL.";
@@ -47,6 +50,23 @@ NB_MODULE(_sleipnir, m) {
       optimization, "EqualityConstraints", DOC(slp, EqualityConstraints)};
   nb::class_<InequalityConstraints<double>> inequality_constraints{
       optimization, "InequalityConstraints", DOC(slp_InequalityConstraints)};
+
+  // Bounds function
+  for_each_type<double, int, const Variable<double>&,
+                const VariableMatrix<double>&,
+                const VariableBlock<VariableMatrix<double>>&>([&]<typename L> {
+    for_each_type<const Variable<double>&, const VariableMatrix<double>&,
+                  const VariableBlock<VariableMatrix<double>>&>(
+        [&]<typename X> {
+          for_each_type<double, int, const Variable<double>&,
+                        const VariableMatrix<double>&,
+                        const VariableBlock<VariableMatrix<double>>&>(
+              [&]<typename U> {
+                optimization.def("bounds", &bounds<L&&, X&&, U&&>, "l"_a, "x"_a,
+                                 "u"_a, DOC(slp, bounds));
+              });
+        });
+  });
 
   nb::enum_<ExitStatus> exit_status{optimization, "ExitStatus",
                                     DOC(slp, ExitStatus)};
