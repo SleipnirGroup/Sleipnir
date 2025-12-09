@@ -26,8 +26,7 @@ slp::Problem<double> flywheel_problem(std::chrono::duration<double> dt, int N) {
 
   // State and input constraints
   problem.subject_to(X.col(0) == 0.0);
-  problem.subject_to(-12 <= U);
-  problem.subject_to(U <= 12);
+  problem.subject_to(slp::bounds(-12, U, 12));
 
   // Cost function - minimize error
   Eigen::Matrix<double, 1, 1> r{10.0};

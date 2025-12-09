@@ -115,12 +115,10 @@ casadi::Opti cart_pole_casadi(std::chrono::duration<double> dt, int N) {
   problem.subject_to(X(3, N) == x_final(3));
 
   // Cart position constraints
-  problem.subject_to(X(0, all) >= 0.0);
-  problem.subject_to(X(0, all) <= d_max);
+  problem.subject_to(problem.bounded(0.0, X(0, all), d_max));
 
   // Input constraints
-  problem.subject_to(U >= -u_max);
-  problem.subject_to(U <= u_max);
+  problem.subject_to(problem.bounded(-u_max, U, u_max));
 
   // Dynamics constraints - RK4 integration
   for (int k = 0; k < N; ++k) {
