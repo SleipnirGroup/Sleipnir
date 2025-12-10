@@ -378,11 +378,13 @@ Returns:
 
 static const char *__doc_slp_Jacobian_m_J = R"doc()doc";
 
-static const char *__doc_slp_Jacobian_m_cached_triplets = R"doc()doc";
+static const char *__doc_slp_Jacobian_m_cached_triplets = R"doc(Cached triplets for gradients of linear rows)doc";
 
 static const char *__doc_slp_Jacobian_m_graphs = R"doc()doc";
 
-static const char *__doc_slp_Jacobian_m_nonlinear_rows = R"doc()doc";
+static const char *__doc_slp_Jacobian_m_nonlinear_rows =
+R"doc(List of row indices for nonlinear rows whose graients will be computed
+in Value())doc";
 
 static const char *__doc_slp_Jacobian_m_variables = R"doc()doc";
 

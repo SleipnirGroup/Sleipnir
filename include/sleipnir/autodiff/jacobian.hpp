@@ -148,11 +148,11 @@ class Jacobian {
 
   Eigen::SparseMatrix<Scalar> m_J{m_variables.rows(), m_wrt.rows()};
 
-  // Cached triplets for gradients of linear rows
+  /// Cached triplets for gradients of linear rows
   gch::small_vector<Eigen::Triplet<Scalar>> m_cached_triplets;
 
-  // List of row indices for nonlinear rows whose graients will be computed in
-  // Value()
+  /// List of row indices for nonlinear rows whose graients will be computed in
+  /// Value()
   gch::small_vector<int> m_nonlinear_rows;
 };
 

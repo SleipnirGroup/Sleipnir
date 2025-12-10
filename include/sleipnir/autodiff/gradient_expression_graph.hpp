@@ -171,10 +171,10 @@ class GradientExpressionGraph {
   }
 
  private:
-  // Topological sort of graph from parent to child
+  /// Topological sort of graph from parent to child
   gch::small_vector<Expression<Scalar>*> m_top_list;
 
-  // List that maps nodes to their respective column
+  /// List that maps nodes to their respective column
   gch::small_vector<int> m_col_list;
 };
 
