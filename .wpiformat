@@ -1,5 +1,3 @@
 modifiableFileExclude {
-  \.png$
-  \.svg$
   python/cpp/docstrings\.hpp$
 }
