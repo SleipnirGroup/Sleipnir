@@ -25,9 +25,8 @@
 #include "sleipnir/optimization/solver/util/regularized_ldlt.hpp"
 #include "sleipnir/util/assert.hpp"
 #include "sleipnir/util/print_diagnostics.hpp"
+#include "sleipnir/util/profiler.hpp"
 #include "sleipnir/util/scope_exit.hpp"
-#include "sleipnir/util/scoped_profiler.hpp"
-#include "sleipnir/util/solve_profiler.hpp"
 #include "sleipnir/util/symbol_exports.hpp"
 
 // See docs/algorithms.md#Works_cited for citation definitions.

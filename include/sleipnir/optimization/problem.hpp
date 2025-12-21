@@ -33,7 +33,7 @@
 #include "sleipnir/util/empty.hpp"
 #include "sleipnir/util/print.hpp"
 #include "sleipnir/util/print_diagnostics.hpp"
-#include "sleipnir/util/setup_profiler.hpp"
+#include "sleipnir/util/profiler.hpp"
 #include "sleipnir/util/spy.hpp"
 #include "sleipnir/util/symbol_exports.hpp"
 
