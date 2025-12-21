@@ -16,8 +16,7 @@
 #include <gch/small_vector.hpp>
 
 #include "sleipnir/util/print.hpp"
-#include "sleipnir/util/setup_profiler.hpp"
-#include "sleipnir/util/solve_profiler.hpp"
+#include "sleipnir/util/profiler.hpp"
 
 namespace slp {
 
