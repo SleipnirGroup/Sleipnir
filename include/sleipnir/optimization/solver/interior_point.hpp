@@ -483,7 +483,9 @@ ExitStatus interior_point(
                   step_acceptable ? IterationType::ACCEPTED_SOC
                                   : IterationType::REJECTED_SOC,
                   soc_profiler.current_duration(),
-                  error_estimate<Scalar>(g, A_e, trial_c_e, trial_y), trial_f,
+                  error_estimate<Scalar>(g, A_e, trial_c_e, A_i, trial_c_i,
+                                         trial_s, trial_y, trial_z, Scalar(0)),
+                  trial_f,
                   trial_c_e.template lpNorm<1>() +
                       (trial_c_i - trial_s).template lpNorm<1>(),
                   trial_s.dot(trial_z), μ, solver.hessian_regularization(),
