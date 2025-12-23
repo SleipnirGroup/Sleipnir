@@ -3,7 +3,6 @@
 #pragma once
 
 #include <cmath>
-#include <compare>
 #include <concepts>
 #include <format>
 #include <limits>
