@@ -1,7 +1,6 @@
 // Copyright (c) Sleipnir contributors
 
 #include <chrono>
-#include <concepts>
 #include <format>
 #include <fstream>
 #include <numbers>

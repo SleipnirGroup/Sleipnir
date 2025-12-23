@@ -2,7 +2,6 @@
 
 #include <chrono>
 #include <cmath>
-#include <concepts>
 #include <format>
 #include <fstream>
 #include <string>
