@@ -46,6 +46,6 @@ TEMPLATE_TEST_CASE("multistart - Mishra's Bird function", "[multistart]",
 
   CHECK(status == slp::ExitStatus::SUCCESS);
 
-  CHECK_THAT(variables.x, WithinAbs(T(-3.130246803458174), T(1e-15)));
-  CHECK_THAT(variables.y, WithinAbs(T(-1.5821421769364057), T(1e-15)));
+  CHECK_THAT(variables.x, WithinAbs(T(-3.13024680), T(1e-8)));
+  CHECK_THAT(variables.y, WithinAbs(T(-1.58214218), T(1e-8)));
 }

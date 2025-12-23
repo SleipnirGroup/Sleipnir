@@ -203,7 +203,7 @@ TEMPLATE_TEST_CASE("Problem - Wachter and Biegler line search failure",
         slp::ExitStatus::LINE_SEARCH_FAILED);
   SKIP("Fails with \"line search failed\"");
 
-  CHECK(x.value() == T(1));
-  CHECK(s1.value() == T(0));
-  CHECK(s2.value() == T(0.5));
+  CHECK_THAT(x.value(), WithinAbs(T(1), T(1e-6)));
+  CHECK_THAT(s1.value(), WithinAbs(T(0), T(1e-6)));
+  CHECK_THAT(s2.value(), WithinAbs(T(0.5), T(1e-6)));
 }
