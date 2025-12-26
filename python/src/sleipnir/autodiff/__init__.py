@@ -50,8 +50,8 @@ def spy(mat: scipy.sparse.csc_matrix):
     ax.set_xlabel("Cols")
     ax.set_ylabel("Rows")
 
-    ax.set_xlim([0, mat.shape[1]])
-    ax.set_ylim([0, mat.shape[0]])
+    ax.set_xlim(0, mat.shape[1])
+    ax.set_ylim(0, mat.shape[0])
     ax.invert_yaxis()
     ax.set_aspect(1.0)
 

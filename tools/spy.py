@@ -80,8 +80,8 @@ def plot_csv(filename: str) -> animation.FuncAnimation:
     ax.set_xlabel(col_label)
     ax.set_ylabel(row_label)
 
-    ax.set_xlim([0, cols])
-    ax.set_ylim([0, rows])
+    ax.set_xlim(0, cols)
+    ax.set_ylim(0, rows)
     ax.invert_yaxis()
     ax.set_aspect(1.0)
 
