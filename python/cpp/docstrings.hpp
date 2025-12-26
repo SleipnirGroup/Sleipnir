@@ -384,7 +384,7 @@ static const char *__doc_slp_Jacobian_m_graphs = R"doc()doc";
 
 static const char *__doc_slp_Jacobian_m_nonlinear_rows =
 R"doc(List of row indices for nonlinear rows whose graients will be computed
-in Value())doc";
+in value())doc";
 
 static const char *__doc_slp_Jacobian_m_variables = R"doc()doc";
 
