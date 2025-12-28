@@ -11,7 +11,7 @@ jobs:
     name: "pybind11_mkdoc"
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - uses: actions/setup-python@v6
         with:
@@ -44,7 +44,7 @@ jobs:
         run: git diff HEAD > pybind11_mkdoc-fixes.patch
         if: ${{ failure() }}
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: pybind11_mkdoc fixes
           path: pybind11_mkdoc-fixes.patch
@@ -62,7 +62,7 @@ jobs:
     name: "wpiformat"
     runs-on: ubuntu-slim
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -86,7 +86,7 @@ jobs:
         run: git diff HEAD > wpiformat-fixes.patch
         if: ${{ failure() }}
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: wpiformat fixes
           path: wpiformat-fixes.patch
@@ -104,7 +104,7 @@ jobs:
     name: "clang-tidy"
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
