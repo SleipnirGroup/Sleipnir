@@ -11,7 +11,7 @@ jobs:
     name: "Doxygen"
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - run: mkdir build
 
@@ -36,7 +36,7 @@ jobs:
 
       - run: ./tools/generate_website.py
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: documentation
           path: build/html
