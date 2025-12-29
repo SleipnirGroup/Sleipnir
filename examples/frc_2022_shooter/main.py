@@ -117,7 +117,7 @@ def main():
 
     # Require initial velocity is below max
     #
-    #   √{v_x² + v_y² + v_z²) ≤ vₘₐₓ
+    #   √(v_x² + v_y² + v_z²) ≤ vₘₐₓ
     #   v_x² + v_y² + v_z² ≤ vₘₐₓ²
     problem.subject_to(
         (v_x[0] - robot_wrt_field[3, 0]) ** 2

@@ -111,7 +111,7 @@ int main() {
 
   // Require initial velocity is below max
   //
-  //   √{v_x² + v_y² + v_z²) ≤ vₘₐₓ
+  //   √(v_x² + v_y² + v_z²) ≤ vₘₐₓ
   //   v_x² + v_y² + v_z² ≤ vₘₐₓ²
   problem.subject_to(slp::pow(x[3] - robot_wrt_field[3], 2) +
                          slp::pow(x[4] - robot_wrt_field[4], 2) +
