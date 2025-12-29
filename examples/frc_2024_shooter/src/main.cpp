@@ -11,8 +11,11 @@
 // FRC 2024 shooter trajectory optimization.
 //
 // This program finds the initial velocity, pitch, and yaw for a game piece to
-// hit the 2024 FRC game's target that minimizes z sensitivity to initial
-// velocity.
+// hit the 2024 FRC game's target that minimizes either z sensitivity to initial
+// velocity or initial velocity (see minimize() calls below).
+//
+// This optimization problem formulation uses single-shooting on the flight
+// dynamics, including air resistance, to allow minimizing z sensitivity.
 
 using Eigen::Vector3d;
 using Vector6d = Eigen::Vector<double, 6>;
@@ -100,6 +103,9 @@ int main() {
   x.segment(3, 3).set_value(robot_wrt_field.segment(3, 3) +
                             max_initial_velocity * uvec_shooter_to_target);
 
+  auto v0_wrt_shooter =
+      x.segment(3, 3) - shooter_wrt_field.segment(3, 3).eval();
+
   // Shooter initial position
   problem.subject_to(x.segment(0, 3) == shooter_wrt_field.block(0, 0, 3, 1));
 
@@ -133,10 +139,13 @@ int main() {
   auto sensitivity = slp::Gradient(x_k[3], x.segment(3, 3)).get();
   problem.minimize(sensitivity.T() * sensitivity);
 
+  // Minimize initial velocity
+  // problem.minimize(v0_wrt_shooter.T() * v0_wrt_shooter);
+
   problem.solve({.diagnostics = true});
 
-  // Initial velocity vector
-  Eigen::Vector3d v0 = x.segment(3, 3).value() - robot_wrt_field.segment(3, 3);
+  // Initial velocity vector with respect to shooter
+  Eigen::Vector3d v0 = v0_wrt_shooter.value();
 
   double velocity = v0.norm();
   std::println("Velocity = {:.03} ms", velocity);

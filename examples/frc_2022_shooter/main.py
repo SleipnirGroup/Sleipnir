@@ -4,7 +4,11 @@
 FRC 2022 shooter trajectory optimization.
 
 This program finds the initial velocity, pitch, and yaw for a game piece to hit
-the 2022 FRC game's target that minimizes time-to-target.
+the 2022 FRC game's target that minimizes either time-to-target or initial
+velocity (see minimize() calls below).
+
+This optimization problem formulation uses direct transcription of the flight
+dynamics, including air resistance.
 """
 
 import math
@@ -92,6 +96,8 @@ def main():
     v_y = X[4, :]
     v_z = X[5, :]
 
+    v0_wrt_shooter = X[3:, :1] - shooter_wrt_field[3:, :]
+
     # Position initial guess is linear interpolation between start and end position
     for k in range(N):
         p_x[k].set_value(lerp(shooter_wrt_field[0, 0], target_wrt_field[0, 0], k / N))
@@ -141,10 +147,13 @@ def main():
     # Minimize time-to-target
     problem.minimize(T)
 
+    # Minimize initial velocity
+    # problem.minimize(v0_wrt_shooter.T @ v0_wrt_shooter)
+
     problem.solve(diagnostics=True)
 
-    # Initial velocity vector
-    v0 = X[3:, :1].value() - robot_wrt_field[3:, :]
+    # Initial velocity vector with respect to shooter
+    v0 = v0_wrt_shooter.value()
 
     velocity = norm(v0)
     print(f"Velocity = {velocity:.03f} m/s")

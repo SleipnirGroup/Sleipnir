@@ -4,7 +4,11 @@
 FRC 2024 shooter trajectory optimization.
 
 This program finds the initial velocity, pitch, and yaw for a game piece to hit
-the 2024 FRC game's target that minimizes z sensitivity to initial velocity.
+the 2024 FRC game's target that minimizes either z sensitivity to initial
+velocity or initial velocity (see minimize() calls below).
+
+This optimization problem formulation uses single-shooting on the flight
+dynamics, including air resistance, to allow minimizing z sensitivity.
 """
 
 import math
@@ -119,6 +123,8 @@ def main():
         robot_wrt_field[3:, :] + max_initial_velocity * uvec_shooter_to_target
     )
 
+    v0_wrt_shooter = x[3:, :] - shooter_wrt_field[3:, :]
+
     # Shooter initial position
     problem.subject_to(x[:3, :] == shooter_wrt_field[:3, :])
 
@@ -153,10 +159,13 @@ def main():
     sensitivity = Gradient(x_k[3, 0], x[3:, :]).get()
     problem.minimize(sensitivity.T @ sensitivity)
 
+    # Minimize initial velocity
+    # problem.minimize(v0_wrt_shooter.T @ v0_wrt_shooter)
+
     problem.solve(diagnostics=True)
 
-    # Initial velocity vector
-    v0 = x[3:, :].value() - robot_wrt_field[3:, :]
+    # Initial velocity vector with respect to shooter
+    v0 = v0_wrt_shooter.value()
 
     velocity = norm(v0)
     print(f"Velocity = {velocity:.03f} m/s")

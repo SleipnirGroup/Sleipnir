@@ -10,7 +10,11 @@
 // FRC 2022 shooter trajectory optimization.
 //
 // This program finds the initial velocity, pitch, and yaw for a game piece to
-// hit the 2022 FRC game's target that minimizes time-to-target.
+// hit the 2022 FRC game's target that minimizes either time-to-target or
+// initial velocity (see minimize() calls below).
+//
+// This optimization problem formulation uses direct transcription of the flight
+// dynamics, including air resistance.
 
 using Eigen::Vector3d;
 using Vector6d = Eigen::Vector<double, 6>;
@@ -90,6 +94,9 @@ int main() {
   auto v_y = X.row(4);
   auto v_z = X.row(5);
 
+  auto v0_wrt_shooter =
+      X.block(3, 0, 3, 1) - shooter_wrt_field.segment(3, 3).eval();
+
   // Position initial guess is linear interpolation between start and end
   // position
   for (int k = 0; k < N; ++k) {
@@ -144,11 +151,13 @@ int main() {
   // Minimize time-to-target
   problem.minimize(T);
 
+  // Minimize initial velocity
+  // problem.minimize(v0_wrt_shooter.T() * v0_wrt_shooter);
+
   problem.solve({.diagnostics = true});
 
-  // Initial velocity vector
-  Eigen::Vector3d v0 =
-      X.block(3, 0, 3, 1).value() - robot_wrt_field.segment(3, 3);
+  // Initial velocity vector with respect to shooter
+  Eigen::Vector3d v0 = v0_wrt_shooter.value();
 
   double velocity = v0.norm();
   std::println("Velocity = {:.03} ms", velocity);
