@@ -139,11 +139,11 @@ void bind_variable(nb::module_& autodiff, nb::class_<Variable<double>>& cls) {
   def_unary_math(autodiff, "erf", &erf<double>, "x"_a, DOC(slp, erf));
   def_unary_math(autodiff, "exp", &exp<double>, "x"_a, DOC(slp, exp));
   def_binary_math(autodiff, "hypot",
-                  static_cast<V (*)(const V&, const V&)>(&hypot<double>), "x"_a,
+                  nb::overload_cast<const V&, const V&>(&hypot<double>), "x"_a,
                   "y"_a, DOC(slp, hypot));
   def_ternary_math(
       autodiff, "hypot",
-      static_cast<V (*)(const V&, const V&, const V&)>(&hypot<double>), "x"_a,
+      nb::overload_cast<const V&, const V&, const V&>(&hypot<double>), "x"_a,
       "y"_a, "z"_a, DOC(slp, hypot, 2));
   def_unary_math(autodiff, "log", &log<double>, "x"_a, DOC(slp, log));
   def_unary_math(autodiff, "log10", &log10<double>, "x"_a, DOC(slp, log10));
