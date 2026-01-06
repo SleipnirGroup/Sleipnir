@@ -425,17 +425,11 @@ void bind_variable_matrix(nb::module_& autodiff,
   cls.def_prop_ro("shape", [](const VariableMatrix<double>& self) {
     return nb::make_tuple(self.rows(), self.cols());
   });
-  cls.def("value",
-          static_cast<double (VariableMatrix<double>::*)(int, int)>(
-              &VariableMatrix<double>::value),
+  cls.def("value", nb::overload_cast<int, int>(&VariableMatrix<double>::value),
           "row"_a, "col"_a, DOC(slp, VariableMatrix, value));
-  cls.def("value",
-          static_cast<double (VariableMatrix<double>::*)(int)>(
-              &VariableMatrix<double>::value),
+  cls.def("value", nb::overload_cast<int>(&VariableMatrix<double>::value),
           "index"_a, DOC(slp, VariableMatrix, value, 2));
-  cls.def("value",
-          static_cast<Eigen::MatrixXd (VariableMatrix<double>::*)()>(
-              &VariableMatrix<double>::value),
+  cls.def("value", nb::overload_cast<>(&VariableMatrix<double>::value),
           DOC(slp, VariableMatrix, value, 3));
   cls.def(
       "cwise_map",
@@ -507,18 +501,16 @@ void bind_variable_matrix(nb::module_& autodiff,
              binary_op) { return cwise_reduce<double>(lhs, rhs, binary_op); },
       "lhs"_a, "rhs"_a, "func"_a, DOC(slp, cwise_reduce));
 
-  autodiff.def(
-      "block",
-      static_cast<VariableMatrix<double> (*)(
-          const std::vector<std::vector<VariableMatrix<double>>>&)>(&block),
-      "list"_a, DOC(slp, block));
+  autodiff.def("block",
+               nb::overload_cast<
+                   const std::vector<std::vector<VariableMatrix<double>>>&>(
+                   &block<double>),
+               "list"_a, DOC(slp, block));
 
-  autodiff.def(
-      "solve",
-      static_cast<VariableMatrix<double> (*)(const VariableMatrix<double>&,
-                                             const VariableMatrix<double>&)>(
-          &solve),
-      "A"_a, "B"_a, DOC(slp, solve));
+  autodiff.def("solve",
+               nb::overload_cast<const VariableMatrix<double>&,
+                                 const VariableMatrix<double>&>(&solve<double>),
+               "A"_a, "B"_a, DOC(slp, solve));
 }
 
 }  // namespace slp

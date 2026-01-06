@@ -374,20 +374,16 @@ void bind_variable_block(
                   [](const VariableBlock<VariableMatrix<double>>& self) {
                     return nb::make_tuple(self.rows(), self.cols());
                   });
-  cls.def(
-      "value",
-      static_cast<double (VariableBlock<VariableMatrix<double>>::*)(int, int)>(
-          &VariableBlock<VariableMatrix<double>>::value),
-      "row"_a, "col"_a, DOC(slp, VariableBlock, value));
   cls.def("value",
-          static_cast<double (VariableBlock<VariableMatrix<double>>::*)(int)>(
+          nb::overload_cast<int, int>(
               &VariableBlock<VariableMatrix<double>>::value),
+          "row"_a, "col"_a, DOC(slp, VariableBlock, value));
+  cls.def("value",
+          nb::overload_cast<int>(&VariableBlock<VariableMatrix<double>>::value),
           "index"_a, DOC(slp, VariableBlock, value, 2));
-  cls.def(
-      "value",
-      static_cast<Eigen::MatrixXd (VariableBlock<VariableMatrix<double>>::*)()>(
-          &VariableBlock<VariableMatrix<double>>::value),
-      DOC(slp, VariableBlock, value, 3));
+  cls.def("value",
+          nb::overload_cast<>(&VariableBlock<VariableMatrix<double>>::value),
+          DOC(slp, VariableBlock, value, 3));
   cls.def(
       "cwise_map",
       [](const VariableBlock<VariableMatrix<double>>& self,
