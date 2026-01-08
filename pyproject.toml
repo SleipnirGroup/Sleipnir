@@ -1,6 +1,6 @@
 [project]
 name = "sleipnirgroup-jormungandr"
-description = "Linearity-exploiting reverse mode autodiff library and nonlinear program solver DSL"
+description = "Reverse mode autodiff library and NLP solver DSL"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = ["matplotlib", "numpy", "scipy"]
