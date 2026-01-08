@@ -1,5 +1,6 @@
 // Copyright (c) Sleipnir contributors
 
+#include <nanobind/eigen/dense.h>
 #include <nanobind/nanobind.h>
 #include <sleipnir/autodiff/variable.hpp>
 #include <sleipnir/autodiff/variable_block.hpp>
@@ -52,21 +53,22 @@ NB_MODULE(_sleipnir, m) {
       optimization, "InequalityConstraints", DOC(slp_InequalityConstraints)};
 
   // Bounds function
-  for_each_type<double, int, const Variable<double>&,
-                const VariableMatrix<double>&,
-                const VariableBlock<VariableMatrix<double>>&>([&]<typename L> {
-    for_each_type<const Variable<double>&, const VariableMatrix<double>&,
-                  const VariableBlock<VariableMatrix<double>>&>(
-        [&]<typename X> {
-          for_each_type<double, int, const Variable<double>&,
-                        const VariableMatrix<double>&,
-                        const VariableBlock<VariableMatrix<double>>&>(
-              [&]<typename U> {
+  for_each_type<
+      double, int, const Variable<double>&, const VariableMatrix<double>&,
+      const VariableBlock<VariableMatrix<double>>&, nb::DRef<Eigen::MatrixXd>>(
+      [&]<typename L> {
+        for_each_type<const Variable<double>&, const VariableMatrix<double>&,
+                      const VariableBlock<VariableMatrix<double>>&>(
+            [&]<typename X> {
+              for_each_type<double, int, const Variable<double>&,
+                            const VariableMatrix<double>&,
+                            const VariableBlock<VariableMatrix<double>>&,
+                            nb::DRef<Eigen::MatrixXd>>([&]<typename U> {
                 optimization.def("bounds", &bounds<L&&, X&&, U&&>, "l"_a, "x"_a,
                                  "u"_a, DOC(slp, bounds));
               });
-        });
-  });
+            });
+      });
 
   nb::enum_<ExitStatus> exit_status{optimization, "ExitStatus",
                                     DOC(slp, ExitStatus)};
