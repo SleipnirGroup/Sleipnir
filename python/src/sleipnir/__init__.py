@@ -1,6 +1,4 @@
-"""
-Linearity-exploiting reverse mode autodiff library and nonlinear program solver DSL
-"""
+"""Reverse mode autodiff library and NLP solver DSL"""
 
 from ._sleipnir import *
 

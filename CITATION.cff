@@ -7,9 +7,8 @@ authors:
 repository-code: 'https://github.com/SleipnirGroup/Sleipnir'
 url: 'https://github.com/SleipnirGroup/Sleipnir'
 abstract: >-
-  Linearity-exploiting reverse mode autodiff library,
-  interior-point method, and NLP solver DSL for C++23 and
-  Python.
+  Reverse mode autodiff library, interior-point method, and NLP solver DSL for
+  C++23 and Python.
 keywords:
   - autodiff
   - interior-point-method

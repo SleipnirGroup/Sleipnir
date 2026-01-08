@@ -10,7 +10,7 @@
 
 > Sparsity and Linearity-Exploiting Interior-Point solver - Now Internally Readable
 
-Named after Odin's eight-legged horse from Norse mythology, Sleipnir is a linearity-exploiting reverse mode autodiff library, interior-point method, and nonlinear program solver DSL for C++23 and Python. The DSL automatically chooses the best solver based on the problem structure.
+Named after Odin's eight-legged horse from Norse mythology, Sleipnir is a reverse mode autodiff library, interior-point method, and NLP solver DSL for C++23 and Python. The DSL automatically chooses the best solver based on the problem structure.
 
 ```cpp
 #include <print>
