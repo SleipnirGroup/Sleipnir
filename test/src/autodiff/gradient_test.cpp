@@ -8,6 +8,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <sleipnir/autodiff/gradient.hpp>
 #include <sleipnir/autodiff/variable_matrix.hpp>
+#include <sleipnir/util/scope_exit.hpp>
 
 #include "catch_matchers.hpp"
 #include "scalar_types_under_test.hpp"
@@ -15,6 +16,9 @@
 TEMPLATE_TEST_CASE("Gradient - Trivial case", "[Gradient]",
                    SCALAR_TYPES_UNDER_TEST) {
   using T = TestType;
+
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
   slp::Variable<T> a;
   a.set_value(T(10));
@@ -32,6 +36,9 @@ TEMPLATE_TEST_CASE("Gradient - Unary plus", "[Gradient]",
                    SCALAR_TYPES_UNDER_TEST) {
   using T = TestType;
 
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
+
   slp::Variable<T> a;
   a.set_value(T(10));
   slp::Variable c = +a;
@@ -44,6 +51,9 @@ TEMPLATE_TEST_CASE("Gradient - Unary minus", "[Gradient]",
                    SCALAR_TYPES_UNDER_TEST) {
   using T = TestType;
 
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
+
   slp::Variable<T> a;
   a.set_value(T(10));
   slp::Variable c = -a;
@@ -55,6 +65,9 @@ TEMPLATE_TEST_CASE("Gradient - Unary minus", "[Gradient]",
 TEMPLATE_TEST_CASE("Gradient - Identical variables", "[Gradient]",
                    SCALAR_TYPES_UNDER_TEST) {
   using T = TestType;
+
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
   slp::Variable<T> a;
   a.set_value(T(10));
@@ -71,6 +84,9 @@ TEMPLATE_TEST_CASE("Gradient - Identical variables", "[Gradient]",
 TEMPLATE_TEST_CASE("Gradient - Elementary", "[Gradient]",
                    SCALAR_TYPES_UNDER_TEST) {
   using T = TestType;
+
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
   slp::Variable<T> a;
   a.set_value(T(1));
@@ -105,6 +121,9 @@ TEMPLATE_TEST_CASE("Gradient - Elementary", "[Gradient]",
 TEMPLATE_TEST_CASE("Gradient - Comparison", "[Gradient]",
                    SCALAR_TYPES_UNDER_TEST) {
   using T = TestType;
+
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
   slp::Variable<T> x;
   x.set_value(T(10));
@@ -177,6 +196,9 @@ TEMPLATE_TEST_CASE("Gradient - Trigonometry", "[Gradient]",
   using std::sqrt;
   using std::tan;
 
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
+
   slp::Variable<T> x;
   x.set_value(T(0.5));
 
@@ -230,6 +252,9 @@ TEMPLATE_TEST_CASE("Gradient - Hyperbolic", "[Gradient]",
   using std::sinh;
   using std::tanh;
 
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
+
   slp::Variable<T> x;
   x.set_value(T(1));
 
@@ -262,6 +287,9 @@ TEMPLATE_TEST_CASE("Gradient - Exponential", "[Gradient]",
   using std::log;
   using std::log10;
 
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
+
   slp::Variable<T> x;
   x.set_value(T(1));
 
@@ -293,6 +321,9 @@ TEMPLATE_TEST_CASE("Gradient - Power", "[Gradient]", SCALAR_TYPES_UNDER_TEST) {
   using std::log;
   using std::pow;
   using std::sqrt;
+
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
   slp::Variable<T> x;
   x.set_value(T(1));
@@ -396,6 +427,9 @@ TEMPLATE_TEST_CASE("Gradient - abs()", "[Gradient]", SCALAR_TYPES_UNDER_TEST) {
   using T = TestType;
   using std::abs;
 
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
+
   slp::Variable<T> x;
   auto g = slp::Gradient(slp::abs(x), x);
 
@@ -421,6 +455,9 @@ TEMPLATE_TEST_CASE("Gradient - atan2()", "[Gradient]",
   using std::atan2;
   using std::cos;
   using std::sin;
+
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
   slp::Variable<T> x;
   slp::Variable<T> y;
@@ -510,6 +547,9 @@ TEMPLATE_TEST_CASE("Gradient - hypot()", "[Gradient]",
   using T = TestType;
   using std::hypot;
 
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
+
   slp::Variable<T> x;
   slp::Variable<T> y;
 
@@ -592,6 +632,9 @@ TEMPLATE_TEST_CASE("Gradient - Miscellaneous", "[Gradient]",
   using std::abs;
   using std::exp;
 
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
+
   slp::Variable<T> x;
 
   // dx/dx
@@ -617,6 +660,9 @@ TEMPLATE_TEST_CASE("Gradient - Variable reuse", "[Gradient]",
                    SCALAR_TYPES_UNDER_TEST) {
   using T = TestType;
 
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
+
   slp::Variable<T> a;
   a.set_value(T(10));
 
@@ -637,6 +683,9 @@ TEMPLATE_TEST_CASE("Gradient - Variable reuse", "[Gradient]",
 
 TEMPLATE_TEST_CASE("Gradient - sign()", "[Gradient]", SCALAR_TYPES_UNDER_TEST) {
   using T = TestType;
+
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
   auto sign = [](T x) {
     if (x < T(0)) {
@@ -678,6 +727,9 @@ TEMPLATE_TEST_CASE("Gradient - sign()", "[Gradient]", SCALAR_TYPES_UNDER_TEST) {
 TEMPLATE_TEST_CASE("Gradient - Non-scalar", "[Gradient]",
                    SCALAR_TYPES_UNDER_TEST) {
   using T = TestType;
+
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
   slp::VariableMatrix<T> x{3};
   x[0].set_value(T(1));
