@@ -25,19 +25,19 @@ A problem is constant if:
 * the equality constraints are constant or lower
 * the inequality constraints are constant or lower
 
-A problem is linear if:
+A problem is a linear program (LP) if:
 
 * the cost function is linear
 * the equality constraints are linear or lower
 * the inequality constraints are linear or lower
 
-A problem is quadratic if:
+A problem is a quadratic program (QP) if:
 
 * the cost function is quadratic
 * the equality constraints are linear or lower
 * the inequality constraints are linear or lower
 
-All other problems are nonlinear.
+All other problems are nonlinear programs (NLPs).
 
 ## Avoiding numerical issues
 
