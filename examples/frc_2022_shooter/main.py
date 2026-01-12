@@ -42,9 +42,12 @@ def f(x):
     #
     # where a_D(v) = ½ρv² C_D A / m
     # (see https://en.wikipedia.org/wiki/Drag_(physics)#The_drag_equation)
+    #
+    # The cross-sectional area A is a circle.
     rho = 1.204  # kg/m³
     C_D = 0.5
-    A = math.pi * 0.3
+    r = 0.15  # m
+    A = math.pi * r**2  # m²
     m = 2.0  # kg
     a_D = lambda v: 0.5 * rho * v**2 * C_D * A / m
 
@@ -145,10 +148,10 @@ def main():
     problem.subject_to(v_z[-1] < 0.0)
 
     # Minimize time-to-target
-    problem.minimize(T)
+    # problem.minimize(T)
 
     # Minimize initial velocity
-    # problem.minimize(v0_wrt_shooter.T @ v0_wrt_shooter)
+    problem.minimize(v0_wrt_shooter.T @ v0_wrt_shooter)
 
     problem.solve(diagnostics=True)
 

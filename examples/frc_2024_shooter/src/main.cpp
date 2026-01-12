@@ -46,10 +46,13 @@ slp::VariableMatrix<double> f(const slp::VariableMatrix<double>& x) {
   //
   // where a_D(v) = ½ρv² C_D A / m
   // (see https://en.wikipedia.org/wiki/Drag_(physics)#The_drag_equation)
+  //
+  // The cross-sectional area A is a circle.
   constexpr double rho = 1.204;  // kg/m³
   constexpr double C_D = 0.5;
-  constexpr double A = std::numbers::pi * 0.3;
-  constexpr double m = 2.0;  // kg
+  constexpr double r = 0.15;                      // m
+  constexpr double A = std::numbers::pi * r * r;  // m²
+  constexpr double m = 2.0;                       // kg
   auto a_D = [=](auto v) { return 0.5 * rho * v * v * C_D * A / m; };
 
   auto v_x = x[3, 0];
