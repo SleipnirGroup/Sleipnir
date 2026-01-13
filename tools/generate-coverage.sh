@@ -2,7 +2,7 @@
 set -e
 
 if [ $# -eq 0 ]; then
-  echo -e "Usage: coverage-generate.sh CMAKE_TARGET\nGenerates coverage of CMake target executable with llvm-cov."
+  echo -e "Usage: generate-coverage.sh CMAKE_TARGET\nGenerates coverage of CMake target executable with llvm-cov."
   exit 1
 fi
 
