@@ -95,7 +95,7 @@ jobs:
           echo "CXX=clang++" >> $GITHUB_ENV
           echo "CXXFLAGS=-stdlib=libc++" >> $GITHUB_ENV
 
-      - run: ./tools/coverage-generate.sh sleipnir_test
+      - run: ./tools/generate-coverage.sh sleipnir_test
 
       - uses: actions/upload-artifact@v6
         with:
