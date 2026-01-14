@@ -28,9 +28,9 @@ and the acceleration constraints are -1 ≤ u ≤ 1.
 First, we need to make a problem instance.
 
 ```cpp
-constexpr auto T = 5s;
+constexpr auto TOTAL_TIME = 5s;
 constexpr auto dt = 5ms;
-constexpr int N = T / dt;
+constexpr int N = TOTAL_TIME / dt;
 
 constexpr double r = 2.0;
 

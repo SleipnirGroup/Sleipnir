@@ -28,9 +28,9 @@ import numpy as np
 First, we need to make a problem instance.
 
 ```py
-T = 5.0  # s
+TOTAL_TIME = 5.0  # s
 dt = 0.005  # 5 ms
-N = int(T / dt)
+N = int(TOTAL_TIME / dt)
 
 r = 2.0
 
