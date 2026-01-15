@@ -27,26 +27,26 @@ extern template slp::VariableMatrix<ExplicitDouble> slp::solve(
 extern template class slp::OCP<ExplicitDouble>;
 
 extern template slp::ExitStatus slp::interior_point(
-    const InteriorPointMatrixCallbacks<double>& matrix_callbacks,
-    std::span<std::function<bool(const IterationInfo<double>& info)>>
+    const InteriorPointMatrixCallbacks<ExplicitDouble>& matrix_callbacks,
+    std::span<std::function<bool(const IterationInfo<ExplicitDouble>& info)>>
         iteration_callbacks,
     const Options& options,
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
     const Eigen::ArrayX<bool>& bound_constraint_mask,
 #endif
-    Eigen::Vector<double, Eigen::Dynamic>& x);
+    Eigen::Vector<ExplicitDouble, Eigen::Dynamic>& x);
 
 extern template slp::ExitStatus slp::newton(
-    const NewtonMatrixCallbacks<double>& matrix_callbacks,
-    std::span<std::function<bool(const IterationInfo<double>& info)>>
+    const NewtonMatrixCallbacks<ExplicitDouble>& matrix_callbacks,
+    std::span<std::function<bool(const IterationInfo<ExplicitDouble>& info)>>
         iteration_callbacks,
-    const Options& options, Eigen::Vector<double, Eigen::Dynamic>& x);
+    const Options& options, Eigen::Vector<ExplicitDouble, Eigen::Dynamic>& x);
 
 extern template slp::ExitStatus slp::sqp(
-    const SQPMatrixCallbacks<double>& matrix_callbacks,
-    std::span<std::function<bool(const IterationInfo<double>& info)>>
+    const SQPMatrixCallbacks<ExplicitDouble>& matrix_callbacks,
+    std::span<std::function<bool(const IterationInfo<ExplicitDouble>& info)>>
         iteration_callbacks,
-    const Options& options, Eigen::Vector<double, Eigen::Dynamic>& x);
+    const Options& options, Eigen::Vector<ExplicitDouble, Eigen::Dynamic>& x);
 
 extern template class slp::Problem<ExplicitDouble>;
 
