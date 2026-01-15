@@ -94,7 +94,7 @@ TEMPLATE_TEST_CASE("Problem - Arm on elevator", "[Problem]",
   // Height limit
 #if 0
   auto heights =
-      elevator.row(0) + ARM_LENGTH * arm.row(0).cwise_transform(slp::sin);
+      elevator.row(0) + ARM_LENGTH * arm.row(0).cwise_transform(slp::sin<T>);
   problem.subject_to(heights <= END_EFFECTOR_MAX_HEIGHT);
 #endif
 
