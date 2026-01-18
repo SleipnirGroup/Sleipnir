@@ -873,6 +873,15 @@ Returns:
 
 )doc";
 
+constexpr char mkd_doc_slp_Problem_is_warm_startable[] =
+R"doc(Returns true if the solver's iterates are usable as a warm start for
+the next solve.
+
+Args:
+    status: The solver's exit status.
+
+)doc";
+
 constexpr char mkd_doc_slp_Problem_m_decision_variables[] = R"doc()doc";
 
 constexpr char mkd_doc_slp_Problem_m_equality_constraints[] = R"doc()doc";
@@ -884,6 +893,16 @@ constexpr char mkd_doc_slp_Problem_m_inequality_constraints[] = R"doc()doc";
 constexpr char mkd_doc_slp_Problem_m_iteration_callbacks[] = R"doc()doc";
 
 constexpr char mkd_doc_slp_Problem_m_persistent_iteration_callbacks[] = R"doc()doc";
+
+constexpr char mkd_doc_slp_Problem_m_prev_s[] = R"doc()doc";
+
+constexpr char mkd_doc_slp_Problem_m_prev_y[] = R"doc()doc";
+
+constexpr char mkd_doc_slp_Problem_m_prev_z[] = R"doc()doc";
+
+static const char *mkd_doc_slp_Problem_m_prev_μ = R"doc()doc";
+
+constexpr char mkd_doc_slp_Problem_m_warm_startable[] = R"doc()doc";
 
 constexpr char mkd_doc_slp_Problem_maximize[] =
 R"doc(Tells the solver to maximize the output of the given objective

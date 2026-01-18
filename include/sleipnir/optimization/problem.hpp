@@ -36,6 +36,7 @@
 #include "sleipnir/optimization/solver/sqp.hpp"
 #include "sleipnir/optimization/solver/sqp_matrix_callbacks.hpp"
 #include "sleipnir/optimization/solver/util/bounds.hpp"
+#include "sleipnir/optimization/solver/util/ipm_initial_iterate.hpp"
 #include "sleipnir/optimization/solver/util/problem_scaling.hpp"
 #include "sleipnir/optimization/solver/util/time_trace.hpp"
 #include "sleipnir/util/empty.hpp"
@@ -240,6 +241,8 @@ class Problem {
                                    constraint.constraints.size());
     std::ranges::copy(constraint.constraints,
                       std::back_inserter(m_equality_constraints));
+
+    m_warm_startable = false;
   }
 
   /// Tells the solver to solve the problem while satisfying the given equality
@@ -251,6 +254,8 @@ class Problem {
                                    constraint.constraints.size());
     std::ranges::copy(constraint.constraints,
                       std::back_inserter(m_equality_constraints));
+
+    m_warm_startable = false;
   }
 
   /// Tells the solver to solve the problem while satisfying the given
@@ -262,6 +267,8 @@ class Problem {
                                      constraint.constraints.size());
     std::ranges::copy(constraint.constraints,
                       std::back_inserter(m_inequality_constraints));
+
+    m_warm_startable = false;
   }
 
   /// Tells the solver to solve the problem while satisfying the given
@@ -273,6 +280,8 @@ class Problem {
                                      constraint.constraints.size());
     std::ranges::copy(constraint.constraints,
                       std::back_inserter(m_inequality_constraints));
+
+    m_warm_startable = false;
   }
 
   /// Returns the cost function's type.
@@ -449,6 +458,28 @@ class Problem {
   gch::small_vector<
       std::function<ControlFlow(const IterationInfo<Scalar>& info)>>
       m_persistent_iteration_callbacks;
+
+  // Whether the next solve warm starts from the m_prev_* members
+  bool m_warm_startable = false;
+
+  // Stored in unscaled form because the problem scaling depends on the initial
+  // guess, which can change between solves
+  DenseVector m_prev_s;
+  DenseVector m_prev_y;
+  DenseVector m_prev_z;
+  Scalar m_prev_μ;
+
+  /// Returns true if the solver's iterates are usable as a warm start for the
+  /// next solve.
+  ///
+  /// @param status The solver's exit status.
+  static bool is_warm_startable(ExitStatus status) {
+    // Failures can leave the iterates in an arbitrarily bad state
+    return status == ExitStatus::SUCCESS ||
+           status == ExitStatus::CALLBACK_REQUESTED_STOP ||
+           status == ExitStatus::MAX_ITERATIONS_EXCEEDED ||
+           status == ExitStatus::TIMEOUT;
+  }
 
   ExitStatus solve_newton(const Options<Scalar>& options,
                           [[maybe_unused]] bool spy, DenseVector& x) {
@@ -648,8 +679,19 @@ class Problem {
         },
         scaling};
 
+    DenseVector y =
+        m_warm_startable
+            ? DenseVector{scaling.f * m_prev_y.cwiseQuotient(scaling.c_e)}
+            : DenseVector::Zero(matrix_callbacks.num_equality_constraints);
+
     // Invoke SQP solver
-    return sqp<Scalar>(matrix_callbacks, iteration_callbacks, options, x);
+    auto status =
+        sqp<Scalar>(matrix_callbacks, iteration_callbacks, options, x, y);
+
+    m_warm_startable = is_warm_startable(status);
+    m_prev_y = scaling.c_e.cwiseProduct(y) / scaling.f;
+
+    return status;
   }
 
   ExitStatus solve_ipm(const Options<Scalar>& options,
@@ -810,12 +852,35 @@ class Problem {
         },
         scaling};
 
+    DenseVector s;
+    DenseVector y;
+    DenseVector z;
+    Scalar μ;
+    if (m_warm_startable) {
+      s = scaling.c_i.cwiseProduct(m_prev_s);
+      y = scaling.f * m_prev_y.cwiseQuotient(scaling.c_e);
+      z = scaling.f * m_prev_z.cwiseQuotient(scaling.c_i);
+      μ = scaling.f * m_prev_μ;
+    } else {
+      set_ipm_cold_start_initial_iterate(matrix_callbacks, x, s, y, z, μ);
+    }
+
     // Invoke interior-point method solver
-    return ipm<Scalar>(matrix_callbacks, iteration_callbacks, options,
+    int iterations = 0;
+    auto status = ipm<Scalar>(matrix_callbacks, iteration_callbacks, options,
+                              false, m_warm_startable,
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
-                       bound_constraint_mask,
+                              bound_constraint_mask,
 #endif
-                       x);
+                              x, s, y, z, μ, iterations);
+
+    m_warm_startable = is_warm_startable(status);
+    m_prev_s = s.cwiseQuotient(scaling.c_i);
+    m_prev_y = scaling.c_e.cwiseProduct(y) / scaling.f;
+    m_prev_z = scaling.c_i.cwiseProduct(z) / scaling.f;
+    m_prev_μ = μ / scaling.f;
+
+    return status;
   }
 
   void print_exit_conditions(const Options<Scalar>& options) {

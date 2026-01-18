@@ -26,6 +26,7 @@
 #include "sleipnir/optimization/solver/util/feasibility_restoration_cycle_detector.hpp"
 #include "sleipnir/optimization/solver/util/filter.hpp"
 #include "sleipnir/optimization/solver/util/fraction_to_the_boundary_rule.hpp"
+#include "sleipnir/optimization/solver/util/ipm_initial_iterate.hpp"
 #include "sleipnir/optimization/solver/util/kkt_error.hpp"
 #include "sleipnir/optimization/solver/util/kkt_system.hpp"
 #include "sleipnir/optimization/solver/util/time_trace.hpp"
@@ -76,18 +77,14 @@ ExitStatus ipm(
     Eigen::VectorX<Scalar>& x) {
   using DenseVector = Eigen::VectorX<Scalar>;
 
-  // If cᵢ(x) is sufficiently feasible, start the constraint with zero
-  // violation. Otherwise, make Σ = S⁻¹Z ≈ I.
-  DenseVector c_i = matrix_callbacks.c_i(x);
-  DenseVector s = (c_i.array() >= Scalar(1e-2)).select(c_i, Scalar(1));
-
-  DenseVector y = DenseVector::Zero(matrix_callbacks.num_equality_constraints);
-  DenseVector z =
-      DenseVector::Ones(matrix_callbacks.num_inequality_constraints);
-  Scalar μ = Scalar(0.1) * matrix_callbacks.scaling.f;
+  DenseVector s;
+  DenseVector y;
+  DenseVector z;
+  Scalar μ;
+  set_ipm_cold_start_initial_iterate(matrix_callbacks, x, s, y, z, μ);
   int iterations = 0;
 
-  return ipm(matrix_callbacks, iteration_callbacks, options, false,
+  return ipm(matrix_callbacks, iteration_callbacks, options, false, false,
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
              bound_constraint_mask,
 #endif
@@ -115,6 +112,7 @@ ExitStatus ipm(
 /// @param[in] options Solver options.
 /// @param[in] in_feasibility_restoration Whether solver is in feasibility
 ///     restoration mode.
+/// @param[in] warm_start Whether s, y, z, and μ are from a previous solve.
 /// @param[in,out] x The initial guess and output location for the decision
 ///     variables.
 /// @param[in,out] s The initial guess and output location for the inequality
@@ -133,6 +131,7 @@ ExitStatus ipm(
     std::span<std::function<ControlFlow(const IterationInfo<Scalar>& info)>>
         iteration_callbacks,
     const Options<Scalar>& options, bool in_feasibility_restoration,
+    bool warm_start,
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
     const Eigen::ArrayX<bool>& bound_constraint_mask,
 #endif
@@ -239,6 +238,51 @@ ExitStatus ipm(
   // Fraction-to-the-boundary rule scale factor τ
   Scalar τ = τ_min;
 
+  IPMKKTSystem<Scalar> kkt_system{H, A_e, A_i};
+
+  if (warm_start) {
+    // Moves the previous solve's iterate back along the central path. Returns
+    // false if it's no better than a cold start.
+    auto recenter = [&](bool include_equality_constraints) {
+      const auto [recentered, z_changed] = set_ipm_warm_start_initial_iterate(
+          matrices, g, A_e, c_e, A_i, c_i, include_equality_constraints, s, y,
+          z, μ);
+      if (z_changed) {
+        H = matrices.H(x, y, z);
+      }
+      return recentered;
+    };
+
+    // The equality constraint violation is left out of the first recentering.
+    // A Newton step can remove it at any barrier parameter, so a probe step
+    // checks whether removing it requires a larger barrier parameter.
+    bool recentered = recenter(false);
+    if (recentered) {
+      kkt_system.build(H, A_e, A_i, s, z);
+      if (!kkt_system.factorize()) [[unlikely]] {
+        return ExitStatus::FACTORIZATION_FAILED;
+      }
+      const auto step = kkt_system.solve(g, A_e, A_i, y, s, z, μ, c_e, c_i - s);
+
+      // If the fraction-to-the-boundary rule shortens the probe step too much,
+      // the slacks and duals are too close to their bounds for the step the
+      // equality constraint violation requires, so recenter them with it
+      // included.
+      //
+      // Warm starts whose first step is shorter than ~0.5 stall in practice.
+      if (std::min(fraction_to_the_boundary_rule<Scalar>(s, step.p_s, τ),
+                   fraction_to_the_boundary_rule<Scalar>(z, step.p_z, τ)) <
+          Scalar(0.75)) {
+        recentered = recenter(true);
+      }
+    }
+
+    if (!recentered) {
+      set_ipm_cold_start_initial_iterate(matrices, x, s, y, z, μ);
+      H = matrices.H(x, y, z);
+    }
+  }
+
   Filter<Scalar> filter{constraint_violation(c_e, c_i, s)};
 
   // The smallest KKT error of a step accepted by the KKT error reduction
@@ -263,8 +307,6 @@ ExitStatus ipm(
     filter.reset();
     fallback_kkt_error = std::numeric_limits<Scalar>::infinity();
   };
-
-  IPMKKTSystem<Scalar> kkt_system{H, A_e, A_i};
 
   // Step size reduction factor
   constexpr Scalar α_reduction_factor(0.5);
@@ -758,6 +800,7 @@ ipm(const IPMMatrixCallbacks<double>& matrix_callbacks,
     std::span<std::function<ControlFlow(const IterationInfo<double>& info)>>
         iteration_callbacks,
     const Options<double>& options, bool in_feasibility_restoration,
+    bool warm_start,
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
     const Eigen::ArrayX<bool>& bound_constraint_mask,
 #endif

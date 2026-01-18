@@ -26,6 +26,7 @@ template slp::ExitStatus slp::ipm(
     std::span<std::function<ControlFlow(const IterationInfo<float>& info)>>
         iteration_callbacks,
     const Options<float>& options, bool in_feasibility_restoration,
+    bool warm_start,
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
     const Eigen::ArrayX<bool>& bound_constraint_mask,
 #endif
