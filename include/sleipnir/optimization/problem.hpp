@@ -138,7 +138,9 @@ class Problem {
   /// will find the closest solution to the initial conditions that's in the
   /// feasible set.
   ///
-  /// @param cost The cost function to minimize.
+  /// @param cost The cost function to minimize. A 1x1 VariableMatrix will
+  ///     implicitly convert to a Variable, and a non-1x1 VariableMatrix will
+  ///     raise an assertion.
   void minimize(const Variable<Scalar>& cost) { m_f = cost; }
 
   /// Tells the solver to minimize the output of the given cost function.
@@ -147,7 +149,9 @@ class Problem {
   /// will find the closest solution to the initial conditions that's in the
   /// feasible set.
   ///
-  /// @param cost The cost function to minimize.
+  /// @param cost The cost function to minimize. A 1x1 VariableMatrix will
+  ///     implicitly convert to a Variable, and a non-1x1 VariableMatrix will
+  ///     raise an assertion.
   void minimize(Variable<Scalar>&& cost) { m_f = std::move(cost); }
 
   /// Tells the solver to maximize the output of the given objective function.
@@ -156,7 +160,9 @@ class Problem {
   /// will find the closest solution to the initial conditions that's in the
   /// feasible set.
   ///
-  /// @param objective The objective function to maximize.
+  /// @param objective The objective function to maximize. A 1x1 VariableMatrix
+  ///     will implicitly convert to a Variable, and a non-1x1 VariableMatrix
+  ///     will raise an assertion.
   void maximize(const Variable<Scalar>& objective) {
     // Maximizing a cost function is the same as minimizing its negative
     m_f = -objective;
@@ -168,7 +174,9 @@ class Problem {
   /// will find the closest solution to the initial conditions that's in the
   /// feasible set.
   ///
-  /// @param objective The objective function to maximize.
+  /// @param objective The objective function to maximize. A 1x1 VariableMatrix
+  ///     will implicitly convert to a Variable, and a non-1x1 VariableMatrix
+  ///     will raise an assertion.
   void maximize(Variable<Scalar>&& objective) {
     // Maximizing a cost function is the same as minimizing its negative
     m_f = -std::move(objective);

@@ -786,7 +786,9 @@ solver will find the closest solution to the initial conditions that's
 in the feasible set.
 
 Parameter ``objective``:
-    The objective function to maximize.)doc";
+    The objective function to maximize. A 1x1 VariableMatrix will
+    implicitly convert to a Variable, and a non-1x1 VariableMatrix
+    will raise an assertion.)doc";
 
 static const char *__doc_slp_Problem_maximize_2 =
 R"doc(Tells the solver to maximize the output of the given objective
@@ -797,7 +799,9 @@ solver will find the closest solution to the initial conditions that's
 in the feasible set.
 
 Parameter ``objective``:
-    The objective function to maximize.)doc";
+    The objective function to maximize. A 1x1 VariableMatrix will
+    implicitly convert to a Variable, and a non-1x1 VariableMatrix
+    will raise an assertion.)doc";
 
 static const char *__doc_slp_Problem_minimize =
 R"doc(Tells the solver to minimize the output of the given cost function.
@@ -807,7 +811,9 @@ solver will find the closest solution to the initial conditions that's
 in the feasible set.
 
 Parameter ``cost``:
-    The cost function to minimize.)doc";
+    The cost function to minimize. A 1x1 VariableMatrix will
+    implicitly convert to a Variable, and a non-1x1 VariableMatrix
+    will raise an assertion.)doc";
 
 static const char *__doc_slp_Problem_minimize_2 =
 R"doc(Tells the solver to minimize the output of the given cost function.
@@ -817,7 +823,9 @@ solver will find the closest solution to the initial conditions that's
 in the feasible set.
 
 Parameter ``cost``:
-    The cost function to minimize.)doc";
+    The cost function to minimize. A 1x1 VariableMatrix will
+    implicitly convert to a Variable, and a non-1x1 VariableMatrix
+    will raise an assertion.)doc";
 
 static const char *__doc_slp_Problem_print_exit_conditions = R"doc()doc";
 
