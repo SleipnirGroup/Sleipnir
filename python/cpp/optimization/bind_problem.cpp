@@ -10,6 +10,7 @@
 #include <sleipnir/optimization/solver/options.hpp>
 
 #include "docstrings.hpp"
+#include "for_each_type.hpp"
 
 namespace nb = nanobind;
 
@@ -41,34 +42,19 @@ void bind_problem(nb::class_<Problem<double>>& cls) {
   cls.def("symmetric_decision_variable",
           &Problem<double>::symmetric_decision_variable, "rows"_a,
           DOC(slp, Problem, symmetric_decision_variable));
-  cls.def(
-      "minimize",
-      nb::overload_cast<const Variable<double>&>(&Problem<double>::minimize),
-      "cost"_a, DOC(slp, Problem, minimize));
-  cls.def(
-      "minimize",
-      [](Problem<double>& self, const VariableMatrix<double>& cost) {
-        self.minimize(cost);
-      },
-      "cost"_a, DOC(slp, Problem, minimize));
-  cls.def(
-      "minimize",
-      [](Problem<double>& self, double cost) { self.minimize(cost); }, "cost"_a,
-      DOC(slp, Problem, minimize));
-  cls.def(
-      "maximize",
-      nb::overload_cast<const Variable<double>&>(&Problem<double>::maximize),
-      "objective"_a, DOC(slp, Problem, maximize));
-  cls.def(
-      "maximize",
-      [](Problem<double>& self, const VariableMatrix<double>& objective) {
-        self.maximize(objective);
-      },
-      "objective"_a, DOC(slp, Problem, maximize));
-  cls.def(
-      "maximize",
-      [](Problem<double>& self, double objective) { self.maximize(objective); },
-      "objective"_a, DOC(slp, Problem, maximize));
+  for_each_type<double, const Variable<double>&, const VariableMatrix<double>&>(
+      [&]<typename T> {
+        cls.def(
+            "minimize",
+            [](Problem<double>& self, T cost) { self.minimize(cost); },
+            "cost"_a, DOC(slp, Problem, minimize));
+        cls.def(
+            "maximize",
+            [](Problem<double>& self, T objective) {
+              self.maximize(objective);
+            },
+            "objective"_a, DOC(slp, Problem, maximize));
+      });
   cls.def("subject_to",
           nb::overload_cast<const EqualityConstraints<double>&>(
               &Problem<double>::subject_to),
