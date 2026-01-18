@@ -58,6 +58,41 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
                const Options& options,
                Eigen::Vector<Scalar, Eigen::Dynamic>& x) {
   using DenseVector = Eigen::Vector<Scalar, Eigen::Dynamic>;
+
+  DenseVector y = DenseVector::Zero(matrix_callbacks.num_equality_constraints);
+
+  return sqp(matrix_callbacks, iteration_callbacks, options, x, y);
+}
+
+/// Finds the optimal solution to a nonlinear program using Sequential Quadratic
+/// Programming (SQP).
+///
+/// A nonlinear program has the form:
+///
+/// ```
+///      min_x f(x)
+/// subject to cₑ(x) = 0
+/// ```
+///
+/// where f(x) is the cost function and cₑ(x) are the equality constraints.
+///
+/// @tparam Scalar Scalar type.
+/// @param[in] matrix_callbacks Matrix callbacks.
+/// @param[in] iteration_callbacks The list of callbacks to call at the
+///     beginning of each iteration.
+/// @param[in] options Solver options.
+/// @param[in,out] x The initial guess and output location for the decision
+///     variables.
+/// @param[in,out] y The initial guess and output location for the equality
+///     constraint dual variables.
+/// @return The exit status.
+template <typename Scalar>
+ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
+               std::span<std::function<bool(const IterationInfo<Scalar>& info)>>
+                   iteration_callbacks,
+               const Options& options, Eigen::Vector<Scalar, Eigen::Dynamic>& x,
+               Eigen::Vector<Scalar, Eigen::Dynamic>& y) {
+  using DenseVector = Eigen::Vector<Scalar, Eigen::Dynamic>;
   using SparseMatrix = Eigen::SparseMatrix<Scalar>;
   using SparseVector = Eigen::SparseVector<Scalar>;
 
@@ -112,6 +147,8 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
   auto& A_e_prof = solve_profilers[15];
 
   SQPMatrixCallbacks<Scalar> matrices{
+      matrix_callbacks.num_decision_variables,
+      matrix_callbacks.num_equality_constraints,
       [&](const DenseVector& x) -> Scalar {
         ScopedProfiler prof{f_prof};
         return matrix_callbacks.f(x);
@@ -140,33 +177,27 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
   setup_prof.start();
 
   Scalar f = matrices.f(x);
+  SparseVector g = matrices.g(x);
+  SparseMatrix H = matrices.H(x, y);
   DenseVector c_e = matrices.c_e(x);
+  SparseMatrix A_e = matrices.A_e(x);
 
-  int num_decision_variables = x.rows();
-  int num_equality_constraints = c_e.rows();
+  // Ensure matrix callback dimensions are consistent
+  slp_assert(g.rows() == matrices.num_decision_variables);
+  slp_assert(H.rows() == matrices.num_decision_variables);
+  slp_assert(H.cols() == matrices.num_decision_variables);
+  slp_assert(c_e.rows() == matrices.num_equality_constraints);
+  slp_assert(A_e.rows() == matrices.num_equality_constraints);
+  slp_assert(A_e.cols() == matrices.num_decision_variables);
 
   // Check for overconstrained problem
-  if (num_equality_constraints > num_decision_variables) {
+  if (matrices.num_equality_constraints > matrices.num_decision_variables) {
     if (options.diagnostics) {
       print_too_few_dofs_error(c_e);
     }
 
     return ExitStatus::TOO_FEW_DOFS;
   }
-
-  SparseVector g = matrices.g(x);
-  SparseMatrix A_e = matrices.A_e(x);
-
-  DenseVector y = DenseVector::Zero(num_equality_constraints);
-
-  SparseMatrix H = matrices.H(x, y);
-
-  // Ensure matrix callback dimensions are consistent
-  slp_assert(g.rows() == num_decision_variables);
-  slp_assert(A_e.rows() == num_equality_constraints);
-  slp_assert(A_e.cols() == num_decision_variables);
-  slp_assert(H.rows() == num_decision_variables);
-  slp_assert(H.cols() == num_decision_variables);
 
   // Check whether initial guess has finite f(xₖ) and cₑ(xₖ)
   if (!isfinite(f) || !c_e.allFinite()) {
@@ -180,8 +211,8 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
   // Kept outside the loop so its storage can be reused
   gch::small_vector<Eigen::Triplet<Scalar>> triplets;
 
-  RegularizedLDLT<Scalar> solver{num_decision_variables,
-                                 num_equality_constraints};
+  RegularizedLDLT<Scalar> solver{matrices.num_decision_variables,
+                                 matrices.num_equality_constraints};
 
   // Variables for determining when a step is acceptable
   constexpr Scalar α_reduction_factor(0.5);
@@ -252,8 +283,9 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
         triplets.emplace_back(H.rows() + it.row(), it.col(), it.value());
       }
     }
-    SparseMatrix lhs(num_decision_variables + num_equality_constraints,
-                     num_decision_variables + num_equality_constraints);
+    SparseMatrix lhs(
+        matrices.num_decision_variables + matrices.num_equality_constraints,
+        matrices.num_decision_variables + matrices.num_equality_constraints);
     lhs.setFromSortedTriplets(triplets.begin(), triplets.end());
 
     // rhs = −[∇f − Aₑᵀy]
