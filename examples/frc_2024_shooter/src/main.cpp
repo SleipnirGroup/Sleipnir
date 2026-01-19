@@ -34,32 +34,37 @@ constexpr Vector6d target_wrt_field{
     {0.0},
     {0.0},
     {0.0}};
-constexpr double g = 9.806;  // m/s²
+constexpr Eigen::Vector3d g{{0.0}, {0.0}, {9.806}};  // m/s²
 
 slp::VariableMatrix<double> f(const slp::VariableMatrix<double>& x) {
+  using namespace slp::slicing;
+
   // x' = x'
   // y' = y'
   // z' = z'
-  // x" = −a_D(v_x)
-  // y" = −a_D(v_y)
-  // z" = −g − a_D(v_z)
+  // x" = −F_D(v)/m v̂_x
+  // y" = −F_D(v)/m v̂_y
+  // z" = −g − F_D(v)/m v̂_z
   //
-  // where a_D(v) = ½ρv² C_D A / m
-  // (see https://en.wikipedia.org/wiki/Drag_(physics)#The_drag_equation)
-  //
-  // The cross-sectional area A is a circle.
-  constexpr double rho = 1.204;  // kg/m³
+  // Per https://en.wikipedia.org/wiki/Drag_(physics)#The_drag_equation:
+  //   F_D(v) = ½ρv²C_D A
+  //   ρ is the fluid density in kg/m³
+  //   v is the velocity magnitude in m/s
+  //   C_D is the drag coefficient (dimensionless)
+  //   A is the cross-sectional area of a circle in m²
+  //   m is the mass in kg
+  //   v̂ is the velocity direction unit vector
+  constexpr double ρ = 1.204;  // kg/m³
+  auto v = x[slp::Slice{3, 6}, _];
+  slp::Variable v2 = v.T() * v;
   constexpr double C_D = 0.5;
   constexpr double r = 0.15;                      // m
   constexpr double A = std::numbers::pi * r * r;  // m²
-  constexpr double m = 2.0;                       // kg
-  auto a_D = [=](auto v) { return 0.5 * rho * v * v * C_D * A / m; };
+  auto F_D = 0.5 * ρ * v2 * C_D * A;
 
-  auto v_x = x[3, 0];
-  auto v_y = x[4, 0];
-  auto v_z = x[5, 0];
-  return slp::VariableMatrix<double>{{v_x},       {v_y},       {v_z},
-                                     {-a_D(v_x)}, {-a_D(v_y)}, {-g - a_D(v_z)}};
+  constexpr double m = 2.0;  // kg
+  auto v_hat = v / sqrt(v2);
+  return slp::block<double>({{v}, {-g / m - F_D / m * v_hat}});
 }
 
 #ifndef RUNNING_TESTS
