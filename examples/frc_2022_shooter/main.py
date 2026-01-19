@@ -16,7 +16,7 @@ import math
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy.linalg import norm
-from sleipnir.autodiff import VariableMatrix
+from sleipnir.autodiff import block, sqrt
 from sleipnir.optimization import Problem
 
 field_width = 8.2296  # 27 ft -> m
@@ -25,7 +25,7 @@ target_wrt_field = np.array(
     [[field_length / 2.0], [field_width / 2.0], [2.64], [0.0], [0.0], [0.0]]
 )
 target_radius = 0.61  # m
-g = 9.806  # m/s²
+g = np.array([[0], [0], [9.806]])  # m/s²
 
 
 def lerp(a, b, t):
@@ -36,27 +36,29 @@ def f(x):
     # x' = x'
     # y' = y'
     # z' = z'
-    # x" = −a_D(v_x)
-    # y" = −a_D(v_y)
-    # z" = −g − a_D(v_z)
+    # x" = −F_D(v)/m v̂_x
+    # y" = −F_D(v)/m v̂_y
+    # z" = −g − F_D(v)/m v̂_z
     #
-    # where a_D(v) = ½ρv² C_D A / m
-    # (see https://en.wikipedia.org/wiki/Drag_(physics)#The_drag_equation)
-    #
-    # The cross-sectional area A is a circle.
-    rho = 1.204  # kg/m³
+    # Per https://en.wikipedia.org/wiki/Drag_(physics)#The_drag_equation:
+    #   F_D(v) = ½ρv²C_D A
+    #   ρ is the fluid density in kg/m³
+    #   v is the velocity magnitude in m/s
+    #   C_D is the drag coefficient (dimensionless)
+    #   A is the cross-sectional area of a circle in m²
+    #   m is the object mass in kg
+    #   v̂ is the velocity direction unit vector
+    ρ = 1.204  # kg/m³
+    v = x[3:6, :]  # m/s
+    v2 = (v.T @ v)[0, 0]
     C_D = 0.5
     r = 0.15  # m
     A = math.pi * r**2  # m²
-    m = 2.0  # kg
-    a_D = lambda v: 0.5 * rho * v**2 * C_D * A / m
+    F_D = 0.5 * ρ * v2 * C_D * A
 
-    v_x = x[3, 0]
-    v_y = x[4, 0]
-    v_z = x[5, 0]
-    return VariableMatrix(
-        [[v_x], [v_y], [v_z], [-a_D(v_x)], [-a_D(v_y)], [-g - a_D(v_z)]]
-    )
+    m = 2.0  # kg
+    v_hat = v / sqrt(v2)
+    return block([[v], [-g / m - F_D / m * v_hat]])
 
 
 def main():
