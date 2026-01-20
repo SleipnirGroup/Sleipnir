@@ -64,7 +64,7 @@ def f_variable(x):
 
     m = 2.0  # kg
     v_hat = v / sqrt(v2)
-    return block([[v], [-g / m - F_D / m * v_hat]])
+    return block([[v], [-g - F_D / m * v_hat]])
 
 
 def f_double(x):
@@ -93,7 +93,7 @@ def f_double(x):
 
     m = 2.0  # kg
     v_hat = v / math.sqrt(v2)
-    return np.block([[v], [-g / m - F_D / m * v_hat]])
+    return np.block([[v], [-g - F_D / m * v_hat]])
 
 
 def main():

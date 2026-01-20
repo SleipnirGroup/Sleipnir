@@ -58,7 +58,7 @@ def f(x):
 
     m = 2.0  # kg
     v_hat = v / sqrt(v2)
-    return block([[v], [-g / m - F_D / m * v_hat]])
+    return block([[v], [-g - F_D / m * v_hat]])
 
 
 def main():
