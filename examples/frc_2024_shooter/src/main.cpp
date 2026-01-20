@@ -64,7 +64,7 @@ slp::VariableMatrix<double> f(const slp::VariableMatrix<double>& x) {
 
   constexpr double m = 2.0;  // kg
   auto v_hat = v / sqrt(v2);
-  return slp::block<double>({{v}, {-g / m - F_D / m * v_hat}});
+  return slp::block<double>({{v}, {-g - F_D / m * v_hat}});
 }
 
 #ifndef RUNNING_TESTS
