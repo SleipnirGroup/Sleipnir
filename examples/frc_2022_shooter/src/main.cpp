@@ -53,7 +53,7 @@ slp::VariableMatrix<double> f(const slp::VariableMatrix<double>& x) {
   constexpr double A = std::numbers::pi * r * r;  // m²
   auto F_D = 0.5 * ρ * v2 * C_D * A;
 
-  constexpr double m = 2.0;  // kg
+  constexpr double m = 0.283;  // kg
   auto v_hat = v / sqrt(v2);
   return slp::block<double>({{v}, {-g - F_D / m * v_hat}});
 }
