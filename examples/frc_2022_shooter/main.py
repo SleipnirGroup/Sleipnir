@@ -56,7 +56,7 @@ def f(x):
     A = math.pi * r**2  # m²
     F_D = 0.5 * ρ * v2 * C_D * A
 
-    m = 2.0  # kg
+    m = 0.283  # kg
     v_hat = v / sqrt(v2)
     return block([[v], [-g - F_D / m * v_hat]])
 
