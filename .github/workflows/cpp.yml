@@ -52,7 +52,7 @@ jobs:
         # sccache doesn't work with MSBuild
         if: runner.os != 'Windows'
 
-      - run: cmake -B build -S . -DBUILD_EXAMPLES=ON ${{ matrix.cmake-args }}
+      - run: cmake -B build -S . -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache -DBUILD_EXAMPLES=ON ${{ matrix.cmake-args }}
       - run: cmake --build build --config RelWithDebInfo --parallel 4
       - run: ctest --test-dir build -C RelWithDebInfo --output-on-failure
         if: ${{ !(matrix.skip-tests || false) }}
