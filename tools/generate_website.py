@@ -22,7 +22,17 @@ def clear_python_workspace():
 def prep_python_api_docs():
     # Generate .pyi files
     subprocess.run(
-        ["cmake", "-B", "build-stubs", "-S", ".", "-DBUILD_PYTHON=ON"], check=True
+        [
+            "cmake",
+            "-B",
+            "build-stubs",
+            "-S",
+            ".",
+            "-DCMAKE_C_COMPILER_LAUNCHER=sccache",
+            "-DCMAKE_CXX_COMPILER_LAUNCHER=sccache",
+            "-DBUILD_PYTHON=ON",
+        ],
+        check=True,
     )
     subprocess.run(
         ["cmake", "--build", "build-stubs", "--target", "_sleipnir"], check=True

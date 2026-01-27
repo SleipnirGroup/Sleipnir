@@ -14,13 +14,13 @@ jobs:
       matrix:
         include:
           - name: asan
-            cmake-flags: -DCMAKE_BUILD_TYPE=Asan
+            cmake-args: -DCMAKE_BUILD_TYPE=Asan
             ctest-env:
           - name: tsan
-            cmake-flags: -DCMAKE_BUILD_TYPE=Tsan
+            cmake-args: -DCMAKE_BUILD_TYPE=Tsan
             ctest-env: TSAN_OPTIONS=second_deadlock_stack=1
           - name: ubsan
-            cmake-flags: -DCMAKE_BUILD_TYPE=Ubsan
+            cmake-args: -DCMAKE_BUILD_TYPE=Ubsan
             ctest-env:
     name: "${{ matrix.name }}"
     runs-on: ubuntu-24.04
@@ -43,6 +43,6 @@ jobs:
         # sccache doesn't work with MSBuild
         if: runner.os != 'Windows'
 
-      - run: cmake -B build -S . ${{ matrix.cmake-flags }} -DBUILD_EXAMPLES=ON -DBUILD_PYTHON=OFF
+      - run: cmake -B build -S . -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache -DBUILD_EXAMPLES=ON -DBUILD_PYTHON=OFF ${{ matrix.cmake-args }}
       - run: cmake --build build --target all --config RelWithDebInfo --parallel $(nproc)
       - run: ${{ matrix.ctest-env }} ctest --test-dir build -C RelWithDebInfo --output-on-failure
