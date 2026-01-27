@@ -47,6 +47,11 @@ jobs:
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 200
           sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14 200
 
+      - name: Set up sccache
+        uses: mozilla-actions/sccache-action@v0.0.9
+        # sccache doesn't work with MSBuild
+        if: runner.os != 'Windows'
+
       - run: cmake -B build -S . -DBUILD_EXAMPLES=ON ${{ matrix.cmake-args }}
       - run: cmake --build build --config RelWithDebInfo --parallel 4
       - run: ctest --test-dir build -C RelWithDebInfo --output-on-failure
@@ -94,6 +99,11 @@ jobs:
           echo "CC=clang" >> $GITHUB_ENV
           echo "CXX=clang++" >> $GITHUB_ENV
           echo "CXXFLAGS=-stdlib=libc++" >> $GITHUB_ENV
+
+      - name: Set up sccache
+        uses: mozilla-actions/sccache-action@v0.0.9
+        # sccache doesn't work with MSBuild
+        if: runner.os != 'Windows'
 
       - run: ./tools/generate-coverage.sh sleipnir_test
 
