@@ -38,6 +38,11 @@ jobs:
           echo "CXX=clang++" >> $GITHUB_ENV
           echo "CXXFLAGS=-stdlib=libc++" >> $GITHUB_ENV
 
+      - name: Set up sccache
+        uses: mozilla-actions/sccache-action@v0.0.9
+        # sccache doesn't work with MSBuild
+        if: runner.os != 'Windows'
+
       - run: cmake -B build -S . ${{ matrix.cmake-flags }} -DBUILD_EXAMPLES=ON -DBUILD_PYTHON=OFF
       - run: cmake --build build --target all --config RelWithDebInfo --parallel $(nproc)
       - run: ${{ matrix.ctest-env }} ctest --test-dir build -C RelWithDebInfo --output-on-failure
