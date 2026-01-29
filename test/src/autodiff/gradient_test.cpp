@@ -626,6 +626,68 @@ TEMPLATE_TEST_CASE("Gradient - hypot()", "[Gradient]",
         z.value() / hypot(x.value(), y.value(), z.value()));
 }
 
+TEMPLATE_TEST_CASE("Gradient - max()", "[Gradient]", SCALAR_TYPES_UNDER_TEST) {
+  using T = TestType;
+
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
+
+  slp::Variable<T> x;
+  x.set_value(T(2));
+
+  slp::Variable<T> x2 = x * x;
+  slp::Variable<T> x3 = x * x * x;
+
+  // Testing lhs < rhs
+  auto g = slp::Gradient(slp::max(x2, x3), x);
+  CHECK(slp::max(x2, x3).value() == x3.value());
+  CHECK(g.get().value().coeff(0) == slp::Gradient(x3, x).value().coeff(0));
+  CHECK(g.value().coeff(0) == slp::Gradient(x3, x).value().coeff(0));
+
+  // Testing lhs > rhs
+  g = slp::Gradient(slp::max(x3, x2), x);
+  CHECK(slp::max(x3, x2).value() == x3.value());
+  CHECK(g.get().value().coeff(0) == slp::Gradient(x3, x).value().coeff(0));
+  CHECK(g.value().coeff(0) == slp::Gradient(x3, x).value().coeff(0));
+
+  // Testing lhs == rhs
+  g = slp::Gradient(slp::max(x, x), x);
+  CHECK(slp::max(x, x).value() == x.value());
+  CHECK(g.get().value().coeff(0) == T(1));
+  CHECK(g.value().coeff(0) == T(1));
+}
+
+TEMPLATE_TEST_CASE("Gradient - min()", "[Gradient]", SCALAR_TYPES_UNDER_TEST) {
+  using T = TestType;
+
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
+
+  slp::Variable<T> x;
+  x.set_value(T(2));
+
+  slp::Variable<T> x2 = x * x;
+  slp::Variable<T> x3 = x * x * x;
+
+  // Testing lhs < rhs
+  auto g = slp::Gradient(slp::min(x2, x3), x);
+  CHECK(slp::min(x2, x3).value() == x2.value());
+  CHECK(g.get().value().coeff(0) == slp::Gradient(x2, x).value().coeff(0));
+  CHECK(g.value().coeff(0) == slp::Gradient(x2, x).value().coeff(0));
+
+  // Testing lhs > rhs
+  g = slp::Gradient(slp::min(x3, x2), x);
+  CHECK(slp::min(x3, x2).value() == x2.value());
+  CHECK(g.get().value().coeff(0) == slp::Gradient(x2, x).value().coeff(0));
+  CHECK(g.value().coeff(0) == slp::Gradient(x2, x).value().coeff(0));
+
+  // Testing lhs == rhs
+  g = slp::Gradient(slp::min(x, x), x);
+  CHECK(slp::min(x, x).value() == x.value());
+  CHECK(g.get().value().coeff(0) == T(1));
+  CHECK(g.value().coeff(0) == T(1));
+}
+
 TEMPLATE_TEST_CASE("Gradient - Miscellaneous", "[Gradient]",
                    SCALAR_TYPES_UNDER_TEST) {
   using T = TestType;
