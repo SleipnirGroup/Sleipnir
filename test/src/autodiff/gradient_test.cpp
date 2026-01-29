@@ -556,14 +556,14 @@ TEMPLATE_TEST_CASE("Gradient - hypot()", "[Gradient]",
   // Testing hypot function on (var, T)
   x.set_value(T(1.8));
   y.set_value(T(1.5));
-  CHECK(slp::hypot(x, 2).value() == hypot(x.value(), T(2)));
+  CHECK(slp::hypot(x, T(2)).value() == hypot(x.value(), T(2)));
 
   auto g = slp::Gradient(slp::hypot(x, T(2)), x);
   CHECK(g.get().value().coeff(0) == x.value() / hypot(x.value(), T(2)));
   CHECK(g.value().coeff(0) == x.value() / hypot(x.value(), T(2)));
 
   // Testing hypot function on (T, var)
-  CHECK(slp::hypot(2.0, y).value() == hypot(T(2), y.value()));
+  CHECK(slp::hypot(T(2), y).value() == hypot(T(2), y.value()));
 
   g = slp::Gradient(slp::hypot(T(2), y), y);
   CHECK(g.get().value().coeff(0) == y.value() / hypot(T(2), y.value()));
