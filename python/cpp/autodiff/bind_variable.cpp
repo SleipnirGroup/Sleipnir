@@ -147,6 +147,12 @@ void bind_variable(nb::module_& autodiff, nb::class_<Variable<double>>& cls) {
       "y"_a, "z"_a, DOC(slp, hypot, 2));
   def_unary_math(autodiff, "log", &log<double>, "x"_a, DOC(slp, log));
   def_unary_math(autodiff, "log10", &log10<double>, "x"_a, DOC(slp, log10));
+  def_binary_math(autodiff, "max",
+                  nb::overload_cast<const V&, const V&>(&max<double>), "a"_a,
+                  "b"_a, DOC(slp, max));
+  def_binary_math(autodiff, "min",
+                  nb::overload_cast<const V&, const V&>(&min<double>), "a"_a,
+                  "b"_a, DOC(slp, min));
   def_binary_math(autodiff, "pow", &pow<double>, "base"_a, "power"_a,
                   DOC(slp, pow));
   def_unary_math(autodiff, "sign", &sign<double>, "x"_a, DOC(slp, sign));

@@ -549,6 +549,58 @@ def test_hypot():
     assert g.value()[0, 0] == z.value() / math.hypot(x.value(), y.value(), z.value())
 
 
+def test_max():
+    x = Variable()
+    x.set_value(2)
+
+    x2 = x * x
+    x3 = x * x * x
+
+    # Testing lhs < rhs
+    g = Gradient(autodiff.max(x2, x3), x)
+    assert autodiff.max(x2, x3).value() == x3.value()
+    assert g.get().value()[0, 0] == Gradient(x3, x).value()[0, 0]
+    assert g.value()[0, 0] == Gradient(x3, x).value()[0, 0]
+
+    # Testing lhs > rhs
+    g = Gradient(autodiff.max(x3, x2), x)
+    assert autodiff.max(x3, x2).value() == x3.value()
+    assert g.get().value()[0, 0] == Gradient(x3, x).value()[0, 0]
+    assert g.value()[0, 0] == Gradient(x3, x).value()[0, 0]
+
+    # Testing lhs == rhs
+    g = autodiff.Gradient(autodiff.max(x, x), x)
+    assert autodiff.max(x, x).value() == x.value()
+    assert g.get().value()[0, 0] == 1
+    assert g.value()[0, 0] == 1
+
+
+def test_min():
+    x = Variable()
+    x.set_value(2)
+
+    x2 = x * x
+    x3 = x * x * x
+
+    # Testing lhs < rhs
+    g = Gradient(autodiff.min(x2, x3), x)
+    assert autodiff.min(x2, x3).value() == x2.value()
+    assert g.get().value()[0, 0] == Gradient(x2, x).value()[0, 0]
+    assert g.value()[0, 0] == Gradient(x2, x).value()[0, 0]
+
+    # Testing lhs > rhs
+    g = Gradient(autodiff.min(x3, x2), x)
+    assert autodiff.min(x3, x2).value() == x2.value()
+    assert g.get().value()[0, 0] == Gradient(x2, x).value()[0, 0]
+    assert g.value()[0, 0] == Gradient(x2, x).value()[0, 0]
+
+    # Testing lhs == rhs
+    g = Gradient(autodiff.min(x, x), x)
+    assert autodiff.min(x, x).value() == x.value()
+    assert g.get().value()[0, 0] == 1
+    assert g.value()[0, 0] == 1
+
+
 def test_miscellaneous():
     x = Variable()
 

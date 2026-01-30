@@ -2336,6 +2336,96 @@ static const char *__doc_slp_make_constraints_3 = R"doc()doc";
 
 static const char *__doc_slp_make_constraints_4 = R"doc()doc";
 
+static const char *__doc_slp_max =
+R"doc(max() for Variables.
+
+Returns the greater of a and b. If the values are equivalent, returns
+a.
+
+Template parameter ``Scalar``:
+    Scalar type.
+
+Parameter ``a``:
+    The a argument.
+
+Parameter ``b``:
+    The b argument.)doc";
+
+static const char *__doc_slp_max_2 =
+R"doc(max() for Variables.
+
+Returns the greater of a and b. If the values are equivalent, returns
+a.
+
+Template parameter ``Scalar``:
+    Scalar type.
+
+Parameter ``a``:
+    The a argument.
+
+Parameter ``b``:
+    The b argument.)doc";
+
+static const char *__doc_slp_max_3 =
+R"doc(max() for Variables.
+
+Returns the greater of a and b. If the values are equivalent, returns
+a.
+
+Template parameter ``Scalar``:
+    Scalar type.
+
+Parameter ``a``:
+    The a argument.
+
+Parameter ``b``:
+    The b argument.)doc";
+
+static const char *__doc_slp_min =
+R"doc(min() for Variables.
+
+Returns the lesser of a and b. If the values are equivalent, returns
+a.
+
+Template parameter ``Scalar``:
+    Scalar type.
+
+Parameter ``a``:
+    The a argument.
+
+Parameter ``b``:
+    The b argument.)doc";
+
+static const char *__doc_slp_min_2 =
+R"doc(min() for Variables.
+
+Returns the lesser of a and b. If the values are equivalent, returns
+a.
+
+Template parameter ``Scalar``:
+    Scalar type.
+
+Parameter ``a``:
+    The a argument.
+
+Parameter ``b``:
+    The b argument.)doc";
+
+static const char *__doc_slp_min_3 =
+R"doc(min() for Variables.
+
+Returns the lesser of a and b. If the values are equivalent, returns
+a.
+
+Template parameter ``Scalar``:
+    Scalar type.
+
+Parameter ``a``:
+    The a argument.
+
+Parameter ``b``:
+    The b argument.)doc";
+
 static const char *__doc_slp_operator_eq =
 R"doc(Equality operator that returns an equality constraint for two
 Variables.
