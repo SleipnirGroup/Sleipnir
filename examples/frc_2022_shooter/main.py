@@ -15,6 +15,7 @@ import math
 
 import matplotlib.pyplot as plt
 import numpy as np
+import sleipnir.autodiff as autodiff
 from numpy.linalg import norm
 from sleipnir.autodiff import block, sqrt
 from sleipnir.optimization import Problem
@@ -25,6 +26,7 @@ target_wrt_field = np.array(
     [[field_length / 2.0], [field_width / 2.0], [2.64], [0.0], [0.0], [0.0]]
 )
 target_radius = 0.61  # m
+cone_angle = math.pi / 4  # rad
 g = np.array([[0], [0], [9.806]])  # m/s²
 
 
@@ -75,7 +77,7 @@ def main():
     problem = Problem()
 
     # Set up duration decision variables
-    N = 10
+    N = 50
     T = problem.decision_variable()
     problem.subject_to(T >= 0)
     T.set_value(1)
@@ -130,6 +132,65 @@ def main():
         + (v_z[0] - robot_wrt_field[5, 0]) ** 2
         <= max_initial_velocity**2
     )
+
+    # Keep-out region (cylinder with conic bowl)
+    #
+    #            r_t
+    #           |----|
+    #   ___ ___  ____
+    #    |   |  |   /
+    #    |  h|  |  /
+    # z_t|   |  |γ/    z
+    #    |  ___ |/     ^
+    #    |      |      |
+    #   ___     |      ⋅-> x
+    #
+    # (x_c, y_c, z_c) is the tip of the cone, r_t is target radius, z_t is
+    # target height.
+    #
+    #   tan(γ) = r_t/h
+    #   h = r_t/tan(γ)
+    #
+    #   z_c = z_t - h
+    #   z_c = z_t - r_t/tan(γ)
+    #
+    # Constrain ball to be either outside cylinder or inside cone.
+    # First, get cylindrical coordinates with respect to cone origin.
+    #
+    #   r' = hypot(x - x_c, y - y_c)
+    #   z' = z - z_c
+    #
+    # Cylinder:
+    #   r' ≥ r_t
+    #   (x - x_c)² + (y - y_c)² ≥ r_t²
+    #   (x - x_c)² + (y - y_c)² - r_t² ≥ 0
+    #
+    # Cone:
+    #   z' ≥ r'/tan(γ)
+    #   z - z_c ≥ r'/tan(γ)
+    #   (z - z_c) tan(γ) ≥ r'
+    #   (z - z_c)² tan²(γ) ≥ (x - x_c)² + (y - y_c)²
+    #   (z - z_c)² tan²(γ) - (x - x_c)² - (y - y_c)² ≥ 0
+    #
+    # Ball is in keep-out region if both constraints are violated.
+    #
+    #   max((x - x_c)² + (y - y_c)² - r_t²,
+    #       (z - z_c)² tan²(γ) - (x - x_c)² - (y - y_c)²) ≥ 0
+    x_c = target_wrt_field[0, 0]
+    y_c = target_wrt_field[1, 0]
+    z_c = target_wrt_field[2, 0] - target_radius / math.tan(cone_angle)
+    for k in range(N):
+        x = p_x[k]
+        y = p_y[k]
+        z = p_z[k]
+
+        x2 = (x - x_c) ** 2
+        y2 = (y - y_c) ** 2
+        z2 = (z - z_c) ** 2
+        cylinder = x2 + y2 - target_radius**2
+        cone = z2 * math.tan(cone_angle) ** 2 - x2 - y2
+
+        problem.subject_to(autodiff.max(cylinder, cone) >= 0)
 
     # Dynamics constraints - RK4 integration
     h = dt
@@ -207,6 +268,18 @@ def main():
         ys.append(target_wrt_field[1, 0] + target_radius * math.sin(angle))
         zs.append(target_wrt_field[2, 0])
     ax.plot(xs, ys, zs, color="black")
+
+    # Conic bowl
+    θs, Rs = np.meshgrid(
+        np.linspace(0, 2 * math.pi, 100),
+        np.linspace(0, target_radius, 100),
+    )
+    ax.plot_surface(
+        target_wrt_field[0, 0] + Rs * np.cos(θs),  # x
+        target_wrt_field[1, 0] + Rs * np.sin(θs),  # y
+        target_wrt_field[2, 0] + (Rs - target_radius) / math.tan(cone_angle),  # z
+        alpha=0.2,
+    )
 
     # Trajectory
     trajectory_x = p_x.value()[0, :]

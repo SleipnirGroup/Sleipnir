@@ -25,6 +25,7 @@ constexpr Vector6d target_wrt_field{
     {field_length / 2.0}, {field_width / 2.0}, {2.64}, {0.0}, {0.0}, {0.0}};
 [[maybe_unused]]
 constexpr double target_radius = 0.61;               // m
+constexpr double cone_angle = std::numbers::pi / 4;  // rad
 constexpr Eigen::Vector3d g{{0.0}, {0.0}, {9.806}};  // m/s²
 
 slp::VariableMatrix<double> f(const slp::VariableMatrix<double>& x) {
@@ -76,7 +77,7 @@ int main() {
   slp::Problem<double> problem;
 
   // Set up duration decision variables
-  constexpr int N = 10;
+  constexpr int N = 50;
   auto T = problem.decision_variable();
   problem.subject_to(T >= 0);
   T.set_value(1);
@@ -136,6 +137,67 @@ int main() {
                          slp::pow(v_y[0] - robot_wrt_field[4], 2) +
                          slp::pow(v_z[0] - robot_wrt_field[5], 2) <=
                      max_initial_velocity * max_initial_velocity);
+
+  // Keep-out region (cylinder with conic bowl)
+  //
+  //            r_t
+  //           |----|
+  //   ___ ___  ____
+  //    |   |  |   /
+  //    |  h|  |  /
+  // z_t|   |  |γ/    z
+  //    |  ___ |/     ^
+  //    |      |      |
+  //   ___     |      ⋅-> x
+  //
+  // (x_c, y_c, z_c) is the tip of the cone, r_t is target radius, z_t is
+  // target height.
+  //
+  //   tan(γ) = r_t/h
+  //   h = r_t/tan(γ)
+  //
+  //   z_c = z_t - h
+  //   z_c = z_t - r_t/tan(γ)
+  //
+  // Constrain ball to be either outside cylinder or inside cone.
+  // First, get cylindrical coordinates with respect to cone origin.
+  //
+  //   r' = hypot(x - x_c, y - y_c)
+  //   z' = z - z_c
+  //
+  // Cylinder:
+  //   r' ≥ r_t
+  //   (x - x_c)² + (y - y_c)² ≥ r_t²
+  //   (x - x_c)² + (y - y_c)² - r_t² ≥ 0
+  //
+  // Cone:
+  //   z' ≥ r'/tan(γ)
+  //   z - z_c ≥ r'/tan(γ)
+  //   (z - z_c) tan(γ) ≥ r'
+  //   (z - z_c)² tan²(γ) ≥ (x - x_c)² + (y - y_c)²
+  //   (z - z_c)² tan²(γ) - (x - x_c)² - (y - y_c)² ≥ 0
+  //
+  // Ball is in keep-out region if both constraints are violated.
+  //
+  //   max((x - x_c)² + (y - y_c)² - r_t²,
+  //       (z - z_c)² tan²(γ) - (x - x_c)² - (y - y_c)²) ≥ 0
+  auto& x_c = target_wrt_field[0, 0];
+  auto& y_c = target_wrt_field[1, 0];
+  auto z_c = target_wrt_field[2, 0] - target_radius / std::tan(cone_angle);
+  for (int k = 0; k < N; ++k) {
+    auto& x = p_x[k];
+    auto& y = p_y[k];
+    auto& z = p_z[k];
+
+    auto x2 = slp::pow(x - x_c, 2);
+    auto y2 = slp::pow(y - y_c, 2);
+    auto z2 = slp::pow(z - z_c, 2);
+    auto tan = std::tan(cone_angle);
+    auto cylinder = x2 + y2 - target_radius * target_radius;
+    auto cone = z2 * tan * tan - x2 - y2;
+
+    problem.subject_to(slp::max(cylinder, cone) >= 0);
+  }
 
   // Dynamics constraints - RK4 integration
   auto h = dt;
