@@ -12,9 +12,9 @@ class CmdlineArgs {
 
   /// Populate commandline arguments.
   ///
-  /// @param argv argv argument of main(int argc, char* argv[]).
-  /// @param argc argc argument of main(int argc, char* argv[]).
-  CmdlineArgs(char* argv[], int argc) : args(argv, argc) {}
+  /// @param argv argv argument of main(int argc, const char* argv[]).
+  /// @param argc argc argument of main(int argc, const char* argv[]).
+  CmdlineArgs(const char* argv[], int argc) : args(argv, argc) {}
 
   /// Returns size of the list of arguments.
   size_t size() const { return args.size(); }
@@ -26,5 +26,5 @@ class CmdlineArgs {
   }
 
  private:
-  std::span<char*> args;
+  std::span<const char*> args;
 };

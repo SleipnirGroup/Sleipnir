@@ -39,7 +39,7 @@ slp::Problem<double> flywheel_problem(std::chrono::duration<double> dt, int N) {
   return problem;
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, const char* argv[]) {
   using namespace std::chrono_literals;
 
   CmdlineArgs args{argv, argc};
