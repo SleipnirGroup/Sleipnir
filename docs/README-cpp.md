@@ -8,9 +8,9 @@ See the
 ## Introduction
 
 A system with position and velocity states and an acceleration input is an
-example of a double integrator. We want to go from 0 m at rest to 10 m at rest
-in the minimum time while obeying the velocity limit (-1, 1) and the
-acceleration limit (-1, 1).
+example of a double integrator. We want to go from 0 m at rest to 2 m at rest in
+the minimum time while obeying the velocity limit (-1, 1) and the acceleration
+limit (-1, 1).
 
 The model for our double integrator is ẍ = u where x is the vector [position;
 velocity] and u is the acceleration. The velocity constraints are -1 ≤ x₁ ≤ 1
@@ -19,8 +19,12 @@ and the acceleration constraints are -1 ≤ u ≤ 1.
 ## Importing required libraries
 
 ```cpp
+#include <chrono>
+
 #include <Eigen/Core>
 #include <sleipnir/optimization/problem.hpp>
+
+using namespace std::chrono_literals;
 ```
 
 ## Initializing a problem instance
@@ -32,7 +36,7 @@ constexpr auto TOTAL_TIME = 5s;
 constexpr auto dt = 5ms;
 constexpr int N = TOTAL_TIME / dt;
 
-constexpr double r = 2.0;
+constexpr double r = 2.0;  // m
 
 slp::Problem problem;
 ```
