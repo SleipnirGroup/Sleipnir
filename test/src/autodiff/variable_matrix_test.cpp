@@ -394,7 +394,7 @@ TEMPLATE_TEST_CASE("VariableMatrix - cwise_transform()", "[VariableMatrix]",
   CHECK(result2.value() == expected2);
 }
 
-TEMPLATE_TEST_CASE("VariableMatrix - Zero() static function",
+TEMPLATE_TEST_CASE("VariableMatrix - zero() static function",
                    "[VariableMatrix]", SCALAR_TYPES_UNDER_TEST) {
   using T = TestType;
 
@@ -405,14 +405,25 @@ TEMPLATE_TEST_CASE("VariableMatrix - Zero() static function",
   }
 }
 
-TEMPLATE_TEST_CASE("VariableMatrix - Ones() static function",
-                   "[VariableMatrix]", SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("VariableMatrix - one() static function", "[VariableMatrix]",
+                   SCALAR_TYPES_UNDER_TEST) {
   using T = TestType;
 
-  auto A = slp::VariableMatrix<T>::ones(2, 3);
+  auto A = slp::VariableMatrix<T>::one(2, 3);
 
   for (auto& elem : A) {
     CHECK(elem.value() == T(1));
+  }
+}
+
+TEMPLATE_TEST_CASE("VariableMatrix - constant() static function",
+                   "[VariableMatrix]", SCALAR_TYPES_UNDER_TEST) {
+  using T = TestType;
+
+  auto A = slp::VariableMatrix<T>::constant(2, 3, T(2));
+
+  for (auto& elem : A) {
+    CHECK(elem.value() == T(2));
   }
 }
 
