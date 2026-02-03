@@ -439,8 +439,10 @@ void bind_variable_matrix(nb::module_& autodiff,
       "func"_a, DOC(slp, VariableMatrix, cwise_transform));
   cls.def_static("zero", &VariableMatrix<double>::zero, "rows"_a, "cols"_a,
                  DOC(slp, VariableMatrix, zero));
-  cls.def_static("ones", &VariableMatrix<double>::ones, "rows"_a, "cols"_a,
-                 DOC(slp, VariableMatrix, ones));
+  cls.def_static("one", &VariableMatrix<double>::one, "rows"_a, "cols"_a,
+                 DOC(slp, VariableMatrix, one));
+  cls.def_static("constant", &VariableMatrix<double>::constant, "rows"_a,
+                 "cols"_a, "constant"_a, DOC(slp, VariableMatrix, constant));
 
   // Comparison operators
   for_each_type<nb::detail::self_t, double, int, Variable<double>>(

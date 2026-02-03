@@ -296,12 +296,20 @@ def test_zero_static_function():
             assert A[row, col].value() == 0.0
 
 
-def test_ones_static_function():
-    A = VariableMatrix.ones(2, 3)
+def test_one_static_function():
+    A = VariableMatrix.one(2, 3)
 
     for row in range(A.rows()):
         for col in range(A.cols()):
             assert A[row, col].value() == 1.0
+
+
+def test_constant_static_function():
+    A = VariableMatrix.constant(2, 3, 2.0)
+
+    for row in range(A.rows()):
+        for col in range(A.cols()):
+            assert A[row, col].value() == 2.0
 
 
 def test_cwise_reduce():

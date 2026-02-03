@@ -1661,6 +1661,21 @@ static const char *__doc_slp_VariableMatrix_const_iterator_operator_inc_2 = R"do
 
 static const char *__doc_slp_VariableMatrix_const_iterator_operator_mul = R"doc()doc";
 
+static const char *__doc_slp_VariableMatrix_constant =
+R"doc(Returns a variable matrix filled with a constant.
+
+Parameter ``rows``:
+    The number of matrix rows.
+
+Parameter ``cols``:
+    The number of matrix columns.
+
+Parameter ``constant``:
+    The constant.
+
+Returns:
+    A variable matrix filled with a constant.)doc";
+
 static const char *__doc_slp_VariableMatrix_crbegin =
 R"doc(Returns const reverse begin iterator.
 
@@ -1720,7 +1735,7 @@ static const char *__doc_slp_VariableMatrix_m_rows = R"doc()doc";
 
 static const char *__doc_slp_VariableMatrix_m_storage = R"doc()doc";
 
-static const char *__doc_slp_VariableMatrix_ones =
+static const char *__doc_slp_VariableMatrix_one =
 R"doc(Returns a variable matrix filled with ones.
 
 Parameter ``rows``:

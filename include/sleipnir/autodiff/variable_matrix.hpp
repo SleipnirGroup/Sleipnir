@@ -1204,11 +1204,27 @@ class VariableMatrix : public SleipnirBase {
   /// @param rows The number of matrix rows.
   /// @param cols The number of matrix columns.
   /// @return A variable matrix filled with ones.
-  static VariableMatrix<Scalar> ones(int rows, int cols) {
+  static VariableMatrix<Scalar> one(int rows, int cols) {
     VariableMatrix<Scalar> result{detail::empty, rows, cols};
 
     for (auto& elem : result) {
       elem = Scalar(1);
+    }
+
+    return result;
+  }
+
+  /// Returns a variable matrix filled with a constant.
+  ///
+  /// @param rows The number of matrix rows.
+  /// @param cols The number of matrix columns.
+  /// @param constant The constant.
+  /// @return A variable matrix filled with a constant.
+  static VariableMatrix<Scalar> constant(int rows, int cols, Scalar constant) {
+    VariableMatrix<Scalar> result{detail::empty, rows, cols};
+
+    for (auto& elem : result) {
+      elem = constant;
     }
 
     return result;
