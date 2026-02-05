@@ -36,35 +36,53 @@ constexpr Vector6d target_wrt_field{
     {0.0}};
 constexpr Eigen::Vector3d g{{0.0}, {0.0}, {9.806}};  // m/s²
 
+slp::VariableMatrix<double> cross(const slp::VariableMatrix<double>& a,
+                                  const slp::VariableMatrix<double>& b) {
+  return slp::VariableMatrix<double>({{a[1, 0] * b[2, 0] - a[2, 0] * b[1, 0]},
+                                      {a[2, 0] * b[0, 0] - a[0, 0] * b[2, 0]},
+                                      {a[0, 0] * b[1, 0] - a[1, 0] * b[0, 0]}});
+}
+
 slp::VariableMatrix<double> f(const slp::VariableMatrix<double>& x) {
   using namespace slp::slicing;
 
   // x' = x'
   // y' = y'
   // z' = z'
-  // x" = −F_D(v)/m v̂_x
-  // y" = −F_D(v)/m v̂_y
-  // z" = −g − F_D(v)/m v̂_z
-  //
-  // Per https://en.wikipedia.org/wiki/Drag_(physics)#The_drag_equation:
-  //   F_D(v) = ½ρv²C_D A
-  //   ρ is the fluid density in kg/m³
-  //   v is the velocity magnitude in m/s
-  //   C_D is the drag coefficient (dimensionless)
-  //   A is the cross-sectional area of a circle in m²
-  //   m is the mass in kg
-  //   v̂ is the velocity direction unit vector
+  // [x"]   [ 0]
+  // [y"] = [ 0] − F_D(v)/m v̂ − F_L(v)/m (ω x v)
+  // [z"]   [−g]
+
+  // ρ is the fluid density in kg/m³
+  // v is the linear velocity in m/s
+  // v̂ is the velocity direction unit vector
+  // ω is the angular velocity in rad/s
+  // A is the cross-sectional area of a circle in m²
+  // m is the object mass in kg
   constexpr double ρ = 1.204;  // kg/m³
   auto v = x[slp::Slice{3, 6}, _];
   slp::Variable v2 = v.T() * v;
+  auto v_norm = sqrt(v2);
+  auto v_hat = v / v_norm;
+  constexpr Eigen::Vector3d ω{{0.0}, {0.0}, {2.0}};  // rad/s
+  constexpr double r = 0.15;                         // m
+  constexpr double A = std::numbers::pi * r * r;     // m²
+  constexpr double m = 0.283;                        // kg
+
+  // Per https://en.wikipedia.org/wiki/Drag_(physics)#The_drag_equation:
+  //   F_D(v) = ½ρ|v|²C_D A
+  //   C_D is the drag coefficient (dimensionless)
   constexpr double C_D = 0.5;
-  constexpr double r = 0.15;                      // m
-  constexpr double A = std::numbers::pi * r * r;  // m²
   auto F_D = 0.5 * ρ * v2 * C_D * A;
 
-  constexpr double m = 0.283;  // kg
-  auto v_hat = v / sqrt(v2);
-  return slp::block<double>({{v}, {-g - F_D / m * v_hat}});
+  // Magnus force:
+  //   F_L(v) = ½ρ|v|C_L A
+  //   C_L is the lift coefficient (dimensionless)
+  constexpr double C_L = 0.5;
+  auto F_L = 0.5 * ρ * v_norm * C_L * A;
+
+  return slp::block<double>(
+      {{v}, {-g - F_D / m * v_hat - F_L / m * cross(v, ω)}});
 }
 
 #ifndef RUNNING_TESTS
