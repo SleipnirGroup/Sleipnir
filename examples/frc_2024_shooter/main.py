@@ -16,7 +16,7 @@ import math
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy.linalg import norm
-from sleipnir.autodiff import Gradient, block, sqrt
+from sleipnir.autodiff import Gradient, VariableMatrix, block, sqrt
 from sleipnir.optimization import Problem
 
 field_width = 8.2296  # 27 ft -> m
@@ -38,62 +38,102 @@ target_wrt_field = np.array(
 g = np.array([[0], [0], [9.806]])  # m/s²
 
 
+def cross_variable(a, b) -> VariableMatrix:
+    return VariableMatrix(
+        [
+            [a[1, 0] * b[2, 0] - a[2, 0] * b[1, 0]],
+            [a[2, 0] * b[0, 0] - a[0, 0] * b[2, 0]],
+            [a[0, 0] * b[1, 0] - a[1, 0] * b[0, 0]],
+        ]
+    )
+
+
 def f_variable(x):
     # x' = x'
     # y' = y'
     # z' = z'
-    # x" = −F_D(v)/m v̂_x
-    # y" = −F_D(v)/m v̂_y
-    # z" = −g − F_D(v)/m v̂_z
-    #
-    # Per https://en.wikipedia.org/wiki/Drag_(physics)#The_drag_equation:
-    #   F_D(v) = ½ρv²C_D A
-    #   ρ is the fluid density in kg/m³
-    #   v is the velocity magnitude in m/s
-    #   C_D is the drag coefficient (dimensionless)
-    #   A is the cross-sectional area of a circle in m²
-    #   m is the mass in kg
-    #   v̂ is the velocity direction unit vector
+    # [x"]   [ 0]
+    # [y"] = [ 0] − F_D(v)/m v̂ − F_L(v)/m (ω x v)
+    # [z"]   [−g]
+
+    # ρ is the fluid density in kg/m³
+    # v is the linear velocity in m/s
+    # v̂ is the velocity direction unit vector
+    # ω is the angular velocity in rad/s
+    # A is the cross-sectional area of a circle in m²
+    # m is the object mass in kg
     ρ = 1.204  # kg/m³
     v = x[3:6, :]  # m/s
     v2 = (v.T @ v)[0, 0]
-    C_D = 0.5
+    v_norm = sqrt(v2)
+    v_hat = v / v_norm
+    ω = np.array([[0.0], [0.0], [2.0]])  # rad/s
     r = 0.15  # m
     A = math.pi * r**2  # m²
+    m = 0.283  # kg
+
+    # Per https://en.wikipedia.org/wiki/Drag_(physics)#The_drag_equation:
+    #   F_D(v) = ½ρ|v|²C_D A
+    #   C_D is the drag coefficient (dimensionless)
+    C_D = 0.5
     F_D = 0.5 * ρ * v2 * C_D * A
 
-    m = 0.283  # kg
-    v_hat = v / sqrt(v2)
-    return block([[v], [-g - F_D / m * v_hat]])
+    # Magnus force:
+    #   F_L(v) = ½ρ|v|C_L A
+    #   C_L is the lift coefficient (dimensionless)
+    C_L = 0.5
+    F_L = 0.5 * ρ * v_norm * C_L * A
+
+    return block([[v], [-g - F_D / m * v_hat - F_L / m * cross_variable(v, ω)]])
+
+
+def cross_double(a, b):
+    return np.array(
+        [
+            [a[1, 0] * b[2, 0] - a[2, 0] * b[1, 0]],
+            [a[2, 0] * b[0, 0] - a[0, 0] * b[2, 0]],
+            [a[0, 0] * b[1, 0] - a[1, 0] * b[0, 0]],
+        ]
+    )
 
 
 def f_double(x):
     # x' = x'
     # y' = y'
     # z' = z'
-    # x" = −F_D(v)/m v̂_x
-    # y" = −F_D(v)/m v̂_y
-    # z" = −g − F_D(v)/m v̂_z
-    #
-    # Per https://en.wikipedia.org/wiki/Drag_(physics)#The_drag_equation:
-    #   F_D(v) = ½ρv²C_D A
-    #   ρ is the fluid density in kg/m³
-    #   v is the velocity magnitude in m/s
-    #   C_D is the drag coefficient (dimensionless)
-    #   A is the cross-sectional area of a circle in m²
-    #   m is the mass in kg
-    #   v̂ is the velocity direction unit vector
+    # [x"]   [ 0]
+    # [y"] = [ 0] − F_D(v)/m v̂ − F_L(v)/m (ω x v)
+    # [z"]   [−g]
+
+    # ρ is the fluid density in kg/m³
+    # v is the linear velocity in m/s
+    # v̂ is the velocity direction unit vector
+    # ω is the angular velocity in rad/s
+    # A is the cross-sectional area of a circle in m²
+    # m is the object mass in kg
     ρ = 1.204  # kg/m³
     v = x[3:6, :]  # m/s
     v2 = (v.T @ v)[0, 0]
-    C_D = 0.5
+    v_norm = math.sqrt(v2)
+    v_hat = v / v_norm
+    ω = np.array([[0.0], [0.0], [2.0]])  # rad/s
     r = 0.15  # m
     A = math.pi * r**2  # m²
+    m = 0.283  # kg
+
+    # Per https://en.wikipedia.org/wiki/Drag_(physics)#The_drag_equation:
+    #   F_D(v) = ½ρ|v|²C_D A
+    #   C_D is the drag coefficient (dimensionless)
+    C_D = 0.5
     F_D = 0.5 * ρ * v2 * C_D * A
 
-    m = 0.283  # kg
-    v_hat = v / math.sqrt(v2)
-    return np.block([[v], [-g - F_D / m * v_hat]])
+    # Magnus force:
+    #   F_L(v) = ½ρ|v|C_L A
+    #   C_L is the lift coefficient (dimensionless)
+    C_L = 0.5
+    F_L = 0.5 * ρ * v_norm * C_L * A
+
+    return np.block([[v], [-g - F_D / m * v_hat - F_L / m * cross_double(v, ω)]])
 
 
 def main():
