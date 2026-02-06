@@ -25,38 +25,26 @@ TEST_CASE("CurrentManager - Not enough current", "[CurrentManager]") {
 
   auto currents = manager.calculate(std::array{30.0, 10.0, 5.0, 0.0});
 
-  // Expected values are from the following CasADi program:
+  // Expected values are from the following program:
   //
   // #!/usr/bin/env python3
   //
-  // import casadi as ca
-  // import numpy as np
+  // from scipy.optimize import minimize
   //
-  // opti = ca.Opti()
-  // allocated_currents = opti.variable(4, 1)
+  // r = [30.0, 10.0, 5.0, 0.0]
+  // q = [1.0, 5.0, 10.0, 5.0]
   //
-  // current_tolerances = np.array([[1.0], [5.0], [10.0], [5.0]])
-  // desired_currents = np.array([[30.0], [10.0], [5.0], [0.0]])
-  //
-  // J = 0.0
-  // current_sum = 0.0
-  // for i in range(4):
-  //     error = desired_currents[i, 0] - allocated_currents[i, 0]
-  //     J += error**2 / current_tolerances[i] ** 2
-  //
-  //     current_sum += allocated_currents[i, 0]
-  //
-  //     # Currents must be nonnegative
-  //     opti.subject_to(allocated_currents[i, 0] >= 0.0)
-  // opti.minimize(J)
-  //
-  // # Keep total current below maximum
-  // opti.subject_to(current_sum <= 40.0)
-  //
-  // opti.solver("ipopt")
-  // print(opti.solve().value(allocated_currents))
+  // result = minimize(
+  //     lambda x: sum((r[i] - x[i]) ** 2 / q[i] ** 2 for i in range(4)),
+  //     [0.0, 0.0, 0.0, 0.0],
+  //     constraints=[
+  //         {"type": "ineq", "fun": lambda x: x},
+  //         {"type": "ineq", "fun": lambda x: 40.0 - sum(x)},
+  //     ],
+  // )
+  // print(result.x)
   CHECK_THAT(currents[0], WithinAbs(29.960, 1e-3));
-  CHECK_THAT(currents[1], WithinAbs(9.007, 1e-3));
+  CHECK_THAT(currents[1], WithinAbs(9.008, 1e-3));
   CHECK_THAT(currents[2], WithinAbs(1.032, 1e-3));
   CHECK_THAT(currents[3], WithinAbs(0.0, 1e-3));
 }
