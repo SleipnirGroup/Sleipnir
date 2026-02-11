@@ -149,10 +149,8 @@ def test_wachter_and_biegler_line_search_failure():
     assert problem.equality_constraint_type() == ExpressionType.QUADRATIC
     assert problem.inequality_constraint_type() == ExpressionType.LINEAR
 
-    # FIXME: Fails with "line search failed"
-    assert problem.solve(diagnostics=True) == ExitStatus.LINE_SEARCH_FAILED
+    assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
 
-    if 0:
-        assert x.value() == pytest.approx(1.0, abs=1e-6)
-        assert s1.value() == pytest.approx(0.0, abs=1e-6)
-        assert s2.value() == pytest.approx(0.5, abs=1e-6)
+    assert x.value() == pytest.approx(1.0, abs=1e-6)
+    assert s1.value() == pytest.approx(0.0, abs=1e-6)
+    assert s2.value() == pytest.approx(0.5, abs=1e-6)
