@@ -2,13 +2,14 @@
 
 #pragma once
 
+#include <nanobind/ndarray.h>
+
 #include <stdint.h>
 
 #include <optional>
 #include <utility>
 
 #include <Eigen/Core>
-#include <nanobind/ndarray.h>
 #include <sleipnir/util/assert.hpp>
 
 namespace nb = nanobind;

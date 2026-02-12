@@ -1,8 +1,5 @@
 // Copyright (c) Sleipnir contributors
 
-#include <format>
-#include <string>
-
 #include <nanobind/eigen/dense.h>
 #include <nanobind/make_iterator.h>
 #include <nanobind/nanobind.h>
@@ -10,6 +7,10 @@
 #include <nanobind/stl/function.h>
 #include <nanobind/stl/string.h>
 #include <nanobind/stl/vector.h>
+
+#include <format>
+#include <string>
+
 #include <sleipnir/autodiff/variable_block.hpp>
 #include <sleipnir/autodiff/variable_matrix.hpp>
 
