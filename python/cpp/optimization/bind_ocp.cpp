@@ -4,6 +4,7 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/chrono.h>
 #include <nanobind/stl/function.h>
+
 #include <sleipnir/autodiff/variable_matrix.hpp>
 #include <sleipnir/optimization/ocp.hpp>
 

@@ -1,11 +1,12 @@
 // Copyright (c) Sleipnir contributors
 
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/function.h>
+
 #include <format>
 #include <string>
 #include <utility>
 
-#include <nanobind/nanobind.h>
-#include <nanobind/stl/function.h>
 #include <sleipnir/optimization/problem.hpp>
 #include <sleipnir/optimization/solver/options.hpp>
 

@@ -277,6 +277,9 @@ if(BUILD_PYTHON)
             GIT_SHALLOW ON
             EXCLUDE_FROM_ALL
             SYSTEM
+            PATCH_COMMAND
+                git apply ${CMAKE_CURRENT_SOURCE_DIR}/cmake/nanobind.patch
+            UPDATE_DISCONNECTED 1
         )
         FetchContent_MakeAvailable(nanobind)
     else()

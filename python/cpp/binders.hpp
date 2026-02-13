@@ -3,6 +3,7 @@
 #pragma once
 
 #include <nanobind/nanobind.h>
+
 #include <sleipnir/autodiff/expression_type.hpp>
 #include <sleipnir/autodiff/gradient.hpp>
 #include <sleipnir/autodiff/hessian.hpp>

@@ -1,11 +1,12 @@
 // Copyright (c) Sleipnir contributors
 
-#include <concepts>
-#include <utility>
-
 #include <nanobind/eigen/dense.h>
 #include <nanobind/nanobind.h>
 #include <nanobind/operators.h>
+
+#include <concepts>
+#include <utility>
+
 #include <sleipnir/autodiff/variable.hpp>
 
 #include "docstrings.hpp"

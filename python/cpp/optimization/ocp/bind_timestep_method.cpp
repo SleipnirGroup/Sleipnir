@@ -1,6 +1,7 @@
 // Copyright (c) Sleipnir contributors
 
 #include <nanobind/nanobind.h>
+
 #include <sleipnir/optimization/ocp/timestep_method.hpp>
 
 #include "docstrings.hpp"

@@ -3,6 +3,7 @@
 #include <nanobind/eigen/dense.h>
 #include <nanobind/eigen/sparse.h>
 #include <nanobind/nanobind.h>
+
 #include <sleipnir/optimization/solver/iteration_info.hpp>
 
 #include "docstrings.hpp"

@@ -1,6 +1,7 @@
 // Copyright (c) Sleipnir contributors
 
 #include <nanobind/nanobind.h>
+
 #include <sleipnir/optimization/solver/exit_status.hpp>
 
 #include "docstrings.hpp"

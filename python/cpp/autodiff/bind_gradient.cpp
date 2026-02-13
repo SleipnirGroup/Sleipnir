@@ -2,6 +2,7 @@
 
 #include <nanobind/eigen/sparse.h>
 #include <nanobind/nanobind.h>
+
 #include <sleipnir/autodiff/gradient.hpp>
 
 #include "docstrings.hpp"
