@@ -93,6 +93,7 @@ ExitStatus newton(
   auto& H_prof = solve_profilers[11];
 
   NewtonMatrixCallbacks<Scalar> matrices{
+      matrix_callbacks.num_decision_variables,
       [&](const DenseVector& x) -> Scalar {
         ScopedProfiler prof{f_prof};
         return matrix_callbacks.f(x);
@@ -113,16 +114,13 @@ ExitStatus newton(
   setup_prof.start();
 
   Scalar f = matrices.f(x);
-
-  int num_decision_variables = x.rows();
-
   SparseVector g = matrices.g(x);
   SparseMatrix H = matrices.H(x);
 
   // Ensure matrix callback dimensions are consistent
-  slp_assert(g.rows() == num_decision_variables);
-  slp_assert(H.rows() == num_decision_variables);
-  slp_assert(H.cols() == num_decision_variables);
+  slp_assert(g.rows() == matrices.num_decision_variables);
+  slp_assert(H.rows() == matrices.num_decision_variables);
+  slp_assert(H.cols() == matrices.num_decision_variables);
 
   // Check whether initial guess has finite f(xₖ)
   if (!isfinite(f)) {
@@ -133,7 +131,7 @@ ExitStatus newton(
 
   Filter<Scalar> filter;
 
-  RegularizedLDLT<Scalar> solver{num_decision_variables, 0};
+  RegularizedLDLT<Scalar> solver{matrices.num_decision_variables, 0};
 
   // Variables for determining when a step is acceptable
   constexpr Scalar α_reduction_factor(0.5);

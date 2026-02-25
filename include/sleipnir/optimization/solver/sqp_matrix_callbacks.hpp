@@ -21,6 +21,12 @@ struct SQPMatrixCallbacks {
   /// Type alias for sparse vector.
   using SparseVector = Eigen::SparseVector<Scalar>;
 
+  /// Number of decision variables.
+  int num_decision_variables = 0;
+
+  /// Number of equality constraints.
+  int num_equality_constraints = 0;
+
   /// Cost function value f(x) getter.
   ///
   /// <table>
