@@ -17,6 +17,7 @@
 #include "sleipnir/optimization/solver/interior_point_matrix_callbacks.hpp"
 #include "sleipnir/optimization/solver/iteration_info.hpp"
 #include "sleipnir/optimization/solver/options.hpp"
+#include "sleipnir/optimization/solver/util/append_as_triplets.hpp"
 #include "sleipnir/optimization/solver/util/error_estimate.hpp"
 #include "sleipnir/optimization/solver/util/filter.hpp"
 #include "sleipnir/optimization/solver/util/fraction_to_the_boundary_rule.hpp"
@@ -391,16 +392,7 @@ ExitStatus interior_point(
         H + (A_i.transpose() * Σ * A_i).template triangularView<Eigen::Lower>();
     triplets.clear();
     triplets.reserve(top_left.nonZeros() + A_e.nonZeros());
-    for (int col = 0; col < H.cols(); ++col) {
-      // Append column of H + AᵢᵀΣAᵢ lower triangle in top-left quadrant
-      for (typename SparseMatrix::InnerIterator it{top_left, col}; it; ++it) {
-        triplets.emplace_back(it.row(), it.col(), it.value());
-      }
-      // Append column of Aₑ in bottom-left quadrant
-      for (typename SparseMatrix::InnerIterator it{A_e, col}; it; ++it) {
-        triplets.emplace_back(H.rows() + it.row(), it.col(), it.value());
-      }
-    }
+    append_as_triplets(triplets, 0, 0, {top_left, A_e});
     SparseMatrix lhs(
         matrices.num_decision_variables + matrices.num_equality_constraints,
         matrices.num_decision_variables + matrices.num_equality_constraints);
