@@ -99,9 +99,9 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
 
   /// SQP step direction.
   struct Step {
-    /// Primal step.
+    /// Decision variable primal step.
     DenseVector p_x;
-    /// Dual step.
+    /// Equality constraint dual step.
     DenseVector p_y;
   };
 
@@ -260,7 +260,7 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
 
     // Call iteration callbacks
     for (const auto& callback : iteration_callbacks) {
-      if (callback({iterations, x, g, H, A_e, SparseMatrix{}})) {
+      if (callback({iterations, x, {}, y, {}, g, H, A_e, {}})) {
         return ExitStatus::CALLBACK_REQUESTED_STOP;
       }
     }

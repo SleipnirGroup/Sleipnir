@@ -71,9 +71,9 @@ ExitStatus interior_point(
     Eigen::Vector<Scalar, Eigen::Dynamic>& x) {
   using DenseVector = Eigen::Vector<Scalar, Eigen::Dynamic>;
 
-  DenseVector y = DenseVector::Zero(matrix_callbacks.num_equality_constraints);
   DenseVector s =
       DenseVector::Ones(matrix_callbacks.num_inequality_constraints);
+  DenseVector y = DenseVector::Zero(matrix_callbacks.num_equality_constraints);
   DenseVector z =
       DenseVector::Ones(matrix_callbacks.num_inequality_constraints);
   Scalar μ(0.1);
@@ -82,7 +82,7 @@ ExitStatus interior_point(
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
                         bound_constraint_mask,
 #endif
-                        x, y, s, z, μ);
+                        x, s, y, z, μ);
 }
 
 /// Finds the optimal solution to a nonlinear program using the interior-point
@@ -106,10 +106,10 @@ ExitStatus interior_point(
 /// @param[in] options Solver options.
 /// @param[in,out] x The initial guess and output location for the decision
 ///     variables.
-/// @param[in,out] y The initial guess and output location for the equality
-///     constraint dual variables.
 /// @param[in,out] s The initial guess and output location for the inequality
 ///     constraint slack variables.
+/// @param[in,out] y The initial guess and output location for the equality
+///     constraint dual variables.
 /// @param[in,out] z The initial guess and output location for the inequality
 ///     constraint dual variables.
 /// @param[in,out] μ The initial guess and output location for the barrier
@@ -125,8 +125,8 @@ ExitStatus interior_point(
     const Eigen::ArrayX<bool>& bound_constraint_mask,
 #endif
     Eigen::Vector<Scalar, Eigen::Dynamic>& x,
-    Eigen::Vector<Scalar, Eigen::Dynamic>& y,
     Eigen::Vector<Scalar, Eigen::Dynamic>& s,
+    Eigen::Vector<Scalar, Eigen::Dynamic>& y,
     Eigen::Vector<Scalar, Eigen::Dynamic>& z, Scalar& μ) {
   using DenseVector = Eigen::Vector<Scalar, Eigen::Dynamic>;
   using SparseMatrix = Eigen::SparseMatrix<Scalar>;
@@ -134,12 +134,12 @@ ExitStatus interior_point(
 
   /// Interior-point method step direction.
   struct Step {
-    /// Primal step.
+    /// Decision variable primal step.
     DenseVector p_x;
+    /// Inequality constraint slack variable primal step.
+    DenseVector p_s;
     /// Equality constraint dual step.
     DenseVector p_y;
-    /// Inequality constraint slack variable step.
-    DenseVector p_s;
     /// Inequality constraint dual step.
     DenseVector p_z;
   };
@@ -371,7 +371,7 @@ ExitStatus interior_point(
 
     // Call iteration callbacks
     for (const auto& callback : iteration_callbacks) {
-      if (callback({iterations, x, g, H, A_e, A_i})) {
+      if (callback({iterations, x, s, y, z, g, H, A_e, A_i})) {
         return ExitStatus::CALLBACK_REQUESTED_STOP;
       }
     }
