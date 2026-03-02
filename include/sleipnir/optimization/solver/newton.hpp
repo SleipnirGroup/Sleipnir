@@ -167,7 +167,7 @@ ExitStatus newton(
 
     // Call iteration callbacks
     for (const auto& callback : iteration_callbacks) {
-      if (callback({iterations, x, g, H, SparseMatrix{}, SparseMatrix{}})) {
+      if (callback({iterations, x, {}, {}, {}, g, H, {}, {}})) {
         return ExitStatus::CALLBACK_REQUESTED_STOP;
       }
     }
