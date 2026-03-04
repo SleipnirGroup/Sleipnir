@@ -26,7 +26,7 @@ class ExplicitDouble {
       : m_value(value) {}
 
   // Observers
-  double value() const { return m_value; }
+  constexpr double value() const { return m_value; }
 
   // Assignment
   constexpr ExplicitDouble& operator+=(const ExplicitDouble& rhs) {
