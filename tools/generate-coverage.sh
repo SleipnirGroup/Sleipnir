@@ -12,7 +12,7 @@ cmake --build build-coverage --target $1 --parallel $(nproc --all)
 
 # Run executable and generate reports
 pushd build-coverage
-./$1
+./$1 1>/dev/null
 llvm-profdata merge -sparse default.profraw -o default.profdata
 llvm-cov show -ignore-filename-regex="_deps/|test/" ./$1 -instr-profile=default.profdata -format=html > coverage-line-by-line-$1.html
 llvm-cov report -ignore-filename-regex="_deps/|test/" ./$1 -instr-profile=default.profdata > coverage-report-$1.txt
