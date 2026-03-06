@@ -27,8 +27,9 @@ enum class ExitStatus : int8_t {
   /// The backtracking line search failed, and the problem isn't locally
   /// infeasible.
   LINE_SEARCH_FAILED = -5,
-  /// The solver encountered nonfinite initial cost or constraints and gave up.
-  NONFINITE_INITIAL_COST_OR_CONSTRAINTS = -6,
+  /// The solver encountered nonfinite initial cost, constraints, or derivatives
+  /// and gave up.
+  NONFINITE_INITIAL_GUESS = -6,
   /// The solver encountered diverging primal iterates xₖ and/or sₖ and gave up.
   DIVERGING_ITERATES = -7,
   /// The solver returned its solution so far after exceeding the maximum number
@@ -77,9 +78,9 @@ struct std::formatter<slp::ExitStatus> {
         return m_underlying.format("factorization failed", ctx);
       case LINE_SEARCH_FAILED:
         return m_underlying.format("line search failed", ctx);
-      case NONFINITE_INITIAL_COST_OR_CONSTRAINTS:
-        return m_underlying.format("nonfinite initial cost or constraints",
-                                   ctx);
+      case NONFINITE_INITIAL_GUESS:
+        return m_underlying.format(
+            "nonfinite initial cost, constraints, or derivatives", ctx);
       case DIVERGING_ITERATES:
         return m_underlying.format("diverging iterates", ctx);
       case MAX_ITERATIONS_EXCEEDED:

@@ -71,22 +71,52 @@ def test_locally_infeasible_inequality_constraints():
     assert problem.solve(diagnostics=True) == ExitStatus.LOCALLY_INFEASIBLE
 
 
-def test_nonfinite_initial_cost_or_constraints():
+def test_nonfinite_cost():
     problem = Problem()
-
     x = problem.decision_variable()
-    x.set_value(-1)
+    problem.minimize(1 / x)
 
+    assert problem.solve() == ExitStatus.NONFINITE_INITIAL_GUESS
+
+
+def test_nonfinite_gradient():
+    problem = Problem()
+    x = problem.decision_variable()
     problem.minimize(sqrt(x))
 
-    assert problem.cost_function_type() == ExpressionType.NONLINEAR
-    assert problem.equality_constraint_type() == ExpressionType.NONE
-    assert problem.inequality_constraint_type() == ExpressionType.NONE
+    assert problem.solve() == ExitStatus.NONFINITE_INITIAL_GUESS
 
-    assert (
-        problem.solve(diagnostics=True)
-        == ExitStatus.NONFINITE_INITIAL_COST_OR_CONSTRAINTS
-    )
+
+def test_nonfinite_equality_constraint():
+    problem = Problem()
+    x = problem.decision_variable()
+    problem.subject_to(1 / x == 1)
+
+    assert problem.solve() == ExitStatus.NONFINITE_INITIAL_GUESS
+
+
+def test_nonfinite_equality_constraint_jacobian():
+    problem = Problem()
+    x = problem.decision_variable()
+    problem.subject_to(sqrt(x) == 1)
+
+    assert problem.solve() == ExitStatus.NONFINITE_INITIAL_GUESS
+
+
+def test_nonfinite_inequality_constraint():
+    problem = Problem()
+    x = problem.decision_variable()
+    problem.subject_to(1 / x > 1)
+
+    assert problem.solve() == ExitStatus.NONFINITE_INITIAL_GUESS
+
+
+def test_nonfinite_inequality_constraint_jacobian():
+    problem = Problem()
+    x = problem.decision_variable()
+    problem.subject_to(sqrt(x) > 1)
+
+    assert problem.solve() == ExitStatus.NONFINITE_INITIAL_GUESS
 
 
 def test_diverging_iterates():

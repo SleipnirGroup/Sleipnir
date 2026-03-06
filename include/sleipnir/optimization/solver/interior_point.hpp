@@ -17,6 +17,7 @@
 #include "sleipnir/optimization/solver/interior_point_matrix_callbacks.hpp"
 #include "sleipnir/optimization/solver/iteration_info.hpp"
 #include "sleipnir/optimization/solver/options.hpp"
+#include "sleipnir/optimization/solver/util/all_finite.hpp"
 #include "sleipnir/optimization/solver/util/append_as_triplets.hpp"
 #include "sleipnir/optimization/solver/util/error_estimate.hpp"
 #include "sleipnir/optimization/solver/util/filter.hpp"
@@ -258,9 +259,10 @@ ExitStatus interior_point(
     return ExitStatus::TOO_FEW_DOFS;
   }
 
-  // Check whether initial guess has finite f(xₖ), cₑ(xₖ), and cᵢ(xₖ)
-  if (!isfinite(f) || !c_e.allFinite() || !c_i.allFinite()) {
-    return ExitStatus::NONFINITE_INITIAL_COST_OR_CONSTRAINTS;
+  // Check whether initial guess has finite cost, constraints, and derivatives
+  if (!isfinite(f) || !all_finite(g) || !all_finite(H) || !c_e.allFinite() ||
+      !all_finite(A_e) || !c_i.allFinite() || !all_finite(A_i)) {
+    return ExitStatus::NONFINITE_INITIAL_GUESS;
   }
 
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION

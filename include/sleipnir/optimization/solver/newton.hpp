@@ -16,6 +16,7 @@
 #include "sleipnir/optimization/solver/iteration_info.hpp"
 #include "sleipnir/optimization/solver/newton_matrix_callbacks.hpp"
 #include "sleipnir/optimization/solver/options.hpp"
+#include "sleipnir/optimization/solver/util/all_finite.hpp"
 #include "sleipnir/optimization/solver/util/error_estimate.hpp"
 #include "sleipnir/optimization/solver/util/filter.hpp"
 #include "sleipnir/optimization/solver/util/kkt_error.hpp"
@@ -122,9 +123,9 @@ ExitStatus newton(
   slp_assert(H.rows() == matrices.num_decision_variables);
   slp_assert(H.cols() == matrices.num_decision_variables);
 
-  // Check whether initial guess has finite f(xₖ)
-  if (!isfinite(f)) {
-    return ExitStatus::NONFINITE_INITIAL_COST_OR_CONSTRAINTS;
+  // Check whether initial guess has finite cost and derivatives
+  if (!isfinite(f) || !all_finite(g) || !all_finite(H)) {
+    return ExitStatus::NONFINITE_INITIAL_GUESS;
   }
 
   int iterations = 0;

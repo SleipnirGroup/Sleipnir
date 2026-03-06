@@ -107,23 +107,63 @@ TEMPLATE_TEST_CASE("ExitStatus - Locally infeasible", "[ExitStatus]",
   }
 }
 
-TEMPLATE_TEST_CASE("ExitStatus - Nonfinite initial cost or constraints",
-                   "[ExitStatus]", SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("ExitStatus - Nonfinite initial guess", "[ExitStatus]",
+                   SCALAR_TYPES_UNDER_TEST) {
   using T = TestType;
 
-  slp::Problem<T> problem;
+  // Nonfinite cost
+  {
+    slp::Problem<T> problem;
+    auto x = problem.decision_variable();
+    problem.minimize(T(1) / x);
 
-  auto x = problem.decision_variable();
-  x.set_value(T(-1));
+    CHECK(problem.solve() == slp::ExitStatus::NONFINITE_INITIAL_GUESS);
+  }
 
-  problem.minimize(sqrt(x));
+  // Nonfinite gradient
+  {
+    slp::Problem<T> problem;
+    auto x = problem.decision_variable();
+    problem.minimize(sqrt(x));
 
-  CHECK(problem.cost_function_type() == slp::ExpressionType::NONLINEAR);
-  CHECK(problem.equality_constraint_type() == slp::ExpressionType::NONE);
-  CHECK(problem.inequality_constraint_type() == slp::ExpressionType::NONE);
+    CHECK(problem.solve() == slp::ExitStatus::NONFINITE_INITIAL_GUESS);
+  }
 
-  CHECK(problem.solve({.diagnostics = true}) ==
-        slp::ExitStatus::NONFINITE_INITIAL_COST_OR_CONSTRAINTS);
+  // Nonfinite equality constraint
+  {
+    slp::Problem<T> problem;
+    auto x = problem.decision_variable();
+    problem.subject_to(T(1) / x == T(1));
+
+    CHECK(problem.solve() == slp::ExitStatus::NONFINITE_INITIAL_GUESS);
+  }
+
+  // Nonfinite equality constraint Jacobian
+  {
+    slp::Problem<T> problem;
+    auto x = problem.decision_variable();
+    problem.subject_to(sqrt(x) == T(1));
+
+    CHECK(problem.solve() == slp::ExitStatus::NONFINITE_INITIAL_GUESS);
+  }
+
+  // Nonfinite inequality constraint
+  {
+    slp::Problem<T> problem;
+    auto x = problem.decision_variable();
+    problem.subject_to(T(1) / x > T(1));
+
+    CHECK(problem.solve() == slp::ExitStatus::NONFINITE_INITIAL_GUESS);
+  }
+
+  // Nonfinite inequality constraint Jacobian
+  {
+    slp::Problem<T> problem;
+    auto x = problem.decision_variable();
+    problem.subject_to(sqrt(x) > T(1));
+
+    CHECK(problem.solve() == slp::ExitStatus::NONFINITE_INITIAL_GUESS);
+  }
 }
 
 TEMPLATE_TEST_CASE("ExitStatus - Diverging iterates", "[ExitStatus]",
