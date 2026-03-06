@@ -343,15 +343,7 @@ void bind_variable_matrix(nb::module_& autodiff,
           }
         }
 
-        std::string input1_name =
-            nb::cast<std::string>(inputs[0].attr("__repr__")());
-        std::string input2_name =
-            nb::cast<std::string>(inputs[1].attr("__repr__")());
-        throw nb::value_error(
-            std::format("VariableMatrix: numpy method {}, ufunc {} not "
-                        "implemented for ({}, {})",
-                        method_name, ufunc_name, input1_name, input2_name)
-                .c_str());
+        return nb::not_implemented();
       },
       "ufunc"_a, "method"_a, "inputs"_a, "kwargs"_a);
 
