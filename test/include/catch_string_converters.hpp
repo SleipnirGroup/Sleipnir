@@ -55,8 +55,8 @@ struct StringMaker<slp::ExitStatus> {
         return "FACTORIZATION_FAILED";
       case LINE_SEARCH_FAILED:
         return "LINE_SEARCH_FAILED";
-      case NONFINITE_INITIAL_COST_OR_CONSTRAINTS:
-        return "NONFINITE_INITIAL_COST_OR_CONSTRAINTS";
+      case NONFINITE_INITIAL_GUESS:
+        return "NONFINITE_INITIAL_GUESS";
       case DIVERGING_ITERATES:
         return "DIVERGING_ITERATES";
       case MAX_ITERATIONS_EXCEEDED:

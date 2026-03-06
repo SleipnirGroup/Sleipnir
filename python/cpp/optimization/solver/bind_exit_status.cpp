@@ -24,9 +24,8 @@ void bind_exit_status(nb::enum_<ExitStatus>& e) {
           DOC(slp, ExitStatus, FACTORIZATION_FAILED));
   e.value("LINE_SEARCH_FAILED", ExitStatus::LINE_SEARCH_FAILED,
           DOC(slp, ExitStatus, LINE_SEARCH_FAILED));
-  e.value("NONFINITE_INITIAL_COST_OR_CONSTRAINTS",
-          ExitStatus::NONFINITE_INITIAL_COST_OR_CONSTRAINTS,
-          DOC(slp, ExitStatus, NONFINITE_INITIAL_COST_OR_CONSTRAINTS));
+  e.value("NONFINITE_INITIAL_GUESS", ExitStatus::NONFINITE_INITIAL_GUESS,
+          DOC(slp, ExitStatus, NONFINITE_INITIAL_GUESS));
   e.value("DIVERGING_ITERATES", ExitStatus::DIVERGING_ITERATES,
           DOC(slp, ExitStatus, DIVERGING_ITERATES));
   e.value("MAX_ITERATIONS_EXCEEDED", ExitStatus::MAX_ITERATIONS_EXCEEDED,

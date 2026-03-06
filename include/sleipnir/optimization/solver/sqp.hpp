@@ -16,6 +16,7 @@
 #include "sleipnir/optimization/solver/iteration_info.hpp"
 #include "sleipnir/optimization/solver/options.hpp"
 #include "sleipnir/optimization/solver/sqp_matrix_callbacks.hpp"
+#include "sleipnir/optimization/solver/util/all_finite.hpp"
 #include "sleipnir/optimization/solver/util/append_as_triplets.hpp"
 #include "sleipnir/optimization/solver/util/error_estimate.hpp"
 #include "sleipnir/optimization/solver/util/filter.hpp"
@@ -200,9 +201,10 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
     return ExitStatus::TOO_FEW_DOFS;
   }
 
-  // Check whether initial guess has finite f(xₖ) and cₑ(xₖ)
-  if (!isfinite(f) || !c_e.allFinite()) {
-    return ExitStatus::NONFINITE_INITIAL_COST_OR_CONSTRAINTS;
+  // Check whether initial guess has finite cost, constraints, and derivatives
+  if (!isfinite(f) || !all_finite(g) || !all_finite(H) || !c_e.allFinite() ||
+      !all_finite(A_e)) {
+    return ExitStatus::NONFINITE_INITIAL_GUESS;
   }
 
   int iterations = 0;

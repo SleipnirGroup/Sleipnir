@@ -160,9 +160,9 @@ static const char *__doc_slp_ExitStatus_MAX_ITERATIONS_EXCEEDED =
 R"doc(The solver returned its solution so far after exceeding the maximum
 number of iterations.)doc";
 
-static const char *__doc_slp_ExitStatus_NONFINITE_INITIAL_COST_OR_CONSTRAINTS =
-R"doc(The solver encountered nonfinite initial cost or constraints and gave
-up.)doc";
+static const char *__doc_slp_ExitStatus_NONFINITE_INITIAL_GUESS =
+R"doc(The solver encountered nonfinite initial cost, constraints, or
+derivatives and gave up.)doc";
 
 static const char *__doc_slp_ExitStatus_SUCCESS = R"doc(Solved the problem to the desired tolerance.)doc";
 
