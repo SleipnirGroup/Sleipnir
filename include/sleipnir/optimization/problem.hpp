@@ -70,6 +70,8 @@ class Problem {
 
   /// Create a decision variable in the optimization problem.
   ///
+  /// Decision variables have an initial value of zero.
+  ///
   /// @return A decision variable in the optimization problem.
   [[nodiscard]]
   Variable<Scalar> decision_variable() {
@@ -78,6 +80,8 @@ class Problem {
   }
 
   /// Create a matrix of decision variables in the optimization problem.
+  ///
+  /// Decision variables have an initial value of zero.
   ///
   /// @param rows Number of matrix rows.
   /// @param cols Number of matrix columns.
@@ -103,6 +107,8 @@ class Problem {
   ///
   /// Variable instances are reused across the diagonal, which helps reduce
   /// problem dimensionality.
+  ///
+  /// Decision variables have an initial value of zero.
   ///
   /// @param rows Number of matrix rows.
   /// @return A symmetric matrix of decision varaibles in the optimization
