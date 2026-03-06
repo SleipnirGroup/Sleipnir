@@ -744,11 +744,15 @@ Returns:
 static const char *__doc_slp_Problem_decision_variable =
 R"doc(Create a decision variable in the optimization problem.
 
+Decision variables have an initial value of zero.
+
 Returns:
     A decision variable in the optimization problem.)doc";
 
 static const char *__doc_slp_Problem_decision_variable_2 =
 R"doc(Create a matrix of decision variables in the optimization problem.
+
+Decision variables have an initial value of zero.
 
 Parameter ``rows``:
     Number of matrix rows.
@@ -886,6 +890,8 @@ problem.
 
 Variable instances are reused across the diagonal, which helps reduce
 problem dimensionality.
+
+Decision variables have an initial value of zero.
 
 Parameter ``rows``:
     Number of matrix rows.
