@@ -208,7 +208,7 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
 
   int iterations = 0;
 
-  Filter<Scalar> filter;
+  Filter<Scalar> filter{c_e.template lpNorm<1>()};
 
   // Kept outside the loop so its storage can be reused
   gch::small_vector<Eigen::Triplet<Scalar>> triplets;
@@ -319,6 +319,8 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
 
     α = α_max;
 
+    const FilterEntry<Scalar> current_entry{f, c_e};
+
     // Loop until a step is accepted
     while (1) {
       DenseVector trial_x = x + α * step.p_x;
@@ -340,7 +342,8 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
       }
 
       // Check whether filter accepts trial iterate
-      if (filter.try_add(FilterEntry{trial_f, trial_c_e}, α)) {
+      FilterEntry trial_entry{trial_f, trial_c_e};
+      if (filter.try_add(current_entry, trial_entry, step.p_x, g, α)) {
         // Accept step
         break;
       }
@@ -411,7 +414,8 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
           }
 
           // Check whether filter accepts trial iterate
-          if (filter.try_add(FilterEntry{trial_f, trial_c_e}, α)) {
+          FilterEntry trial_entry{trial_f, trial_c_e};
+          if (filter.try_add(current_entry, trial_entry, step.p_x, g, α)) {
             step = soc_step;
             α = α_soc;
             step_acceptable = true;
@@ -437,7 +441,8 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
       // See section 3.2 case I of [2].
       if (full_step_rejected_counter >= 4 &&
           filter.max_constraint_violation >
-              filter.back().constraint_violation / Scalar(10)) {
+              current_entry.constraint_violation / Scalar(10) &&
+          filter.last_rejection_due_to_filter()) {
         filter.max_constraint_violation *= Scalar(0.1);
         filter.reset();
         continue;
