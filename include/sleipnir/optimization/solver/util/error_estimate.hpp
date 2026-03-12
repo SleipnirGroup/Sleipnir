@@ -17,8 +17,7 @@ namespace slp {
 /// @param g Gradient of the cost function ∇f.
 template <typename Scalar>
 Scalar error_estimate(const Eigen::Vector<Scalar, Eigen::Dynamic>& g) {
-  // Update the error estimate using the KKT conditions from equations (19.5a)
-  // through (19.5d) of [1].
+  // The KKT conditions from docs/algorithms.md:
   //
   //   ∇f = 0
 
@@ -39,8 +38,7 @@ Scalar error_estimate(const Eigen::Vector<Scalar, Eigen::Dynamic>& g,
                       const Eigen::SparseMatrix<Scalar>& A_e,
                       const Eigen::Vector<Scalar, Eigen::Dynamic>& c_e,
                       const Eigen::Vector<Scalar, Eigen::Dynamic>& y) {
-  // Update the error estimate using the KKT conditions from equations (19.5a)
-  // through (19.5d) of [1].
+  // The KKT conditions from docs/algorithms.md:
   //
   //   ∇f − Aₑᵀy = 0
   //   cₑ = 0
@@ -88,8 +86,7 @@ Scalar error_estimate(const Eigen::Vector<Scalar, Eigen::Dynamic>& g,
                       const Eigen::Vector<Scalar, Eigen::Dynamic>& y,
                       const Eigen::Vector<Scalar, Eigen::Dynamic>& z,
                       Scalar μ) {
-  // Update the error estimate using the KKT conditions from equations (19.5a)
-  // through (19.5d) of [1].
+  // The KKT conditions from docs/algorithms.md:
   //
   //   ∇f − Aₑᵀy − Aᵢᵀz = 0
   //   Sz − μe = 0
