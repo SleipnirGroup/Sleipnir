@@ -75,7 +75,7 @@ jobs:
         with:
           python-version: 3.14
 
-      - run: pip3 install wpiformat==2025.79
+      - run: pip3 install wpiformat==2026.56
 
       - run: wpiformat
 

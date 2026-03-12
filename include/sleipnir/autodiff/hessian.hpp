@@ -40,8 +40,9 @@ class Hessian {
   /// @param wrt Vector of variables with respect to which to compute the
   ///     Hessian.
   Hessian(Variable<Scalar> variable, SleipnirMatrixLike<Scalar> auto wrt)
-      : m_variables{detail::GradientExpressionGraph<Scalar>{variable}
-                        .generate_tree(wrt)},
+      : m_variables{
+            detail::GradientExpressionGraph<Scalar>{variable}.generate_tree(
+                wrt)},
         m_wrt{wrt} {
     slp_assert(m_wrt.cols() == 1);
 
