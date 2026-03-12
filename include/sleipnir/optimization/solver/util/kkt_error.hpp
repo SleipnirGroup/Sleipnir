@@ -15,10 +15,11 @@ namespace slp {
 /// @param g Gradient of the cost function ∇f.
 template <typename Scalar>
 Scalar kkt_error(const Eigen::Vector<Scalar, Eigen::Dynamic>& g) {
-  // Compute the KKT error as the 1-norm of the KKT conditions from equations
-  // (19.5a) through (19.5d) of [1].
+  // The KKT conditions from docs/algorithms.md:
   //
   //   ∇f = 0
+  //
+  // The KKT error is the 1-norm of the KKT conditions.
 
   return g.template lpNorm<1>();
 }
@@ -37,11 +38,12 @@ Scalar kkt_error(const Eigen::Vector<Scalar, Eigen::Dynamic>& g,
                  const Eigen::SparseMatrix<Scalar>& A_e,
                  const Eigen::Vector<Scalar, Eigen::Dynamic>& c_e,
                  const Eigen::Vector<Scalar, Eigen::Dynamic>& y) {
-  // Compute the KKT error as the 1-norm of the KKT conditions from equations
-  // (19.5a) through (19.5d) of [1].
+  // The KKT conditions from docs/algorithms.md:
   //
   //   ∇f − Aₑᵀy = 0
   //   cₑ = 0
+  //
+  // The KKT error is the 1-norm of the KKT conditions.
 
   return (g - A_e.transpose() * y).template lpNorm<1>() +
          c_e.template lpNorm<1>();
@@ -72,13 +74,14 @@ Scalar kkt_error(const Eigen::Vector<Scalar, Eigen::Dynamic>& g,
                  const Eigen::Vector<Scalar, Eigen::Dynamic>& s,
                  const Eigen::Vector<Scalar, Eigen::Dynamic>& y,
                  const Eigen::Vector<Scalar, Eigen::Dynamic>& z, Scalar μ) {
-  // Compute the KKT error as the 1-norm of the KKT conditions from equations
-  // (19.5a) through (19.5d) of [1].
+  // The KKT conditions from docs/algorithms.md:
   //
   //   ∇f − Aₑᵀy − Aᵢᵀz = 0
   //   Sz − μe = 0
   //   cₑ = 0
   //   cᵢ − s = 0
+  //
+  // The KKT error is the 1-norm of the KKT conditions.
 
   const auto S = s.asDiagonal();
   const Eigen::Vector<Scalar, Eigen::Dynamic> μe =

@@ -50,7 +50,7 @@ The gradients are
   ∇ₓL(x) = ∇f
 ```
 
-The first-order necessary conditions for optimality are
+The first-order necessary conditions for optimality (KKT conditions) are
 
 ```
   ∇f = 0
@@ -110,7 +110,7 @@ The gradients are
   ∇_yL(x, y) = −cₑ
 ```
 
-The first-order necessary conditions for optimality are
+The first-order necessary conditions for optimality (KKT conditions) are
 
 ```
   ∇f − Aₑᵀy = 0
@@ -227,7 +227,7 @@ The gradients are
   ∇_zL(x, s, y, z) = −cᵢ + s
 ```
 
-The first-order necessary conditions for optimality are
+The first-order necessary conditions for optimality (KKT conditions) are
 
 ```
   ∇f − Aₑᵀy − Aᵢᵀz = 0
