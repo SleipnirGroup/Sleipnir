@@ -61,6 +61,15 @@ struct FilterEntry {
       : FilterEntry{f - μ * s.array().log().sum(),
                     c_e.template lpNorm<1>() + (c_i - s).template lpNorm<1>()} {
   }
+
+  /// Returns true if this filter entry is dominated by another.
+  ///
+  /// @param entry The other entry.
+  /// @return True if this filter entry is dominated by another.
+  constexpr bool dominated_by(const FilterEntry<Scalar>& entry) const {
+    return entry.cost <= cost &&
+           entry.constraint_violation <= constraint_violation;
+  }
 };
 
 /// Step filter.
@@ -71,6 +80,9 @@ struct FilterEntry {
 template <typename Scalar>
 class Filter {
  public:
+  /// The minimum constraint violation
+  static constexpr Scalar min_constraint_violation{1e-4};
+
   /// The maximum constraint violation
   Scalar max_constraint_violation{1e4};
 
@@ -95,10 +107,8 @@ class Filter {
   /// @param entry The entry to add to the filter.
   void add(const FilterEntry<Scalar>& entry) {
     // Remove dominated entries
-    erase_if(m_filter, [&](const auto& elem) {
-      return entry.cost <= elem.cost &&
-             entry.constraint_violation <= elem.constraint_violation;
-    });
+    erase_if(m_filter,
+             [&](const auto& elem) { return elem.dominated_by(entry); });
 
     m_filter.push_back(entry);
   }
@@ -108,10 +118,8 @@ class Filter {
   /// @param entry The entry to add to the filter.
   void add(FilterEntry<Scalar>&& entry) {
     // Remove dominated entries
-    erase_if(m_filter, [&](const auto& elem) {
-      return entry.cost <= elem.cost &&
-             entry.constraint_violation <= elem.constraint_violation;
-    });
+    erase_if(m_filter,
+             [&](const auto& elem) { return elem.dominated_by(entry); });
 
     m_filter.push_back(entry);
   }
@@ -157,17 +165,25 @@ class Filter {
       return false;
     }
 
-    Scalar ϕ = pow(α, Scalar(1.5));
-
     // If current filter entry is better than all prior ones in some respect,
     // accept it.
     //
     // See equation (2.13) of [4].
-    return std::ranges::all_of(m_filter, [&](const auto& elem) {
-      return entry.cost <= elem.cost - ϕ * γ_cost * elem.constraint_violation ||
-             entry.constraint_violation <=
-                 (Scalar(1) - ϕ * γ_constraint) * elem.constraint_violation;
-    });
+    Scalar ϕ = pow(α, Scalar(1.5));
+    if (entry.constraint_violation <= min_constraint_violation) {
+      // Accept only optimality improvement when constraint violation is low
+      return std::ranges::all_of(m_filter, [&](const auto& elem) {
+        return entry.cost <= elem.cost - ϕ * γ_cost * elem.constraint_violation;
+      });
+    } else {
+      // Accept either optimality or constraint violation improvement
+      return std::ranges::all_of(m_filter, [&](const auto& elem) {
+        return entry.cost <=
+                   elem.cost - ϕ * γ_cost * elem.constraint_violation ||
+               entry.constraint_violation <=
+                   (Scalar(1) - ϕ * γ_constraint) * elem.constraint_violation;
+      });
+    }
   }
 
   /// Returns the most recently added filter entry.
