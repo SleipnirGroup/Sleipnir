@@ -17,7 +17,6 @@
 #include "sleipnir/optimization/solver/newton_matrix_callbacks.hpp"
 #include "sleipnir/optimization/solver/options.hpp"
 #include "sleipnir/optimization/solver/util/all_finite.hpp"
-#include "sleipnir/optimization/solver/util/error_estimate.hpp"
 #include "sleipnir/optimization/solver/util/filter.hpp"
 #include "sleipnir/optimization/solver/util/kkt_error.hpp"
 #include "sleipnir/optimization/solver/util/regularized_ldlt.hpp"
@@ -138,7 +137,7 @@ ExitStatus newton(
   constexpr Scalar α_reduction_factor(0.5);
   constexpr Scalar α_min(1e-20);
 
-  // Error estimate
+  // Error
   Scalar E_0 = std::numeric_limits<Scalar>::infinity();
 
   setup_prof.stop();
@@ -222,11 +221,12 @@ ExitStatus newton(
       // If step size hit a minimum, check if the KKT error was reduced. If it
       // wasn't, report bad line search.
       if (α < α_min) {
-        Scalar current_kkt_error = kkt_error<Scalar>(g);
+        Scalar current_kkt_error = kkt_error<Scalar, KKTErrorType::ONE_NORM>(g);
 
         DenseVector trial_x = x + α_max * p_x;
 
-        Scalar next_kkt_error = kkt_error<Scalar>(matrices.g(trial_x));
+        Scalar next_kkt_error =
+            kkt_error<Scalar, KKTErrorType::ONE_NORM>(matrices.g(trial_x));
 
         // If the step using αᵐᵃˣ reduced the KKT error, accept it anyway
         if (next_kkt_error <= Scalar(0.999) * current_kkt_error) {
@@ -252,8 +252,8 @@ ExitStatus newton(
 
     ScopedProfiler next_iter_prep_profiler{next_iter_prep_prof};
 
-    // Update the error estimate
-    E_0 = error_estimate<Scalar>(g);
+    // Update the error
+    E_0 = kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(g);
 
     next_iter_prep_profiler.stop();
     inner_iter_profiler.stop();

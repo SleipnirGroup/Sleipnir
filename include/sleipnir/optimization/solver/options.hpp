@@ -51,7 +51,7 @@ struct SLEIPNIR_DLLEXPORT Options {
   ///   </tr>
   ///   <tr>
   ///     <td>error</td>
-  ///     <td>Error estimate</td>
+  ///     <td>Infinity norm of scaled KKT condition errors</td>
   ///   </tr>
   ///   <tr>
   ///     <td>cost</td>
