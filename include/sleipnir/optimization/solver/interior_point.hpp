@@ -19,7 +19,6 @@
 #include "sleipnir/optimization/solver/options.hpp"
 #include "sleipnir/optimization/solver/util/all_finite.hpp"
 #include "sleipnir/optimization/solver/util/append_as_triplets.hpp"
-#include "sleipnir/optimization/solver/util/error_estimate.hpp"
 #include "sleipnir/optimization/solver/util/filter.hpp"
 #include "sleipnir/optimization/solver/util/fraction_to_the_boundary_rule.hpp"
 #include "sleipnir/optimization/solver/util/is_locally_infeasible.hpp"
@@ -283,8 +282,8 @@ ExitStatus interior_point(
 
   Filter<Scalar> filter;
 
-  // This should be run when the error estimate is below a desired threshold for
-  // the current barrier parameter
+  // This should be run when the error is below a desired threshold for the
+  // current barrier parameter
   auto update_barrier_parameter_and_reset_filter = [&] {
     // Barrier parameter linear decrease power in "κ_μ μ". Range of (0, 1).
     constexpr Scalar κ_μ(0.2);
@@ -324,7 +323,7 @@ ExitStatus interior_point(
 
   int full_step_rejected_counter = 0;
 
-  // Error estimate
+  // Error
   Scalar E_0 = std::numeric_limits<Scalar>::infinity();
 
   setup_prof.stop();
@@ -530,8 +529,9 @@ ExitStatus interior_point(
                   step_acceptable ? IterationType::ACCEPTED_SOC
                                   : IterationType::REJECTED_SOC,
                   soc_profiler.current_duration(),
-                  error_estimate<Scalar>(g, A_e, trial_c_e, A_i, trial_c_i,
-                                         trial_s, trial_y, trial_z, Scalar(0)),
+                  kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(
+                      g, A_e, trial_c_e, A_i, trial_c_i, trial_s, trial_y,
+                      trial_z, Scalar(0)),
                   trial_f,
                   trial_c_e.template lpNorm<1>() +
                       (trial_c_i - trial_s).template lpNorm<1>(),
@@ -619,8 +619,8 @@ ExitStatus interior_point(
       // If step size hit a minimum, check if the KKT error was reduced. If it
       // wasn't, report line search failure.
       if (α < α_min) {
-        Scalar current_kkt_error =
-            kkt_error<Scalar>(g, A_e, c_e, A_i, c_i, s, y, z, μ);
+        Scalar current_kkt_error = kkt_error<Scalar, KKTErrorType::ONE_NORM>(
+            g, A_e, c_e, A_i, c_i, s, y, z, μ);
 
         trial_x = x + α_max * step.p_x;
         trial_s = s + α_max * step.p_s;
@@ -631,7 +631,7 @@ ExitStatus interior_point(
         trial_c_e = matrices.c_e(trial_x);
         trial_c_i = matrices.c_i(trial_x);
 
-        Scalar next_kkt_error = kkt_error<Scalar>(
+        Scalar next_kkt_error = kkt_error<Scalar, KKTErrorType::ONE_NORM>(
             matrices.g(trial_x), matrices.A_e(trial_x), matrices.c_e(trial_x),
             matrices.A_i(trial_x), trial_c_i, trial_s, trial_y, trial_z, μ);
 
@@ -694,20 +694,23 @@ ExitStatus interior_point(
     c_e = matrices.c_e(x);
     c_i = matrices.c_i(x);
 
-    // Update the error estimate
-    E_0 = error_estimate<Scalar>(g, A_e, c_e, A_i, c_i, s, y, z, Scalar(0));
+    // Update the error
+    E_0 = kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(
+        g, A_e, c_e, A_i, c_i, s, y, z, Scalar(0));
 
     // Update the barrier parameter if necessary
     if (E_0 > Scalar(options.tolerance)) {
       // Barrier parameter scale factor for tolerance checks
       constexpr Scalar κ_ε(10);
 
-      // While the error estimate is below the desired threshold for this
-      // barrier parameter value, decrease the barrier parameter further
-      Scalar E_μ = error_estimate<Scalar>(g, A_e, c_e, A_i, c_i, s, y, z, μ);
+      // While the error is below the desired threshold for this barrier
+      // parameter value, decrease the barrier parameter further
+      Scalar E_μ = kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(
+          g, A_e, c_e, A_i, c_i, s, y, z, μ);
       while (μ > μ_min && E_μ <= κ_ε * μ) {
         update_barrier_parameter_and_reset_filter();
-        E_μ = error_estimate<Scalar>(g, A_e, c_e, A_i, c_i, s, y, z, μ);
+        E_μ = kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(g, A_e, c_e, A_i,
+                                                               c_i, s, y, z, μ);
       }
     }
 

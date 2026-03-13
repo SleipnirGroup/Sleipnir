@@ -18,7 +18,6 @@
 #include "sleipnir/optimization/solver/sqp_matrix_callbacks.hpp"
 #include "sleipnir/optimization/solver/util/all_finite.hpp"
 #include "sleipnir/optimization/solver/util/append_as_triplets.hpp"
-#include "sleipnir/optimization/solver/util/error_estimate.hpp"
 #include "sleipnir/optimization/solver/util/filter.hpp"
 #include "sleipnir/optimization/solver/util/is_locally_infeasible.hpp"
 #include "sleipnir/optimization/solver/util/kkt_error.hpp"
@@ -223,7 +222,7 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
 
   int full_step_rejected_counter = 0;
 
-  // Error estimate
+  // Error
   Scalar E_0 = std::numeric_limits<Scalar>::infinity();
 
   setup_prof.stop();
@@ -375,8 +374,9 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
                   step_acceptable ? IterationType::ACCEPTED_SOC
                                   : IterationType::REJECTED_SOC,
                   soc_profiler.current_duration(),
-                  error_estimate<Scalar>(g, A_e, trial_c_e, trial_y), trial_f,
-                  trial_c_e.template lpNorm<1>(), Scalar(0), Scalar(0),
+                  kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(
+                      g, A_e, trial_c_e, trial_y),
+                  trial_f, trial_c_e.template lpNorm<1>(), Scalar(0), Scalar(0),
                   solver.hessian_regularization(), α_soc, Scalar(1),
                   α_reduction_factor, Scalar(1));
             }
@@ -449,14 +449,15 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
       // If step size hit a minimum, check if the KKT error was reduced. If it
       // wasn't, report line search failure.
       if (α < α_min) {
-        Scalar current_kkt_error = kkt_error<Scalar>(g, A_e, c_e, y);
+        Scalar current_kkt_error =
+            kkt_error<Scalar, KKTErrorType::ONE_NORM>(g, A_e, c_e, y);
 
         trial_x = x + α_max * step.p_x;
         trial_y = y + α_max * step.p_y;
 
         trial_c_e = matrices.c_e(trial_x);
 
-        Scalar next_kkt_error = kkt_error<Scalar>(
+        Scalar next_kkt_error = kkt_error<Scalar, KKTErrorType::ONE_NORM>(
             matrices.g(trial_x), matrices.A_e(trial_x), trial_c_e, trial_y);
 
         // If the step using αᵐᵃˣ reduced the KKT error, accept it anyway
@@ -493,8 +494,8 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
 
     c_e = matrices.c_e(x);
 
-    // Update the error estimate
-    E_0 = error_estimate<Scalar>(g, A_e, c_e, y);
+    // Update the error
+    E_0 = kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(g, A_e, c_e, y);
 
     next_iter_prep_profiler.stop();
     inner_iter_profiler.stop();
