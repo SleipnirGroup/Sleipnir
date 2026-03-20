@@ -97,17 +97,6 @@ class Filter {
                           max_constraint_violation);
   }
 
-  /// Adds a new entry to the filter.
-  ///
-  /// @param entry The entry to add to the filter.
-  void add(const FilterEntry<Scalar>& entry) {
-    // Remove dominated entries
-    erase_if(m_filter,
-             [&](const auto& elem) { return elem.dominated_by(entry); });
-
-    m_filter.push_back(entry);
-  }
-
   /// Returns true if the given iterate is accepted by the filter.
   ///
   /// @param entry The entry to attempt adding to the filter.
@@ -120,6 +109,28 @@ class Filter {
     } else {
       return false;
     }
+  }
+
+  /// Returns the most recently added filter entry.
+  ///
+  /// @return The most recently added filter entry.
+  const FilterEntry<Scalar>& back() const { return m_filter.back(); }
+
+ private:
+  static constexpr Scalar γ_cost{1e-8};
+  static constexpr Scalar γ_constraint{1e-5};
+
+  gch::small_vector<FilterEntry<Scalar>> m_filter;
+
+  /// Adds a new entry to the filter.
+  ///
+  /// @param entry The entry to add to the filter.
+  void add(const FilterEntry<Scalar>& entry) {
+    // Remove dominated entries
+    erase_if(m_filter,
+             [&](const auto& elem) { return elem.dominated_by(entry); });
+
+    m_filter.push_back(entry);
   }
 
   /// Returns true if the given entry is acceptable to the filter.
@@ -155,17 +166,6 @@ class Filter {
       });
     }
   }
-
-  /// Returns the most recently added filter entry.
-  ///
-  /// @return The most recently added filter entry.
-  const FilterEntry<Scalar>& back() const { return m_filter.back(); }
-
- private:
-  static constexpr Scalar γ_cost{1e-8};
-  static constexpr Scalar γ_constraint{1e-5};
-
-  gch::small_vector<FilterEntry<Scalar>> m_filter;
 };
 
 }  // namespace slp
