@@ -34,13 +34,9 @@ struct FilterEntry {
   ///
   /// @param cost The cost function's value.
   /// @param constraint_violation The constraint violation.
-  constexpr FilterEntry(Scalar cost, Scalar constraint_violation)
+  explicit constexpr FilterEntry(Scalar cost,
+                                 Scalar constraint_violation = Scalar(0))
       : cost{cost}, constraint_violation{constraint_violation} {}
-
-  /// Constructs a Newton's method filter entry.
-  ///
-  /// @param f The cost function value.
-  explicit FilterEntry(Scalar f) : FilterEntry{f, Scalar(0)} {}
 
   /// Constructs a Sequential Quadratic Programming filter entry.
   ///
