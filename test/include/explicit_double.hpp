@@ -20,9 +20,9 @@ class ExplicitDouble {
  public:
   // Construction
   constexpr ExplicitDouble() noexcept = default;
-  constexpr explicit ExplicitDouble(std::floating_point auto value) noexcept
+  explicit constexpr ExplicitDouble(std::floating_point auto value) noexcept
       : m_value(value) {}
-  constexpr explicit ExplicitDouble(std::integral auto value) noexcept
+  explicit constexpr ExplicitDouble(std::integral auto value) noexcept
       : m_value(value) {}
 
   // Observers
@@ -93,8 +93,8 @@ class ExplicitDouble {
                                     const ExplicitDouble&) noexcept = default;
 
   // Explicit conversion
-  constexpr explicit operator double() const noexcept { return m_value; }
-  constexpr explicit operator int() const noexcept {
+  explicit constexpr operator double() const noexcept { return m_value; }
+  explicit constexpr operator int() const noexcept {
     return static_cast<int>(m_value);
   }
 
