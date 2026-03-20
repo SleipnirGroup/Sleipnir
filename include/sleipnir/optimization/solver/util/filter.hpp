@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
-#include <utility>
 
 #include <Eigen/Core>
 #include <gch/small_vector.hpp>
@@ -109,17 +108,6 @@ class Filter {
     m_filter.push_back(entry);
   }
 
-  /// Adds a new entry to the filter.
-  ///
-  /// @param entry The entry to add to the filter.
-  void add(FilterEntry<Scalar>&& entry) {
-    // Remove dominated entries
-    erase_if(m_filter,
-             [&](const auto& elem) { return elem.dominated_by(entry); });
-
-    m_filter.push_back(entry);
-  }
-
   /// Returns true if the given iterate is accepted by the filter.
   ///
   /// @param entry The entry to attempt adding to the filter.
@@ -128,20 +116,6 @@ class Filter {
   bool try_add(const FilterEntry<Scalar>& entry, Scalar α) {
     if (is_acceptable(entry, α)) {
       add(entry);
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  /// Returns true if the given iterate is accepted by the filter.
-  ///
-  /// @param entry The entry to attempt adding to the filter.
-  /// @param α The step size (0, 1].
-  /// @return True if the given iterate is accepted by the filter.
-  bool try_add(FilterEntry<Scalar>&& entry, Scalar α) {
-    if (is_acceptable(entry, α)) {
-      add(std::move(entry));
       return true;
     } else {
       return false;
