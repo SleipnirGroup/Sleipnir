@@ -65,10 +65,10 @@ namespace slp {
 template <typename Scalar>
 class Problem {
  public:
-  /// Construct the optimization problem.
+  /// Constructs the optimization problem.
   Problem() noexcept = default;
 
-  /// Create a decision variable in the optimization problem.
+  /// Creates a decision variable in the optimization problem.
   ///
   /// Decision variables have an initial value of zero.
   ///
@@ -79,7 +79,7 @@ class Problem {
     return m_decision_variables.back();
   }
 
-  /// Create a matrix of decision variables in the optimization problem.
+  /// Creates a matrix of decision variables in the optimization problem.
   ///
   /// Decision variables have an initial value of zero.
   ///
@@ -102,7 +102,7 @@ class Problem {
     return vars;
   }
 
-  /// Create a symmetric matrix of decision variables in the optimization
+  /// Creates a symmetric matrix of decision variables in the optimization
   /// problem.
   ///
   /// Variable instances are reused across the diagonal, which helps reduce
@@ -269,7 +269,7 @@ class Problem {
     }
   }
 
-  /// Solve the optimization problem. The solution will be stored in the
+  /// Solves the optimization problem. The solution will be stored in the
   /// original variables used to construct the problem.
   ///
   /// @param options Solver options.

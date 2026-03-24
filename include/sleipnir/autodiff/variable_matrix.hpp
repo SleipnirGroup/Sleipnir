@@ -1269,7 +1269,7 @@ VariableMatrix<Scalar> cwise_reduce(
   return result;
 }
 
-/// Assemble a VariableMatrix from a nested list of blocks.
+/// Assembles a VariableMatrix from a nested list of blocks.
 ///
 /// Each row's blocks must have the same height, and the assembled block rows
 /// must have the same width. For example, for the block matrix [[A, B], [C]] to
@@ -1324,7 +1324,7 @@ VariableMatrix<Scalar> block(
   return result;
 }
 
-/// Assemble a VariableMatrix from a nested list of blocks.
+/// Assembles a VariableMatrix from a nested list of blocks.
 ///
 /// Each row's blocks must have the same height, and the assembled block rows
 /// must have the same width. For example, for the block matrix [[A, B], [C]] to

@@ -7,7 +7,7 @@
 #include <source_location>
 #include <stdexcept>
 
-/// Throw an exception in Python.
+/// Throws an exception in Python.
 #define slp_assert(condition)                                        \
   do {                                                               \
     if (!(condition)) {                                              \
@@ -20,6 +20,6 @@
 #else
 #include <cassert>
 
-/// Abort in C++.
+/// Aborts in C++.
 #define slp_assert(condition) assert(condition)
 #endif

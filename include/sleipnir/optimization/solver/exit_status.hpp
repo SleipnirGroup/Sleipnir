@@ -45,7 +45,7 @@ enum class ExitStatus : int8_t {
 /// Formatter for ExitStatus.
 template <>
 struct std::formatter<slp::ExitStatus> {
-  /// Parse format string.
+  /// Parses format string.
   ///
   /// @param ctx Format parse context.
   /// @return Format parse context iterator.
@@ -53,7 +53,7 @@ struct std::formatter<slp::ExitStatus> {
     return m_underlying.parse(ctx);
   }
 
-  /// Format ExitStatus.
+  /// Formats ExitStatus.
   ///
   /// @tparam FmtContext Format context type.
   /// @param exit_status Exit status.

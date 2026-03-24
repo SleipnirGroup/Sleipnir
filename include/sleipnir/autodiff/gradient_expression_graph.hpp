@@ -34,7 +34,7 @@ class GradientExpressionGraph {
     }
   }
 
-  /// Update the values of all nodes in this graph based on the values of their
+  /// Updates the values of all nodes in this graph based on the values of their
   /// dependent nodes.
   void update_values() { detail::update_values(m_top_list); }
 
