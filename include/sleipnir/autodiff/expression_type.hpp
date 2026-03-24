@@ -38,7 +38,7 @@ struct std::formatter<slp::ExpressionType> {
     return m_underlying.parse(ctx);
   }
 
-  /// Format ExpressionType.
+  /// Formats ExpressionType.
   ///
   /// @tparam FmtContext Format context type.
   /// @param type Expression type.

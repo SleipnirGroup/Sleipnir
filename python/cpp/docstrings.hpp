@@ -28,7 +28,7 @@ static const char *__doc_formatter = R"doc(Formatter for ExpressionType.)doc";
 static const char *__doc_formatter_2 = R"doc(Formatter for ExitStatus.)doc";
 
 static const char *__doc_formatter_format =
-R"doc(Format ExpressionType.
+R"doc(Formats ExpressionType.
 
 Template parameter ``FmtContext``:
     Format context type.
@@ -43,7 +43,7 @@ Returns:
     Format context iterator.)doc";
 
 static const char *__doc_formatter_format_2 =
-R"doc(Format ExitStatus.
+R"doc(Formats ExitStatus.
 
 Template parameter ``FmtContext``:
     Format context type.
@@ -71,7 +71,7 @@ Returns:
     Format parse context iterator.)doc";
 
 static const char *__doc_formatter_parse_2 =
-R"doc(Parse format string.
+R"doc(Parses format string.
 
 Parameter ``ctx``:
     Format parse context.
@@ -463,7 +463,7 @@ Template parameter ``Scalar``:
 static const char *__doc_slp_OCP_2 = R"doc()doc";
 
 static const char *__doc_slp_OCP_OCP =
-R"doc(Build an optimization problem using a system evolution function
+R"doc(Builds an optimization problem using a system evolution function
 (explicit ODE or discrete state transition function).
 
 Parameter ``num_states``:
@@ -498,7 +498,7 @@ Parameter ``transcription_method``:
     The transcription method.)doc";
 
 static const char *__doc_slp_OCP_OCP_2 =
-R"doc(Build an optimization problem using a system evolution function
+R"doc(Builds an optimization problem using a system evolution function
 (explicit ODE or discrete state transition function).
 
 Parameter ``num_states``:
@@ -533,7 +533,7 @@ Parameter ``transcription_method``:
     The transcription method.)doc";
 
 static const char *__doc_slp_OCP_U =
-R"doc(Get the input variables. After the problem is solved, this will
+R"doc(Gets the input variables. After the problem is solved, this will
 contain the inputs corresponding to the optimized trajectory.
 
 Shaped (num_inputs)x(num_steps+1), although the last input step is
@@ -543,7 +543,7 @@ Returns:
     The input variable matrix.)doc";
 
 static const char *__doc_slp_OCP_X =
-R"doc(Get the state variables. After the problem is solved, this will
+R"doc(Gets the state variables. After the problem is solved, this will
 contain the optimized trajectory.
 
 Shaped (num_states)x(num_steps+1).
@@ -551,26 +551,26 @@ Shaped (num_states)x(num_steps+1).
 Returns:
     The state variable matrix.)doc";
 
-static const char *__doc_slp_OCP_constrain_direct_collocation = R"doc(Apply direct collocation dynamics constraints.)doc";
+static const char *__doc_slp_OCP_constrain_direct_collocation = R"doc(Applies direct collocation dynamics constraints.)doc";
 
-static const char *__doc_slp_OCP_constrain_direct_transcription = R"doc(Apply direct transcription dynamics constraints.)doc";
+static const char *__doc_slp_OCP_constrain_direct_transcription = R"doc(Applies direct transcription dynamics constraints.)doc";
 
 static const char *__doc_slp_OCP_constrain_final_state =
-R"doc(Utility function to constrain the final state.
+R"doc(Constrains the final state.
 
 Parameter ``final_state``:
     the final state to constrain to.)doc";
 
 static const char *__doc_slp_OCP_constrain_initial_state =
-R"doc(Utility function to constrain the initial state.
+R"doc(Constrains the initial state.
 
 Parameter ``initial_state``:
     the initial state to constrain to.)doc";
 
-static const char *__doc_slp_OCP_constrain_single_shooting = R"doc(Apply single shooting dynamics constraints.)doc";
+static const char *__doc_slp_OCP_constrain_single_shooting = R"doc(Applies single shooting dynamics constraints.)doc";
 
 static const char *__doc_slp_OCP_dt =
-R"doc(Get the timestep variables. After the problem is solved, this will
+R"doc(Gets the timestep variables. After the problem is solved, this will
 contain the timesteps corresponding to the optimized trajectory.
 
 Shaped 1x(num_steps+1), although the last timestep is unused in the
@@ -580,13 +580,13 @@ Returns:
     The timestep variable matrix.)doc";
 
 static const char *__doc_slp_OCP_final_state =
-R"doc(Convenience function to get the final state in the trajectory.
+R"doc(Gets the final state in the trajectory.
 
 Returns:
     The final state of the trajectory.)doc";
 
 static const char *__doc_slp_OCP_for_each_step =
-R"doc(Set the constraint evaluation function. This function is called
+R"doc(Sets the constraint evaluation function. This function is called
 `num_steps+1` times, with the corresponding state and input
 VariableMatrices.
 
@@ -595,7 +595,7 @@ Parameter ``callback``:
     vector.)doc";
 
 static const char *__doc_slp_OCP_for_each_step_2 =
-R"doc(Set the constraint evaluation function. This function is called
+R"doc(Sets the constraint evaluation function. This function is called
 `num_steps+1` times, with the corresponding state and input
 VariableMatrices.
 
@@ -604,7 +604,7 @@ Parameter ``callback``:
     vector, u is the input vector, and dt is the timestep duration.)doc";
 
 static const char *__doc_slp_OCP_initial_state =
-R"doc(Convenience function to get the initial state in the trajectory.
+R"doc(Gets the initial state in the trajectory.
 
 Returns:
     The initial state of the trajectory.)doc";
@@ -641,26 +641,26 @@ Parameter ``dt``:
     The time over which to integrate.)doc";
 
 static const char *__doc_slp_OCP_set_lower_input_bound =
-R"doc(Convenience function to set a lower bound on the input.
+R"doc(Sets a lower bound on the input.
 
 Parameter ``lower_bound``:
     The lower bound that inputs must always be above. Must be shaped
     (num_inputs)x1.)doc";
 
 static const char *__doc_slp_OCP_set_max_timestep =
-R"doc(Convenience function to set an upper bound on the timestep.
+R"doc(Sets an upper bound on the timestep.
 
 Parameter ``max_timestep``:
     The maximum timestep.)doc";
 
 static const char *__doc_slp_OCP_set_min_timestep =
-R"doc(Convenience function to set a lower bound on the timestep.
+R"doc(Sets a lower bound on the timestep.
 
 Parameter ``min_timestep``:
     The minimum timestep.)doc";
 
 static const char *__doc_slp_OCP_set_upper_input_bound =
-R"doc(Convenience function to set an upper bound on the input.
+R"doc(Sets an upper bound on the input.
 
 Parameter ``upper_bound``:
     The upper bound that inputs must always be below. Must be shaped
@@ -729,7 +729,7 @@ Template parameter ``Scalar``:
 
 static const char *__doc_slp_Problem_2 = R"doc()doc";
 
-static const char *__doc_slp_Problem_Problem = R"doc(Construct the optimization problem.)doc";
+static const char *__doc_slp_Problem_Problem = R"doc(Constructs the optimization problem.)doc";
 
 static const char *__doc_slp_Problem_add_callback =
 R"doc(Adds a callback to be called at the beginning of each solver
@@ -771,7 +771,7 @@ Returns:
     The cost function's type.)doc";
 
 static const char *__doc_slp_Problem_decision_variable =
-R"doc(Create a decision variable in the optimization problem.
+R"doc(Creates a decision variable in the optimization problem.
 
 Decision variables have an initial value of zero.
 
@@ -779,7 +779,7 @@ Returns:
     A decision variable in the optimization problem.)doc";
 
 static const char *__doc_slp_Problem_decision_variable_2 =
-R"doc(Create a matrix of decision variables in the optimization problem.
+R"doc(Creates a matrix of decision variables in the optimization problem.
 
 Decision variables have an initial value of zero.
 
@@ -871,7 +871,7 @@ static const char *__doc_slp_Problem_print_exit_conditions = R"doc()doc";
 static const char *__doc_slp_Problem_print_problem_analysis = R"doc()doc";
 
 static const char *__doc_slp_Problem_solve =
-R"doc(Solve the optimization problem. The solution will be stored in the
+R"doc(Solves the optimization problem. The solution will be stored in the
 original variables used to construct the problem.
 
 Parameter ``options``:
@@ -914,7 +914,7 @@ Parameter ``constraint``:
     The constraint to satisfy.)doc";
 
 static const char *__doc_slp_Problem_symmetric_decision_variable =
-R"doc(Create a symmetric matrix of decision variables in the optimization
+R"doc(Creates a symmetric matrix of decision variables in the optimization
 problem.
 
 Variable instances are reused across the diagonal, which helps reduce
@@ -2354,7 +2354,7 @@ Parameter ``x``:
     The x argument.)doc";
 
 static const char *__doc_slp_block =
-R"doc(Assemble a VariableMatrix from a nested list of blocks.
+R"doc(Assembles a VariableMatrix from a nested list of blocks.
 
 Each row's blocks must have the same height, and the assembled block
 rows must have the same width. For example, for the block matrix [[A,
@@ -2368,7 +2368,7 @@ Parameter ``list``:
     The nested list of blocks.)doc";
 
 static const char *__doc_slp_block_2 =
-R"doc(Assemble a VariableMatrix from a nested list of blocks.
+R"doc(Assembles a VariableMatrix from a nested list of blocks.
 
 Each row's blocks must have the same height, and the assembled block
 rows must have the same width. For example, for the block matrix [[A,

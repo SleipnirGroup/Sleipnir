@@ -19,14 +19,14 @@ class SetupProfiler {
   /// @param name Name of measurement to show in diagnostics.
   explicit SetupProfiler(std::string_view name) : m_name{name} {}
 
-  /// Tell the profiler to start measuring setup time.
+  /// Starts setup time measurement.
   void start() {
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     m_setup_start_time = std::chrono::steady_clock::now();
 #endif
   }
 
-  /// Tell the profiler to stop measuring setup time.
+  /// Stops setup time measurement.
   void stop() {
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     m_setup_stop_time = std::chrono::steady_clock::now();
@@ -64,15 +64,15 @@ class SolveProfiler {
   /// @param name Name of measurement to show in diagnostics.
   explicit SolveProfiler(std::string_view name) : m_name{name} {}
 
-  /// Tell the profiler to start measuring solve time.
+  /// Starts solve time measurement.
   void start() {
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     m_current_solve_start_time = std::chrono::steady_clock::now();
 #endif
   }
 
-  /// Tell the profiler to stop measuring solve time, increment the number of
-  /// averages, and incorporate the latest measurement into the average.
+  /// Stops solve time measurement, increments the number of averages, and
+  /// incorporates the latest measurement into the average.
   void stop() {
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     m_current_solve_stop_time = std::chrono::steady_clock::now();

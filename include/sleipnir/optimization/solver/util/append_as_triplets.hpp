@@ -7,7 +7,7 @@
 #include <Eigen/SparseCore>
 #include <gch/small_vector.hpp>
 
-/// Append sparse matrices to list of triplets at the given offset.
+/// Appends sparse matrices to list of triplets at the given offset.
 ///
 /// The triplets are appended in column-major order (e.g., first column of mat1,
 /// first column of mat2 underneath first column of mat1, second column of mat1,
