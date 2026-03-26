@@ -1,5 +1,3 @@
-"""This problem tests the case where regularization fails"""
-
 import math
 
 import numpy as np

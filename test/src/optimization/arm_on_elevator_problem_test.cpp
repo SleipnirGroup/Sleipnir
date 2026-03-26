@@ -11,7 +11,6 @@
 #include "catch_string_converters.hpp"
 #include "scalar_types_under_test.hpp"
 
-// This problem tests the case where regularization fails
 TEMPLATE_TEST_CASE("Problem - Arm on elevator", "[Problem]",
                    SCALAR_TYPES_UNDER_TEST) {
   using T = TestType;
