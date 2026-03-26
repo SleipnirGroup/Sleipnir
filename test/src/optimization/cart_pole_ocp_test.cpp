@@ -89,8 +89,7 @@ TEMPLATE_TEST_CASE("OCP - Cart-pole", "[OCP]", SCALAR_TYPES_UNDER_TEST) {
   CHECK_THAT(X.value(3, 0), WithinAbs(x_initial[3], T(1e-8)));
 
   // FIXME: Replay diverges
-  SKIP("Replay diverges");
-
+#if 0
   // Verify solution
   Eigen::Matrix<T, 4, 1> x{T(0), T(0), T(0), T(0)};
   Eigen::Matrix<T, 1, 1> u{T(0)};
@@ -113,6 +112,7 @@ TEMPLATE_TEST_CASE("OCP - Cart-pole", "[OCP]", SCALAR_TYPES_UNDER_TEST) {
     // Project state forward
     x = rk4<T>(CartPoleUtil<T>::dynamics_scalar, x, u, dt);
   }
+#endif
 
   // Verify final state
   CHECK_THAT(X.value(0, N), WithinAbs(x_final[0], T(1e-8)));
