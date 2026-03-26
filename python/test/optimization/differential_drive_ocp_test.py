@@ -69,29 +69,28 @@ def test_differential_drive_ocp():
     assert X.value(4, 0) == pytest.approx(x_initial[4, 0], abs=1e-8)
 
     # FIXME: Replay diverges
-    return
+    if 0:
+        # Verify solution
+        x = np.zeros((5, 1))
+        u = np.zeros((2, 1))
+        for k in range(N):
+            u = U[:, k : k + 1].value()
 
-    # Verify solution
-    x = np.zeros((5, 1))
-    u = np.zeros((2, 1))
-    for k in range(N):
-        u = U[:, k : k + 1].value()
+            # Input constraints
+            assert U[0, k].value() >= -u_max[0]
+            assert U[0, k].value() <= u_max[0]
+            assert U[1, k].value() >= -u_max[1]
+            assert U[1, k].value() <= u_max[1]
 
-        # Input constraints
-        assert U[0, k].value() >= -u_max[0]
-        assert U[0, k].value() <= u_max[0]
-        assert U[1, k].value() >= -u_max[1]
-        assert U[1, k].value() <= u_max[1]
+            # Verify state
+            assert X.value(0, k) == pytest.approx(x[0, 0], abs=1e-8)
+            assert X.value(1, k) == pytest.approx(x[1, 0], abs=1e-8)
+            assert X.value(2, k) == pytest.approx(x[2, 0], abs=1e-8)
+            assert X.value(3, k) == pytest.approx(x[3, 0], abs=1e-8)
+            assert X.value(4, k) == pytest.approx(x[4, 0], abs=1e-8)
 
-        # Verify state
-        assert X.value(0, k) == pytest.approx(x[0, 0], abs=1e-8)
-        assert X.value(1, k) == pytest.approx(x[1, 0], abs=1e-8)
-        assert X.value(2, k) == pytest.approx(x[2, 0], abs=1e-8)
-        assert X.value(3, k) == pytest.approx(x[3, 0], abs=1e-8)
-        assert X.value(4, k) == pytest.approx(x[4, 0], abs=1e-8)
-
-        # Project state forward
-        x = rk4(differential_drive_dynamics_double, x, u, problem.dt().value(0, k))
+            # Project state forward
+            x = rk4(differential_drive_dynamics_double, x, u, problem.dt().value(0, k))
 
     # Verify final state
     assert X.value(0, N) == pytest.approx(x_final[0, 0], abs=1e-8)

@@ -72,8 +72,7 @@ TEMPLATE_TEST_CASE("OCP - Differential drive", "[OCP]",
   CHECK_THAT(X.value(4, 0), WithinAbs(x_initial[4], T(1e-8)));
 
   // FIXME: Replay diverges
-  SKIP("Replay diverges");
-
+#if 0
   // Verify solution
   Eigen::Vector<T, 5> x{T(0), T(0), T(0), T(0), T(0)};
   Eigen::Vector<T, 2> u{T(0), T(0)};
@@ -99,6 +98,7 @@ TEMPLATE_TEST_CASE("OCP - Differential drive", "[OCP]",
     x = rk4<T>(DifferentialDriveUtil<T>::dynamics_scalar, x, u,
                std::chrono::duration<T>{problem.dt().value(0, k)});
   }
+#endif
 
   // Verify final state
   CHECK_THAT(X.value(0, N), WithinAbs(x_final[0], T(1e-8)));

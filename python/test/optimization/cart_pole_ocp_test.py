@@ -87,28 +87,27 @@ def test_cart_pole_ocp():
     assert X.value(3, 0) == pytest.approx(x_initial[3, 0], abs=1e-8)
 
     # FIXME: Replay diverges
-    return
+    if 0:
+        # Verify solution
+        x = np.zeros((4, 1))
+        u = np.zeros((1, 1))
+        for k in range(N):
+            # Cart position constraints
+            assert X[0, k] >= 0.0
+            assert X[0, k] <= d_max
 
-    # Verify solution
-    x = np.zeros((4, 1))
-    u = np.zeros((1, 1))
-    for k in range(N):
-        # Cart position constraints
-        assert X[0, k] >= 0.0
-        assert X[0, k] <= d_max
+            # Input constraints
+            assert U[0, k] >= -u_max
+            assert U[0, k] <= u_max
 
-        # Input constraints
-        assert U[0, k] >= -u_max
-        assert U[0, k] <= u_max
+            # Verify state
+            assert X.value(0, k) == pytest.approx(x[0, 0], abs=1e-2)
+            assert X.value(1, k) == pytest.approx(x[1, 0], abs=1e-2)
+            assert X.value(2, k) == pytest.approx(x[2, 0], abs=1e-2)
+            assert X.value(3, k) == pytest.approx(x[3, 0], abs=1e-2)
 
-        # Verify state
-        assert X.value(0, k) == pytest.approx(x[0, 0], abs=1e-2)
-        assert X.value(1, k) == pytest.approx(x[1, 0], abs=1e-2)
-        assert X.value(2, k) == pytest.approx(x[2, 0], abs=1e-2)
-        assert X.value(3, k) == pytest.approx(x[3, 0], abs=1e-2)
-
-        # Project state forward
-        x = rk4(cart_pole_dynamics_double, x, u, dt)
+            # Project state forward
+            x = rk4(cart_pole_dynamics_double, x, u, dt)
 
     # Verify final state
     assert X.value(0, N) == pytest.approx(x_final[0, 0], abs=1e-8)
