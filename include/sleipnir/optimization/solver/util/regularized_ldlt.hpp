@@ -55,14 +55,14 @@ class RegularizedLDLT {
     m_info = m_is_sparse ? compute_sparse(lhs).info()
                          : m_dense_solver.compute(lhs).info();
 
-    Inertia inertia;
-
     if (m_info == Eigen::Success) {
-      inertia = m_is_sparse ? Inertia{m_sparse_solver.vectorD()}
-                            : Inertia{m_dense_solver.vectorD()};
+      auto D =
+          m_is_sparse ? m_sparse_solver.vectorD() : m_dense_solver.vectorD();
 
-      // If the inertia is ideal, don't regularize the system
-      if (inertia == ideal_inertia) {
+      // If the inertia is ideal and D from LDLT is sufficiently far from zero,
+      // don't regularize the system
+      if (Inertia{D} == ideal_inertia &&
+          (D.cwiseAbs().array() >= Scalar(1e-4)).all()) {
         m_prev_δ = Scalar(0);
         return *this;
       }
@@ -76,6 +76,8 @@ class RegularizedLDLT {
     Scalar γ(1e-10);
 
     while (true) {
+      Inertia inertia;
+
       // Regularize lhs by adding a multiple of the identity matrix
       //
       // lhs = [H + AᵢᵀΣAᵢ + δI  Aₑᵀ]
