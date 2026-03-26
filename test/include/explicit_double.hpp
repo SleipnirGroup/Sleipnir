@@ -141,6 +141,12 @@ class ExplicitDouble {
   friend bool isfinite(const ExplicitDouble& num) {
     return std::isfinite(num.m_value);
   }
+  friend bool isinf(const ExplicitDouble& num) {
+    return std::isinf(num.m_value);
+  }
+  friend bool isnan(const ExplicitDouble& num) {
+    return std::isnan(num.m_value);
+  }
   friend ExplicitDouble log(const ExplicitDouble& x) {
     return ExplicitDouble{std::log(x.m_value)};
   }
