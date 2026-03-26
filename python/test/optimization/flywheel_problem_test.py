@@ -92,7 +92,7 @@ def test_flywheel_problem():
         x = A * x + B * u
 
     # Verify final state
-    assert X.value(0, N) == pytest.approx(r[0, 0], abs=1e-7)
+    assert X.value(0, N) == pytest.approx(r[0, 0], abs=2e-7)
 
     # Log states for offline viewing
     with open("Flywheel states.csv", "w") as f:

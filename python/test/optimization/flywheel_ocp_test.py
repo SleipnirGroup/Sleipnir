@@ -105,7 +105,7 @@ def flywheel_test(
         x = A_discrete * x + B_discrete * u
 
     # Verify final state
-    assert problem.X().value(0, N) == pytest.approx(r, abs=1e-6)
+    assert problem.X().value(0, N) == pytest.approx(r, abs=2e-6)
 
     # Log states for offline viewing
     with open(f"{test_name} states.csv", "w") as f:

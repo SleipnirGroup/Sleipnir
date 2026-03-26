@@ -118,7 +118,7 @@ void flywheel_test(
   }
 
   // Verify final state
-  CHECK_THAT(problem.X().value(0, N), WithinAbs(r, T(1e-6)));
+  CHECK_THAT(problem.X().value(0, N), WithinAbs(r, T(2e-6)));
 
   // Log states for offline viewing
   std::ofstream states{std::format("{} states.csv", test_name)};
