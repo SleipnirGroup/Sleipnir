@@ -280,7 +280,8 @@ ExitStatus interior_point(
   // Fraction-to-the-boundary rule scale factor τ
   Scalar τ = τ_min;
 
-  Filter<Scalar> filter;
+  Filter<Scalar> filter{c_e.template lpNorm<1>() +
+                        (c_i - s).template lpNorm<1>()};
 
   // This should be run when the error is below a desired threshold for the
   // current barrier parameter
@@ -455,6 +456,8 @@ ExitStatus interior_point(
     // αₖᶻ = max(α ∈ (0, 1] : zₖ + αpₖᶻ ≥ (1−τⱼ)zₖ)
     α_z = fraction_to_the_boundary_rule<Scalar>(z, step.p_z, τ);
 
+    const FilterEntry<Scalar> current_entry{f, s, c_e, c_i, μ};
+
     // Loop until a step is accepted
     while (1) {
       DenseVector trial_x = x + α * step.p_x;
@@ -490,8 +493,8 @@ ExitStatus interior_point(
       }
 
       // Check whether filter accepts trial iterate
-      if (filter.try_add(FilterEntry{trial_f, trial_s, trial_c_e, trial_c_i, μ},
-                         α)) {
+      FilterEntry trial_entry{trial_f, trial_s, trial_c_e, trial_c_i, μ};
+      if (filter.try_add(current_entry, trial_entry, step.p_x, g, α)) {
         // Accept step
         break;
       }
@@ -579,8 +582,8 @@ ExitStatus interior_point(
           }
 
           // Check whether filter accepts trial iterate
-          if (filter.try_add(
-                  FilterEntry{trial_f, trial_s, trial_c_e, trial_c_i, μ}, α)) {
+          FilterEntry trial_entry{trial_f, trial_s, trial_c_e, trial_c_i, μ};
+          if (filter.try_add(current_entry, trial_entry, step.p_x, g, α)) {
             step = soc_step;
             α = α_soc;
             α_z = α_z_soc;
@@ -607,7 +610,8 @@ ExitStatus interior_point(
       // See section 3.2 case I of [2].
       if (full_step_rejected_counter >= 4 &&
           filter.max_constraint_violation >
-              filter.back().constraint_violation / Scalar(10)) {
+              current_entry.constraint_violation / Scalar(10) &&
+          filter.last_rejection_due_to_filter()) {
         filter.max_constraint_violation *= Scalar(0.1);
         filter.reset();
         continue;
