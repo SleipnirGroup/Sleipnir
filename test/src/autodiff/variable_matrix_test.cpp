@@ -87,7 +87,7 @@ TEMPLATE_TEST_CASE("VariableMatrix - Assignment aliasing", "[VariableMatrix]",
   CHECK(B.value() == expected_B);
 }
 
-TEMPLATE_TEST_CASE("VariableMatrix - Block() member function",
+TEMPLATE_TEST_CASE("VariableMatrix - block() member function",
                    "[VariableMatrix]", SCALAR_TYPES_UNDER_TEST) {
   using T = TestType;
 
@@ -439,7 +439,7 @@ TEMPLATE_TEST_CASE("VariableMatrix - cwise_reduce()", "[VariableMatrix]",
   CHECK(result.value() == expected);
 }
 
-TEMPLATE_TEST_CASE("VariableMatrix - Block() free function", "[VariableMatrix]",
+TEMPLATE_TEST_CASE("VariableMatrix - block() free function", "[VariableMatrix]",
                    SCALAR_TYPES_UNDER_TEST) {
   using T = TestType;
 
