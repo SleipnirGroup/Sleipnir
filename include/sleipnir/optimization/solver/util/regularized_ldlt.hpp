@@ -147,7 +147,7 @@ class RegularizedLDLT {
   /// @param rhs Right-hand side of the system.
   /// @return The solution.
   template <typename Rhs>
-  DenseVector solve(const Eigen::MatrixBase<Rhs>& rhs) {
+  DenseVector solve(const Eigen::MatrixBase<Rhs>& rhs) const {
     if (m_is_sparse) {
       return m_sparse_solver.solve(rhs);
     } else {
@@ -160,7 +160,7 @@ class RegularizedLDLT {
   /// @param rhs Right-hand side of the system.
   /// @return The solution.
   template <typename Rhs>
-  DenseVector solve(const Eigen::SparseMatrixBase<Rhs>& rhs) {
+  DenseVector solve(const Eigen::SparseMatrixBase<Rhs>& rhs) const {
     if (m_is_sparse) {
       return m_sparse_solver.solve(rhs);
     } else {
@@ -224,7 +224,7 @@ class RegularizedLDLT {
   /// @param δ The Hessian regularization factor.
   /// @param γ The equality constraint Jacobian regularization factor.
   /// @return Regularization matrix.
-  SparseMatrix regularization(Scalar δ, Scalar γ) {
+  SparseMatrix regularization(Scalar δ, Scalar γ) const {
     DenseVector vec{m_num_decision_variables + m_num_equality_constraints};
     vec.segment(0, m_num_decision_variables).setConstant(δ);
     vec.segment(m_num_decision_variables, m_num_equality_constraints)
