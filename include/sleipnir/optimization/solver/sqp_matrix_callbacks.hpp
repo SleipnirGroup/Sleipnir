@@ -71,7 +71,7 @@ struct SQPMatrixCallbacks {
 
   /// Lagrangian Hessian ∇ₓₓ²L(x, y) getter.
   ///
-  /// L(xₖ, yₖ) = f(xₖ) − yₖᵀcₑ(xₖ)
+  /// L(x, y) = f(x) − yᵀcₑ(x)
   ///
   /// <table>
   ///   <tr>
@@ -147,10 +147,10 @@ struct SQPMatrixCallbacks {
   /// Equality constraint Jacobian ∂cₑ/∂x getter.
   ///
   /// ```
-  ///         [∇ᵀcₑ₁(xₖ)]
-  /// Aₑ(x) = [∇ᵀcₑ₂(xₖ)]
-  ///         [    ⋮    ]
-  ///         [∇ᵀcₑₘ(xₖ)]
+  ///         [∇ᵀcₑ₁(x)]
+  /// Aₑ(x) = [∇ᵀcₑ₂(x)]
+  ///         [   ⋮    ]
+  ///         [∇ᵀcₑₘ(x)]
   /// ```
   ///
   /// <table>

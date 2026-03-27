@@ -68,7 +68,7 @@ struct NewtonMatrixCallbacks {
 
   /// Lagrangian Hessian ∇ₓₓ²L(x) getter.
   ///
-  /// L(xₖ) = f(xₖ)
+  /// L(x) = f(x)
   ///
   /// <table>
   ///   <tr>
