@@ -74,7 +74,7 @@ struct InteriorPointMatrixCallbacks {
 
   /// Lagrangian Hessian ∇ₓₓ²L(x, y, z) getter.
   ///
-  /// L(xₖ, yₖ, zₖ) = f(xₖ) − yₖᵀcₑ(xₖ) − zₖᵀcᵢ(xₖ)
+  /// L(x, y, z) = f(x) − yᵀcₑ(x) − zᵀcᵢ(x)
   ///
   /// <table>
   ///   <tr>
@@ -164,10 +164,10 @@ struct InteriorPointMatrixCallbacks {
   /// Equality constraint Jacobian ∂cₑ/∂x getter.
   ///
   /// ```
-  ///         [∇ᵀcₑ₁(xₖ)]
-  /// Aₑ(x) = [∇ᵀcₑ₂(xₖ)]
-  ///         [    ⋮    ]
-  ///         [∇ᵀcₑₘ(xₖ)]
+  ///         [∇ᵀcₑ₁(x)]
+  /// Aₑ(x) = [∇ᵀcₑ₂(x)]
+  ///         [   ⋮    ]
+  ///         [∇ᵀcₑₘ(x)]
   /// ```
   ///
   /// <table>
@@ -213,10 +213,10 @@ struct InteriorPointMatrixCallbacks {
   /// Inequality constraint Jacobian ∂cᵢ/∂x getter.
   ///
   /// ```
-  ///         [∇ᵀcᵢ₁(xₖ)]
-  /// Aᵢ(x) = [∇ᵀcᵢ₂(xₖ)]
-  ///         [    ⋮    ]
-  ///         [∇ᵀcᵢₘ(xₖ)]
+  ///         [∇ᵀcᵢ₁(x)]
+  /// Aᵢ(x) = [∇ᵀcᵢ₂(x)]
+  ///         [   ⋮    ]
+  ///         [∇ᵀcᵢₘ(x)]
   /// ```
   ///
   /// <table>
