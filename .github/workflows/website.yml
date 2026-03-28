@@ -48,13 +48,14 @@ jobs:
 
       - run: pip3 install pybind11-mkdoc
       - run: sudo apt-get install -y doxygen
-      - run: ./tools/generate_website.py
+      - run: ./generate_website.py
+        working-directory: ./docs
 
       - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v4
         with:
-          path: build/html
+          path: docs/build/html
 
       - uses: actions/deploy-pages@v4
         id: deployment
