@@ -7,13 +7,12 @@ import sys
 
 
 def clear_python_workspace():
-    shutil.rmtree("build-stubs", ignore_errors=True)
     subprocess.run(
         [
             "git",
             "restore",
-            "python/src/sleipnir/autodiff/__init__.py",
-            "python/src/sleipnir/optimization/__init__.py",
+            "../python/src/sleipnir/autodiff/__init__.py",
+            "../python/src/sleipnir/optimization/__init__.py",
         ],
         check=True,
     )
@@ -25,27 +24,25 @@ def prep_python_api_docs():
         [
             "cmake",
             "-B",
-            "build-stubs",
+            "build",
             "-S",
-            ".",
+            "..",
             "-DCMAKE_C_COMPILER_LAUNCHER=sccache",
             "-DCMAKE_CXX_COMPILER_LAUNCHER=sccache",
             "-DBUILD_PYTHON=ON",
         ],
         check=True,
     )
-    subprocess.run(
-        ["cmake", "--build", "build-stubs", "--target", "_sleipnir"], check=True
-    )
+    subprocess.run(["cmake", "--build", "build", "--target", "_sleipnir"], check=True)
     subprocess.run(
         [
             "cmake",
             "--install",
-            "build-stubs",
+            "build",
             "--component",
             "python_modules",
             "--prefix",
-            "build-stubs/install",
+            "build/install",
         ],
         check=True,
     )
@@ -53,7 +50,7 @@ def prep_python_api_docs():
     for package in ["autodiff", "optimization"]:
         # Read .pyi
         with open(
-            os.path.join("build-stubs", "install", "sleipnir", package, "__init__.pyi")
+            os.path.join("build", "install", "sleipnir", package, "__init__.pyi")
         ) as f:
             package_content = f.read()
 
@@ -68,10 +65,10 @@ def prep_python_api_docs():
             ).replace("_sleipnir.autodiff.", "")
 
         # Replace _sleipnir.package import with contents
-        with open(os.path.join("python/src/sleipnir", package, "__init__.py")) as f:
+        with open(os.path.join("../python/src/sleipnir", package, "__init__.py")) as f:
             init_content = f.read()
         with open(
-            os.path.join("python/src/sleipnir", package, "__init__.py"),
+            os.path.join("../python/src/sleipnir", package, "__init__.py"),
             mode="w",
         ) as f:
             f.write(
@@ -82,34 +79,16 @@ def prep_python_api_docs():
 
 
 def main():
-    shutil.rmtree("build/html", ignore_errors=True)
+    shutil.rmtree("build", ignore_errors=True)
     os.makedirs("build/html/docs", exist_ok=True)
 
     if "--doxygen-only" not in sys.argv:
         clear_python_workspace()
         prep_python_api_docs()
 
-    subprocess.run(
-        [
-            "doxygen",
-            "docs/Doxyfile-cpp",
-        ],
-        check=True,
-    )
-    subprocess.run(
-        [
-            "doxygen",
-            "docs/Doxyfile-py",
-        ],
-        check=True,
-    )
-    subprocess.run(
-        [
-            "doxygen",
-            "docs/Doxyfile",
-        ],
-        check=True,
-    )
+    subprocess.run(["doxygen", "Doxyfile-cpp"], check=True)
+    subprocess.run(["doxygen", "Doxyfile-py"], check=True)
+    subprocess.run(["doxygen", "Doxyfile"], check=True)
 
     if "--doxygen-only" not in sys.argv:
         clear_python_workspace()

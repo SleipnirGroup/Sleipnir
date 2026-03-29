@@ -1,8 +1,9 @@
 build*/
 *.csv
 *.png
-!logo/*.png
-!*-results.png
+!benchmarks/*.csv
+!benchmarks/*.png
+!docs/logo/*.png
 perf.*
 .DS_Store
 

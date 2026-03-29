@@ -3,7 +3,7 @@
 ## Setup
 
 See the
-[Python installation instructions](https://sleipnirgroup.github.io/Sleipnir/index.html#autotoc_md2).
+[Python installation instructions](https://sleipnirgroup.github.io/Sleipnir/#install).
 
 ## Introduction
 

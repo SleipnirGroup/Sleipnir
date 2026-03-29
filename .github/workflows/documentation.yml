@@ -39,9 +39,10 @@ jobs:
 
       - run: sudo apt-get install -y doxygen
 
-      - run: ./tools/generate_website.py
+      - run: ./generate_website.py
+        working-directory: ./docs
 
       - uses: actions/upload-artifact@v6
         with:
           name: documentation
-          path: build/html
+          path: docs/build/html

@@ -669,31 +669,20 @@ Parameter ``upper_bound``:
 static const char *__doc_slp_Options = R"doc(Solver options.)doc";
 
 static const char *__doc_slp_Options_diagnostics =
-R"doc(Enables diagnostic prints.
+R"doc(Enables diagnostic output.
 
-<table> <tr> <th>Heading</th> <th>Description</th> </tr> <tr>
-<td>iter</td> <td>Iteration number</td> </tr> <tr> <td>type</td>
-<td>Iteration type (normal, accepted second-order correction, rejected
-second-order correction)</td> </tr> <tr> <td>time (ms)</td>
-<td>Duration of iteration in milliseconds</td> </tr> <tr>
-<td>error</td> <td>Infinity norm of scaled KKT condition errors</td>
-</tr> <tr> <td>cost</td> <td>Cost function value at current
-iterate</td> </tr> <tr> <td>infeas.</td> <td>Constraint infeasibility
-at current iterate</td> </tr> <tr> <td>complement.</td>
-<td>Complementary slackness at current iterate (sᵀz)</td> </tr> <tr>
-<td>μ</td> <td>Barrier parameter</td> </tr> <tr> <td>reg</td>
-<td>Iteration matrix regularization</td> </tr> <tr> <td>primal α</td>
-<td>Primal step size</td> </tr> <tr> <td>dual α</td> <td>Dual step
-size</td> </tr> <tr> <td>↩</td> <td>Number of line search
-backtracks</td> </tr> </table>)doc";
+See https://sleipnirgroup.github.io/Sleipnir/md_usage.html#output for
+more information.)doc";
 
 static const char *__doc_slp_Options_feasible_ipm =
-R"doc(Enables the feasible interior-point method. When the inequality
-constraints are all feasible, step sizes are reduced when necessary to
-prevent them becoming infeasible again. This is useful when parts of
-the problem are ill-conditioned in infeasible regions (e.g., square
-root of a negative value). This can slow or prevent progress toward a
-solution though, so only enable it if necessary.)doc";
+R"doc(Enables the feasible interior-point method.
+
+When the inequality constraints are all feasible, step sizes are
+reduced when necessary to prevent them becoming infeasible again. This
+is useful when parts of the problem are ill-conditioned in infeasible
+regions (e.g., square root of a negative value). This can slow or
+prevent progress toward a solution though, so only enable it if
+necessary.)doc";
 
 static const char *__doc_slp_Options_max_iterations = R"doc(The maximum number of solver iterations before returning a solution.)doc";
 
