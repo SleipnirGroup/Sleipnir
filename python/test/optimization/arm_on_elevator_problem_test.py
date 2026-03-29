@@ -76,7 +76,7 @@ def test_arm_on_elevator_problem():
     problem.subject_to(bounds(-ARM_MAX_ACCELERATION, arm_accel, ARM_MAX_ACCELERATION))
 
     # Height limit
-    heights = elevator[:1, :] + ARM_LENGTH * arm[:1, :].cwise_map(autodiff.sin)
+    heights = elevator[:1, :] + ARM_LENGTH * autodiff.sin(arm[:1, :])
     problem.subject_to(heights <= END_EFFECTOR_MAX_HEIGHT)
 
     # Cost function

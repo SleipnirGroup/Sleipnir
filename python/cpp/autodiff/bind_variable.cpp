@@ -8,6 +8,8 @@
 #include <utility>
 
 #include <sleipnir/autodiff/variable.hpp>
+#include <sleipnir/autodiff/variable_block.hpp>
+#include <sleipnir/autodiff/variable_matrix.hpp>
 
 #include "docstrings.hpp"
 #include "for_each_type.hpp"
@@ -26,15 +28,26 @@ namespace slp {
 template <typename F, typename... Args>
 void def_unary_math(nb::module_& autodiff, const char* name, F&& f,
                     Args&&... args) {
-  using V = Variable<double>;
-  for_each_type<double, const V&>([&]<typename X> {
-    if constexpr (std::same_as<X, const V&>) {
-      autodiff.def(name, f, std::forward<Args>(args)...);
-    } else {
-      autodiff.def(
-          name, [=](X&& x) { return f(x); }, std::forward<Args>(args)...);
-    }
-  });
+  // double overload
+  autodiff.def(
+      name, [=](double x) { return f(x); }, std::forward<Args>(args)...);
+
+  // Variable overload
+  autodiff.def(name, f, std::forward<Args>(args)...);
+
+  // VariableMatrix overload
+  autodiff.def(
+      name,
+      [=](const VariableMatrix<double>& x) { return x.cwise_transform(f); },
+      std::forward<Args>(args)...);
+
+  // VariableBlock overload
+  autodiff.def(
+      name,
+      [=](const VariableBlock<VariableMatrix<double>>& x) {
+        return x.cwise_transform(f);
+      },
+      std::forward<Args>(args)...);
 }
 
 /// Bind binary math function.

@@ -288,6 +288,31 @@ def test_cwise_map():
     assert (result2.value() == expected2).all()
 
 
+def test_unary_broadcast():
+    # VariableMatrix broadcast
+    A = VariableMatrix([[-2.0, -3.0, -4.0], [-5.0, -6.0, -7.0]])
+
+    result1 = autodiff.abs(A)
+    expected1 = np.array([[2.0, 3.0, 4.0], [5.0, 6.0, 7.0]])
+
+    # Don't modify original matrix
+    assert (A.value() == -expected1).all()
+
+    assert (result1.value() == expected1).all()
+
+    # VariableBlock broadcast
+    sub_A = A[:2, :2]
+
+    result2 = autodiff.abs(sub_A)
+    expected2 = np.array([[2.0, 3.0], [5.0, 6.0]])
+
+    # Don't modify original matrix
+    assert (A.value() == -expected1).all()
+    assert (sub_A.value() == -expected2).all()
+
+    assert (result2.value() == expected2).all()
+
+
 def test_zero_static_function():
     A = VariableMatrix.zero(2, 3)
 
