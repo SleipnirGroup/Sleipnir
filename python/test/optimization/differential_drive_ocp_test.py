@@ -56,7 +56,7 @@ def test_differential_drive_ocp():
     assert problem.equality_constraint_type() == ExpressionType.NONLINEAR
     assert problem.inequality_constraint_type() == ExpressionType.LINEAR
 
-    assert problem.solve(max_iterations=1000, diagnostics=True) == ExitStatus.SUCCESS
+    assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
 
     X = problem.X()
     U = problem.U()
