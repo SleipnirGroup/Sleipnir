@@ -8,6 +8,18 @@ This section documents Sleipnir's diagnostic output when the `diagnostics` optio
        x,y
 subject to x + 3y = 36
 ```
+```python
+from sleipnir.optimization import Problem
+
+problem = Problem()
+
+x, y = problem.decision_variable(2)
+
+problem.maximize(x * y)
+problem.subject_to(x + 3 * y == 36)
+
+problem.solve(diagnostics=True)
+```
 
 ### Exit conditions
 
@@ -18,6 +30,8 @@ User-configured exit conditions:
   ↳ iteration callback requested stop
   ↳ executed 5000 iterations
 ```
+
+The user-configurable exit conditions include the error tolerance, maximum iterations, and timeout passed to the `solve()` call; and iteration callbacks added to the `Problem` returning `true`.
 
 ### Problem size and structure
 
@@ -143,6 +157,7 @@ At the end of the solve, the solver prints time traces of itself and the autodif
 │    ↳ f(x)                0.00%▕         ▏      0.000     0.000    7│
 │    ↳ ∇f(x)               1.79%▕▏        ▏      0.001     0.000    4│
 │    ↳ ∇²ₓₓL               0.00%▕         ▏      0.000     0.000    4│
+│    ↳ ∇²ₓₓyᵀcₑ            0.00%▕         ▏      0.000     0.000    0│
 │    ↳ cₑ(x)               1.79%▕▏        ▏      0.001     0.000    7│
 │    ↳ ∂cₑ/∂x              0.00%▕         ▏      0.000     0.000    4│
 └────────────────────────────────────────────────────────────────────┘
@@ -155,6 +170,50 @@ At the end of the solve, the solver prints time traces of itself and the autodif
 │  ↳ ∇²ₓₓL                38.46%▕███▍     ▏      0.005     0.005    1│
 └────────────────────────────────────────────────────────────────────┘
 ```
+
+The function evaluations are defined as follows:
+<table>
+  <tr>
+    <th>Function</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>f(x)</td>
+    <td>Cost function value</td>
+  </tr>
+  <tr>
+    <td>∇f(x)</td>
+    <td>Cost function gradient</td>
+  </tr>
+  <tr>
+    <td>∇²ₓₓL</td>
+    <td>Lagrangian Hessian</td>
+  </tr>
+  <tr>
+    <td>∇²ₓₓyᵀcₑ</td>
+    <td>Constraint part of SQP Lagrangian Hessian</td>
+  </tr>
+  <tr>
+    <td>∇²ₓₓ(yᵀcₑ + zᵀcᵢ)</td>
+    <td>Constraint part of IPM Lagrangian Hessian</td>
+  </tr>
+  <tr>
+    <td>cₑ(x)</td>
+    <td>Equality constraint value</td>
+  </tr>
+  <tr>
+    <td>∂cₑ/∂x</td>
+    <td>Equality constraint Jacobian</td>
+  </tr>
+  <tr>
+    <td>cᵢ(x)</td>
+    <td>Inequality constraint value</td>
+  </tr>
+  <tr>
+    <td>∂cᵢ/∂x</td>
+    <td>Inequality constraint Jacobian</td>
+  </tr>
+</table>
 
 ### Exit status
 
