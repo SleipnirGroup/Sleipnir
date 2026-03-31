@@ -112,7 +112,7 @@ Visually Explained's _Convex Optimization_ video series provides geometric intui
 
 Sleipnir's authors learned numerical optimization from the following book and relied heavily upon it to implement Sleipnir.
 
-> Nocedal, J. and Wright, S. _Numerical Optimization_, 2nd. ed., Springer, 2006. https://www.math.uci.edu/~qnie/Publications/NumericalOptimization.pdf
+> Nocedal, J. and Wright, S. _Numerical Optimization_, 2nd. ed., Springer, 2006. https://www.math.kent.edu/~reichel/courses/optimization/Numerical_Optimization.pdf
 
 See [this page](https://sleipnirgroup.github.io/Sleipnir/md_algorithms.html) for derivations of Newton's method (unconstrained optimization), sequential quadratic programming (optimization with equality constraints), and interior-point method (optimization with equality and inequality constraints). The bottom of that page lists works cited by Sleipnir's internals.
 
