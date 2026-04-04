@@ -8,9 +8,7 @@
 [![Python API](https://img.shields.io/badge/documentation-Python-blue?label=API%20Docs)](https://sleipnirgroup.github.io/Sleipnir/docs/py)
 [![Discord](https://img.shields.io/discord/975739302933856277?color=%23738ADB&label=Join%20our%20Discord&logo=discord&logoColor=white)](https://discord.gg/ad2EEZZwsS)
 
-> Sparsity and Linearity-Exploiting Interior-Point solver - Now Internally Readable
-
-Named after Odin's eight-legged horse from Norse mythology, Sleipnir is a reverse mode autodiff library, interior-point method, and NLP solver DSL for C++23 and Python. The DSL automatically chooses the best solver based on the problem structure.
+Sleipnir is a reverse mode autodiff library, interior-point method, and NLP solver DSL for C++23 and Python. The DSL automatically chooses the best solver based on the problem structure.
 
 ```cpp
 #include <print>
@@ -57,9 +55,9 @@ if __name__ == "__main__":
     main()
 ```
 
-The C++ API also supports arbitrary scalar types, so users can specify higher precision floating-point types at the cost of speed.
+Sleipnir supports easy cross-compilation via CMake toolchain files, provides good performance by default, and contains clean [reference implementations](https://github.com/SleipnirGroup/Sleipnir/tree/main/include/sleipnir/optimization/solver) of various solvers with links to explanatory material.
 
-Sleipnir's internals are intended to be readable by those who aren't domain experts with links to explanatory material for its algorithms.
+The C++ API also supports arbitrary scalar types, so users can specify higher precision floating-point types at the cost of speed.
 
 ## Install
 
