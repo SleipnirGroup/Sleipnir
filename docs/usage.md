@@ -60,6 +60,21 @@ Available solvers include:
 * Sequential Quadratic Programming (SQP) for equality-constrained problems
 * Interior-point method (IPM) for inequality-constrained problems
 
+### Setup time trace
+
+Then, Sleipnir prints a time trace of its autodiff setup.
+```
+┏━━━━━━━━━━━━━━━━━━━━━┯━━━━━━━━━━━━━━━━━━┯━━━━━━━━━━┯━━━━━━━━━┯━━━━┓
+┃     setup trace     │     percent      │total (ms)│each (ms)│runs┃
+┡━━━━━━━━━━━━━━━━━━━━━┷━━━━━━━━━━━━━━━━━━┷━━━━━━━━━━┷━━━━━━━━━┷━━━━┩
+│setup                 100.00%▕█████████▏      0.017     0.017    1│
+│↳ ∇f(x)                 5.88%▕▌        ▏      0.001     0.001    1│
+│↳ ∇²ₓₓL                35.29%▕███▏     ▏      0.006     0.006    1│
+│↳ ∇²ₓₓL_c              11.76%▕█        ▏      0.002     0.002    1│
+│↳ ∂cₑ/∂x                5.88%▕▌        ▏      0.001     0.001    1│
+└──────────────────────────────────────────────────────────────────┘
+```
+
 ### Iterations
 
 After the solver takes each step, it prints a row of iteration diagnostics in a table format.
@@ -136,9 +151,9 @@ The headings are defined as follows:
   </tr>
 </table>
 
-### Time traces
+### Solver time trace
 
-At the end of the solve, the solver prints time traces of itself and the autodiff.
+At the end of the solve, the solver prints a time trace of itself.
 ```
 ┏━━━━━━━━━━━━━━━━━━━━━┯━━━━━━━━━━━━━━━━━━┯━━━━━━━━━━┯━━━━━━━━━┯━━━━┓
 ┃    solver trace     │     percent      │total (ms)│each (ms)│runs┃
@@ -160,15 +175,6 @@ At the end of the solve, the solver prints time traces of itself and the autodif
 │  ↳ ∇²ₓₓL_c             0.00%▕         ▏      0.000     0.000    0│
 │  ↳ cₑ(x)               1.54%▕▏        ▏      0.001     0.000    7│
 │  ↳ ∂cₑ/∂x              0.00%▕         ▏      0.000     0.000    4│
-└──────────────────────────────────────────────────────────────────┘
-┏━━━━━━━━━━━━━━━━━━━━━┯━━━━━━━━━━━━━━━━━━┯━━━━━━━━━━┯━━━━━━━━━┯━━━━┓
-┃   autodiff trace    │     percent      │total (ms)│each (ms)│runs┃
-┡━━━━━━━━━━━━━━━━━━━━━┷━━━━━━━━━━━━━━━━━━┷━━━━━━━━━━┷━━━━━━━━━┷━━━━┩
-│setup                 100.00%▕█████████▏      0.017     0.017    1│
-│↳ ∇f(x)                 5.88%▕▌        ▏      0.001     0.001    1│
-│↳ ∇²ₓₓL                35.29%▕███▏     ▏      0.006     0.006    1│
-│↳ ∇²ₓₓL_c              11.76%▕█        ▏      0.002     0.002    1│
-│↳ ∂cₑ/∂x                5.88%▕▌        ▏      0.001     0.001    1│
 └──────────────────────────────────────────────────────────────────┘
 ```
 
