@@ -112,7 +112,7 @@ void bind_problem(nb::class_<Problem<double>>& cls) {
       //
       // C++'s Problem<double>::solve() takes an Options object instead of
       // keyword arguments, so pybind11_mkdoc generates the wrong docs.
-      R"doc(Solve the optimization problem. The solution will be stored in the
+      R"doc(Solves the optimization problem. The solution will be stored in the
 original variables used to construct the problem.
 
 Parameter ``tolerance``:
