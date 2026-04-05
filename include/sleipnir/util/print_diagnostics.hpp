@@ -318,17 +318,17 @@ inline void print_solver_diagnostics(
 #endif
 
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-/// Prints autodiff diagnostics.
+/// Prints setup diagnostics.
 ///
-/// @param setup_profilers Autodiff setup profilers.
-inline void print_autodiff_diagnostics(
+/// @param setup_profilers Setup profilers.
+inline void print_setup_diagnostics(
     const gch::small_vector<SetupProfiler>& setup_profilers) {
   auto setup_duration = to_ms(setup_profilers[0].duration());
 
   // Print heading
   slp::println("┏{:━^21}┯{:━^18}┯{:━^10}┯{:━^9}┯{:━^4}┓", "", "", "", "", "");
-  slp::println("┃{:^21}│{:^18}│{:^10}│{:^9}│{:^4}┃", "autodiff trace",
-               "percent", "total (ms)", "each (ms)", "runs");
+  slp::println("┃{:^21}│{:^18}│{:^10}│{:^9}│{:^4}┃", "setup trace", "percent",
+               "total (ms)", "each (ms)", "runs");
   slp::println("┡{:━^21}┷{:━^18}┷{:━^10}┷{:━^9}┷{:━^4}┩", "", "", "", "", "");
 
   // Print setup profilers
@@ -344,7 +344,7 @@ inline void print_autodiff_diagnostics(
   slp::println("└{:─^66}┘", "");
 }
 #else
-#define print_autodiff_diagnostics(...)
+#define print_setup_diagnostics(...)
 #endif
 
 }  // namespace slp

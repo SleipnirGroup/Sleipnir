@@ -351,6 +351,10 @@ class Problem {
 
       ad_setup_profilers[0].stop();
 
+      if (options.diagnostics) {
+        print_setup_diagnostics(ad_setup_profilers);
+      }
+
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
       // Sparsity pattern files written when spy flag is set
       std::unique_ptr<Spy<Scalar>> H_spy;
@@ -412,6 +416,10 @@ class Problem {
       ad_setup_profilers.back().stop();
 
       ad_setup_profilers[0].stop();
+
+      if (options.diagnostics) {
+        print_setup_diagnostics(ad_setup_profilers);
+      }
 
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
       // Sparsity pattern files written when spy flag is set
@@ -502,6 +510,10 @@ class Problem {
       ad_setup_profilers.back().stop();
 
       ad_setup_profilers[0].stop();
+
+      if (options.diagnostics) {
+        print_setup_diagnostics(ad_setup_profilers);
+      }
 
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
       // Sparsity pattern files written when spy flag is set
@@ -599,7 +611,6 @@ class Problem {
     }
 
     if (options.diagnostics) {
-      print_autodiff_diagnostics(ad_setup_profilers);
       slp::println("\nExit: {}", status);
     }
 
