@@ -305,7 +305,7 @@ class Problem {
         c_i_type <= ExpressionType::CONSTANT) {
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
       if (options.diagnostics) {
-        slp::println("\nInvoking no-op solver...\n");
+        slp::println("\nInvoking no-op solver\n");
       }
 #endif
       return ExitStatus::SUCCESS;
@@ -341,7 +341,7 @@ class Problem {
     ExitStatus status;
     if (m_equality_constraints.empty() && m_inequality_constraints.empty()) {
       if (options.diagnostics) {
-        slp::println("\nInvoking Newton solver...\n");
+        slp::println("\nInvoking Newton solver\n");
       }
 
       // Set up Lagrangian Hessian autodiff
@@ -469,7 +469,7 @@ class Problem {
       status = sqp<Scalar>(matrix_callbacks, iteration_callbacks, options, x);
     } else {
       if (options.diagnostics) {
-        slp::println("\nInvoking IPM solver...\n");
+        slp::println("\nInvoking IPM solver\n");
       }
 
       VariableMatrix<Scalar> c_e_ad{m_equality_constraints};
