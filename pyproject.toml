@@ -28,7 +28,7 @@ install_args = []
 
   [tool.py-build-cmake.cmake.options]
   BUILD_TESTING = "OFF"
-  BUILD_PYTHON = "ON"
+  SLEIPNIR_BUILD_PYTHON = "ON"
 
 [tool.py-build-cmake.module]
 name = "sleipnir"

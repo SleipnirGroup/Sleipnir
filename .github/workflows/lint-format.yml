@@ -30,7 +30,7 @@ jobs:
 
       - run: pip3 install --user --break-system-packages pybind11_mkdoc
 
-      - run: cmake -B build -S . -DBUILD_PYTHON=ON
+      - run: cmake -B build -S . -DSLEIPNIR_BUILD_PYTHON=ON
 
       # Ensures _sleipnir_docstrings rule runs
       - run: cmake --build build -t clean

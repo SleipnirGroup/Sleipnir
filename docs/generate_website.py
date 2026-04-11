@@ -29,7 +29,7 @@ def prep_python_api_docs():
             "..",
             "-DCMAKE_C_COMPILER_LAUNCHER=sccache",
             "-DCMAKE_CXX_COMPILER_LAUNCHER=sccache",
-            "-DBUILD_PYTHON=ON",
+            "-DSLEIPNIR_BUILD_PYTHON=ON",
         ],
         check=True,
     )

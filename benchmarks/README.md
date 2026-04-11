@@ -41,7 +41,7 @@ Ipopt uses MUMPS by default because it has free licensing. Commercial linear sol
 Benchmark projects are in the [benchmarks folder](https://github.com/SleipnirGroup/Sleipnir/tree/main/benchmarks). To compile and run them, run the following in the repository root:
 ```bash
 # Install CasADi and [matplotlib, numpy, scipy] pip packages first
-cmake -B build -S . -DBUILD_BENCHMARKS=ON
+cmake -B build -S . -DSLEIPNIR_BUILD_BENCHMARKS=ON
 cmake --build build
 ./tools/generate-scalability-results.sh
 ```
