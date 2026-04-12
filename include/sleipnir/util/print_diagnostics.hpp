@@ -72,8 +72,8 @@ std::string power_of_10(Scalar value) {
       if (exponent < 0) {
         output += "⁻";
       }
-      constexpr std::array strs = {"⁰", "¹", "²", "³", "⁴",
-                                   "⁵", "⁶", "⁷", "⁸", "⁹"};
+      constexpr std::array strs{"⁰", "¹", "²", "³", "⁴",
+                                "⁵", "⁶", "⁷", "⁸", "⁹"};
       for (const auto& digit : digits | std::views::reverse) {
         output += strs[digit];
       }
@@ -235,7 +235,7 @@ void print_iteration_diagnostics(int iterations, IterationType type,
   int backtracks =
       static_cast<int>(log(primal_α / primal_α_max) / log(α_reduction_factor));
 
-  constexpr std::array ITERATION_TYPES = {"norm", "✓SOC", "XSOC", "rest"};
+  constexpr std::array ITERATION_TYPES{"norm", "✓SOC", "XSOC", "rest"};
   slp::println(
       "│{:4} {:4} {:9.3f} {:12e} {:13e} {:12e} {:12e} {:.2e} {:<5} {:.2e} "
       "{:.2e} {:2d}│",
@@ -268,7 +268,7 @@ std::string histogram(double value) {
   double ipart;
   int fpart = static_cast<int>(std::modf(value * Width, &ipart) * 8);
 
-  constexpr std::array strs = {" ", "▏", "▎", "▍", "▌", "▋", "▊", "▉", "█"};
+  constexpr std::array strs{" ", "▏", "▎", "▍", "▌", "▋", "▊", "▉", "█"};
   std::string hist;
 
   int index = 0;
