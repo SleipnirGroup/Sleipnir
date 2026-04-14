@@ -23,6 +23,7 @@ namespace slp {
 ///
 /// @tparam Scalar Scalar type.
 /// @tparam UpLo Which part of the Hessian to compute (Lower or Lower | Upper).
+///     Default is Lower | Upper.
 template <typename Scalar, int UpLo>
   requires(UpLo == Eigen::Lower) || (UpLo == (Eigen::Lower | Eigen::Upper))
 class Hessian {

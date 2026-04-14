@@ -73,6 +73,8 @@ struct SQPMatrixCallbacks {
   ///
   /// L(x, y) = f(x) − yᵀcₑ(x)
   ///
+  /// Only the lower triangle is used.
+  ///
   /// <table>
   ///   <tr>
   ///     <th>Variable</th>
@@ -98,6 +100,8 @@ struct SQPMatrixCallbacks {
   std::function<SparseMatrix(const DenseVector& x, const DenseVector& y)> H;
 
   /// Constraint part of Lagrangian Hessian ∇ₓₓ²(−yᵀcₑ(x)) getter.
+  ///
+  /// Only the lower triangle is used.
   ///
   /// <table>
   ///   <tr>

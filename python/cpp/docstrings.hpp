@@ -252,7 +252,8 @@ Template parameter ``Scalar``:
     Scalar type.
 
 Template parameter ``UpLo``:
-    Which part of the Hessian to compute (Lower or Lower | Upper).)doc";
+    Which part of the Hessian to compute (Lower or Lower | Upper).
+    Default is Lower | Upper.)doc";
 
 static const char *__doc_slp_Hessian_2 = R"doc()doc";
 

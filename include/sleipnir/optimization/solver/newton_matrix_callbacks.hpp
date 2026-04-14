@@ -70,6 +70,8 @@ struct NewtonMatrixCallbacks {
   ///
   /// L(x) = f(x)
   ///
+  /// Only the lower triangle is used.
+  ///
   /// <table>
   ///   <tr>
   ///     <th>Variable</th>
