@@ -76,6 +76,8 @@ struct InteriorPointMatrixCallbacks {
   ///
   /// L(x, y, z) = f(x) − yᵀcₑ(x) − zᵀcᵢ(x)
   ///
+  /// Only the lower triangle is used.
+  ///
   /// <table>
   ///   <tr>
   ///     <th>Variable</th>
@@ -108,6 +110,8 @@ struct InteriorPointMatrixCallbacks {
       H;
 
   /// Constraint part of Lagrangian Hessian ∇ₓₓ²(−yᵀcₑ(x) − zᵀcᵢ(x)) getter.
+  ///
+  /// Only the lower triangle is used.
   ///
   /// <table>
   ///   <tr>
