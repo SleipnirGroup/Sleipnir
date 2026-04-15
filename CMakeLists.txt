@@ -100,7 +100,7 @@ FetchContent_MakeAvailable(small_vector)
 
 target_link_libraries(Sleipnir PUBLIC small_vector)
 
-if(BUILD_TESTING AND NOT CMAKE_CROSSCOMPILING)
+if(PROJECT_IS_TOP_LEVEL AND BUILD_TESTING AND NOT CMAKE_CROSSCOMPILING)
     # Catch2 dependency
     FetchContent_Declare(
         Catch2
@@ -199,7 +199,7 @@ if(SLEIPNIR_BUILD_BENCHMARKS)
     endif()
 endif()
 
-if(BUILD_TESTING AND NOT CMAKE_CROSSCOMPILING)
+if(PROJECT_IS_TOP_LEVEL AND BUILD_TESTING AND NOT CMAKE_CROSSCOMPILING)
     enable_testing()
     list(APPEND CMAKE_MODULE_PATH ${Catch2_SOURCE_DIR}/extras)
     include(Catch)
@@ -235,7 +235,8 @@ if(SLEIPNIR_BUILD_EXAMPLES)
 
         # Build example test if files exist for it
         if(
-            BUILD_TESTING
+            PROJECT_IS_TOP_LEVEL
+            AND BUILD_TESTING
             AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/examples/${example}/test
         )
             file(GLOB_RECURSE test_sources examples/${example}/test/*.cpp)
