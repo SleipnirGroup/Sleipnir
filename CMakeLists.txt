@@ -22,10 +22,10 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
 
+option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 option(SLEIPNIR_BUILD_BENCHMARKS "Build CasADi and Sleipnir benchmarks" OFF)
 option(SLEIPNIR_BUILD_EXAMPLES "Build examples" OFF)
 option(SLEIPNIR_BUILD_PYTHON "Build Python module" OFF)
-option(SLEIPNIR_BUILD_SHARED_LIBS "Build using shared libraries" ON)
 option(
     SLEIPNIR_DISABLE_DIAGNOSTICS
     "Disable diagnostics support at compile-time"
