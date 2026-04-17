@@ -367,7 +367,6 @@ if(SLEIPNIR_BUILD_PYTHON)
             GIT_REPOSITORY https://github.com/pybind/pybind11_mkdoc.git
             # master on 2023-02-08
             GIT_TAG 42fbf377824185e255b06d68fa70f4efcd569e2d
-            GIT_SUBMODULES ""
             EXCLUDE_FROM_ALL
             SYSTEM
         )
