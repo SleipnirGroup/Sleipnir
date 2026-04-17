@@ -373,23 +373,22 @@ if(SLEIPNIR_BUILD_PYTHON)
         )
         FetchContent_MakeAvailable(pybind11_mkdoc)
 
-        file(
-            GLOB_RECURSE sleipnir_headers
-            include/sleipnir/autodiff/expression_type.hpp
-            include/sleipnir/autodiff/gradient.hpp
-            include/sleipnir/autodiff/hessian.hpp
-            include/sleipnir/autodiff/jacobian.hpp
-            include/sleipnir/autodiff/variable.hpp
-            include/sleipnir/autodiff/variable_block.hpp
-            include/sleipnir/autodiff/variable_matrix.hpp
-            include/sleipnir/optimization/ocp.hpp
-            include/sleipnir/optimization/ocp/dynamics_type.hpp
-            include/sleipnir/optimization/ocp/timestep_method.hpp
-            include/sleipnir/optimization/ocp/transcription_method.hpp
-            include/sleipnir/optimization/problem.hpp
-            include/sleipnir/optimization/solver/exit_status.hpp
-            include/sleipnir/optimization/solver/iteration_info.hpp
-            include/sleipnir/optimization/solver/options.hpp
+        set(sleipnir_headers
+            ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/autodiff/expression_type.hpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/autodiff/gradient.hpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/autodiff/hessian.hpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/autodiff/jacobian.hpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/autodiff/variable.hpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/autodiff/variable_block.hpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/autodiff/variable_matrix.hpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/optimization/ocp.hpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/optimization/ocp/dynamics_type.hpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/optimization/ocp/timestep_method.hpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/optimization/ocp/transcription_method.hpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/optimization/problem.hpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/optimization/solver/exit_status.hpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/optimization/solver/iteration_info.hpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/optimization/solver/options.hpp
         )
 
         # Generate docs for the Python module
