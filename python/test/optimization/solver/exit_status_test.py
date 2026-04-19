@@ -6,19 +6,20 @@ from sleipnir.optimization import ExitStatus, Problem
 
 def test_callback_requested_stop():
     problem = Problem()
-
     x = problem.decision_variable()
-
     problem.minimize(x * x)
 
     problem.add_callback(lambda info: False)
+    x.set_value(1)
     assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
 
     problem.add_callback(lambda info: True)
+    x.set_value(1)
     assert problem.solve(diagnostics=True) == ExitStatus.CALLBACK_REQUESTED_STOP
 
     problem.clear_callbacks()
     problem.add_callback(lambda info: False)
+    x.set_value(1)
     assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
 
 
@@ -137,6 +138,7 @@ def test_max_iterations_exceeded():
     problem = Problem()
 
     x = problem.decision_variable()
+    x.set_value(1)
 
     problem.minimize(x * x)
 
@@ -154,6 +156,7 @@ def test_timeout():
     problem = Problem()
 
     x = problem.decision_variable()
+    x.set_value(1)
 
     problem.minimize(x * x)
 
