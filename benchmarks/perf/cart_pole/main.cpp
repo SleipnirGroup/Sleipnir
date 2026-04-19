@@ -131,6 +131,6 @@ int main(int argc, const char* argv[]) {
   CmdlineArgs args{argv, argc};
   bool diagnostics = args.contains("--enable-diagnostics");
 
-  auto problem = cart_pole_problem(5s, 300);
+  auto problem = cart_pole_problem(50ms, 100);
   problem.solve({.diagnostics = diagnostics});
 }

@@ -45,6 +45,6 @@ int main(int argc, const char* argv[]) {
   CmdlineArgs args{argv, argc};
   bool diagnostics = args.contains("--enable-diagnostics");
 
-  auto problem = flywheel_problem(5s, 5000);
+  auto problem = flywheel_problem(5ms, 1000);
   problem.solve({.diagnostics = diagnostics});
 }
