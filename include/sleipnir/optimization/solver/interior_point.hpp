@@ -161,7 +161,6 @@ ExitStatus interior_point(
   solve_profilers.emplace_back("  ↳ KKT system solve");
   solve_profilers.emplace_back("  ↳ line search");
   solve_profilers.emplace_back("    ↳ SOC");
-  solve_profilers.emplace_back("  ↳ next iter prep");
   solve_profilers.emplace_back("  ↳ f(x)");
   solve_profilers.emplace_back("  ↳ ∇f(x)");
   solve_profilers.emplace_back("  ↳ ∇²ₓₓL");
@@ -181,18 +180,17 @@ ExitStatus interior_point(
   auto& kkt_system_solve_prof = solve_profilers[7];
   auto& line_search_prof = solve_profilers[8];
   auto& soc_prof = solve_profilers[9];
-  auto& next_iter_prep_prof = solve_profilers[10];
 
   // Set up profiled matrix callbacks
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-  auto& f_prof = solve_profilers[11];
-  auto& g_prof = solve_profilers[12];
-  auto& H_prof = solve_profilers[13];
-  auto& H_c_prof = solve_profilers[14];
-  auto& c_e_prof = solve_profilers[15];
-  auto& A_e_prof = solve_profilers[16];
-  auto& c_i_prof = solve_profilers[17];
-  auto& A_i_prof = solve_profilers[18];
+  auto& f_prof = solve_profilers[10];
+  auto& g_prof = solve_profilers[11];
+  auto& H_prof = solve_profilers[12];
+  auto& H_c_prof = solve_profilers[13];
+  auto& c_e_prof = solve_profilers[14];
+  auto& A_e_prof = solve_profilers[15];
+  auto& c_i_prof = solve_profilers[16];
+  auto& A_i_prof = solve_profilers[17];
 
   InteriorPointMatrixCallbacks<Scalar> matrices{
       matrix_callbacks.num_decision_variables,
@@ -717,6 +715,10 @@ ExitStatus interior_point(
         // Report failure
         return status;
       }
+
+      f = matrices.f(x);
+      c_e = matrices.c_e(x);
+      c_i = matrices.c_i(x);
     } else {
       // If full step was accepted, reset full-step rejected counter
       if (α == α_max) {
@@ -747,6 +749,10 @@ ExitStatus interior_point(
         z[row] =
             std::clamp(z[row], Scalar(1) / κ_Σ * μ / s[row], κ_Σ * μ / s[row]);
       }
+
+      f = trial_f;
+      c_e = trial_c_e;
+      c_i = trial_c_i;
     }
 
     // Update autodiff for Jacobians and Hessian
@@ -754,12 +760,6 @@ ExitStatus interior_point(
     A_i = matrices.A_i(x);
     g = matrices.g(x);
     H = matrices.H(x, y, z);
-
-    ScopedProfiler next_iter_prep_profiler{next_iter_prep_prof};
-
-    f = trial_f;
-    c_e = trial_c_e;
-    c_i = trial_c_i;
 
     // Update the error
     E_0 = kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(
@@ -781,7 +781,6 @@ ExitStatus interior_point(
       }
     }
 
-    next_iter_prep_profiler.stop();
     inner_iter_profiler.stop();
 
     if (options.diagnostics) {

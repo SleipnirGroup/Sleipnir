@@ -169,7 +169,6 @@ At the end of the solve, the solver prints a time trace of itself.
 │  ↳ KKT system solve    1.72%▕▏        ▏      0.001     0.000    3│
 │  ↳ line search        13.79%▕█▏       ▏      0.008     0.002    3│
 │    ↳ SOC               0.00%▕         ▏      0.000     0.000    0│
-│  ↳ next iter prep      0.00%▕         ▏      0.000     0.000    3│
 │  ↳ f(x)                0.00%▕         ▏      0.000     0.000    7│
 │  ↳ ∇f(x)               3.45%▕▎        ▏      0.002     0.000    4│
 │  ↳ ∇²ₓₓL               1.72%▕▏        ▏      0.001     0.000    4│
