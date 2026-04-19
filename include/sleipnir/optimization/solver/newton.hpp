@@ -70,7 +70,6 @@ ExitStatus newton(
   solve_profilers.emplace_back("  ↳ KKT matrix decomp");
   solve_profilers.emplace_back("  ↳ KKT system solve");
   solve_profilers.emplace_back("  ↳ line search");
-  solve_profilers.emplace_back("  ↳ next iter prep");
   solve_profilers.emplace_back("  ↳ f(x)");
   solve_profilers.emplace_back("  ↳ ∇f(x)");
   solve_profilers.emplace_back("  ↳ ∇²ₓₓL");
@@ -83,13 +82,12 @@ ExitStatus newton(
   auto& kkt_matrix_decomp_prof = solve_profilers[5];
   auto& kkt_system_solve_prof = solve_profilers[6];
   auto& line_search_prof = solve_profilers[7];
-  auto& next_iter_prep_prof = solve_profilers[8];
 
   // Set up profiled matrix callbacks
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-  auto& f_prof = solve_profilers[9];
-  auto& g_prof = solve_profilers[10];
-  auto& H_prof = solve_profilers[11];
+  auto& f_prof = solve_profilers[8];
+  auto& g_prof = solve_profilers[9];
+  auto& H_prof = solve_profilers[10];
 
   NewtonMatrixCallbacks<Scalar> matrices{
       matrix_callbacks.num_decision_variables,
@@ -248,18 +246,15 @@ ExitStatus newton(
     // Update iterates
     x = trial_x;
 
+    f = trial_f;
+
     // Update autodiff for Hessian
     g = matrices.g(x);
     H = matrices.H(x);
 
-    ScopedProfiler next_iter_prep_profiler{next_iter_prep_prof};
-
-    f = trial_f;
-
     // Update the error
     E_0 = kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(g);
 
-    next_iter_prep_profiler.stop();
     inner_iter_profiler.stop();
 
     if (options.diagnostics) {
