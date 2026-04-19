@@ -15,7 +15,6 @@
 #include "catch_matchers.hpp"
 #include "catch_string_converters.hpp"
 #include "lerp.hpp"
-#include "rk4.hpp"
 #include "scalar_types_under_test.hpp"
 
 TEMPLATE_TEST_CASE("OCP - Cart-pole", "[OCP]", SCALAR_TYPES_UNDER_TEST) {
