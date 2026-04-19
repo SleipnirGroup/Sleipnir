@@ -5,7 +5,6 @@
 #include <chrono>
 #include <cmath>
 #include <functional>
-#include <limits>
 #include <span>
 
 #include <Eigen/Core>
@@ -122,6 +121,10 @@ ExitStatus newton(
   slp_assert(H.rows() == matrices.num_decision_variables);
   slp_assert(H.cols() == matrices.num_decision_variables);
 
+  DenseVector trial_x;
+
+  Scalar trial_f;
+
   // Check whether initial guess has finite cost and derivatives
   if (!isfinite(f) || !all_finite(g) || !all_finite(H)) {
     return ExitStatus::NONFINITE_INITIAL_GUESS;
@@ -138,7 +141,7 @@ ExitStatus newton(
   constexpr Scalar α_min(1e-20);
 
   // Error
-  Scalar E_0 = std::numeric_limits<Scalar>::infinity();
+  Scalar E_0 = kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(g);
 
   setup_prof.stop();
 
@@ -194,9 +197,9 @@ ExitStatus newton(
     // Loop until a step is accepted. If a step becomes acceptable, the loop
     // will exit early.
     while (1) {
-      DenseVector trial_x = x + α * p_x;
+      trial_x = x + α * p_x;
 
-      Scalar trial_f = matrices.f(trial_x);
+      trial_f = matrices.f(trial_x);
 
       // If f(xₖ + αpₖˣ) isn't finite, reduce step size immediately
       if (!isfinite(trial_f)) {
@@ -223,14 +226,14 @@ ExitStatus newton(
       if (α < α_min) {
         Scalar current_kkt_error = kkt_error<Scalar, KKTErrorType::ONE_NORM>(g);
 
-        DenseVector trial_x = x + α_max * p_x;
+        trial_x = x + α_max * p_x;
 
         Scalar next_kkt_error =
             kkt_error<Scalar, KKTErrorType::ONE_NORM>(matrices.g(trial_x));
 
         // If the step using αᵐᵃˣ reduced the KKT error, accept it anyway
         if (next_kkt_error <= Scalar(0.999) * current_kkt_error) {
-          α = α_max;
+          trial_f = matrices.f(trial_x);
 
           // Accept step
           break;
@@ -242,15 +245,16 @@ ExitStatus newton(
 
     line_search_profiler.stop();
 
-    // xₖ₊₁ = xₖ + αₖpₖˣ
-    x += α * p_x;
+    // Update iterates
+    x = trial_x;
 
     // Update autodiff for Hessian
-    f = matrices.f(x);
     g = matrices.g(x);
     H = matrices.H(x);
 
     ScopedProfiler next_iter_prep_profiler{next_iter_prep_prof};
+
+    f = trial_f;
 
     // Update the error
     E_0 = kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(g);

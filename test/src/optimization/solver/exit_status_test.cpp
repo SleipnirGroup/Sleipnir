@@ -14,28 +14,32 @@ TEMPLATE_TEST_CASE("ExitStatus - Callback requested stop", "[ExitStatus]",
   using T = TestType;
 
   slp::Problem<T> problem;
-
   auto x = problem.decision_variable();
   problem.minimize(x * x);
 
   problem.add_callback([](const slp::IterationInfo<T>&) {});
+  x.set_value(T(1));
   CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
   problem.add_callback([](const slp::IterationInfo<T>&) { return false; });
+  x.set_value(T(1));
   CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
   problem.add_callback([](const slp::IterationInfo<T>&) { return true; });
+  x.set_value(T(1));
   CHECK(problem.solve({.diagnostics = true}) ==
         slp::ExitStatus::CALLBACK_REQUESTED_STOP);
 
   problem.clear_callbacks();
   problem.add_callback([](const slp::IterationInfo<T>&) { return false; });
+  x.set_value(T(1));
   CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
   // Ensure persistent callbacks aren't removed by clear_callbacks()
   problem.add_persistent_callback(
       [](const slp::IterationInfo<T>&) { return true; });
   problem.clear_callbacks();
+  x.set_value(T(1));
   CHECK(problem.solve({.diagnostics = true}) ==
         slp::ExitStatus::CALLBACK_REQUESTED_STOP);
 }
@@ -191,6 +195,7 @@ TEMPLATE_TEST_CASE("ExitStatus - Max iterations exceeded", "[ExitStatus]",
   slp::Problem<T> problem;
 
   auto x = problem.decision_variable();
+  x.set_value(T(1));
 
   problem.minimize(x * x);
 
@@ -211,6 +216,7 @@ TEMPLATE_TEST_CASE("ExitStatus - Timeout", "[ExitStatus]",
   slp::Problem<T> problem;
 
   auto x = problem.decision_variable();
+  x.set_value(T(1));
 
   problem.minimize(x * x);
 
