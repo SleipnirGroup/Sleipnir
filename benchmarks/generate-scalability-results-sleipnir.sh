@@ -1,6 +1,6 @@
 #!/bin/bash
-./build/flywheel_scalability_benchmark --sleipnir
-./tools/plot_scalability_results.py \
+../build/flywheel_scalability_benchmark --sleipnir
+./plot_scalability_results.py \
   --filenames \
     flywheel-scalability-results-sleipnir.csv \
   --labels \
@@ -8,8 +8,8 @@
   --title Flywheel \
   --noninteractive
 
-./build/cart_pole_scalability_benchmark --sleipnir
-./tools/plot_scalability_results.py \
+../build/cart_pole_scalability_benchmark --sleipnir
+./plot_scalability_results.py \
   --filenames \
     cart-pole-scalability-results-sleipnir.csv \
   --labels \
