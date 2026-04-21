@@ -161,6 +161,7 @@ ExitStatus interior_point(
   solve_profilers.emplace_back("  ↳ KKT system solve");
   solve_profilers.emplace_back("  ↳ line search");
   solve_profilers.emplace_back("    ↳ SOC");
+  solve_profilers.emplace_back("  ↳ feas. restoration");
   solve_profilers.emplace_back("  ↳ f(x)");
   solve_profilers.emplace_back("  ↳ ∇f(x)");
   solve_profilers.emplace_back("  ↳ ∇²ₓₓL");
@@ -180,17 +181,18 @@ ExitStatus interior_point(
   auto& kkt_system_solve_prof = solve_profilers[7];
   auto& line_search_prof = solve_profilers[8];
   auto& soc_prof = solve_profilers[9];
+  auto& feasibility_restoration_prof = solve_profilers[10];
 
   // Set up profiled matrix callbacks
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-  auto& f_prof = solve_profilers[10];
-  auto& g_prof = solve_profilers[11];
-  auto& H_prof = solve_profilers[12];
-  auto& H_c_prof = solve_profilers[13];
-  auto& c_e_prof = solve_profilers[14];
-  auto& A_e_prof = solve_profilers[15];
-  auto& c_i_prof = solve_profilers[16];
-  auto& A_i_prof = solve_profilers[17];
+  auto& f_prof = solve_profilers[11];
+  auto& g_prof = solve_profilers[12];
+  auto& H_prof = solve_profilers[13];
+  auto& H_c_prof = solve_profilers[14];
+  auto& c_e_prof = solve_profilers[15];
+  auto& A_e_prof = solve_profilers[16];
+  auto& c_i_prof = solve_profilers[17];
+  auto& A_i_prof = solve_profilers[18];
 
   InteriorPointMatrixCallbacks<Scalar> matrices{
       matrix_callbacks.num_decision_variables,
@@ -678,6 +680,9 @@ ExitStatus interior_point(
     line_search_profiler.stop();
 
     if (call_feasibility_restoration) {
+      ScopedProfiler feasibility_restoration_profiler{
+          feasibility_restoration_prof};
+
       // If already in feasibility restoration mode, running it again won't help
       if (in_feasibility_restoration) {
         return ExitStatus::FEASIBILITY_RESTORATION_FAILED;
