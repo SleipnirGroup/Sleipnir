@@ -116,7 +116,7 @@ fn subject_to_accepts_prebuilt_constraint() {
     let x = problem.decision_variable();
     problem.minimize(x * x);
 
-    let c = cmp!(x >= 1.0);
+    let c: hafgufa::InequalityConstraints<'_> = cmp!(x >= 1.0);
     subject_to!(problem, c);
 
     problem.solve(Default::default()).unwrap();

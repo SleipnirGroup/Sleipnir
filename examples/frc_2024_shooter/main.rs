@@ -179,10 +179,13 @@ fn main() {
     let cost = (&sensitivity.t() * &sensitivity).get(0, 0);
     problem.minimize(cost);
 
-    match problem.solve(hafgufa::Options {
-        diagnostics: cfg!(feature = "diagnostics"),
-        ..Default::default()
-    }) {
+    #[allow(unused_mut)]
+    let mut opts = hafgufa::Options::default();
+    #[cfg(feature = "diagnostics")]
+    {
+        opts = opts.diagnostics(true);
+    }
+    match problem.solve(opts) {
         Ok(()) => println!("exit status: success"),
         Err(e) => println!("exit status: {e}"),
     }

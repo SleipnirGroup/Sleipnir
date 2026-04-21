@@ -11,10 +11,9 @@ name = "hafgufa"
 path = "src/lib.rs"
 
 [features]
-default = []
+default = ["multistart"]
 # Enable Sleipnir's diagnostic printing. Off by default so the bindings build on older
 # toolchains.
-# Should only be enabled by final users of the library and not library crates using `hafgufa` as a dependency.
 diagnostics = []
 # Enable the rayon-backed `multistart` driver. Pulls in `rayon` as a
 # dependency and exposes the `multistart` module.

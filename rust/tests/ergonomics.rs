@@ -24,13 +24,17 @@ fn options_builder_chains() {
         .tolerance(1e-6)
         .max_iterations(1000)
         .timeout(Duration::from_millis(500))
-        .feasible_ipm(true)
-        .diagnostics(false);
+        .feasible_ipm(true);
     assert!((opts.tolerance - 1e-6).abs() < f64::EPSILON);
     assert_eq!(opts.max_iterations, 1000);
     assert_eq!(opts.timeout, Some(Duration::from_millis(500)));
     assert!(opts.feasible_ipm);
-    assert!(!opts.diagnostics);
+
+    #[cfg(feature = "diagnostics")]
+    {
+        let with_diag = Options::default().diagnostics(true);
+        assert!(with_diag.diagnostics);
+    }
 }
 
 #[test]

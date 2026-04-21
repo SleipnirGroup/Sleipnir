@@ -12,12 +12,17 @@ use crate::variable_matrix::VariableMatrix;
 use crate::{ExitStatus, ExpressionType, IterationInfo, SleipnirError};
 
 /// Solver options, mirroring `slp::Options` in C++.
+///
+/// The `diagnostics` field is only present when the crate is built
+/// with the `diagnostics` Cargo feature — otherwise it's compile-time
+/// impossible to request output the solver can't produce.
 #[derive(Clone, Copy, Debug)]
 pub struct Options {
     pub tolerance: f64,
     pub max_iterations: i32,
     pub timeout: Option<Duration>,
     pub feasible_ipm: bool,
+    #[cfg(feature = "diagnostics")]
     pub diagnostics: bool,
 }
 
@@ -28,6 +33,7 @@ impl Default for Options {
             max_iterations: 5000,
             timeout: None,
             feasible_ipm: false,
+            #[cfg(feature = "diagnostics")]
             diagnostics: false,
         }
     }
@@ -40,7 +46,10 @@ impl Options {
             max_iterations: self.max_iterations,
             timeout_seconds: self.timeout.map(|d| d.as_secs_f64()).unwrap_or(f64::INFINITY),
             feasible_ipm: self.feasible_ipm,
+            #[cfg(feature = "diagnostics")]
             diagnostics: self.diagnostics,
+            #[cfg(not(feature = "diagnostics"))]
+            diagnostics: false,
         }
     }
 
@@ -82,8 +91,11 @@ impl Options {
         self
     }
 
-    /// Enable diagnostic printing. Default `false`. Requires the
-    /// `diagnostics` Cargo feature at library-build time.
+    /// Enable diagnostic printing. Only available when the
+    /// `diagnostics` Cargo feature is enabled — otherwise this method
+    /// is absent (callers can't ask for output the solver wasn't
+    /// compiled to produce).
+    #[cfg(feature = "diagnostics")]
     #[inline]
     pub fn diagnostics(mut self, diagnostics: bool) -> Self {
         self.diagnostics = diagnostics;
