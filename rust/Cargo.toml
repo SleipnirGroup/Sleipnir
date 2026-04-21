@@ -1,0 +1,61 @@
+[package]
+name = "hafgufa"
+version = "0.1.0"
+edition = "2024"
+description = "Rust bindings for Sleipnir, a sparse nonlinear optimization library"
+license = "BSD-3-Clause"
+links = "sleipnir"
+
+[lib]
+name = "hafgufa"
+path = "src/lib.rs"
+
+[features]
+default = []
+# Enable Sleipnir's diagnostic printing. Off by default so the bindings build on older
+# toolchains.
+# Should only be enabled by final users of the library and not library crates using `hafgufa` as a dependency.
+diagnostics = []
+# Enable the rayon-backed `multistart` driver. Pulls in `rayon` as a
+# dependency and exposes the `multistart` module.
+multistart = ["dep:rayon"]
+
+[dependencies]
+cxx = "1.0"
+ndarray = "0.17"
+thiserror = "2"
+rayon = { version = "1.10", optional = true }
+
+[build-dependencies]
+cxx-build = "1.0"
+cmake = "0.1"
+
+[[example]]
+name = "current_manager"
+path = "../examples/current_manager/main.rs"
+
+[[example]]
+name = "flywheel_direct_transcription"
+path = "../examples/flywheel_direct_transcription/main.rs"
+
+[[example]]
+name = "flywheel_ocp"
+path = "../examples/flywheel_ocp/main.rs"
+
+[[example]]
+name = "frc_2022_shooter"
+path = "../examples/frc_2022_shooter/main.rs"
+
+[[example]]
+name = "constrained_multitag"
+path = "../examples/constrained_multitag/main.rs"
+
+[[example]]
+name = "frc_2024_shooter"
+path = "../examples/frc_2024_shooter/main.rs"
+
+[[test]]
+name = "multistart"
+path = "tests/multistart.rs"
+required-features = ["multistart"]
+

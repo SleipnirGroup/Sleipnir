@@ -18,6 +18,7 @@ compile_commands.json
 
 # clangd cache
 .clangd/
+.clangd
 .cache/
 
 # Python
@@ -28,5 +29,10 @@ compile_commands.json
 .tox/
 __pycache__/
 dist/
+.venv/
 
 *.spy
+
+# Rust
+target/
+Cargo.lock
