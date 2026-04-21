@@ -4,7 +4,7 @@
 //! AprilTags. The robot pose is constrained to be on the floor (`z = 0`).
 
 use hafgufa::math::{cos, sin};
-use hafgufa::{Problem, Variable, VariableArena, VariableMatrix, solve};
+use hafgufa::{Problem, VariableArena, solve};
 use ndarray::{Array2, array};
 
 fn main() {
@@ -20,7 +20,7 @@ fn main() {
     // Robot pose.
     let robot_x = problem.decision_variable();
     let robot_y = problem.decision_variable();
-    let robot_z = Variable::constant_in(&arena, 0.0);
+    let robot_z = arena.constant(0.0);
     let robot_theta = problem.decision_variable();
 
     // Cache the trig variables so the expression graph shares the nodes.
@@ -28,9 +28,9 @@ fn main() {
     let cos_theta = cos(robot_theta);
 
     // 4×4 field-to-robot homogeneous transform.
-    let zero = Variable::constant_in(&arena, 0.0);
-    let one = Variable::constant_in(&arena, 1.0);
-    let mut field2robot = VariableMatrix::zeros_in(&arena, 4, 4);
+    let zero = arena.constant(0.0);
+    let one = arena.constant(1.0);
+    let mut field2robot = arena.zeros(4, 4);
     field2robot.set_variable(0, 0, cos_theta);
     field2robot.set_variable(0, 1, -sin_theta);
     field2robot.set_variable(0, 2, zero);
@@ -49,28 +49,19 @@ fn main() {
     field2robot.set_variable(3, 3, one);
 
     // Robot frame is ENU, camera frame is SDE.
-    let robot2camera = VariableMatrix::from_array_in(
-        &arena,
-        &array![
-            [0.0, 0.0, 1.0, 0.0],
-            [-1.0, 0.0, 0.0, 0.0],
-            [0.0, -1.0, 0.0, 0.0],
-            [0.0, 0.0, 0.0, 1.0],
-        ],
-    );
+    let robot2camera = arena.array(&array![
+        [0.0, 0.0, 1.0, 0.0],
+        [-1.0, 0.0, 0.0, 0.0],
+        [0.0, -1.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0],
+    ]);
 
     let field2camera = &field2robot * &robot2camera;
 
     // 4×1 (x, y, z, 1) points in the field frame.
     let field2points = [
-        VariableMatrix::from_array_in(
-            &arena,
-            &Array2::from_shape_vec((4, 1), vec![2.0, 0.0 - 0.08255, 0.4, 1.0]).unwrap(),
-        ),
-        VariableMatrix::from_array_in(
-            &arena,
-            &Array2::from_shape_vec((4, 1), vec![2.0, 0.0 + 0.08255, 0.4, 1.0]).unwrap(),
-        ),
+        arena.array(&Array2::from_shape_vec((4, 1), vec![2.0, 0.0 - 0.08255, 0.4, 1.0]).unwrap()),
+        arena.array(&Array2::from_shape_vec((4, 1), vec![2.0, 0.0 + 0.08255, 0.4, 1.0]).unwrap()),
     ];
 
     // Hand-calibrated observations: the pixel locations we'd see for a
@@ -83,11 +74,11 @@ fn main() {
     robot_theta.set_value(0.2);
 
     // camera2field such that field2camera * camera2field = I.
-    let identity = VariableMatrix::from_array_in(&arena, &Array2::eye(4));
+    let identity = arena.array(&Array2::eye(4));
     let camera2field = solve(&field2camera, identity);
 
     // Cost: sum of squared reprojection errors.
-    let mut cost = Variable::constant_in(&arena, 0.0);
+    let mut cost = arena.constant(0.0);
     for (field2point, (u_observed, v_observed)) in
         field2points.iter().zip(point_observations.iter())
     {
@@ -98,12 +89,7 @@ fn main() {
         let y = camera2point.get(1, 0);
         let z = camera2point.get(2, 0);
 
-        println!(
-            "camera2point = {}, {}, {}",
-            x.value(),
-            y.value(),
-            z.value()
-        );
+        println!("camera2point = {}, {}, {}", x.value(), y.value(), z.value());
 
         let big_x = x / z;
         let big_y = y / z;
@@ -122,13 +108,7 @@ fn main() {
 
     problem.minimize(cost);
 
-    #[allow(unused_mut)]
-    let mut opts = hafgufa::Options::default();
-    #[cfg(feature = "diagnostics")]
-    {
-        opts = opts.diagnostics(true);
-    }
-    match problem.solve(opts) {
+    match problem.solve(hafgufa::Options::default().diagnostics(true)) {
         Ok(()) => println!("exit status: success"),
         Err(e) => println!("exit status: {e}"),
     }

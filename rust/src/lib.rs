@@ -49,16 +49,17 @@
 //! slices for `x` / `s` / `y` / `z`, CSC-encoded sparse views for the
 //! gradient, Hessian, and Jacobians. Nothing is copied per iteration.
 //!
+//! # Requirements
+//!
+//! A C++23 toolchain. The build probes for `<print>` up front and
+//! panics with a clear error if the compiler can't satisfy it
+//! (GCC 14+ libstdc++, libc++ 19+, MSVC 19.37+).
+//!
 //! # Features
 //!
-//! - `diagnostics` — enables Sleipnir's C++-side diagnostic printing.
-//!   Requires a C++23 `<print>` header (GCC 14+ libstdc++ or libc++ 19+).
-//!   Off by default so the bindings build on older toolchains.
 //! - `multistart` — pulls in rayon and exposes
-//!   [`multistart()`](crate::multistart::multistart), a
-//!   parallel "solve from N initial guesses, pick the best" driver.
-//!
-//! Both features are additive.
+//!   [`multistart()`](crate::multistart::multistart), a parallel
+//!   "solve from N initial guesses, pick the best" driver.
 
 pub mod arena;
 pub mod constraints;
@@ -202,18 +203,17 @@ pub use jacobian::Jacobian;
 pub use multistart::{MultistartResult, multistart};
 pub use ocp::{DynamicsType, OCP, TimestepMethod, TranscriptionMethod};
 pub use problem::{Options, Problem};
-pub use variable::{IntoVariable, Variable, __dsl::IntoMatrixOperand};
+pub use variable::{__dsl::IntoMatrixOperand, IntoVariable, Variable};
 pub use variable_matrix::{VariableMatrix, hstack, solve, vstack};
 
 /// One-shot glob import for building optimization problems.
 pub mod prelude {
     pub use crate::{
-        Constraint, DynamicsType, EqualityConstraints, ExitStatus, Gradient,
-        Hessian, HessianTriangle, InequalityConstraints, IntoMatrixOperand,
-        IntoVariable, IterationInfo, Jacobian, OCP, Options, Problem,
-        SleipnirError, SparseMatrixView, SparseVectorView, TimestepMethod,
-        TranscriptionMethod, Variable, VariableArena, VariableMatrix, bounds,
-        cmp, hstack, math, solve, subject_to, vstack,
+        Constraint, DynamicsType, EqualityConstraints, ExitStatus, Gradient, Hessian,
+        HessianTriangle, InequalityConstraints, IntoMatrixOperand, IntoVariable, IterationInfo,
+        Jacobian, OCP, Options, Problem, SleipnirError, SparseMatrixView, SparseVectorView,
+        TimestepMethod, TranscriptionMethod, Variable, VariableArena, VariableMatrix, bounds, cmp,
+        hstack, math, solve, subject_to, vstack,
     };
 
     #[cfg(feature = "multistart")]
@@ -290,9 +290,7 @@ impl ExitStatus {
             Self::GloballyInfeasible => Err(SleipnirError::GloballyInfeasible),
             Self::FactorizationFailed => Err(SleipnirError::FactorizationFailed),
             Self::LineSearchFailed => Err(SleipnirError::LineSearchFailed),
-            Self::FeasibilityRestorationFailed => {
-                Err(SleipnirError::FeasibilityRestorationFailed)
-            }
+            Self::FeasibilityRestorationFailed => Err(SleipnirError::FeasibilityRestorationFailed),
             Self::NonfiniteInitialGuess => Err(SleipnirError::NonfiniteInitialGuess),
             Self::DivergingIterates => Err(SleipnirError::DivergingIterates),
             Self::MaxIterationsExceeded => Err(SleipnirError::MaxIterationsExceeded),
@@ -304,7 +302,9 @@ impl ExitStatus {
 /// Error variants for every non-success `ExitStatus` the solver can produce.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, thiserror::Error)]
 pub enum SleipnirError {
-    #[error("the solver returned its best-so-far solution after an iteration callback requested a stop")]
+    #[error(
+        "the solver returned its best-so-far solution after an iteration callback requested a stop"
+    )]
     CallbackRequestedStop,
     #[error("the solver determined the problem to be overconstrained (too few degrees of freedom)")]
     TooFewDofs,
@@ -316,7 +316,9 @@ pub enum SleipnirError {
     FactorizationFailed,
     #[error("the backtracking line search failed and the problem isn't locally infeasible")]
     LineSearchFailed,
-    #[error("the solver failed to reach the desired tolerance and feasibility restoration failed to converge")]
+    #[error(
+        "the solver failed to reach the desired tolerance and feasibility restoration failed to converge"
+    )]
     FeasibilityRestorationFailed,
     #[error("the solver encountered nonfinite initial cost, constraints, or derivatives")]
     NonfiniteInitialGuess,

@@ -108,11 +108,7 @@ pub(crate) mod ffi {
 
         fn variable_atan2(y: &Variable, x: &Variable) -> UniquePtr<Variable>;
         fn variable_hypot(x: &Variable, y: &Variable) -> UniquePtr<Variable>;
-        fn variable_hypot3(
-            x: &Variable,
-            y: &Variable,
-            z: &Variable,
-        ) -> UniquePtr<Variable>;
+        fn variable_hypot3(x: &Variable, y: &Variable, z: &Variable) -> UniquePtr<Variable>;
         fn variable_max(a: &Variable, b: &Variable) -> UniquePtr<Variable>;
         fn variable_min(a: &Variable, b: &Variable) -> UniquePtr<Variable>;
         fn variable_pow(base: &Variable, power: &Variable) -> UniquePtr<Variable>;
@@ -128,34 +124,21 @@ pub(crate) mod ffi {
         fn variable_matrix_clone(m: &VariableMatrix) -> UniquePtr<VariableMatrix>;
         fn variable_matrix_rows(m: &VariableMatrix) -> i32;
         fn variable_matrix_cols(m: &VariableMatrix) -> i32;
-        fn variable_matrix_get(
-            m: &VariableMatrix,
-            row: i32,
-            col: i32,
-        ) -> UniquePtr<Variable>;
+        fn variable_matrix_get(m: &VariableMatrix, row: i32, col: i32) -> UniquePtr<Variable>;
         fn variable_matrix_set_variable(
             m: Pin<&mut VariableMatrix>,
             row: i32,
             col: i32,
             v: &Variable,
         );
-        fn variable_matrix_set_f64(
-            m: Pin<&mut VariableMatrix>,
-            row: i32,
-            col: i32,
-            value: f64,
-        );
+        fn variable_matrix_set_f64(m: Pin<&mut VariableMatrix>, row: i32, col: i32, value: f64);
         fn variable_matrix_set_value_at(
             m: Pin<&mut VariableMatrix>,
             row: i32,
             col: i32,
             value: f64,
         );
-        fn variable_matrix_value_at(
-            m: Pin<&mut VariableMatrix>,
-            row: i32,
-            col: i32,
-        ) -> f64;
+        fn variable_matrix_value_at(m: Pin<&mut VariableMatrix>, row: i32, col: i32) -> f64;
         fn variable_matrix_value(m: Pin<&mut VariableMatrix>) -> Vec<f64>;
         fn variable_matrix_set_value(m: Pin<&mut VariableMatrix>, data: &[f64]);
         fn variable_matrix_transpose(m: &VariableMatrix) -> UniquePtr<VariableMatrix>;
@@ -242,10 +225,7 @@ pub(crate) mod ffi {
         fn problem_minimize(problem: Pin<&mut Problem>, cost: &Variable);
         fn problem_minimize_matrix(problem: Pin<&mut Problem>, cost: &VariableMatrix);
         fn problem_maximize(problem: Pin<&mut Problem>, objective: &Variable);
-        fn problem_maximize_matrix(
-            problem: Pin<&mut Problem>,
-            objective: &VariableMatrix,
-        );
+        fn problem_maximize_matrix(problem: Pin<&mut Problem>, objective: &VariableMatrix);
         fn problem_subject_to_eq(problem: Pin<&mut Problem>, c: &EqualityConstraints);
         fn problem_subject_to_ineq(problem: Pin<&mut Problem>, c: &InequalityConstraints);
         fn problem_cost_function_type(problem: &Problem) -> u8;
@@ -254,17 +234,11 @@ pub(crate) mod ffi {
         fn problem_solve(problem: Pin<&mut Problem>, options: SolverOptions) -> i8;
 
         fn problem_add_callback(problem: Pin<&mut Problem>, callback: Box<RustCallback>);
-        fn problem_add_persistent_callback(
-            problem: Pin<&mut Problem>,
-            callback: Box<RustCallback>,
-        );
+        fn problem_add_persistent_callback(problem: Pin<&mut Problem>, callback: Box<RustCallback>);
         fn problem_clear_callbacks(problem: Pin<&mut Problem>);
 
         // Gradient
-        fn gradient_new(
-            variable: &Variable,
-            wrt: &VariableMatrix,
-        ) -> UniquePtr<Gradient>;
+        fn gradient_new(variable: &Variable, wrt: &VariableMatrix) -> UniquePtr<Gradient>;
         fn gradient_value(gradient: Pin<&mut Gradient>) -> Vec<f64>;
         fn gradient_get(gradient: &Gradient) -> UniquePtr<VariableMatrix>;
 
@@ -280,10 +254,7 @@ pub(crate) mod ffi {
         fn hessian_get(hessian: &Hessian) -> UniquePtr<VariableMatrix>;
 
         // Jacobian
-        fn jacobian_new(
-            variables: &VariableMatrix,
-            wrt: &VariableMatrix,
-        ) -> UniquePtr<Jacobian>;
+        fn jacobian_new(variables: &VariableMatrix, wrt: &VariableMatrix) -> UniquePtr<Jacobian>;
         fn jacobian_value(jacobian: Pin<&mut Jacobian>) -> Vec<f64>;
         fn jacobian_rows(jacobian: &Jacobian) -> i32;
         fn jacobian_cols(jacobian: &Jacobian) -> i32;
@@ -351,9 +322,7 @@ pub(crate) mod ffi {
 pub(crate) use ffi::SolverOptions;
 
 pub struct RustCallback {
-    pub(crate) inner: Box<
-        dyn for<'a> FnMut(&crate::IterationInfo<'a>) -> bool + Send,
-    >,
+    pub(crate) inner: Box<dyn for<'a> FnMut(&crate::IterationInfo<'a>) -> bool + Send>,
 }
 
 impl RustCallback {

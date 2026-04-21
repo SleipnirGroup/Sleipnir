@@ -38,8 +38,7 @@ fn main() {
     solver.set_lower_input_bound(-12.0);
 
     let r = 10.0_f64;
-    let r_mat =
-        VariableMatrix::from_array_in(&arena, &Array2::from_elem((1, (n + 1) as usize), r));
+    let r_mat = arena.array(&Array2::from_elem((1, (n + 1) as usize), r));
     let diff = &r_mat - &solver.x();
     let cost = &diff * &diff.t();
     solver.minimize_matrix(&cost);

@@ -1,6 +1,6 @@
 //! Rust port of `examples/flywheel_direct_transcription/main.py`.
 
-use hafgufa::{Problem, VariableArena, VariableMatrix, subject_to};
+use hafgufa::{Problem, VariableArena, subject_to};
 use ndarray::Array2;
 
 fn main() {
@@ -35,7 +35,7 @@ fn main() {
     subject_to!(problem, &u <= 12.0);
 
     // Cost: track r = 10 at every state.
-    let r = VariableMatrix::from_array_in(&arena, &Array2::from_elem((1, (n + 1) as usize), 10.0));
+    let r = arena.array(&Array2::from_elem((1, (n + 1) as usize), 10.0));
     let diff = r - &x;
     let cost = &diff * diff.t();
     problem.minimize_matrix(&cost);

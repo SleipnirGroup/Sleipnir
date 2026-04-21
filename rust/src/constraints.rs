@@ -78,11 +78,7 @@ impl<'arena> From<InequalityConstraints<'arena>> for Constraint<'arena> {
 /// The arena is extracted from `x` — which must therefore be a
 /// `Variable` / `VariableMatrix` (compile error for scalar `x`, since
 /// bounding a constant is meaningless).
-pub fn bounds<'arena, L, X, U>(
-    lower: L,
-    x: X,
-    upper: U,
-) -> Vec<InequalityConstraints<'arena>>
+pub fn bounds<'arena, L, X, U>(lower: L, x: X, upper: U) -> Vec<InequalityConstraints<'arena>>
 where
     L: IntoMatrixOperand<'arena>,
     X: crate::__marker::HasArena<'arena> + IntoMatrixOperand<'arena> + Clone,

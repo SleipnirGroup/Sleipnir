@@ -147,10 +147,7 @@ macro_rules! impl_variable_binop {
             #[inline]
             fn $method(self, rhs: R) -> Variable<'a> {
                 let rhs = rhs.into_variable(self.arena);
-                Variable::from_unique_in(
-                    self.arena,
-                    ffi::$ffi(self.as_ref(), rhs.as_ref()),
-                )
+                Variable::from_unique_in(self.arena, ffi::$ffi(self.as_ref(), rhs.as_ref()))
             }
         }
         impl<'a, R: IntoVariable<'a>> $trait<R> for &Variable<'a> {
@@ -158,10 +155,7 @@ macro_rules! impl_variable_binop {
             #[inline]
             fn $method(self, rhs: R) -> Variable<'a> {
                 let rhs = rhs.into_variable(self.arena);
-                Variable::from_unique_in(
-                    self.arena,
-                    ffi::$ffi(self.as_ref(), rhs.as_ref()),
-                )
+                Variable::from_unique_in(self.arena, ffi::$ffi(self.as_ref(), rhs.as_ref()))
             }
         }
     };
@@ -180,10 +174,7 @@ macro_rules! impl_scalar_lhs_binop {
             #[inline]
             fn $method(self, rhs: Variable<'a>) -> Variable<'a> {
                 let lhs = Variable::constant_in(rhs.arena, self);
-                Variable::from_unique_in(
-                    rhs.arena,
-                    ffi::$ffi(lhs.as_ref(), rhs.as_ref()),
-                )
+                Variable::from_unique_in(rhs.arena, ffi::$ffi(lhs.as_ref(), rhs.as_ref()))
             }
         }
         impl<'a> $trait<&Variable<'a>> for f64 {
@@ -191,10 +182,7 @@ macro_rules! impl_scalar_lhs_binop {
             #[inline]
             fn $method(self, rhs: &Variable<'a>) -> Variable<'a> {
                 let lhs = Variable::constant_in(rhs.arena, self);
-                Variable::from_unique_in(
-                    rhs.arena,
-                    ffi::$ffi(lhs.as_ref(), rhs.as_ref()),
-                )
+                Variable::from_unique_in(rhs.arena, ffi::$ffi(lhs.as_ref(), rhs.as_ref()))
             }
         }
     };
@@ -286,10 +274,7 @@ pub mod __dsl {
     {
         let lhs = lhs.into_matrix(arena);
         let rhs = rhs.into_matrix(arena);
-        EqualityConstraints::from_unique(ffi::make_equality_matrix(
-            lhs.as_ref(),
-            rhs.as_ref(),
-        ))
+        EqualityConstraints::from_unique(ffi::make_equality_matrix(lhs.as_ref(), rhs.as_ref()))
     }
 
     #[inline]
@@ -300,10 +285,7 @@ pub mod __dsl {
     {
         let lhs = lhs.into_matrix(arena);
         let rhs = rhs.into_matrix(arena);
-        InequalityConstraints::from_unique(ffi::make_geq_matrix(
-            lhs.as_ref(),
-            rhs.as_ref(),
-        ))
+        InequalityConstraints::from_unique(ffi::make_geq_matrix(lhs.as_ref(), rhs.as_ref()))
     }
 
     #[inline]
@@ -314,10 +296,7 @@ pub mod __dsl {
     {
         let lhs = lhs.into_matrix(arena);
         let rhs = rhs.into_matrix(arena);
-        InequalityConstraints::from_unique(ffi::make_leq_matrix(
-            lhs.as_ref(),
-            rhs.as_ref(),
-        ))
+        InequalityConstraints::from_unique(ffi::make_leq_matrix(lhs.as_ref(), rhs.as_ref()))
     }
 
     /// Conversion trait accepted by matrix DSL functions and operators.

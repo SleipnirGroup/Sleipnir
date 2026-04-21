@@ -1,5 +1,5 @@
 [package]
-name = "hafgufa"
+name = "sleipnir"
 version = "0.1.0"
 edition = "2024"
 description = "Rust bindings for Sleipnir, a sparse nonlinear optimization library"
@@ -12,11 +12,6 @@ path = "src/lib.rs"
 
 [features]
 default = ["multistart"]
-# Enable Sleipnir's diagnostic printing. Off by default so the bindings build on older
-# toolchains.
-diagnostics = []
-# Enable the rayon-backed `multistart` driver. Pulls in `rayon` as a
-# dependency and exposes the `multistart` module.
 multistart = ["dep:rayon"]
 
 [dependencies]
@@ -54,7 +49,14 @@ name = "frc_2024_shooter"
 path = "../examples/frc_2024_shooter/main.rs"
 
 [[test]]
-name = "multistart"
-path = "tests/multistart.rs"
-required-features = ["multistart"]
+name = "basic"
+path = "test/basic.rs"
+
+[[test]]
+name = "autodiff"
+path = "test/autodiff.rs"
+
+[[test]]
+name = "optimization"
+path = "test/optimization.rs"
 

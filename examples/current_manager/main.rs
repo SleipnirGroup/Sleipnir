@@ -1,6 +1,6 @@
 //! Rust port of `examples/current_manager/main.py`.
 
-use hafgufa::{Problem, Variable, VariableArena, VariableMatrix, subject_to};
+use hafgufa::{Problem, VariableArena, VariableMatrix, subject_to};
 
 struct CurrentManager<'a> {
     problem: Problem<'a>,
@@ -22,7 +22,7 @@ impl<'a> CurrentManager<'a> {
         // pattern of using a decision-variable-shaped matrix initialized
         // to +inf so Sleipnir doesn't constant-fold during graph
         // construction.
-        let mut desired_currents = VariableMatrix::zeros_in(arena, n, 1);
+        let mut desired_currents = arena.zeros(n, 1);
         for i in 0..n {
             desired_currents.set_scalar(i, 0, f64::INFINITY);
         }
@@ -30,8 +30,8 @@ impl<'a> CurrentManager<'a> {
         let allocated_currents = problem.decision_variable_matrix(n, 1);
 
         // Cost: sum_i ((desired_i - allocated_i) / tol_i)^2.
-        let mut cost = Variable::constant_in(arena, 0.0);
-        let mut current_sum = Variable::constant_in(arena, 0.0);
+        let mut cost = arena.constant(0.0);
+        let mut current_sum = arena.constant(0.0);
 
         for i in 0..n {
             let desired = desired_currents.get(i, 0);

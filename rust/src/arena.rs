@@ -75,8 +75,7 @@ impl VariableArena {
         let mut storage = self.storage.lock().expect("VariableArena mutex poisoned");
         let ptr = unique
             .as_ref()
-            .expect("Variable FFI pointer was unexpectedly null")
-            as *const _;
+            .expect("Variable FFI pointer was unexpectedly null") as *const _;
         storage.push(unique);
         ptr
     }
@@ -86,6 +85,55 @@ impl VariableArena {
     #[inline]
     pub fn constant(&self, value: f64) -> crate::Variable<'_> {
         crate::Variable::constant_in(self, value)
+    }
+
+    /// Constant-valued matrix from an `ndarray::Array2<f64>`. Shorthand
+    /// for `VariableMatrix::from_array_in(arena, values)`.
+    #[inline]
+    pub fn array(&self, values: &ndarray::Array2<f64>) -> crate::VariableMatrix<'_> {
+        crate::VariableMatrix::from_array_in(self, values)
+    }
+
+    /// Constant-valued matrix from an `ndarray` view. Shorthand for
+    /// `VariableMatrix::from_array_view_in(arena, values)`.
+    #[inline]
+    pub fn array_view(&self, values: ndarray::ArrayView2<'_, f64>) -> crate::VariableMatrix<'_> {
+        crate::VariableMatrix::from_array_view_in(self, values)
+    }
+
+    /// `rows × cols` zero-initialized matrix of fresh decision-variable
+    /// expressions. Shorthand for `VariableMatrix::zeros_in(arena, rows, cols)`.
+    #[inline]
+    pub fn zeros(&self, rows: i32, cols: i32) -> crate::VariableMatrix<'_> {
+        crate::VariableMatrix::zeros_in(self, rows, cols)
+    }
+
+    /// Row-major flat-buffer matrix construction. Shorthand for
+    /// `VariableMatrix::from_slice_in(arena, rows, cols, data)`.
+    #[inline]
+    pub fn slice(&self, rows: i32, cols: i32, data: &[f64]) -> crate::VariableMatrix<'_> {
+        crate::VariableMatrix::from_slice_in(self, rows, cols, data)
+    }
+
+    /// `n × n` identity matrix. Shorthand for
+    /// `VariableMatrix::identity_in(arena, n)`.
+    #[inline]
+    pub fn identity(&self, n: i32) -> crate::VariableMatrix<'_> {
+        crate::VariableMatrix::identity_in(self, n)
+    }
+
+    /// Diagonal matrix with the given entries on the main diagonal.
+    /// Shorthand for `VariableMatrix::diag_in(arena, diagonal)`.
+    #[inline]
+    pub fn diag(&self, diagonal: &[f64]) -> crate::VariableMatrix<'_> {
+        crate::VariableMatrix::diag_in(self, diagonal)
+    }
+
+    /// Wraps a single [`Variable`](crate::Variable) in a 1×1 matrix.
+    /// Shorthand for `VariableMatrix::from_variable_in(arena, v)`.
+    #[inline]
+    pub fn matrix_from_variable<'a>(&'a self, v: crate::Variable<'a>) -> crate::VariableMatrix<'a> {
+        crate::VariableMatrix::from_variable_in(self, v)
     }
 
     /// Current number of variables the arena has allocated.

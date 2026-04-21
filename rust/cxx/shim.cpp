@@ -6,7 +6,7 @@
 #include <memory>
 #include <utility>
 
-#include "hafgufa/src/ffi.rs.h"
+#include "sleipnir/src/ffi.rs.h"
 #include "sleipnir/autodiff/expression_type.hpp"
 #include "sleipnir/autodiff/gradient.hpp"
 #include "sleipnir/autodiff/hessian.hpp"

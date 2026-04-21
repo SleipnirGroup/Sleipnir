@@ -48,7 +48,7 @@ fn f<'a>(state: &VariableMatrix<'a>) -> VariableMatrix<'a> {
     // omega = [0, -2, 0] rad/s, cross(v, omega) = [2·vz, 0, -2·vx]
     let vx = v.get(0, 0);
     let vz = v.get(2, 0);
-    let mut cross = VariableMatrix::from_slice_in(arena, 3, 1, &[0.0, 0.0, 0.0]);
+    let mut cross = arena.slice(3, 1, &[0.0, 0.0, 0.0]);
     cross.set_variable(0, 0, 2.0 * vz);
     cross.set_variable(2, 0, -2.0 * vx);
 
@@ -59,7 +59,7 @@ fn f<'a>(state: &VariableMatrix<'a>) -> VariableMatrix<'a> {
     let f_d = 0.5 * rho * 0.5 * area * v2;
     let f_l = 0.5 * rho * 0.5 * area * v_norm;
 
-    let g = VariableMatrix::from_array_in(arena, &gravity());
+    let g = arena.array(&gravity());
     let drag = &v_hat * (f_d / mass);
     let lift = &cross * (f_l / mass);
     let accel = (-g - drag) - lift;
@@ -69,14 +69,11 @@ fn f<'a>(state: &VariableMatrix<'a>) -> VariableMatrix<'a> {
 
 /// Vertical-stack two matrices with the same column count. Arena taken
 /// from `top`.
-fn stack_vertical<'a>(
-    top: &VariableMatrix<'a>,
-    bottom: &VariableMatrix<'a>,
-) -> VariableMatrix<'a> {
+fn stack_vertical<'a>(top: &VariableMatrix<'a>, bottom: &VariableMatrix<'a>) -> VariableMatrix<'a> {
     assert_eq!(top.cols(), bottom.cols());
     let rows = top.rows() + bottom.rows();
     let cols = top.cols();
-    let mut out = VariableMatrix::zeros_in(top.arena(), rows, cols);
+    let mut out = top.arena().zeros(rows, cols);
     let top_rows = top.rows();
     for c in 0..cols {
         for r in 0..top_rows {
@@ -142,16 +139,18 @@ fn main() {
 
     // Shooter initial position constraint.
     let first_pos = x_mat.block(0, 0, 3, 1);
-    let shooter_pos_vm = VariableMatrix::from_array_in(&arena, &shooter_pos);
+    let shooter_pos_vm = arena.array(&shooter_pos);
     subject_to!(problem, first_pos == shooter_pos_vm);
 
     // Initial speed within the cap: (v0 - v_robot)^T (v0 - v_robot) <= vmax².
     let v0_col = x_mat.block(3, 0, 3, 1);
-    let v_robot_col =
-        VariableMatrix::from_array_in(&arena, &robot_wrt_field.slice(s![3..6, ..]).to_owned());
+    let v_robot_col = arena.array(&robot_wrt_field.slice(s![3..6, ..]).to_owned());
     let dv = v0_col.clone() - v_robot_col;
     let speed2 = (dv.t() * &dv).get(0, 0);
-    subject_to!(problem, speed2 <= max_initial_velocity * max_initial_velocity);
+    subject_to!(
+        problem,
+        speed2 <= max_initial_velocity * max_initial_velocity
+    );
 
     // Keep-out region: outside cylinder OR inside cone. Applied per column.
     let x_c = target[[0, 0]];
@@ -193,26 +192,19 @@ fn main() {
 
     // Final position at target center.
     let final_pos = x_mat.block(0, n - 1, 3, 1);
-    subject_to!(problem, final_pos == VariableMatrix::from_array_in(&arena, &target_pos));
+    subject_to!(problem, final_pos == arena.array(&target_pos));
 
     // Final velocity points downward.
     let final_vz = x_mat.get(5, n - 1);
     subject_to!(problem, final_vz < 0.0);
 
     // Cost: minimize shooter-relative initial velocity squared.
-    let shooter_vel_vm =
-        VariableMatrix::from_array_in(&arena, &shooter_wrt_field.slice(s![3..6, ..]).to_owned());
+    let shooter_vel_vm = arena.array(&shooter_wrt_field.slice(s![3..6, ..]).to_owned());
     let v0_wrt_shooter = &v0_col - &shooter_vel_vm;
     let cost = (&v0_wrt_shooter.t() * &v0_wrt_shooter).get(0, 0);
     problem.minimize(cost);
 
-    #[allow(unused_mut)]
-    let mut opts = hafgufa::Options::default();
-    #[cfg(feature = "diagnostics")]
-    {
-        opts = opts.diagnostics(true);
-    }
-    match problem.solve(opts) {
+    match problem.solve(hafgufa::Options::default().diagnostics(true)) {
         Ok(()) => println!("exit status: success"),
         Err(e) => println!("exit status: {e}"),
     }

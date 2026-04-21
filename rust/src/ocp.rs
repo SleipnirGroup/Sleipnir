@@ -6,8 +6,8 @@ use cxx::UniquePtr;
 use crate::arena::VariableArena;
 use crate::ffi::{RustDynamics, RustDynamics4, ffi};
 use crate::problem::Options;
-use crate::variable::Variable;
 use crate::variable::__dsl::IntoMatrixOperand;
+use crate::variable::Variable;
 use crate::variable_matrix::VariableMatrix;
 use crate::{ExitStatus, IterationInfo, SleipnirError};
 
@@ -22,8 +22,8 @@ pub enum DynamicsType {
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TimestepMethod {
     Fixed = 0,
-    VariableSingle = 1,
-    Variable = 2,
+    Variable = 1,
+    VariableSingle = 2,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -396,10 +396,7 @@ impl std::fmt::Debug for OCP<'_> {
     }
 }
 
-fn box_dynamics4<'arena, F>(
-    arena: &'arena VariableArena,
-    mut dynamics: F,
-) -> Box<RustDynamics4>
+fn box_dynamics4<'arena, F>(arena: &'arena VariableArena, mut dynamics: F) -> Box<RustDynamics4>
 where
     F: FnMut(
             &Variable<'arena>,
@@ -445,7 +442,9 @@ where
     // SAFETY: see `box_dynamics` — closure invoked only during the
     // sibling `ocp_new_*_4arg` FFI call.
     let inner_static: Erased = unsafe { std::mem::transmute(inner) };
-    Box::new(RustDynamics4 { inner: inner_static })
+    Box::new(RustDynamics4 {
+        inner: inner_static,
+    })
 }
 
 /// Wrap a borrowed C++ `slp::Variable<double>` (as exposed through the
@@ -473,18 +472,12 @@ where
         + 'arena,
 {
     type Erased = Box<
-        dyn FnMut(
-                &ffi::VariableMatrix,
-                &ffi::VariableMatrix,
-            ) -> cxx::UniquePtr<ffi::VariableMatrix>
+        dyn FnMut(&ffi::VariableMatrix, &ffi::VariableMatrix) -> cxx::UniquePtr<ffi::VariableMatrix>
             + Send,
     >;
 
     let inner: Box<
-        dyn FnMut(
-                &ffi::VariableMatrix,
-                &ffi::VariableMatrix,
-            ) -> cxx::UniquePtr<ffi::VariableMatrix>
+        dyn FnMut(&ffi::VariableMatrix, &ffi::VariableMatrix) -> cxx::UniquePtr<ffi::VariableMatrix>
             + Send
             + 'arena,
     > = Box::new(move |x_ref, u_ref| {
@@ -497,5 +490,7 @@ where
     // SAFETY: see fn doc — closure is invoked only while OCP::new_*
     // is still on the Rust call stack.
     let inner_static: Erased = unsafe { std::mem::transmute(inner) };
-    Box::new(RustDynamics { inner: inner_static })
+    Box::new(RustDynamics {
+        inner: inner_static,
+    })
 }

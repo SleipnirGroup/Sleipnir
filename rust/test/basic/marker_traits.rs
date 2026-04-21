@@ -52,7 +52,8 @@ fn operand_covers_scalars_and_matrices() {
     accept_operand(&arr);
 }
 
-fn identity_dyn<'a>() -> impl FnMut(&VariableMatrix<'a>, &VariableMatrix<'a>) -> VariableMatrix<'a> + Send + 'a {
+fn identity_dyn<'a>()
+-> impl FnMut(&VariableMatrix<'a>, &VariableMatrix<'a>) -> VariableMatrix<'a> + Send + 'a {
     |x, u| x + u
 }
 

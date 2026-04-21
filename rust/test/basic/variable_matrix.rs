@@ -55,8 +55,7 @@ fn decision_variable_matrix_solves_quadratic() {
         &arena,
         &Array2::from_shape_vec((1, 2), vec![1.0, 1.0]).unwrap(),
     );
-    let expected =
-        VariableMatrix::from_array_in(&arena, &Array2::from_elem((1, 1), 1.0));
+    let expected = VariableMatrix::from_array_in(&arena, &Array2::from_elem((1, 1), 1.0));
     subject_to!(problem, &sum_row * &x == expected);
 
     problem.solve(Default::default()).unwrap();
@@ -71,11 +70,7 @@ fn block_row_col_slicing() {
     let arena = VariableArena::new();
     let m = VariableMatrix::from_array_in(
         &arena,
-        &Array2::from_shape_vec(
-            (3, 3),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0],
-        )
-        .unwrap(),
+        &Array2::from_shape_vec((3, 3), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]).unwrap(),
     );
 
     let mut row_1 = m.row(1);

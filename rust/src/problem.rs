@@ -12,17 +12,12 @@ use crate::variable_matrix::VariableMatrix;
 use crate::{ExitStatus, ExpressionType, IterationInfo, SleipnirError};
 
 /// Solver options, mirroring `slp::Options` in C++.
-///
-/// The `diagnostics` field is only present when the crate is built
-/// with the `diagnostics` Cargo feature — otherwise it's compile-time
-/// impossible to request output the solver can't produce.
 #[derive(Clone, Copy, Debug)]
 pub struct Options {
     pub tolerance: f64,
     pub max_iterations: i32,
     pub timeout: Option<Duration>,
     pub feasible_ipm: bool,
-    #[cfg(feature = "diagnostics")]
     pub diagnostics: bool,
 }
 
@@ -33,7 +28,6 @@ impl Default for Options {
             max_iterations: 5000,
             timeout: None,
             feasible_ipm: false,
-            #[cfg(feature = "diagnostics")]
             diagnostics: false,
         }
     }
@@ -44,12 +38,12 @@ impl Options {
         SolverOptions {
             tolerance: self.tolerance,
             max_iterations: self.max_iterations,
-            timeout_seconds: self.timeout.map(|d| d.as_secs_f64()).unwrap_or(f64::INFINITY),
+            timeout_seconds: self
+                .timeout
+                .map(|d| d.as_secs_f64())
+                .unwrap_or(f64::INFINITY),
             feasible_ipm: self.feasible_ipm,
-            #[cfg(feature = "diagnostics")]
             diagnostics: self.diagnostics,
-            #[cfg(not(feature = "diagnostics"))]
-            diagnostics: false,
         }
     }
 
@@ -91,11 +85,8 @@ impl Options {
         self
     }
 
-    /// Enable diagnostic printing. Only available when the
-    /// `diagnostics` Cargo feature is enabled — otherwise this method
-    /// is absent (callers can't ask for output the solver wasn't
-    /// compiled to produce).
-    #[cfg(feature = "diagnostics")]
+    /// Enable Sleipnir's per-iteration diagnostic printing. Default
+    /// `false`.
     #[inline]
     pub fn diagnostics(mut self, diagnostics: bool) -> Self {
         self.diagnostics = diagnostics;
@@ -158,11 +149,7 @@ impl<'arena> Problem<'arena> {
     }
 
     /// Creates a `rows × cols` matrix of fresh decision variables.
-    pub fn decision_variable_matrix(
-        &mut self,
-        rows: i32,
-        cols: i32,
-    ) -> VariableMatrix<'arena> {
+    pub fn decision_variable_matrix(&mut self, rows: i32, cols: i32) -> VariableMatrix<'arena> {
         let unique = ffi::problem_decision_variable_matrix(self.pin_inner(), rows, cols);
         VariableMatrix::from_unique_in(self.arena, unique)
     }
@@ -297,7 +284,10 @@ impl std::fmt::Debug for Problem<'_> {
         f.debug_struct("Problem")
             .field("cost_function_type", &self.cost_function_type())
             .field("equality_constraint_type", &self.equality_constraint_type())
-            .field("inequality_constraint_type", &self.inequality_constraint_type())
+            .field(
+                "inequality_constraint_type",
+                &self.inequality_constraint_type(),
+            )
             .field("arena_len", &self.arena.len())
             .finish()
     }

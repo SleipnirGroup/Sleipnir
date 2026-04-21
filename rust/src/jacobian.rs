@@ -45,8 +45,7 @@ impl<'arena> Jacobian<'arena> {
             .as_mut()
             .expect("Jacobian FFI pointer was unexpectedly null");
         let flat = ffi::jacobian_value(pin);
-        Array2::from_shape_vec((rows, cols), flat)
-            .expect("Jacobian value buffer shape mismatch")
+        Array2::from_shape_vec((rows, cols), flat).expect("Jacobian value buffer shape mismatch")
     }
 
     /// Return the Jacobian as a symbolic `VariableMatrix`.

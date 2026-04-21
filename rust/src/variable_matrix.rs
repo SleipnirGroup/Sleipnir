@@ -37,10 +37,7 @@ impl<'arena> VariableMatrix<'arena> {
     }
 
     /// Constant-valued matrix from an `ndarray` view.
-    pub fn from_array_view_in(
-        arena: &'arena VariableArena,
-        values: ArrayView2<'_, f64>,
-    ) -> Self {
+    pub fn from_array_view_in(arena: &'arena VariableArena, values: ArrayView2<'_, f64>) -> Self {
         let rows = values.nrows() as i32;
         let cols = values.ncols() as i32;
         let flat: Vec<f64> = values.iter().copied().collect();
@@ -48,21 +45,13 @@ impl<'arena> VariableMatrix<'arena> {
     }
 
     /// Row-major flat-buffer construction.
-    pub fn from_slice_in(
-        arena: &'arena VariableArena,
-        rows: i32,
-        cols: i32,
-        data: &[f64],
-    ) -> Self {
+    pub fn from_slice_in(arena: &'arena VariableArena, rows: i32, cols: i32, data: &[f64]) -> Self {
         assert_eq!(data.len(), (rows * cols) as usize);
         Self::from_unique_in(arena, ffi::variable_matrix_from_f64(rows, cols, data))
     }
 
     /// Wraps a single scalar `Variable` in a 1×1 `VariableMatrix`.
-    pub fn from_variable_in(
-        arena: &'arena VariableArena,
-        v: Variable<'arena>,
-    ) -> Self {
+    pub fn from_variable_in(arena: &'arena VariableArena, v: Variable<'arena>) -> Self {
         Self::from_unique_in(arena, ffi::variable_matrix_from_variable(v.as_ref()))
     }
 
@@ -174,10 +163,7 @@ impl<'arena> VariableMatrix<'arena> {
     }
 
     pub fn t(&self) -> VariableMatrix<'arena> {
-        VariableMatrix::from_unique_in(
-            self.arena,
-            ffi::variable_matrix_transpose(self.as_ref()),
-        )
+        VariableMatrix::from_unique_in(self.arena, ffi::variable_matrix_transpose(self.as_ref()))
     }
 
     pub fn block(
@@ -219,17 +205,11 @@ impl<'arena> VariableMatrix<'arena> {
     }
 
     pub fn row(&self, row: i32) -> VariableMatrix<'arena> {
-        VariableMatrix::from_unique_in(
-            self.arena,
-            ffi::variable_matrix_row(self.as_ref(), row),
-        )
+        VariableMatrix::from_unique_in(self.arena, ffi::variable_matrix_row(self.as_ref(), row))
     }
 
     pub fn col(&self, col: i32) -> VariableMatrix<'arena> {
-        VariableMatrix::from_unique_in(
-            self.arena,
-            ffi::variable_matrix_col(self.as_ref(), col),
-        )
+        VariableMatrix::from_unique_in(self.arena, ffi::variable_matrix_col(self.as_ref(), col))
     }
 
     /// Iterate the matrix's rows as `1 × cols` matrices.
@@ -266,10 +246,7 @@ where
     let arena = a.arena_ref();
     let a = a.into_matrix(arena);
     let b = b.into_matrix(arena);
-    VariableMatrix::from_unique_in(
-        arena,
-        ffi::variable_matrix_solve(a.as_ref(), b.as_ref()),
-    )
+    VariableMatrix::from_unique_in(arena, ffi::variable_matrix_solve(a.as_ref(), b.as_ref()))
 }
 
 /// Vertical stack: concatenate along the row axis. Both operands must
@@ -322,7 +299,10 @@ fn resolve_range<R: RangeBounds<i32>>(range: R, len: i32) -> (i32, i32) {
         Bound::Excluded(&e) => e,
         Bound::Unbounded => len,
     };
-    assert!(start <= end, "slice start ({start}) must not exceed end ({end})");
+    assert!(
+        start <= end,
+        "slice start ({start}) must not exceed end ({end})"
+    );
     assert!(
         start >= 0 && end <= len,
         "slice range {start}..{end} out of bounds for axis of length {len}"
@@ -332,10 +312,7 @@ fn resolve_range<R: RangeBounds<i32>>(range: R, len: i32) -> (i32, i32) {
 
 impl<'arena> Clone for VariableMatrix<'arena> {
     fn clone(&self) -> Self {
-        VariableMatrix::from_unique_in(
-            self.arena,
-            ffi::variable_matrix_clone(self.as_ref()),
-        )
+        VariableMatrix::from_unique_in(self.arena, ffi::variable_matrix_clone(self.as_ref()))
     }
 }
 
@@ -355,10 +332,7 @@ macro_rules! impl_matrix_binop {
             #[inline]
             fn $method(self, rhs: R) -> VariableMatrix<'a> {
                 let rhs = rhs.into_matrix(self.arena);
-                VariableMatrix::from_unique_in(
-                    self.arena,
-                    ffi::$ffi(self.as_ref(), rhs.as_ref()),
-                )
+                VariableMatrix::from_unique_in(self.arena, ffi::$ffi(self.as_ref(), rhs.as_ref()))
             }
         }
         impl<'a, R: IntoMatrixOperand<'a>> $trait<R> for &VariableMatrix<'a> {
@@ -366,10 +340,7 @@ macro_rules! impl_matrix_binop {
             #[inline]
             fn $method(self, rhs: R) -> VariableMatrix<'a> {
                 let rhs = rhs.into_matrix(self.arena);
-                VariableMatrix::from_unique_in(
-                    self.arena,
-                    ffi::$ffi(self.as_ref(), rhs.as_ref()),
-                )
+                VariableMatrix::from_unique_in(self.arena, ffi::$ffi(self.as_ref(), rhs.as_ref()))
             }
         }
     };
@@ -406,20 +377,14 @@ impl<'a, R: IntoVariable<'a>> Div<R> for &VariableMatrix<'a> {
 impl<'a> Neg for VariableMatrix<'a> {
     type Output = VariableMatrix<'a>;
     fn neg(self) -> VariableMatrix<'a> {
-        VariableMatrix::from_unique_in(
-            self.arena,
-            ffi::variable_matrix_neg(self.as_ref()),
-        )
+        VariableMatrix::from_unique_in(self.arena, ffi::variable_matrix_neg(self.as_ref()))
     }
 }
 
 impl<'a> Neg for &VariableMatrix<'a> {
     type Output = VariableMatrix<'a>;
     fn neg(self) -> VariableMatrix<'a> {
-        VariableMatrix::from_unique_in(
-            self.arena,
-            ffi::variable_matrix_neg(self.as_ref()),
-        )
+        VariableMatrix::from_unique_in(self.arena, ffi::variable_matrix_neg(self.as_ref()))
     }
 }
 

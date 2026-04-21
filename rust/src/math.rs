@@ -139,8 +139,5 @@ where
     let arena = base.arena_ref();
     let base = base.into_variable(arena);
     let power = power.into_variable(arena);
-    Variable::from_unique_in(
-        arena,
-        ffi::variable_pow(base.as_ref(), power.as_ref()),
-    )
+    Variable::from_unique_in(arena, ffi::variable_pow(base.as_ref(), power.as_ref()))
 }

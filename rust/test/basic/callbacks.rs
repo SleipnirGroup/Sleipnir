@@ -44,7 +44,10 @@ fn callback_observes_iteration_state() {
     let observed_cb = Arc::clone(&observed);
 
     problem.add_callback(move |info| {
-        observed_cb.lock().unwrap().push((info.iteration(), info.x().len()));
+        observed_cb
+            .lock()
+            .unwrap()
+            .push((info.iteration(), info.x().len()));
         false
     });
 

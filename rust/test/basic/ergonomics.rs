@@ -24,17 +24,13 @@ fn options_builder_chains() {
         .tolerance(1e-6)
         .max_iterations(1000)
         .timeout(Duration::from_millis(500))
-        .feasible_ipm(true);
+        .feasible_ipm(true)
+        .diagnostics(false);
     assert!((opts.tolerance - 1e-6).abs() < f64::EPSILON);
     assert_eq!(opts.max_iterations, 1000);
     assert_eq!(opts.timeout, Some(Duration::from_millis(500)));
     assert!(opts.feasible_ipm);
-
-    #[cfg(feature = "diagnostics")]
-    {
-        let with_diag = Options::default().diagnostics(true);
-        assert!(with_diag.diagnostics);
-    }
+    assert!(!opts.diagnostics);
 }
 
 #[test]
@@ -66,11 +62,8 @@ fn variable_matrix_identity_and_diag() {
     assert_eq!(i3.value(), expected_eye);
 
     let mut d = VariableMatrix::diag_in(&arena, &[2.0, -1.0, 0.5]);
-    let expected_diag = Array2::from_shape_vec(
-        (3, 3),
-        vec![2.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.5],
-    )
-    .unwrap();
+    let expected_diag =
+        Array2::from_shape_vec((3, 3), vec![2.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.5]).unwrap();
     assert_eq!(d.value(), expected_diag);
 }
 
@@ -79,11 +72,7 @@ fn cols_iter_and_rows_iter() {
     let arena = VariableArena::new();
     let m = VariableMatrix::from_array_in(
         &arena,
-        &Array2::from_shape_vec(
-            (2, 3),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        )
-        .unwrap(),
+        &Array2::from_shape_vec((2, 3), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0]).unwrap(),
     );
 
     let cols: Vec<_> = m.cols_iter().collect();
@@ -130,11 +119,7 @@ fn variable_matrix_range_slicing() {
     let arena = VariableArena::new();
     let m = VariableMatrix::from_array_in(
         &arena,
-        &Array2::from_shape_vec(
-            (4, 4),
-            (0..16).map(|i| i as f64).collect(),
-        )
-        .unwrap(),
+        &Array2::from_shape_vec((4, 4), (0..16).map(|i| i as f64).collect()).unwrap(),
     );
 
     let mut middle = m.slice(1..3, 1..3);

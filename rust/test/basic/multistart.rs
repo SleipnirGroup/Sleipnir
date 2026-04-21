@@ -3,8 +3,7 @@
 //! never cross thread boundaries.
 
 use hafgufa::{
-    ExitStatus, MultistartResult, Problem, SleipnirError, VariableArena, multistart,
-    subject_to,
+    ExitStatus, MultistartResult, Problem, SleipnirError, VariableArena, multistart, subject_to,
 };
 
 fn solve(guess: &f64) -> Result<MultistartResult<f64>, SleipnirError> {

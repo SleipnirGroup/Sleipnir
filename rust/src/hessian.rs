@@ -72,8 +72,7 @@ impl<'arena> Hessian<'arena> {
             .as_mut()
             .expect("Hessian FFI pointer was unexpectedly null");
         let flat = ffi::hessian_value(pin);
-        Array2::from_shape_vec((rows, cols), flat)
-            .expect("Hessian value buffer shape mismatch")
+        Array2::from_shape_vec((rows, cols), flat).expect("Hessian value buffer shape mismatch")
     }
 
     /// Returns the Hessian as a symbolic `VariableMatrix`.

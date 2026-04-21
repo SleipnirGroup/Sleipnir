@@ -43,10 +43,8 @@ fn flywheel_discrete_ocp() {
     ocp.set_lower_input_bound(-12.0);
 
     let r = 10.0_f64;
-    let r_mat = VariableMatrix::from_array_in(
-        &arena,
-        &Array2::from_elem((1, (n_steps + 1) as usize), r),
-    );
+    let r_mat =
+        VariableMatrix::from_array_in(&arena, &Array2::from_elem((1, (n_steps + 1) as usize), r));
     let diff = &r_mat - &ocp.x();
     let cost_mat = &diff * &diff.t();
     ocp.minimize_matrix(&cost_mat);

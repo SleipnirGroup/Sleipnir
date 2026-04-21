@@ -44,10 +44,8 @@ where
     T: Send,
     F: Fn(&G) -> Result<MultistartResult<T>, SleipnirError> + Sync + Send,
 {
-    let results: Vec<Result<MultistartResult<T>, SleipnirError>> = initial_guesses
-        .par_iter()
-        .map(|g| solve(g))
-        .collect();
+    let results: Vec<Result<MultistartResult<T>, SleipnirError>> =
+        initial_guesses.par_iter().map(|g| solve(g)).collect();
 
     // Partition into successful and failed solves. A "successful" solve is
     // one whose inner status is `ExitStatus::Success`; anything that

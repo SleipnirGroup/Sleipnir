@@ -86,16 +86,14 @@ fn cmp_parses_complex_expression() {
 
     subject_to!(
         problem,
-        math::sqrt(math::pow(x - 1.0, 2.0) + math::pow(y - 2.0, 2.0))
-            + math::max(x, 0.5)
+        math::sqrt(math::pow(x - 1.0, 2.0) + math::pow(y - 2.0, 2.0)) + math::max(x, 0.5)
             - 2.0 * math::exp(hafgufa::Variable::constant_in(&arena, 0.0))
             == 1.5
     );
 
     // Same shape inside a standalone `cmp!`.
     let c = cmp!(
-        math::sqrt(math::pow(x - 1.0, 2.0) + math::pow(y - 2.0, 2.0))
-            + math::max(x, 0.5)
+        math::sqrt(math::pow(x - 1.0, 2.0) + math::pow(y - 2.0, 2.0)) + math::max(x, 0.5)
             - 2.0 * math::exp(hafgufa::Variable::constant_in(&arena, 0.0))
             >= 0.0
     );
@@ -106,7 +104,11 @@ fn cmp_parses_complex_expression() {
     // Verify the equality constraint is actually satisfied.
     let dist = ((x.value() - 1.0).powi(2) + (y.value() - 2.0).powi(2)).sqrt();
     let lhs = dist + x.value().max(0.5) - 2.0 * 1.0_f64;
-    assert!((lhs - 1.5).abs() < 1e-6, "equality residual = {}", lhs - 1.5);
+    assert!(
+        (lhs - 1.5).abs() < 1e-6,
+        "equality residual = {}",
+        lhs - 1.5
+    );
 }
 
 #[test]
