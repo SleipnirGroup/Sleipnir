@@ -17,7 +17,7 @@ CMakeUserPresets.json
 compile_commands.json
 
 # clangd cache
-.clangd/
+.clangd
 .cache/
 
 # Python
@@ -30,3 +30,7 @@ __pycache__/
 dist/
 
 *.spy
+
+# Rust
+Cargo.lock
+target/
