@@ -2152,7 +2152,7 @@ Returns:
     The contents of the variable matrix.)doc";
 
 static const char *__doc_slp_VariableMatrix_zero =
-R"doc(Returns a variable matrix filled with zeroes.
+R"doc(Returns a variable matrix filled with zeros.
 
 Parameter ``rows``:
     The number of matrix rows.
@@ -2161,7 +2161,7 @@ Parameter ``cols``:
     The number of matrix columns.
 
 Returns:
-    A variable matrix filled with zeroes.)doc";
+    A variable matrix filled with zeros.)doc";
 
 static const char *__doc_slp_Variable_Variable = R"doc(Constructs a linear Variable with a value of zero.)doc";
 
