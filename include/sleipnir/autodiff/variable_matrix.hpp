@@ -1184,11 +1184,11 @@ class VariableMatrix : public SleipnirBase {
   /// @return Number of elements in matrix.
   size_t size() const { return m_storage.size(); }
 
-  /// Returns a variable matrix filled with zeroes.
+  /// Returns a variable matrix filled with zeros.
   ///
   /// @param rows The number of matrix rows.
   /// @param cols The number of matrix columns.
-  /// @return A variable matrix filled with zeroes.
+  /// @return A variable matrix filled with zeros.
   static VariableMatrix<Scalar> zero(int rows, int cols) {
     VariableMatrix<Scalar> result{detail::empty, rows, cols};
 
