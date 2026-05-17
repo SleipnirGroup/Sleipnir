@@ -68,8 +68,11 @@ class RegularizedLDLT {
     // We consider less than 25% to be sparse.
     m_is_sparse = lhs.nonZeros() < 0.25 * lhs.size();
 
-    m_info = m_is_sparse ? compute_sparse(lhs).info()
-                         : m_dense_solver.compute(lhs).info();
+    m_info =
+        m_is_sparse
+            ? compute_sparse(lhs + regularization(Scalar(0), Scalar(0))).info()
+            : m_dense_solver.compute(lhs + regularization(Scalar(0), Scalar(0)))
+                  .info();
 
     if (m_info == Eigen::Success) {
       auto D =
