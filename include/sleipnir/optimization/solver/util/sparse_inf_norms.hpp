@@ -7,6 +7,8 @@
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
 
+namespace slp {
+
 /// Computes the row-wise infinity norm of a sparse matrix.
 ///
 /// @param mat Sparse matrix.
@@ -28,3 +30,5 @@ auto sparse_inf_norms(const Eigen::SparseCompressedBase<Derived>& mat)
 
   return norms;
 }
+
+} // namespace slp
