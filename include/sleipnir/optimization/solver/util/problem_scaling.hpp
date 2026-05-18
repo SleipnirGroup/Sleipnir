@@ -73,7 +73,7 @@ struct ProblemScaling {
   ///
   /// @param g Cost gradient ∇f, evaluated at the starting point.
   /// @param A_e Equality constraint Jacobian Aₑ, evaluated at the starting
-  ///    point.
+  ///     point.
   ProblemScaling(const DenseVector& g, const SparseMatrix& A_e) {
     constexpr Scalar g_max(100);
 
@@ -93,9 +93,9 @@ struct ProblemScaling {
   ///
   /// @param g Cost gradient ∇f, evaluated at the starting point.
   /// @param A_e Equality constraint Jacobian Aₑ, evaluated at the starting
-  ///    point.
+  ///     point.
   /// @param A_i Inequality constraint Jacobian Aᵢ, evaluated at the starting
-  ///    point.
+  ///     point.
   ProblemScaling(const DenseVector& g, const SparseMatrix& A_e,
                  const SparseMatrix& A_i) {
     constexpr Scalar g_max(100);
