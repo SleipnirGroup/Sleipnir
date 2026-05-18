@@ -403,8 +403,8 @@ ExitStatus feasibility_restoration(
                           (c_i - s).template lpNorm<Eigen::Infinity>()});
 
   // Inherit the parent problem's scaling for the constraints, and use no
-  // scaling for the objective function since it has changed. The new rows
-  // introduced are not scaled.
+  // scaling for the cost function since it has changed. The new rows introduced
+  // are not scaled.
   DenseVector fr_d_c_i{c_i.rows() + 2 * num_eq + 2 * num_ineq};
   fr_d_c_i << matrices.scaling.c_i,
       DenseVector::Ones(2 * num_eq + 2 * num_ineq);

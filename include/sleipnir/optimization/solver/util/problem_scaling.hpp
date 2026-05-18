@@ -20,6 +20,10 @@ template <typename Scalar>
 struct ProblemScaling {
   /// Type alias for dense vector.
   using DenseVector = Eigen::Vector<Scalar, Eigen::Dynamic>;
+  /// Type alias for sparse matrix.
+  using SparseMatrix = Eigen::SparseMatrix<Scalar>;
+  /// Type alias for sparse vector.
+  using SparseVector = Eigen::SparseVector<Scalar>;
 
   /// Cost scaling factor d_f.
   Scalar f = Scalar(1);
@@ -29,6 +33,17 @@ struct ProblemScaling {
 
   /// Inequality constraint scaling factors d_cᵢ.
   DenseVector c_i;
+
+  /// Constructs identity problem scaling.
+  ProblemScaling() = default;
+
+  /// Constructs problem scaling from explicit factors.
+  ///
+  /// @param f Cost scaling factor d_f.
+  /// @param c_e Equality constraint scaling factors d_cₑ.
+  /// @param c_i Inequality constraint scaling factors d_cᵢ.
+  ProblemScaling(Scalar f, const DenseVector& c_e, const DenseVector& c_i)
+      : f{f}, c_e{c_e}, c_i{c_i} {}
 
   /// Computes interior-point problem scaling.
   ///
@@ -40,26 +55,18 @@ struct ProblemScaling {
   ///
   /// See §3.8 Automatic Scaling of the Problem Statement in [2].
   ///
-  /// @tparam Gradient Cost gradient autodiff type.
-  /// @tparam Jacobian Constraint Jacobian autodiff type.
-  /// @param g Cost gradient autodiff ∇f, evaluated at the starting point.
-  /// @param A_e Equality constraint Jacobian autodiff Aₑ, evaluated at the
-  ///            starting point.
-  /// @param A_i Inequality constraint Jacobian autodiff Aᵢ, evaluated at the
-  ///            starting point.
-  /// @return The interior-point problem scaling.
-  template <typename Gradient, typename Jacobian>
-  static ProblemScaling interior_point(Gradient& g, Jacobian& A_e,
-                                       Jacobian& A_i) {
+  /// @param g Cost gradient ∇f, evaluated at the starting point.
+  /// @param A_e Equality constraint Jacobian Aₑ, evaluated at the starting
+  ///            point.
+  /// @param A_i Inequality constraint Jacobian Aᵢ, evaluated at the starting
+  ///            point.
+  ProblemScaling(const DenseVector& g, const SparseMatrix& A_e,
+                 const SparseMatrix& A_i) {
     constexpr Scalar g_max(100);
 
-    const DenseVector grad_f = g.value();
-    return ProblemScaling{
-        std::min(Scalar(1), g_max / grad_f.template lpNorm<Eigen::Infinity>()),
-        (g_max / sparse_inf_norms(A_e.value()).array()).min(Scalar(1)).matrix(),
-        (g_max / sparse_inf_norms(A_i.value()).array())
-            .min(Scalar(1))
-            .matrix()};
+    f = std::min(Scalar(1), g_max / g.template lpNorm<Eigen::Infinity>());
+    c_e = (g_max / sparse_inf_norms(A_e).array()).min(Scalar(1)).matrix();
+    c_i = (g_max / sparse_inf_norms(A_i).array()).min(Scalar(1)).matrix();
   }
 
   /// Whether the problem scaling is identity.

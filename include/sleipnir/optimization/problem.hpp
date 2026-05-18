@@ -600,7 +600,7 @@ class Problem {
       // procedure is described in more detail in
       // docs/algorithms.md#problem-scaling.
       x_ad.set_value(x);
-      const auto scaling = ProblemScaling<Scalar>::interior_point(g, A_e, A_i);
+      const ProblemScaling<Scalar> scaling(g.value(), A_e.value(), A_i.value());
 
       InteriorPointMatrixCallbacks<Scalar> matrix_callbacks{
           num_decision_variables,
