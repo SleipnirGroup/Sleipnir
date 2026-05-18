@@ -191,18 +191,19 @@ Scalar unscaled_kkt_error(const ProblemScaling<Scalar>& scaling,
   const DenseVector inv_d_c_e = scaling.c_e.cwiseInverse();
   const DenseVector inv_d_c_i = scaling.c_i.cwiseInverse();
 
-  const DenseVector g_o = inv_d_f * g;
-  const SparseMatrix A_e_o = inv_d_c_e.asDiagonal() * A_e;
-  const DenseVector c_e_o = inv_d_c_e.cwiseProduct(c_e);
-  const SparseMatrix A_i_o = inv_d_c_i.asDiagonal() * A_i;
-  const DenseVector c_i_o = inv_d_c_i.cwiseProduct(c_i);
-  const DenseVector s_o = inv_d_c_i.cwiseProduct(s);
-  const DenseVector y_o = scaling.c_e.cwiseProduct(y) * inv_d_f;
-  const DenseVector z_o = scaling.c_i.cwiseProduct(z) * inv_d_f;
-  const Scalar μ_o = inv_d_f * μ;
+  const DenseVector g_unscaled = inv_d_f * g;
+  const SparseMatrix A_e_unscaled = inv_d_c_e.asDiagonal() * A_e;
+  const DenseVector c_e_unscaled = inv_d_c_e.cwiseProduct(c_e);
+  const SparseMatrix A_i_unscaled = inv_d_c_i.asDiagonal() * A_i;
+  const DenseVector c_i_unscaled = inv_d_c_i.cwiseProduct(c_i);
+  const DenseVector s_unscaled = inv_d_c_i.cwiseProduct(s);
+  const DenseVector y_unscaled = scaling.c_e.cwiseProduct(y) * inv_d_f;
+  const DenseVector z_unscaled = scaling.c_i.cwiseProduct(z) * inv_d_f;
+  const Scalar μ_unscaled = inv_d_f * μ;
 
-  return kkt_error<Scalar, T>(g_o, A_e_o, c_e_o, A_i_o, c_i_o, s_o, y_o, z_o,
-                              μ_o);
+  return kkt_error<Scalar, T>(g_unscaled, A_e_unscaled, c_e_unscaled,
+                              A_i_unscaled, c_i_unscaled, s_unscaled,
+                              y_unscaled, z_unscaled, μ_unscaled);
 }
 
 }  // namespace slp

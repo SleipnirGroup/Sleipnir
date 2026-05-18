@@ -441,6 +441,59 @@ where αₖᵐᵃˣ and αₖᶻ are computed via the fraction-to-the-boundary r
 
 Section 6 of [^3] describes how to check for local infeasibility.
 
+## Problem scaling
+
+Sleipnir scales the cost and constraints to improve numerical stability. The objective and each constraint are scaled so that the largest gradient component at the starting point is at most `g_max`. For an initial point `x₀`, define
+
+```
+  d_f    = min(1, g_max / ‖∇f(x₀)‖_∞)
+  d_c[j] = min(1, g_max / ‖∇c_j(x₀)‖_∞)
+```
+
+where `D_c = diag(d_c)` and `A = ∂c/∂x` is the constraint Jacobian. The scaled Lagrangian is:
+
+```
+  L(x, λ) = d_f f(x) + λᵀ D_c c(x)
+```
+
+The Hessian of the scaled Lagrangian with respect to `x` is:
+
+```
+  ∇²ₓₓL(x, λ) = d_f ∇²ₓₓ f(x) + Σ_i (D_c λ)_i ∇²ₓₓ c_i(x)
+```
+
+Recall that the original KKT matrix is:
+
+```
+[ ∇²ₓₓL      Aᵀ ]
+[   A        0  ]
+```
+
+Scaling the KKT matrix for this problem gives:
+
+```
+[ D_x⁻¹ ∇²ₓₓL D_x⁻¹    D_x⁻¹ Aᵀ D_c ]
+[   D_c A D_x⁻¹             0       ]
+```
+
+With `D_x = I`, this reduces to:
+
+```
+[ ∇²ₓₓL      Aᵀ D_c ]
+[ D_c A        0   ]
+```
+
+Expanding `∇²ₓₓL` yields:
+
+```
+[ d_f ∇²ₓₓ f + Σ_i (D_c λ)_i ∇²ₓₓ c_i    Aᵀ D_c ]
+[            D_c A                         0   ]
+```
+
+where `D_c A` replaces `A` and `d_f ∇²ₓₓ f + Σ_i (D_c λ)_i ∇²ₓₓ c_i` replaces `∇²ₓₓ f + ∇²ₓₓ c` in the original KKT matrix.
+
+The algorithm is described in more detail in Section 3.8 of [^2].
+
 ## Works cited
 
 [^1]: Nocedal, J. and Wright, S. "Numerical Optimization", 2nd. ed., Ch. 19. Springer, 2006.

@@ -246,7 +246,7 @@ struct InteriorPointMatrixCallbacks {
 
   /// Automatic problem scaling factors. Used to scale the cost, constraints,
   /// and tolerance inside the interior-point solver.
-  ProblemScaling<Scalar> scaling{};
+  ProblemScaling<Scalar> scaling;
 };
 
 }  // namespace slp

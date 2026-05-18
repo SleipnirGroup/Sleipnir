@@ -31,4 +31,4 @@ auto sparse_inf_norms(const Eigen::SparseCompressedBase<Derived>& mat)
   return norms;
 }
 
-} // namespace slp
+}  // namespace slp

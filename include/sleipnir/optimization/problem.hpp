@@ -31,7 +31,6 @@
 #include "sleipnir/optimization/solver/sqp.hpp"
 #include "sleipnir/optimization/solver/util/bounds.hpp"
 #include "sleipnir/optimization/solver/util/problem_scaling.hpp"
-#include "sleipnir/optimization/solver/util/sparse_inf_norms.hpp"
 #include "sleipnir/util/empty.hpp"
 #include "sleipnir/util/print.hpp"
 #include "sleipnir/util/print_diagnostics.hpp"
@@ -597,27 +596,11 @@ class Problem {
       project_onto_bounds(x, bounds);
 #endif
 
-      // Scale the objective and each constraint so the largest gradient
-      // component at the starting point is at most gₘₐₓ:
-      //
-      //   d_f    = min(1, gₘₐₓ / ‖∇f(x₀)‖_∞)
-      //   d_c[j] = min(1, gₘₐₓ / ‖∇cⱼ(x₀)‖_∞)
-      //
-      // See §3.8 Automatic Scaling of the Problem Statement in [2].
-      constexpr Scalar g_max(100);
-
+      // Automatically scale the objective and constraints. The problem scaling
+      // procedure is described in more detail in
+      // docs/algorithms.md#problem-scaling.
       x_ad.set_value(x);
-      const DenseVector g_0 = g.value();
-      const SparseMatrix A_e_0 = A_e.value();
-      const SparseMatrix A_i_0 = A_i.value();
-
-      const Scalar grad_f_inf = g_0.template lpNorm<Eigen::Infinity>();
-      const Scalar d_f = std::min(Scalar(1), g_max / grad_f_inf);
-
-      const DenseVector d_c_e =
-          (g_max / sparse_inf_norms(A_e_0).array()).min(Scalar(1)).matrix();
-      const DenseVector d_c_i =
-          (g_max / sparse_inf_norms(A_i_0).array()).min(Scalar(1)).matrix();
+      const auto scaling = ProblemScaling<Scalar>::interior_point(g, A_e, A_i);
 
       InteriorPointMatrixCallbacks<Scalar> matrix_callbacks{
           num_decision_variables,
@@ -625,43 +608,43 @@ class Problem {
           num_inequality_constraints,
           [&](const DenseVector& x) -> Scalar {
             x_ad.set_value(x);
-            return d_f * f.value();
+            return scaling.f * f.value();
           },
           [&](const DenseVector& x) -> SparseVector {
             x_ad.set_value(x);
-            return d_f * g.value();
+            return scaling.f * g.value();
           },
           [&](const DenseVector& x, const DenseVector& y,
               const DenseVector& z) -> SparseMatrix {
             x_ad.set_value(x);
-            y_ad.set_value(d_c_e.cwiseProduct(y));
-            z_ad.set_value(d_c_i.cwiseProduct(z));
-            return d_f * H_f.value() + H_c.value();
+            y_ad.set_value(scaling.c_e.cwiseProduct(y));
+            z_ad.set_value(scaling.c_i.cwiseProduct(z));
+            return scaling.f * H_f.value() + H_c.value();
           },
           [&](const DenseVector& x, const DenseVector& y,
               const DenseVector& z) -> SparseMatrix {
             x_ad.set_value(x);
-            y_ad.set_value(d_c_e.cwiseProduct(y));
-            z_ad.set_value(d_c_i.cwiseProduct(z));
+            y_ad.set_value(scaling.c_e.cwiseProduct(y));
+            z_ad.set_value(scaling.c_i.cwiseProduct(z));
             return H_c.value();
           },
           [&](const DenseVector& x) -> DenseVector {
             x_ad.set_value(x);
-            return d_c_e.cwiseProduct(c_e_ad.value());
+            return scaling.c_e.cwiseProduct(c_e_ad.value());
           },
           [&](const DenseVector& x) -> SparseMatrix {
             x_ad.set_value(x);
-            return d_c_e.asDiagonal() * A_e.value();
+            return scaling.c_e.asDiagonal() * A_e.value();
           },
           [&](const DenseVector& x) -> DenseVector {
             x_ad.set_value(x);
-            return d_c_i.cwiseProduct(c_i_ad.value());
+            return scaling.c_i.cwiseProduct(c_i_ad.value());
           },
           [&](const DenseVector& x) -> SparseMatrix {
             x_ad.set_value(x);
-            return d_c_i.asDiagonal() * A_i.value();
+            return scaling.c_i.asDiagonal() * A_i.value();
           },
-          ProblemScaling<Scalar>{d_f, d_c_e, d_c_i}};
+          scaling};
 
       // Invoke interior-point method solver
       status =

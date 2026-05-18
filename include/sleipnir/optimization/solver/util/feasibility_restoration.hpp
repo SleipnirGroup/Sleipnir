@@ -287,7 +287,8 @@ ExitStatus feasibility_restoration(
         SparseMatrix A_i_p{2 * num_eq, x_p.rows()};
         A_i_p.setFromSortedTriplets(triplets.begin(), triplets.end());
         return A_i_p;
-      }};
+      },
+      ProblemScaling<Scalar>{}};
 
   auto status = interior_point<Scalar>(fr_matrix_callbacks, iteration_callbacks,
                                        options, true,
@@ -400,6 +401,15 @@ ExitStatus feasibility_restoration(
 
   Scalar fr_μ = std::max({μ, c_e.template lpNorm<Eigen::Infinity>(),
                           (c_i - s).template lpNorm<Eigen::Infinity>()});
+
+  // Inherit the parent problem's scaling for the constraints, and use no
+  // scaling for the objective function since it has changed. The new rows
+  // introduced are not scaled.
+  DenseVector fr_d_c_i{c_i.rows() + 2 * num_eq + 2 * num_ineq};
+  fr_d_c_i << matrices.scaling.c_i,
+      DenseVector::Ones(2 * num_eq + 2 * num_ineq);
+  const ProblemScaling<Scalar> fr_scaling{Scalar(1), matrices.scaling.c_e,
+                                          fr_d_c_i};
 
   InteriorPointMatrixCallbacks<Scalar> fr_matrix_callbacks{
       static_cast<int>(fr_x.rows()),
@@ -562,7 +572,8 @@ ExitStatus feasibility_restoration(
         SparseMatrix A_i_p{2 * num_eq + 3 * num_ineq, x_p.rows()};
         A_i_p.setFromSortedTriplets(triplets.begin(), triplets.end());
         return A_i_p;
-      }};
+      },
+      fr_scaling};
 
   auto status = interior_point<Scalar>(fr_matrix_callbacks, iteration_callbacks,
                                        options, true,
