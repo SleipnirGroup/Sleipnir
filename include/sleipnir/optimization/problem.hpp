@@ -30,6 +30,7 @@
 #include "sleipnir/optimization/solver/options.hpp"
 #include "sleipnir/optimization/solver/sqp.hpp"
 #include "sleipnir/optimization/solver/util/bounds.hpp"
+#include "sleipnir/optimization/solver/util/problem_scaling.hpp"
 #include "sleipnir/util/empty.hpp"
 #include "sleipnir/util/print.hpp"
 #include "sleipnir/util/print_diagnostics.hpp"
@@ -673,7 +674,8 @@ class Problem {
           [&](const DenseVector& x) -> SparseMatrix {
             x_ad.set_value(x);
             return d_c_i.asDiagonal() * A_i.value();
-          }};
+          },
+          ProblemScaling<Scalar>{d_f, d_c_e, d_c_i}};
 
       // Invoke interior-point method solver
       status =
