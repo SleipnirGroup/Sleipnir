@@ -24,8 +24,8 @@ enum class KKTErrorType {
 /// Returns the KKT error for Newton's method.
 ///
 /// @tparam Scalar Scalar type.
-/// @tparam T The type of KKT error to compute.
-/// @param g Gradient of the cost function ∇f.
+/// @tparam T Type of KKT error to compute.
+/// @param g Cost function gradient ∇f.
 template <typename Scalar, KKTErrorType T>
 Scalar kkt_error(const Eigen::Vector<Scalar, Eigen::Dynamic>& g) {
   // The KKT conditions from docs/algorithms.md:
@@ -42,12 +42,10 @@ Scalar kkt_error(const Eigen::Vector<Scalar, Eigen::Dynamic>& g) {
 /// Returns the KKT error for Sequential Quadratic Programming.
 ///
 /// @tparam Scalar Scalar type.
-/// @tparam T The type of KKT error to compute.
-/// @param g Gradient of the cost function ∇f.
-/// @param A_e The problem's equality constraint Jacobian Aₑ(x) evaluated at the
-///     current iterate.
-/// @param c_e The problem's equality constraints cₑ(x) evaluated at the current
-///     iterate.
+/// @tparam T Type of KKT error to compute.
+/// @param g Cost function gradient ∇f.
+/// @param A_e Equality constraint Jacobian Aₑ(x).
+/// @param c_e Equality constraints cₑ(x).
 /// @param y Equality constraint dual variables.
 template <typename Scalar, KKTErrorType T>
 Scalar kkt_error(const Eigen::Vector<Scalar, Eigen::Dynamic>& g,
@@ -81,16 +79,12 @@ Scalar kkt_error(const Eigen::Vector<Scalar, Eigen::Dynamic>& g,
 /// Returns the KKT error for the interior-point method.
 ///
 /// @tparam Scalar Scalar type.
-/// @tparam T The type of KKT error to compute.
-/// @param g Gradient of the cost function ∇f.
-/// @param A_e The problem's equality constraint Jacobian Aₑ(x) evaluated at the
-///     current iterate.
-/// @param c_e The problem's equality constraints cₑ(x) evaluated at the current
-///     iterate.
-/// @param A_i The problem's inequality constraint Jacobian Aᵢ(x) evaluated at
-///     the current iterate.
-/// @param c_i The problem's inequality constraints cᵢ(x) evaluated at the
-///     current iterate.
+/// @tparam T Type of KKT error to compute.
+/// @param g Cost function gradient ∇f.
+/// @param A_e Equality constraint Jacobian Aₑ(x).
+/// @param c_e Equality constraints cₑ(x).
+/// @param A_i Inequality constraint Jacobian Aᵢ(x).
+/// @param c_i Inequality constraints cᵢ(x).
 /// @param s Inequality constraint slack variables.
 /// @param y Equality constraint dual variables.
 /// @param z Inequality constraint dual variables.
@@ -154,9 +148,9 @@ Scalar kkt_error(const Eigen::Vector<Scalar, Eigen::Dynamic>& g,
 /// Returns the unscaled KKT error for Newton's method.
 ///
 /// @tparam Scalar Scalar type.
-/// @tparam T The type of KKT error to compute.
-/// @param scaling The problem scaling factors.
-/// @param g Gradient of the scaled cost function d_f·∇f.
+/// @tparam T Type of KKT error to compute.
+/// @param scaling Problem scaling.
+/// @param g Scaled cost function gradient d_f·∇f.
 template <typename Scalar, KKTErrorType T>
 Scalar unscaled_kkt_error(const ProblemScaling<Scalar>& scaling,
                           const Eigen::Vector<Scalar, Eigen::Dynamic>& g) {
@@ -174,13 +168,11 @@ Scalar unscaled_kkt_error(const ProblemScaling<Scalar>& scaling,
 /// Returns the unscaled KKT error for Sequential Quadratic Programming.
 ///
 /// @tparam Scalar Scalar type.
-/// @tparam T The type of KKT error to compute.
-/// @param scaling The problem scaling factors.
-/// @param g Gradient of the scaled cost function d_f·∇f.
-/// @param A_e The problem's scaled equality constraint Jacobian D_cₑ·Aₑ(x)
-///     evaluated at the current iterate.
-/// @param c_e The problem's scaled equality constraints D_cₑ·cₑ(x) evaluated
-///     at the current iterate.
+/// @tparam T Type of KKT error to compute.
+/// @param scaling Problem scaling.
+/// @param g Scaled cost function gradient d_f·∇f.
+/// @param A_e Scaled equality constraint Jacobian D_cₑ·Aₑ(x).
+/// @param c_e Scaled equality constraints D_cₑ·cₑ(x).
 /// @param y Scaled equality constraint dual variables.
 template <typename Scalar, KKTErrorType T>
 Scalar unscaled_kkt_error(const ProblemScaling<Scalar>& scaling,
@@ -210,17 +202,13 @@ Scalar unscaled_kkt_error(const ProblemScaling<Scalar>& scaling,
 /// Returns the unscaled KKT error for the interior-point method.
 ///
 /// @tparam Scalar Scalar type.
-/// @tparam T The type of KKT error to compute.
-/// @param scaling The problem scaling factors.
-/// @param g Gradient of the scaled cost function d_f·∇f.
-/// @param A_e The problem's scaled equality constraint Jacobian D_cₑ·Aₑ(x)
-///     evaluated at the current iterate.
-/// @param c_e The problem's scaled equality constraints D_cₑ·cₑ(x) evaluated at
-///     the current iterate.
-/// @param A_i The problem's scaled inequality constraint Jacobian D_cᵢ·Aᵢ(x)
-///     evaluated at the current iterate.
-/// @param c_i The problem's scaled inequality constraints D_cᵢ·cᵢ(x) evaluated
-///     at the current iterate.
+/// @tparam T Type of KKT error to compute.
+/// @param scaling Problem scaling.
+/// @param g Scaled cost function gradient d_f·∇f.
+/// @param A_e Scaled equality constraint Jacobian D_cₑ·Aₑ(x).
+/// @param c_e Scaled equality constraints D_cₑ·cₑ(x).
+/// @param A_i Scaled inequality constraint Jacobian D_cᵢ·Aᵢ(x).
+/// @param c_i Scaled inequality constraints D_cᵢ·cᵢ(x).
 /// @param s Scaled inequality constraint slack variables.
 /// @param y Scaled equality constraint dual variables.
 /// @param z Scaled inequality constraint dual variables.
