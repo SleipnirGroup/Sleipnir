@@ -132,7 +132,9 @@ ExitStatus newton(
 
   Filter<Scalar> filter;
 
-  RegularizedLDLT<Scalar> solver{matrices.num_decision_variables, 0};
+  RegularizedLDLT<Scalar> solver{
+      // Use sparse solver if lower triangle fills < 25% of system
+      H.nonZeros() < 0.25 * H.size(), matrices.num_decision_variables, 0};
 
   // Variables for determining when a step is acceptable
   constexpr Scalar α_reduction_factor(0.5);
