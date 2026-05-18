@@ -14,7 +14,7 @@ struct ProblemScaling {
   /// Type alias for dense vector.
   using DenseVector = Eigen::Vector<Scalar, Eigen::Dynamic>;
 
-  /// Objective scaling factor d_f.
+  /// Cost scaling factor d_f.
   Scalar f = Scalar(1);
 
   /// Equality constraint scaling factors d_cₑ.
