@@ -178,9 +178,9 @@ Scalar unscaled_kkt_error(const ProblemScaling<Scalar>& scaling,
 /// @param scaling The problem scaling factors.
 /// @param g Gradient of the scaled cost function d_f·∇f.
 /// @param A_e The problem's scaled equality constraint Jacobian D_cₑ·Aₑ(x)
-/// evaluated at the current iterate.
+///     evaluated at the current iterate.
 /// @param c_e The problem's scaled equality constraints D_cₑ·cₑ(x) evaluated
-/// at the current iterate.
+///     at the current iterate.
 /// @param y Scaled equality constraint dual variables.
 template <typename Scalar, KKTErrorType T>
 Scalar unscaled_kkt_error(const ProblemScaling<Scalar>& scaling,
@@ -214,13 +214,13 @@ Scalar unscaled_kkt_error(const ProblemScaling<Scalar>& scaling,
 /// @param scaling The problem scaling factors.
 /// @param g Gradient of the scaled cost function d_f·∇f.
 /// @param A_e The problem's scaled equality constraint Jacobian D_cₑ·Aₑ(x)
-/// evaluated at the current iterate.
-/// @param c_e The problem's scaled equality constraints D_cₑ(x) evaluated at
-/// the current iterate.
-/// @param A_i The problem's scaled inequality constraint Jacobian D_cᵢ·(x)
-/// evaluated at the current iterate.
+///     evaluated at the current iterate.
+/// @param c_e The problem's scaled equality constraints D_cₑ·cₑ(x) evaluated at
+///     the current iterate.
+/// @param A_i The problem's scaled inequality constraint Jacobian D_cᵢ·Aᵢ(x)
+///     evaluated at the current iterate.
 /// @param c_i The problem's scaled inequality constraints D_cᵢ·cᵢ(x) evaluated
-/// at the current iterate.
+///     at the current iterate.
 /// @param s Scaled inequality constraint slack variables.
 /// @param y Scaled equality constraint dual variables.
 /// @param z Scaled inequality constraint dual variables.
