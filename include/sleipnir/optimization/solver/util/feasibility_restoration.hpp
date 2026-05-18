@@ -169,6 +169,12 @@ ExitStatus feasibility_restoration(
 
   Scalar fr_μ = std::max(μ, c_e.template lpNorm<Eigen::Infinity>());
 
+  // Inherit the parent problem's scaling for the constraints, and use no
+  // scaling for the cost function since it has changed. The new rows introduced
+  // are not scaled.
+  const ProblemScaling<Scalar> fr_scaling{Scalar(1), matrices.scaling.c_e,
+                                          DenseVector::Ones(2 * num_eq)};
+
   InteriorPointMatrixCallbacks<Scalar> fr_matrix_callbacks{
       static_cast<int>(fr_x.rows()),
       static_cast<int>(fr_y.rows()),
@@ -288,7 +294,7 @@ ExitStatus feasibility_restoration(
         A_i_p.setFromSortedTriplets(triplets.begin(), triplets.end());
         return A_i_p;
       },
-      ProblemScaling<Scalar>{}};
+      fr_scaling};
 
   auto status = interior_point<Scalar>(fr_matrix_callbacks, iteration_callbacks,
                                        options, true,

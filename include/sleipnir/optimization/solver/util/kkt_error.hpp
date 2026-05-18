@@ -151,7 +151,63 @@ Scalar kkt_error(const Eigen::Vector<Scalar, Eigen::Dynamic>& g,
   }
 }
 
-/// Returns the interior-point KKT error of the unscaled problem.
+/// Returns the unscaled KKT error for Newton's method.
+///
+/// @tparam Scalar Scalar type.
+/// @tparam T The type of KKT error to compute.
+/// @param scaling The problem scaling factors.
+/// @param g Gradient of the scaled cost function d_f·∇f.
+template <typename Scalar, KKTErrorType T>
+Scalar unscaled_kkt_error(const ProblemScaling<Scalar>& scaling,
+                          const Eigen::Vector<Scalar, Eigen::Dynamic>& g) {
+  using DenseVector = Eigen::Vector<Scalar, Eigen::Dynamic>;
+
+  if (scaling.is_identity()) {
+    return kkt_error<Scalar, T>(g);
+  }
+
+  const DenseVector g_unscaled = (Scalar(1) / scaling.f) * g;
+
+  return kkt_error<Scalar, T>(g_unscaled);
+}
+
+/// Returns the unscaled KKT error for Sequential Quadratic Programming.
+///
+/// @tparam Scalar Scalar type.
+/// @tparam T The type of KKT error to compute.
+/// @param scaling The problem scaling factors.
+/// @param g Gradient of the scaled cost function d_f·∇f.
+/// @param A_e The problem's scaled equality constraint Jacobian D_cₑ·Aₑ(x)
+/// evaluated at the current iterate.
+/// @param c_e The problem's scaled equality constraints D_cₑ·cₑ(x) evaluated
+/// at the current iterate.
+/// @param y Scaled equality constraint dual variables.
+template <typename Scalar, KKTErrorType T>
+Scalar unscaled_kkt_error(const ProblemScaling<Scalar>& scaling,
+                          const Eigen::Vector<Scalar, Eigen::Dynamic>& g,
+                          const Eigen::SparseMatrix<Scalar>& A_e,
+                          const Eigen::Vector<Scalar, Eigen::Dynamic>& c_e,
+                          const Eigen::Vector<Scalar, Eigen::Dynamic>& y) {
+  using DenseVector = Eigen::Vector<Scalar, Eigen::Dynamic>;
+  using SparseMatrix = Eigen::SparseMatrix<Scalar>;
+
+  if (scaling.is_identity()) {
+    return kkt_error<Scalar, T>(g, A_e, c_e, y);
+  }
+
+  const Scalar inv_d_f = Scalar(1) / scaling.f;
+  const DenseVector inv_d_c_e = scaling.c_e.cwiseInverse();
+
+  const DenseVector g_unscaled = inv_d_f * g;
+  const SparseMatrix A_e_unscaled = inv_d_c_e.asDiagonal() * A_e;
+  const DenseVector c_e_unscaled = inv_d_c_e.cwiseProduct(c_e);
+  const DenseVector y_unscaled = scaling.c_e.cwiseProduct(y) * inv_d_f;
+
+  return kkt_error<Scalar, T>(g_unscaled, A_e_unscaled, c_e_unscaled,
+                              y_unscaled);
+}
+
+/// Returns the unscaled KKT error for the interior-point method.
 ///
 /// @tparam Scalar Scalar type.
 /// @tparam T The type of KKT error to compute.

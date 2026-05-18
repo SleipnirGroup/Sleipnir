@@ -376,20 +376,26 @@ class Problem {
       }
 #endif
 
+      // Automatically scale the cost. The problem scaling procedure is
+      // described in more detail in docs/algorithms.md#problem-scaling.
+      x_ad.set_value(x);
+      const ProblemScaling<Scalar> scaling{g.value()};
+
       NewtonMatrixCallbacks<Scalar> matrix_callbacks{
           num_decision_variables,
           [&](const DenseVector& x) -> Scalar {
             x_ad.set_value(x);
-            return f.value();
+            return scaling.f * f.value();
           },
           [&](const DenseVector& x) -> SparseVector {
             x_ad.set_value(x);
-            return g.value();
+            return scaling.f * g.value();
           },
           [&](const DenseVector& x) -> SparseMatrix {
             x_ad.set_value(x);
-            return H.value();
-          }};
+            return scaling.f * H.value();
+          },
+          scaling};
 
       // Invoke Newton solver
       status =
@@ -464,35 +470,42 @@ class Problem {
       }
 #endif
 
+      // Automatically scale the cost and constraints. The problem scaling
+      // procedure is described in more detail in
+      // docs/algorithms.md#problem-scaling.
+      x_ad.set_value(x);
+      const ProblemScaling<Scalar> scaling{g.value(), A_e.value()};
+
       SQPMatrixCallbacks<Scalar> matrix_callbacks{
           num_decision_variables,
           num_equality_constraints,
           [&](const DenseVector& x) -> Scalar {
             x_ad.set_value(x);
-            return f.value();
+            return scaling.f * f.value();
           },
           [&](const DenseVector& x) -> SparseVector {
             x_ad.set_value(x);
-            return g.value();
+            return scaling.f * g.value();
           },
           [&](const DenseVector& x, const DenseVector& y) -> SparseMatrix {
             x_ad.set_value(x);
-            y_ad.set_value(y);
-            return H_f.value() + H_c.value();
+            y_ad.set_value(scaling.c_e.cwiseProduct(y));
+            return scaling.f * H_f.value() + H_c.value();
           },
           [&](const DenseVector& x, const DenseVector& y) -> SparseMatrix {
             x_ad.set_value(x);
-            y_ad.set_value(y);
+            y_ad.set_value(scaling.c_e.cwiseProduct(y));
             return H_c.value();
           },
           [&](const DenseVector& x) -> DenseVector {
             x_ad.set_value(x);
-            return c_e_ad.value();
+            return scaling.c_e.cwiseProduct(c_e_ad.value());
           },
           [&](const DenseVector& x) -> SparseMatrix {
             x_ad.set_value(x);
-            return A_e.value();
-          }};
+            return scaling.c_e.asDiagonal() * A_e.value();
+          },
+          scaling};
 
       // Invoke SQP solver
       status = sqp<Scalar>(matrix_callbacks, iteration_callbacks, options, x);

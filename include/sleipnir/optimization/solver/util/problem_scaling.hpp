@@ -45,6 +45,42 @@ struct ProblemScaling {
   ProblemScaling(Scalar f, const DenseVector& c_e, const DenseVector& c_i)
       : f{f}, c_e{c_e}, c_i{c_i} {}
 
+  /// Computes Newton problem scaling.
+  ///
+  /// Scales the cost so the largest gradient component at the starting point
+  /// is at most gₘₐₓ:
+  ///
+  ///   d_f = min(1, gₘₐₓ / ‖∇f(x₀)‖_∞)
+  ///
+  /// See §3.8 Automatic Scaling of the Problem Statement in [2].
+  ///
+  /// @param g Cost gradient ∇f, evaluated at the starting point.
+  explicit ProblemScaling(const DenseVector& g) {
+    constexpr Scalar g_max(100);
+
+    f = std::min(Scalar(1), g_max / g.template lpNorm<Eigen::Infinity>());
+  }
+
+  /// Computes SQP problem scaling.
+  ///
+  /// Scales the cost and each equality constraint so the largest gradient
+  /// component at the starting point is at most gₘₐₓ:
+  ///
+  ///   d_f     = min(1, gₘₐₓ / ‖∇f(x₀)‖_∞)
+  ///   d_cₑ[j] = min(1, gₘₐₓ / ‖∇cₑⱼ(x₀)‖_∞)
+  ///
+  /// See §3.8 Automatic Scaling of the Problem Statement in [2].
+  ///
+  /// @param g Cost gradient ∇f, evaluated at the starting point.
+  /// @param A_e Equality constraint Jacobian Aₑ, evaluated at the starting
+  ///    point.
+  ProblemScaling(const DenseVector& g, const SparseMatrix& A_e) {
+    constexpr Scalar g_max(100);
+
+    f = std::min(Scalar(1), g_max / g.template lpNorm<Eigen::Infinity>());
+    c_e = (g_max / sparse_inf_norms(A_e).array()).min(Scalar(1)).matrix();
+  }
+
   /// Computes interior-point problem scaling.
   ///
   /// Scales the cost and each constraint so the largest gradient

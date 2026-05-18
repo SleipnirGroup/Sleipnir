@@ -7,6 +7,8 @@
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
 
+#include "sleipnir/optimization/solver/util/problem_scaling.hpp"
+
 namespace slp {
 
 /// Matrix callbacks for the Newton's method solver.
@@ -90,6 +92,10 @@ struct NewtonMatrixCallbacks {
   ///   </tr>
   /// </table>
   std::function<SparseMatrix(const DenseVector& x)> H;
+
+  /// Automatic problem scaling factors. Used to scale the cost and tolerance
+  /// inside the Newton solver.
+  ProblemScaling<Scalar> scaling;
 };
 
 }  // namespace slp

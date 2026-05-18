@@ -102,7 +102,8 @@ ExitStatus newton(
       [&](const DenseVector& x) -> SparseMatrix {
         ScopedProfiler prof{H_prof};
         return matrix_callbacks.H(x);
-      }};
+      },
+      matrix_callbacks.scaling};
 #else
   const auto& matrices = matrix_callbacks;
 #endif
@@ -139,7 +140,8 @@ ExitStatus newton(
   constexpr Scalar α_min(1e-20);
 
   // Error
-  Scalar E_0 = kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(g);
+  Scalar E_0 = unscaled_kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(
+      matrices.scaling, g);
 
   setup_prof.stop();
 
@@ -253,7 +255,8 @@ ExitStatus newton(
     H = matrices.H(x);
 
     // Update the error
-    E_0 = kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(g);
+    E_0 = unscaled_kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(
+        matrices.scaling, g);
 
     inner_iter_profiler.stop();
 

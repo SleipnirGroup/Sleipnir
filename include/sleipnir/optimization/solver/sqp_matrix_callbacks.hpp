@@ -7,6 +7,8 @@
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
 
+#include "sleipnir/optimization/solver/util/problem_scaling.hpp"
+
 namespace slp {
 
 /// Matrix callbacks for the Sequential Quadratic Programming (SQP) solver.
@@ -175,6 +177,10 @@ struct SQPMatrixCallbacks {
   ///   </tr>
   /// </table>
   std::function<SparseMatrix(const DenseVector& x)> A_e;
+
+  /// Automatic problem scaling factors. Used to scale the cost, constraints,
+  /// and tolerance inside the SQP solver.
+  ProblemScaling<Scalar> scaling;
 };
 
 }  // namespace slp
