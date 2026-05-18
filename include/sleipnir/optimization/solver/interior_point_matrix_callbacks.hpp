@@ -7,6 +7,8 @@
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
 
+#include "sleipnir/optimization/solver/util/problem_scaling.hpp"
+
 namespace slp {
 
 /// Matrix callbacks for the interior-point method solver.
@@ -241,6 +243,10 @@ struct InteriorPointMatrixCallbacks {
   ///   </tr>
   /// </table>
   std::function<SparseMatrix(const DenseVector& x)> A_i;
+
+  /// Automatic problem scaling factors. Used to scale the cost, constraints,
+  /// and tolerance inside the interior-point solver.
+  ProblemScaling<Scalar> scaling;
 };
 
 }  // namespace slp

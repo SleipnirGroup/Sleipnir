@@ -175,7 +175,8 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
       [&](const DenseVector& x) -> SparseMatrix {
         ScopedProfiler prof{A_e_prof};
         return matrix_callbacks.A_e(x);
-      }};
+      },
+      matrix_callbacks.scaling};
 #else
   const auto& matrices = matrix_callbacks;
 #endif
@@ -239,7 +240,8 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
   int full_step_rejected_counter = 0;
 
   // Error
-  Scalar E_0 = kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(g, A_e, c_e, y);
+  Scalar E_0 = unscaled_kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(
+      matrices.scaling, g, A_e, c_e, y);
 
   setup_prof.stop();
 
@@ -555,7 +557,8 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
     H = matrices.H(x, y);
 
     // Update the error
-    E_0 = kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(g, A_e, c_e, y);
+    E_0 = unscaled_kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(
+        matrices.scaling, g, A_e, c_e, y);
 
     inner_iter_profiler.stop();
 

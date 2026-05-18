@@ -76,7 +76,7 @@ ExitStatus interior_point(
   DenseVector y = DenseVector::Zero(matrix_callbacks.num_equality_constraints);
   DenseVector z =
       DenseVector::Ones(matrix_callbacks.num_inequality_constraints);
-  Scalar μ(0.1);
+  Scalar μ = Scalar(0.1) * matrix_callbacks.scaling.f;
 
   return interior_point(matrix_callbacks, iteration_callbacks, options, false,
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
@@ -231,7 +231,8 @@ ExitStatus interior_point(
       [&](const DenseVector& x) -> SparseMatrix {
         ScopedProfiler prof{A_i_prof};
         return matrix_callbacks.A_i(x);
-      }};
+      },
+      matrix_callbacks.scaling};
 #else
   const auto& matrices = matrix_callbacks;
 #endif
@@ -290,7 +291,8 @@ ExitStatus interior_point(
   int iterations = 0;
 
   // Barrier parameter minimum
-  const Scalar μ_min = Scalar(options.tolerance) / Scalar(10);
+  const Scalar μ_min =
+      matrices.scaling.f * Scalar(options.tolerance) / Scalar(10);
 
   // Fraction-to-the-boundary rule scale factor minimum
   constexpr Scalar τ_min(0.99);
@@ -356,8 +358,8 @@ ExitStatus interior_point(
   int full_step_rejected_counter = 0;
 
   // Error
-  Scalar E_0 = kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(
-      g, A_e, c_e, A_i, c_i, s, y, z, Scalar(0));
+  Scalar E_0 = unscaled_kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(
+      matrices.scaling, g, A_e, c_e, A_i, c_i, s, y, z, Scalar(0));
 
   setup_prof.stop();
 
@@ -569,9 +571,9 @@ ExitStatus interior_point(
                   step_acceptable ? IterationType::ACCEPTED_SOC
                                   : IterationType::REJECTED_SOC,
                   soc_profiler.current_duration(),
-                  kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(
-                      g, A_e, trial_c_e, A_i, trial_c_i, trial_s, trial_y,
-                      trial_z, Scalar(0)),
+                  unscaled_kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(
+                      matrices.scaling, g, A_e, trial_c_e, A_i, trial_c_i,
+                      trial_s, trial_y, trial_z, Scalar(0)),
                   trial_f,
                   trial_c_e.template lpNorm<1>() +
                       (trial_c_i - trial_s).template lpNorm<1>(),
@@ -781,8 +783,8 @@ ExitStatus interior_point(
     H = matrices.H(x, y, z);
 
     // Update the error
-    E_0 = kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(
-        g, A_e, c_e, A_i, c_i, s, y, z, Scalar(0));
+    E_0 = unscaled_kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(
+        matrices.scaling, g, A_e, c_e, A_i, c_i, s, y, z, Scalar(0));
 
     // Update the barrier parameter if necessary
     if (E_0 > Scalar(options.tolerance)) {
