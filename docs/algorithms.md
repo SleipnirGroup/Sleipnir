@@ -465,29 +465,29 @@ The Hessian of the scaled Lagrangian with respect to `x` is:
 Recall that the original KKT matrix is:
 
 ```
-[∇²ₓₓL  Aᵀ]
-[  A    0 ]
+  [∇²ₓₓL  Aᵀ]
+  [  A    0 ]
 ```
 
 Scaling the KKT matrix for this problem gives:
 
 ```
-[D_x⁻¹ ∇²ₓₓL D_x⁻¹  D_x⁻¹ Aᵀ D_c]
-[   D_c A D_x⁻¹          0      ]
+  [D_x⁻¹ ∇²ₓₓL D_x⁻¹  D_x⁻¹ Aᵀ D_c]
+  [   D_c A D_x⁻¹          0      ]
 ```
 
 With `D_x = I`, this reduces to:
 
 ```
-[∇²ₓₓL  Aᵀ D_c]
-[D_c A    0   ]
+  [∇²ₓₓL  Aᵀ D_c]
+  [D_c A    0   ]
 ```
 
 Expanding `∇²ₓₓL` yields:
 
 ```
-[d_f ∇²ₓₓf + Σᵢ (D_c λ)ᵢ ∇²ₓₓcᵢ    Aᵀ D_c]
-[            D_c A                   0   ]
+  [d_f ∇²ₓₓf + Σᵢ (D_c λ)ᵢ ∇²ₓₓcᵢ    Aᵀ D_c]
+  [            D_c A                   0   ]
 ```
 
 where `D_c A` replaces `A` and `d_f ∇²ₓₓf + Σᵢ (D_c λ)ᵢ ∇²ₓₓcᵢ` replaces `∇²ₓₓf + ∇²ₓₓc` in the original KKT matrix.

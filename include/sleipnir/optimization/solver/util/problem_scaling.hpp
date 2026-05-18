@@ -47,7 +47,7 @@ struct ProblemScaling {
 
   /// Computes interior-point problem scaling.
   ///
-  /// Scales the objective and each constraint so the largest gradient
+  /// Scales the cost and each constraint so the largest gradient
   /// component at the starting point is at most gₘₐₓ:
   ///
   ///   d_f    = min(1, gₘₐₓ / ‖∇f(x₀)‖_∞)
@@ -57,9 +57,9 @@ struct ProblemScaling {
   ///
   /// @param g Cost gradient ∇f, evaluated at the starting point.
   /// @param A_e Equality constraint Jacobian Aₑ, evaluated at the starting
-  ///            point.
+  ///    point.
   /// @param A_i Inequality constraint Jacobian Aᵢ, evaluated at the starting
-  ///            point.
+  ///    point.
   ProblemScaling(const DenseVector& g, const SparseMatrix& A_e,
                  const SparseMatrix& A_i) {
     constexpr Scalar g_max(100);
