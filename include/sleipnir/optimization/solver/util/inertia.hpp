@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <limits>
+
 #include <Eigen/Core>
 
 namespace slp {
@@ -36,9 +38,9 @@ class Inertia {
   template <typename Scalar>
   explicit Inertia(const Eigen::Vector<Scalar, Eigen::Dynamic>& D) {
     for (const auto& elem : D) {
-      if (elem > Scalar(0)) {
+      if (elem > std::numeric_limits<Scalar>::epsilon()) {
         ++positive;
-      } else if (elem < Scalar(0)) {
+      } else if (elem < -std::numeric_limits<Scalar>::epsilon()) {
         ++negative;
       } else {
         ++zero;
@@ -56,9 +58,9 @@ class Inertia {
       const Eigen::Diagonal<
           const Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>>& D) {
     for (const auto& elem : D) {
-      if (elem > Scalar(0)) {
+      if (elem > std::numeric_limits<Scalar>::epsilon()) {
         ++positive;
-      } else if (elem < Scalar(0)) {
+      } else if (elem < -std::numeric_limits<Scalar>::epsilon()) {
         ++negative;
       } else {
         ++zero;
