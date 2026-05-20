@@ -116,6 +116,17 @@ class RegularizedLDLT {
     }
   }
 
+  /// Returns the constraint Jacobian regularization factor.
+  ///
+  /// @return Constraint Jacobian regularization factor.
+  Scalar constraint_jacobian_regularization() const {
+    if (m_use_sparse_solver) {
+      return m_sparse_solver.constraint_jacobian_regularization();
+    } else {
+      return m_dense_solver.constraint_jacobian_regularization();
+    }
+  }
+
  private:
   bool m_use_sparse_solver;
   SparseRegularizedLDLT<Scalar> m_sparse_solver;
