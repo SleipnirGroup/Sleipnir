@@ -557,6 +557,8 @@ ExitStatus interior_point(
         Scalar α_z_soc = α_z;
         DenseVector c_e_soc = c_e;
 
+        Scalar soc_constraint_violation = next_constraint_violation;
+
         bool step_acceptable = false;
         for (int soc_iteration = 0; soc_iteration < 5 && !step_acceptable;
              ++soc_iteration) {
@@ -612,6 +614,16 @@ ExitStatus interior_point(
           trial_c_e = matrices.c_e(trial_x);
           trial_c_i = matrices.c_i(trial_x);
 
+          // Check whether filter accepts trial iterate
+          FilterEntry trial_entry{trial_f, trial_s, trial_c_e, trial_c_i, μ};
+          if (filter.try_add(current_entry, trial_entry, step.p_x, g, α)) {
+            step = soc_step;
+            α = α_soc;
+            α_z = α_z_soc;
+            step_acceptable = true;
+            break;
+          }
+
           // Constraint violation scale factor for second-order corrections
           constexpr Scalar κ_soc(0.99);
 
@@ -620,18 +632,11 @@ ExitStatus interior_point(
           next_constraint_violation =
               trial_c_e.template lpNorm<1>() +
               (trial_c_i - trial_s).template lpNorm<1>();
-          if (next_constraint_violation > κ_soc * prev_constraint_violation) {
+          if (next_constraint_violation > κ_soc * soc_constraint_violation) {
             break;
           }
 
-          // Check whether filter accepts trial iterate
-          FilterEntry trial_entry{trial_f, trial_s, trial_c_e, trial_c_i, μ};
-          if (filter.try_add(current_entry, trial_entry, step.p_x, g, α)) {
-            step = soc_step;
-            α = α_soc;
-            α_z = α_z_soc;
-            step_acceptable = true;
-          }
+          soc_constraint_violation = next_constraint_violation;
         }
 
         if (step_acceptable) {
