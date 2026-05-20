@@ -83,6 +83,7 @@ class SparseRegularizedLDLT {
       if (Inertia{D} == ideal_inertia &&
           (D.cwiseAbs().array() >= Scalar(1e-4)).all()) {
         m_prev_δ = Scalar(0);
+        m_prev_γ = Scalar(0);
         return *this;
       }
     }
@@ -104,6 +105,7 @@ class SparseRegularizedLDLT {
         if (inertia == ideal_inertia) {
           // If the inertia is ideal, report success
           m_prev_δ = δ;
+          m_prev_γ = γ;
           return *this;
         } else if (inertia.zero > 0) {
           if (γ == Scalar(0)) {
@@ -131,6 +133,8 @@ class SparseRegularizedLDLT {
       // caused by ill-conditioning.
       if (δ > Scalar(1e20) || γ > Scalar(1e20)) {
         m_info = Eigen::NumericalIssue;
+        m_prev_δ = δ;
+        m_prev_γ = γ;
         return *this;
       }
     }
@@ -159,6 +163,11 @@ class SparseRegularizedLDLT {
   /// @return Hessian regularization factor.
   Scalar hessian_regularization() const { return m_prev_δ; }
 
+  /// Returns the constraint Jacobian regularization factor.
+  ///
+  /// @return Constraint Jacobian regularization factor.
+  Scalar constraint_jacobian_regularization() const { return m_prev_γ; }
+
  private:
   using Solver = Eigen::SimplicialLDLT<SparseMatrix>;
 
@@ -182,6 +191,9 @@ class SparseRegularizedLDLT {
 
   /// The value of δ from the previous run of compute().
   Scalar m_prev_δ{0};
+
+  /// The value of γ from the previous run of compute().
+  Scalar m_prev_γ{0};
 
   /// Returns regularization matrix.
   ///

@@ -267,6 +267,7 @@ ExitStatus newton(
           iterations, IterationType::NORMAL,
           inner_iter_profiler.current_duration(), E_0, f, Scalar(0), Scalar(0),
           Scalar(0), solver.hessian_regularization(),
+          solver.constraint_jacobian_regularization(),
           p_x.template lpNorm<Eigen::Infinity>(), Scalar(1), α, α_max,
           α_reduction_factor, Scalar(1));
     }
