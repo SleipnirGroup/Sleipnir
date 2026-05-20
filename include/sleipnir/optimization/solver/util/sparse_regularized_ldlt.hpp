@@ -102,26 +102,27 @@ class SparseRegularizedLDLT {
         Inertia inertia{m_solver.vectorD()};
 
         if (inertia == ideal_inertia) {
-          // If the inertia is ideal, store δ and return
+          // If the inertia is ideal, report success
           m_prev_δ = δ;
           return *this;
         } else if (inertia.zero > 0) {
-          // If there's zero eigenvalues, increase δ and γ by an order of
-          // magnitude and try again
-          δ *= Scalar(10);
-          γ *= Scalar(10);
+          if (γ == Scalar(0)) {
+            // If there's zero eigenvalues and γ = 0, increase γ
+            γ = Scalar(1e-10);
+          } else {
+            // If there's zero eigenvalues and γ > 0, increase δ and γ
+            δ *= Scalar(10);
+            γ *= Scalar(10);
+          }
         } else if (inertia.negative > ideal_inertia.negative) {
-          // If there's too many negative eigenvalues, increase δ by an order of
-          // magnitude and try again
+          // If there's too many negative eigenvalues, increase δ
           δ *= Scalar(10);
         } else if (inertia.positive > ideal_inertia.positive) {
-          // If there's too many positive eigenvalues, increase γ by an order of
-          // magnitude and try again
+          // If there's too many positive eigenvalues, increase γ
           γ = γ == Scalar(0) ? Scalar(1e-10) : γ * Scalar(10);
         }
       } else {
-        // If the decomposition failed, increase δ and γ by an order of
-        // magnitude and try again
+        // If the decomposition failed, increase δ and γ
         δ *= Scalar(10);
         γ *= Scalar(10);
       }
