@@ -383,6 +383,8 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
         Scalar α_soc = α;
         DenseVector c_e_soc = c_e;
 
+        Scalar soc_constraint_violation = next_constraint_violation;
+
         bool step_acceptable = false;
         for (int soc_iteration = 0; soc_iteration < 5 && !step_acceptable;
              ++soc_iteration) {
@@ -425,23 +427,26 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
           trial_f = matrices.f(trial_x);
           trial_c_e = matrices.c_e(trial_x);
 
+          // Check whether the filter accepts trial iterate
+          FilterEntry trial_entry{trial_f, trial_c_e};
+          if (filter.try_add(current_entry, trial_entry, step.p_x, g, α)) {
+            step = soc_step;
+            α = α_soc;
+            step_acceptable = true;
+            break;
+          }
+
           // Constraint violation scale factor for second-order corrections
           constexpr Scalar κ_soc(0.99);
 
           // If constraint violation hasn't been sufficiently reduced, stop
           // making second-order corrections
           next_constraint_violation = trial_c_e.template lpNorm<1>();
-          if (next_constraint_violation > κ_soc * prev_constraint_violation) {
+          if (next_constraint_violation > κ_soc * soc_constraint_violation) {
             break;
           }
 
-          // Check whether filter accepts trial iterate
-          FilterEntry trial_entry{trial_f, trial_c_e};
-          if (filter.try_add(current_entry, trial_entry, step.p_x, g, α)) {
-            step = soc_step;
-            α = α_soc;
-            step_acceptable = true;
-          }
+          soc_constraint_violation = next_constraint_violation;
         }
 
         if (step_acceptable) {
