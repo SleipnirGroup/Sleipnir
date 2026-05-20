@@ -166,6 +166,7 @@ ExitStatus feasibility_restoration(
 
   DenseVector fr_y = DenseVector::Zero(num_eq);
 
+  // Force the duals to start with perfect complementarity with the slacks
   DenseVector fr_z{2 * num_eq};
   fr_z << fr_μ * p_e_0.cwiseInverse(), fr_μ * n_e_0.cwiseInverse();
 
@@ -385,7 +386,6 @@ ExitStatus feasibility_restoration(
 
   Scalar fr_μ = std::max({μ, c_e.template lpNorm<Eigen::Infinity>(),
                           (c_i - s).template lpNorm<Eigen::Infinity>()});
-
   const Scalar ζ = sqrt(fr_μ);
 
   const auto& x_r = x;
