@@ -146,12 +146,14 @@ ExitStatus feasibility_restoration(
 
   constexpr Scalar ρ(1e3);
   const Scalar μ(options.tolerance / 10.0);
-  const Scalar ζ = sqrt(μ);
 
   const DenseVector c_e = matrices.c_e(x);
 
+  Scalar fr_μ = std::max(μ, c_e.template lpNorm<Eigen::Infinity>());
+  const Scalar ζ = sqrt(fr_μ);
+
   const auto& x_r = x;
-  const auto [p_e_0, n_e_0] = compute_p_n(c_e, ρ, μ);
+  const auto [p_e_0, n_e_0] = compute_p_n(c_e, ρ, fr_μ);
 
   // Dᵣ = diag(min(1, 1/xᵣ[i]²) for i in x.rows())
   const DiagonalMatrix D_r =
@@ -164,10 +166,9 @@ ExitStatus feasibility_restoration(
 
   DenseVector fr_y = DenseVector::Zero(num_eq);
 
+  // Force the duals to start with perfect complementarity with the slacks
   DenseVector fr_z{2 * num_eq};
-  fr_z << μ * p_e_0.cwiseInverse(), μ * n_e_0.cwiseInverse();
-
-  Scalar fr_μ = std::max(μ, c_e.template lpNorm<Eigen::Infinity>());
+  fr_z << fr_μ * p_e_0.cwiseInverse(), fr_μ * n_e_0.cwiseInverse();
 
   // Inherit the parent problem's scaling for the constraints, and use no
   // scaling for the cost function since it has changed. The new rows introduced
@@ -379,14 +380,17 @@ ExitStatus feasibility_restoration(
   const auto& num_ineq = matrices.num_inequality_constraints;
 
   constexpr Scalar ρ(1e3);
-  const Scalar ζ = sqrt(μ);
 
   const DenseVector c_e = matrices.c_e(x);
   const DenseVector c_i = matrices.c_i(x);
 
+  Scalar fr_μ = std::max({μ, c_e.template lpNorm<Eigen::Infinity>(),
+                          (c_i - s).template lpNorm<Eigen::Infinity>()});
+  const Scalar ζ = sqrt(fr_μ);
+
   const auto& x_r = x;
-  const auto [p_e_0, n_e_0] = compute_p_n(c_e, ρ, μ);
-  const auto [p_i_0, n_i_0] = compute_p_n((c_i - s).eval(), ρ, μ);
+  const auto [p_e_0, n_e_0] = compute_p_n(c_e, ρ, fr_μ);
+  const auto [p_i_0, n_i_0] = compute_p_n((c_i - s).eval(), ρ, fr_μ);
 
   // Dᵣ = diag(min(1, 1/xᵣ[i]²) for i in x.rows())
   const DiagonalMatrix D_r =
@@ -401,12 +405,11 @@ ExitStatus feasibility_restoration(
 
   DenseVector fr_y = DenseVector::Zero(c_e.rows());
 
+  // Force the duals to start with perfect complementarity with the slacks
   DenseVector fr_z{c_i.rows() + 2 * num_eq + 2 * num_ineq};
-  fr_z << z.cwiseMin(ρ), μ * p_e_0.cwiseInverse(), μ * n_e_0.cwiseInverse(),
-      μ * p_i_0.cwiseInverse(), μ * n_i_0.cwiseInverse();
-
-  Scalar fr_μ = std::max({μ, c_e.template lpNorm<Eigen::Infinity>(),
-                          (c_i - s).template lpNorm<Eigen::Infinity>()});
+  fr_z << fr_μ * s.cwiseInverse(), fr_μ * p_e_0.cwiseInverse(),
+      fr_μ * n_e_0.cwiseInverse(), fr_μ * p_i_0.cwiseInverse(),
+      fr_μ * n_i_0.cwiseInverse();
 
   // Inherit the parent problem's scaling for the constraints, and use no
   // scaling for the cost function since it has changed. The new rows introduced
