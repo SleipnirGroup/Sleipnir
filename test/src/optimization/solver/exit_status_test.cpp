@@ -1,8 +1,11 @@
 // Copyright (c) Sleipnir contributors
 
+#include <format>
+
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <sleipnir/optimization/problem.hpp>
+#include <sleipnir/optimization/solver/exit_status.hpp>
 
 #include "catch_string_converters.hpp"
 #include "scalar_types_under_test.hpp"
@@ -226,4 +229,29 @@ TEMPLATE_TEST_CASE("ExitStatus - Timeout", "[ExitStatus]",
 
   CHECK(problem.solve({.timeout = 0s, .diagnostics = true}) ==
         slp::ExitStatus::TIMEOUT);
+}
+
+TEST_CASE("ExitStatus - Formatter", "[Formatter]") {
+  CHECK(std::format("{}", slp::ExitStatus::SUCCESS) == "success");
+  CHECK(std::format("{}", slp::ExitStatus::CALLBACK_REQUESTED_STOP) ==
+        "callback requested stop");
+  CHECK(std::format("{}", slp::ExitStatus::TOO_FEW_DOFS) ==
+        "too few degrees of freedom");
+  CHECK(std::format("{}", slp::ExitStatus::LOCALLY_INFEASIBLE) ==
+        "locally infeasible");
+  CHECK(std::format("{}", slp::ExitStatus::GLOBALLY_INFEASIBLE) ==
+        "globally infeasible");
+  CHECK(std::format("{}", slp::ExitStatus::FACTORIZATION_FAILED) ==
+        "factorization failed");
+  CHECK(std::format("{}", slp::ExitStatus::LINE_SEARCH_FAILED) ==
+        "line search failed");
+  CHECK(std::format("{}", slp::ExitStatus::FEASIBILITY_RESTORATION_FAILED) ==
+        "feasibility restoration failed");
+  CHECK(std::format("{}", slp::ExitStatus::NONFINITE_INITIAL_GUESS) ==
+        "nonfinite initial guess");
+  CHECK(std::format("{}", slp::ExitStatus::DIVERGING_ITERATES) ==
+        "diverging iterates");
+  CHECK(std::format("{}", slp::ExitStatus::MAX_ITERATIONS_EXCEEDED) ==
+        "max iterations exceeded");
+  CHECK(std::format("{}", slp::ExitStatus::TIMEOUT) == "timeout");
 }
