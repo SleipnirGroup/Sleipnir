@@ -128,3 +128,41 @@ jobs:
 
       - name: Run clang-tidy
         run: wpiformat -no-format -tidy-all -compile-commands=build -tidy-extra-args std=c++23
+
+  rustfmt:
+    name: "cargo fmt"
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: rust
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install Rust toolchain
+        run: |
+          rustup update stable
+          rustup default stable
+          rustup component add rustfmt
+
+      - name: Run cargo fmt
+        run: cargo fmt --all -- --check
+
+      - name: Generate diff
+        run: |
+          cargo fmt --all
+          git diff HEAD > ../cargo-fmt-fixes.patch
+        if: ${{ failure() }}
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: cargo fmt fixes
+          path: cargo-fmt-fixes.patch
+        if: ${{ failure() }}
+
+      - name: Write to job summary
+        run: |
+          echo '```diff' >> $GITHUB_STEP_SUMMARY
+          cat ../cargo-fmt-fixes.patch >> $GITHUB_STEP_SUMMARY
+          echo '' >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+        if: ${{ failure() }}
