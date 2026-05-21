@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <format>
 #include <limits>
 
 #include <Eigen/Core>
@@ -75,3 +76,37 @@ class Inertia {
 };
 
 }  // namespace slp
+
+/// Formatter for Inertia.
+template <>
+struct std::formatter<slp::Inertia> {
+  /// Parses format string.
+  ///
+  /// @param ctx Format parse context.
+  /// @return Format parse context iterator.
+  constexpr auto parse(std::format_parse_context& ctx) {
+    return m_underlying.parse(ctx);
+  }
+
+  /// Formats Inertia.
+  ///
+  /// @tparam FmtContext Format context type.
+  /// @param inertia Inertia.
+  /// @param ctx Format context.
+  /// @return Format context iterator.
+  template <typename FmtContext>
+  auto format(const slp::Inertia& inertia, FmtContext& ctx) const {
+    auto out = ctx.out();
+
+    out = std::format_to(out, "(");
+    out = m_underlying.format(inertia.positive, ctx);
+    out = std::format_to(out, ", ");
+    out = m_underlying.format(inertia.negative, ctx);
+    out = std::format_to(out, ", ");
+    out = m_underlying.format(inertia.zero, ctx);
+    return std::format_to(out, ")");
+  }
+
+ private:
+  std::formatter<int> m_underlying;
+};
