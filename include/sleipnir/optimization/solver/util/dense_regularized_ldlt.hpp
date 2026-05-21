@@ -110,7 +110,7 @@ class DenseRegularizedLDLT {
       } else {
         // If the decomposition failed, increase δ and γ
         δ *= Scalar(10);
-        γ *= Scalar(10);
+        γ = γ == Scalar(0) ? Scalar(1e-10) : γ * Scalar(10);
       }
 
       // If the Hessian perturbation is too high, report failure. This can be
