@@ -393,11 +393,9 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
           scope_exit soc_exit{[&] {
             soc_profiler.stop();
 
-            if (options.diagnostics) {
+            if (options.diagnostics && step_acceptable) {
               print_iteration_diagnostics(
-                  iterations,
-                  step_acceptable ? IterationType::ACCEPTED_SOC
-                                  : IterationType::REJECTED_SOC,
+                  iterations, IterationType::SECOND_ORDER_CORRECTION,
                   soc_profiler.current_duration(),
                   kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(
                       g, A_e, trial_c_e, trial_y),

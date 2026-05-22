@@ -120,8 +120,7 @@ The headings are defined as follows:
     <td>Iteration number with one of the suffixes below denoting the iteration type
       <ul>
         <li>` ` = normal</li>
-        <li>`s` = accepted second-order correction</li>
-        <li>`x` = rejected second-order correction</li>
+        <li>`s` = second-order correction</li>
         <li>`r` = feasibility restoration</li>
       </ul>
     </td>
