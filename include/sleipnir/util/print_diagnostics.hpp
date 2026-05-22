@@ -24,10 +24,8 @@ namespace slp {
 enum class IterationType : uint8_t {
   /// Normal iteration.
   NORMAL,
-  /// Accepted second-order correction iteration.
-  ACCEPTED_SOC,
-  /// Rejected second-order correction iteration.
-  REJECTED_SOC,
+  /// Second-order correction iteration.
+  SECOND_ORDER_CORRECTION,
   /// Feasibility restoration iteration.
   FEASIBILITY_RESTORATION
 };
@@ -228,7 +226,7 @@ void print_iteration_diagnostics(int iterations, IterationType type,
   int backtracks =
       static_cast<int>(log(primal_α / primal_α_max) / log(α_reduction_factor));
 
-  constexpr std::array ITERATION_TYPES{" ", "s", "x", "r"};
+  constexpr std::array ITERATION_TYPES{" ", "s", "r"};
   slp::println(
       "│{:4} {:1} {:9.3f} {:.4e} {:11.4e} {:.4e} {:.2e} {:.2e} {:<5} {:<5} "
       "{:.2e} {:.2e} {:.2e} {:.2e} {:2d}│",
