@@ -33,7 +33,7 @@ ExitStatus interior_point(
     Eigen::Vector<Scalar, Eigen::Dynamic>& x,
     Eigen::Vector<Scalar, Eigen::Dynamic>& s,
     Eigen::Vector<Scalar, Eigen::Dynamic>& y,
-    Eigen::Vector<Scalar, Eigen::Dynamic>& z, Scalar& μ);
+    Eigen::Vector<Scalar, Eigen::Dynamic>& z, Scalar& μ, int& iterations);
 
 /// Computes initial values for p and n in feasibility restoration.
 ///
@@ -109,6 +109,7 @@ compute_p_n(const Eigen::Vector<Scalar, Eigen::Dynamic>& c, Scalar ρ,
 /// @param[in,out] x The decision variables from the normal solve.
 /// @param[in,out] y The equality constraint dual variables from the normal
 ///     solve.
+/// @param[in,out] iterations The iteration counter.
 /// @return The exit status.
 template <typename Scalar>
 ExitStatus feasibility_restoration(
@@ -116,7 +117,7 @@ ExitStatus feasibility_restoration(
     std::span<std::function<bool(const IterationInfo<Scalar>& info)>>
         iteration_callbacks,
     const Options& options, Eigen::Vector<Scalar, Eigen::Dynamic>& x,
-    Eigen::Vector<Scalar, Eigen::Dynamic>& y) {
+    Eigen::Vector<Scalar, Eigen::Dynamic>& y, int& iterations) {
   // Feasibility restoration
   //
   //        min  ρ Σ (pₑ + nₑ) + ζ/2 (x - xᵣ)ᵀDᵣ(x - xᵣ)
@@ -297,12 +298,12 @@ ExitStatus feasibility_restoration(
       },
       fr_scaling};
 
-  auto status = interior_point<Scalar>(fr_matrix_callbacks, iteration_callbacks,
-                                       options, true,
+  auto status = interior_point<Scalar>(
+      fr_matrix_callbacks, iteration_callbacks, options, true,
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
-                                       {},
+      {},
 #endif
-                                       fr_x, fr_s, fr_y, fr_z, fr_μ);
+      fr_x, fr_s, fr_y, fr_z, fr_μ, iterations);
 
   x = fr_x.segment(0, x.rows());
 
@@ -337,6 +338,7 @@ ExitStatus feasibility_restoration(
 /// @param[in,out] z The current inequality constraint duals from the normal
 ///     solve.
 /// @param[in] μ Barrier parameter.
+/// @param[in,out] iterations The iteration counter.
 /// @return The exit status.
 template <typename Scalar>
 ExitStatus feasibility_restoration(
@@ -346,7 +348,7 @@ ExitStatus feasibility_restoration(
     const Options& options, Eigen::Vector<Scalar, Eigen::Dynamic>& x,
     Eigen::Vector<Scalar, Eigen::Dynamic>& s,
     Eigen::Vector<Scalar, Eigen::Dynamic>& y,
-    Eigen::Vector<Scalar, Eigen::Dynamic>& z, Scalar μ) {
+    Eigen::Vector<Scalar, Eigen::Dynamic>& z, Scalar μ, int& iterations) {
   // Feasibility restoration
   //
   //        min  ρ Σ (pₑ + nₑ + pᵢ + nᵢ) + ζ/2 (x - xᵣ)ᵀDᵣ(x - xᵣ)
@@ -584,12 +586,12 @@ ExitStatus feasibility_restoration(
       },
       fr_scaling};
 
-  auto status = interior_point<Scalar>(fr_matrix_callbacks, iteration_callbacks,
-                                       options, true,
+  auto status = interior_point<Scalar>(
+      fr_matrix_callbacks, iteration_callbacks, options, true,
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
-                                       {},
+      {},
 #endif
-                                       fr_x, fr_s, fr_y, fr_z, fr_μ);
+      fr_x, fr_s, fr_y, fr_z, fr_μ, iterations);
 
   x = fr_x.segment(0, x.rows());
   s = fr_s.segment(0, s.rows());
