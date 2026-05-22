@@ -100,13 +100,13 @@ The headings are defined as follows:
 
 After the solver takes each step, it prints a row of iteration diagnostics in a table format.
 ```
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃iter type duration    error       cost      infeas.   complem.    μ       δ     γ    |p_pr|   |p_du|    α_pr     α_du   ↩ ┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-│   0 norm     0.016 1.7998e-03 -1.0800e+02 6.0167e-10 0.00e+00 0.00e+00 10⁻⁴  10⁻¹⁰ 1.80e+01 6.00e+00 1.00e+00 1.00e+00  0│
-│   1 norm     0.003 1.1997e-07 -1.0800e+02 9.9476e-14 0.00e+00 0.00e+00 10⁻⁴  10⁻¹⁰ 2.40e-03 1.00e-03 1.00e+00 1.00e+00  0│
-│   2 norm     0.002 4.9987e-12 -1.0800e+02 0.0000e+00 0.00e+00 0.00e+00 10⁻⁴  10⁻¹⁰ 2.00e-07 5.33e-08 1.00e+00 1.00e+00  0│
-└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃iter   duration    error       cost      infeas.   complem.    μ       δ     γ    |p_pr|   |p_du|    α_pr     α_du   ↩ ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│   0       0.016 1.7998e-03 -1.0800e+02 6.0167e-10 0.00e+00 0.00e+00 10⁻⁴  10⁻¹⁰ 1.80e+01 6.00e+00 1.00e+00 1.00e+00  0│
+│   1       0.003 1.1997e-07 -1.0800e+02 9.9476e-14 0.00e+00 0.00e+00 10⁻⁴  10⁻¹⁰ 2.40e-03 1.00e-03 1.00e+00 1.00e+00  0│
+│   2       0.002 4.9987e-12 -1.0800e+02 0.0000e+00 0.00e+00 0.00e+00 10⁻⁴  10⁻¹⁰ 2.00e-07 5.33e-08 1.00e+00 1.00e+00  0│
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 The headings are defined as follows:
@@ -117,16 +117,12 @@ The headings are defined as follows:
   </tr>
   <tr>
     <td>iter</td>
-    <td>Iteration number</td>
-  </tr>
-  <tr>
-    <td>type</td>
-    <td>Iteration type
+    <td>Iteration number with one of the suffixes below denoting the iteration type
       <ul>
-        <li>`norm` = normal</li>
-        <li>`✓SOC` = accepted second-order correction</li>
-        <li>`XSOC` = rejected second-order correction</li>
-        <li>`rest` = feasibility restoration</li>
+        <li>` ` = normal</li>
+        <li>`s` = accepted second-order correction</li>
+        <li>`x` = rejected second-order correction</li>
+        <li>`r` = feasibility restoration</li>
       </ul>
     </td>
   </tr>

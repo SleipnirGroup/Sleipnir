@@ -202,16 +202,16 @@ void print_iteration_diagnostics(int iterations, IterationType type,
                                  Scalar α_reduction_factor, Scalar dual_α) {
   if (iterations % 20 == 0) {
     if (iterations == 0) {
-      slp::println("┏{:━^122}┓", "");
+      slp::println("┏{:━^119}┓", "");
     } else {
-      slp::println("┢{:━^122}┪", "");
+      slp::println("┢{:━^119}┪", "");
     }
     slp::println(
-        "┃{:^4} {:^4} {:^9} {:^10} {:^11} {:^10} {:^8} {:^8} {:^5} {:^5} {:^8} "
+        "┃{:^4}   {:^9} {:^10} {:^11} {:^10} {:^8} {:^8} {:^5} {:^5} {:^8} "
         "{:^8} {:^8} {:^8} {:^2}┃",
-        "iter", "type", "duration", "error", "cost", "infeas.", "complem.", "μ",
-        "δ", "γ", "|p_pr|", "|p_du|", "α_pr", "α_du", "↩");
-    slp::println("┡{:━^122}┩", "");
+        "iter", "duration", "error", "cost", "infeas.", "complem.", "μ", "δ",
+        "γ", "|p_pr|", "|p_du|", "α_pr", "α_du", "↩");
+    slp::println("┡{:━^119}┩", "");
   }
 
   // For the number of backtracks, we want x such that:
@@ -228,9 +228,9 @@ void print_iteration_diagnostics(int iterations, IterationType type,
   int backtracks =
       static_cast<int>(log(primal_α / primal_α_max) / log(α_reduction_factor));
 
-  constexpr std::array ITERATION_TYPES{"norm", "✓SOC", "XSOC", "rest"};
+  constexpr std::array ITERATION_TYPES{" ", "s", "x", "r"};
   slp::println(
-      "│{:4} {:4} {:9.3f} {:.4e} {:11.4e} {:.4e} {:.2e} {:.2e} {:<5} {:<5} "
+      "│{:4} {:1} {:9.3f} {:.4e} {:11.4e} {:.4e} {:.2e} {:.2e} {:<5} {:<5} "
       "{:.2e} {:.2e} {:.2e} {:.2e} {:2d}│",
       iterations, ITERATION_TYPES[std::to_underlying(type)], to_ms(time), error,
       cost, infeasibility, complementarity, μ, power_of_10(δ), power_of_10(γ),
@@ -244,7 +244,7 @@ void print_iteration_diagnostics(int iterations, IterationType type,
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
 /// Prints bottom of iteration diagnostics table.
 inline void print_bottom_iteration_diagnostics() {
-  slp::println("└{:─^122}┘", "");
+  slp::println("└{:─^119}┘", "");
 }
 #else
 #define print_bottom_iteration_diagnostics(...)
