@@ -8,8 +8,6 @@
 
 #include "sleipnir/optimization/solver/util/inertia.hpp"
 
-// See docs/algorithms.md#Works_cited for citation definitions
-
 namespace slp {
 
 /// Solves sparse systems of linear equations using a regularized LDLT
@@ -61,8 +59,6 @@ class SparseRegularizedLDLT {
   /// @param lhs Left-hand side of the system.
   /// @return The factorization.
   SparseRegularizedLDLT& compute(const SparseMatrix& lhs) {
-    // The regularization procedure is based on algorithm B.1 of [1]
-
     // Regularization with zeros ensures the pattern analysis in the sparse
     // solver is reused by all factorizations
     SparseMatrix unregularized_lhs = lhs + regularization(Scalar(0), Scalar(0));
@@ -88,11 +84,15 @@ class SparseRegularizedLDLT {
       }
     }
 
-    // Also regularize the Hessian. If the Hessian wasn't regularized in a
-    // previous run of compute(), start at small values of δ and γ. Otherwise,
-    // attempt a δ and γ half as big as the previous run so δ and γ can trend
-    // downwards over time.
+    // We'll give lhs the correct inertia by adding [δI, 0; 0, −γI] where δ and
+    // γ regularize the Hessian and equality constraint Jacobian respectively.
+
+    // If the previous δ was zero, attempt a small value. Otherwise, attempt a
+    // smaller value than the previous δ so δ trends downward.
     Scalar δ = m_prev_δ == Scalar(0) ? Scalar(1e-4) : m_prev_δ / Scalar(2);
+
+    // Start γ at the minimum to minimize equality constraint Jacobian
+    // distortion.
     Scalar γ = m_γ_min;
 
     while (true) {
@@ -109,28 +109,33 @@ class SparseRegularizedLDLT {
           return *this;
         } else if (inertia.zero > 0) {
           if (γ == Scalar(0)) {
-            // If there's zero eigenvalues and γ = 0, increase γ
+            // If there's zero eigenvalues and γ = 0, increase γ to potentially
+            // compensate for a rank-deficient equality constraint Jacobian
             γ = Scalar(1e-10);
           } else {
-            // If there's zero eigenvalues and γ > 0, increase δ and γ
+            // If there's zero eigenvalues and γ > 0, increase δ and γ to drive
+            // all eigenvalues away from zero
             δ *= Scalar(10);
             γ *= Scalar(10);
           }
         } else if (inertia.negative > ideal_inertia.negative) {
-          // If there's too many negative eigenvalues, increase δ
+          // If there's too many negative eigenvalues, increase δ to add more
+          // positive eigenvalues
           δ *= Scalar(10);
         } else if (inertia.positive > ideal_inertia.positive) {
-          // If there's too many positive eigenvalues, increase γ
+          // If there's too many positive eigenvalues, increase γ to add more
+          // negative eigenvalues
           γ = γ == Scalar(0) ? Scalar(1e-10) : γ * Scalar(10);
         }
       } else {
-        // If the decomposition failed, increase δ and γ
+        // If the decomposition failed, increase δ and γ to drive all
+        // eigenvalues away from zero
         δ *= Scalar(10);
         γ = γ == Scalar(0) ? Scalar(1e-10) : γ * Scalar(10);
       }
 
-      // If the Hessian perturbation is too high, report failure. This can be
-      // caused by ill-conditioning.
+      // If the lhs perturbation is too high, report failure. This can be caused
+      // by ill-conditioning.
       if (δ > Scalar(1e20) || γ > Scalar(1e20)) {
         m_info = Eigen::NumericalIssue;
         m_prev_δ = δ;
