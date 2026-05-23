@@ -77,12 +77,13 @@ ExitStatus interior_point(
   DenseVector z =
       DenseVector::Ones(matrix_callbacks.num_inequality_constraints);
   Scalar μ = Scalar(0.1) * matrix_callbacks.scaling.f;
+  int iterations = 0;
 
   return interior_point(matrix_callbacks, iteration_callbacks, options, false,
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
                         bound_constraint_mask,
 #endif
-                        x, s, y, z, μ);
+                        x, s, y, z, μ, iterations);
 }
 
 /// Finds the optimal solution to a nonlinear program using the interior-point
@@ -116,6 +117,7 @@ ExitStatus interior_point(
 ///     constraint dual variables.
 /// @param[in,out] μ The initial guess and output location for the barrier
 ///     parameter.
+/// @param[in,out] iterations The iteration counter.
 /// @return The exit status.
 template <typename Scalar>
 ExitStatus interior_point(
@@ -129,7 +131,7 @@ ExitStatus interior_point(
     Eigen::Vector<Scalar, Eigen::Dynamic>& x,
     Eigen::Vector<Scalar, Eigen::Dynamic>& s,
     Eigen::Vector<Scalar, Eigen::Dynamic>& y,
-    Eigen::Vector<Scalar, Eigen::Dynamic>& z, Scalar& μ) {
+    Eigen::Vector<Scalar, Eigen::Dynamic>& z, Scalar& μ, int& iterations) {
   using DenseVector = Eigen::Vector<Scalar, Eigen::Dynamic>;
   using SparseMatrix = Eigen::SparseMatrix<Scalar>;
   using SparseVector = Eigen::SparseVector<Scalar>;
@@ -287,8 +289,6 @@ ExitStatus interior_point(
   // We set sʲ = cᵢʲ(x) for each bound inequality constraint index j
   s = bound_constraint_mask.select(c_i, s);
 #endif
-
-  int iterations = 0;
 
   // Barrier parameter minimum
   const Scalar μ_min =
@@ -733,8 +733,8 @@ ExitStatus interior_point(
                    Scalar(0.9) * initial_entry.constraint_violation &&
                filter.try_add(initial_entry, trial_entry, trial_x - x, g, α);
       });
-      auto status = feasibility_restoration<Scalar>(matrices, callbacks,
-                                                    options, x, s, y, z, μ);
+      auto status = feasibility_restoration<Scalar>(
+          matrices, callbacks, options, x, s, y, z, μ, iterations);
 
       if (status != ExitStatus::SUCCESS) {
         // Report failure

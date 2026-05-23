@@ -531,8 +531,8 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
                    Scalar(0.9) * initial_entry.constraint_violation &&
                filter.try_add(initial_entry, trial_entry, trial_x - x, g, α);
       });
-      auto status =
-          feasibility_restoration<Scalar>(matrices, callbacks, options, x, y);
+      auto status = feasibility_restoration<Scalar>(matrices, callbacks,
+                                                    options, x, y, iterations);
 
       if (status != ExitStatus::SUCCESS) {
         // Report failure
