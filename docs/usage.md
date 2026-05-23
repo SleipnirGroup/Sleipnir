@@ -388,6 +388,27 @@ A problem is a quadratic program (QP) if:
 
 All other problems are nonlinear programs (NLPs).
 
+### Suppressing constant pruning
+
+Sleipnir aggressively simplifies constant expressions in the expression graph. This includes:
+
+* multiplication by 0 or 1
+* division by 1
+* addition or subtraction by 0
+* math functions evaluating constants
+
+If the user intends to reuse the problem formulation with different constants, the expression pruning can be suppressed in two ways.
+
+1. Make an empty (linear) `Variable`, then set its value. This can negatively impact autodiff caching.
+```python
+a = Variable()
+a.set_value(0)
+```
+2. Create a constant `Variable` with a value that won't be pruned (expression-dependent).
+```python
+a = Variable(2)
+```
+
 ### Avoiding numerical issues
 
 Instead of using distance (2-norm) for the cost function, use sum-of-squares. The distance calculation's square root is nonlinear and has a limited domain, whereas sum-of-squares has the same minimum, is quadratic, and has no domain restriction. In other words, use `minimize(x ** 2 + y ** 2 + z ** 2)` instead of `minimize(hypot(x, y, z))`.
