@@ -2,19 +2,14 @@
 
 ## Setup
 
-See the
-[Python installation instructions](https://sleipnirgroup.github.io/Sleipnir/#install).
+See the [Python installation instructions](https://sleipnirgroup.github.io/Sleipnir/#install).
 
 ## Introduction
 
-A system with position and velocity states and an acceleration input is an
-example of a double integrator. We want to go from 0 m at rest to 2 m at rest in
-the minimum time while obeying the velocity limit (-1, 1) and the acceleration
+A system with position and velocity states and an acceleration input is an example of a double integrator. We want to go from 0 m at rest to 2 m at rest in the minimum time while obeying the velocity limit (-1, 1) and the acceleration
 limit (-1, 1).
 
-The model for our double integrator is ẍ = u where x is the vector [position;
-velocity] and u is the acceleration. The velocity constraints are -1 ≤ x₁ ≤ 1
-and the acceleration constraints are -1 ≤ u ≤ 1.
+The model for our double integrator is ẍ = u where x is the vector [position; velocity] and u is the acceleration. The velocity constraints are -1 ≤ x₁ ≤ 1 and the acceleration constraints are -1 ≤ u ≤ 1.
 
 ## Importing required libraries
 
@@ -49,8 +44,7 @@ X = problem.decision_variable(2, N + 1)
 U = problem.decision_variable(1, N)
 ```
 
-By convention, we use capital letters for the variables to designate
-matrices.
+By convention, we use capital letters for the variables to designate matrices.
 
 ## Applying constraints
 
@@ -107,8 +101,7 @@ Now we can solve the problem.
 problem.solve()
 ```
 
-The solver will find the decision variable values that minimize the cost
-function while satisfying the constraints.
+The solver will find the decision variable values that minimize the cost function while satisfying the constraints.
 
 ## Accessing the solution
 
@@ -122,10 +115,4 @@ acceleration = U.value(0)
 
 ## Other applications
 
-In retrospect, the solution here seems obvious: if you want to reach the desired
-position in the minimum time, you just apply positive max input to accelerate to
-the max speed, coast for a while, then apply negative max input to decelerate to
-a stop at the desired position. Optimization problems can get more complex than
-this though. In fact, we can use this same framework to design optimal
-trajectories for a drivetrain while satisfying dynamics constraints, avoiding
-obstacles, and driving through points of interest.
+In retrospect, the solution here seems obvious: if you want to reach the desired position in the minimum time, you just apply positive max input to accelerate to the max speed, coast for a while, then apply negative max input to decelerate to a stop at the desired position. Optimization problems can get more complex than this though. In fact, we can use this same framework to design optimal trajectories for a drivetrain while satisfying dynamics constraints, avoiding obstacles, and driving through points of interest.

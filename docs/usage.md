@@ -363,11 +363,7 @@ Cost functions and constraints can have the following orders:
 * quadratic
 * nonlinear
 
-For nonlinear problems, the solver calculates the Hessian of the cost
-function and the Jacobians of the constraints at each iteration. However,
-problems with lower order cost functions and constraints can be solved
-faster. For example, the following only need to be computed once because
-they're constant:
+For nonlinear problems, the solver calculates the Hessian of the cost function and the Jacobians of the constraints at each iteration. However, problems with lower order cost functions and constraints can be solved faster. For example, the following only need to be computed once because they're constant:
 
 * the Hessian of a quadratic or lower cost function
 * the Jacobian of linear or lower constraints
@@ -394,22 +390,15 @@ All other problems are nonlinear programs (NLPs).
 
 ### Avoiding numerical issues
 
-Instead of using distance (2-norm) for the cost function, use sum-of-squares.
-The distance calculation's square root is nonlinear and has a limited domain,
-whereas sum-of-squares has the same minimum, is quadratic, and has no domain
-restriction. In other words, use `minimize(x ** 2 + y ** 2 + z ** 2)` instead of
-`minimize(hypot(x, y, z))`.
+Instead of using distance (2-norm) for the cost function, use sum-of-squares. The distance calculation's square root is nonlinear and has a limited domain, whereas sum-of-squares has the same minimum, is quadratic, and has no domain restriction. In other words, use `minimize(x ** 2 + y ** 2 + z ** 2)` instead of `minimize(hypot(x, y, z))`.
 
 ### Deduplicating autodiff work
 
-Store common subexpressions in intermediate variables and reuse them instead of
-writing out the subexpressions each time. This ensures common subexpressions in
-the expression tree are only traversed and updated once.
+Store common subexpressions in intermediate variables and reuse them instead of writing out the subexpressions each time. This ensures common subexpressions in the expression tree are only traversed and updated once.
 
 ### Minimum-time problems
 
-The obvious problem formulation for minimum-time problems uses one dt shared
-across all timesteps.
+The obvious problem formulation for minimum-time problems uses one dt shared across all timesteps.
 
 ```python
 import sleipnir as slp
@@ -434,13 +423,9 @@ problem.minimize(dt)
 
 problem.solve()
 ```
-The nonzero initial value for dt avoids a degenerate case, and the upper bound
-prevents the solver exploiting discretization artifacts.
+The nonzero initial value for dt avoids a degenerate case, and the upper bound prevents the solver exploiting discretization artifacts.
 
-This formulation can have feasibility issues though per section 15.3
-"Elimination of variables" of "Numerical Optimization, 2nd Ed.". Instead, we
-recommend using a separate dt for each timestep, with them all
-equality-constrained.
+This formulation can have feasibility issues though per section 15.3 "Elimination of variables" of "Numerical Optimization, 2nd Ed.". Instead, we recommend using a separate dt for each timestep, with them all equality-constrained.
 
 ```python
 import sleipnir as slp
