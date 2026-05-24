@@ -228,8 +228,8 @@ void print_iteration_diagnostics(int iterations, IterationType type,
 
   constexpr std::array ITERATION_TYPES{" ", "s", "r"};
   slp::println(
-      "│{:4} {:1} {:9.3f} {:.4e} {:11.4e} {:.4e} {:.2e} {:.2e} {:<5} {:<5} "
-      "{:.2e} {:.2e} {:.2e} {:.2e} {:2d}│",
+      "│{:4} {:1} {:9.3f} {:10.4e} {:11.4e} {:10.4e} {:8.2e} {:8.2e} {:<5} "
+      "{:<5} {:8.2e} {:8.2e} {:8.2e} {:8.2e} {:2d}│",
       iterations, ITERATION_TYPES[std::to_underlying(type)], to_ms(time), error,
       cost, infeasibility, complementarity, μ, power_of_10(δ), power_of_10(γ),
       full_primal_step_inf_norm, full_dual_step_inf_norm, primal_α, dual_α,
