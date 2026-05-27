@@ -733,8 +733,12 @@ ExitStatus interior_point(
                    Scalar(0.9) * initial_entry.constraint_violation &&
                filter.try_add(initial_entry, trial_entry, trial_x - x, g, α);
       });
-      auto status = feasibility_restoration<Scalar>(
-          matrices, callbacks, options, x, s, y, z, μ, iterations);
+      auto status =
+          feasibility_restoration<Scalar>(matrices, callbacks, options,
+#ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
+                                          bound_constraint_mask,
+#endif
+                                          x, s, y, z, μ, iterations);
 
       if (status != ExitStatus::SUCCESS) {
         // Report failure
