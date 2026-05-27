@@ -301,7 +301,7 @@ ExitStatus feasibility_restoration(
   auto status = interior_point<Scalar>(
       fr_matrix_callbacks, iteration_callbacks, options, true,
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
-      {},
+      Eigen::ArrayX<bool>::Constant(2 * num_eq, true),
 #endif
       fr_x, fr_s, fr_y, fr_z, fr_μ, iterations);
 
@@ -345,7 +345,11 @@ ExitStatus feasibility_restoration(
     const InteriorPointMatrixCallbacks<Scalar>& matrix_callbacks,
     std::span<std::function<bool(const IterationInfo<Scalar>& info)>>
         iteration_callbacks,
-    const Options& options, Eigen::Vector<Scalar, Eigen::Dynamic>& x,
+    const Options& options,
+#ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
+    const Eigen::ArrayX<bool>& bound_constraint_mask,
+#endif
+    Eigen::Vector<Scalar, Eigen::Dynamic>& x,
     Eigen::Vector<Scalar, Eigen::Dynamic>& s,
     Eigen::Vector<Scalar, Eigen::Dynamic>& y,
     Eigen::Vector<Scalar, Eigen::Dynamic>& z, Scalar μ, int& iterations) {
@@ -586,10 +590,16 @@ ExitStatus feasibility_restoration(
       },
       fr_scaling};
 
+#ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
+  Eigen::ArrayX<bool> fr_bound_constraint_mask{2 * num_eq + 3 * num_ineq};
+  fr_bound_constraint_mask.segment(0, num_ineq) = bound_constraint_mask;
+  fr_bound_constraint_mask.segment(num_ineq, 2 * num_eq + 2 * num_ineq) = true;
+#endif
+
   auto status = interior_point<Scalar>(
       fr_matrix_callbacks, iteration_callbacks, options, true,
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
-      {},
+      fr_bound_constraint_mask,
 #endif
       fr_x, fr_s, fr_y, fr_z, fr_μ, iterations);
 
