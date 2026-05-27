@@ -2,6 +2,9 @@
 
 #pragma once
 
+#include <algorithm>
+#include <limits>
+
 #include <Eigen/Core>
 #include <Eigen/SparseCholesky>
 #include <Eigen/SparseCore>
@@ -89,7 +92,10 @@ class SparseRegularizedLDLT {
 
     // If the previous δ was zero, attempt a small value. Otherwise, attempt a
     // smaller value than the previous δ so δ trends downward.
-    Scalar δ = m_prev_δ == Scalar(0) ? Scalar(1e-4) : m_prev_δ / Scalar(2);
+    Scalar δ = m_prev_δ == Scalar(0)
+                   ? Scalar(1e-4)
+                   : std::max(m_prev_δ / Scalar(2),
+                              std::numeric_limits<Scalar>::epsilon());
 
     // Start γ at the minimum to minimize equality constraint Jacobian
     // distortion.
