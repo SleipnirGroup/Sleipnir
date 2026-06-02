@@ -1679,11 +1679,11 @@ VariableMatrix<Scalar> gradient_tree(const ExpressionGraph<Scalar>& top_list,
     if (lhs != nullptr) {
       if (rhs != nullptr) {
         // Binary operator
-        lhs->adjoint_expr += node->grad_expr_l(lhs, rhs, node->adjoint_expr);
-        rhs->adjoint_expr += node->grad_expr_r(lhs, rhs, node->adjoint_expr);
+        lhs->adjoint_expr += node->grad_expr_l(lhs, rhs);
+        rhs->adjoint_expr += node->grad_expr_r(lhs, rhs);
       } else {
         // Unary operator
-        lhs->adjoint_expr += node->grad_expr_l(lhs, rhs, node->adjoint_expr);
+        lhs->adjoint_expr += node->grad_expr_l(lhs, rhs);
       }
     }
   }
