@@ -123,7 +123,7 @@ install(
     INCLUDES DESTINATION include
 )
 export(TARGETS Sleipnir FILE Sleipnir.cmake NAMESPACE Sleipnir::)
-install(DIRECTORY include/ COMPONENT Sleipnir DESTINATION "include")
+install(DIRECTORY include/ COMPONENT Sleipnir DESTINATION include)
 install(
     EXPORT SleipnirTargets
     FILE Sleipnir.cmake
@@ -135,7 +135,7 @@ install(
 configure_package_config_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/SleipnirConfig.cmake.in
     ${CMAKE_CURRENT_BINARY_DIR}/SleipnirConfig.cmake
-    INSTALL_DESTINATION "lib/cmake/Sleipnir"
+    INSTALL_DESTINATION lib/cmake/Sleipnir
     NO_SET_AND_CHECK_MACRO
     NO_CHECK_REQUIRED_COMPONENTS_MACRO
 )
