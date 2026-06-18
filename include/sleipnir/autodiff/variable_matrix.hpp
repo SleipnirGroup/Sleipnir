@@ -658,7 +658,7 @@ class VariableMatrix : public SleipnirBase {
   /// @return Result of multiplication.
   VariableMatrix& operator*=(const ScalarLike auto& rhs) {
     for (int row = 0; row < rows(); ++row) {
-      for (int col = 0; col < rhs.cols(); ++col) {
+      for (int col = 0; col < cols(); ++col) {
         (*this)[row, col] *= rhs;
       }
     }
