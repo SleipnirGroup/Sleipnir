@@ -276,7 +276,7 @@ if(SLEIPNIR_BUILD_PYTHON)
         FetchContent_Declare(
             nanobind
             GIT_REPOSITORY https://github.com/wjakob/nanobind.git
-            GIT_TAG v2.12.0
+            GIT_TAG v2.13.0
             GIT_SHALLOW ON
             EXCLUDE_FROM_ALL
             SYSTEM
