@@ -1,6 +1,6 @@
 import scipy.sparse
 
-from .._sleipnir.autodiff import *
+from .._sleipnir.autodiff import *  # noqa: F403
 
 
 def spy(mat: scipy.sparse.csc_matrix):

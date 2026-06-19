@@ -55,7 +55,7 @@ def plot_csv(filename: str) -> animation.FuncAnimation:
                 x = []
                 y = []
                 v = []
-        except:
+        except struct.error:
             pass
 
     print(" done.")

@@ -38,7 +38,7 @@ class DataSeries:
 def num_lines(filename):
     with open(filename) as f:
         i = 0
-        for i, l in enumerate(f):
+        for i, _ in enumerate(f):
             pass
     return i + 1
 
@@ -150,7 +150,7 @@ def main():
                 name_groups[name] = NameGroup(filename, data[:, i + 1 : i + 2])
 
         # Plot time domain datasets
-        print(f'  [vs time] {category} ({", ".join(unit_groups.keys())})')
+        print(f"  [vs time] {category} ({', '.join(unit_groups.keys())})")
         for unit, unit_group in unit_groups.items():
             fig, ax = plt.subplots(1, 1)
             ax.set_title(f"{category} ({unit})")

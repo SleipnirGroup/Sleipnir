@@ -1,6 +1,6 @@
 import concurrent.futures
 
-from .._sleipnir.optimization import *
+from .._sleipnir.optimization import *  # noqa: F403
 
 
 def multistart(solve, initial_guesses):
@@ -33,7 +33,7 @@ def multistart(solve, initial_guesses):
     return min(
         results,
         key=lambda x: (
-            int(x[0] != ExitStatus.SUCCESS),
+            int(x[0] != ExitStatus.SUCCESS),  # noqa: F405
             x[1],
         ),
     )

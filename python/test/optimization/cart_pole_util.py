@@ -30,7 +30,7 @@ from sleipnir.autodiff import Variable, VariableMatrix
 
 m_c = 5.0  # Cart mass (kg)
 m_p = 0.5  # Pole mass (kg)
-l = 0.5  # Pole length (m)
+l = 0.5  # Pole length (m)  # noqa: E741
 g = 9.806  # Acceleration due to gravity (m/s²)
 
 
