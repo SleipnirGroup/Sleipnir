@@ -20,7 +20,7 @@ def test_current_manager_not_enough_current():
 
     # Expected values are from the following program:
     #
-    # #!/usr/bin/env python3
+    # #!/usr/bin/env python
     #
     # from scipy.optimize import minimize
     #

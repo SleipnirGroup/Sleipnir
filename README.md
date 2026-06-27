@@ -32,7 +32,7 @@ int main() {
 ```
 
 ```python
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 from sleipnir.optimization import Problem
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 """
 Determines a robot pose from the corner pixel locations of several AprilTags.

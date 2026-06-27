@@ -54,9 +54,9 @@ jobs:
           # Minimum supported Python version
           python-version: 3.12
 
-      - run: python3 ./tools/update_version.py
-      - run: pip3 install build
-      - run: ${{ matrix.cmake-env }} python3 -m build --wheel
+      - run: python ./tools/update_version.py
+      - run: pip install build
+      - run: ${{ matrix.cmake-env }} python -m build --wheel
 
       - uses: actions/upload-artifact@v7
         with:
@@ -132,7 +132,7 @@ jobs:
           path: dist
           pattern: '${{ matrix.name }} wheel'
 
-      - run: pip3 install pytest dist/sleipnirgroup_jormungandr-*.whl
+      - run: pip install pytest dist/sleipnirgroup_jormungandr-*.whl
         shell: bash
       - run: pytest
         shell: bash
@@ -151,9 +151,9 @@ jobs:
         with:
           python-version: 3.14
 
-      - run: python3 ./tools/update_version.py
-      - run: pip3 install build
-      - run: python3 -m build --sdist
+      - run: python ./tools/update_version.py
+      - run: pip install build
+      - run: python -m build --sdist
 
       - uses: actions/upload-artifact@v7
         with:

@@ -28,7 +28,7 @@ jobs:
           echo "CXX=clang++" >> $GITHUB_ENV
           echo "CXXFLAGS=-stdlib=libc++" >> $GITHUB_ENV
 
-      - run: pip3 install --user --break-system-packages pybind11_mkdoc
+      - run: pip install --user --break-system-packages pybind11_mkdoc
 
       - run: cmake -B build -S . -DSLEIPNIR_BUILD_PYTHON=ON
 
@@ -75,7 +75,7 @@ jobs:
         with:
           python-version: 3.14
 
-      - run: pip3 install wpiformat==2026.64
+      - run: pip install wpiformat==2026.64
 
       - run: wpiformat
 
@@ -118,7 +118,7 @@ jobs:
         with:
           python-version: 3.14
 
-      - run: pip3 install wpiformat==2026.64
+      - run: pip install wpiformat==2026.64
 
       - name: Create compile_commands.json
         run: cmake -B build -S . -DCMAKE_EXPORT_COMPILE_COMMANDS=YES
