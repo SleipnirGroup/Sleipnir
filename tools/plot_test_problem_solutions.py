@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+
 """Finds latest versions of the solution CSVs for each test problem, then plots
 the time domain and X-Y data.
 

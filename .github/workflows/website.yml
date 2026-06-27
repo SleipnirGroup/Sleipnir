@@ -46,7 +46,7 @@ jobs:
         with:
           python-version: 3.14
 
-      - run: pip3 install pybind11-mkdoc
+      - run: pip install pybind11-mkdoc
       - run: sudo apt-get install -y doxygen
       - run: ./generate_website.py
         working-directory: ./docs

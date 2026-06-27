@@ -29,7 +29,7 @@ jobs:
         with:
           python-version: 3.14
 
-      - run: pip3 install \
+      - run: pip install \
           build \
           py-build-cmake \
           pybind11 \
