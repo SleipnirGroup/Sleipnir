@@ -213,6 +213,51 @@ def test_subslicing():
     ).all()
 
 
+def test_compound_assignment_operators():
+    A1 = VariableMatrix([[1]])
+    A2 = VariableMatrix([[1, 2], [3, 4]])
+    B = VariableMatrix([[1, 2], [3, 4]])
+    b = 2
+
+    # VariableMatrix matrix-matrix operators
+    A2 += B
+    assert (A2.value() == np.array([[2, 4], [6, 8]])).all()
+    A2 -= B
+    assert (A2.value() == np.array([[1, 2], [3, 4]])).all()
+    A2 *= B
+    assert (A2.value() == np.array([[7, 10], [15, 22]])).all()
+    A2.set_value(np.array([[1, 2], [3, 4]]))
+
+    # VariableBlock matrix-matrix operators
+    A2[:, :] += B
+    assert (A2.value() == np.array([[2, 4], [6, 8]])).all()
+    A2[:, :] -= B
+    assert (A2.value() == np.array([[1, 2], [3, 4]])).all()
+    A2[:, :] *= B
+    assert (A2.value() == np.array([[7, 10], [15, 22]])).all()
+    A2.set_value(np.array([[1, 2], [3, 4]]))
+
+    # VariableMatrix matrix-scalar operators
+    A1 += b
+    assert (A1.value() == np.array([[3]])).all()
+    A1 -= b
+    assert (A1.value() == np.array([[1]])).all()
+    A2 *= b
+    assert (A2.value() == np.array([[2, 4], [6, 8]])).all()
+    A2 /= b
+    assert (A2.value() == np.array([[1, 2], [3, 4]])).all()
+
+    # VariableBlock matrix-scalar operators
+    A2[:1, :1] += b
+    assert (A2.value() == np.array([[3, 2], [3, 4]])).all()
+    A2[:1, :1] -= b
+    assert (A2.value() == np.array([[1, 2], [3, 4]])).all()
+    A2[:, :] *= b
+    assert (A2.value() == np.array([[2, 4], [6, 8]])).all()
+    A2[:, :] /= b
+    assert (A2.value() == np.array([[1, 2], [3, 4]])).all()
+
+
 def test_iterators():
     A = VariableMatrix([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]])
     sub_A = A[2:3, 1:3]

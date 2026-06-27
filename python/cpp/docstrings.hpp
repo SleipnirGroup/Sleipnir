@@ -1383,15 +1383,6 @@ Parameter ``rhs``:
 Returns:
     Result of division.)doc";
 
-static const char *__doc_slp_VariableBlock_operator_idiv_2 =
-R"doc(Compound matrix division-assignment operator.
-
-Parameter ``rhs``:
-    Variable to divide.
-
-Returns:
-    Result of division.)doc";
-
 static const char *__doc_slp_VariableBlock_operator_imul =
 R"doc(Compound matrix multiplication-assignment operator.
 
