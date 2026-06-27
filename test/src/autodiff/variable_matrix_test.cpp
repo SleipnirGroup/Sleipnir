@@ -283,6 +283,54 @@ TEMPLATE_TEST_CASE("VariableMatrix - Subslicing", "[VariableMatrix]",
   }
 }
 
+TEMPLATE_TEST_CASE("VariableMatrix - Compound assignment operators",
+                   "[VariableMatrix]", SCALAR_TYPES_UNDER_TEST) {
+  using T = TestType;
+
+  slp::VariableMatrix<T> A1{{T(1)}};
+  slp::VariableMatrix<T> A2{{T(1), T(2)}, {T(3), T(4)}};
+  const slp::VariableMatrix<T> B{{T(1), T(2)}, {T(3), T(4)}};
+  const T b{2};
+
+  // VariableMatrix matrix-matrix operators
+  A2 += B;
+  CHECK(A2.value() == Eigen::Matrix<T, 2, 2>{{T(2), T(4)}, {T(6), T(8)}});
+  A2 -= B;
+  CHECK(A2.value() == Eigen::Matrix<T, 2, 2>{{T(1), T(2)}, {T(3), T(4)}});
+  A2 *= B;
+  CHECK(A2.value() == Eigen::Matrix<T, 2, 2>{{T(7), T(10)}, {T(15), T(22)}});
+  A2.set_value(Eigen::Matrix<T, 2, 2>{{T(1), T(2)}, {T(3), T(4)}});
+
+  // VariableBlock matrix-matrix operators
+  A2.block(0, 0, A2.rows(), A2.cols()) += B;
+  CHECK(A2.value() == Eigen::Matrix<T, 2, 2>{{T(2), T(4)}, {T(6), T(8)}});
+  A2.block(0, 0, A2.rows(), A2.cols()) -= B;
+  CHECK(A2.value() == Eigen::Matrix<T, 2, 2>{{T(1), T(2)}, {T(3), T(4)}});
+  A2.block(0, 0, A2.rows(), A2.cols()) *= B;
+  CHECK(A2.value() == Eigen::Matrix<T, 2, 2>{{T(7), T(10)}, {T(15), T(22)}});
+  A2.set_value(Eigen::Matrix<T, 2, 2>{{T(1), T(2)}, {T(3), T(4)}});
+
+  // VariableMatrix matrix-scalar operators
+  A1 += b;
+  CHECK(A1.value() == Eigen::Matrix<T, 1, 1>{{T(3)}});
+  A1 -= b;
+  CHECK(A1.value() == Eigen::Matrix<T, 1, 1>{{T(1)}});
+  A2 *= b;
+  CHECK(A2.value() == Eigen::Matrix<T, 2, 2>{{T(2), T(4)}, {T(6), T(8)}});
+  A2 /= b;
+  CHECK(A2.value() == Eigen::Matrix<T, 2, 2>{{T(1), T(2)}, {T(3), T(4)}});
+
+  // VariableBlock matrix-scalar operators
+  A2.block(0, 0, 1, 1) += b;
+  CHECK(A2.value() == Eigen::Matrix<T, 2, 2>{{T(3), T(2)}, {T(3), T(4)}});
+  A2.block(0, 0, 1, 1) -= b;
+  CHECK(A2.value() == Eigen::Matrix<T, 2, 2>{{T(1), T(2)}, {T(3), T(4)}});
+  A2.block(0, 0, A2.rows(), A2.cols()) *= b;
+  CHECK(A2.value() == Eigen::Matrix<T, 2, 2>{{T(2), T(4)}, {T(6), T(8)}});
+  A2.block(0, 0, A2.rows(), A2.cols()) /= b;
+  CHECK(A2.value() == Eigen::Matrix<T, 2, 2>{{T(1), T(2)}, {T(3), T(4)}});
+}
+
 TEMPLATE_TEST_CASE("VariableMatrix - Iterators", "[VariableMatrix]",
                    SCALAR_TYPES_UNDER_TEST) {
   using T = TestType;
