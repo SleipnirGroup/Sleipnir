@@ -81,6 +81,7 @@ cd Sleipnir
 pip install --user build
 
 # Build
+./tools/update_version.py
 python -m build --wheel
 
 # Install
