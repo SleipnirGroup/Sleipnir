@@ -1,11 +1,11 @@
 build*/
 *.csv
 *.png
+*.spy
 !benchmarks/*.csv
 !benchmarks/*.png
 !docs/logo/*.png
 perf.*
-.DS_Store
 
 # Visual Studio Code
 .vscode/settings.json
@@ -13,20 +13,11 @@ perf.*
 # CMake
 CMakeUserPresets.json
 
-# compile_commands
-compile_commands.json
-
-# clangd cache
-.clangd/
-.cache/
-
 # Python
 *.egg-info/
-.eggs/
 .py-build-cmake_cache/
-.pytest_cache/
-.tox/
 __pycache__/
 dist/
 
-*.spy
+# macOS
+.DS_Store
