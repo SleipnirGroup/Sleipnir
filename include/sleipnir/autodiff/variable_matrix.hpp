@@ -507,7 +507,7 @@ class VariableMatrix : public SleipnirBase {
       for (int j = 0; j < rhs.cols(); ++j) {
         Variable sum{Scalar(0)};
         for (int k = 0; k < lhs.cols(); ++k) {
-          sum += lhs(i, k) * rhs[k, j];
+          sum += lhs[i, k] * rhs[k, j];
         }
         result[i, j] = sum;
       }
@@ -530,7 +530,7 @@ class VariableMatrix : public SleipnirBase {
       for (int j = 0; j < rhs.cols(); ++j) {
         Variable sum{Scalar(0)};
         for (int k = 0; k < lhs.cols(); ++k) {
-          sum += lhs[i, k] * rhs(k, j);
+          sum += lhs[i, k] * rhs[k, j];
         }
         result[i, j] = sum;
       }
