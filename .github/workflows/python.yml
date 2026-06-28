@@ -156,6 +156,10 @@ jobs:
           python-version: 3.14
 
       - run: python ./tools/update_version.py
+        if: ${{ !(github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')) }}
+      - run: python ./tools/update_version.py --release
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+
       - run: pip install build
       - run: python -m build --sdist
 
