@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
-"""Finds latest versions of the solution CSVs for each test problem, then plots
-the time domain and X-Y data.
+"""
+Finds latest versions of the solution CSVs for each test problem, then plots the
+time domain and X-Y data.
 
 If provided, the first argument to this script is a filename regex that
 restricts which CSVs are plotted to those that match the regex.
