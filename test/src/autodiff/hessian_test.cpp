@@ -11,6 +11,7 @@
 #include <sleipnir/autodiff/hessian.hpp>
 #include <sleipnir/autodiff/jacobian.hpp>
 #include <sleipnir/autodiff/variable.hpp>
+#include <sleipnir/util/pool.hpp>
 #include <sleipnir/util/scope_exit.hpp>
 
 #include "catch_matchers.hpp"

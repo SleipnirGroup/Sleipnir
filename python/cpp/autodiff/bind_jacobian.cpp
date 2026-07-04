@@ -4,6 +4,8 @@
 #include <nanobind/nanobind.h>
 
 #include <sleipnir/autodiff/jacobian.hpp>
+#include <sleipnir/autodiff/variable.hpp>
+#include <sleipnir/autodiff/variable_matrix.hpp>
 
 #include "docstrings.hpp"
 

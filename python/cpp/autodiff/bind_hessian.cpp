@@ -4,6 +4,7 @@
 #include <nanobind/nanobind.h>
 
 #include <sleipnir/autodiff/hessian.hpp>
+#include <sleipnir/autodiff/variable.hpp>
 
 #include "docstrings.hpp"
 

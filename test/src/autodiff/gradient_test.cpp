@@ -6,8 +6,11 @@
 #include <Eigen/Core>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
 #include <sleipnir/autodiff/gradient.hpp>
+#include <sleipnir/autodiff/variable.hpp>
 #include <sleipnir/autodiff/variable_matrix.hpp>
+#include <sleipnir/util/pool.hpp>
 #include <sleipnir/util/scope_exit.hpp>
 
 #include "catch_matchers.hpp"

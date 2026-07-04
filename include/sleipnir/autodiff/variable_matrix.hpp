@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <concepts>
+#include <cstddef>
 #include <initializer_list>
 #include <iterator>
 #include <span>
@@ -14,6 +15,7 @@
 #include <Eigen/QR>
 #include <gch/small_vector.hpp>
 
+#include "sleipnir/autodiff/expression_graph.hpp"
 #include "sleipnir/autodiff/sleipnir_base.hpp"
 #include "sleipnir/autodiff/slice.hpp"
 #include "sleipnir/autodiff/variable.hpp"

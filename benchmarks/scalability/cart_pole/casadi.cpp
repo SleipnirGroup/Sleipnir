@@ -2,10 +2,12 @@
 
 #include "casadi.hpp"
 
+#include <chrono>
 #include <cmath>
 #include <numbers>
 
 #include <Eigen/Core>
+#include <casadi/casadi.hpp>
 
 #include "rk4.hpp"
 

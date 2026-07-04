@@ -1,6 +1,7 @@
 // Copyright (c) Sleipnir contributors
 
 #include <array>
+#include <cstddef>
 #include <print>
 
 #include "current_manager.hpp"

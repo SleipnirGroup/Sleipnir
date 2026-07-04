@@ -4,6 +4,8 @@
 #include <cmath>
 #include <print>
 
+#include <Eigen/Core>
+#include <sleipnir/autodiff/variable.hpp>
 #include <sleipnir/optimization/problem.hpp>
 
 #ifndef RUNNING_TESTS

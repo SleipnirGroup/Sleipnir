@@ -2,6 +2,7 @@
 
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <sleipnir/autodiff/expression_type.hpp>
 #include <sleipnir/autodiff/variable.hpp>
 
 #include "catch_string_converters.hpp"

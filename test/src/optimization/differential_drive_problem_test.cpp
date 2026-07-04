@@ -5,9 +5,16 @@
 #include <fstream>
 
 #include <Eigen/Core>
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <sleipnir/autodiff/expression_type.hpp>
+#include <sleipnir/autodiff/variable.hpp>
+#include <sleipnir/autodiff/variable_matrix.hpp>
 #include <sleipnir/optimization/problem.hpp>
+#include <sleipnir/optimization/solver/exit_status.hpp>
+#include <sleipnir/util/pool.hpp>
 #include <sleipnir/util/scope_exit.hpp>
 
 #include "catch_matchers.hpp"

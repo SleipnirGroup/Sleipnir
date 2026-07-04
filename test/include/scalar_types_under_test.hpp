@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <Eigen/Core>
 #include <sleipnir/autodiff/gradient.hpp>
 #include <sleipnir/autodiff/hessian.hpp>
 #include <sleipnir/autodiff/jacobian.hpp>

@@ -5,6 +5,9 @@
 #include <print>
 
 #include <Eigen/Core>
+#include <sleipnir/autodiff/slice.hpp>
+#include <sleipnir/autodiff/variable.hpp>
+#include <sleipnir/autodiff/variable_matrix.hpp>
 #include <sleipnir/optimization/problem.hpp>
 
 // FRC 2022 shooter trajectory optimization.

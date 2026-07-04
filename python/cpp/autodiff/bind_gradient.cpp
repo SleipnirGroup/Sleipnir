@@ -3,7 +3,9 @@
 #include <nanobind/eigen/sparse.h>
 #include <nanobind/nanobind.h>
 
+#include <Eigen/SparseCore>
 #include <sleipnir/autodiff/gradient.hpp>
+#include <sleipnir/autodiff/variable.hpp>
 
 #include "docstrings.hpp"
 

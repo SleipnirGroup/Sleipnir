@@ -2,6 +2,7 @@
 
 #include <Eigen/Core>
 #include <sleipnir/autodiff/variable.hpp>
+#include <sleipnir/autodiff/variable_block.hpp>
 #include <sleipnir/autodiff/variable_matrix.hpp>
 #include <sleipnir/util/concepts.hpp>
 

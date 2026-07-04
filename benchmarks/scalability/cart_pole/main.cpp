@@ -4,6 +4,9 @@
 #include <print>
 #include <vector>
 
+#include <casadi/casadi.hpp>
+#include <sleipnir/optimization/problem.hpp>
+
 #include "casadi.hpp"
 #include "cmdline_args.hpp"
 #include "sleipnir.hpp"

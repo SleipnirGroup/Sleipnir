@@ -5,7 +5,11 @@
 #include <print>
 
 #include <Eigen/Core>
+#include <sleipnir/autodiff/variable_matrix.hpp>
 #include <sleipnir/optimization/ocp.hpp>
+#include <sleipnir/optimization/ocp/dynamics_type.hpp>
+#include <sleipnir/optimization/ocp/timestep_method.hpp>
+#include <sleipnir/optimization/ocp/transcription_method.hpp>
 
 #ifndef RUNNING_TESTS
 int main() {
