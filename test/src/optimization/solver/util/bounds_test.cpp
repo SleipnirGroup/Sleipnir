@@ -2,10 +2,13 @@
 
 #include <algorithm>
 #include <array>
+#include <cmath>
+#include <cstddef>
 #include <limits>
 #include <utility>
 
 #define CATCH_CONFIG_ENABLE_PAIR_STRINGMAKER
+#include <Eigen/Core>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_tostring.hpp>

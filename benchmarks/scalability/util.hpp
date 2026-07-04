@@ -5,13 +5,16 @@
 #include <chrono>
 #include <concepts>
 #include <fstream>
+#include <ostream>
 #include <print>
+#include <ratio>
 #include <span>
 #include <string>
 #include <string_view>
 
 #include <casadi/casadi.hpp>
 #include <sleipnir/optimization/problem.hpp>
+#include <sleipnir/optimization/solver/exit_status.hpp>
 #include <sleipnir/util/function_ref.hpp>
 
 /// Converts std::chrono::duration to a number of milliseconds rounded to three

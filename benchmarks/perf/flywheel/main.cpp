@@ -4,6 +4,7 @@
 #include <cmath>
 
 #include <Eigen/Core>
+#include <sleipnir/autodiff/variable.hpp>
 #include <sleipnir/optimization/problem.hpp>
 
 #include "cmdline_args.hpp"

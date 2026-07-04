@@ -1,9 +1,12 @@
 // Copyright (c) Sleipnir contributors
 
+#include <cmath>
 #include <format>
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
 #include <sleipnir/autodiff/expression_type.hpp>
 #include <sleipnir/optimization/problem.hpp>
 #include <sleipnir/optimization/solver/exit_status.hpp>

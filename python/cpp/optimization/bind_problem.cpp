@@ -3,11 +3,16 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/function.h>
 
+#include <chrono>
 #include <format>
+#include <functional>
 #include <string>
 #include <utility>
 
+#include <sleipnir/autodiff/variable.hpp>
+#include <sleipnir/autodiff/variable_matrix.hpp>
 #include <sleipnir/optimization/problem.hpp>
+#include <sleipnir/optimization/solver/iteration_info.hpp>
 #include <sleipnir/optimization/solver/options.hpp>
 
 #include "docstrings.hpp"

@@ -1,8 +1,11 @@
 // Copyright (c) Sleipnir contributors
 
+#include <Eigen/Core>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <sleipnir/autodiff/expression_type.hpp>
 #include <sleipnir/optimization/problem.hpp>
+#include <sleipnir/optimization/solver/exit_status.hpp>
 
 #include "catch_string_converters.hpp"
 #include "scalar_types_under_test.hpp"

@@ -8,12 +8,21 @@
 #include <nanobind/stl/string.h>
 #include <nanobind/stl/vector.h>
 
+#include <stdint.h>
+
 #include <concepts>
 #include <format>
+#include <functional>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
+#include <Eigen/Core>
+#include <sleipnir/autodiff/slice.hpp>
+#include <sleipnir/autodiff/variable.hpp>
+#include <sleipnir/autodiff/variable_block.hpp>
 #include <sleipnir/autodiff/variable_matrix.hpp>
+#include <sleipnir/util/concepts.hpp>
 
 #include "docstrings.hpp"
 #include "for_each_type.hpp"

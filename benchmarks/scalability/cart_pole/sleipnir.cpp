@@ -2,10 +2,14 @@
 
 #include "sleipnir.hpp"
 
+#include <chrono>
 #include <cmath>
 #include <numbers>
 
 #include <Eigen/Core>
+#include <sleipnir/autodiff/variable.hpp>
+#include <sleipnir/autodiff/variable_matrix.hpp>
+#include <sleipnir/optimization/problem.hpp>
 
 #include "rk4.hpp"
 

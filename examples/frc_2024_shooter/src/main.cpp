@@ -6,6 +6,9 @@
 
 #include <Eigen/Core>
 #include <sleipnir/autodiff/gradient.hpp>
+#include <sleipnir/autodiff/slice.hpp>
+#include <sleipnir/autodiff/variable.hpp>
+#include <sleipnir/autodiff/variable_matrix.hpp>
 #include <sleipnir/optimization/problem.hpp>
 
 // FRC 2024 shooter trajectory optimization.

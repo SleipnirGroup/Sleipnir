@@ -3,6 +3,9 @@
 #include <nanobind/eigen/dense.h>
 #include <nanobind/nanobind.h>
 
+#include <Eigen/Core>
+#include <sleipnir/autodiff/expression_type.hpp>
+#include <sleipnir/autodiff/gradient.hpp>
 #include <sleipnir/autodiff/variable.hpp>
 #include <sleipnir/autodiff/variable_block.hpp>
 #include <sleipnir/autodiff/variable_matrix.hpp>

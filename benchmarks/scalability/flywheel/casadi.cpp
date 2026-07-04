@@ -2,9 +2,11 @@
 
 #include "casadi.hpp"
 
+#include <chrono>
 #include <cmath>
 
 #include <Eigen/Core>
+#include <casadi/casadi.hpp>
 
 casadi::Opti flywheel_casadi(std::chrono::duration<double> dt, int N) {
   // Flywheel model:

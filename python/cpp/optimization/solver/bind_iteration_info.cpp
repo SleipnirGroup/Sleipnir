@@ -4,6 +4,7 @@
 #include <nanobind/eigen/sparse.h>
 #include <nanobind/nanobind.h>
 
+#include <Eigen/SparseCore>
 #include <sleipnir/optimization/solver/iteration_info.hpp>
 
 #include "docstrings.hpp"

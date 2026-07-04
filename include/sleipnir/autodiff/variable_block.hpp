@@ -3,6 +3,8 @@
 #pragma once
 
 #include <concepts>
+#include <cstddef>
+#include <iterator>
 #include <type_traits>
 #include <utility>
 
@@ -12,6 +14,7 @@
 #include "sleipnir/autodiff/slice.hpp"
 #include "sleipnir/autodiff/variable.hpp"
 #include "sleipnir/util/assert.hpp"
+#include "sleipnir/util/concepts.hpp"
 #include "sleipnir/util/empty.hpp"
 #include "sleipnir/util/function_ref.hpp"
 

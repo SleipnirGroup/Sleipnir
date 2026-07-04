@@ -2,9 +2,12 @@
 
 #include "sleipnir.hpp"
 
+#include <chrono>
 #include <cmath>
 
 #include <Eigen/Core>
+#include <sleipnir/autodiff/variable.hpp>
+#include <sleipnir/optimization/problem.hpp>
 
 slp::Problem<double> flywheel_sleipnir(std::chrono::duration<double> dt,
                                        int N) {

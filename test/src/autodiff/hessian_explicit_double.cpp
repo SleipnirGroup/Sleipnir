@@ -1,5 +1,6 @@
 // Copyright (c) Sleipnir contributors
 
+#include <Eigen/Core>
 #include <sleipnir/autodiff/hessian.hpp>
 
 #include "explicit_double.hpp"
