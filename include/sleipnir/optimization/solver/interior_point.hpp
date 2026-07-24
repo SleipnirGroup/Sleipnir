@@ -498,8 +498,9 @@ ExitStatus interior_point(
 
     const FilterEntry<Scalar> current_entry{f, s, c_e, c_i, μ};
 
-    // Compute the directional derivative of the IPM cost function along the
-    // search direction by
+    // Compute the directional derivative of the log-barrier function along the
+    // search direction.
+    //
     // ϕ_μ(x, s) = f(x) − μ∑ᵢ ln(sᵢ)
     // D_ϕ = ∇ϕ_μ(x, s)ᵀ[pˣ pˢ] = ∇f(x)ᵀpˣ − μ∑ᵢ pᵢˢ/sᵢ
     const Scalar D_ϕ =
