@@ -307,102 +307,44 @@ Multiply the second row by S⁻¹ and replace S⁻¹Z with Σ.
   [Aᵢ  −I   0    0 ][−pᶻ]    [      cᵢ − s       ]
 ```
 
-Solve the second row for pˢ.
+Solve the fourth row for pˢ.
+
+```
+  Aᵢpˣ − pˢ = −(cᵢ − s)
+  pˢ = cᵢ − s + Aᵢpˣ
+```
+
+Solve the second row for pᶻ.
 
 ```
   Σpˢ + pᶻ = μS⁻¹e − z
-  Σpˢ = μS⁻¹e − z − pᶻ
-  pˢ = μΣ⁻¹S⁻¹e − Σ⁻¹z − Σ⁻¹pᶻ
+  pᶻ = μS⁻¹e − z − Σpˢ
 ```
 
-Substitute Σ = S⁻¹Z into the first two terms.
+Substitute pᶻ into the first row, expand, and cancel Aᵢᵀz from both sides.
 
 ```
-  pˢ = μ(S⁻¹Z)⁻¹S⁻¹e − (S⁻¹Z)⁻¹z − Σ⁻¹pᶻ
-  pˢ = μZ⁻¹SS⁻¹e − Z⁻¹Sz − Σ⁻¹pᶻ
-  pˢ = μZ⁻¹e − s − Σ⁻¹pᶻ
+  Hpˣ − Aₑᵀpʸ − Aᵢᵀ(μS⁻¹e − z − Σpˢ) = −∇f + Aₑᵀy + Aᵢᵀz
+  Hpˣ − Aₑᵀpʸ − AᵢᵀμS⁻¹e + Aᵢᵀz + AᵢᵀΣpˢ = −∇f + Aₑᵀy + Aᵢᵀz
+  Hpˣ − Aₑᵀpʸ − AᵢᵀμS⁻¹e + AᵢᵀΣpˢ = −∇f + Aₑᵀy
+  Hpˣ − Aₑᵀpʸ + AᵢᵀΣpˢ = −∇f + Aₑᵀy + AᵢᵀμS⁻¹e
 ```
 
-Substitute the explicit formula for pˢ into the fourth row and simplify.
+Substitute pˢ, distribute AᵢᵀΣ, and collect the pˣ terms.
 
 ```
-  Aᵢpˣ − pˢ = s − cᵢ
-  Aᵢpˣ − (μZ⁻¹e − s − Σ⁻¹pᶻ) = s − cᵢ
-  Aᵢpˣ − μZ⁻¹e + s + Σ⁻¹pᶻ = s − cᵢ
-  Aᵢpˣ + Σ⁻¹pᶻ = −cᵢ + μZ⁻¹e
+  Hpˣ − Aₑᵀpʸ + AᵢᵀΣ(cᵢ − s + Aᵢpˣ) = −∇f + Aₑᵀy + AᵢᵀμS⁻¹e
+  Hpˣ − Aₑᵀpʸ + AᵢᵀΣ(cᵢ − s) + AᵢᵀΣAᵢpˣ = −∇f + Aₑᵀy + AᵢᵀμS⁻¹e
+  (H + AᵢᵀΣAᵢ)pˣ − Aₑᵀpʸ + AᵢᵀΣ(cᵢ − s) = −∇f + Aₑᵀy + AᵢᵀμS⁻¹e
+  (H + AᵢᵀΣAᵢ)pˣ − Aₑᵀpʸ = −∇f + Aₑᵀy + Aᵢᵀ(μS⁻¹e − Σ(cᵢ − s))
+  (H + AᵢᵀΣAᵢ)pˣ − Aₑᵀpʸ = −(∇f − Aₑᵀy − Aᵢᵀ(μS⁻¹e − Σ(cᵢ − s)))
 ```
 
-Substitute the new second and fourth rows into the system.
+Since pˢ and pᶻ can be recovered by back-substitution, eliminate their rows and columns.
 
 ```
-  [H   0  Aₑᵀ  Aᵢᵀ ][ pˣ]    [∇f(x) − Aₑᵀy − Aᵢᵀz]
-  [0   I   0    0  ][ pˢ] = −[−μZ⁻¹e + s + Σ⁻¹pᶻ ]
-  [Aₑ  0   0    0  ][−pʸ]    [        cₑ         ]
-  [Aᵢ  0   0   −Σ⁻¹][−pᶻ]    [     cᵢ − μZ⁻¹e    ]
-```
-
-Eliminate the second row and column.
-
-```
-  [H   Aₑᵀ  Aᵢᵀ ][ pˣ]    [∇f(x) − Aₑᵀy − Aᵢᵀz]
-  [Aₑ   0    0  ][−pʸ] = −[        cₑ         ]
-  [Aᵢ   0   −Σ⁻¹][−pᶻ]    [    cᵢ − μZ⁻¹e     ]
-```
-
-Solve the third row for pᶻ.
-
-```
-  Aᵢpˣ + Σ⁻¹pᶻ = −cᵢ + μZ⁻¹e
-  Σ⁻¹pᶻ = −cᵢ + μZ⁻¹e − Aᵢpˣ
-  pᶻ = −Σcᵢ + μΣZ⁻¹e − ΣAᵢpˣ
-  pᶻ = −Σcᵢ + μ(S⁻¹Z)Z⁻¹e − ΣAᵢpˣ
-  pᶻ = −Σcᵢ + μS⁻¹e − ΣAᵢpˣ
-```
-
-Substitute the explicit formula for pᶻ into the first row.
-
-```
-  Hpˣ − Aₑᵀpʸ − Aᵢᵀpᶻ = −∇f(x) + Aₑᵀy + Aᵢᵀz
-  Hpˣ − Aₑᵀpʸ − Aᵢᵀ(−Σcᵢ + μS⁻¹e − ΣAᵢpˣ) = −∇f(x) + Aₑᵀy + Aᵢᵀz
-```
-
-Expand and simplify.
-
-```
-  Hpˣ − Aₑᵀpʸ + AᵢᵀΣcᵢ − AᵢᵀμS⁻¹e + AᵢᵀΣAᵢpˣ = −∇f(x) + Aₑᵀy + Aᵢᵀz
-  Hpˣ + AᵢᵀΣAᵢpˣ − Aₑᵀpʸ  = −∇f(x) + Aₑᵀy − AᵢᵀΣcᵢ + AᵢᵀμS⁻¹e + Aᵢᵀz
-  (H + AᵢᵀΣAᵢ)pˣ − Aₑᵀpʸ = −∇f(x) + Aₑᵀy + Aᵢᵀ(−Σcᵢ + μS⁻¹e + z)
-  (H + AᵢᵀΣAᵢ)pˣ − Aₑᵀpʸ = −(∇f(x) − Aₑᵀy − Aᵢᵀ(−Σcᵢ + μS⁻¹e + z))
-```
-
-Substitute the new first and third rows into the system.
-
-```
-  [H + AᵢᵀΣAᵢ   Aₑᵀ  0][ pˣ]    [∇f(x) − Aₑᵀy − Aᵢᵀ(−Σcᵢ + μS⁻¹e + z)]
-  [    Aₑ        0   0][−pʸ] = −[                 cₑ                 ]
-  [    0         0   I][−pᶻ]    [        −Σcᵢ + μS⁻¹e − ΣAᵢpˣ        ]
-```
-
-Eliminate the third row and column.
-
-```
-  [H + AᵢᵀΣAᵢ  Aₑᵀ][ pˣ] = −[∇f − Aₑᵀy − Aᵢᵀ(−Σcᵢ + μS⁻¹e + z)]
-  [    Aₑ       0 ][−pʸ]    [               cₑ                ]
-```
-
-Expand and simplify pˢ.
-
-```
-  pˢ = μZ⁻¹e − s − Σ⁻¹pᶻ
-  pˢ = μZ⁻¹e − s − (S⁻¹Z)⁻¹pᶻ
-  pˢ = μZ⁻¹e − s − Z⁻¹Spᶻ
-  pˢ = μZ⁻¹e − s − Z⁻¹S(−Σcᵢ + μS⁻¹e − ΣAᵢpˣ)
-  pˢ = μZ⁻¹e − s − Z⁻¹S(−S⁻¹Zcᵢ + μS⁻¹e − S⁻¹ZAᵢpˣ)
-  pˢ = μZ⁻¹e − s − Z⁻¹(−Zcᵢ + μe − ZAᵢpˣ)
-  pˢ = μZ⁻¹e − s − (−cᵢ + μZ⁻¹e − Aᵢpˣ)
-  pˢ = μZ⁻¹e − s + cᵢ − μZ⁻¹e + Aᵢpˣ
-  pˢ = −s + cᵢ + Aᵢpˣ
-  pˢ = cᵢ − s + Aᵢpˣ
+  [H + AᵢᵀΣAᵢ  Aₑᵀ][ pˣ] = −[∇f − Aₑᵀy − Aᵢᵀ(μS⁻¹e − Σ(cᵢ − s))]
+  [    Aₑ       0 ][−pʸ]    [                cₑ                ]
 ```
 
 ### Final results
@@ -410,15 +352,15 @@ Expand and simplify pˢ.
 In summary, the reduced 2x2 block system gives the iterates pₖˣ and pₖʸ.
 
 ```
-  [H + AᵢᵀΣAᵢ  Aₑᵀ][ pˣ] = −[∇f − Aₑᵀy − Aᵢᵀ(−Σcᵢ + μS⁻¹e + z)]
-  [    Aₑ       0 ][−pʸ]    [               cₑ                ]
+  [H + AᵢᵀΣAᵢ  Aₑᵀ][ pˣ] = −[∇f − Aₑᵀy − Aᵢᵀ(μS⁻¹e − Σ(cᵢ − s))]
+  [    Aₑ       0 ][−pʸ]    [                cₑ                ]
 ```
 
 The iterates pˢ and pᶻ are given by
 
 ```
   pˢ = cᵢ − s + Aᵢpˣ
-  pᶻ = −Σcᵢ + μS⁻¹e − ΣAᵢpˣ
+  pᶻ = μS⁻¹e − z − Σpˢ
 ```
 
 The iterates are applied like so
