@@ -497,6 +497,8 @@ ExitStatus interior_point(
     α_z = fraction_to_the_boundary_rule<Scalar>(z, step.p_z, τ);
 
     const FilterEntry<Scalar> current_entry{f, s, c_e, c_i, μ};
+    const Scalar D_ϕ =
+        g.transpose() * step.p_x - μ * s.cwiseInverse().dot(step.p_s);
 
     // Loop until a step is accepted
     while (1) {
@@ -533,7 +535,7 @@ ExitStatus interior_point(
 
       // Check whether filter accepts trial iterate
       FilterEntry trial_entry{trial_f, trial_s, trial_c_e, trial_c_i, μ};
-      if (filter.try_add(current_entry, trial_entry, step.p_x, g, α)) {
+      if (filter.try_add(current_entry, trial_entry, D_ϕ, α)) {
         // Accept step
         break;
       }
@@ -615,7 +617,7 @@ ExitStatus interior_point(
 
           // Check whether filter accepts trial iterate
           FilterEntry trial_entry{trial_f, trial_s, trial_c_e, trial_c_i, μ};
-          if (filter.try_add(current_entry, trial_entry, step.p_x, g, α)) {
+          if (filter.try_add(current_entry, trial_entry, D_ϕ, α)) {
             step = soc_step;
             α = α_soc;
             α_z = α_z_soc;
@@ -729,9 +731,11 @@ ExitStatus interior_point(
         // is accepted by the normal filter, stop feasibility restoration
         FilterEntry trial_entry{matrices.f(trial_x), trial_s, trial_c_e,
                                 trial_c_i, μ};
+        const Scalar D_ϕ_restoration = g.transpose() * (trial_x - x) -
+                                       μ * s.cwiseInverse().dot(trial_s - s);
         return trial_entry.constraint_violation <
                    Scalar(0.9) * initial_entry.constraint_violation &&
-               filter.try_add(initial_entry, trial_entry, trial_x - x, g, α);
+               filter.try_add(initial_entry, trial_entry, D_ϕ_restoration, α);
       });
       auto status =
           feasibility_restoration<Scalar>(matrices, callbacks, options,
