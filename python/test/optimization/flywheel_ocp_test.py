@@ -108,21 +108,21 @@ def flywheel_test(
     assert problem.X().value(0, N) == pytest.approx(r, abs=2e-6)
 
     # Log states for offline viewing
-    with open(f"{test_name} states.csv", "w") as f:
-        f.write("Time (s),Velocity (rad/s)\n")
+    with open(f"{test_name} states.csv", "w") as file:
+        file.write("Time (s),Velocity (rad/s)\n")
 
         for k in range(N + 1):
-            f.write(f"{k * dt},{problem.X().value(0, k)}\n")
+            file.write(f"{k * dt},{problem.X().value(0, k)}\n")
 
     # Log inputs for offline viewing
-    with open(f"{test_name} inputs.csv", "w") as f:
-        f.write("Time (s),Voltage (V)\n")
+    with open(f"{test_name} inputs.csv", "w") as file:
+        file.write("Time (s),Voltage (V)\n")
 
         for k in range(N + 1):
             if k < N:
-                f.write(f"{k * dt},{problem.U().value(0, k)}\n")
+                file.write(f"{k * dt},{problem.U().value(0, k)}\n")
             else:
-                f.write(f"{k * dt},0.0\n")
+                file.write(f"{k * dt},0.0\n")
 
 
 def test_flywheel_explicit_ocp():

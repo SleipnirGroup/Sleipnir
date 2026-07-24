@@ -1,5 +1,5 @@
 import pytest
-import sleipnir.autodiff as autodiff
+from sleipnir import autodiff
 from sleipnir.optimization import ExitStatus, Problem, multistart
 
 
@@ -30,7 +30,7 @@ def mishras_bird_function_solve(input: DecisionVariables):
 
 
 def test_mishras_bird_function():
-    status, cost, variables = multistart(
+    status, _cost, variables = multistart(
         mishras_bird_function_solve,
         [DecisionVariables(-3, -8), DecisionVariables(-3, -1.5)],
     )
