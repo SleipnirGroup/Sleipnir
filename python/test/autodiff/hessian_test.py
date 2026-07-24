@@ -209,6 +209,71 @@ def test_nested_powers():
     assert H[0, 0] == pytest.approx(12 * x0 * x0, abs=1e-12)
 
 
+def test_max_and_min():
+    input = VariableMatrix(2)
+    expected_y = np.array([[0.0, 0.0], [0.0, 2.0]])
+    expected_x = np.array([[2.0, 0.0], [0.0, 0.0]])
+
+    def check(f, x0, y0, x1, y1):
+        hessian = Hessian(f, input)
+        symbolic_H = hessian.get()
+
+        input[0].set_value(x0)
+        input[1].set_value(y0)
+        np.testing.assert_array_equal(symbolic_H.value(), expected_y)
+        np.testing.assert_array_equal(hessian.value().todense(), expected_y)
+
+        input[0].set_value(x1)
+        input[1].set_value(y1)
+        np.testing.assert_array_equal(symbolic_H.value(), expected_x)
+        np.testing.assert_array_equal(hessian.value().todense(), expected_x)
+
+        input[0].set_value(2.0)
+        input[1].set_value(2.0)
+        np.testing.assert_array_equal(symbolic_H.value(), expected_x)
+        np.testing.assert_array_equal(hessian.value().todense(), expected_x)
+
+    x_squared = input[0] * input[0]
+    y_squared = input[1] * input[1]
+    check(autodiff.max(x_squared, y_squared), 1.0, 2.0, 3.0, 2.0)
+    check(autodiff.min(x_squared, y_squared), 2.0, 1.0, 2.0, 3.0)
+
+
+def test_pow():
+    input = VariableMatrix(2)
+    f = autodiff.pow(input[0] + 1.0, input[1])
+    hessian = Hessian(f, input)
+
+    # Construct the symbolic Hessian while the base's cached value is zero.
+    symbolic_H = hessian.get()
+
+    input[0].set_value(2.0)
+    input[1].set_value(3.0)
+    mixed = 9.0 * (1.0 + 3.0 * math.log(3.0))
+    expected = np.array([[18.0, mixed], [mixed, 27.0 * math.log(3.0) ** 2]])
+    np.testing.assert_allclose(symbolic_H.value(), expected, rtol=0.0, atol=1e-12)
+    np.testing.assert_allclose(
+        hessian.value().todense(), expected, rtol=0.0, atol=1e-12
+    )
+
+    input[0].set_value(3.0)
+    input[1].set_value(2.0)
+    mixed = 4.0 * (1.0 + 2.0 * math.log(4.0))
+    expected = np.array([[2.0, mixed], [mixed, 16.0 * math.log(4.0) ** 2]])
+    np.testing.assert_allclose(symbolic_H.value(), expected, rtol=0.0, atol=1e-12)
+    np.testing.assert_allclose(
+        hessian.value().todense(), expected, rtol=0.0, atol=1e-12
+    )
+
+    input[0].set_value(-1.0)
+    input[1].set_value(2.0)
+    expected = np.array([[2.0, 0.0], [0.0, 0.0]])
+    np.testing.assert_allclose(symbolic_H.value(), expected, rtol=0.0, atol=1e-12)
+    np.testing.assert_allclose(
+        hessian.value().todense(), expected, rtol=0.0, atol=1e-12
+    )
+
+
 def test_rosenbrock():
     # z = (1 − x)² + 100(y − x²)²
     #   = 100(−x² + y)² + (−x + 1)²

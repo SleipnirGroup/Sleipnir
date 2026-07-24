@@ -293,6 +293,80 @@ TEMPLATE_TEST_CASE("Hessian - Nested powers", "[Hessian]",
   CHECK_THAT(H(0, 0), WithinAbs(T(12) * x0 * x0, T(1e-12)));
 }
 
+TEMPLATE_TEST_CASE("Hessian - max() and min()", "[Hessian]",
+                   SCALAR_TYPES_UNDER_TEST) {
+  using T = TestType;
+
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
+
+  slp::VariableMatrix<T> input{2};
+  Eigen::Matrix<T, 2, 2> expected_y{{T(0), T(0)}, {T(0), T(2)}};
+  Eigen::Matrix<T, 2, 2> expected_x{{T(2), T(0)}, {T(0), T(0)}};
+
+  auto check = [&](slp::Variable<T> f, T x0, T y0, T x1, T y1) {
+    slp::Hessian hessian{f, input};
+    auto symbolic_H = hessian.get();
+
+    input[0].set_value(x0);
+    input[1].set_value(y0);
+    CHECK(symbolic_H.value() == expected_y);
+    CHECK(hessian.value().toDense() == expected_y);
+
+    input[0].set_value(x1);
+    input[1].set_value(y1);
+    CHECK(symbolic_H.value() == expected_x);
+    CHECK(hessian.value().toDense() == expected_x);
+
+    input[0].set_value(T(2));
+    input[1].set_value(T(2));
+    CHECK(symbolic_H.value() == expected_x);
+    CHECK(hessian.value().toDense() == expected_x);
+  };
+
+  auto x_squared = input[0] * input[0];
+  auto y_squared = input[1] * input[1];
+  check(slp::max(x_squared, y_squared), T(1), T(2), T(3), T(2));
+  check(slp::min(x_squared, y_squared), T(2), T(1), T(2), T(3));
+}
+
+TEMPLATE_TEST_CASE("Hessian - pow()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+  using T = TestType;
+  using std::log;
+  using std::pow;
+
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
+
+  slp::VariableMatrix<T> input{2};
+  auto f = slp::pow(input[0] + T(1), input[1]);
+  slp::Hessian hessian{f, input};
+
+  auto symbolic_H = hessian.get();
+
+  input[0].set_value(T(2));
+  input[1].set_value(T(3));
+  T mixed = T(9) * (T(1) + T(3) * log(T(3)));
+  Eigen::Matrix<T, 2, 2> expected{{T(18), mixed},
+                                  {mixed, T(27) * pow(log(T(3)), T(2))}};
+  CHECK_THAT(symbolic_H.value(), MatrixWithinAbs(expected, T(1e-12)));
+  CHECK_THAT(hessian.value().toDense(), MatrixWithinAbs(expected, T(1e-12)));
+
+  input[0].set_value(T(3));
+  input[1].set_value(T(2));
+  mixed = T(4) * (T(1) + T(2) * log(T(4)));
+  expected = Eigen::Matrix<T, 2, 2>{{T(2), mixed},
+                                    {mixed, T(16) * pow(log(T(4)), T(2))}};
+  CHECK_THAT(symbolic_H.value(), MatrixWithinAbs(expected, T(1e-12)));
+  CHECK_THAT(hessian.value().toDense(), MatrixWithinAbs(expected, T(1e-12)));
+
+  input[0].set_value(T(-1));
+  input[1].set_value(T(2));
+  expected = Eigen::Matrix<T, 2, 2>{{T(2), T(0)}, {T(0), T(0)}};
+  CHECK_THAT(symbolic_H.value(), MatrixWithinAbs(expected, T(1e-12)));
+  CHECK_THAT(hessian.value().toDense(), MatrixWithinAbs(expected, T(1e-12)));
+}
+
 TEMPLATE_TEST_CASE("Hessian - Rosenbrock", "[Hessian]",
                    SCALAR_TYPES_UNDER_TEST) {
   // z = (1 − x)² + 100(y − x²)²
