@@ -497,6 +497,11 @@ ExitStatus interior_point(
     α_z = fraction_to_the_boundary_rule<Scalar>(z, step.p_z, τ);
 
     const FilterEntry<Scalar> current_entry{f, s, c_e, c_i, μ};
+
+    // Compute the directional derivative of the IPM cost function along the
+    // search direction by
+    // ϕ_μ(x, s) = f(x) − μ∑ᵢ ln(sᵢ)
+    // D_ϕ = ∇ϕ_μ(x, s)ᵀ[pˣ pˢ] = ∇f(x)ᵀpˣ − μ∑ᵢ pᵢˢ/sᵢ
     const Scalar D_ϕ =
         g.transpose() * step.p_x - μ * s.cwiseInverse().dot(step.p_s);
 
