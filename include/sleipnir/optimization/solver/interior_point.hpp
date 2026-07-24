@@ -501,8 +501,10 @@ ExitStatus interior_point(
     // Compute the directional derivative of the log-barrier function along the
     // search direction.
     //
-    // ϕ_μ(x, s) = f(x) − μ∑ᵢ ln(sᵢ)
-    // D_ϕ = ∇ϕ_μ(x, s)ᵀ[pˣ pˢ] = ∇f(x)ᵀpˣ − μ∑ᵢ pᵢˢ/sᵢ
+    //   ϕ_μ(x, s) = f(x) − μ∑ᵢ ln(sᵢ)
+    //
+    //   D_ϕ = ∇ϕ_μ(x, s)ᵀ[pˣ pˢ]
+    //       = ∇f(x)ᵀpˣ − μ∑ᵢ pᵢˢ/sᵢ
     const Scalar D_ϕ =
         g.transpose() * step.p_x - μ * s.cwiseInverse().dot(step.p_s);
 
@@ -603,9 +605,9 @@ ExitStatus interior_point(
           //
           // where
           //
-          // cₑˢᵒᶜ = αˢᵒᶜcₑ(xₖ) + cₑ(xₖ + αˢᵒᶜpˣˢᵒᶜ)
-          // (cᵢ − s)ˢᵒᶜ = αˢᵒᶜ(cᵢ(xₖ) − sₖ) + cᵢ(xₖ + αˢᵒᶜpˣˢᵒᶜ)
-          //                                 − (sₖ + αˢᵒᶜpˢˢᵒᶜ).
+          //   cₑˢᵒᶜ = αˢᵒᶜcₑ(xₖ) + cₑ(xₖ + αˢᵒᶜpˣˢᵒᶜ)
+          //   (cᵢ − s)ˢᵒᶜ =
+          //     αˢᵒᶜ(cᵢ(xₖ) − sₖ) + cᵢ(xₖ + αˢᵒᶜpˣˢᵒᶜ) − (sₖ + αˢᵒᶜpˢˢᵒᶜ)
           c_e_soc = α_soc * c_e_soc + trial_c_e;
           c_i_minus_s_soc = α_soc * c_i_minus_s_soc + trial_c_i - trial_s;
           rhs.segment(0, x.rows()) =
