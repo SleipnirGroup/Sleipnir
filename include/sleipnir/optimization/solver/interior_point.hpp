@@ -467,8 +467,7 @@ ExitStatus interior_point(
     kkt_matrix_decomp_profiler.stop();
     ScopedProfiler kkt_system_solve_profiler{kkt_system_solve_prof};
 
-    auto compute_step = [&](Step& step,
-                            const DenseVector& c_i_minus_s) {
+    auto compute_step = [&](Step& step, const DenseVector& c_i_minus_s) {
       // p = [ pˣ]
       //     [−pʸ]
       DenseVector p = solver.solve(rhs);
