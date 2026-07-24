@@ -67,7 +67,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: numworks/setup-emscripten@latest
+      - uses: emscripten-core/setup-emsdk@v16
 
       - run: emcmake cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTING=OFF
       - run: cmake --build build --config Release --parallel $(nproc)
