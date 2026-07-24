@@ -468,7 +468,7 @@ ExitStatus interior_point(
     ScopedProfiler kkt_system_solve_profiler{kkt_system_solve_prof};
 
     auto compute_step = [&](Step& step,
-                            const DenseVector& c_i_ms) {
+                            const DenseVector& c_i_minus_s) {
       // p = [ pˣ]
       //     [−pʸ]
       DenseVector p = solver.solve(rhs);
@@ -477,7 +477,7 @@ ExitStatus interior_point(
 
       // pˢ = cᵢ − s + Aᵢpˣ
       // pᶻ = μS⁻¹e − z − Σpˢ
-      step.p_s = c_i_ms + A_i * step.p_x;
+      step.p_s = c_i_minus_s + A_i * step.p_x;
       step.p_z = μ * s.cwiseInverse() - z - Σ * step.p_s;
     };
     compute_step(step, c_i - s);
@@ -557,7 +557,7 @@ ExitStatus interior_point(
         Scalar α_soc = α;
         Scalar α_z_soc = α_z;
         DenseVector c_e_soc = c_e;
-        DenseVector c_i_ms_soc = c_i - s;
+        DenseVector c_i_minus_s_soc = c_i - s;
 
         Scalar soc_constraint_violation = next_constraint_violation;
 
@@ -600,14 +600,14 @@ ExitStatus interior_point(
           // (cᵢ − s)ˢᵒᶜ = αˢᵒᶜ(cᵢ(xₖ) − sₖ) + cᵢ(xₖ + αˢᵒᶜpˣˢᵒᶜ)
           //                                 − (sₖ + αˢᵒᶜpˢˢᵒᶜ).
           c_e_soc = α_soc * c_e_soc + trial_c_e;
-          c_i_ms_soc = α_soc * c_i_ms_soc + trial_c_i - trial_s;
+          c_i_minus_s_soc = α_soc * c_i_minus_s_soc + trial_c_i - trial_s;
           rhs.segment(0, x.rows()) =
               -g + A_e.transpose() * y +
-              A_i.transpose() * (μ * s.cwiseInverse() - Σ * c_i_ms_soc);
+              A_i.transpose() * (μ * s.cwiseInverse() - Σ * c_i_minus_s_soc);
           rhs.segment(x.rows(), y.rows()) = -c_e_soc;
 
           // Solve the Newton-KKT system
-          compute_step(soc_step, c_i_ms_soc);
+          compute_step(soc_step, c_i_minus_s_soc);
 
           // αˢᵒᶜ = max(α ∈ (0, 1] : sₖ + αpₖˢ ≥ (1−τⱼ)sₖ)
           // αₖᶻˢᵒᶜ = max(α ∈ (0, 1] : zₖ + αpₖᶻ ≥ (1−τⱼ)zₖ)
