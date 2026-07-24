@@ -4,7 +4,7 @@ from functools import reduce
 
 import numpy as np
 import pytest
-import sleipnir.autodiff as autodiff
+from sleipnir import autodiff
 from sleipnir.autodiff import Gradient, Hessian, Jacobian, Variable, VariableMatrix
 
 

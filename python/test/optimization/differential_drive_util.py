@@ -1,7 +1,7 @@
 import math
 
 import numpy as np
-import sleipnir.autodiff as autodiff
+from sleipnir import autodiff
 from sleipnir.autodiff import VariableMatrix
 
 # x = [x, y, heading, left velocity, right velocity]ᵀ

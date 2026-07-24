@@ -1,7 +1,7 @@
 import math
 
 import numpy as np
-import sleipnir.autodiff as autodiff
+from sleipnir import autodiff
 from sleipnir.autodiff import Variable, VariableMatrix
 
 # https://underactuated.mit.edu/acrobot.html#cart_pole
@@ -30,7 +30,7 @@ from sleipnir.autodiff import Variable, VariableMatrix
 
 m_c = 5.0  # Cart mass (kg)
 m_p = 0.5  # Pole mass (kg)
-l = 0.5  # Pole length (m)  # noqa: E741
+l = 0.5  # Pole length (m)
 g = 9.806  # Acceleration due to gravity (m/s²)
 
 

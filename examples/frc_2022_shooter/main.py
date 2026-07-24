@@ -15,8 +15,8 @@ import math
 
 import matplotlib.pyplot as plt
 import numpy as np
-import sleipnir.autodiff as autodiff
 from numpy.linalg import norm
+from sleipnir import autodiff
 from sleipnir.autodiff import VariableMatrix, block, sqrt
 from sleipnir.optimization import Problem
 
