@@ -97,7 +97,7 @@ def make_groups(files):
 
             # Create a new category if one doesn't exist, or add the file to the
             # existing category if it does
-            if category not in file_groups.keys():
+            if category not in file_groups:
                 file_groups[category] = [f]
             else:
                 file_groups[category].append(f)
@@ -140,7 +140,7 @@ def main():
                 name = match.group("name")
                 unit = match.group("unit")
 
-                if unit not in unit_groups.keys():
+                if unit not in unit_groups:
                     unit_groups[unit] = UnitGroup()
                 # "i + 1" skips the time data column
                 unit_groups[unit].series.append(
@@ -154,7 +154,7 @@ def main():
         # Plot time domain datasets
         print(f"  [vs time] {category} ({', '.join(unit_groups.keys())})")
         for unit, unit_group in unit_groups.items():
-            fig, ax = plt.subplots(1, 1)
+            _fig, ax = plt.subplots(1, 1)
             ax.set_title(f"{category} ({unit})")
 
             for i in range(len(unit_group.series)):
@@ -172,9 +172,9 @@ def main():
 
         # Plot X-Y datasets. If the file doesn't have all the required keys,
         # skip it.
-        if not (set(["X position", "Y position"]) - set(name_groups.keys())):
+        if not ({"X position", "Y position"} - set(name_groups.keys())):
             print(f"  [y vs x] {category}")
-            fig, ax = plt.subplots(1, 1)
+            _fig, ax = plt.subplots(1, 1)
             ax.set_title(f"{category} trajectory")
 
             ax.plot(name_groups["X position"].series, name_groups["Y position"].series)

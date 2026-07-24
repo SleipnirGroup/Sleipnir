@@ -1,6 +1,6 @@
 import concurrent.futures
 
-from .._sleipnir.optimization import *  # noqa: F403
+from .._sleipnir.optimization import *
 
 
 def multistart(solve, initial_guesses):
@@ -30,10 +30,4 @@ def multistart(solve, initial_guesses):
         ]
 
     # Prioritize successful solve, otherwise prioritize solution with lower cost
-    return min(
-        results,
-        key=lambda x: (
-            int(x[0] != ExitStatus.SUCCESS),  # noqa: F405
-            x[1],
-        ),
-    )
+    return min(results, key=lambda x: (int(x[0] != ExitStatus.SUCCESS), x[1]))
