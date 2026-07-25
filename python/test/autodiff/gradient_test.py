@@ -363,6 +363,20 @@ def test_abs():
     assert g.get().value()[0, 0] == 0.0
     assert g.value()[0, 0] == 0.0
 
+    f = autodiff.abs(x * x - 4.0)
+    g = Gradient(f, x)
+    symbolic_g = g.get()
+
+    x.set_value(3.0)
+    assert symbolic_g.value()[0, 0] == 6.0
+    assert g.value()[0, 0] == 6.0
+    assert g.get().value()[0, 0] == 6.0
+
+    x.set_value(1.0)
+    assert symbolic_g.value()[0, 0] == -2.0
+    assert g.value()[0, 0] == -2.0
+    assert g.get().value()[0, 0] == -2.0
+
 
 def test_atan2():
     x = Variable()

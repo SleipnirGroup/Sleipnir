@@ -428,6 +428,8 @@ ExpressionPtr<Scalar> cbrt(const ExpressionPtr<Scalar>& x);
 template <typename Scalar>
 ExpressionPtr<Scalar> exp(const ExpressionPtr<Scalar>& x);
 template <typename Scalar>
+ExpressionPtr<Scalar> sign(const ExpressionPtr<Scalar>& x);
+template <typename Scalar>
 ExpressionPtr<Scalar> sin(const ExpressionPtr<Scalar>& x);
 template <typename Scalar>
 ExpressionPtr<Scalar> sinh(const ExpressionPtr<Scalar>& x);
@@ -797,13 +799,7 @@ struct AbsExpression final : Expression<Scalar> {
   ExpressionPtr<Scalar> grad_expr_l(
       const ExpressionPtr<Scalar>& x,
       const ExpressionPtr<Scalar>&) const override {
-    if (x->val < Scalar(0)) {
-      return -this->adjoint_expr;
-    } else if (x->val > Scalar(0)) {
-      return this->adjoint_expr;
-    } else {
-      return constant_ptr(Scalar(0));
-    }
+    return this->adjoint_expr * sign(x);
   }
 };
 
@@ -1356,6 +1352,72 @@ ExpressionPtr<Scalar> hypot(const ExpressionPtr<Scalar>& x,
   return make_expression_ptr<HypotExpression<Scalar>>(x, y);
 }
 
+/// Derived expression type for is_nonnegative().
+///
+/// @tparam Scalar Scalar type.
+template <typename Scalar>
+struct IsNonnegativeExpression final : Expression<Scalar> {
+  /// Constructs an unary expression (an operator with one argument).
+  ///
+  /// @param x Unary operator's operand.
+  explicit constexpr IsNonnegativeExpression(ExpressionPtr<Scalar> x)
+      : Expression<Scalar>{std::move(x)} {}
+
+  Scalar value(Scalar x, Scalar) const override {
+    return x >= Scalar(0) ? Scalar(1) : Scalar(0);
+  }
+
+  ExpressionType type() const override { return ExpressionType::NONLINEAR; }
+
+  std::string_view name() const override { return "is nonnegative"; }
+};
+
+/// Returns one if x is nonnegative and zero otherwise.
+///
+/// @tparam Scalar Scalar type.
+/// @param x The argument.
+template <typename Scalar>
+ExpressionPtr<Scalar> is_nonnegative(const ExpressionPtr<Scalar>& x) {
+  if (x->type() == ExpressionType::CONSTANT) {
+    return constant_ptr(x->val >= Scalar(0) ? Scalar(1) : Scalar(0));
+  }
+
+  return make_expression_ptr<IsNonnegativeExpression<Scalar>>(x);
+}
+
+/// Derived expression type for is_positive().
+///
+/// @tparam Scalar Scalar type.
+template <typename Scalar>
+struct IsPositiveExpression final : Expression<Scalar> {
+  /// Constructs an unary expression (an operator with one argument).
+  ///
+  /// @param x Unary operator's operand.
+  explicit constexpr IsPositiveExpression(ExpressionPtr<Scalar> x)
+      : Expression<Scalar>{std::move(x)} {}
+
+  Scalar value(Scalar x, Scalar) const override {
+    return x > Scalar(0) ? Scalar(1) : Scalar(0);
+  }
+
+  ExpressionType type() const override { return ExpressionType::NONLINEAR; }
+
+  std::string_view name() const override { return "is positive"; }
+};
+
+/// Returns one if x is positive and zero otherwise.
+///
+/// @tparam Scalar Scalar type.
+/// @param x The argument.
+template <typename Scalar>
+ExpressionPtr<Scalar> is_positive(const ExpressionPtr<Scalar>& x) {
+  if (x->type() == ExpressionType::CONSTANT) {
+    return constant_ptr(x->val > Scalar(0) ? Scalar(1) : Scalar(0));
+  }
+
+  return make_expression_ptr<IsPositiveExpression<Scalar>>(x);
+}
+
 /// Derived expression type for log().
 ///
 /// @tparam Scalar Scalar type.
@@ -1496,13 +1558,19 @@ struct MaxExpression final : Expression<Scalar> {
   ExpressionPtr<Scalar> grad_expr_l(
       const ExpressionPtr<Scalar>& a,
       const ExpressionPtr<Scalar>& b) const override {
-    return a->val >= b->val ? this->adjoint_expr : constant_ptr(Scalar(0));
+    // adjoint * (a >= b)
+    // adjoint * (a - b >= 0)
+    return this->adjoint_expr * is_nonnegative(a - b);
   }
 
   ExpressionPtr<Scalar> grad_expr_r(
       const ExpressionPtr<Scalar>& a,
       const ExpressionPtr<Scalar>& b) const override {
-    return a->val >= b->val ? constant_ptr(Scalar(0)) : this->adjoint_expr;
+    // adjoint * !(a >= b)
+    // adjoint * (a < b)
+    // adjoint * (b > a)
+    // adjoint * (b - a > 0)
+    return this->adjoint_expr * is_positive(b - a);
   }
 };
 
@@ -1560,13 +1628,19 @@ struct MinExpression final : Expression<Scalar> {
   ExpressionPtr<Scalar> grad_expr_l(
       const ExpressionPtr<Scalar>& a,
       const ExpressionPtr<Scalar>& b) const override {
-    return a->val <= b->val ? this->adjoint_expr : constant_ptr(Scalar(0));
+    // adjoint * (a <= b)
+    // adjoint * (b >= a)
+    // adjoint * (b - a >= 0)
+    return this->adjoint_expr * is_nonnegative(b - a);
   }
 
   ExpressionPtr<Scalar> grad_expr_r(
       const ExpressionPtr<Scalar>& a,
       const ExpressionPtr<Scalar>& b) const override {
-    return a->val <= b->val ? constant_ptr(Scalar(0)) : this->adjoint_expr;
+    // adjoint * !(a <= b)
+    // adjoint * (a > b)
+    // adjoint * (a - b > 0)
+    return this->adjoint_expr * is_positive(a - b);
   }
 };
 
@@ -1624,9 +1698,7 @@ struct PowExpression final : Expression<Scalar> {
     using std::log;
     using std::pow;
 
-    // Since x log(x) -> 0 as x -> 0
-    return base == Scalar(0) ? Scalar(0)
-                             : this->adjoint * pow(base, power) * log(base);
+    return this->adjoint * pow(base, power) * log(base);
   }
 
   ExpressionPtr<Scalar> grad_expr_l(
@@ -1639,10 +1711,7 @@ struct PowExpression final : Expression<Scalar> {
   ExpressionPtr<Scalar> grad_expr_r(
       const ExpressionPtr<Scalar>& base,
       const ExpressionPtr<Scalar>& power) const override {
-    // Since x log(x) -> 0 as x -> 0
-    return base->val == Scalar(0)
-               ? base  // Return zero
-               : this->adjoint_expr * pow(base, power) * log(base);
+    return this->adjoint_expr * pow(base, power) * log(base);
   }
 };
 

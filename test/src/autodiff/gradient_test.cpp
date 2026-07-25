@@ -450,6 +450,20 @@ TEMPLATE_TEST_CASE("Gradient - abs()", "[Gradient]", SCALAR_TYPES_UNDER_TEST) {
   CHECK(slp::abs(x).value() == abs(x.value()));
   CHECK(g.get().value().coeff(0) == T(0));
   CHECK(g.value().coeff(0) == T(0));
+
+  auto f = slp::abs(x * x - T(4));
+  g = slp::Gradient{f, x};
+  auto symbolic_g = g.get();
+
+  x.set_value(T(3));
+  CHECK(symbolic_g.value(0) == T(6));
+  CHECK(g.value().coeff(0) == T(6));
+  CHECK(g.get().value(0) == T(6));
+
+  x.set_value(T(1));
+  CHECK(symbolic_g.value(0) == T(-2));
+  CHECK(g.value().coeff(0) == T(-2));
+  CHECK(g.get().value(0) == T(-2));
 }
 
 TEMPLATE_TEST_CASE("Gradient - atan2()", "[Gradient]",
