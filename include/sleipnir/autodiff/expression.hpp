@@ -1486,39 +1486,23 @@ struct MaxExpression final : Expression<Scalar> {
   std::string_view name() const override { return "max"; }
 
   Scalar grad_l(Scalar a, Scalar b) const override {
-    if (a >= b) {
-      return this->adjoint;
-    } else {
-      return Scalar(0);
-    }
+    return a >= b ? this->adjoint : Scalar(0);
   }
 
   Scalar grad_r(Scalar a, Scalar b) const override {
-    if (b > a) {
-      return this->adjoint;
-    } else {
-      return Scalar(0);
-    }
+    return a >= b ? Scalar(0) : this->adjoint;
   }
 
   ExpressionPtr<Scalar> grad_expr_l(
       const ExpressionPtr<Scalar>& a,
       const ExpressionPtr<Scalar>& b) const override {
-    if (a->val >= b->val) {
-      return this->adjoint_expr;
-    } else {
-      return constant_ptr(Scalar(0));
-    }
+    return a->val >= b->val ? this->adjoint_expr : constant_ptr(Scalar(0));
   }
 
   ExpressionPtr<Scalar> grad_expr_r(
       const ExpressionPtr<Scalar>& a,
       const ExpressionPtr<Scalar>& b) const override {
-    if (b->val > a->val) {
-      return this->adjoint_expr;
-    } else {
-      return constant_ptr(Scalar(0));
-    }
+    return a->val >= b->val ? constant_ptr(Scalar(0)) : this->adjoint_expr;
   }
 };
 
@@ -1565,40 +1549,24 @@ struct MinExpression final : Expression<Scalar> {
   std::string_view name() const override { return "min"; }
 
   Scalar grad_l(Scalar a, Scalar b) const override {
-    if (a <= b) {
-      return this->adjoint;
-    } else {
-      return Scalar(0);
-    }
+    return a <= b ? this->adjoint : Scalar(0);
   }
 
   Scalar grad_r([[maybe_unused]] Scalar a,
                 [[maybe_unused]] Scalar b) const override {
-    if (b < a) {
-      return this->adjoint;
-    } else {
-      return Scalar(0);
-    }
+    return a <= b ? Scalar(0) : this->adjoint;
   }
 
   ExpressionPtr<Scalar> grad_expr_l(
       const ExpressionPtr<Scalar>& a,
       const ExpressionPtr<Scalar>& b) const override {
-    if (a->val <= b->val) {
-      return this->adjoint_expr;
-    } else {
-      return constant_ptr(Scalar(0));
-    }
+    return a->val <= b->val ? this->adjoint_expr : constant_ptr(Scalar(0));
   }
 
   ExpressionPtr<Scalar> grad_expr_r(
       const ExpressionPtr<Scalar>& a,
       const ExpressionPtr<Scalar>& b) const override {
-    if (b->val < a->val) {
-      return this->adjoint_expr;
-    } else {
-      return constant_ptr(Scalar(0));
-    }
+    return a->val <= b->val ? constant_ptr(Scalar(0)) : this->adjoint_expr;
   }
 };
 
@@ -1657,11 +1625,8 @@ struct PowExpression final : Expression<Scalar> {
     using std::pow;
 
     // Since x log(x) -> 0 as x -> 0
-    if (base == Scalar(0)) {
-      return Scalar(0);
-    } else {
-      return this->adjoint * pow(base, power) * log(base);
-    }
+    return base == Scalar(0) ? Scalar(0)
+                             : this->adjoint * pow(base, power) * log(base);
   }
 
   ExpressionPtr<Scalar> grad_expr_l(
@@ -1675,12 +1640,9 @@ struct PowExpression final : Expression<Scalar> {
       const ExpressionPtr<Scalar>& base,
       const ExpressionPtr<Scalar>& power) const override {
     // Since x log(x) -> 0 as x -> 0
-    if (base->val == Scalar(0)) {
-      // Return zero
-      return base;
-    } else {
-      return this->adjoint_expr * pow(base, power) * log(base);
-    }
+    return base->val == Scalar(0)
+               ? base  // Return zero
+               : this->adjoint_expr * pow(base, power) * log(base);
   }
 };
 
