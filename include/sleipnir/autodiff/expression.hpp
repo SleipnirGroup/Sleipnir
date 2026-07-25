@@ -1523,6 +1523,7 @@ ExpressionPtr<Scalar> log10(const ExpressionPtr<Scalar>& x) {
 
   return make_expression_ptr<Log10Expression<Scalar>>(x);
 }
+
 /// Derived expression type for max().
 ///
 /// Returns the greater of a and b. If the values are equivalent, returns a.
