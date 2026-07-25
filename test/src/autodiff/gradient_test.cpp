@@ -675,6 +675,37 @@ TEMPLATE_TEST_CASE("Gradient - hypot()", "[Gradient]",
         z.value() / hypot(x.value(), y.value(), z.value()));
 }
 
+TEMPLATE_TEST_CASE("Gradient - if_else()", "[Gradient]",
+                   SCALAR_TYPES_UNDER_TEST) {
+  using T = TestType;
+
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
+
+  slp::Variable<T> x;
+  x.set_value(T(2));
+
+  slp::Variable<T> x2 = x * x;
+  slp::Variable<T> x3 = x * x * x;
+
+  // f(x) = x² if x < 0, otherwise x³
+  auto f = slp::if_else([](T a, T b) { return a < b; }, x,
+                        slp::Variable<T>{T(0)}, x2, x3);
+  auto g = slp::Gradient(f, x);
+
+  // True branch
+  x.set_value(T(-3));
+  CHECK(f.value() == x2.value());
+  CHECK(g.get().value().coeff(0) == slp::Gradient(x2, x).value().coeff(0));
+  CHECK(g.value().coeff(0) == slp::Gradient(x2, x).value().coeff(0));
+
+  // False branch
+  x.set_value(T(0));
+  CHECK(f.value() == x3.value());
+  CHECK(g.get().value().coeff(0) == slp::Gradient(x3, x).value().coeff(0));
+  CHECK(g.value().coeff(0) == slp::Gradient(x3, x).value().coeff(0));
+}
+
 TEMPLATE_TEST_CASE("Gradient - max()", "[Gradient]", SCALAR_TYPES_UNDER_TEST) {
   using T = TestType;
 

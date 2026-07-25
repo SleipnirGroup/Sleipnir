@@ -9,6 +9,7 @@
 #include <memory>
 #include <numbers>
 #include <string_view>
+#include <type_traits>
 #include <utility>
 
 #include <gch/small_vector.hpp>
@@ -1559,86 +1560,117 @@ ExpressionPtr<Scalar> hypot(const ExpressionPtr<Scalar>& x,
   return make_expression_ptr<Hypot3Expression<Scalar>>(x, y, z);
 }
 
-/// Derived expression type for is_nonnegative().
+/// Derived expression type for if_else().
+///
+/// Returns t if cond(a, b) is true, otherwise f.
 ///
 /// @tparam Scalar Scalar type.
 template <typename Scalar>
-struct IsNonnegativeExpression final : Expression<Scalar> {
-  /// Unary operator's operand.
-  ExpressionPtr<Scalar> x;
+struct IfElseExpression final : Expression<Scalar> {
+  /// Condition evaluated on a and b.
+  bool (*cond)(Scalar a, Scalar b);
 
-  /// Constructs an unary expression (an operator with one argument).
+  /// The condition's first argument.
+  ExpressionPtr<Scalar> a;
+
+  /// The condition's second argument.
+  ExpressionPtr<Scalar> b;
+
+  /// Value selected when cond(a, b) is true.
+  ExpressionPtr<Scalar> t;
+
+  /// Value selected when cond(a, b) is false.
+  ExpressionPtr<Scalar> f;
+
+  /// Constructs an if-else expression.
   ///
-  /// @param x Unary operator's operand.
-  explicit constexpr IsNonnegativeExpression(ExpressionPtr<Scalar> x)
-      : x{std::move(x)} {}
+  /// @param cond Condition evaluated on a and b.
+  /// @param a The condition's first argument.
+  /// @param b The condition's second argument.
+  /// @param t Value selected when cond(a, b) is true.
+  /// @param f Value selected when cond(a, b) is false.
+  constexpr IfElseExpression(bool (*cond)(Scalar a, Scalar b),
+                             ExpressionPtr<Scalar> a, ExpressionPtr<Scalar> b,
+                             ExpressionPtr<Scalar> t, ExpressionPtr<Scalar> f)
+      : cond{cond},
+        a{std::move(a)},
+        b{std::move(b)},
+        t{std::move(t)},
+        f{std::move(f)} {}
 
   void visit_args(
       function_ref<void(Expression<Scalar>* arg)> func) const override {
-    func(x.get());
+    func(a.get());
+    func(b.get());
+    func(t.get());
+    func(f.get());
   }
 
   Scalar value() const override {
-    return x->val >= Scalar(0) ? Scalar(1) : Scalar(0);
+    return cond(a->val, b->val) ? t->val : f->val;
   }
 
   ExpressionType type() const override { return ExpressionType::NONLINEAR; }
 
-  std::string_view name() const override { return "is nonnegative"; }
+  std::string_view name() const override { return "if-else"; }
+
+  // a and b have zero gradient, so only t and f accumulate adjoints
+  void accumulate_adjoints() const override {
+    if (cond(a->val, b->val)) {
+      t->adj += this->adj;
+    } else {
+      f->adj += this->adj;
+    }
+  }
+
+  void accumulate_adjoints_expr() const override {
+    t->adj_expr += grad_expr_t();
+    f->adj_expr += grad_expr_f();
+  }
+
+ private:
+  ExpressionPtr<Scalar> grad_expr_t() const {
+    // adjoint if cond(a, b), otherwise 0
+    return if_else(cond, a, b, this->adj_expr, constant_ptr(Scalar(0)));
+  }
+
+  ExpressionPtr<Scalar> grad_expr_f() const {
+    // 0 if cond(a, b), otherwise adjoint
+    return if_else(cond, a, b, constant_ptr(Scalar(0)), this->adj_expr);
+  }
 };
 
-/// Returns one if x is nonnegative and zero otherwise.
+/// Returns t if cond(a, b) is true, otherwise f.
 ///
 /// @tparam Scalar Scalar type.
-/// @param x The argument.
+/// @param cond Condition evaluated on a and b.
+/// @param a The condition's first argument.
+/// @param b The condition's second argument.
+/// @param t Value selected when cond(a, b) is true.
+/// @param f Value selected when cond(a, b) is false.
 template <typename Scalar>
-ExpressionPtr<Scalar> is_nonnegative(const ExpressionPtr<Scalar>& x) {
-  if (x->type() == ExpressionType::CONSTANT) {
-    return constant_ptr(x->val >= Scalar(0) ? Scalar(1) : Scalar(0));
+ExpressionPtr<Scalar> if_else(
+    std::type_identity_t<bool (*)(Scalar a, Scalar b)> cond,
+    const ExpressionPtr<Scalar>& a, const ExpressionPtr<Scalar>& b,
+    const ExpressionPtr<Scalar>& t, const ExpressionPtr<Scalar>& f) {
+  using enum ExpressionType;
+
+  // Prune expression
+  if (t == f) {
+    // Return t, which both branches currently are
+    return t;
+  } else if (t->type() == CONSTANT && f->type() == CONSTANT &&
+             t->val == f->val) {
+    // Return t, which both branches currently equal
+    return t;
   }
 
-  return make_expression_ptr<IsNonnegativeExpression<Scalar>>(x);
-}
-
-/// Derived expression type for is_positive().
-///
-/// @tparam Scalar Scalar type.
-template <typename Scalar>
-struct IsPositiveExpression final : Expression<Scalar> {
-  /// Unary operator's operand.
-  ExpressionPtr<Scalar> x;
-
-  /// Constructs an unary expression (an operator with one argument).
-  ///
-  /// @param x Unary operator's operand.
-  explicit constexpr IsPositiveExpression(ExpressionPtr<Scalar> x)
-      : x{std::move(x)} {}
-
-  void visit_args(
-      function_ref<void(Expression<Scalar>* arg)> func) const override {
-    func(x.get());
+  // Evaluate constant condition
+  if (a->type() == CONSTANT && b->type() == CONSTANT) {
+    return cond(a->val, b->val) ? t : f;
   }
 
-  Scalar value() const override {
-    return x->val > Scalar(0) ? Scalar(1) : Scalar(0);
-  }
-
-  ExpressionType type() const override { return ExpressionType::NONLINEAR; }
-
-  std::string_view name() const override { return "is positive"; }
-};
-
-/// Returns one if x is positive and zero otherwise.
-///
-/// @tparam Scalar Scalar type.
-/// @param x The argument.
-template <typename Scalar>
-ExpressionPtr<Scalar> is_positive(const ExpressionPtr<Scalar>& x) {
-  if (x->type() == ExpressionType::CONSTANT) {
-    return constant_ptr(x->val > Scalar(0) ? Scalar(1) : Scalar(0));
-  }
-
-  return make_expression_ptr<IsPositiveExpression<Scalar>>(x);
+  return make_expression_ptr<IfElseExpression<Scalar>>(cond, a, b, t, f);
 }
 
 /// Derived expression type for log().
@@ -1821,17 +1853,15 @@ struct MaxExpression final : Expression<Scalar> {
   Scalar grad_r() const { return a->val >= b->val ? Scalar(0) : this->adj; }
 
   ExpressionPtr<Scalar> grad_expr_l() const {
-    // adjoint * (a >= b)
-    // adjoint * (a - b >= 0)
-    return this->adj_expr * is_nonnegative(a - b);
+    // adjoint if a >= b, otherwise 0
+    return if_else([](Scalar a, Scalar b) { return a >= b; }, a, b,
+                   this->adj_expr, constant_ptr(Scalar(0)));
   }
 
   ExpressionPtr<Scalar> grad_expr_r() const {
-    // adjoint * !(a >= b)
-    // adjoint * (a < b)
-    // adjoint * (b > a)
-    // adjoint * (b - a > 0)
-    return this->adj_expr * is_positive(b - a);
+    // 0 if a >= b, otherwise adjoint
+    return if_else([](Scalar a, Scalar b) { return a >= b; }, a, b,
+                   constant_ptr(Scalar(0)), this->adj_expr);
   }
 };
 
@@ -1905,17 +1935,15 @@ struct MinExpression final : Expression<Scalar> {
   Scalar grad_r() const { return a->val <= b->val ? Scalar(0) : this->adj; }
 
   ExpressionPtr<Scalar> grad_expr_l() const {
-    // adjoint * (a <= b)
-    // adjoint * (b >= a)
-    // adjoint * (b - a >= 0)
-    return this->adj_expr * is_nonnegative(b - a);
+    // adjoint if a <= b, otherwise 0
+    return if_else([](Scalar a, Scalar b) { return a <= b; }, a, b,
+                   this->adj_expr, constant_ptr(Scalar(0)));
   }
 
   ExpressionPtr<Scalar> grad_expr_r() const {
-    // adjoint * !(a <= b)
-    // adjoint * (a > b)
-    // adjoint * (a - b > 0)
-    return this->adj_expr * is_positive(a - b);
+    // 0 if a <= b, otherwise adjoint
+    return if_else([](Scalar a, Scalar b) { return a <= b; }, a, b,
+                   constant_ptr(Scalar(0)), this->adj_expr);
   }
 };
 

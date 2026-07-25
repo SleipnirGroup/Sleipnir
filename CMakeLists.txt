@@ -111,6 +111,9 @@ if(PROJECT_IS_TOP_LEVEL AND BUILD_TESTING AND NOT CMAKE_CROSSCOMPILING)
         SYSTEM
     )
     FetchContent_MakeAvailable(Catch2)
+
+    # Enable StringMaker<std::string_view>
+    target_compile_features(Catch2 PRIVATE cxx_std_23)
 endif()
 
 install(
