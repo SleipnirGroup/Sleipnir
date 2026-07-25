@@ -1369,7 +1369,7 @@ struct IsNonnegativeExpression final : Expression<Scalar> {
 
   ExpressionType type() const override { return ExpressionType::NONLINEAR; }
 
-  std::string_view name() const override { return "is positive"; }
+  std::string_view name() const override { return "is nonnegative"; }
 };
 
 /// Returns one if x is nonnegative and zero otherwise.
@@ -1383,6 +1383,39 @@ ExpressionPtr<Scalar> is_nonnegative(const ExpressionPtr<Scalar>& x) {
   }
 
   return make_expression_ptr<IsNonnegativeExpression<Scalar>>(x);
+}
+
+/// Derived expression type for is_nonzero().
+///
+/// @tparam Scalar Scalar type.
+template <typename Scalar>
+struct IsNonzeroExpression final : Expression<Scalar> {
+  /// Constructs an unary expression (an operator with one argument).
+  ///
+  /// @param x Unary operator's operand.
+  explicit constexpr IsNonzeroExpression(ExpressionPtr<Scalar> x)
+      : Expression<Scalar>{std::move(x)} {}
+
+  Scalar value(Scalar x, Scalar) const override {
+    return x != Scalar(0) ? Scalar(1) : Scalar(0);
+  }
+
+  ExpressionType type() const override { return ExpressionType::NONLINEAR; }
+
+  std::string_view name() const override { return "is nonzero"; }
+};
+
+/// Returns one if x is nonzero and zero otherwise.
+///
+/// @tparam Scalar Scalar type.
+/// @param x The argument.
+template <typename Scalar>
+ExpressionPtr<Scalar> is_nonzero(const ExpressionPtr<Scalar>& x) {
+  if (x->type() == ExpressionType::CONSTANT) {
+    return constant_ptr(x->val != Scalar(0) ? Scalar(1) : Scalar(0));
+  }
+
+  return make_expression_ptr<IsNonzeroExpression<Scalar>>(x);
 }
 
 /// Derived expression type for is_positive().
@@ -1714,8 +1747,8 @@ struct PowExpression final : Expression<Scalar> {
       const ExpressionPtr<Scalar>& base,
       const ExpressionPtr<Scalar>& power) const override {
     // Since x log(x) -> 0 as x -> 0
-    // We use the sign of base to avoid evaluating log(0) when base is zero.
-    auto nonzero = abs(sign(base));
+    // We check whether base is nonzero to avoid evaluating log(0).
+    auto nonzero = is_nonzero(base);
     auto safe_base = base + (constant_ptr(Scalar(1)) - nonzero);
     return this->adjoint_expr * nonzero * pow(safe_base, power) *
            log(safe_base);
