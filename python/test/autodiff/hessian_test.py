@@ -244,7 +244,6 @@ def test_pow():
     f = autodiff.pow(input[0] + 1.0, input[1])
     hessian = Hessian(f, input)
 
-    # Construct the symbolic Hessian while the base's cached value is zero.
     symbolic_H = hessian.get()
 
     input[0].set_value(2.0)
@@ -260,14 +259,6 @@ def test_pow():
     input[1].set_value(2.0)
     mixed = 4.0 * (1.0 + 2.0 * math.log(4.0))
     expected = np.array([[2.0, mixed], [mixed, 16.0 * math.log(4.0) ** 2]])
-    np.testing.assert_allclose(symbolic_H.value(), expected, rtol=0.0, atol=1e-12)
-    np.testing.assert_allclose(
-        hessian.value().todense(), expected, rtol=0.0, atol=1e-12
-    )
-
-    input[0].set_value(-1.0)
-    input[1].set_value(2.0)
-    expected = np.array([[2.0, 0.0], [0.0, 0.0]])
     np.testing.assert_allclose(symbolic_H.value(), expected, rtol=0.0, atol=1e-12)
     np.testing.assert_allclose(
         hessian.value().todense(), expected, rtol=0.0, atol=1e-12

@@ -1385,39 +1385,6 @@ ExpressionPtr<Scalar> is_nonnegative(const ExpressionPtr<Scalar>& x) {
   return make_expression_ptr<IsNonnegativeExpression<Scalar>>(x);
 }
 
-/// Derived expression type for is_nonzero().
-///
-/// @tparam Scalar Scalar type.
-template <typename Scalar>
-struct IsNonzeroExpression final : Expression<Scalar> {
-  /// Constructs an unary expression (an operator with one argument).
-  ///
-  /// @param x Unary operator's operand.
-  explicit constexpr IsNonzeroExpression(ExpressionPtr<Scalar> x)
-      : Expression<Scalar>{std::move(x)} {}
-
-  Scalar value(Scalar x, Scalar) const override {
-    return x != Scalar(0) ? Scalar(1) : Scalar(0);
-  }
-
-  ExpressionType type() const override { return ExpressionType::NONLINEAR; }
-
-  std::string_view name() const override { return "is nonzero"; }
-};
-
-/// Returns one if x is nonzero and zero otherwise.
-///
-/// @tparam Scalar Scalar type.
-/// @param x The argument.
-template <typename Scalar>
-ExpressionPtr<Scalar> is_nonzero(const ExpressionPtr<Scalar>& x) {
-  if (x->type() == ExpressionType::CONSTANT) {
-    return constant_ptr(x->val != Scalar(0) ? Scalar(1) : Scalar(0));
-  }
-
-  return make_expression_ptr<IsNonzeroExpression<Scalar>>(x);
-}
-
 /// Derived expression type for is_positive().
 ///
 /// @tparam Scalar Scalar type.
@@ -1731,9 +1698,7 @@ struct PowExpression final : Expression<Scalar> {
     using std::log;
     using std::pow;
 
-    // Since x log(x) -> 0 as x -> 0
-    return base == Scalar(0) ? Scalar(0)
-                             : this->adjoint * pow(base, power) * log(base);
+    return this->adjoint * pow(base, power) * log(base);
   }
 
   ExpressionPtr<Scalar> grad_expr_l(
@@ -1746,12 +1711,7 @@ struct PowExpression final : Expression<Scalar> {
   ExpressionPtr<Scalar> grad_expr_r(
       const ExpressionPtr<Scalar>& base,
       const ExpressionPtr<Scalar>& power) const override {
-    // Since x log(x) -> 0 as x -> 0
-    // We check whether base is nonzero to avoid evaluating log(0).
-    auto nonzero = is_nonzero(base);
-    auto safe_base = base + (constant_ptr(Scalar(1)) - nonzero);
-    return this->adjoint_expr * nonzero * pow(safe_base, power) *
-           log(safe_base);
+    return this->adjoint_expr * pow(base, power) * log(base);
   }
 };
 
