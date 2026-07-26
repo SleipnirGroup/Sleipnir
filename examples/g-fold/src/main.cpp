@@ -267,12 +267,6 @@ int main() {
 
         problem.subject_to(σ_k >= 0);
 
-        // Thrust magnitude limit
-        //
-        // See equation (34) of [1].
-        //
-        //   |u|₂ ≤ σ
-        //   u_x² + u_y² + u_z² ≤ σ²
         if (k == N - 1 && END_STRAIGHT) {
           // Union of the following constraints:
           //
@@ -284,17 +278,23 @@ int main() {
           problem.subject_to(u_k[1, 0] == 0);
           problem.subject_to(u_k[2, 0] == 0);
         } else {
+          // Thrust magnitude limit
+          //
+          // See equation (34) of [1].
+          //
+          //   |u|₂ ≤ σ
+          //   u_x² + u_y² + u_z² ≤ σ²
           problem.subject_to(u_k.T() * u_k <= σ_k * σ_k);
-        }
 
-        // Thrust pointing limit
-        //
-        // See equation (34) of [1].
-        //
-        //   n̂ᵀu ≥ cos(θ)σ where n̂ = [1  0  0]ᵀ
-        //   [1  0  0]u ≥ cos(θ)σ
-        //   u_x ≥ cos(θ)σ
-        problem.subject_to(u_k[0] >= std::cos(θ) * σ_k);
+          // Thrust pointing limit
+          //
+          // See equation (34) of [1].
+          //
+          //   n̂ᵀu ≥ cos(θ)σ where n̂ = [1  0  0]ᵀ
+          //   [1  0  0]u ≥ cos(θ)σ
+          //   u_x ≥ cos(θ)σ
+          problem.subject_to(u_k[0] >= std::cos(θ) * σ_k);
+        }
 
         // Thrust slack limits
         //
