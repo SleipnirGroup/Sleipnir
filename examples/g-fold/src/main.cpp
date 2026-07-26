@@ -183,8 +183,8 @@ int main() {
     // Initial velocity
     problem.subject_to(v[_, slp::Slice{_, 1}] == v_0);
 
-    // Initial ln(mass)
-    problem.subject_to(Z[0] == std::log(m_0));
+    // Initial mass
+    problem.subject_to(Z[0, 0] == std::log(m_0));
 
     // Final position
     problem.subject_to(q[_, N] == q_f);
@@ -214,15 +214,9 @@ int main() {
       // Velocity limits
       problem.subject_to(v_k.T() * v_k <= v_max * v_max);
 
-      // Mass limits
+      // Mass initial guess
       double z_min = std::log(m_0 - α * ρ_2 * t);
       double z_max = std::log(m_0 - α * ρ_1 * t);
-      if (k == 0) {
-        // Initial mass can only be one value
-        problem.subject_to(z_k == z_max);
-      } else {
-        problem.subject_to(slp::bounds(z_min, z_k, z_max));
-      }
       double z_estimate = (z_min + z_max) / 2;
       z_k.set_value(z_estimate);
 
