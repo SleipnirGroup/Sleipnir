@@ -21,6 +21,8 @@ extern template class slp::Hessian<ExplicitDouble, Eigen::Lower | Eigen::Upper>;
 
 extern template class slp::Jacobian<ExplicitDouble>;
 
+extern template class slp::VariableMatrix<ExplicitDouble>;
+
 extern template slp::VariableMatrix<ExplicitDouble> slp::solve(
     const slp::VariableMatrix<ExplicitDouble>& A,
     const slp::VariableMatrix<ExplicitDouble>& B);

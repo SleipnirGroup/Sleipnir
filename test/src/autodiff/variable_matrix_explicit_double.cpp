@@ -4,6 +4,8 @@
 
 #include "explicit_double.hpp"
 
+template class slp::VariableMatrix<ExplicitDouble>;
+
 template slp::VariableMatrix<ExplicitDouble> slp::solve(
     const slp::VariableMatrix<ExplicitDouble>& A,
     const slp::VariableMatrix<ExplicitDouble>& B);
