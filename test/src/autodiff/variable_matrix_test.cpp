@@ -3,10 +3,13 @@
 #include <format>
 #include <functional>
 #include <iterator>
+#include <ranges>
 
 #include <Eigen/Core>
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <sleipnir/autodiff/slice.hpp>
 #include <sleipnir/autodiff/variable_matrix.hpp>
 
 #include "scalar_types_under_test.hpp"
