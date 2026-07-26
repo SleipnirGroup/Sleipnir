@@ -1160,6 +1160,12 @@ R"doc(Returns end iterator.
 Returns:
     End iterator.)doc";
 
+static const char *__doc_slp_VariableBlock_exp =
+R"doc(Returns the matrix exponential.
+
+Returns:
+    The matrix exponential.)doc";
+
 static const char *__doc_slp_VariableBlock_iterator = R"doc()doc";
 
 static const char *__doc_slp_VariableBlock_iterator_iterator = R"doc()doc";
@@ -1811,6 +1817,12 @@ R"doc(Returns const end iterator.
 
 Returns:
     Const end iterator.)doc";
+
+static const char *__doc_slp_VariableMatrix_exp =
+R"doc(Returns the matrix exponential.
+
+Returns:
+    The matrix exponential.)doc";
 
 static const char *__doc_slp_VariableMatrix_identity =
 R"doc(Returns an identity variable matrix.

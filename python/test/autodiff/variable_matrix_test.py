@@ -404,6 +404,45 @@ def test_cwise_reduce():
     assert (result.value() == np.array([[16.0, 27.0, 40.0], [55.0, 72.0, 91.0]])).all()
 
 
+def test_exp():
+    A1 = VariableMatrix([[4.0]])
+    np.testing.assert_allclose(A1.exp().value() @ (-A1).exp().value(), np.identity(1))
+    np.testing.assert_allclose(
+        A1[:, :].exp().value() @ (-A1[:, :]).exp().value(), np.identity(1)
+    )
+
+    A2 = VariableMatrix([[0.0, 1.0], [0.0, -0.5]])
+    np.testing.assert_allclose(
+        A2.exp().value() @ (-A2).exp().value(), np.identity(2), atol=1e-15
+    )
+    np.testing.assert_allclose(
+        A2[:, :].exp().value() @ (-A2[:, :]).exp().value(), np.identity(2), atol=1e-15
+    )
+
+    A3 = VariableMatrix([[0.0, 1.0], [0.0, 10.0]])
+    np.testing.assert_allclose(
+        A3.exp().value() @ (-A3).exp().value(), np.identity(2), atol=1e-15
+    )
+    np.testing.assert_allclose(
+        A3[:, :].exp().value() @ (-A3[:, :]).exp().value(), np.identity(2), atol=1e-15
+    )
+    A4 = VariableMatrix([[1.0, 10.0], [0.0, 0.0]])
+    np.testing.assert_allclose(
+        A4.exp().value() @ (-A4).exp().value(), np.identity(2), atol=1e-15
+    )
+    np.testing.assert_allclose(
+        A4[:, :].exp().value() @ (-A4[:, :]).exp().value(), np.identity(2), atol=1e-15
+    )
+
+    A5 = VariableMatrix([[2.0, 3.0], [4.0, 5.0]])
+    np.testing.assert_allclose(
+        A5.exp().value() @ (-A5).exp().value(), np.identity(2), atol=1e-12
+    )
+    np.testing.assert_allclose(
+        A5[:, :].exp().value() @ (-A5[:, :]).exp().value(), np.identity(2), atol=1e-12
+    )
+
+
 def test_block_free_function():
     A = VariableMatrix([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
     B = VariableMatrix([[7.0], [8.0]])

@@ -439,6 +439,7 @@ void bind_variable_matrix(nb::module_& autodiff,
          const std::function<Variable<double>(const Variable<double>& x)>&
              unary_op) { return self.cwise_transform(unary_op); },
       "func"_a, DOC(slp, VariableMatrix, cwise_transform));
+  cls.def("exp", &VariableMatrix<double>::exp, DOC(slp, VariableMatrix, exp));
   cls.def_static("identity", &VariableMatrix<double>::identity, "rows"_a,
                  DOC(slp, VariableMatrix, identity));
   cls.def_static("zero", &VariableMatrix<double>::zero, "rows"_a, "cols"_a,
