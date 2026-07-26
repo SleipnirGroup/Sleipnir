@@ -492,6 +492,14 @@ TEMPLATE_TEST_CASE("Gradient - atan2()", "[Gradient]",
       g.value().coeff(0),
       WithinAbs(T(-2) / (T(2) * T(2) + x.value() * x.value()), T(1e-15)));
 
+  // Testing atan2 function on (0, var)
+  x.set_value(T(-2));
+  CHECK(slp::atan2(T(0), x).value() == atan2(T(0), x.value()));
+
+  g = slp::Gradient(slp::atan2(T(0), x), x);
+  CHECK(g.get().value().coeff(0) == T(0));
+  CHECK(g.value().coeff(0) == T(0));
+
   // Testing atan2 function on (var, T)
   x.set_value(T(1));
   y.set_value(T(0.9));
@@ -502,6 +510,14 @@ TEMPLATE_TEST_CASE("Gradient - atan2()", "[Gradient]",
              WithinAbs(T(2) / (T(2) * T(2) + x.value() * x.value()), T(1e-15)));
   CHECK_THAT(g.value().coeff(0),
              WithinAbs(T(2) / (T(2) * T(2) + x.value() * x.value()), T(1e-15)));
+
+  // Testing atan2 function on (var, 0)
+  x.set_value(T(-2));
+  CHECK(slp::atan2(x, T(0)).value() == atan2(x.value(), T(0)));
+
+  g = slp::Gradient(slp::atan2(x, T(0)), x);
+  CHECK(g.get().value().coeff(0) == T(0));
+  CHECK(g.value().coeff(0) == T(0));
 
   // Testing atan2 function on (var, var)
   x.set_value(T(1.1));
@@ -579,12 +595,28 @@ TEMPLATE_TEST_CASE("Gradient - hypot()", "[Gradient]",
   CHECK(g.get().value().coeff(0) == x.value() / hypot(x.value(), T(2)));
   CHECK(g.value().coeff(0) == x.value() / hypot(x.value(), T(2)));
 
+  // Testing hypot function on (var, 0)
+  x.set_value(T(-1));
+  CHECK(slp::hypot(x, T(0)).value() == hypot(x.value(), T(0)));
+
+  g = slp::Gradient(slp::hypot(x, T(0)), x);
+  CHECK(g.get().value().coeff(0) == T(-1));
+  CHECK(g.value().coeff(0) == T(-1));
+
   // Testing hypot function on (T, var)
   CHECK(slp::hypot(T(2), y).value() == hypot(T(2), y.value()));
 
   g = slp::Gradient(slp::hypot(T(2), y), y);
   CHECK(g.get().value().coeff(0) == y.value() / hypot(T(2), y.value()));
   CHECK(g.value().coeff(0) == y.value() / hypot(T(2), y.value()));
+
+  // Testing hypot function on (0, var)
+  y.set_value(T(-2));
+  CHECK(slp::hypot(T(0), y).value() == hypot(T(0), y.value()));
+
+  g = slp::Gradient(slp::hypot(T(0), y), y);
+  CHECK(g.get().value().coeff(0) == T(-1));
+  CHECK(g.value().coeff(0) == T(-1));
 
   // Testing hypot function on (var, var)
   x.set_value(T(1.3));

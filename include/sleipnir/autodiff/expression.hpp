@@ -1043,14 +1043,6 @@ ExpressionPtr<Scalar> atan2(const ExpressionPtr<Scalar>& y,
   using enum ExpressionType;
   using std::atan2;
 
-  // Prune expression
-  if (y->is_constant(Scalar(0))) {
-    // Return zero, which y currently is
-    return y;
-  } else if (x->is_constant(Scalar(0))) {
-    return constant_ptr(Scalar(std::numbers::pi) / Scalar(2));
-  }
-
   // Evaluate constant
   if (y->type() == CONSTANT && x->type() == CONSTANT) {
     return constant_ptr(atan2(y->val, x->val));
@@ -1339,9 +1331,9 @@ ExpressionPtr<Scalar> hypot(const ExpressionPtr<Scalar>& x,
 
   // Prune expression
   if (x->is_constant(Scalar(0))) {
-    return y;
+    return abs(y);
   } else if (y->is_constant(Scalar(0))) {
-    return x;
+    return abs(x);
   }
 
   // Evaluate constant
