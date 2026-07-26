@@ -177,11 +177,16 @@ TEMPLATE_TEST_CASE("Expression - Prune atan2()", "[Expression]",
   using T = TestType;
   using std::atan2;
 
+  auto negative_one = constant_ptr(T(-1));
   auto zero = constant_ptr(T(0));
   auto one = constant_ptr(T(1));
 
   CHECK(slp::detail::atan2(zero, one)->is_constant(T(0)));
   CHECK(slp::detail::atan2(one, zero)->is_constant(T(std::numbers::pi / 2)));
+  CHECK(
+      slp::detail::atan2(zero, negative_one)->is_constant(atan2(T(0), T(-1))));
+  CHECK(
+      slp::detail::atan2(negative_one, zero)->is_constant(atan2(T(-1), T(0))));
   CHECK(slp::detail::atan2(one, one)->is_constant(atan2(T(1), T(1))));
 }
 
@@ -255,13 +260,19 @@ TEMPLATE_TEST_CASE("Expression - Prune exp()", "[Expression]",
 TEMPLATE_TEST_CASE("Expression - Prune hypot()", "[Expression]",
                    SCALAR_TYPES_UNDER_TEST) {
   using T = TestType;
+  using std::hypot;
 
+  auto negative_one = constant_ptr(T(-1));
   auto zero = constant_ptr(T(0));
   auto one = constant_ptr(T(1));
 
   CHECK(slp::detail::hypot(zero, zero)->is_constant(T(0)));
-  CHECK(slp::detail::hypot(zero, one) == one);
-  CHECK(slp::detail::hypot(one, zero) == one);
+  CHECK(slp::detail::hypot(zero, one)->is_constant(T(1)));
+  CHECK(slp::detail::hypot(one, zero)->is_constant(T(1)));
+  CHECK(
+      slp::detail::hypot(zero, negative_one)->is_constant(hypot(T(0), T(-1))));
+  CHECK(
+      slp::detail::hypot(negative_one, zero)->is_constant(hypot(T(-1), T(0))));
   CHECK(slp::detail::hypot(one, one)->is_constant(T(std::numbers::sqrt2)));
 }
 
