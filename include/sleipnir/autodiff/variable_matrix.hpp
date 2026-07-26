@@ -1709,6 +1709,9 @@ VariableMatrix<Scalar> gradient_tree(const ExpressionGraph<Scalar>& top_list,
 
 }  // namespace detail
 
+extern template class EXPORT_TEMPLATE_DECLARE(SLEIPNIR_DLLEXPORT)
+VariableMatrix<double>;
+
 extern template SLEIPNIR_DLLEXPORT VariableMatrix<double> solve(
     const VariableMatrix<double>& A, const VariableMatrix<double>& B);
 

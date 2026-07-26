@@ -1548,6 +1548,8 @@ R"doc(A matrix of autodiff variables.
 Template parameter ``Scalar_``:
     Scalar type.)doc";
 
+static const char *__doc_slp_VariableMatrix_3 = R"doc()doc";
+
 static const char *__doc_slp_VariableMatrix_T =
 R"doc(Returns the transpose of the variable matrix.
 
