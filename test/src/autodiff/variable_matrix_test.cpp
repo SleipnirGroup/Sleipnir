@@ -526,7 +526,7 @@ void check_solve(slp::VariableMatrix<T> A, slp::VariableMatrix<T> B) {
   CHECK(T((A.value() * X.value() - B.value()).norm()) < T(1e-12));
 }
 
-TEMPLATE_TEST_CASE("VariableMatrix - Solve() free function", "[VariableMatrix]",
+TEMPLATE_TEST_CASE("VariableMatrix - solve() free function", "[VariableMatrix]",
                    SCALAR_TYPES_UNDER_TEST) {
   using T = TestType;
 
