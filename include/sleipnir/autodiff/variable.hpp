@@ -1028,6 +1028,8 @@ struct NumTraits<slp::Variable<Scalar>> : NumTraits<Scalar> {
   using NonInteger = slp::Variable<Scalar>;
   /// Nested type.
   using Nested = slp::Variable<Scalar>;
+  /// Literal type.
+  using Literal = slp::Variable<Scalar>;
 
   /// Is complex.
   static constexpr int IsComplex = 0;
