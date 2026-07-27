@@ -1812,6 +1812,15 @@ R"doc(Returns const end iterator.
 Returns:
     Const end iterator.)doc";
 
+static const char *__doc_slp_VariableMatrix_identity =
+R"doc(Returns an identity variable matrix.
+
+Parameter ``rows``:
+    The number of matrix rows.
+
+Returns:
+    An identity variable matrix.)doc";
+
 static const char *__doc_slp_VariableMatrix_iterator = R"doc()doc";
 
 static const char *__doc_slp_VariableMatrix_iterator_iterator = R"doc()doc";
