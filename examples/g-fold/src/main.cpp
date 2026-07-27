@@ -57,11 +57,14 @@ int main() {
 
   // From section IV of [1]:
 
-  // Initial mass (kg)
-  constexpr double m_0 = 2000.0;
+  // Initial lander mass including fuel (kg)
+  constexpr double m_wet = 2000.0;
 
-  // Final mass (kg)
-  constexpr double m_f = 300.0;
+  // Initial fuel mass (kg)
+  constexpr double m_fuel = 300.0;
+
+  // Lander dry mass (kg)
+  constexpr double m_dry = m_wet - m_fuel;
 
   // Maximum thrust (N)
   constexpr double T_max = 24000;
@@ -140,8 +143,8 @@ int main() {
   // Time horizon bounds (s)
   //
   // See equation (55) of [2].
-  double t_min = (m_0 - m_f) * v_0.norm() / ρ_2;
-  constexpr double t_max = m_f / (α * ρ_1);
+  double t_min = m_dry * v_0.norm() / ρ_2;
+  constexpr double t_max = m_fuel / (α * ρ_1);
 
   // Number of control intervals
   //
@@ -184,7 +187,7 @@ int main() {
     problem.subject_to(v[_, slp::Slice{_, 1}] == v_0);
 
     // Initial mass
-    problem.subject_to(Z[0, 0] == std::log(m_0));
+    problem.subject_to(Z[0, 0] == std::log(m_wet));
 
     // Final position
     problem.subject_to(q[_, N] == q_f);
@@ -215,8 +218,8 @@ int main() {
       problem.subject_to(v_k.T() * v_k <= v_max * v_max);
 
       // Mass initial guess
-      double z_min = std::log(m_0 - α * ρ_2 * t);
-      double z_max = std::log(m_0 - α * ρ_1 * t);
+      double z_min = std::log(m_wet - α * ρ_2 * t);
+      double z_max = std::log(m_wet - α * ρ_1 * t);
       double z_estimate = (z_min + z_max) / 2;
       z_k.set_value(z_estimate);
 
@@ -293,7 +296,7 @@ int main() {
         // Thrust slack limits
         //
         // See equation (34) of [2].
-        double z_0 = std::log(m_0 - α * ρ_2 * t);
+        double z_0 = std::log(m_wet - α * ρ_2 * t);
         double μ_1 = ρ_1 * std::exp(-z_0);
         double μ_2 = ρ_2 * std::exp(-z_0);
         auto σ_min =
