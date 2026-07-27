@@ -60,11 +60,14 @@ def discretize_ab(A, B, dt):
 def main():
     # From section IV of [1]:
 
-    # Initial mass (kg)
-    m_0 = 2000.0
+    # Initial lander mass including fuel (kg)
+    m_wet = 2000.0
 
-    # Final mass (kg)
-    m_f = 300.0
+    # Initial fuel mass (kg)
+    m_fuel = 300.0
+
+    # Lander dry mass (kg)
+    m_dry = m_wet - m_fuel
 
     # Maximum thrust (N)
     T_max = 24000
@@ -134,8 +137,8 @@ def main():
     # Time horizon bounds (s)
     #
     # See equation (55) of [2].
-    t_min = (m_0 - m_f) * norm(v_0) / ρ_2
-    t_max = m_f / (α * ρ_1)
+    t_min = m_dry * norm(v_0) / ρ_2
+    t_max = m_fuel / (α * ρ_1)
 
     # Number of control intervals
     #
@@ -179,7 +182,7 @@ def main():
         problem.subject_to(v[:, :1] == v_0)
 
         # Initial mass
-        problem.subject_to(Z[0, 0] == math.log(m_0))
+        problem.subject_to(Z[0, 0] == math.log(m_wet))
 
         # Final position
         problem.subject_to(q[:, -1] == q_f)
@@ -206,8 +209,8 @@ def main():
             problem.subject_to(v_k.T @ v_k <= v_max**2)
 
             # Mass initial guess
-            z_min = math.log(m_0 - α * ρ_2 * t)
-            z_max = math.log(m_0 - α * ρ_1 * t)
+            z_min = math.log(m_wet - α * ρ_2 * t)
+            z_max = math.log(m_wet - α * ρ_1 * t)
             z_estimate = (z_min + z_max) / 2
             z_k.set_value(z_estimate)
 
@@ -284,7 +287,7 @@ def main():
                 # Thrust slack limits
                 #
                 # See equation (34) of [2].
-                z_0 = math.log(m_0 - α * ρ_2 * t)
+                z_0 = math.log(m_wet - α * ρ_2 * t)
                 μ_1 = ρ_1 * math.exp(-z_0)
                 μ_2 = ρ_2 * math.exp(-z_0)
                 σ_min = μ_1 * (1 - (z_k - z_0) + 0.5 * (z_k - z_0) ** 2)
@@ -361,8 +364,8 @@ def main():
     ax.set_title("Mass vs Time")
     ax.set_xlabel("Time (s)")
     ax.set_ylabel("Mass (kg)")
-    ax.plot(times, [m_0 - α * ρ_2 * k * dt for k in range(N + 1)], label="Min mass")
-    ax.plot(times, [m_0 - α * ρ_1 * k * dt for k in range(N + 1)], label="Max mass")
+    ax.plot(times, [m_wet - α * ρ_2 * k * dt for k in range(N + 1)], label="Min mass")
+    ax.plot(times, [m_wet - α * ρ_1 * k * dt for k in range(N + 1)], label="Max mass")
     ax.plot(times, [math.exp(Z_value[0, k]) for k in range(N + 1)], label="Mass")
     ax.legend()
 
