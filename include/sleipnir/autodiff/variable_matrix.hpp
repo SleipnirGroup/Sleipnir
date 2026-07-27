@@ -1187,6 +1187,22 @@ class VariableMatrix : public SleipnirBase {
   /// @return Number of elements in matrix.
   size_t size() const { return m_storage.size(); }
 
+  /// Returns an identity variable matrix.
+  ///
+  /// @param rows The number of matrix rows.
+  /// @return An identity variable matrix.
+  static VariableMatrix<Scalar> identity(int rows) {
+    VariableMatrix<Scalar> result{detail::empty, rows, rows};
+
+    for (int row = 0; row < rows; ++row) {
+      for (int col = 0; col < rows; ++col) {
+        result[row, col] = row == col ? Scalar(1) : Scalar(0);
+      }
+    }
+
+    return result;
+  }
+
   /// Returns a variable matrix filled with zeros.
   ///
   /// @param rows The number of matrix rows.

@@ -358,8 +358,18 @@ def test_unary_broadcast():
     assert (result2.value() == expected2).all()
 
 
+def test_identity_static_function():
+    A = VariableMatrix.identity(3)
+
+    assert A.shape == (3, 3)
+
+    assert (A.value() == np.identity(3)).all()
+
+
 def test_zero_static_function():
     A = VariableMatrix.zero(2, 3)
+
+    assert A.shape == (2, 3)
 
     for row in range(A.rows()):
         for col in range(A.cols()):
@@ -369,6 +379,8 @@ def test_zero_static_function():
 def test_one_static_function():
     A = VariableMatrix.one(2, 3)
 
+    assert A.shape == (2, 3)
+
     for row in range(A.rows()):
         for col in range(A.cols()):
             assert A[row, col].value() == 1.0
@@ -376,6 +388,8 @@ def test_one_static_function():
 
 def test_constant_static_function():
     A = VariableMatrix.constant(2, 3, 2.0)
+
+    assert A.shape == (2, 3)
 
     for row in range(A.rows()):
         for col in range(A.cols()):

@@ -445,11 +445,26 @@ TEMPLATE_TEST_CASE("VariableMatrix - cwise_transform()", "[VariableMatrix]",
   CHECK(result2.value() == expected2);
 }
 
+TEMPLATE_TEST_CASE("VariableMatrix - identity() static function",
+                   "[VariableMatrix]", SCALAR_TYPES_UNDER_TEST) {
+  using T = TestType;
+
+  auto A = slp::VariableMatrix<T>::identity(3);
+
+  CHECK(A.rows() == 3);
+  CHECK(A.cols() == 3);
+
+  CHECK(A.value() == Eigen::Matrix<T, 3, 3>::Identity());
+}
+
 TEMPLATE_TEST_CASE("VariableMatrix - zero() static function",
                    "[VariableMatrix]", SCALAR_TYPES_UNDER_TEST) {
   using T = TestType;
 
   auto A = slp::VariableMatrix<T>::zero(2, 3);
+
+  CHECK(A.rows() == 2);
+  CHECK(A.cols() == 3);
 
   for (auto& elem : A) {
     CHECK(elem.value() == T(0));
@@ -462,6 +477,9 @@ TEMPLATE_TEST_CASE("VariableMatrix - one() static function", "[VariableMatrix]",
 
   auto A = slp::VariableMatrix<T>::one(2, 3);
 
+  CHECK(A.rows() == 2);
+  CHECK(A.cols() == 3);
+
   for (auto& elem : A) {
     CHECK(elem.value() == T(1));
   }
@@ -472,6 +490,9 @@ TEMPLATE_TEST_CASE("VariableMatrix - constant() static function",
   using T = TestType;
 
   auto A = slp::VariableMatrix<T>::constant(2, 3, T(2));
+
+  CHECK(A.rows() == 2);
+  CHECK(A.cols() == 3);
 
   for (auto& elem : A) {
     CHECK(elem.value() == T(2));
