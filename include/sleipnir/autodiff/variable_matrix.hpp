@@ -1001,6 +1001,23 @@ class VariableMatrix : public SleipnirBase {
     return result;
   }
 
+  /// Converts the VariableMatrix to an Eigen matrix.
+  ///
+  /// @return Eigen matrix.
+  Eigen::Matrix<Variable<Scalar>, Eigen::Dynamic, Eigen::Dynamic> to_eigen()
+      const {
+    Eigen::Matrix<Variable<Scalar>, Eigen::Dynamic, Eigen::Dynamic> result{
+        rows(), cols()};
+
+    for (int row = 0; row < rows(); ++row) {
+      for (int col = 0; col < cols(); ++col) {
+        result[row, col] = (*this)[row, col];
+      }
+    }
+
+    return result;
+  }
+
   /// Transforms the matrix coefficient-wise with an unary operator.
   ///
   /// @param unary_op The unary operator to use for the transform operation.
@@ -1629,33 +1646,8 @@ VariableMatrix<Scalar> solve(const VariableMatrix<Scalar>& A,
     auto det_A = a * adj_A00 + b * adj_A10 + c * adj_A20 + d * adj_A30;
     return adj_A / det_A * B;
   } else {
-    using MatrixXv =
-        Eigen::Matrix<Variable<Scalar>, Eigen::Dynamic, Eigen::Dynamic>;
-
-    MatrixXv eigen_A{A.rows(), A.cols()};
-    for (int row = 0; row < A.rows(); ++row) {
-      for (int col = 0; col < A.cols(); ++col) {
-        eigen_A[row, col] = A[row, col];
-      }
-    }
-
-    MatrixXv eigen_B{B.rows(), B.cols()};
-    for (int row = 0; row < B.rows(); ++row) {
-      for (int col = 0; col < B.cols(); ++col) {
-        eigen_B[row, col] = B[row, col];
-      }
-    }
-
-    MatrixXv eigen_X = eigen_A.householderQr().solve(eigen_B);
-
-    VariableMatrix<Scalar> X{detail::empty, A.cols(), B.cols()};
-    for (int row = 0; row < X.rows(); ++row) {
-      for (int col = 0; col < X.cols(); ++col) {
-        X[row, col] = eigen_X[row, col];
-      }
-    }
-
-    return X;
+    return VariableMatrix<Scalar>{
+        A.to_eigen().householderQr().solve(B.to_eigen())};
   }
 }
 

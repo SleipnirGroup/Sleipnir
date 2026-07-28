@@ -417,6 +417,23 @@ TEMPLATE_TEST_CASE("VariableMatrix - Value", "[VariableMatrix]",
             1) == T(9));
 }
 
+TEMPLATE_TEST_CASE("VariableMatrix - to_eigen()", "[VariableMatrix]",
+                   SCALAR_TYPES_UNDER_TEST) {
+  using T = TestType;
+
+  slp::VariableMatrix<T> A{{T(1), T(2), T(3)}, {T(4), T(5), T(6)}};
+  auto eigen_A = A.to_eigen();
+
+  CHECK(A.rows() == eigen_A.rows());
+  CHECK(A.cols() == eigen_A.cols());
+
+  for (int row = 0; row < A.rows(); ++row) {
+    for (int col = 0; col < A.cols(); ++col) {
+      CHECK(A[row, col] == eigen_A[row, col]);
+    }
+  }
+}
+
 TEMPLATE_TEST_CASE("VariableMatrix - cwise_transform()", "[VariableMatrix]",
                    SCALAR_TYPES_UNDER_TEST) {
   using T = TestType;
