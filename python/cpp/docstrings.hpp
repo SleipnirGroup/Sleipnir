@@ -2136,6 +2136,12 @@ R"doc(Returns number of elements in matrix.
 Returns:
     Number of elements in matrix.)doc";
 
+static const char *__doc_slp_VariableMatrix_to_eigen =
+R"doc(Converts the VariableMatrix to an Eigen matrix.
+
+Returns:
+    Eigen matrix.)doc";
+
 static const char *__doc_slp_VariableMatrix_value =
 R"doc(Returns an element of the variable matrix.
 
