@@ -555,7 +555,7 @@ TEMPLATE_TEST_CASE("VariableMatrix - block() free function", "[VariableMatrix]",
 
 template <typename T>
 void check_solve(slp::VariableMatrix<T> A, slp::VariableMatrix<T> B) {
-  INFO(std::format("Solve {}x{}", A.rows(), A.cols()));
+  INFO(std::format("solve(A, B) {}x{}", A.rows(), A.cols()));
 
   auto X = solve(A, B);
 
