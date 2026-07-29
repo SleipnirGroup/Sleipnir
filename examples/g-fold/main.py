@@ -18,43 +18,12 @@ import sys
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy.linalg import norm
-from scipy.linalg import expm
+from scipy.signal import cont2discrete
 from sleipnir.optimization import ExitStatus, Problem, bounds
 
 
 def lerp(a, b, t):
     return a + t * (b - a)
-
-
-def discretize_ab(A, B, dt):
-    """
-    Discretizes the given continuous A and B matrices.
-
-    Parameter ``A``:
-        Continuous system matrix.
-
-    Parameter ``B``:
-        Continuous input matrix.
-
-    Parameter ``dt``:
-        Discretization timestep.
-
-    Returns:
-        Discrete system matrix, discrete input matrix.
-    """
-    states = A.shape[0]
-    inputs = B.shape[1]
-
-    # M = [A  B]
-    #     [0  0]
-    M = expm(
-        np.block([[A, B], [np.zeros((inputs, states)), np.zeros((inputs, inputs))]])
-        * dt
-    )
-
-    # ϕ = eᴹᵀ = [A_d  B_d]
-    #           [ 0    I ]
-    return M[:states, :states], M[:states, states:]
 
 
 def main():
@@ -126,13 +95,13 @@ def main():
 
     #     [  0        I  ]
     # A = [-S(ω)²  -2S(ω)]
-    A = np.block([[np.zeros((3, 3)), np.eye(3)], [-S @ S, -2 * S]])
+    A = np.block([[np.zeros((3, 3)), np.identity(3)], [-S @ S, -2 * S]])
 
     #     [0]
     # B = [I]
-    B = np.block([[np.zeros((3, 3))], [np.eye(3)]])
+    B = np.block([[np.zeros((3, 3))], [np.identity(3)]])
 
-    A_d, B_d = discretize_ab(A, B, dt)
+    A_d, B_d, _, _, _ = cont2discrete((A, B, np.identity(3), np.zeros((3, 3))), dt)
 
     # Time horizon bounds (s)
     #
