@@ -424,7 +424,7 @@ def test_block_free_function():
 
 
 def check_solve(A: VariableMatrix, B: VariableMatrix):
-    print(f"Solve {A.shape[0]}x{A.shape[1]}")
+    print(f"solve(A, B) {A.shape[0]}x{A.shape[1]}")
 
     X = autodiff.solve(A, B)
 
