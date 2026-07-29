@@ -3,6 +3,7 @@
 #pragma once
 
 #include <algorithm>
+#include <array>
 #include <concepts>
 #include <cstddef>
 #include <initializer_list>
@@ -12,6 +13,7 @@
 #include <vector>
 
 #include <Eigen/Core>
+#include <Eigen/LU>
 #include <Eigen/QR>
 #include <gch/small_vector.hpp>
 
@@ -1034,6 +1036,88 @@ class VariableMatrix : public SleipnirBase {
     }
 
     return result;
+  }
+
+  /// Returns the matrix exponential.
+  ///
+  /// @return The matrix exponential.
+  VariableMatrix<Scalar> exp() const {
+    slp_assert(rows() == cols());
+
+    // Coefficients for (13, 13) Padé approximant of exp(A) are from the
+    // following program:
+    //
+    // #!/usr/bin/env python
+    //
+    // import mpmath as mp
+    //
+    // # https://en.wikipedia.org/wiki/IEEE_754#Basic_and_interchange_formats
+    // mp.mp.prec = 113  # quad precision
+    //
+    // L = 13
+    // M = 13
+    // p, q = mp.pade(mp.taylor(mp.exp, 0, L + M), L, M)
+    //
+    // print("constexpr std::array p{")
+    // for k, p_k in enumerate(p):
+    //     print(f"Scalar({p_k}L){',' if k < len(p) - 1 else '};'}")
+    // print("constexpr std::array q{")
+    // for k, q_k in enumerate(q):
+    //     print(f"Scalar({q_k}L){',' if k < len(q) - 1 else '};'}")
+    constexpr size_t NUM_COEFFS = 14;
+    constexpr std::array p{Scalar(1.0L),
+                           Scalar(0.499999999999999999999987615564159L),
+                           Scalar(0.119999999999999999999993719796468L),
+                           Scalar(0.0183333333333333333333318078905823L),
+                           Scalar(0.00199275362318840579710121408775205L),
+                           Scalar(0.00016304347826086956521736560868541L),
+                           Scalar(1.03519668737060041407846479512981e-05L),
+                           Scalar(5.17598343685300207039205144279119e-07L),
+                           Scalar(2.04315135665250081725989398668247e-08L),
+                           Scalar(6.30602270571759511499920806570486e-10L),
+                           Scalar(1.48377004840414002705850442238441e-11L),
+                           Scalar(2.52915349159796595521307855480881e-13L),
+                           Scalar(2.81017054621996217245857568431558e-15L),
+                           Scalar(1.54404975067030888596595580141692e-17L)};
+    constexpr std::array q{Scalar(1.0L),
+                           Scalar(-0.500000000000000000000012384435841L),
+                           Scalar(0.120000000000000000000006104232309L),
+                           Scalar(-0.0183333333333333333333347707904729L),
+                           Scalar(0.00199275362318840579710166350137732L),
+                           Scalar(-0.000163043478260869565217413851346892L),
+                           Scalar(1.03519668737060041407885187519331e-05L),
+                           Scalar(-5.17598343685300207039443859549262e-07L),
+                           Scalar(2.04315135665250081726103781506842e-08L),
+                           Scalar(-6.30602270571759511500345035969254e-10L),
+                           Scalar(1.48377004840414002705969744674248e-11L),
+                           Scalar(-2.52915349159796595521550648156349e-13L),
+                           Scalar(2.81017054621996217246180850207342e-15L),
+                           Scalar(-1.54404975067030888596810607146175e-17L)};
+    static_assert(p.size() == NUM_COEFFS);
+    static_assert(q.size() == NUM_COEFFS);
+
+    //     13
+    // P = Σ pₖAᵏ
+    //    k=0
+    //
+    //     13
+    // Q = Σ qₖAᵏ
+    //    k=0
+    VariableMatrix<Scalar> P{
+        Eigen::Vector<Scalar, Eigen::Dynamic>::Constant(rows(), p[0])
+            .asDiagonal()};
+    VariableMatrix<Scalar> Q{
+        Eigen::Vector<Scalar, Eigen::Dynamic>::Constant(rows(), q[0])
+            .asDiagonal()};
+    auto A_pow = *this;
+    for (size_t k = 1; k < NUM_COEFFS; ++k) {
+      P += p[k] * A_pow;
+      Q += q[k] * A_pow;
+      A_pow *= *this;
+    }
+
+    // exp(A) ≈ P/Q
+    return VariableMatrix<Scalar>{Q.to_eigen().lu().solve(P.to_eigen())};
   }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

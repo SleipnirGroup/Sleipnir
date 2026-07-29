@@ -624,6 +624,13 @@ class VariableBlock : public SleipnirBase {
     return result;
   }
 
+  /// Returns the matrix exponential.
+  ///
+  /// @return The matrix exponential.
+  std::remove_cv_t<Mat> exp() const {
+    return std::remove_cv_t<Mat>{*this}.exp();
+  }
+
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
   class iterator {

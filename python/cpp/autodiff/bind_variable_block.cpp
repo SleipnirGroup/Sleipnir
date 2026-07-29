@@ -392,6 +392,8 @@ void bind_variable_block(
          const std::function<Variable<double>(const Variable<double>& x)>&
              unary_op) { return self.cwise_transform(unary_op); },
       "func"_a, DOC(slp, VariableBlock, cwise_transform));
+  cls.def("exp", &VariableBlock<VariableMatrix<double>>::exp,
+          DOC(slp, VariableBlock, exp));
 
   // Comparison operators
   for_each_type<nb::detail::self_t, double, int, Variable<double>>(

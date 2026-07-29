@@ -9,9 +9,11 @@
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
 #include <sleipnir/autodiff/slice.hpp>
 #include <sleipnir/autodiff/variable_matrix.hpp>
 
+#include "catch_matchers.hpp"
 #include "scalar_types_under_test.hpp"
 
 TEMPLATE_TEST_CASE("VariableMatrix - Construct from Eigen::MatrixBase",
@@ -526,6 +528,42 @@ TEMPLATE_TEST_CASE("VariableMatrix - cwise_reduce()", "[VariableMatrix]",
 
   Eigen::Matrix<T, 2, 3> expected{{T(16), T(27), T(40)}, {T(55), T(72), T(91)}};
   CHECK(result.value() == expected);
+}
+
+TEMPLATE_TEST_CASE("VariableMatrix - exp()", "[VariableMatrix]",
+                   SCALAR_TYPES_UNDER_TEST) {
+  using T = TestType;
+  using namespace slp::slicing;
+
+  auto A1 = slp::VariableMatrix<T>{{T(4)}};
+  CHECK_THAT(A1.exp().value() * (-A1).exp().value(),
+             MatrixWithinAbs(Eigen::Matrix<T, 1, 1>::Identity(), T(1e-15)));
+  CHECK_THAT((A1[_, _].exp().value() * (-A1[_, _]).exp().value()),
+             MatrixWithinAbs(Eigen::Matrix<T, 1, 1>::Identity(), T(1e-15)));
+
+  auto A2 = slp::VariableMatrix<T>{{T(0), T(1)}, {T(0), T(-0.5)}};
+  CHECK_THAT(A2.exp().value() * (-A2).exp().value(),
+             MatrixWithinAbs(Eigen::Matrix<T, 2, 2>::Identity(), T(1e-15)));
+  CHECK_THAT((A2[_, _].exp().value() * (-A2[_, _]).exp().value()),
+             MatrixWithinAbs(Eigen::Matrix<T, 2, 2>::Identity(), T(1e-15)));
+
+  auto A3 = slp::VariableMatrix<T>{{T(0), T(1)}, {T(0), T(10)}};
+  CHECK_THAT(A3.exp().value() * (-A3).exp().value(),
+             MatrixWithinAbs(Eigen::Matrix<T, 2, 2>::Identity(), T(1e-15)));
+  CHECK_THAT((A3[_, _].exp().value() * (-A3[_, _]).exp().value()),
+             MatrixWithinAbs(Eigen::Matrix<T, 2, 2>::Identity(), T(1e-15)));
+
+  auto A4 = slp::VariableMatrix<T>{{T(1), T(10)}, {T(0), T(0)}};
+  CHECK_THAT(A4.exp().value() * (-A4).exp().value(),
+             MatrixWithinAbs(Eigen::Matrix<T, 2, 2>::Identity(), T(1e-15)));
+  CHECK_THAT((A4[_, _].exp().value() * (-A4[_, _]).exp().value()),
+             MatrixWithinAbs(Eigen::Matrix<T, 2, 2>::Identity(), T(1e-15)));
+
+  auto A5 = slp::VariableMatrix<T>{{T(2), T(3)}, {T(4), T(5)}};
+  CHECK_THAT(A5.exp().value() * (-A5).exp().value(),
+             MatrixWithinAbs(Eigen::Matrix<T, 2, 2>::Identity(), T(1e-12)));
+  CHECK_THAT((A5[_, _].exp().value() * (-A5[_, _]).exp().value()),
+             MatrixWithinAbs(Eigen::Matrix<T, 2, 2>::Identity(), T(1e-12)));
 }
 
 TEMPLATE_TEST_CASE("VariableMatrix - block() free function", "[VariableMatrix]",
