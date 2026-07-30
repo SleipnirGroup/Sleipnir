@@ -1116,8 +1116,13 @@ class VariableMatrix : public SleipnirBase {
       A_pow *= *this;
     }
 
-    // exp(A) ≈ P/Q
-    return VariableMatrix<Scalar>{Q.to_eigen().lu().solve(P.to_eigen())};
+    // https://mpmath.org/doc/current/calculus/approximation.html#mpmath.pade
+    // defines the Padé approximant as AQ ≈ P, so:
+    //
+    //   A ≈ P / Q
+    //   A ≈ (Qᵀ \ Pᵀ)ᵀ
+    return VariableMatrix<Scalar>{
+        Q.T().to_eigen().lu().solve(P.T().to_eigen()).transpose()};
   }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

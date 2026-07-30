@@ -1,5 +1,6 @@
 // Copyright (c) Sleipnir contributors
 
+#include <cmath>
 #include <format>
 #include <functional>
 #include <iterator>
@@ -534,12 +535,14 @@ TEMPLATE_TEST_CASE("VariableMatrix - exp()", "[VariableMatrix]",
                    SCALAR_TYPES_UNDER_TEST) {
   using T = TestType;
   using namespace slp::slicing;
+  using std::exp;
 
+  // Scalar
   auto A1 = slp::VariableMatrix<T>{{T(4)}};
-  CHECK_THAT(A1.exp().value() * (-A1).exp().value(),
-             MatrixWithinAbs(Eigen::Matrix<T, 1, 1>::Identity(), T(1e-15)));
-  CHECK_THAT((A1[_, _].exp().value() * (-A1[_, _]).exp().value()),
-             MatrixWithinAbs(Eigen::Matrix<T, 1, 1>::Identity(), T(1e-15)));
+  CHECK_THAT(A1.exp().value(),
+             MatrixWithinAbs(Eigen::Matrix<T, 1, 1>{exp(T(4))}, T(1e-13)));
+  CHECK_THAT((A1[_, _].exp().value()),
+             MatrixWithinAbs(Eigen::Matrix<T, 1, 1>{exp(T(4))}, T(1e-13)));
 
   auto A2 = slp::VariableMatrix<T>{{T(0), T(1)}, {T(0), T(-0.5)}};
   CHECK_THAT(A2.exp().value() * (-A2).exp().value(),
@@ -564,6 +567,31 @@ TEMPLATE_TEST_CASE("VariableMatrix - exp()", "[VariableMatrix]",
              MatrixWithinAbs(Eigen::Matrix<T, 2, 2>::Identity(), T(1e-12)));
   CHECK_THAT((A5[_, _].exp().value() * (-A5[_, _]).exp().value()),
              MatrixWithinAbs(Eigen::Matrix<T, 2, 2>::Identity(), T(1e-12)));
+
+  // Pascal matrix
+  //
+  //    ([0  0  0  0  0  0  0])   [1  0   0   0   0  0  0]
+  //    ([1  0  0  0  0  0  0])   [1  1   0   0   0  0  0]
+  //    ([0  2  0  0  0  0  0])   [1  2   1   0   0  0  0]
+  // exp([0  0  3  0  0  0  0]) = [1  3   3   1   0  0  0]
+  //    ([0  0  0  4  0  0  0])   [1  4   6   4   1  0  0]
+  //    ([0  0  0  0  5  0  0])   [1  5  10  10   5  1  0]
+  //    ([0  0  0  0  0  6  0])   [1  6  15  20  15  6  1]
+  auto pascal = slp::VariableMatrix<T>::zero(7, 7);
+  for (int col = 0; col < 6; ++col) {
+    pascal[col + 1, col] = T(col + 1);
+  }
+  Eigen::Matrix<T, 7, 7> expected_pascal = Eigen::Matrix<T, 7, 7>::Zero();
+  expected_pascal.col(0).setConstant(T(1));
+  for (int col = 1; col < 7; ++col) {
+    for (int row = col; row < 7; ++row) {
+      expected_pascal[row, col] =
+          expected_pascal[row - 1, col - 1] + expected_pascal[row - 1, col];
+    }
+  }
+  CHECK_THAT(pascal.exp().value(), MatrixWithinAbs(expected_pascal, T(1e-14)));
+  CHECK_THAT((pascal[_, _].exp().value()),
+             MatrixWithinAbs(expected_pascal, T(1e-14)));
 }
 
 TEMPLATE_TEST_CASE("VariableMatrix - block() free function", "[VariableMatrix]",
