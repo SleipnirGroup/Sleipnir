@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 from sleipnir import autodiff
 from sleipnir.autodiff import VariableMatrix
@@ -405,11 +407,10 @@ def test_cwise_reduce():
 
 
 def test_exp():
+    # Scalar
     A1 = VariableMatrix([[4.0]])
-    np.testing.assert_allclose(A1.exp().value() @ (-A1).exp().value(), np.identity(1))
-    np.testing.assert_allclose(
-        A1[:, :].exp().value() @ (-A1[:, :]).exp().value(), np.identity(1)
-    )
+    np.testing.assert_allclose(A1.exp().value(), np.array([[math.exp(4.0)]]))
+    np.testing.assert_allclose(A1[:, :].exp().value(), np.array([[math.exp(4.0)]]))
 
     A2 = VariableMatrix([[0.0, 1.0], [0.0, -0.5]])
     np.testing.assert_allclose(
@@ -441,6 +442,28 @@ def test_exp():
     np.testing.assert_allclose(
         A5[:, :].exp().value() @ (-A5[:, :]).exp().value(), np.identity(2), atol=1e-12
     )
+
+    # Pascal matrix
+    #
+    #    ([0  0  0  0  0  0  0])   [1  0   0   0   0  0  0]
+    #    ([1  0  0  0  0  0  0])   [1  1   0   0   0  0  0]
+    #    ([0  2  0  0  0  0  0])   [1  2   1   0   0  0  0]
+    # exp([0  0  3  0  0  0  0]) = [1  3   3   1   0  0  0]
+    #    ([0  0  0  4  0  0  0])   [1  4   6   4   1  0  0]
+    #    ([0  0  0  0  5  0  0])   [1  5  10  10   5  1  0]
+    #    ([0  0  0  0  0  6  0])   [1  6  15  20  15  6  1]
+    pascal = VariableMatrix.zero(7, 7)
+    for col in range(6):
+        pascal[col + 1, col] = col + 1
+    expected_pascal = np.zeros((7, 7))
+    expected_pascal[:, 0] = 1.0
+    for col in range(1, 7):
+        for row in range(col, 7):
+            expected_pascal[row, col] = (
+                expected_pascal[row - 1, col - 1] + expected_pascal[row - 1, col]
+            )
+    np.testing.assert_allclose(pascal.exp().value(), expected_pascal, atol=1e-14)
+    np.testing.assert_allclose(pascal[:, :].exp().value(), expected_pascal, atol=1e-14)
 
 
 def test_block_free_function():
