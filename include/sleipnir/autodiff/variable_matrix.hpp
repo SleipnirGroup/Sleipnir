@@ -1117,10 +1117,10 @@ class VariableMatrix : public SleipnirBase {
     }
 
     // https://mpmath.org/doc/current/calculus/approximation.html#mpmath.pade
-    // defines the Padé approximant as AQ ≈ P, so:
+    // defines the Padé approximant as exp(A)Q ≈ P, so:
     //
-    //   A ≈ P / Q
-    //   A ≈ (Qᵀ \ Pᵀ)ᵀ
+    //   exp(A) ≈ P / Q
+    //   exp(A) ≈ (Qᵀ \ Pᵀ)ᵀ
     return VariableMatrix<Scalar>{
         Q.T().to_eigen().lu().solve(P.T().to_eigen()).transpose()};
   }
