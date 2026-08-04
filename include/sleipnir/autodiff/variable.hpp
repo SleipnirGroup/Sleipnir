@@ -811,7 +811,7 @@ struct EqualityConstraints {
     }
   }
 
-  /// Constructs an equality constraint from a left and right side.
+  /// Constructs an equality constraint TESTfrom a left and right side.
   ///
   /// The standard form for equality constraints is c(x) = 0. This function
   /// takes a constraint of the form lhs = rhs and converts it to lhs - rhs = 0.
