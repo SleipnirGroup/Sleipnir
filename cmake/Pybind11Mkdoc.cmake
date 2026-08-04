@@ -40,22 +40,19 @@ function(pybind11_mkdoc target headers)
     list(FILTER small_vector_dirs INCLUDE REGEX "\\$<BUILD_INTERFACE:.*>")
     list(TRANSFORM small_vector_dirs PREPEND "-I")
 
-    set(docstrings ${CMAKE_CURRENT_SOURCE_DIR}/python/cpp/docstrings.hpp)
-    set(generated_docstrings ${CMAKE_CURRENT_BINARY_DIR}/docstrings.hpp)
-    file(COPY ${docstrings} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-
     add_custom_command(
-        OUTPUT ${generated_docstrings}
+        OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/python/cpp/docstrings.hpp
         COMMAND
             ${env_vars} ${Python3_EXECUTABLE} -m pybind11_mkdoc ${headers} -o
-            ${generated_docstrings} -I/usr/lib/clang/`clang++ --version | grep
-            -E -o '[0-9]+' | head -1`/include ${target_dirs} ${eigen_dirs}
-            ${small_vector_dirs} -std=c++23
-        COMMAND
-            ${CMAKE_COMMAND} -E copy_if_different ${generated_docstrings}
-            ${docstrings}
+            ${CMAKE_CURRENT_SOURCE_DIR}/python/cpp/docstrings.hpp
+            -I/usr/lib/clang/`clang++ --version | grep -E -o '[0-9]+' | head
+            -1`/include ${target_dirs} ${eigen_dirs} ${small_vector_dirs}
+            -std=c++23
         DEPENDS ${headers}
         USES_TERMINAL
     )
-    add_custom_target(${target}_docstrings DEPENDS ${generated_docstrings})
+    add_custom_target(
+        ${target}_docstrings
+        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/python/cpp/docstrings.hpp
+    )
 endfunction()
