@@ -19,5 +19,8 @@ CMakeUserPresets.json
 __pycache__/
 dist/
 
+# Python - uv
+uv.lock
+
 # macOS
 .DS_Store
