@@ -66,7 +66,10 @@ cache-keys = [
     { file = "cmake/*.cmake" },
     { file = "include/**" },
     { file = "pyproject.toml" },
-    { file = "python/cpp/**" },
+    { file = "python/cpp/**/*.cpp" },
+    { file = "python/cpp/binders.hpp" },
+    { file = "python/cpp/for_each_type.hpp" },
+    { file = "python/cpp/try_cast.hpp" },
     { file = "python/src/**" },
     { file = "src/**" },
 ]
