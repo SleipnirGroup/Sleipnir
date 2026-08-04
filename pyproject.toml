@@ -19,6 +19,11 @@ requires = [
 ]
 build-backend = "py_build_cmake.build"
 
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
+
 [tool.py-build-cmake.cmake]
 build_type = "Release"
 source_path = "."
@@ -53,3 +58,15 @@ abi3_minimum_cpython_version = 312
 [tool.pytest.ini_options]
 minversion = "6.0"
 testpaths = ["python/test", "examples/CurrentManager/test"]
+
+[tool.uv]
+cache-keys = [
+    { file = "CMakeLists.txt" },
+    { file = "SleipnirConfig.cmake.in" },
+    { file = "cmake/*.cmake" },
+    { file = "include/**" },
+    { file = "pyproject.toml" },
+    { file = "python/cpp/**" },
+    { file = "python/src/**" },
+    { file = "src/**" },
+]
