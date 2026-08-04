@@ -53,3 +53,23 @@ abi3_minimum_cpython_version = 312
 [tool.pytest.ini_options]
 minversion = "6.0"
 testpaths = ["python/test", "examples/CurrentManager/test"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
+
+[tool.uv]
+cache-keys = [
+    { file = "pyproject.toml" },
+    { file = "CMakeLists.txt" },
+    { file = "SleipnirConfig.cmake.in" },
+    { file = "cmake/**" },
+    { file = "include/**" },
+    { file = "src/**" },
+    { file = "python/src/**" },
+    { file = "python/**/*.cpp" },
+    { file = "python/cpp/binders.hpp" },
+    { file = "python/cpp/for_each_type.hpp" },
+    { file = "python/cpp/try_cast.hpp" },
+]
