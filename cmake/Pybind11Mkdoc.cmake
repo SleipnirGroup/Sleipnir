@@ -42,6 +42,7 @@ function(pybind11_mkdoc target headers)
 
     set(docstrings ${CMAKE_CURRENT_SOURCE_DIR}/python/cpp/docstrings.hpp)
     set(generated_docstrings ${CMAKE_CURRENT_BINARY_DIR}/docstrings.hpp)
+    file(COPY ${docstrings} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
     add_custom_command(
         OUTPUT ${generated_docstrings}
@@ -53,7 +54,6 @@ function(pybind11_mkdoc target headers)
         COMMAND
             ${CMAKE_COMMAND} -E copy_if_different ${generated_docstrings}
             ${docstrings}
-        COMMAND ${CMAKE_COMMAND} -E remove ${generated_docstrings}
         DEPENDS ${headers}
         USES_TERMINAL
     )
