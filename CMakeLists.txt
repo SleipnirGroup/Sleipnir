@@ -363,8 +363,8 @@ if(SLEIPNIR_BUILD_PYTHON)
         FetchContent_Declare(
             pybind11_mkdoc
             GIT_REPOSITORY https://github.com/pybind/pybind11_mkdoc.git
-            # master on 2023-02-08
-            GIT_TAG 42fbf377824185e255b06d68fa70f4efcd569e2d
+            # master on 2026-08-05
+            GIT_TAG 5c38600d5f4364c51d924a9eb26a50058c472dd1
             EXCLUDE_FROM_ALL
             SYSTEM
         )
