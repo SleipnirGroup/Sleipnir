@@ -92,8 +92,8 @@ target_link_libraries(Sleipnir PUBLIC Eigen3::Eigen)
 FetchContent_Declare(
     small_vector
     GIT_REPOSITORY https://github.com/gharveymn/small_vector.git
-    # main on 2025-05-15
-    GIT_TAG b19a9c477cad5e58f8aed59dbe9be1c30e4b9826
+    # main on 2026-08-05
+    GIT_TAG 66998cd7d6621e83ad193e03ac119e62dad9b2d5
     SYSTEM
 )
 FetchContent_MakeAvailable(small_vector)
