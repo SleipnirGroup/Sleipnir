@@ -91,6 +91,34 @@ pip install --user dist/sleipnirgroup_jormungandr-*.whl
 pytest
 ```
 
+## Development
+
+### Running C++ tests
+
+The following will run the C++ tests on a development build.
+
+```bash
+cmake --build build
+ctest --test-dir build --output-on-failure
+```
+
+### Running Python tests
+
+The following will run the Python tests on a development build.
+
+```bash
+uv run pytest
+```
+
+### Running Python examples
+
+The following runs an example on a development build.
+
+```bash
+cd examples/...
+uv run main.py
+```
+
 ## Educational resources
 
 ### Autodiff

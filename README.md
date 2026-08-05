@@ -107,3 +107,7 @@ See the [examples folder](https://github.com/SleipnirGroup/Sleipnir/tree/main/ex
 ## Benchmarks
 
 See the [benchmarks folder](https://github.com/SleipnirGroup/Sleipnir/tree/main/benchmarks).
+
+## Contributing
+
+See the [contributing docs](https://sleipnirgroup.github.io/Sleipnir/md_contributing.html).
