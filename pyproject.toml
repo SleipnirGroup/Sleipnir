@@ -51,7 +51,6 @@ include = [
 exclude = []
 
 [tool.py-build-cmake.wheel]
-platform_tag = "guess"
 python_abi = "abi3"
 abi3_minimum_cpython_version = 312
 
