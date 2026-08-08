@@ -13,10 +13,13 @@ The coordinate system is +X up, +Y east, +Z north.
 """
 
 import math
-import sys
+from collections.abc import Callable
+from dataclasses import dataclass
+from typing import Any
 
 import matplotlib.pyplot as plt
 import numpy as np
+import numpy.typing as npt
 from numpy.linalg import norm
 from scipy.signal import cont2discrete
 from sleipnir.optimization import ExitStatus, Problem, bounds
@@ -24,6 +27,66 @@ from sleipnir.optimization import ExitStatus, Problem, bounds
 
 def lerp(a, b, t):
     return a + t * (b - a)
+
+
+def line_search(f: Callable[[int], Any], first: int, last: int) -> tuple[int, Any]:
+    """
+    Returns the index and value of the unimodal function f's minimum within [first, last].
+
+    Parameter ``f``:
+        Unimodal function.
+    Parameter ``first``:
+        First index of range.
+    Parameter ``last``:
+        Last index of range.
+    Returns:
+        Index and value of the unimodal function's minimum.
+    """
+    # https://en.wikipedia.org/wiki/Golden-section_search
+
+    ϕ_inv = (math.sqrt(5) - 1) / 2
+
+    b = round(lerp(first, last, ϕ_inv))
+    b_sol = f(b)
+    print(f"\tN ∈ [{min(first, last)}, {max(first, last)}] -> N = {b}: {b_sol}")
+
+    while abs(last - first) > 1:
+        a = round(lerp(first, b, ϕ_inv))
+        a_sol = f(a)
+        print(f"\tN ∈ [{min(first, last)}, {max(first, last)}] -> N = {a}: {a_sol}")
+
+        if a_sol < b_sol:
+            b_sol = a_sol
+            last = b
+            b = a
+        else:
+            first = last
+            last = a
+    return b, b_sol
+
+
+@dataclass
+class Solution:
+    status: ExitStatus
+    X_value: npt.NDArray[np.float64]
+    Z_value: npt.NDArray[np.float64]
+    U_value: npt.NDArray[np.float64]
+    σ_value: npt.NDArray[np.float64]
+
+    def cost(self) -> float:
+        return self.σ_value.sum()
+
+    def __lt__(self, other) -> bool:
+        if self.status != other.status:
+            return self.status == ExitStatus.SUCCESS
+        else:
+            return self.cost() < other.cost()
+
+    def __str__(self) -> str:
+        if self.status == ExitStatus.SUCCESS:
+            return f"feasible, cost = {self.cost()}"
+        else:
+            return "infeasible"
 
 
 def main():
@@ -121,15 +184,7 @@ def main():
     U_value = np.empty((3, 1))
     σ_value = np.empty((1, 1))
 
-    # Bisect to find minimum feasible N
-    print(f"Searching N ∈ [{N_min}, {N_max}] for smallest feasible N")
-    found = False
-    while not found:
-        N = N_min + math.floor((N_max - N_min) / 2)
-
-        print(f"Trying N = {N} from [{N_min}, {N_max}]...", end="")
-        sys.stdout.flush()
-
+    def solve(N: int) -> Solution:
         problem = Problem()
 
         # x = [position, velocity]ᵀ
@@ -280,31 +335,18 @@ def main():
         problem.minimize(sum(σ))
         status = problem.solve()
 
-        if status == ExitStatus.SUCCESS:
-            print(" feasible")
+        return Solution(status, X.value(), Z.value(), U.value(), σ.value())
 
-            X_value = X.value()
-            U_value = U.value()
-            Z_value = Z.value()
-            σ_value = σ.value()
+    # Find N with minimum fuel use
+    print(f"Searching N ∈ [{N_min}, {N_max}] for minimum fuel use")
+    N, sol = line_search(solve, N_min, N_max)
+    print(f"N = {N}: {sol}")
 
-            # Problem is feasible, so try a smaller N
-            if N_min < N:
-                N_max = N - 1
-            else:
-                print(f"Smallest feasible N = {N}")
-                found = True
-        else:
-            print(" infeasible")
+    X_value = sol.X_value
+    Z_value = sol.Z_value
+    U_value = sol.U_value
+    σ_value = sol.σ_value
 
-            # Problem is infeasible, so try a larger N
-            if N_min < N_max:
-                N_min = N + 1
-            else:
-                print(f"Smallest feasible N = {N + 1}")
-                found = True
-
-    N = X_value.shape[1] - 1
     times = [k * dt for k in range(N + 1)]
 
     plt.figure()
