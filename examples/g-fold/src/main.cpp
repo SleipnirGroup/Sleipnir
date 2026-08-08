@@ -224,24 +224,6 @@ int main() {
   Eigen::Matrix<double, 6, 3> B_d;
   discretize_ab<6, 3>(A, B, dt, &A_d, &B_d);
 
-  // Time horizon bounds (s)
-  //
-  // See equation (55) of [2].
-  double t_min = m_dry * v_0.norm() / ρ_2;
-  constexpr double t_max = m_fuel / (α * ρ_1);
-
-  // Number of control intervals
-  //
-  // See equation (57) of [2].
-  int N_min = std::ceil(t_min / dt);
-  int N_max = std::floor(t_max / dt);
-
-  // Set initial solution storage size to N = 1
-  Eigen::MatrixXd X_value{6, 2};
-  Eigen::MatrixXd U_value{1, 2};
-  Eigen::MatrixXd Z_value{3, 1};
-  Eigen::MatrixXd σ_value{1, 1};
-
   auto solve = [&](int N) -> Solution {
     slp::Problem<double> problem;
 
@@ -402,6 +384,18 @@ int main() {
 
     return Solution{status, X.value(), Z.value(), U.value(), σ.value()};
   };
+
+  // Time horizon bounds (s)
+  //
+  // See equation (55) of [2].
+  double t_min = m_dry * v_0.norm() / ρ_2;
+  constexpr double t_max = m_fuel / (α * ρ_1);
+
+  // Number of control intervals
+  //
+  // See equation (57) of [2].
+  int N_min = std::ceil(t_min / dt);
+  int N_max = std::floor(t_max / dt);
 
   // Find N with minimum fuel use
   std::println("Searching N ∈ [{}, {}] for minimum fuel use", N_min, N_max);

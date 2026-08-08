@@ -166,24 +166,6 @@ def main():
 
     A_d, B_d, _, _, _ = cont2discrete((A, B, np.identity(3), np.zeros((3, 3))), dt)
 
-    # Time horizon bounds (s)
-    #
-    # See equation (55) of [2].
-    t_min = m_dry * norm(v_0) / ρ_2
-    t_max = m_fuel / (α * ρ_1)
-
-    # Number of control intervals
-    #
-    # See equation (57) of [2].
-    N_min = math.ceil(t_min / dt)
-    N_max = math.floor(t_max / dt)
-
-    # Set initial solution storage size to N = 1
-    X_value = np.empty((6, 2))
-    Z_value = np.empty((1, 2))
-    U_value = np.empty((3, 1))
-    σ_value = np.empty((1, 1))
-
     def solve(N: int) -> Solution:
         problem = Problem()
 
@@ -336,6 +318,18 @@ def main():
         status = problem.solve()
 
         return Solution(status, X.value(), Z.value(), U.value(), σ.value())
+
+    # Time horizon bounds (s)
+    #
+    # See equation (55) of [2].
+    t_min = m_dry * norm(v_0) / ρ_2
+    t_max = m_fuel / (α * ρ_1)
+
+    # Number of control intervals
+    #
+    # See equation (57) of [2].
+    N_min = math.ceil(t_min / dt)
+    N_max = math.floor(t_max / dt)
 
     # Find N with minimum fuel use
     print(f"Searching N ∈ [{N_min}, {N_max}] for minimum fuel use")
