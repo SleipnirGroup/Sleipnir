@@ -12,12 +12,10 @@ def multistart(solve, initial_guesses):
     solves are always preferred over solutions from unsuccessful solves, and
     cost (lower is better) is the tiebreaker between successful solves.
 
-    Parameter ``solve``:
-        A user-provided function that takes a decision variable initial guess
-        and returns a MultistartResult.
-
-    Parameter ``initial_guesses``:
-        A list of decision variable initial guesses to try.
+    Args:
+        solve: A user-provided function that takes a decision variable initial
+            guess and returns a MultistartResult.
+        initial_guesses: A list of decision variable initial guesses to try.
     """
     with concurrent.futures.ThreadPoolExecutor(
         max_workers=len(initial_guesses)

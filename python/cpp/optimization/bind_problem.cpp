@@ -120,40 +120,28 @@ void bind_problem(nb::class_<Problem<double>>& cls) {
       R"doc(Solves the optimization problem. The solution will be stored in the
 original variables used to construct the problem.
 
-Parameter ``tolerance``:
-    The solver will stop once the error is below this tolerance.
-    (default: 1e-8)
+Args:
+    tolerance: The solver will stop once the error is below this tolerance.
+        (default: 1e-8)
+    max_iterations: The maximum number of solver iterations before returning a
+        solution. (default: 5000)
+    timeout: The maximum elapsed wall clock time before returning a solution.
+        (default: infinity)
+    feasible_ipm: Enables the feasible interior-point method.
 
-Parameter ``max_iterations``:
-    The maximum number of solver iterations before returning a solution.
-    (default: 5000)
+        When the inequality constraints are all feasible, step sizes are reduced
+        when necessary to prevent them becoming infeasible again. This is useful
+        when parts of the problem are ill-conditioned in infeasible regions
+        (e.g., square root of a negative value). This can slow or prevent
+        progress toward a solution though, so only enable it if necessary.
+        (default: False)
+    diagnostics: Enables diagnostic output.
 
-Parameter ``timeout``:
-    The maximum elapsed wall clock time before returning a solution.
-    (default: infinity)
-
-Parameter ``feasible_ipm``:
-    Enables the feasible interior-point method.
-
-    When the inequality constraints are all feasible, step sizes are reduced
-    when necessary to prevent them becoming infeasible again. This is useful
-    when parts of the problem are ill-conditioned in infeasible regions (e.g.,
-    square root of a negative value). This can slow or prevent progress toward a
-    solution though, so only enable it if necessary.
-    (default: False)
-
-Parameter ``diagnostics``:
-    Enables diagnostic output.
-
-
-    See https://sleipnirgroup.github.io/Sleipnir/md_usage.html#output for more
-    information.
-    (default: False)
-
-Parameter ``spy``:
-    Enables writing sparsity patterns of H, Aₑ, and Aᵢ to files named H.spy,
-    A_e.spy, and A_i.spy respectively during solve. Use tools/spy.py to plot them.
-    (default: False))doc");
+        See https://sleipnirgroup.github.io/Sleipnir/md_usage.html#output for
+        more information. (default: False)
+    spy: Enables writing sparsity patterns of H, Aₑ, and Aᵢ to files named
+        H.spy, A_e.spy, and A_i.spy respectively during solve. Use tools/spy.py
+        to plot them. (default: False))doc");
   cls.def(
       "add_callback",
       [](Problem<double>& self,

@@ -13,23 +13,13 @@ def plot_poly_fit(ax, x, y, func, bases, color):
     """
     Plots a polynomial curve fit for the given x-y function.
 
-    Parameter ``ax``:
-        The axis on which to plot.
-
-    Parameter ``x``:
-        The list of x values.
-
-    Parameter ``y``:
-        The list of y values.
-
-    Parameter ``func``:
-        The function to fit.
-
-    Parameter ``bases``:
-        A list of strings to print for the basis terms.
-
-    Parameter ``color``:
-        The color to use for the plot.
+    Args:
+        ax: The axis on which to plot.
+        x: The list of x values.
+        y: The list of y values.
+        func: The function to fit.
+        bases: A list of strings to print for the basis terms.
+        color: The color to use for the plot.
     """
     coeffs = curve_fit(
         func, x, y, p0=(1,) * len(bases), bounds=([0] * len(bases), np.inf)

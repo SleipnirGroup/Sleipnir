@@ -33,12 +33,11 @@ def line_search(f: Callable[[int], Any], first: int, last: int) -> tuple[int, An
     """
     Returns the index and value of the unimodal function f's minimum within [first, last].
 
-    Parameter ``f``:
-        Unimodal function.
-    Parameter ``first``:
-        First index of range.
-    Parameter ``last``:
-        Last index of range.
+    Args:
+        f: Unimodal function.
+        first: First index of range.
+        last: Last index of range.
+
     Returns:
         Index and value of the unimodal function's minimum.
     """
