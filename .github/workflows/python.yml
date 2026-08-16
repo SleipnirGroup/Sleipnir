@@ -8,6 +8,9 @@ concurrency:
 
 jobs:
   build-wheel:
+    env:
+      ARCHFLAGS: -arch arm64 -arch x86_64
+      MACOSX_DEPLOYMENT_TARGET: 14.0
     timeout-minutes: 10
     strategy:
       fail-fast: false
@@ -15,19 +18,14 @@ jobs:
         include:
           - name: Windows x86_64
             os: windows-2025
-            cmake-env:
           - name: Windows aarch64
             os: windows-11-arm
-            cmake-env:
           - name: Linux x86_64
             os: ubuntu-24.04
-            cmake-env:
           - name: Linux aarch64
             os: ubuntu-24.04-arm
-            cmake-env:
           - name: macOS universal
             os: macos-15
-            cmake-env: ARCHFLAGS="-arch arm64 -arch x86_64" MACOSX_DEPLOYMENT_TARGET=14.0
 
     name: Build ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
@@ -62,7 +60,7 @@ jobs:
       - name: Build wheel
         run: |
           pip install build
-          ${{ matrix.cmake-env }} python -m build --wheel
+          python -m build --wheel
 
       - name: Repair wheel (Windows)
         run: |
