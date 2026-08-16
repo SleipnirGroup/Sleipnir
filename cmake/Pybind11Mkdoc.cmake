@@ -1,6 +1,14 @@
 function(pybind11_mkdoc target headers)
     find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
+    # Get default clang version
+    execute_process(
+        COMMAND clang++ --version
+        OUTPUT_VARIABLE CLANG_VERSION
+        COMMAND_ERROR_IS_FATAL ANY
+    )
+    string(REGEX MATCH "[0-9]+" CLANG_VERSION ${CLANG_VERSION})
+
     if(UNIX AND NOT APPLE)
         if(EXISTS /usr/lib/libclang.so)
             set(env_vars
@@ -8,16 +16,6 @@ function(pybind11_mkdoc target headers)
                 LIBCLANG_PATH=/usr/lib/libclang.so
             )
         else()
-            # Get default clang version
-            execute_process(
-                COMMAND
-                    bash -c
-                    "clang++ --version | grep -E -o \'[0-9]+\' | head -1"
-                OUTPUT_VARIABLE CLANG_VERSION
-                OUTPUT_STRIP_TRAILING_WHITESPACE
-                COMMAND_ERROR_IS_FATAL ANY
-            )
-
             set(env_vars
                 LLVM_DIR_PATH=/usr/lib/llvm-${CLANG_VERSION}
                 LIBCLANG_PATH=/usr/lib/llvm-${CLANG_VERSION}/lib/libclang.so
@@ -45,9 +43,8 @@ function(pybind11_mkdoc target headers)
         COMMAND
             ${env_vars} ${Python3_EXECUTABLE} -m pybind11_mkdoc ${headers} -o
             ${CMAKE_CURRENT_SOURCE_DIR}/python/cpp/docstrings.hpp
-            -I/usr/lib/clang/`clang++ --version | grep -E -o '[0-9]+' | head
-            -1`/include ${target_dirs} ${eigen_dirs} ${small_vector_dirs}
-            -std=c++23
+            -I/usr/lib/clang/${CLANG_VERSION}/include ${target_dirs}
+            ${eigen_dirs} ${small_vector_dirs} -std=c++23
         DEPENDS ${headers}
         USES_TERMINAL
     )
