@@ -29,16 +29,8 @@ jobs:
         with:
           python-version: 3.14
 
-      - run: pip install \
-          build \
-          py-build-cmake \
-          pybind11 \
-          pybind11-stubgen \
-          pybind11-mkdoc \
-          clang
-
+      - run: pip install pybind11-mkdoc==3.0.0
       - run: sudo apt-get install -y doxygen
-
       - run: ./generate_website.py
         working-directory: ./docs
 

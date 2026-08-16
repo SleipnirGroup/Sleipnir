@@ -10,8 +10,8 @@ def spy(mat: scipy.sparse.csc_matrix):
     Green points represent positive values and red points represent negative
     values.
 
-    Parameter ``mat``:
-        The sparse matrix.
+    Args:
+        mat: The sparse matrix.
     """
     import matplotlib.pyplot as plt
     import matplotlib.ticker as mticker

@@ -14,11 +14,10 @@ class CurrentManager:
         """
         Constructs a CurrentManager.
 
-        Parameter ``current_tolerances``:
-            The relative current tolerance of each subsystem.
-
-        Parameter ``max_current``:
-            The current budget to allocate between subsystems.
+        Args:
+            current_tolerances: The relative current tolerance of each
+                subsystem.
+            max_current: The current budget to allocate between subsystems.
         """
         self.__desired_currents = VariableMatrix(len(current_tolerances), 1)
         self.__problem = Problem()
@@ -56,12 +55,11 @@ class CurrentManager:
         which subsystem gets less current if the current budget is exceeded.
         Subsystems with a smaller tolerance are given higher priority.
 
-        Parameter ``desired_currents``:
-            The desired current for each subsystem.
-
-        Raises ``ValueError``:
-            if the number of desired currents doesn't equal the number of
-            tolerances passed in the constructor.
+        Args:
+            desired_currents: The desired current for each subsystem.
+        Raises:
+            ValueError: The number of desired currents doesn't equal the number
+                of tolerances passed in the constructor.
         """
         if self.__desired_currents.rows() != len(desired_currents):
             raise ValueError(
