@@ -60,7 +60,8 @@ jobs:
       - name: Build wheel
         run: |
           pip install build
-          python -m build --wheel
+          python .github/workflows/print_constraints.py > constraints.txt
+          python -m build --wheel --dependency-constraints-txt constraints.txt
 
       - name: Repair wheel (Windows)
         run: |

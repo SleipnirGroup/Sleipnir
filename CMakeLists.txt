@@ -357,8 +357,7 @@ if(SLEIPNIR_BUILD_PYTHON)
         COMPONENT python_modules
     )
 
-    # pybind11_mkdoc doesn't support Windows
-    if(NOT WIN32 AND NOT CMAKE_CROSSCOMPILING)
+    if(NOT CMAKE_CROSSCOMPILING)
         # pybind11_mkdoc dependency
         FetchContent_Declare(
             pybind11_mkdoc
