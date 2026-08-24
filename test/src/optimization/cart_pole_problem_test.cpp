@@ -31,12 +31,12 @@ TEMPLATE_TEST_CASE("Problem - Cart-pole", "[Problem]",
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  constexpr std::chrono::duration<T> TOTAL_TIME{T(5)};
+  constexpr std::chrono::duration<T> TOTAL_TIME{T(3.5)};
   constexpr std::chrono::duration<T> dt{T(0.05)};
   constexpr int N = static_cast<int>(TOTAL_TIME / dt);
 
   constexpr T u_max(20);  // N
-  constexpr T d_max(2);   // m
+  constexpr T d_max(1);   // m
 
   constexpr Eigen::Vector<T, 4> x_initial{{T(0), T(0), T(0), T(0)}};
   constexpr Eigen::Vector<T, 4> x_final{
