@@ -102,7 +102,7 @@ See the [C++ API docs](https://sleipnirgroup.github.io/Sleipnir/docs/cpp), [Pyth
 
 ## Examples
 
-See the [examples folder](https://github.com/SleipnirGroup/Sleipnir/tree/main/examples), [C++ optimization unit tests](https://github.com/SleipnirGroup/Sleipnir/tree/main/test/optimization), and [Python optimization unit tests](https://github.com/SleipnirGroup/Sleipnir/tree/main/python/test/optimization).
+See the [examples folder](https://github.com/SleipnirGroup/Sleipnir/tree/main/examples), [C++ optimization unit tests](https://github.com/SleipnirGroup/Sleipnir/tree/main/test/src/optimization), and [Python optimization unit tests](https://github.com/SleipnirGroup/Sleipnir/tree/main/python/test/optimization).
 
 ## Benchmarks
 
