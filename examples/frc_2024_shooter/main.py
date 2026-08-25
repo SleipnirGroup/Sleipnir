@@ -209,7 +209,7 @@ def main():
     problem.subject_to(x_k[5, 0] > 0.0)
 
     # Minimize sensitivity of vertical position to velocity
-    sensitivity = Gradient(x_k[3, 0], x[3:, :]).get()
+    sensitivity = Gradient(x_k[2, 0], x[3:, :]).get()
     problem.minimize(sensitivity.T @ sensitivity)
 
     # Minimize initial velocity

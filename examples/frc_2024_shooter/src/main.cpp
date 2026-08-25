@@ -165,7 +165,7 @@ int main() {
   problem.subject_to(x_k[5] > 0.0);
 
   // Minimize sensitivity of vertical position to velocity
-  auto sensitivity = slp::Gradient(x_k[3], x.segment(3, 3)).get();
+  auto sensitivity = slp::Gradient(x_k[2], x.segment(3, 3)).get();
   problem.minimize(sensitivity.T() * sensitivity);
 
   // Minimize initial velocity
