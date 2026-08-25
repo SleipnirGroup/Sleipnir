@@ -173,7 +173,7 @@ The iterates are applied like so
   yₖ₊₁ = yₖ + pₖʸ
 ```
 
-Section 6 of [^3] describes how to check for local infeasibility.
+Local infeasibility is only declared when the feasibility restoration phase converges to a minimizer of the constraint violation that still violates the constraints; testing for infeasibility at arbitrary iterates risks false positives. See section 3.3 of [^2].
 
 ## Interior-point method
 
@@ -381,7 +381,7 @@ where αₖᵐᵃˣ and αₖᶻ are computed via the fraction-to-the-boundary r
       = max(α ∈ (0, 1] : αpₖᶻ ≥ −τⱼzₖ)
 ```
 
-Section 6 of [^3] describes how to check for local infeasibility.
+Local infeasibility is only declared when the feasibility restoration phase converges to a minimizer of the constraint violation that still violates the constraints; testing for infeasibility at arbitrary iterates risks false positives. See section 3.3 of [^2].
 
 ## Problem scaling
 

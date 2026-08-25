@@ -21,6 +21,7 @@
 #include "sleipnir/optimization/solver/util/append_as_triplets.hpp"
 #include "sleipnir/optimization/solver/util/lagrange_multiplier_estimate.hpp"
 #include "sleipnir/optimization/solver/util/problem_scaling.hpp"
+#include "sleipnir/util/print_diagnostics.hpp"
 
 namespace slp {
 
@@ -318,7 +319,26 @@ ExitStatus feasibility_restoration(
 
     return ExitStatus::SUCCESS;
   } else if (status == ExitStatus::SUCCESS) {
-    return ExitStatus::LOCALLY_INFEASIBLE;
+    // Feasibility restoration converged to a minimizer of the constraint
+    // violation. If the constraint violation is still above the tolerance,
+    // that minimizer is a certificate of local infeasibility. Declaring local
+    // infeasibility anywhere else risks false positives (e.g., a
+    // point-in-time test can reject iterates the solver would otherwise
+    // escape). See section 3.3 of [2].
+    DenseVector c_e = matrices.c_e(x);
+    if (matrices.scaling.c_e.size() > 0) {
+      c_e = matrices.scaling.c_e.cwiseInverse().cwiseProduct(c_e);
+    }
+
+    if (c_e.template lpNorm<Eigen::Infinity>() > Scalar(options.tolerance)) {
+      if (options.diagnostics) {
+        print_c_e_local_infeasibility_error(c_e, Scalar(options.tolerance));
+      }
+
+      return ExitStatus::LOCALLY_INFEASIBLE;
+    }
+
+    return ExitStatus::FEASIBILITY_RESTORATION_FAILED;
   } else {
     return ExitStatus::FEASIBILITY_RESTORATION_FAILED;
   }
@@ -621,7 +641,45 @@ ExitStatus feasibility_restoration(
 
     return ExitStatus::SUCCESS;
   } else if (status == ExitStatus::SUCCESS) {
-    return ExitStatus::LOCALLY_INFEASIBLE;
+    // Feasibility restoration converged to a minimizer of the constraint
+    // violation. If the constraint violation is still above the tolerance,
+    // that minimizer is a certificate of local infeasibility. Declaring local
+    // infeasibility anywhere else risks false positives (e.g., a
+    // point-in-time test can reject iterates the solver would otherwise
+    // escape). See section 3.3 of [2].
+    DenseVector c_e = matrices.c_e(x);
+    if (matrices.scaling.c_e.size() > 0) {
+      c_e = matrices.scaling.c_e.cwiseInverse().cwiseProduct(c_e);
+    }
+
+    DenseVector c_i = matrices.c_i(x);
+    if (matrices.scaling.c_i.size() > 0) {
+      c_i = matrices.scaling.c_i.cwiseInverse().cwiseProduct(c_i);
+    }
+
+    // Inequality constraints cᵢ(x) ≥ 0 are only violated where they're
+    // negative
+    const DenseVector c_i_violation = (-c_i).cwiseMax(Scalar(0));
+
+    const bool c_e_violated =
+        c_e.template lpNorm<Eigen::Infinity>() > Scalar(options.tolerance);
+    const bool c_i_violated = c_i_violation.template lpNorm<Eigen::Infinity>() >
+                              Scalar(options.tolerance);
+
+    if (c_e_violated || c_i_violated) {
+      if (options.diagnostics) {
+        if (c_e_violated) {
+          print_c_e_local_infeasibility_error(c_e, Scalar(options.tolerance));
+        }
+        if (c_i_violated) {
+          print_c_i_local_infeasibility_error(c_i, Scalar(options.tolerance));
+        }
+      }
+
+      return ExitStatus::LOCALLY_INFEASIBLE;
+    }
+
+    return ExitStatus::FEASIBILITY_RESTORATION_FAILED;
   } else {
     return ExitStatus::FEASIBILITY_RESTORATION_FAILED;
   }

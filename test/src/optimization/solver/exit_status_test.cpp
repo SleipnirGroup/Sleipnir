@@ -4,11 +4,13 @@
 
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
 #include <sleipnir/autodiff/expression_type.hpp>
 #include <sleipnir/optimization/problem.hpp>
 #include <sleipnir/optimization/solver/exit_status.hpp>
 #include <sleipnir/optimization/solver/iteration_info.hpp>
 
+#include "catch_matchers.hpp"
 #include "catch_string_converters.hpp"
 #include "scalar_types_under_test.hpp"
 
@@ -113,6 +115,45 @@ TEMPLATE_TEST_CASE("ExitStatus - Locally infeasible", "[ExitStatus]",
 
     CHECK(problem.solve({.diagnostics = true}) ==
           slp::ExitStatus::LOCALLY_INFEASIBLE);
+  }
+}
+
+TEMPLATE_TEST_CASE("ExitStatus - Small constraint scaling is feasible",
+                   "[ExitStatus]", SCALAR_TYPES_UNDER_TEST) {
+  using T = TestType;
+
+  // Equality constraints
+  {
+    slp::Problem<T> problem;
+
+    auto x = problem.decision_variable();
+    x.set_value(T(5005));
+
+    problem.subject_to(T(1e-5) * (x - T(5)) == T(0));
+
+    CHECK(problem.cost_function_type() == slp::ExpressionType::NONE);
+    CHECK(problem.equality_constraint_type() == slp::ExpressionType::LINEAR);
+    CHECK(problem.inequality_constraint_type() == slp::ExpressionType::NONE);
+
+    CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
+    CHECK_THAT(x.value(), WithinAbs(T(5), T(1e-3)));
+  }
+
+  // Inequality constraints
+  {
+    slp::Problem<T> problem;
+
+    auto x = problem.decision_variable();
+    x.set_value(T(5005));
+
+    problem.subject_to(T(1e-5) * (T(5) - x) >= T(0));
+
+    CHECK(problem.cost_function_type() == slp::ExpressionType::NONE);
+    CHECK(problem.equality_constraint_type() == slp::ExpressionType::NONE);
+    CHECK(problem.inequality_constraint_type() == slp::ExpressionType::LINEAR);
+
+    CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
+    CHECK(x.value() <= T(5) + T(1e-3));
   }
 }
 
