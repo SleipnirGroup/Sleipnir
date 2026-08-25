@@ -228,7 +228,7 @@ ExitStatus feasibility_restoration(
         //
         //   −∇ₓₓ²yᵀcₑ(x)
         auto H_c = matrices.H_c(x, y);
-        H_c.resize(x_p.rows(), x_p.rows());
+        H_c.conservativeResize(x_p.rows(), x_p.rows());
 
         // Lagrangian Hessian
         //
@@ -483,7 +483,7 @@ ExitStatus feasibility_restoration(
         //
         //   −∇ₓₓ²yᵀcₑ(x) − ∇ₓₓ²zᵀcᵢ(x)
         auto H_c = matrices.H_c(x, y, z);
-        H_c.resize(x_p.rows(), x_p.rows());
+        H_c.conservativeResize(x_p.rows(), x_p.rows());
 
         // Lagrangian Hessian
         //
