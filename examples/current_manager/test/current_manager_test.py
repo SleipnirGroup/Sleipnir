@@ -1,5 +1,6 @@
 import pytest
-from CurrentManager import CurrentManager
+
+from current_manager import CurrentManager
 
 
 def test_current_manager_enough_current():
