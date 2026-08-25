@@ -324,7 +324,7 @@ ExitStatus feasibility_restoration(
     // that minimizer is a certificate of local infeasibility. Declaring local
     // infeasibility anywhere else risks false positives (e.g., a
     // point-in-time test can reject iterates the solver would otherwise
-    // escape). See section 3.3 of [2].
+    // escape). See section 3.3 (Page 14) of [2].
     DenseVector c_e = matrices.c_e(x);
     if (matrices.scaling.c_e.size() > 0) {
       c_e = matrices.scaling.c_e.cwiseInverse().cwiseProduct(c_e);
@@ -646,7 +646,7 @@ ExitStatus feasibility_restoration(
     // that minimizer is a certificate of local infeasibility. Declaring local
     // infeasibility anywhere else risks false positives (e.g., a
     // point-in-time test can reject iterates the solver would otherwise
-    // escape). See section 3.3 of [2].
+    // escape). See section 3.3 (Page 14) of [2].
     DenseVector c_e = matrices.c_e(x);
     if (matrices.scaling.c_e.size() > 0) {
       c_e = matrices.scaling.c_e.cwiseInverse().cwiseProduct(c_e);
