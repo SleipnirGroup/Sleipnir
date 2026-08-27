@@ -386,7 +386,7 @@ ExitStatus interior_point(
     // Check for local equality constraint infeasibility
     if (is_equality_locally_infeasible(A_e, c_e)) {
       if (options.diagnostics) {
-        print_c_e_local_infeasibility_error(c_e);
+        print_c_e_local_infeasibility_error(c_e, Scalar(options.tolerance));
       }
 
       return ExitStatus::LOCALLY_INFEASIBLE;
@@ -395,7 +395,7 @@ ExitStatus interior_point(
     // Check for local inequality constraint infeasibility
     if (is_inequality_locally_infeasible(A_i, c_i)) {
       if (options.diagnostics) {
-        print_c_i_local_infeasibility_error(c_i);
+        print_c_i_local_infeasibility_error(c_i, Scalar(options.tolerance));
       }
 
       return ExitStatus::LOCALLY_INFEASIBLE;
