@@ -263,7 +263,7 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
     // Check for local equality constraint infeasibility
     if (is_equality_locally_infeasible(A_e, c_e)) {
       if (options.diagnostics) {
-        print_c_e_local_infeasibility_error(c_e);
+        print_c_e_local_infeasibility_error(c_e, Scalar(options.tolerance));
       }
 
       return ExitStatus::LOCALLY_INFEASIBLE;
