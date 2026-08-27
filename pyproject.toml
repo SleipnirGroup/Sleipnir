@@ -56,7 +56,7 @@ abi3_minimum_cpython_version = 312
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-testpaths = ["python/test", "examples/CurrentManager/test"]
+testpaths = ["python/test", "examples/current_manager/test"]
 
 [tool.uv]
 cache-keys = [
