@@ -21,7 +21,6 @@
 #include "sleipnir/optimization/solver/util/feasibility_restoration.hpp"
 #include "sleipnir/optimization/solver/util/filter.hpp"
 #include "sleipnir/optimization/solver/util/fraction_to_the_boundary_rule.hpp"
-#include "sleipnir/optimization/solver/util/is_locally_infeasible.hpp"
 #include "sleipnir/optimization/solver/util/kkt_error.hpp"
 #include "sleipnir/optimization/solver/util/regularized_ldlt.hpp"
 #include "sleipnir/util/assert.hpp"
@@ -382,24 +381,6 @@ ExitStatus interior_point(
   while (E_0 > Scalar(options.tolerance)) {
     ScopedProfiler inner_iter_profiler{inner_iter_prof};
     ScopedProfiler feasibility_check_profiler{feasibility_check_prof};
-
-    // Check for local equality constraint infeasibility
-    if (is_equality_locally_infeasible(A_e, c_e)) {
-      if (options.diagnostics) {
-        print_c_e_local_infeasibility_error(c_e, Scalar(options.tolerance));
-      }
-
-      return ExitStatus::LOCALLY_INFEASIBLE;
-    }
-
-    // Check for local inequality constraint infeasibility
-    if (is_inequality_locally_infeasible(A_i, c_i)) {
-      if (options.diagnostics) {
-        print_c_i_local_infeasibility_error(c_i, Scalar(options.tolerance));
-      }
-
-      return ExitStatus::LOCALLY_INFEASIBLE;
-    }
 
     // Check for diverging iterates
     if (x.template lpNorm<Eigen::Infinity>() > Scalar(1e10) || !x.allFinite() ||

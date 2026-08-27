@@ -1,5 +1,6 @@
 """These tests ensure coverage of the off-nominal exit statuses"""
 
+import pytest
 from sleipnir.autodiff import ExpressionType, sqrt
 from sleipnir.optimization import ExitStatus, Problem
 
@@ -70,6 +71,38 @@ def test_locally_infeasible_inequality_constraints():
     assert problem.inequality_constraint_type() == ExpressionType.LINEAR
 
     assert problem.solve(diagnostics=True) == ExitStatus.LOCALLY_INFEASIBLE
+
+
+def test_small_equality_constraint_scaling_is_feasible():
+    problem = Problem()
+
+    x = problem.decision_variable()
+    x.set_value(5005)
+
+    problem.subject_to(1e-5 * (x - 5) == 0)
+
+    assert problem.cost_function_type() == ExpressionType.NONE
+    assert problem.equality_constraint_type() == ExpressionType.LINEAR
+    assert problem.inequality_constraint_type() == ExpressionType.NONE
+
+    assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
+    assert x.value() == pytest.approx(5, abs=1e-3)
+
+
+def test_small_inequality_constraint_scaling_is_feasible():
+    problem = Problem()
+
+    x = problem.decision_variable()
+    x.set_value(5005)
+
+    problem.subject_to(1e-5 * (5 - x) >= 0)
+
+    assert problem.cost_function_type() == ExpressionType.NONE
+    assert problem.equality_constraint_type() == ExpressionType.NONE
+    assert problem.inequality_constraint_type() == ExpressionType.LINEAR
+
+    assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
+    assert x.value() <= 5 + 1e-3
 
 
 def test_nonfinite_cost():
