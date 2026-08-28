@@ -189,7 +189,6 @@ At the end of the solve, the solver prints a time trace of itself.
 │solver                100.00%▕█████████▏      0.055     0.055    1│
 │↳ setup                 9.09%▕▊        ▏      0.005     0.005    1│
 │↳ iteration            38.18%▕███▍     ▏      0.021     0.007    3│
-│  ↳ feasibility check   0.00%▕         ▏      0.000     0.000    3│
 │  ↳ callbacks           0.00%▕         ▏      0.000     0.000    3│
 │  ↳ KKT matrix build    3.64%▕▎        ▏      0.002     0.000    3│
 │  ↳ KKT matrix decomp   7.27%▕▋        ▏      0.004     0.001    3│

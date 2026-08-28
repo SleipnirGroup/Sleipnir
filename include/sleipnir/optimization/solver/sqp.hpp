@@ -112,7 +112,6 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
   solve_profilers.emplace_back("solver");
   solve_profilers.emplace_back("↳ setup");
   solve_profilers.emplace_back("↳ iteration");
-  solve_profilers.emplace_back("  ↳ feasibility check");
   solve_profilers.emplace_back("  ↳ callbacks");
   solve_profilers.emplace_back("  ↳ KKT matrix build");
   solve_profilers.emplace_back("  ↳ KKT matrix decomp");
@@ -130,23 +129,22 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
   auto& solver_prof = solve_profilers[0];
   auto& setup_prof = solve_profilers[1];
   auto& inner_iter_prof = solve_profilers[2];
-  auto& feasibility_check_prof = solve_profilers[3];
-  auto& iter_callbacks_prof = solve_profilers[4];
-  auto& kkt_matrix_build_prof = solve_profilers[5];
-  auto& kkt_matrix_decomp_prof = solve_profilers[6];
-  auto& kkt_system_solve_prof = solve_profilers[7];
-  auto& line_search_prof = solve_profilers[8];
-  auto& soc_prof = solve_profilers[9];
-  auto& feasibility_restoration_prof = solve_profilers[10];
+  auto& iter_callbacks_prof = solve_profilers[3];
+  auto& kkt_matrix_build_prof = solve_profilers[4];
+  auto& kkt_matrix_decomp_prof = solve_profilers[5];
+  auto& kkt_system_solve_prof = solve_profilers[6];
+  auto& line_search_prof = solve_profilers[7];
+  auto& soc_prof = solve_profilers[8];
+  auto& feasibility_restoration_prof = solve_profilers[9];
 
   // Set up profiled matrix callbacks
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-  auto& f_prof = solve_profilers[11];
-  auto& g_prof = solve_profilers[12];
-  auto& H_prof = solve_profilers[13];
-  auto& H_c_prof = solve_profilers[14];
-  auto& c_e_prof = solve_profilers[15];
-  auto& A_e_prof = solve_profilers[16];
+  auto& f_prof = solve_profilers[10];
+  auto& g_prof = solve_profilers[11];
+  auto& H_prof = solve_profilers[12];
+  auto& H_c_prof = solve_profilers[13];
+  auto& c_e_prof = solve_profilers[14];
+  auto& A_e_prof = solve_profilers[15];
 
   SQPMatrixCallbacks<Scalar> matrices{
       matrix_callbacks.num_decision_variables,
@@ -257,14 +255,12 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
 
   while (E_0 > Scalar(options.tolerance)) {
     ScopedProfiler inner_iter_profiler{inner_iter_prof};
-    ScopedProfiler feasibility_check_profiler{feasibility_check_prof};
 
     // Check for diverging iterates
     if (x.template lpNorm<Eigen::Infinity>() > Scalar(1e10) || !x.allFinite()) {
       return ExitStatus::DIVERGING_ITERATES;
     }
 
-    feasibility_check_profiler.stop();
     ScopedProfiler iter_callbacks_profiler{iter_callbacks_prof};
 
     // Call iteration callbacks
