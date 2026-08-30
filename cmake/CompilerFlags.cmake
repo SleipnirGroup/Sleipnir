@@ -1,6 +1,12 @@
 macro(compiler_flags target)
     if(NOT MSVC)
         target_compile_options(${target} PRIVATE -Wall -Wextra -pedantic)
+
+        if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+            # Suppress the following false positive warnings:
+            #   * -Warray-bounds=
+            target_compile_options(${target} PRIVATE -Wno-array-bounds)
+        endif()
     else()
         # Suppress the following warnings:
         #   * C4244: lossy conversion
