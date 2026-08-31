@@ -282,7 +282,11 @@ ExitStatus newton(
     }
   }
 
-  return ExitStatus::SUCCESS;
+  if (!isfinite(E_0)) {
+    return ExitStatus::DIVERGING_ITERATES;
+  } else {
+    return ExitStatus::SUCCESS;
+  }
 }
 
 extern template SLEIPNIR_DLLEXPORT ExitStatus
