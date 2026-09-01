@@ -38,7 +38,7 @@ jobs:
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Make GCC 14 the default toolchain (Linux)
         if: runner.os == 'Linux'
@@ -47,7 +47,7 @@ jobs:
           sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14 200
 
       - name: Set up sccache
-        uses: mozilla-actions/sccache-action@v0.0.10
+        uses: mozilla-actions/sccache-action@v0.0.11
         # sccache doesn't work with MSBuild
         if: runner.os != 'Windows'
 
@@ -65,7 +65,7 @@ jobs:
     name: Wasm
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: emscripten-core/setup-emsdk@v16
 
@@ -73,7 +73,7 @@ jobs:
       - run: cmake --build build --config Release --parallel $(nproc)
       - run: cmake --install build --config Release --prefix pkg
 
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: Wasm
           path: pkg
@@ -83,7 +83,7 @@ jobs:
     name: "Coverage"
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Install LLVM 22
         run: |
@@ -99,7 +99,7 @@ jobs:
           echo "CXXFLAGS=-stdlib=libc++" >> $GITHUB_ENV
 
       - name: Set up sccache
-        uses: mozilla-actions/sccache-action@v0.0.10
+        uses: mozilla-actions/sccache-action@v0.0.11
         # sccache doesn't work with MSBuild
         if: runner.os != 'Windows'
 
