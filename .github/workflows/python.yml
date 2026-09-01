@@ -30,7 +30,7 @@ jobs:
     name: Build ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       # https://github.com/actions/checkout/issues/882
@@ -43,11 +43,11 @@ jobs:
           sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14 200
 
       - name: Set up sccache
-        uses: mozilla-actions/sccache-action@v0.0.10
+        uses: mozilla-actions/sccache-action@v0.0.11
         # sccache doesn't work with MSBuild
         if: runner.os != 'Windows'
 
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           # Minimum supported Python version
           python-version: 3.12
@@ -144,13 +144,13 @@ jobs:
     runs-on: ${{ matrix.os }}
     needs: [build-wheel]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.version }}
 
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           path: dist
           pattern: '${{ matrix.name }} wheel'
@@ -164,13 +164,13 @@ jobs:
     name: sdist
     runs-on: ubuntu-slim
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       # https://github.com/actions/checkout/issues/882
       - run: git fetch --tags --force origin
 
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           python-version: 3.14
 
