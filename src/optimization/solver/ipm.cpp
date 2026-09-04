@@ -1,11 +1,11 @@
 // Copyright (c) Sleipnir contributors
 
-#include "sleipnir/optimization/solver/interior_point.hpp"
+#include "sleipnir/optimization/solver/ipm.hpp"
 
 #include "sleipnir/util/symbol_exports.hpp"
 
-template SLEIPNIR_DLLEXPORT slp::ExitStatus slp::interior_point(
-    const InteriorPointMatrixCallbacks<double>& matrix_callbacks,
+template SLEIPNIR_DLLEXPORT slp::ExitStatus slp::ipm(
+    const IPMMatrixCallbacks<double>& matrix_callbacks,
     std::span<std::function<bool(const IterationInfo<double>& info)>>
         iteration_callbacks,
     const Options& options,

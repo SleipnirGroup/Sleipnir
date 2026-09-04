@@ -13,7 +13,7 @@
 #include <gch/small_vector.hpp>
 
 #include "sleipnir/optimization/solver/exit_status.hpp"
-#include "sleipnir/optimization/solver/interior_point_matrix_callbacks.hpp"
+#include "sleipnir/optimization/solver/ipm_matrix_callbacks.hpp"
 #include "sleipnir/optimization/solver/iteration_info.hpp"
 #include "sleipnir/optimization/solver/options.hpp"
 #include "sleipnir/optimization/solver/util/all_finite.hpp"
@@ -59,15 +59,14 @@ namespace slp {
 ///     variables.
 /// @return The exit status.
 template <typename Scalar>
-ExitStatus interior_point(
-    const InteriorPointMatrixCallbacks<Scalar>& matrix_callbacks,
-    std::span<std::function<bool(const IterationInfo<Scalar>& info)>>
-        iteration_callbacks,
-    const Options& options,
+ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
+               std::span<std::function<bool(const IterationInfo<Scalar>& info)>>
+                   iteration_callbacks,
+               const Options& options,
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
-    const Eigen::ArrayX<bool>& bound_constraint_mask,
+               const Eigen::ArrayX<bool>& bound_constraint_mask,
 #endif
-    Eigen::Vector<Scalar, Eigen::Dynamic>& x) {
+               Eigen::Vector<Scalar, Eigen::Dynamic>& x) {
   using DenseVector = Eigen::Vector<Scalar, Eigen::Dynamic>;
 
   DenseVector s =
@@ -78,11 +77,11 @@ ExitStatus interior_point(
   Scalar μ = Scalar(0.1) * matrix_callbacks.scaling.f;
   int iterations = 0;
 
-  return interior_point(matrix_callbacks, iteration_callbacks, options, false,
+  return ipm(matrix_callbacks, iteration_callbacks, options, false,
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
-                        bound_constraint_mask,
+             bound_constraint_mask,
 #endif
-                        x, s, y, z, μ, iterations);
+             x, s, y, z, μ, iterations);
 }
 
 /// Finds the optimal solution to a nonlinear program using the interior-point
@@ -119,18 +118,18 @@ ExitStatus interior_point(
 /// @param[in,out] iterations The iteration counter.
 /// @return The exit status.
 template <typename Scalar>
-ExitStatus interior_point(
-    const InteriorPointMatrixCallbacks<Scalar>& matrix_callbacks,
-    std::span<std::function<bool(const IterationInfo<Scalar>& info)>>
-        iteration_callbacks,
-    const Options& options, bool in_feasibility_restoration,
+ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
+               std::span<std::function<bool(const IterationInfo<Scalar>& info)>>
+                   iteration_callbacks,
+               const Options& options, bool in_feasibility_restoration,
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
-    const Eigen::ArrayX<bool>& bound_constraint_mask,
+               const Eigen::ArrayX<bool>& bound_constraint_mask,
 #endif
-    Eigen::Vector<Scalar, Eigen::Dynamic>& x,
-    Eigen::Vector<Scalar, Eigen::Dynamic>& s,
-    Eigen::Vector<Scalar, Eigen::Dynamic>& y,
-    Eigen::Vector<Scalar, Eigen::Dynamic>& z, Scalar& μ, int& iterations) {
+               Eigen::Vector<Scalar, Eigen::Dynamic>& x,
+               Eigen::Vector<Scalar, Eigen::Dynamic>& s,
+               Eigen::Vector<Scalar, Eigen::Dynamic>& y,
+               Eigen::Vector<Scalar, Eigen::Dynamic>& z, Scalar& μ,
+               int& iterations) {
   using DenseVector = Eigen::Vector<Scalar, Eigen::Dynamic>;
   using SparseMatrix = Eigen::SparseMatrix<Scalar>;
   using SparseVector = Eigen::SparseVector<Scalar>;
@@ -193,7 +192,7 @@ ExitStatus interior_point(
   auto& c_i_prof = solve_profilers[16];
   auto& A_i_prof = solve_profilers[17];
 
-  InteriorPointMatrixCallbacks<Scalar> matrices{
+  IPMMatrixCallbacks<Scalar> matrices{
       matrix_callbacks.num_decision_variables,
       matrix_callbacks.num_equality_constraints,
       matrix_callbacks.num_inequality_constraints,
@@ -847,13 +846,13 @@ ExitStatus interior_point(
 }
 
 extern template SLEIPNIR_DLLEXPORT ExitStatus
-interior_point(const InteriorPointMatrixCallbacks<double>& matrix_callbacks,
-               std::span<std::function<bool(const IterationInfo<double>& info)>>
-                   iteration_callbacks,
-               const Options& options,
+ipm(const IPMMatrixCallbacks<double>& matrix_callbacks,
+    std::span<std::function<bool(const IterationInfo<double>& info)>>
+        iteration_callbacks,
+    const Options& options,
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
-               const Eigen::ArrayX<bool>& bound_constraint_mask,
+    const Eigen::ArrayX<bool>& bound_constraint_mask,
 #endif
-               Eigen::Vector<double, Eigen::Dynamic>& x);
+    Eigen::Vector<double, Eigen::Dynamic>& x);
 
 }  // namespace slp

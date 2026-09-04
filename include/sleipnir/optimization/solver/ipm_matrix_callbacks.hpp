@@ -15,7 +15,7 @@ namespace slp {
 ///
 /// @tparam Scalar Scalar type.
 template <typename Scalar>
-struct InteriorPointMatrixCallbacks {
+struct IPMMatrixCallbacks {
   /// Type alias for dense vector.
   using DenseVector = Eigen::Vector<Scalar, Eigen::Dynamic>;
   /// Type alias for sparse matrix.

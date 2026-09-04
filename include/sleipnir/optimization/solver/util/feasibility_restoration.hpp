@@ -14,7 +14,7 @@
 #include <gch/small_vector.hpp>
 
 #include "sleipnir/optimization/solver/exit_status.hpp"
-#include "sleipnir/optimization/solver/interior_point_matrix_callbacks.hpp"
+#include "sleipnir/optimization/solver/ipm_matrix_callbacks.hpp"
 #include "sleipnir/optimization/solver/iteration_info.hpp"
 #include "sleipnir/optimization/solver/options.hpp"
 #include "sleipnir/optimization/solver/sqp_matrix_callbacks.hpp"
@@ -26,18 +26,18 @@
 namespace slp {
 
 template <typename Scalar>
-ExitStatus interior_point(
-    const InteriorPointMatrixCallbacks<Scalar>& matrix_callbacks,
-    std::span<std::function<bool(const IterationInfo<Scalar>& info)>>
-        iteration_callbacks,
-    const Options& options, bool in_feasibility_restoration,
+ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
+               std::span<std::function<bool(const IterationInfo<Scalar>& info)>>
+                   iteration_callbacks,
+               const Options& options, bool in_feasibility_restoration,
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
-    const Eigen::ArrayX<bool>& bound_constraint_mask,
+               const Eigen::ArrayX<bool>& bound_constraint_mask,
 #endif
-    Eigen::Vector<Scalar, Eigen::Dynamic>& x,
-    Eigen::Vector<Scalar, Eigen::Dynamic>& s,
-    Eigen::Vector<Scalar, Eigen::Dynamic>& y,
-    Eigen::Vector<Scalar, Eigen::Dynamic>& z, Scalar& μ, int& iterations);
+               Eigen::Vector<Scalar, Eigen::Dynamic>& x,
+               Eigen::Vector<Scalar, Eigen::Dynamic>& s,
+               Eigen::Vector<Scalar, Eigen::Dynamic>& y,
+               Eigen::Vector<Scalar, Eigen::Dynamic>& z, Scalar& μ,
+               int& iterations);
 
 /// Computes initial values for p and n in feasibility restoration.
 ///
@@ -181,7 +181,7 @@ ExitStatus feasibility_restoration(
   const ProblemScaling<Scalar> fr_scaling{Scalar(1), matrices.scaling.c_e,
                                           DenseVector::Ones(2 * num_eq)};
 
-  InteriorPointMatrixCallbacks<Scalar> fr_matrix_callbacks{
+  IPMMatrixCallbacks<Scalar> fr_matrix_callbacks{
       static_cast<int>(fr_x.rows()),
       static_cast<int>(fr_y.rows()),
       static_cast<int>(fr_z.rows()),
@@ -302,12 +302,12 @@ ExitStatus feasibility_restoration(
       },
       fr_scaling};
 
-  auto status = interior_point<Scalar>(
-      fr_matrix_callbacks, iteration_callbacks, options, true,
+  auto status =
+      ipm<Scalar>(fr_matrix_callbacks, iteration_callbacks, options, true,
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
-      Eigen::ArrayX<bool>::Constant(2 * num_eq, true),
+                  Eigen::ArrayX<bool>::Constant(2 * num_eq, true),
 #endif
-      fr_x, fr_s, fr_y, fr_z, fr_μ, iterations);
+                  fr_x, fr_s, fr_y, fr_z, fr_μ, iterations);
 
   x = fr_x.segment(0, x.rows());
 
@@ -365,7 +365,7 @@ ExitStatus feasibility_restoration(
 /// @return The exit status.
 template <typename Scalar>
 ExitStatus feasibility_restoration(
-    const InteriorPointMatrixCallbacks<Scalar>& matrix_callbacks,
+    const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
     std::span<std::function<bool(const IterationInfo<Scalar>& info)>>
         iteration_callbacks,
     const Options& options,
@@ -449,7 +449,7 @@ ExitStatus feasibility_restoration(
   const ProblemScaling<Scalar> fr_scaling{Scalar(1), matrices.scaling.c_e,
                                           fr_d_c_i};
 
-  InteriorPointMatrixCallbacks<Scalar> fr_matrix_callbacks{
+  IPMMatrixCallbacks<Scalar> fr_matrix_callbacks{
       static_cast<int>(fr_x.rows()),
       static_cast<int>(fr_y.rows()),
       static_cast<int>(fr_z.rows()),
@@ -619,12 +619,12 @@ ExitStatus feasibility_restoration(
   fr_bound_constraint_mask.segment(num_ineq, 2 * num_eq + 2 * num_ineq) = true;
 #endif
 
-  auto status = interior_point<Scalar>(
-      fr_matrix_callbacks, iteration_callbacks, options, true,
+  auto status =
+      ipm<Scalar>(fr_matrix_callbacks, iteration_callbacks, options, true,
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
-      fr_bound_constraint_mask,
+                  fr_bound_constraint_mask,
 #endif
-      fr_x, fr_s, fr_y, fr_z, fr_μ, iterations);
+                  fr_x, fr_s, fr_y, fr_z, fr_μ, iterations);
 
   x = fr_x.segment(0, x.rows());
   s = fr_s.segment(0, s.rows());
@@ -687,4 +687,4 @@ ExitStatus feasibility_restoration(
 
 }  // namespace slp
 
-#include "sleipnir/optimization/solver/interior_point.hpp"
+#include "sleipnir/optimization/solver/ipm.hpp"

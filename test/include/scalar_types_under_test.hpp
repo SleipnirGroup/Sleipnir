@@ -9,7 +9,7 @@
 #include <sleipnir/autodiff/variable_matrix.hpp>
 #include <sleipnir/optimization/ocp.hpp>
 #include <sleipnir/optimization/problem.hpp>
-#include <sleipnir/optimization/solver/interior_point.hpp>
+#include <sleipnir/optimization/solver/ipm.hpp>
 #include <sleipnir/optimization/solver/newton.hpp>
 #include <sleipnir/optimization/solver/sqp.hpp>
 
@@ -29,8 +29,8 @@ extern template slp::VariableMatrix<ExplicitDouble> slp::solve(
 
 extern template class slp::OCP<ExplicitDouble>;
 
-extern template slp::ExitStatus slp::interior_point(
-    const InteriorPointMatrixCallbacks<ExplicitDouble>& matrix_callbacks,
+extern template slp::ExitStatus slp::ipm(
+    const IPMMatrixCallbacks<ExplicitDouble>& matrix_callbacks,
     std::span<std::function<bool(const IterationInfo<ExplicitDouble>& info)>>
         iteration_callbacks,
     const Options& options,
