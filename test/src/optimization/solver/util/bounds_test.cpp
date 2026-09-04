@@ -99,7 +99,7 @@ TEMPLATE_TEST_CASE("Bounds - Projection", "[Bounds]", SCALAR_TYPES_UNDER_TEST) {
   });
   Eigen::Vector<T, bounds.size()> x, x_correct;
 
-  // This tests that we exactly match section 3.6 in [2]
+  // This tests that we exactly match section 3.6 of [2]
   SECTION("Initial value already mostly in bounds") {
     constexpr T κ_1(1e-2);
     constexpr T κ_2(1e-2);
