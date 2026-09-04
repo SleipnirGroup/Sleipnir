@@ -493,7 +493,7 @@ ExitStatus interior_point(
         // If the inequality constraints are all feasible, prevent them from
         // becoming infeasible again.
         //
-        // See equation (19.30) in [1].
+        // See equation (19.30) of [1].
         trial_s = trial_c_i;
       } else {
         trial_s = s + α * step.p_s;
