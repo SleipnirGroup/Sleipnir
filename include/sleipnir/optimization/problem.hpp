@@ -25,8 +25,8 @@
 #include "sleipnir/autodiff/variable.hpp"
 #include "sleipnir/autodiff/variable_matrix.hpp"
 #include "sleipnir/optimization/solver/exit_status.hpp"
-#include "sleipnir/optimization/solver/interior_point.hpp"
-#include "sleipnir/optimization/solver/interior_point_matrix_callbacks.hpp"
+#include "sleipnir/optimization/solver/ipm.hpp"
+#include "sleipnir/optimization/solver/ipm_matrix_callbacks.hpp"
 #include "sleipnir/optimization/solver/iteration_info.hpp"
 #include "sleipnir/optimization/solver/newton.hpp"
 #include "sleipnir/optimization/solver/newton_matrix_callbacks.hpp"
@@ -619,7 +619,7 @@ class Problem {
       x_ad.set_value(x);
       const ProblemScaling<Scalar> scaling{g.value(), A_e.value(), A_i.value()};
 
-      InteriorPointMatrixCallbacks<Scalar> matrix_callbacks{
+      IPMMatrixCallbacks<Scalar> matrix_callbacks{
           num_decision_variables,
           num_equality_constraints,
           num_inequality_constraints,
@@ -664,12 +664,11 @@ class Problem {
           scaling};
 
       // Invoke interior-point method solver
-      status =
-          interior_point<Scalar>(matrix_callbacks, iteration_callbacks, options,
+      status = ipm<Scalar>(matrix_callbacks, iteration_callbacks, options,
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
-                                 bound_constraint_mask,
+                           bound_constraint_mask,
 #endif
-                                 x);
+                           x);
     }
 
     if (options.diagnostics) {
