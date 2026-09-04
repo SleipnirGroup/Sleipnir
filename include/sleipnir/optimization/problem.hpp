@@ -753,7 +753,7 @@ class Problem {
   gch::small_vector<std::function<bool(const IterationInfo<Scalar>& info)>>
       m_persistent_iteration_callbacks;
 
-  void print_exit_conditions([[maybe_unused]] const Options& options) {
+  void print_exit_conditions(const Options& options) {
     // Print possible exit conditions
     slp::println("User-configured exit conditions:");
     slp::println("  ↳ error below {}", options.tolerance);
