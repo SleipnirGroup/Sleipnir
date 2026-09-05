@@ -952,6 +952,12 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_slp_Problem_solve_ipm = R"doc()doc";
+
+static const char *mkd_doc_slp_Problem_solve_newton = R"doc()doc";
+
+static const char *mkd_doc_slp_Problem_solve_sqp = R"doc()doc";
+
 static const char *mkd_doc_slp_Problem_subject_to =
 R"doc(Tells the solver to solve the problem while satisfying the given
 equality constraint.
