@@ -1773,7 +1773,7 @@ VariableMatrix<Scalar> gradient_tree(const ExpressionGraph<Scalar>& top_list,
   }
 
   // Set root node's adjoint to 1 since df/df is 1
-  top_list[0]->adjoint_expr = constant_ptr(Scalar(1));
+  top_list[0]->adj_expr = constant_ptr(Scalar(1));
 
   // df/dx = (df/dy)(dy/dx). The adjoint of x is equal to the adjoint of y
   // multiplied by dy/dx. If there are multiple "paths" from the root node to
@@ -1786,11 +1786,11 @@ VariableMatrix<Scalar> gradient_tree(const ExpressionGraph<Scalar>& top_list,
     if (lhs != nullptr) {
       if (rhs != nullptr) {
         // Binary operator
-        lhs->adjoint_expr += node->grad_expr_l(lhs, rhs);
-        rhs->adjoint_expr += node->grad_expr_r(lhs, rhs);
+        lhs->adj_expr += node->grad_expr_l(lhs, rhs);
+        rhs->adj_expr += node->grad_expr_r(lhs, rhs);
       } else {
         // Unary operator
-        lhs->adjoint_expr += node->grad_expr_l(lhs, rhs);
+        lhs->adj_expr += node->grad_expr_l(lhs, rhs);
       }
     }
   }
@@ -1798,14 +1798,14 @@ VariableMatrix<Scalar> gradient_tree(const ExpressionGraph<Scalar>& top_list,
   // Move gradient tree to return value
   VariableMatrix<Scalar> grad{detail::empty, wrt.rows(), 1};
   for (int row = 0; row < grad.rows(); ++row) {
-    grad[row] = Variable{std::move(wrt[row].expr->adjoint_expr)};
+    grad[row] = Variable{std::move(wrt[row].expr->adj_expr)};
   }
 
   // Unlink adjoints to avoid circular references between them and their
   // parent expressions. This ensures all expressions are returned to the free
   // list.
   for (auto& node : top_list) {
-    node->adjoint_expr = nullptr;
+    node->adj_expr = nullptr;
   }
 
   return grad;

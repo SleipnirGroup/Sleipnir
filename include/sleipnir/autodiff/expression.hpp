@@ -94,11 +94,11 @@ struct Expression {
   Scalar val{0};
 
   /// The adjoint of the expression node, used during autodiff.
-  Scalar adjoint{0};
+  Scalar adj{0};
 
   /// The adjoint of the expression node, used during gradient expression tree
   /// generation.
-  ExpressionPtr<Scalar> adjoint_expr;
+  ExpressionPtr<Scalar> adj_expr;
 
   /// Expression arguments.
   std::array<ExpressionPtr<Scalar>, 2> args{nullptr, nullptr};
@@ -456,20 +456,20 @@ struct BinaryMinusExpression final : Expression<Scalar> {
 
   std::string_view name() const override { return "binary minus"; }
 
-  Scalar grad_l(Scalar, Scalar) const override { return this->adjoint; }
+  Scalar grad_l(Scalar, Scalar) const override { return this->adj; }
 
-  Scalar grad_r(Scalar, Scalar) const override { return -this->adjoint; }
+  Scalar grad_r(Scalar, Scalar) const override { return -this->adj; }
 
   ExpressionPtr<Scalar> grad_expr_l(
       const ExpressionPtr<Scalar>&,
       const ExpressionPtr<Scalar>&) const override {
-    return this->adjoint_expr;
+    return this->adj_expr;
   }
 
   ExpressionPtr<Scalar> grad_expr_r(
       const ExpressionPtr<Scalar>&,
       const ExpressionPtr<Scalar>&) const override {
-    return -this->adjoint_expr;
+    return -this->adj_expr;
   }
 };
 
@@ -493,20 +493,20 @@ struct BinaryPlusExpression final : Expression<Scalar> {
 
   std::string_view name() const override { return "binary plus"; }
 
-  Scalar grad_l(Scalar, Scalar) const override { return this->adjoint; }
+  Scalar grad_l(Scalar, Scalar) const override { return this->adj; }
 
-  Scalar grad_r(Scalar, Scalar) const override { return this->adjoint; }
+  Scalar grad_r(Scalar, Scalar) const override { return this->adj; }
 
   ExpressionPtr<Scalar> grad_expr_l(
       const ExpressionPtr<Scalar>&,
       const ExpressionPtr<Scalar>&) const override {
-    return this->adjoint_expr;
+    return this->adj_expr;
   }
 
   ExpressionPtr<Scalar> grad_expr_r(
       const ExpressionPtr<Scalar>&,
       const ExpressionPtr<Scalar>&) const override {
-    return this->adjoint_expr;
+    return this->adj_expr;
   }
 };
 
@@ -534,14 +534,14 @@ struct CbrtExpression final : Expression<Scalar> {
     using std::cbrt;
 
     Scalar c = cbrt(x);
-    return this->adjoint / (Scalar(3) * c * c);
+    return this->adj / (Scalar(3) * c * c);
   }
 
   ExpressionPtr<Scalar> grad_expr_l(
       const ExpressionPtr<Scalar>& x,
       const ExpressionPtr<Scalar>&) const override {
     auto c = cbrt(x);
-    return this->adjoint_expr / (constant_ptr(Scalar(3)) * c * c);
+    return this->adj_expr / (constant_ptr(Scalar(3)) * c * c);
   }
 };
 
@@ -627,24 +627,22 @@ struct DivExpression final : Expression<Scalar> {
 
   std::string_view name() const override { return "division"; }
 
-  Scalar grad_l(Scalar, Scalar rhs) const override {
-    return this->adjoint / rhs;
-  };
+  Scalar grad_l(Scalar, Scalar rhs) const override { return this->adj / rhs; };
 
   Scalar grad_r(Scalar lhs, Scalar rhs) const override {
-    return this->adjoint * -lhs / (rhs * rhs);
+    return this->adj * -lhs / (rhs * rhs);
   }
 
   ExpressionPtr<Scalar> grad_expr_l(
       const ExpressionPtr<Scalar>&,
       const ExpressionPtr<Scalar>& rhs) const override {
-    return this->adjoint_expr / rhs;
+    return this->adj_expr / rhs;
   }
 
   ExpressionPtr<Scalar> grad_expr_r(
       const ExpressionPtr<Scalar>& lhs,
       const ExpressionPtr<Scalar>& rhs) const override {
-    return this->adjoint_expr * -lhs / (rhs * rhs);
+    return this->adj_expr * -lhs / (rhs * rhs);
   }
 };
 
@@ -668,23 +666,23 @@ struct MultExpression final : Expression<Scalar> {
   std::string_view name() const override { return "multiplication"; }
 
   Scalar grad_l([[maybe_unused]] Scalar lhs, Scalar rhs) const override {
-    return this->adjoint * rhs;
+    return this->adj * rhs;
   }
 
   Scalar grad_r(Scalar lhs, [[maybe_unused]] Scalar rhs) const override {
-    return this->adjoint * lhs;
+    return this->adj * lhs;
   }
 
   ExpressionPtr<Scalar> grad_expr_l(
       [[maybe_unused]] const ExpressionPtr<Scalar>& lhs,
       const ExpressionPtr<Scalar>& rhs) const override {
-    return this->adjoint_expr * rhs;
+    return this->adj_expr * rhs;
   }
 
   ExpressionPtr<Scalar> grad_expr_r(
       const ExpressionPtr<Scalar>& lhs,
       [[maybe_unused]] const ExpressionPtr<Scalar>& rhs) const override {
-    return this->adjoint_expr * lhs;
+    return this->adj_expr * lhs;
   }
 };
 
@@ -706,12 +704,12 @@ struct UnaryMinusExpression final : Expression<Scalar> {
 
   std::string_view name() const override { return "unary minus"; }
 
-  Scalar grad_l(Scalar, Scalar) const override { return -this->adjoint; }
+  Scalar grad_l(Scalar, Scalar) const override { return -this->adj; }
 
   ExpressionPtr<Scalar> grad_expr_l(
       const ExpressionPtr<Scalar>&,
       const ExpressionPtr<Scalar>&) const override {
-    return -this->adjoint_expr;
+    return -this->adj_expr;
   }
 };
 
@@ -744,8 +742,8 @@ constexpr void dec_ref_count(Expression<Scalar>* expr) {
     // Decrement the current node's refcount. If it reaches zero, deallocate the
     // node and enqueue its children so their refcounts are decremented too.
     if (--elem->ref_count == 0) {
-      if (elem->adjoint_expr != nullptr) {
-        stack.emplace_back(elem->adjoint_expr.get());
+      if (elem->adj_expr != nullptr) {
+        stack.emplace_back(elem->adj_expr.get());
       }
       for (auto& arg : elem->args) {
         if (arg != nullptr) {
@@ -788,9 +786,9 @@ struct AbsExpression final : Expression<Scalar> {
 
   Scalar grad_l(Scalar x, Scalar) const override {
     if (x < Scalar(0)) {
-      return -this->adjoint;
+      return -this->adj;
     } else if (x > Scalar(0)) {
-      return this->adjoint;
+      return this->adj;
     } else {
       return Scalar(0);
     }
@@ -799,7 +797,7 @@ struct AbsExpression final : Expression<Scalar> {
   ExpressionPtr<Scalar> grad_expr_l(
       const ExpressionPtr<Scalar>& x,
       const ExpressionPtr<Scalar>&) const override {
-    return this->adjoint_expr * sign(x);
+    return this->adj_expr * sign(x);
   }
 };
 
@@ -848,13 +846,13 @@ struct AcosExpression final : Expression<Scalar> {
 
   Scalar grad_l(Scalar x, Scalar) const override {
     using std::sqrt;
-    return -this->adjoint / sqrt(Scalar(1) - x * x);
+    return -this->adj / sqrt(Scalar(1) - x * x);
   }
 
   ExpressionPtr<Scalar> grad_expr_l(
       const ExpressionPtr<Scalar>& x,
       const ExpressionPtr<Scalar>&) const override {
-    return -this->adjoint_expr / sqrt(constant_ptr(Scalar(1)) - x * x);
+    return -this->adj_expr / sqrt(constant_ptr(Scalar(1)) - x * x);
   }
 };
 
@@ -902,13 +900,13 @@ struct AsinExpression final : Expression<Scalar> {
 
   Scalar grad_l(Scalar x, Scalar) const override {
     using std::sqrt;
-    return this->adjoint / sqrt(Scalar(1) - x * x);
+    return this->adj / sqrt(Scalar(1) - x * x);
   }
 
   ExpressionPtr<Scalar> grad_expr_l(
       const ExpressionPtr<Scalar>& x,
       const ExpressionPtr<Scalar>&) const override {
-    return this->adjoint_expr / sqrt(constant_ptr(Scalar(1)) - x * x);
+    return this->adj_expr / sqrt(constant_ptr(Scalar(1)) - x * x);
   }
 };
 
@@ -956,13 +954,13 @@ struct AtanExpression final : Expression<Scalar> {
   std::string_view name() const override { return "atan"; }
 
   Scalar grad_l(Scalar x, Scalar) const override {
-    return this->adjoint / (Scalar(1) + x * x);
+    return this->adj / (Scalar(1) + x * x);
   }
 
   ExpressionPtr<Scalar> grad_expr_l(
       const ExpressionPtr<Scalar>& x,
       const ExpressionPtr<Scalar>&) const override {
-    return this->adjoint_expr / (constant_ptr(Scalar(1)) + x * x);
+    return this->adj_expr / (constant_ptr(Scalar(1)) + x * x);
   }
 };
 
@@ -1012,23 +1010,23 @@ struct Atan2Expression final : Expression<Scalar> {
   std::string_view name() const override { return "atan2"; }
 
   Scalar grad_l(Scalar y, Scalar x) const override {
-    return this->adjoint * x / (y * y + x * x);
+    return this->adj * x / (y * y + x * x);
   }
 
   Scalar grad_r(Scalar y, Scalar x) const override {
-    return this->adjoint * -y / (y * y + x * x);
+    return this->adj * -y / (y * y + x * x);
   }
 
   ExpressionPtr<Scalar> grad_expr_l(
       const ExpressionPtr<Scalar>& y,
       const ExpressionPtr<Scalar>& x) const override {
-    return this->adjoint_expr * x / (y * y + x * x);
+    return this->adj_expr * x / (y * y + x * x);
   }
 
   ExpressionPtr<Scalar> grad_expr_r(
       const ExpressionPtr<Scalar>& y,
       const ExpressionPtr<Scalar>& x) const override {
-    return this->adjoint_expr * -y / (y * y + x * x);
+    return this->adj_expr * -y / (y * y + x * x);
   }
 };
 
@@ -1073,13 +1071,13 @@ struct CosExpression final : Expression<Scalar> {
 
   Scalar grad_l(Scalar x, Scalar) const override {
     using std::sin;
-    return this->adjoint * -sin(x);
+    return this->adj * -sin(x);
   }
 
   ExpressionPtr<Scalar> grad_expr_l(
       const ExpressionPtr<Scalar>& x,
       const ExpressionPtr<Scalar>&) const override {
-    return this->adjoint_expr * -sin(x);
+    return this->adj_expr * -sin(x);
   }
 };
 
@@ -1127,13 +1125,13 @@ struct CoshExpression final : Expression<Scalar> {
 
   Scalar grad_l(Scalar x, Scalar) const override {
     using std::sinh;
-    return this->adjoint * sinh(x);
+    return this->adj * sinh(x);
   }
 
   ExpressionPtr<Scalar> grad_expr_l(
       const ExpressionPtr<Scalar>& x,
       const ExpressionPtr<Scalar>&) const override {
-    return this->adjoint_expr * sinh(x);
+    return this->adj_expr * sinh(x);
   }
 };
 
@@ -1181,13 +1179,13 @@ struct ErfExpression final : Expression<Scalar> {
 
   Scalar grad_l(Scalar x, Scalar) const override {
     using std::exp;
-    return this->adjoint * Scalar(2.0 * std::numbers::inv_sqrtpi) * exp(-x * x);
+    return this->adj * Scalar(2.0 * std::numbers::inv_sqrtpi) * exp(-x * x);
   }
 
   ExpressionPtr<Scalar> grad_expr_l(
       const ExpressionPtr<Scalar>& x,
       const ExpressionPtr<Scalar>&) const override {
-    return this->adjoint_expr *
+    return this->adj_expr *
            constant_ptr(Scalar(2.0 * std::numbers::inv_sqrtpi)) * exp(-x * x);
   }
 };
@@ -1237,13 +1235,13 @@ struct ExpExpression final : Expression<Scalar> {
 
   Scalar grad_l(Scalar x, Scalar) const override {
     using std::exp;
-    return this->adjoint * exp(x);
+    return this->adj * exp(x);
   }
 
   ExpressionPtr<Scalar> grad_expr_l(
       const ExpressionPtr<Scalar>& x,
       const ExpressionPtr<Scalar>&) const override {
-    return this->adjoint_expr * exp(x);
+    return this->adj_expr * exp(x);
   }
 };
 
@@ -1297,24 +1295,24 @@ struct HypotExpression final : Expression<Scalar> {
 
   Scalar grad_l(Scalar x, Scalar y) const override {
     using std::hypot;
-    return this->adjoint * x / hypot(x, y);
+    return this->adj * x / hypot(x, y);
   }
 
   Scalar grad_r(Scalar x, Scalar y) const override {
     using std::hypot;
-    return this->adjoint * y / hypot(x, y);
+    return this->adj * y / hypot(x, y);
   }
 
   ExpressionPtr<Scalar> grad_expr_l(
       const ExpressionPtr<Scalar>& x,
       const ExpressionPtr<Scalar>& y) const override {
-    return this->adjoint_expr * x / hypot(x, y);
+    return this->adj_expr * x / hypot(x, y);
   }
 
   ExpressionPtr<Scalar> grad_expr_r(
       const ExpressionPtr<Scalar>& x,
       const ExpressionPtr<Scalar>& y) const override {
-    return this->adjoint_expr * y / hypot(x, y);
+    return this->adj_expr * y / hypot(x, y);
   }
 };
 
@@ -1430,12 +1428,12 @@ struct LogExpression final : Expression<Scalar> {
 
   std::string_view name() const override { return "log"; }
 
-  Scalar grad_l(Scalar x, Scalar) const override { return this->adjoint / x; }
+  Scalar grad_l(Scalar x, Scalar) const override { return this->adj / x; }
 
   ExpressionPtr<Scalar> grad_expr_l(
       const ExpressionPtr<Scalar>& x,
       const ExpressionPtr<Scalar>&) const override {
-    return this->adjoint_expr / x;
+    return this->adj_expr / x;
   }
 };
 
@@ -1483,13 +1481,13 @@ struct Log10Expression final : Expression<Scalar> {
   std::string_view name() const override { return "log10"; }
 
   Scalar grad_l(Scalar x, Scalar) const override {
-    return this->adjoint / (Scalar(std::numbers::ln10) * x);
+    return this->adj / (Scalar(std::numbers::ln10) * x);
   }
 
   ExpressionPtr<Scalar> grad_expr_l(
       const ExpressionPtr<Scalar>& x,
       const ExpressionPtr<Scalar>&) const override {
-    return this->adjoint_expr / (constant_ptr(Scalar(std::numbers::ln10)) * x);
+    return this->adj_expr / (constant_ptr(Scalar(std::numbers::ln10)) * x);
   }
 };
 
@@ -1540,11 +1538,11 @@ struct MaxExpression final : Expression<Scalar> {
   std::string_view name() const override { return "max"; }
 
   Scalar grad_l(Scalar a, Scalar b) const override {
-    return a >= b ? this->adjoint : Scalar(0);
+    return a >= b ? this->adj : Scalar(0);
   }
 
   Scalar grad_r(Scalar a, Scalar b) const override {
-    return a >= b ? Scalar(0) : this->adjoint;
+    return a >= b ? Scalar(0) : this->adj;
   }
 
   ExpressionPtr<Scalar> grad_expr_l(
@@ -1552,7 +1550,7 @@ struct MaxExpression final : Expression<Scalar> {
       const ExpressionPtr<Scalar>& b) const override {
     // adjoint * (a >= b)
     // adjoint * (a - b >= 0)
-    return this->adjoint_expr * is_nonnegative(a - b);
+    return this->adj_expr * is_nonnegative(a - b);
   }
 
   ExpressionPtr<Scalar> grad_expr_r(
@@ -1562,7 +1560,7 @@ struct MaxExpression final : Expression<Scalar> {
     // adjoint * (a < b)
     // adjoint * (b > a)
     // adjoint * (b - a > 0)
-    return this->adjoint_expr * is_positive(b - a);
+    return this->adj_expr * is_positive(b - a);
   }
 };
 
@@ -1609,12 +1607,12 @@ struct MinExpression final : Expression<Scalar> {
   std::string_view name() const override { return "min"; }
 
   Scalar grad_l(Scalar a, Scalar b) const override {
-    return a <= b ? this->adjoint : Scalar(0);
+    return a <= b ? this->adj : Scalar(0);
   }
 
   Scalar grad_r([[maybe_unused]] Scalar a,
                 [[maybe_unused]] Scalar b) const override {
-    return a <= b ? Scalar(0) : this->adjoint;
+    return a <= b ? Scalar(0) : this->adj;
   }
 
   ExpressionPtr<Scalar> grad_expr_l(
@@ -1623,7 +1621,7 @@ struct MinExpression final : Expression<Scalar> {
     // adjoint * (a <= b)
     // adjoint * (b >= a)
     // adjoint * (b - a >= 0)
-    return this->adjoint_expr * is_nonnegative(b - a);
+    return this->adj_expr * is_nonnegative(b - a);
   }
 
   ExpressionPtr<Scalar> grad_expr_r(
@@ -1632,7 +1630,7 @@ struct MinExpression final : Expression<Scalar> {
     // adjoint * !(a <= b)
     // adjoint * (a > b)
     // adjoint * (a - b > 0)
-    return this->adjoint_expr * is_positive(a - b);
+    return this->adj_expr * is_positive(a - b);
   }
 };
 
@@ -1683,27 +1681,26 @@ struct PowExpression final : Expression<Scalar> {
 
   Scalar grad_l(Scalar base, Scalar power) const override {
     using std::pow;
-    return this->adjoint * pow(base, power - Scalar(1)) * power;
+    return this->adj * pow(base, power - Scalar(1)) * power;
   }
 
   Scalar grad_r(Scalar base, Scalar power) const override {
     using std::log;
     using std::pow;
 
-    return this->adjoint * pow(base, power) * log(base);
+    return this->adj * pow(base, power) * log(base);
   }
 
   ExpressionPtr<Scalar> grad_expr_l(
       const ExpressionPtr<Scalar>& base,
       const ExpressionPtr<Scalar>& power) const override {
-    return this->adjoint_expr * pow(base, power - constant_ptr(Scalar(1))) *
-           power;
+    return this->adj_expr * pow(base, power - constant_ptr(Scalar(1))) * power;
   }
 
   ExpressionPtr<Scalar> grad_expr_r(
       const ExpressionPtr<Scalar>& base,
       const ExpressionPtr<Scalar>& power) const override {
-    return this->adjoint_expr * pow(base, power) * log(base);
+    return this->adj_expr * pow(base, power) * log(base);
   }
 };
 
@@ -1820,13 +1817,13 @@ struct SinExpression final : Expression<Scalar> {
 
   Scalar grad_l(Scalar x, Scalar) const override {
     using std::cos;
-    return this->adjoint * cos(x);
+    return this->adj * cos(x);
   }
 
   ExpressionPtr<Scalar> grad_expr_l(
       const ExpressionPtr<Scalar>& x,
       const ExpressionPtr<Scalar>&) const override {
-    return this->adjoint_expr * cos(x);
+    return this->adj_expr * cos(x);
   }
 };
 
@@ -1875,13 +1872,13 @@ struct SinhExpression final : Expression<Scalar> {
 
   Scalar grad_l(Scalar x, Scalar) const override {
     using std::cosh;
-    return this->adjoint * cosh(x);
+    return this->adj * cosh(x);
   }
 
   ExpressionPtr<Scalar> grad_expr_l(
       const ExpressionPtr<Scalar>& x,
       const ExpressionPtr<Scalar>&) const override {
-    return this->adjoint_expr * cosh(x);
+    return this->adj_expr * cosh(x);
   }
 };
 
@@ -1930,13 +1927,13 @@ struct SqrtExpression final : Expression<Scalar> {
 
   Scalar grad_l(Scalar x, Scalar) const override {
     using std::sqrt;
-    return this->adjoint / (Scalar(2) * sqrt(x));
+    return this->adj / (Scalar(2) * sqrt(x));
   }
 
   ExpressionPtr<Scalar> grad_expr_l(
       const ExpressionPtr<Scalar>& x,
       const ExpressionPtr<Scalar>&) const override {
-    return this->adjoint_expr / (constant_ptr(Scalar(2)) * sqrt(x));
+    return this->adj_expr / (constant_ptr(Scalar(2)) * sqrt(x));
   }
 };
 
@@ -1988,14 +1985,14 @@ struct TanExpression final : Expression<Scalar> {
     using std::cos;
 
     auto c = cos(x);
-    return this->adjoint / (c * c);
+    return this->adj / (c * c);
   }
 
   ExpressionPtr<Scalar> grad_expr_l(
       const ExpressionPtr<Scalar>& x,
       const ExpressionPtr<Scalar>&) const override {
     auto c = cos(x);
-    return this->adjoint_expr / (c * c);
+    return this->adj_expr / (c * c);
   }
 };
 
@@ -2046,14 +2043,14 @@ struct TanhExpression final : Expression<Scalar> {
     using std::cosh;
 
     auto c = cosh(x);
-    return this->adjoint / (c * c);
+    return this->adj / (c * c);
   }
 
   ExpressionPtr<Scalar> grad_expr_l(
       const ExpressionPtr<Scalar>& x,
       const ExpressionPtr<Scalar>&) const override {
     auto c = cosh(x);
-    return this->adjoint_expr / (c * c);
+    return this->adj_expr / (c * c);
   }
 };
 

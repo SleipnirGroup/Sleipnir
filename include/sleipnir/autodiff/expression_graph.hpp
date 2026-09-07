@@ -117,11 +117,11 @@ void append_triplets(
   }
 
   // Set root node's adjoint to 1 since df/df is 1
-  top_list[0]->adjoint = Scalar(1);
+  top_list[0]->adj = Scalar(1);
 
   // Zero the rest of the adjoints
   for (auto& node : top_list | std::views::drop(1)) {
-    node->adjoint = Scalar(0);
+    node->adj = Scalar(0);
   }
 
   // df/dx = (df/dy)(dy/dx). The adjoint of x is equal to the adjoint of y
@@ -135,11 +135,11 @@ void append_triplets(
     if (lhs != nullptr) {
       if (rhs != nullptr) {
         // Binary operator
-        lhs->adjoint += node->grad_l(lhs->val, rhs->val);
-        rhs->adjoint += node->grad_r(lhs->val, rhs->val);
+        lhs->adj += node->grad_l(lhs->val, rhs->val);
+        rhs->adj += node->grad_r(lhs->val, rhs->val);
       } else {
         // Unary operator
-        lhs->adjoint += node->grad_l(lhs->val, Scalar(0));
+        lhs->adj += node->grad_l(lhs->val, Scalar(0));
       }
     }
   }
@@ -148,7 +148,7 @@ void append_triplets(
   // appear in the expression graph
   for (const auto& [col, node] : output_list) {
     // Append adjoints of wrt to sparse matrix triplets
-    triplets.emplace_back(row, col, node->adjoint);
+    triplets.emplace_back(row, col, node->adj);
   }
 }
 
