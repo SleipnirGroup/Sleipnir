@@ -304,24 +304,6 @@ if(SLEIPNIR_BUILD_PYTHON)
         PUBLIC Threads::Threads Eigen3::Eigen small_vector
     )
 
-    # Suppress compiler warnings in nanobind
-    if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
-        # nanobind/include/nanobind/nb_attr.h:212:14: warning: ISO C++ forbids zero-size array
-        #  212 |     arg_data args[Size];
-        #      |              ^~~~
-        target_compile_options(_sleipnir PRIVATE -Wno-pedantic)
-    endif()
-    if(
-        ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang"
-        OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang"
-    )
-        target_compile_options(nanobind-static-abi3 PRIVATE -Wno-array-bounds)
-        target_compile_options(
-            _sleipnir
-            PRIVATE -Wno-nested-anon-types -Wno-zero-length-array
-        )
-    endif()
-
     install(
         TARGETS _sleipnir
         COMPONENT python_modules
