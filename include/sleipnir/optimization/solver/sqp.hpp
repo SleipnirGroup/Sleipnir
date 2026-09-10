@@ -20,7 +20,7 @@
 #include "sleipnir/optimization/solver/util/feasibility_restoration.hpp"
 #include "sleipnir/optimization/solver/util/filter.hpp"
 #include "sleipnir/optimization/solver/util/kkt_error.hpp"
-#include "sleipnir/optimization/solver/util/regularized_ldlt.hpp"
+#include "sleipnir/optimization/solver/util/kkt_solver.hpp"
 #include "sleipnir/util/assert.hpp"
 #include "sleipnir/util/print_diagnostics.hpp"
 #include "sleipnir/util/profiler.hpp"
@@ -225,7 +225,7 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
 
   const int lhs_rows =
       matrices.num_decision_variables + matrices.num_equality_constraints;
-  RegularizedLDLT<Scalar> solver{
+  KKTSolver<Scalar> solver{
       // Use sparse solver if lower triangle fills < 25% of system
       H.nonZeros() + A_e.nonZeros() < 0.25 * lhs_rows * lhs_rows,
       matrices.num_decision_variables, matrices.num_equality_constraints};

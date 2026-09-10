@@ -18,7 +18,7 @@
 #include "sleipnir/optimization/solver/util/all_finite.hpp"
 #include "sleipnir/optimization/solver/util/filter.hpp"
 #include "sleipnir/optimization/solver/util/kkt_error.hpp"
-#include "sleipnir/optimization/solver/util/regularized_ldlt.hpp"
+#include "sleipnir/optimization/solver/util/kkt_solver.hpp"
 #include "sleipnir/util/assert.hpp"
 #include "sleipnir/util/print_diagnostics.hpp"
 #include "sleipnir/util/profiler.hpp"
@@ -131,7 +131,7 @@ ExitStatus newton(
 
   Filter<Scalar> filter;
 
-  RegularizedLDLT<Scalar> solver{
+  KKTSolver<Scalar> solver{
       // Use sparse solver if lower triangle fills < 25% of system
       H.nonZeros() < 0.25 * H.size(), matrices.num_decision_variables, 0};
 

@@ -5,36 +5,38 @@
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
 
-#include "sleipnir/optimization/solver/util/dense_regularized_ldlt.hpp"
-#include "sleipnir/optimization/solver/util/sparse_regularized_ldlt.hpp"
+#include "sleipnir/optimization/solver/util/dense_kkt_solver.hpp"
+#include "sleipnir/optimization/solver/util/sparse_kkt_solver.hpp"
 
 namespace slp {
 
-/// Solves systems of linear equations using a regularized LDLT factorization.
+/// Solves a KKT system.
+///
+/// Applies regularization so the solution is a descent direction.
 ///
 /// @tparam Scalar Scalar type.
 template <typename Scalar>
-class RegularizedLDLT {
+class KKTSolver {
  public:
   /// Type alias for dense vector.
   using DenseVector = Eigen::Vector<Scalar, Eigen::Dynamic>;
   /// Type alias for sparse matrix.
   using SparseMatrix = Eigen::SparseMatrix<Scalar>;
 
-  /// Constructs a RegularizedLDLT instance.
+  /// Constructs a KKTSolver instance.
   ///
   /// @param use_sparse_solver Whether to use sparse or dense solver.
   /// @param num_decision_variables The number of decision variables in the
   ///     system.
   /// @param num_equality_constraints The number of equality constraints in the
   ///     system.
-  RegularizedLDLT(bool use_sparse_solver, int num_decision_variables,
-                  int num_equality_constraints)
+  KKTSolver(bool use_sparse_solver, int num_decision_variables,
+            int num_equality_constraints)
       : m_use_sparse_solver{use_sparse_solver},
         m_sparse_solver{num_decision_variables, num_equality_constraints},
         m_dense_solver{num_decision_variables, num_equality_constraints} {}
 
-  /// Constructs a RegularizedLDLT instance.
+  /// Constructs a KKTSolver instance.
   ///
   /// @param use_sparse_solver Whether to use sparse or dense solver.
   /// @param num_decision_variables The number of decision variables in the
@@ -42,8 +44,8 @@ class RegularizedLDLT {
   /// @param num_equality_constraints The number of equality constraints in the
   ///     system.
   /// @param γ_min The minimum constraint regularization.
-  RegularizedLDLT(bool use_sparse_solver, int num_decision_variables,
-                  int num_equality_constraints, Scalar γ_min)
+  KKTSolver(bool use_sparse_solver, int num_decision_variables,
+            int num_equality_constraints, Scalar γ_min)
       : m_use_sparse_solver{use_sparse_solver},
         m_sparse_solver{num_decision_variables, num_equality_constraints,
                         γ_min},
@@ -61,7 +63,7 @@ class RegularizedLDLT {
     }
   }
 
-  /// Computes the regularized LDLT factorization of a matrix.
+  /// Computes the factorization of the KKT matrix.
   ///
   /// In sparse mode, the matrix's symbolic decomposition is reused in
   /// subsequent calls, so subsequent calls must be given a matrix with the same
@@ -69,7 +71,7 @@ class RegularizedLDLT {
   ///
   /// @param lhs Left-hand side of the system.
   /// @return The factorization.
-  RegularizedLDLT& compute(const SparseMatrix& lhs) {
+  KKTSolver& compute(const SparseMatrix& lhs) {
     if (m_use_sparse_solver) {
       m_sparse_solver.compute(lhs);
     } else {
@@ -79,7 +81,7 @@ class RegularizedLDLT {
     return *this;
   }
 
-  /// Solves the system of equations using a regularized LDLT factorization.
+  /// Solves the system of equations.
   ///
   /// @param rhs Right-hand side of the system.
   /// @return The solution.
@@ -92,7 +94,7 @@ class RegularizedLDLT {
     }
   }
 
-  /// Solves the system of equations using a regularized LDLT factorization.
+  /// Solves the system of equations.
   ///
   /// @param rhs Right-hand side of the system.
   /// @return The solution.
@@ -129,8 +131,8 @@ class RegularizedLDLT {
 
  private:
   bool m_use_sparse_solver;
-  SparseRegularizedLDLT<Scalar> m_sparse_solver;
-  DenseRegularizedLDLT<Scalar> m_dense_solver;
+  SparseKKTSolver<Scalar> m_sparse_solver;
+  DenseKKTSolver<Scalar> m_dense_solver;
 };
 
 }  // namespace slp
