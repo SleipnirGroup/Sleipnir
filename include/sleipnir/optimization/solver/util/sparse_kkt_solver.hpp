@@ -5,44 +5,46 @@
 #include <algorithm>
 #include <limits>
 
-#include <Eigen/Cholesky>
 #include <Eigen/Core>
+#include <Eigen/SparseCholesky>
+#include <Eigen/SparseCore>
 
 #include "sleipnir/optimization/solver/util/inertia.hpp"
 
 namespace slp {
 
-/// Solves dense systems of linear equations using a regularized LDLT
-/// factorization.
+/// Solves a sparse KKT system.
+///
+/// Applies regularization so the solution is a descent direction.
 ///
 /// @tparam Scalar Scalar type.
 template <typename Scalar>
-class DenseRegularizedLDLT {
+class SparseKKTSolver {
  public:
-  /// Type alias for dense matrix.
-  using DenseMatrix = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>;
   /// Type alias for dense vector.
   using DenseVector = Eigen::Vector<Scalar, Eigen::Dynamic>;
+  /// Type alias for sparse matrix.
+  using SparseMatrix = Eigen::SparseMatrix<Scalar>;
 
-  /// Constructs a DenseRegularizedLDLT instance.
+  /// Constructs a SparseKKTSolver instance.
   ///
   /// @param num_decision_variables The number of decision variables in the
   ///     system.
   /// @param num_equality_constraints The number of equality constraints in the
   ///     system.
-  DenseRegularizedLDLT(int num_decision_variables, int num_equality_constraints)
+  SparseKKTSolver(int num_decision_variables, int num_equality_constraints)
       : m_num_decision_variables{num_decision_variables},
         m_num_equality_constraints{num_equality_constraints} {}
 
-  /// Constructs a DenseRegularizedLDLT instance.
+  /// Constructs a SparseKKTSolver instance.
   ///
   /// @param num_decision_variables The number of decision variables in the
   ///     system.
   /// @param num_equality_constraints The number of equality constraints in the
   ///     system.
   /// @param γ_min The minimum constraint regularization.
-  DenseRegularizedLDLT(int num_decision_variables, int num_equality_constraints,
-                       Scalar γ_min)
+  SparseKKTSolver(int num_decision_variables, int num_equality_constraints,
+                  Scalar γ_min)
       : m_num_decision_variables{num_decision_variables},
         m_num_equality_constraints{num_equality_constraints},
         m_γ_min{γ_min} {}
@@ -52,12 +54,25 @@ class DenseRegularizedLDLT {
   /// @return Whether previous computation was successful.
   Eigen::ComputationInfo info() const { return m_info; }
 
-  /// Computes the regularized LDLT factorization of a matrix.
+  /// Computes the factorization of the KKT matrix.
+  ///
+  /// The matrix's symbolic decomposition is reused in subsequent calls, so
+  /// subsequent calls must be given a matrix with the same sparsity pattern.
   ///
   /// @param lhs Left-hand side of the system.
   /// @return The factorization.
-  DenseRegularizedLDLT& compute(const DenseMatrix& lhs) {
-    m_info = m_solver.compute(lhs).info();
+  SparseKKTSolver& compute(const SparseMatrix& lhs) {
+    // Regularization with zeros ensures the pattern analysis in the sparse
+    // solver is reused by all factorizations
+    SparseMatrix unregularized_lhs = lhs + regularization(Scalar(0), Scalar(0));
+
+    if (!m_analyzed_pattern) {
+      m_solver.analyzePattern(unregularized_lhs);
+      m_analyzed_pattern = true;
+    }
+
+    m_solver.factorize(unregularized_lhs);
+    m_info = m_solver.info();
 
     if (m_info == Eigen::Success) {
       auto D = m_solver.vectorD();
@@ -87,7 +102,8 @@ class DenseRegularizedLDLT {
     Scalar γ = m_γ_min;
 
     while (true) {
-      m_info = m_solver.compute(lhs + regularization(δ, γ)).info();
+      m_solver.factorize(lhs + regularization(δ, γ));
+      m_info = m_solver.info();
 
       if (m_info == Eigen::Success) {
         Inertia inertia{m_solver.vectorD()};
@@ -135,7 +151,7 @@ class DenseRegularizedLDLT {
     }
   }
 
-  /// Solves the system of equations using a regularized LDLT factorization.
+  /// Solves the system of equations.
   ///
   /// @param rhs Right-hand side of the system.
   /// @return The solution.
@@ -144,13 +160,13 @@ class DenseRegularizedLDLT {
     return m_solver.solve(rhs);
   }
 
-  /// Solves the system of equations using a regularized LDLT factorization.
+  /// Solves the system of equations.
   ///
   /// @param rhs Right-hand side of the system.
   /// @return The solution.
   template <typename Rhs>
   DenseVector solve(const Eigen::SparseMatrixBase<Rhs>& rhs) const {
-    return m_solver.solve(rhs.toDense());
+    return m_solver.solve(rhs);
   }
 
   /// Returns the Hessian regularization factor.
@@ -164,9 +180,10 @@ class DenseRegularizedLDLT {
   Scalar constraint_jacobian_regularization() const { return m_prev_γ; }
 
  private:
-  using Solver = Eigen::LDLT<DenseMatrix>;
+  using Solver = Eigen::SimplicialLDLT<SparseMatrix>;
 
   Solver m_solver;
+  bool m_analyzed_pattern = false;
 
   Eigen::ComputationInfo m_info = Eigen::Success;
 
@@ -197,13 +214,13 @@ class DenseRegularizedLDLT {
   /// @param δ The Hessian regularization factor.
   /// @param γ The equality constraint Jacobian regularization factor.
   /// @return Regularization matrix.
-  DenseMatrix regularization(Scalar δ, Scalar γ) const {
+  SparseMatrix regularization(Scalar δ, Scalar γ) const {
     DenseVector vec{m_num_decision_variables + m_num_equality_constraints};
     vec.segment(0, m_num_decision_variables).setConstant(δ);
     vec.segment(m_num_decision_variables, m_num_equality_constraints)
         .setConstant(-γ);
 
-    return vec.asDiagonal().toDenseMatrix();
+    return SparseMatrix{vec.asDiagonal()};
   }
 };
 
