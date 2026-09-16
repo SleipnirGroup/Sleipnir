@@ -726,16 +726,6 @@ R"doc(Enables diagnostic output.
 See https://sleipnirgroup.github.io/Sleipnir/md_usage.html#output for
 more information.)doc";
 
-static const char *mkd_doc_slp_Options_feasible_ipm =
-R"doc(Enables the feasible interior-point method.
-
-When the inequality constraints are all feasible, step sizes are
-reduced when necessary to prevent them becoming infeasible again. This
-is useful when parts of the problem are ill-conditioned in infeasible
-regions (e.g., square root of a negative value). This can slow or
-prevent progress toward a solution though, so only enable it if
-necessary.)doc";
-
 static const char *mkd_doc_slp_Options_max_iterations = R"doc(The maximum number of solver iterations before returning a solution.)doc";
 
 static const char *mkd_doc_slp_Options_timeout = R"doc(The maximum elapsed wall clock time before returning a solution.)doc";

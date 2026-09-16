@@ -98,8 +98,6 @@ void bind_problem(nb::class_<Problem<double>>& cls) {
           } else if (key_str == "timeout") {
             options.timeout =
                 std::chrono::duration<double>{nb::cast<double>(value)};
-          } else if (key_str == "feasible_ipm") {
-            options.feasible_ipm = nb::cast<bool>(value);
           } else if (key_str == "diagnostics") {
             options.diagnostics = nb::cast<bool>(value);
           } else if (key_str == "spy") {
@@ -127,14 +125,6 @@ Args:
         solution. (default: 5000)
     timeout: The maximum elapsed wall clock time before returning a solution.
         (default: infinity)
-    feasible_ipm: Enables the feasible interior-point method.
-
-        When the inequality constraints are all feasible, step sizes are reduced
-        when necessary to prevent them becoming infeasible again. This is useful
-        when parts of the problem are ill-conditioned in infeasible regions
-        (e.g., square root of a negative value). This can slow or prevent
-        progress toward a solution though, so only enable it if necessary.
-        (default: False)
     diagnostics: Enables diagnostic output.
 
         See https://sleipnirgroup.github.io/Sleipnir/md_usage.html#output for
