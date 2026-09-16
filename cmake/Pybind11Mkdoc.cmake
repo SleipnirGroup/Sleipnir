@@ -5,16 +5,16 @@ function(pybind11_mkdoc target headers)
     get_target_property(target_flags ${target} INCLUDE_DIRECTORIES)
     list(TRANSFORM target_flags PREPEND "-I")
 
-    # Get default clang version
-    execute_process(
-        COMMAND clang++ --version
-        OUTPUT_VARIABLE clang_version
-        COMMAND_ERROR_IS_FATAL ANY
-    )
-    string(REGEX MATCH "[0-9]+" clang_version ${clang_version})
-
-    # LLVM environment variables
     if(UNIX AND NOT APPLE)
+        # Get default clang version
+        execute_process(
+            COMMAND clang++ --version
+            OUTPUT_VARIABLE clang_version
+            COMMAND_ERROR_IS_FATAL ANY
+        )
+        string(REGEX MATCH "[0-9]+" clang_version ${clang_version})
+
+        # LLVM environment variables
         if(EXISTS /usr/lib/libclang.so)
             set(env_vars
                 LLVM_DIR_PATH=/usr/lib
@@ -26,10 +26,8 @@ function(pybind11_mkdoc target headers)
                 LIBCLANG_PATH=/usr/lib/llvm-${clang_version}/lib/libclang.so
             )
         endif()
-    endif()
 
-    # Clang compiler flags
-    if(UNIX AND NOT APPLE)
+        # Clang compiler flags
         set(clang_flags -I/usr/lib/clang/${clang_version}/include)
     endif()
 
