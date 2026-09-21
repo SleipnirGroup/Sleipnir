@@ -375,6 +375,13 @@ ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
     }
   }};
 
+  // Print initial iterate diagnostics
+  if (options.diagnostics) {
+    print_initial_iterate_diagnostics(
+        E_0, f, c_e.template lpNorm<1>() + (c_i - s).template lpNorm<1>(),
+        s.dot(z), μ);
+  }
+
   while (E_0 > Scalar(options.tolerance)) {
     ScopedProfiler inner_iter_profiler{inner_iter_prof};
 
