@@ -156,6 +156,11 @@ ExitStatus newton(
     }
   }};
 
+  // Print initial iterate diagnostics
+  if (options.diagnostics) {
+    print_initial_iterate_diagnostics(E_0, f, Scalar(0), Scalar(0), Scalar(0));
+  }
+
   while (E_0 > Scalar(options.tolerance)) {
     ScopedProfiler inner_iter_profiler{inner_iter_prof};
 

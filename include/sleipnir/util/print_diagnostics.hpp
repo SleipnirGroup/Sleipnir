@@ -176,6 +176,35 @@ inline void print_bound_constraint_global_infeasibility_error(
 #endif
 
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
+/// Prints diagnostics for the initial iterate.
+///
+/// @tparam Scalar Scalar type.
+/// @param error The error.
+/// @param cost The cost.
+/// @param infeasibility The infeasibility.
+/// @param complementarity The complementarity.
+/// @param μ The barrier parameter.
+template <typename Scalar>
+void print_initial_iterate_diagnostics(Scalar error, Scalar cost,
+                                       Scalar infeasibility,
+                                       Scalar complementarity, Scalar μ) {
+  slp::println("┏{:━^119}┓", "");
+  slp::println(
+      "┃{:^4}   {:^9} {:^10} {:^11} {:^10} {:^8} {:^8} {:^5} {:^5} {:^8} {:^8} "
+      "{:^8} {:^8} {:^2}┃",
+      "iter", "duration", "error", "cost", "infeas.", "complem.", "μ", "δ", "γ",
+      "|p_pr|", "|p_du|", "α_pr", "α_du", "↩");
+  slp::println("┡{:━^119}┩", "");
+
+  slp::println(
+      "│init   {:^9} {:10.4e} {:11.4e} {:10.4e} {:8.2e} {:8.2e} {:^50}│", "",
+      error, cost, infeasibility, complementarity, μ, "");
+}
+#else
+#define print_initial_iterate_diagnostics(...)
+#endif
+
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
 /// Prints diagnostics for the current iteration.
 ///
 /// @tparam Scalar Scalar type.
@@ -206,12 +235,8 @@ void print_iteration_diagnostics(int iterations, IterationType type,
                                  Scalar full_dual_step_inf_norm,
                                  Scalar primal_α, Scalar primal_α_max,
                                  Scalar α_reduction_factor, Scalar dual_α) {
-  if (iterations % 20 == 0) {
-    if (iterations == 0) {
-      slp::println("┏{:━^119}┓", "");
-    } else {
-      slp::println("┢{:━^119}┪", "");
-    }
+  if (iterations > 0 && iterations % 20 == 0) {
+    slp::println("┢{:━^119}┪", "");
     slp::println(
         "┃{:^4}   {:^9} {:^10} {:^11} {:^10} {:^8} {:^8} {:^5} {:^5} {:^8} "
         "{:^8} {:^8} {:^8} {:^2}┃",
