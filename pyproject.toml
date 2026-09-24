@@ -13,7 +13,7 @@ license-files = ["LICENSE.txt"]
 
 [build-system]
 requires = [
-  "nanobind~=3.0.1",
+  "nanobind~=3.1.0",
   "py-build-cmake~=0.5.1",
   "pybind11-mkdoc~=3.0.0",
 ]
