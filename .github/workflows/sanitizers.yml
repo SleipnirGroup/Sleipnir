@@ -40,8 +40,6 @@ jobs:
 
       - name: Set up sccache
         uses: mozilla-actions/sccache-action@v0.0.11
-        # sccache doesn't work with MSBuild
-        if: runner.os != 'Windows'
 
       - run: cmake -B build -S . -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache -DSLEIPNIR_BUILD_EXAMPLES=ON -DSLEIPNIR_BUILD_PYTHON=OFF ${{ matrix.cmake-args }}
       - run: cmake --build build --target all --config RelWithDebInfo --parallel $(nproc)

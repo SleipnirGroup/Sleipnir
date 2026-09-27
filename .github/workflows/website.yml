@@ -39,8 +39,6 @@ jobs:
 
       - name: Set up sccache
         uses: mozilla-actions/sccache-action@v0.0.11
-        # sccache doesn't work with MSBuild
-        if: runner.os != 'Windows'
 
       - uses: actions/setup-python@v7
         with:
