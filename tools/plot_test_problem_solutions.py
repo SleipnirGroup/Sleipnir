@@ -128,9 +128,15 @@ def main():
             with open(filename) as f:
                 labels = [x.strip('"') for x in f.readline().rstrip().split(",")]
 
-            # Retrieve data from remaining rows of file. "skip_footer=1" skips
-            # the last line because it may be incompletely written.
-            data = np.genfromtxt(filename, delimiter=",", skip_header=1, skip_footer=1)
+            # Retrieve data from remaining rows of file
+            try:
+                data = np.genfromtxt(filename, delimiter=",", skip_header=1)
+            except ValueError:
+                # If a parsing error occurred, skip the last line because it may
+                # be incompletely written
+                data = np.genfromtxt(
+                    filename, delimiter=",", skip_header=1, skip_footer=1
+                )
 
             times = data[:, 0:1]
 
