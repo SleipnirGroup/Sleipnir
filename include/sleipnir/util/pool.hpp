@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <algorithm>
 #include <cstddef>
 #include <memory>
 
@@ -13,9 +14,11 @@ namespace slp {
 
 /// This class implements a pool memory resource.
 ///
-/// The pool allocates chunks of memory and splits them into blocks managed by a
-/// free list. Allocations return pointers from the free list, and deallocations
-/// return pointers to the free list.
+/// The pool allocates chunks of memory and splits them into blocks managed by
+/// free lists. Each distinct requested block size gets its own chunks and free
+/// list. Allocations return pointers from the free list for the requested size,
+/// and deallocations return pointers to the free list of the chunk they came
+/// from.
 class SLEIPNIR_DLLEXPORT PoolResource {
  public:
   /// Constructs a default PoolResource.
@@ -43,21 +46,36 @@ class SLEIPNIR_DLLEXPORT PoolResource {
   /// Returns a block of memory from the pool.
   ///
   /// @param bytes Number of bytes in the block.
-  /// @param alignment Alignment of the block (unused).
+  /// @param alignment Alignment of the block. Must be a power of two no larger
+  ///     than alignof(std::max_align_t).
   /// @return A block of memory from the pool.
   [[nodiscard]]
-  void* allocate(size_t bytes, [[maybe_unused]] size_t alignment =
-                                   alignof(std::max_align_t)) {
-    if (m_free_list.empty()) {
-      add_chunk(bytes);
+  void* allocate(size_t bytes, size_t alignment = alignof(std::max_align_t)) {
+    // Round up to a multiple of the alignment so consecutive blocks in a chunk
+    // stay aligned. `alignment` is a power of two, so `alignment - 1` is a mask
+    // of the bits below it.
+    //
+    // 1. Add `alignment - 1` so the round-down in step 4 becomes a round-up
+    // 2. Create mask `alignment - 1` with every bit below the alignment set
+    // 3. Invert mask via `~(alignment - 1)` so only higher bits are set
+    // 4. Bitwise AND to zero out lower bits, rounding down to a multiple of the
+    //    alignment
+    size_t block_size = (bytes + alignment - 1) & ~(alignment - 1);
+
+    auto& pool = get_pool(block_size);
+    if (pool.free_list.empty()) {
+      add_chunk(pool);
     }
 
-    auto ptr = m_free_list.back();
-    m_free_list.pop_back();
+    auto ptr = pool.free_list.back();
+    pool.free_list.pop_back();
     return ptr;
   }
 
   /// Gives a block of memory back to the pool.
+  ///
+  /// The block is returned to the free list of the chunk it was allocated from,
+  /// so the size and alignment don't need to match the original allocation.
   ///
   /// @param p A pointer to the block of memory.
   /// @param bytes Number of bytes in the block (unused).
@@ -65,7 +83,13 @@ class SLEIPNIR_DLLEXPORT PoolResource {
   void deallocate(
       void* p, [[maybe_unused]] size_t bytes,
       [[maybe_unused]] size_t alignment = alignof(std::max_align_t)) {
-    m_free_list.emplace_back(p);
+    // Find the last chunk that starts at or before p
+    auto chunk = std::upper_bound(
+        m_chunks.begin(), m_chunks.end(), static_cast<std::byte*>(p),
+        [](const std::byte* ptr, const Chunk& c) { return ptr < c.begin; });
+    --chunk;
+
+    m_pools[chunk->pool_index].free_list.emplace_back(p);
   }
 
   /// Returns true if this pool resource has the same backing storage as
@@ -82,22 +106,71 @@ class SLEIPNIR_DLLEXPORT PoolResource {
   ///
   /// @return The number of blocks from this pool resource that are in use.
   size_t blocks_in_use() const noexcept {
-    return m_buffer.size() * blocks_per_chunk - m_free_list.size();
+    size_t free_blocks = 0;
+    for (const auto& pool : m_pools) {
+      free_blocks += pool.free_list.size();
+    }
+    return m_chunks.size() * blocks_per_chunk - free_blocks;
   }
 
  private:
+  /// Free list for blocks of one size.
+  struct Pool {
+    /// Number of bytes per block.
+    size_t block_size;
+
+    /// Pointers to free blocks.
+    gch::small_vector<void*> free_list;
+  };
+
+  /// Chunk of memory owned by a pool.
+  struct Chunk {
+    /// Start of the chunk's memory.
+    std::byte* begin;
+
+    /// Index of the pool whose blocks were carved from this chunk.
+    size_t pool_index;
+  };
+
   gch::small_vector<std::unique_ptr<std::byte[]>> m_buffer;
-  gch::small_vector<void*> m_free_list;
+
+  /// Chunks sorted by start address.
+  gch::small_vector<Chunk> m_chunks;
+
+  gch::small_vector<Pool> m_pools;
   size_t blocks_per_chunk;
 
-  /// Adds a memory chunk to the pool, partitions it into blocks with the given
-  /// number of bytes, and appends pointers to them to the free list.
+  /// Returns the pool for the given block size, creating it if necessary.
   ///
-  /// @param bytes_per_block Number of bytes in the block.
-  void add_chunk(size_t bytes_per_block) {
-    m_buffer.emplace_back(new std::byte[bytes_per_block * blocks_per_chunk]);
+  /// @param block_size Number of bytes per block.
+  /// @return The pool for the given block size.
+  Pool& get_pool(size_t block_size) {
+    for (auto& pool : m_pools) {
+      if (pool.block_size == block_size) {
+        return pool;
+      }
+    }
+
+    return m_pools.emplace_back(Pool{block_size, {}});
+  }
+
+  /// Adds a memory chunk to the given pool, partitions it into blocks with the
+  /// pool's block size, and appends pointers to them to the pool's free list.
+  ///
+  /// @param pool The pool.
+  void add_chunk(Pool& pool) {
+    auto begin =
+        m_buffer.emplace_back(new std::byte[pool.block_size * blocks_per_chunk])
+            .get();
+
+    size_t pool_index = &pool - m_pools.data();
+    auto pos = std::upper_bound(
+        m_chunks.begin(), m_chunks.end(), begin,
+        [](const std::byte* ptr, const Chunk& c) { return ptr < c.begin; });
+    m_chunks.insert(pos, Chunk{begin, pool_index});
+
     for (int i = blocks_per_chunk - 1; i >= 0; --i) {
-      m_free_list.emplace_back(m_buffer.back().get() + bytes_per_block * i);
+      pool.free_list.emplace_back(begin + pool.block_size * i);
     }
   }
 };
@@ -130,7 +203,7 @@ class PoolAllocator {
   /// @return A block of memory from the pool.
   [[nodiscard]]
   constexpr T* allocate(size_t n) {
-    return static_cast<T*>(m_memory_resource->allocate(n));
+    return static_cast<T*>(m_memory_resource->allocate(n, alignof(T)));
   }
 
   /// Gives a block of memory back to the pool.
@@ -138,7 +211,7 @@ class PoolAllocator {
   /// @param p A pointer to the block of memory.
   /// @param n Number of bytes in the block.
   constexpr void deallocate(T* p, size_t n) {
-    m_memory_resource->deallocate(p, n);
+    m_memory_resource->deallocate(p, n, alignof(T));
   }
 
  private:
