@@ -276,6 +276,32 @@ TEMPLATE_TEST_CASE("Expression - Prune hypot()", "[Expression]",
   CHECK(slp::detail::hypot(one, one)->is_constant(T(std::numbers::sqrt2)));
 }
 
+TEMPLATE_TEST_CASE("Expression - Prune is_nonnegative()", "[Expression]",
+                   SCALAR_TYPES_UNDER_TEST) {
+  using T = TestType;
+
+  auto negative_one = constant_ptr(T(-1));
+  auto zero = constant_ptr(T(0));
+  auto one = constant_ptr(T(1));
+
+  CHECK(slp::detail::is_nonnegative(negative_one)->is_constant(T(0)));
+  CHECK(slp::detail::is_nonnegative(zero)->is_constant(T(1)));
+  CHECK(slp::detail::is_nonnegative(one)->is_constant(T(1)));
+}
+
+TEMPLATE_TEST_CASE("Expression - Prune is_positive()", "[Expression]",
+                   SCALAR_TYPES_UNDER_TEST) {
+  using T = TestType;
+
+  auto negative_one = constant_ptr(T(-1));
+  auto zero = constant_ptr(T(0));
+  auto one = constant_ptr(T(1));
+
+  CHECK(slp::detail::is_positive(negative_one)->is_constant(T(0)));
+  CHECK(slp::detail::is_positive(zero)->is_constant(T(0)));
+  CHECK(slp::detail::is_positive(one)->is_constant(T(1)));
+}
+
 TEMPLATE_TEST_CASE("Expression - Prune log()", "[Expression]",
                    SCALAR_TYPES_UNDER_TEST) {
   using T = TestType;
@@ -298,6 +324,36 @@ TEMPLATE_TEST_CASE("Expression - Prune log10()", "[Expression]",
 
   CHECK(slp::detail::log10(zero)->is_constant(T(0)));
   CHECK(slp::detail::log10(one)->is_constant(log10(T(1))));
+}
+
+TEMPLATE_TEST_CASE("Expression - Prune max()", "[Expression]",
+                   SCALAR_TYPES_UNDER_TEST) {
+  using T = TestType;
+
+  auto negative_one = constant_ptr(T(-1));
+  auto zero = constant_ptr(T(0));
+  auto one = constant_ptr(T(1));
+
+  CHECK(slp::detail::max(negative_one, zero)->is_constant(T(0)));
+  CHECK(slp::detail::max(zero, negative_one)->is_constant(T(0)));
+  CHECK(slp::detail::max(zero, zero)->is_constant(T(0)));
+  CHECK(slp::detail::max(zero, one)->is_constant(T(1)));
+  CHECK(slp::detail::max(one, zero)->is_constant(T(1)));
+}
+
+TEMPLATE_TEST_CASE("Expression - Prune min()", "[Expression]",
+                   SCALAR_TYPES_UNDER_TEST) {
+  using T = TestType;
+
+  auto negative_one = constant_ptr(T(-1));
+  auto zero = constant_ptr(T(0));
+  auto one = constant_ptr(T(1));
+
+  CHECK(slp::detail::min(negative_one, zero)->is_constant(T(-1)));
+  CHECK(slp::detail::min(zero, negative_one)->is_constant(T(-1)));
+  CHECK(slp::detail::min(zero, zero)->is_constant(T(0)));
+  CHECK(slp::detail::min(zero, one)->is_constant(T(0)));
+  CHECK(slp::detail::min(one, zero)->is_constant(T(0)));
 }
 
 TEMPLATE_TEST_CASE("Expression - Prune pow()", "[Expression]",
