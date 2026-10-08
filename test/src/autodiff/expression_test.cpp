@@ -266,7 +266,8 @@ TEMPLATE_TEST_CASE("Expression - Prune hypot()", "[Expression]",
   auto zero = constant_ptr(T(0));
   auto one = constant_ptr(T(1));
 
-  CHECK(slp::detail::hypot(zero, zero)->is_constant(T(0)));
+  // hypot(x, y)
+  CHECK(slp::detail::hypot(zero, zero) == zero);
   CHECK(slp::detail::hypot(zero, one)->is_constant(T(1)));
   CHECK(slp::detail::hypot(one, zero)->is_constant(T(1)));
   CHECK(
@@ -274,6 +275,20 @@ TEMPLATE_TEST_CASE("Expression - Prune hypot()", "[Expression]",
   CHECK(
       slp::detail::hypot(negative_one, zero)->is_constant(hypot(T(-1), T(0))));
   CHECK(slp::detail::hypot(one, one)->is_constant(T(std::numbers::sqrt2)));
+
+  // hypot(x, y, z)
+  CHECK(slp::detail::hypot(zero, zero, zero) == zero);
+  CHECK(slp::detail::hypot(zero, zero, one)->is_constant(T(1)));
+  CHECK(slp::detail::hypot(zero, one, zero)->is_constant(T(1)));
+  CHECK(slp::detail::hypot(one, zero, zero)->is_constant(T(1)));
+  CHECK(
+      slp::detail::hypot(zero, one, one)->is_constant(T(std::numbers::sqrt2)));
+  CHECK(
+      slp::detail::hypot(one, zero, one)->is_constant(T(std::numbers::sqrt2)));
+  CHECK(
+      slp::detail::hypot(one, one, zero)->is_constant(T(std::numbers::sqrt2)));
+  CHECK(
+      slp::detail::hypot(one, one, one)->is_constant(hypot(T(1), T(1), T(1))));
 }
 
 TEMPLATE_TEST_CASE("Expression - Prune is_nonnegative()", "[Expression]",
