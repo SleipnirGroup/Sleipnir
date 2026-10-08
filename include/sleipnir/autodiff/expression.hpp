@@ -1396,11 +1396,11 @@ template <typename Scalar>
 ExpressionPtr<Scalar> hypot(const ExpressionPtr<Scalar>& x,
                             const ExpressionPtr<Scalar>& y);
 
-/// Derived expression type for hypot().
+/// Derived expression type for hypot() with two arguments.
 ///
 /// @tparam Scalar Scalar type.
 template <typename Scalar>
-struct HypotExpression final : Expression<Scalar> {
+struct Hypot2Expression final : Expression<Scalar> {
   /// Binary operator's left operand.
   ExpressionPtr<Scalar> x;
 
@@ -1411,7 +1411,7 @@ struct HypotExpression final : Expression<Scalar> {
   ///
   /// @param x Binary operator's left operand.
   /// @param y Binary operator's right operand.
-  constexpr HypotExpression(ExpressionPtr<Scalar> x, ExpressionPtr<Scalar> y)
+  constexpr Hypot2Expression(ExpressionPtr<Scalar> x, ExpressionPtr<Scalar> y)
       : x{std::move(x)}, y{std::move(y)} {}
 
   void visit_args(
@@ -1430,32 +1430,16 @@ struct HypotExpression final : Expression<Scalar> {
   std::string_view name() const override { return "hypot"; }
 
   void accumulate_adjoints() const override {
-    x->adj += grad_l();
-    y->adj += grad_r();
+    using std::hypot;
+    Scalar norm = hypot(x->val, y->val);
+    x->adj += this->adj * x->val / norm;
+    y->adj += this->adj * y->val / norm;
   }
 
   void accumulate_adjoints_expr() const override {
-    x->adj_expr += grad_expr_l();
-    y->adj_expr += grad_expr_r();
-  }
-
- private:
-  Scalar grad_l() const {
-    using std::hypot;
-    return this->adj * x->val / hypot(x->val, y->val);
-  }
-
-  Scalar grad_r() const {
-    using std::hypot;
-    return this->adj * y->val / hypot(x->val, y->val);
-  }
-
-  ExpressionPtr<Scalar> grad_expr_l() const {
-    return this->adj_expr * x / hypot(x, y);
-  }
-
-  ExpressionPtr<Scalar> grad_expr_r() const {
-    return this->adj_expr * y / hypot(x, y);
+    auto norm = hypot(x, y);
+    x->adj_expr += this->adj_expr * x / norm;
+    y->adj_expr += this->adj_expr * y / norm;
   }
 };
 
@@ -1482,7 +1466,97 @@ ExpressionPtr<Scalar> hypot(const ExpressionPtr<Scalar>& x,
     return constant_ptr(hypot(x->val, y->val));
   }
 
-  return make_expression_ptr<HypotExpression<Scalar>>(x, y);
+  return make_expression_ptr<Hypot2Expression<Scalar>>(x, y);
+}
+
+template <typename Scalar>
+ExpressionPtr<Scalar> hypot(const ExpressionPtr<Scalar>& x,
+                            const ExpressionPtr<Scalar>& y,
+                            const ExpressionPtr<Scalar>& z);
+
+/// Derived expression type for hypot() with three arguments.
+///
+/// @tparam Scalar Scalar type.
+template <typename Scalar>
+struct Hypot3Expression final : Expression<Scalar> {
+  /// Ternary operator's first operand.
+  ExpressionPtr<Scalar> x;
+
+  /// Ternary operator's second operand.
+  ExpressionPtr<Scalar> y;
+
+  /// Ternary operator's third operand.
+  ExpressionPtr<Scalar> z;
+
+  /// Constructs a ternary expression (an operator with three arguments).
+  ///
+  /// @param x Ternary operator's first operand.
+  /// @param y Ternary operator's second operand.
+  /// @param z Ternary operator's third operand.
+  constexpr Hypot3Expression(ExpressionPtr<Scalar> x, ExpressionPtr<Scalar> y,
+                             ExpressionPtr<Scalar> z)
+      : x{std::move(x)}, y{std::move(y)}, z{std::move(z)} {}
+
+  void visit_args(
+      function_ref<void(Expression<Scalar>* arg)> func) const override {
+    func(x.get());
+    func(y.get());
+    func(z.get());
+  }
+
+  Scalar value() const override {
+    using std::hypot;
+    return hypot(x->val, y->val, z->val);
+  }
+
+  ExpressionType type() const override { return ExpressionType::NONLINEAR; }
+
+  std::string_view name() const override { return "hypot"; }
+
+  void accumulate_adjoints() const override {
+    using std::hypot;
+    Scalar norm = hypot(x->val, y->val, z->val);
+    x->adj += this->adj * x->val / norm;
+    y->adj += this->adj * y->val / norm;
+    z->adj += this->adj * z->val / norm;
+  }
+
+  void accumulate_adjoints_expr() const override {
+    auto norm = hypot(x, y, z);
+    x->adj_expr += this->adj_expr * x / norm;
+    y->adj_expr += this->adj_expr * y / norm;
+    z->adj_expr += this->adj_expr * z / norm;
+  }
+};
+
+/// hypot() for Expressions.
+///
+/// @tparam Scalar Scalar type.
+/// @param x The x argument.
+/// @param y The y argument.
+/// @param z The z argument.
+template <typename Scalar>
+ExpressionPtr<Scalar> hypot(const ExpressionPtr<Scalar>& x,
+                            const ExpressionPtr<Scalar>& y,
+                            const ExpressionPtr<Scalar>& z) {
+  using enum ExpressionType;
+  using std::hypot;
+
+  // Prune expression
+  if (x->is_constant(Scalar(0))) {
+    return hypot(y, z);
+  } else if (y->is_constant(Scalar(0))) {
+    return hypot(x, z);
+  } else if (z->is_constant(Scalar(0))) {
+    return hypot(x, y);
+  }
+
+  // Evaluate constant
+  if (x->type() == CONSTANT && y->type() == CONSTANT && z->type() == CONSTANT) {
+    return constant_ptr(hypot(x->val, y->val, z->val));
+  }
+
+  return make_expression_ptr<Hypot3Expression<Scalar>>(x, y, z);
 }
 
 /// Derived expression type for is_nonnegative().
