@@ -124,9 +124,7 @@ class Variable : public SleipnirBase {
   /// @param value The value of the Variable.
   void set_value(Scalar value) {
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-    // We only need to check the first argument since unary and binary operators
-    // both use it
-    if (expr->args[0] != nullptr) {
+    if (!expr->is_leaf) {
       auto location = std::source_location::current();
       slp::println(
           stderr,
