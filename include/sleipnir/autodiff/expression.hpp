@@ -31,11 +31,6 @@ inline constexpr bool USE_POOL_ALLOCATOR = true;
 template <typename Scalar>
 struct Expression;
 
-template <typename Scalar>
-constexpr void inc_ref_count(Expression<Scalar>* expr);
-template <typename Scalar>
-constexpr void dec_ref_count(Expression<Scalar>* expr);
-
 /// Typedef for intrusive shared pointer to Expression.
 ///
 /// @tparam Scalar Scalar type.
@@ -62,9 +57,6 @@ struct BinaryMinusExpression;
 
 template <typename Scalar, ExpressionType T>
 struct BinaryPlusExpression;
-
-template <typename Scalar>
-struct ConstantExpression;
 
 template <typename Scalar, ExpressionType T>
 struct DivExpression;
@@ -377,24 +369,6 @@ struct Expression {
   virtual void accumulate_adjoints_expr() const {}
 };
 
-template <typename Scalar>
-ExpressionPtr<Scalar> constant_ptr(Scalar value) {
-  return make_expression_ptr<ConstantExpression<Scalar>>(value);
-}
-
-template <typename Scalar>
-ExpressionPtr<Scalar> cbrt(const ExpressionPtr<Scalar>& x);
-template <typename Scalar>
-ExpressionPtr<Scalar> exp(const ExpressionPtr<Scalar>& x);
-template <typename Scalar>
-ExpressionPtr<Scalar> sign(const ExpressionPtr<Scalar>& x);
-template <typename Scalar>
-ExpressionPtr<Scalar> sin(const ExpressionPtr<Scalar>& x);
-template <typename Scalar>
-ExpressionPtr<Scalar> sinh(const ExpressionPtr<Scalar>& x);
-template <typename Scalar>
-ExpressionPtr<Scalar> sqrt(const ExpressionPtr<Scalar>& x);
-
 /// Derived expression type for binary minus operator.
 ///
 /// @tparam Scalar Scalar type.
@@ -588,6 +562,11 @@ struct ConstantExpression final : Expression<Scalar> {
 
   std::string_view name() const override { return "constant"; }
 };
+
+template <typename Scalar>
+ExpressionPtr<Scalar> constant_ptr(Scalar value) {
+  return make_expression_ptr<ConstantExpression<Scalar>>(value);
+}
 
 /// Derived expression type for decision variable.
 ///
