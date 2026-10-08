@@ -313,6 +313,11 @@ class Variable : public SleipnirBase {
   friend Variable<Scalar> hypot(const Variable<Scalar>& x,
                                 const Variable<Scalar>& y);
   template <typename Scalar>
+  friend Variable<Scalar> if_else(
+      std::type_identity_t<bool (*)(Scalar a, Scalar b)> cond,
+      const Variable<Scalar>& a, const Variable<Scalar>& b,
+      const Variable<Scalar>& t, const Variable<Scalar>& f);
+  template <typename Scalar>
   friend Variable<Scalar> log(const Variable<Scalar>& x);
   template <typename Scalar>
   friend Variable<Scalar> log10(const Variable<Scalar>& x);
@@ -520,6 +525,26 @@ Variable<Scalar> hypot(const Variable<Scalar>& x, const ScalarLike auto& y) {
 template <typename Scalar>
 Variable<Scalar> hypot(const Variable<Scalar>& x, const Variable<Scalar>& y) {
   return Variable{detail::hypot(x.expr, y.expr)};
+}
+
+/// if_else() for Variables.
+///
+/// Returns t if cond(a, b) is true, otherwise f. The condition is evaluated on
+/// the values of a and b each time the result is evaluated, and the gradient
+/// only flows through the selected branch.
+///
+/// @tparam Scalar Scalar type.
+/// @param cond Condition evaluated on a and b.
+/// @param a The condition's first argument.
+/// @param b The condition's second argument.
+/// @param t Value selected when cond(a, b) is true.
+/// @param f Value selected when cond(a, b) is false.
+template <typename Scalar>
+Variable<Scalar> if_else(
+    std::type_identity_t<bool (*)(Scalar a, Scalar b)> cond,
+    const Variable<Scalar>& a, const Variable<Scalar>& b,
+    const Variable<Scalar>& t, const Variable<Scalar>& f) {
+  return Variable{detail::if_else(cond, a.expr, b.expr, t.expr, f.expr)};
 }
 
 /// log() for Variables.

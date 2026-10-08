@@ -291,30 +291,30 @@ TEMPLATE_TEST_CASE("Expression - Prune hypot()", "[Expression]",
       slp::detail::hypot(one, one, one)->is_constant(hypot(T(1), T(1), T(1))));
 }
 
-TEMPLATE_TEST_CASE("Expression - Prune is_nonnegative()", "[Expression]",
+TEMPLATE_TEST_CASE("Expression - Prune if_else()", "[Expression]",
                    SCALAR_TYPES_UNDER_TEST) {
   using T = TestType;
 
-  auto negative_one = constant_ptr(T(-1));
   auto zero = constant_ptr(T(0));
   auto one = constant_ptr(T(1));
+  auto x = make_expression_ptr<DecisionVariableExpression<T>>(T(1));
+  auto y = make_expression_ptr<DecisionVariableExpression<T>>(T(2));
+  auto lt = +[](T a, T b) { return a < b; };
 
-  CHECK(slp::detail::is_nonnegative(negative_one)->is_constant(T(0)));
-  CHECK(slp::detail::is_nonnegative(zero)->is_constant(T(1)));
-  CHECK(slp::detail::is_nonnegative(one)->is_constant(T(1)));
-}
+  // Identical branches
+  CHECK(slp::detail::if_else(lt, x, y, x, x) == x);
 
-TEMPLATE_TEST_CASE("Expression - Prune is_positive()", "[Expression]",
-                   SCALAR_TYPES_UNDER_TEST) {
-  using T = TestType;
+  // Equal constant branches
+  auto other_one = constant_ptr(T(1));
+  CHECK(slp::detail::if_else(lt, x, y, one, other_one) == one);
 
-  auto negative_one = constant_ptr(T(-1));
-  auto zero = constant_ptr(T(0));
-  auto one = constant_ptr(T(1));
+  // Constant condition
+  CHECK(slp::detail::if_else(lt, zero, one, x, y) == x);
+  CHECK(slp::detail::if_else(lt, one, zero, x, y) == y);
 
-  CHECK(slp::detail::is_positive(negative_one)->is_constant(T(0)));
-  CHECK(slp::detail::is_positive(zero)->is_constant(T(0)));
-  CHECK(slp::detail::is_positive(one)->is_constant(T(1)));
+  // Non-constant condition
+  CHECK(slp::detail::if_else(lt, x, one, x, y)->name() == "if-else");
+  CHECK(slp::detail::if_else(lt, zero, y, x, y)->name() == "if-else");
 }
 
 TEMPLATE_TEST_CASE("Expression - Prune log()", "[Expression]",

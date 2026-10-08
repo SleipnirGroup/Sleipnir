@@ -2811,6 +2811,25 @@ Template Args:
 
 )doc";
 
+static const char *mkd_doc_slp_if_else =
+R"doc(if_else() for Variables.
+
+Returns t if cond(a, b) is true, otherwise f. The condition is
+evaluated on the values of a and b each time the result is evaluated,
+and the gradient only flows through the selected branch.
+
+Args:
+    cond: Condition evaluated on a and b.
+    a: The condition's first argument.
+    b: The condition's second argument.
+    t: Value selected when cond(a, b) is true.
+    f: Value selected when cond(a, b) is false.
+
+Template Args:
+    Scalar: Scalar type.
+
+)doc";
+
 static const char *mkd_doc_slp_log =
 R"doc(log() for Variables.
 
