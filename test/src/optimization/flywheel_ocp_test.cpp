@@ -24,15 +24,8 @@
 
 #include "catch_matchers.hpp"
 #include "catch_string_converters.hpp"
+#include "near.hpp"
 #include "scalar_types_under_test.hpp"
-
-namespace {
-template <typename T>
-bool near(T expected, T actual, T tolerance) {
-  using std::abs;
-  return abs(expected - actual) < tolerance;
-}
-}  // namespace
 
 template <typename T>
 void flywheel_test(
