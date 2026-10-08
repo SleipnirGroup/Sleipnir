@@ -43,6 +43,7 @@ struct MatrixWithinAbs : Catch::Matchers::MatcherGenericBase {
                                Eigen::SparseCompressedBase<OtherDerived>>
   bool match(const OtherDerived& matchee) const {
     using std::abs;
+    using std::isnan;
 
     if (target.rows() != matchee.rows() || target.cols() != matchee.cols()) {
       return false;
@@ -50,7 +51,8 @@ struct MatrixWithinAbs : Catch::Matchers::MatcherGenericBase {
 
     for (Eigen::Index row = 0; row < target.rows(); ++row) {
       for (Eigen::Index col = 0; col < target.cols(); ++col) {
-        if (abs(target.coeff(row, col) - matchee.coeff(row, col)) > margin) {
+        auto error = abs(target.coeff(row, col) - matchee.coeff(row, col));
+        if (isnan(error) || error > margin) {
           return false;
         }
       }
