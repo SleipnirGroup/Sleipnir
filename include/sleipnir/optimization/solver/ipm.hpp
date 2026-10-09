@@ -735,7 +735,8 @@ ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
                                        μ * s.cwiseInverse().dot(trial_s - s);
         return trial_entry.constraint_violation <
                    Scalar(0.9) * initial_entry.constraint_violation &&
-               filter.try_add(initial_entry, trial_entry, D_ϕ_restoration, α);
+               filter.try_add(initial_entry, trial_entry, D_ϕ_restoration,
+                              Scalar(1));
       });
       auto status =
           feasibility_restoration<Scalar>(matrices, callbacks, options,
