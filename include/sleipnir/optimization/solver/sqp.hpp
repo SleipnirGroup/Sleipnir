@@ -523,7 +523,8 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
         // is accepted by the normal filter, stop feasibility restoration
         return trial_entry.constraint_violation <
                    Scalar(0.9) * initial_entry.constraint_violation &&
-               filter.try_add(initial_entry, trial_entry, D_ϕ_restoration, α);
+               filter.try_add(initial_entry, trial_entry, D_ϕ_restoration,
+                              Scalar(1));
       });
       auto status = feasibility_restoration<Scalar>(matrices, callbacks,
                                                     options, x, y, iterations);
