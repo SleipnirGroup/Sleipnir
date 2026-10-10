@@ -2,12 +2,9 @@ import math
 
 import numpy as np
 import pytest
+from near import near
 from sleipnir.autodiff import ExpressionType
 from sleipnir.optimization import ExitStatus, Problem, bounds
-
-
-def near(expected, actual, tolerance):
-    return abs(expected - actual) < tolerance
 
 
 def test_flywheel_problem():

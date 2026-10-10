@@ -3,6 +3,7 @@ from collections.abc import Callable
 
 import numpy as np
 import pytest
+from near import near
 from sleipnir.autodiff import ExpressionType, VariableMatrix
 from sleipnir.optimization import (
     OCP,
@@ -11,10 +12,6 @@ from sleipnir.optimization import (
     TimestepMethod,
     TranscriptionMethod,
 )
-
-
-def near(expected, actual, tolerance):
-    return abs(expected - actual) < tolerance
 
 
 def flywheel_test(
