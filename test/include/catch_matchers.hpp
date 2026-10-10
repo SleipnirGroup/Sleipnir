@@ -7,6 +7,7 @@
 #include <format>
 #include <sstream>
 #include <string>
+#include <utility>
 
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
@@ -30,18 +31,28 @@ struct WithinAbs : Catch::Matchers::MatcherGenericBase {
   T margin;
 };
 
-template <typename Derived>
-  requires std::derived_from<Derived, Eigen::DenseBase<Derived>> ||
-           std::derived_from<Derived, Eigen::SparseCompressedBase<Derived>>
-struct MatrixWithinAbs : Catch::Matchers::MatcherGenericBase {
-  MatrixWithinAbs(const Derived& target, typename Derived::Scalar margin)
-      : target{target}, margin{margin} {}
+/// Any Eigen::Matrix (i.e., not an expression template).
+template <typename T>
+concept DenseMatrix = std::same_as<
+    T, Eigen::Matrix<typename T::Scalar, T::RowsAtCompileTime,
+                     T::ColsAtCompileTime, T::Options, T::MaxRowsAtCompileTime,
+                     T::MaxColsAtCompileTime>>;
 
-  template <typename OtherDerived>
-    requires std::derived_from<OtherDerived, Eigen::DenseBase<OtherDerived>> ||
-             std::derived_from<OtherDerived,
-                               Eigen::SparseCompressedBase<OtherDerived>>
-  bool match(const OtherDerived& matchee) const {
+/// Any Eigen::SparseMatrix (i.e., not an expression template).
+template <typename T>
+concept SparseMatrix =
+    std::same_as<T, Eigen::SparseMatrix<typename T::Scalar, T::Options,
+                                        typename T::StorageIndex>>;
+
+template <typename Matrix>
+  requires DenseMatrix<Matrix> || SparseMatrix<Matrix>
+struct MatrixWithinAbs : Catch::Matchers::MatcherGenericBase {
+  using Scalar = typename Matrix::Scalar;
+
+  MatrixWithinAbs(Matrix target, Scalar margin)
+      : target{std::move(target)}, margin{margin} {}
+
+  bool match(const Matrix& matchee) const {
     using std::abs;
     using std::isnan;
 
@@ -49,11 +60,22 @@ struct MatrixWithinAbs : Catch::Matchers::MatcherGenericBase {
       return false;
     }
 
-    for (Eigen::Index row = 0; row < target.rows(); ++row) {
-      for (Eigen::Index col = 0; col < target.cols(); ++col) {
-        auto error = abs(target.coeff(row, col) - matchee.coeff(row, col));
-        if (isnan(error) || error > margin) {
-          return false;
+    Matrix error = target - matchee;
+
+    if constexpr (DenseMatrix<Matrix>) {
+      for (int row = 0; row < error.rows(); ++row) {
+        for (int col = 0; col < error.cols(); ++col) {
+          if (isnan(error(row, col)) || abs(error(row, col)) > margin) {
+            return false;
+          }
+        }
+      }
+    } else {
+      for (int col = 0; col < error.outerSize(); ++col) {
+        for (typename Matrix::InnerIterator it{error, col}; it; ++it) {
+          if (isnan(it.value()) || abs(it.value()) > margin) {
+            return false;
+          }
         }
       }
     }
@@ -61,11 +83,40 @@ struct MatrixWithinAbs : Catch::Matchers::MatcherGenericBase {
     return true;
   }
 
+  /// Prevents implicit sparse-to-dense conversion of matchee.
+  template <typename Derived>
+    requires DenseMatrix<Matrix>
+  bool match(const Eigen::SparseMatrixBase<Derived>& matchee) const = delete;
+
+  /// Prevents implicit dense-to-sparse conversion of matchee.
+  template <typename Derived>
+    requires SparseMatrix<Matrix>
+  bool match(const Eigen::DenseBase<Derived>& matchee) const = delete;
+
   std::string describe() const override {
     return (std::ostringstream{} << "\n==\n" << target).str();
   }
 
  private:
-  const Derived& target;
-  typename Derived::Scalar margin;
+  Matrix target;
+  Scalar margin;
 };
+
+/// Plain dense matrix deduces dynamic-size dense matrix specialization so
+/// matchees with mismatched sizes fail the match instead of Eigen producing a
+/// resize assertion.
+template <DenseMatrix M>
+MatrixWithinAbs(const M&, typename M::Scalar) -> MatrixWithinAbs<
+    Eigen::Matrix<typename M::Scalar, Eigen::Dynamic, Eigen::Dynamic>>;
+
+/// Dense expression template deduces dense matrix specialization.
+template <typename Derived>
+MatrixWithinAbs(const Eigen::DenseBase<Derived>&, typename Derived::Scalar)
+    -> MatrixWithinAbs<Eigen::Matrix<typename Derived::Scalar, Eigen::Dynamic,
+                                     Eigen::Dynamic>>;
+
+/// Sparse expression template deduces sparse matrix specialization.
+template <typename Derived>
+MatrixWithinAbs(const Eigen::SparseMatrixBase<Derived>&,
+                typename Derived::Scalar)
+    -> MatrixWithinAbs<Eigen::SparseMatrix<typename Derived::Scalar>>;
