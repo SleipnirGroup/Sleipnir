@@ -57,12 +57,17 @@ def test_matrix_init_assign():
     assert z.value(2, 1) == 6.0
 
     # Matrix assignment; matrix comparison
-    z.set_value(np.array([[7.0, 8.0], [9.0, 10.0], [11.0, 12.0]]))
-    assert (z.value() == np.array([[7.0, 8.0], [9.0, 10.0], [11.0, 12.0]])).all()
+    expected = np.array([[7.0, 8.0], [9.0, 10.0], [11.0, 12.0]])
+    z.set_value(expected)
+    assert (z.value() == expected).all()
 
     # Block assignment
     z[:2, :1].set_value(np.array([[1.0], [1.0]]))
     assert (z.value() == np.array([[1.0, 8.0], [1.0, 10.0], [11.0, 12.0]])).all()
+
+    # Segment assignment
+    z[:3, :1][:2, :].set_value(np.array([[2.0], [2.0]]))
+    assert (z.value() == np.array([[2.0, 8.0], [2.0, 10.0], [11.0, 12.0]])).all()
 
 
 def test_symmetric_matrix():
