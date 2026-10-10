@@ -48,27 +48,35 @@ struct Bounds {
 /// @param inequality_constraints Variables representing the left-hand side of
 ///     cᵢ(decision_variables) ≥ 0.
 /// @param A_i The Jacobian of inequality_constraints wrt decision_variables,
-///     evaluated anywhere, in *row-major* storage; in practice, since we
-///     typically store Jacobians column-major, the user of this function must
-///     perform a transpose.
+///     evaluated anywhere.
 template <typename Scalar>
-Bounds<Scalar> get_bounds(
-    std::span<Variable<Scalar>> decision_variables,
-    std::span<Variable<Scalar>> inequality_constraints,
-    const Eigen::SparseMatrix<Scalar, Eigen::RowMajor>& A_i) {
-  // TODO: A blocked, out-of-place transpose should be much faster than
-  // traversing row major on a column major matrix unless we have few linear
-  // constraints (using a heuristic to choose between this and staying column
-  // major based on the number of constraints would be an easy performance
-  // improvement.)
-
+Bounds<Scalar> get_bounds(std::span<Variable<Scalar>> decision_variables,
+                          std::span<Variable<Scalar>> inequality_constraints,
+                          const Eigen::SparseMatrix<Scalar>& A_i) {
   // NB: Casting to long is unspecified if the size of decision_variable.size()
   // is greater than the max long value, but then we wouldn't be able to fill
   // A_i correctly anyway.
   slp_assert(static_cast<Eigen::Index>(decision_variables.size()) ==
-             A_i.innerSize());
+             A_i.cols());
   slp_assert(static_cast<Eigen::Index>(inequality_constraints.size()) ==
-             A_i.outerSize());
+             A_i.rows());
+
+  // For each row of A_i, count its structural nonzeros and record the column
+  // and value of its most recently visited nonzero. If the count is 1, that's
+  // the row's only nonzero; otherwise, the recorded column and value are
+  // meaningless, but those rows aren't bound constraints, so they're never
+  // read.
+  gch::small_vector<int> row_num_nonzeros(A_i.rows(), 0);
+  gch::small_vector<int> row_nonzero_col(A_i.rows());
+  gch::small_vector<Scalar> row_nonzero_value(A_i.rows());
+  for (int col = 0; col < A_i.outerSize(); ++col) {
+    for (typename Eigen::SparseMatrix<Scalar>::InnerIterator it{A_i, col}; it;
+         ++it) {
+      ++row_num_nonzeros[it.row()];
+      row_nonzero_col[it.row()] = it.col();
+      row_nonzero_value[it.row()] = it.value();
+    }
+  }
 
   // Maps each decision variable's index to the indices of its upper and lower
   // bounds if they exist, or NO_BOUND if they do not; used only for bookkeeping
@@ -102,10 +110,7 @@ Bounds<Scalar> get_bounds(
         ExpressionType::LINEAR) {
       continue;
     }
-    const Eigen::SparseVector<Scalar>& row_A_i =
-        A_i.innerVector(constraint_index);
-    const auto non_zeros = row_A_i.nonZeros();
-    if (non_zeros != 1) {
+    if (row_num_nonzeros[constraint_index] != 1) {
       // Constraint is not a bound because either:
       //
       // 1. It's in more than one variable
@@ -122,10 +127,9 @@ Bounds<Scalar> get_bounds(
     // and a ≠ 0. The gradient of c is then aeᵢ (where eᵢ denotes the i-th basis
     // element), and c(0) = b. If c(x) ≥ 0, then since either a < 0 or a > 0, we
     // have either x ≤ -b/a or x ≥ -b/a, respectively. ∎
-    typename Eigen::SparseVector<Scalar>::InnerIterator row_iter(row_A_i);
-    const auto constraint_coefficient =
-        row_iter
-            .value();  // The nonzero value of the j-th constraint's gradient.
+    //
+    // The nonzero value of the j-th constraint's gradient.
+    const auto constraint_coefficient = row_nonzero_value[constraint_index];
 
     // The Jacobian's sparsity pattern is structural, so the single stored value
     // can be zero if the constraint's terms cancel (e.g., x − x + 1 ≥ 0). The
@@ -134,7 +138,7 @@ Bounds<Scalar> get_bounds(
       continue;
     }
 
-    const auto decision_variable_index = row_iter.index();
+    const auto decision_variable_index = row_nonzero_col[constraint_index];
     const auto decision_variable_value =
         decision_variables[decision_variable_index].value();
     Scalar constraint_constant;
