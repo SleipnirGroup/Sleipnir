@@ -96,31 +96,42 @@ TEMPLATE_TEST_CASE("OCP - Cart-pole", "[OCP]", SCALAR_TYPES_UNDER_TEST) {
   CHECK_THAT(X.value(2, 0), WithinAbs(x_initial[2], T(1e-8)));
   CHECK_THAT(X.value(3, 0), WithinAbs(x_initial[3], T(1e-8)));
 
-  // FIXME: Replay diverges
-#if 0
   // Verify solution
-  Eigen::Matrix<T, 4, 1> x{T(0), T(0), T(0), T(0)};
-  Eigen::Matrix<T, 1, 1> u{T(0)};
   for (int k = 0; k < N; ++k) {
     // Cart position constraints
-    CHECK(X[0, k] >= T(0));
-    CHECK(X[0, k] <= d_max);
+    CHECK(X.value(0, k) >= T(0));
+    CHECK(X.value(0, k) <= d_max);
 
     // Input constraints
-    CHECK(U[0, k] >= -u_max);
-    CHECK(U[0, k] <= u_max);
+    CHECK(U.value(0, k) >= -u_max);
+    CHECK(U.value(0, k) <= u_max);
 
-    // Verify state
-    CHECK_THAT(X.value(0, k), WithinAbs(x[0], T(1e-2)));
-    CHECK_THAT(X.value(1, k), WithinAbs(x[1], T(1e-2)));
-    CHECK_THAT(X.value(2, k), WithinAbs(x[2], T(1e-2)));
-    CHECK_THAT(X.value(3, k), WithinAbs(x[3], T(1e-2)));
-    INFO(std::format("  k = {}", k));
+    // Dynamics constraints
+    //
+    // Direct collocation constrains the system dynamics at the midpoint of a
+    // cubic Hermite spline through each pair of adjacent states.
+    constexpr auto f = &CartPoleUtil<T>::dynamics_scalar;
+    T h = problem.dt().value(0, k);
+    Eigen::Vector<T, 4> x_begin = X.col(k).value();
+    Eigen::Vector<T, 4> x_end = X.col(k + 1).value();
+    Eigen::Vector<T, 1> u_begin = U.col(k).value();
+    Eigen::Vector<T, 1> u_end = U.col(k + 1).value();
 
-    // Project state forward
-    x = rk4<T>(CartPoleUtil<T>::dynamics_scalar, x, u, dt);
+    Eigen::Vector<T, 4> xdot_begin = f(x_begin, u_begin);
+    Eigen::Vector<T, 4> xdot_end = f(x_end, u_end);
+    Eigen::Vector<T, 4> xdot_c = T(-3) / (T(2) * h) * (x_begin - x_end) -
+                                 T(0.25) * (xdot_begin + xdot_end);
+
+    Eigen::Vector<T, 4> x_c =
+        T(0.5) * (x_begin + x_end) + h / T(8) * (xdot_begin - xdot_end);
+    Eigen::Vector<T, 1> u_c = T(0.5) * (u_begin + u_end);
+
+    Eigen::Vector<T, 4> expected_xdot_c = f(x_c, u_c);
+    for (int row = 0; row < xdot_c.rows(); ++row) {
+      INFO(std::format("  ẋ({}) @ k = {}", row, k));
+      CHECK_THAT(xdot_c[row], WithinAbs(expected_xdot_c[row], T(1e-8)));
+    }
   }
-#endif
 
   // Verify final state
   CHECK_THAT(X.value(0, N), WithinAbs(x_final[0], T(1e-8)));
@@ -134,10 +145,12 @@ TEMPLATE_TEST_CASE("OCP - Cart-pole", "[OCP]", SCALAR_TYPES_UNDER_TEST) {
     states << "Time (s),Cart position (m),Pole angle (rad),Cart velocity (m/s),"
               "Pole angular velocity (rad/s)\n";
 
+    T time(0);
     for (int k = 0; k < N + 1; ++k) {
-      states << std::format("{},{},{},{},{}\n", T(k) * dt.count(),
-                            X.value(0, k), X.value(1, k), X.value(2, k),
-                            X.value(3, k));
+      states << std::format("{},{},{},{},{}\n", time, X.value(0, k),
+                            X.value(1, k), X.value(2, k), X.value(3, k));
+
+      time += problem.dt().value(0, k);
     }
   }
 
@@ -146,13 +159,11 @@ TEMPLATE_TEST_CASE("OCP - Cart-pole", "[OCP]", SCALAR_TYPES_UNDER_TEST) {
   if (inputs.is_open()) {
     inputs << "Time (s),Cart force (N)\n";
 
+    T time(0);
     for (int k = 0; k < N + 1; ++k) {
-      if (k < N) {
-        inputs << std::format("{},{}\n", T(k) * dt.count(),
-                              problem.U().value(0, k));
-      } else {
-        inputs << std::format("{},{}\n", T(k) * dt.count(), T(0));
-      }
+      inputs << std::format("{},{}\n", time, U.value(0, k));
+
+      time += problem.dt().value(0, k);
     }
   }
 }
