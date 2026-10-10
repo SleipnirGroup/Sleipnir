@@ -211,4 +211,47 @@ class Filter {
   }
 };
 
+/// Detects a solver stall.
+///
+/// @tparam Scalar Scalar type.
+template <typename Scalar>
+class StallDetector {
+ public:
+  /// Returns true if the solver stalled.
+  ///
+  /// @param current_entry The entry corresponding to the current iterate.
+  /// @param trial_entry The entry corresponding to the accepted trial iterate.
+  /// @param α The accepted step size.
+  /// @param min_constraint_violation The minimum constraint violation from the
+  ///     filter.
+  /// @return True if the solver stalled.
+  bool update(const FilterEntry<Scalar>& current_entry,
+              const FilterEntry<Scalar>& trial_entry, Scalar α,
+              Scalar min_constraint_violation) {
+    // If step is tiny, current iterate is infeasible, and accepted trial
+    // iterate made insufficient progress toward feasibility, increment stalled
+    // step counter
+    if (α < Scalar(1e-3) &&
+        current_entry.constraint_violation > min_constraint_violation &&
+        trial_entry.constraint_violation >
+            Scalar(0.99) * current_entry.constraint_violation) {
+      ++m_stalled_step_counter;
+
+      // If there were too many consecutive tiny steps, report a stall
+      if (++m_stalled_step_counter >= 5) {
+        m_stalled_step_counter = 0;
+        return true;
+      }
+    } else {
+      // A break in stalled steps resets the counter
+      m_stalled_step_counter = 0;
+    }
+
+    return false;
+  }
+
+ private:
+  int m_stalled_step_counter = 0;
+};
+
 }  // namespace slp

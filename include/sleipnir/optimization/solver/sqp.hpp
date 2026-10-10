@@ -236,6 +236,8 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
 
   int full_step_rejected_counter = 0;
 
+  StallDetector<Scalar> stall_detector;
+
   // Error
   Scalar E_0 = unscaled_kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(
       matrices.scaling, g, A_e, c_e, y);
@@ -498,6 +500,15 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
     }
 
     line_search_profiler.stop();
+
+    // If solver stalled, invoke feasibility restoration
+    if (!call_feasibility_restoration) {
+      FilterEntry trial_entry{trial_f, trial_c_e};
+      if (stall_detector.update(current_entry, trial_entry, α,
+                                filter.min_constraint_violation)) {
+        call_feasibility_restoration = true;
+      }
+    }
 
     if (call_feasibility_restoration) {
       ScopedProfiler feasibility_restoration_profiler{
