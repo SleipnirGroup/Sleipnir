@@ -105,9 +105,12 @@ Bounds<Scalar> get_bounds(
     const Eigen::SparseVector<Scalar>& row_A_i =
         A_i.innerVector(constraint_index);
     const auto non_zeros = row_A_i.nonZeros();
-    slp_assert(non_zeros != 0);
-    if (non_zeros > 1) {
-      // Constraint is in more than one variable and therefore not a bound.
+    if (non_zeros != 1) {
+      // Constraint is not a bound because either:
+      //
+      // 1. It's in more than one variable
+      // 2. It's in no decision variables (e.g., it only depends on variables
+      //    that aren't decision variables of this problem)
       continue;
     }
 
@@ -123,6 +126,14 @@ Bounds<Scalar> get_bounds(
     const auto constraint_coefficient =
         row_iter
             .value();  // The nonzero value of the j-th constraint's gradient.
+
+    // The Jacobian's sparsity pattern is structural, so the single stored value
+    // can be zero if the constraint's terms cancel (e.g., x − x + 1 ≥ 0). The
+    // constraint is then constant and not a bound.
+    if (constraint_coefficient == Scalar(0)) {
+      continue;
+    }
+
     const auto decision_variable_index = row_iter.index();
     const auto decision_variable_value =
         decision_variables[decision_variable_index].value();
@@ -137,19 +148,14 @@ Bounds<Scalar> get_bounds(
       constraint_constant = inequality_constraints[constraint_index].value();
     }
 
-    // Shouldn't happen since the constraint is supposed to be linear and not a
-    // constant.
-    slp_assert(constraint_coefficient != Scalar(0));
-
     using std::isfinite;
 
-    // We should always get a finite value when evaluating the constraint at
-    // x = 0 since the constraint is linear.
-    slp_assert(isfinite(constraint_constant));
-
-    // This is possible if the user has provided a starting point at which their
-    // problem is ill-defined.
-    slp_assert(isfinite(constraint_coefficient));
+    // The constraint's constant or coefficient can be nonfinite if the user
+    // wrote a constraint like x ≥ −∞ or ∞x ≥ 1. Note that this constraint will
+    // cause the solver to report a nonfinite initial guess later.
+    if (!isfinite(constraint_constant) || !isfinite(constraint_coefficient)) {
+      continue;
+    }
 
     // Update bounds; we assume constraints of the form c(x) ≥ 0.
     auto& [lower_bound, upper_bound] =
