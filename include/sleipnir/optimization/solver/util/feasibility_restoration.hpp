@@ -167,11 +167,13 @@ ExitStatus feasibility_restoration(
   DenseVector fr_x{num_vars + 2 * num_eq};
   fr_x << x, p_e_0, n_e_0;
 
-  DenseVector fr_s = DenseVector::Ones(2 * num_eq);
+  // Start the constraints pₑ, nₑ ≥ 0 with zero violation
+  DenseVector fr_s{2 * num_eq};
+  fr_s << p_e_0, n_e_0;
 
   DenseVector fr_y = DenseVector::Zero(num_eq);
 
-  // Force the duals to start with perfect complementarity with the slacks
+  // Start the duals with perfect complementarity with respect to the slacks
   DenseVector fr_z{2 * num_eq};
   fr_z << fr_μ * p_e_0.cwiseInverse(), fr_μ * n_e_0.cwiseInverse();
 
@@ -428,13 +430,18 @@ ExitStatus feasibility_restoration(
   DenseVector fr_x{num_vars + 2 * num_eq + 2 * num_ineq};
   fr_x << x, p_e_0, n_e_0, p_i_0, n_i_0;
 
+  // Use the original problem's slacks for cᵢ(x) − pᵢ + nᵢ ≥ 0 since
+  // cᵢ(x) − pᵢ + nᵢ = s by construction.
+  //
+  // Start the constraints pₑ, nₑ, pᵢ, nᵢ ≥ 0 with zero violation.
   DenseVector fr_s{s.rows() + 2 * num_eq + 2 * num_ineq};
   fr_s.segment(0, s.rows()) = s;
-  fr_s.segment(s.rows(), 2 * num_eq + 2 * num_ineq).setOnes();
+  fr_s.segment(s.rows(), 2 * num_eq + 2 * num_ineq) << p_e_0, n_e_0, p_i_0,
+      n_i_0;
 
   DenseVector fr_y = DenseVector::Zero(c_e.rows());
 
-  // Force the duals to start with perfect complementarity with the slacks
+  // Start the duals with perfect complementarity with respect to the slacks
   DenseVector fr_z{c_i.rows() + 2 * num_eq + 2 * num_ineq};
   fr_z << fr_μ * s.cwiseInverse(), fr_μ * p_e_0.cwiseInverse(),
       fr_μ * n_e_0.cwiseInverse(), fr_μ * p_i_0.cwiseInverse(),
