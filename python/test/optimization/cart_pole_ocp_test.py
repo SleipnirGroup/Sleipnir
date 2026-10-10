@@ -6,7 +6,6 @@ from cart_pole_util import (
     cart_pole_dynamics_double,
     cart_pole_dynamics_variable,
 )
-from rk4 import rk4
 from sleipnir.autodiff import ExpressionType, VariableMatrix
 from sleipnir.optimization import (
     OCP,
@@ -86,28 +85,37 @@ def test_cart_pole_ocp():
     assert X.value(2, 0) == pytest.approx(x_initial[2, 0], abs=1e-8)
     assert X.value(3, 0) == pytest.approx(x_initial[3, 0], abs=1e-8)
 
-    # FIXME: Replay diverges
-    if 0:
-        # Verify solution
-        x = np.zeros((4, 1))
-        u = np.zeros((1, 1))
-        for k in range(N):
-            # Cart position constraints
-            assert X[0, k] >= 0.0
-            assert X[0, k] <= d_max
+    # Verify solution
+    for k in range(N):
+        # Cart position constraints
+        assert X.value(0, k) >= 0.0
+        assert X.value(0, k) <= d_max
 
-            # Input constraints
-            assert U[0, k] >= -u_max
-            assert U[0, k] <= u_max
+        # Input constraints
+        assert U.value(0, k) >= -u_max
+        assert U.value(0, k) <= u_max
 
-            # Verify state
-            assert X.value(0, k) == pytest.approx(x[0, 0], abs=1e-2)
-            assert X.value(1, k) == pytest.approx(x[1, 0], abs=1e-2)
-            assert X.value(2, k) == pytest.approx(x[2, 0], abs=1e-2)
-            assert X.value(3, k) == pytest.approx(x[3, 0], abs=1e-2)
+        # Dynamics constraints
+        #
+        # Direct collocation constrains the system dynamics at the midpoint of a
+        # cubic Hermite spline through each pair of adjacent states.
+        f = cart_pole_dynamics_double
+        h = problem.dt().value(0, k)
+        x_begin = X[:, k : k + 1].value()
+        x_end = X[:, k + 1 : k + 2].value()
+        u_begin = U[:, k : k + 1].value()
+        u_end = U[:, k + 1 : k + 2].value()
 
-            # Project state forward
-            x = rk4(cart_pole_dynamics_double, x, u, dt)
+        xdot_begin = f(x_begin, u_begin)
+        xdot_end = f(x_end, u_end)
+        xdot_c = -3.0 / (2.0 * h) * (x_begin - x_end) - 0.25 * (xdot_begin + xdot_end)
+
+        x_c = 0.5 * (x_begin + x_end) + h / 8.0 * (xdot_begin - xdot_end)
+        u_c = 0.5 * (u_begin + u_end)
+
+        expected_xdot_c = f(x_c, u_c)
+        for row in range(xdot_c.shape[0]):
+            assert xdot_c[row, 0] == pytest.approx(expected_xdot_c[row, 0], abs=1e-8)
 
     # Verify final state
     assert X.value(0, N) == pytest.approx(x_final[0, 0], abs=1e-8)
@@ -121,17 +129,20 @@ def test_cart_pole_ocp():
             "Time (s),Cart position (m),Pole angle (rad),Cart velocity (m/s),Pole angular velocity (rad/s)\n"
         )
 
+        time = 0.0
         for k in range(N + 1):
             f.write(
-                f"{k * dt},{X.value(0, k)},{X.value(1, k)},{X.value(2, k)},{X.value(3, k)}\n"
+                f"{time},{X.value(0, k)},{X.value(1, k)},{X.value(2, k)},{X.value(3, k)}\n"
             )
+
+            time += problem.dt().value(0, k)
 
     # Log inputs for offline viewing
     with open("Cart-pole inputs.csv", "w") as f:
         f.write("Time (s),Cart force (N)\n")
 
+        time = 0.0
         for k in range(N + 1):
-            if k < N:
-                f.write(f"{k * dt},{U.value(0, k)}\n")
-            else:
-                f.write(f"{k * dt},0.0\n")
+            f.write(f"{time},{U.value(0, k)}\n")
+
+            time += problem.dt().value(0, k)

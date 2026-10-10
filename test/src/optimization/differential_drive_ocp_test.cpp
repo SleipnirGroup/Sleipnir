@@ -20,6 +20,7 @@
 #include "catch_matchers.hpp"
 #include "catch_string_converters.hpp"
 #include "differential_drive_util.hpp"
+#include "rk4.hpp"
 #include "scalar_types_under_test.hpp"
 
 TEMPLATE_TEST_CASE("OCP - Differential drive", "[OCP]",
@@ -76,34 +77,24 @@ TEMPLATE_TEST_CASE("OCP - Differential drive", "[OCP]",
   CHECK_THAT(X.value(3, 0), WithinAbs(x_initial[3], T(1e-8)));
   CHECK_THAT(X.value(4, 0), WithinAbs(x_initial[4], T(1e-8)));
 
-  // FIXME: Replay diverges
-#if 0
   // Verify solution
-  Eigen::Vector<T, 5> x{T(0), T(0), T(0), T(0), T(0)};
-  Eigen::Vector<T, 2> u{T(0), T(0)};
   for (int k = 0; k < N; ++k) {
-    u = U.col(k).value();
-
     // Input constraints
-    CHECK(U[0, k].value() >= -u_max[0]);
-    CHECK(U[0, k].value() <= u_max[0]);
-    CHECK(U[1, k].value() >= -u_max[1]);
-    CHECK(U[1, k].value() <= u_max[1]);
+    CHECK(U.value(0, k) >= -u_max[0]);
+    CHECK(U.value(0, k) <= u_max[0]);
+    CHECK(U.value(1, k) >= -u_max[1]);
+    CHECK(U.value(1, k) <= u_max[1]);
 
-    // Verify state
-    CHECK_THAT(X.value(0, k), WithinAbs(x[0], T(1e-8)));
-    CHECK_THAT(X.value(1, k), WithinAbs(x[1], T(1e-8)));
-    CHECK_THAT(X.value(2, k), WithinAbs(x[2], T(1e-8)));
-    CHECK_THAT(X.value(3, k), WithinAbs(x[3], T(1e-8)));
-    CHECK_THAT(X.value(4, k), WithinAbs(x[4], T(1e-8)));
-
-    INFO(std::format("  k = {}", k));
-
-    // Project state forward
-    x = rk4<T>(DifferentialDriveUtil<T>::dynamics_scalar, x, u,
-               std::chrono::duration<T>{problem.dt().value(0, k)});
+    // Dynamics constraints
+    Eigen::Vector<T, 5> expected_x_k1 = rk4<T>(
+        &DifferentialDriveUtil<T>::dynamics_scalar, X.col(k).value(),
+        U.col(k).value(), std::chrono::duration<T>{problem.dt().value(0, k)});
+    Eigen::Vector<T, 5> actual_x_k1 = X.col(k + 1).value();
+    for (int row = 0; row < actual_x_k1.rows(); ++row) {
+      INFO(std::format("  x({}) @ k = {}", row, k));
+      CHECK_THAT(actual_x_k1[row], WithinAbs(expected_x_k1[row], T(1e-8)));
+    }
   }
-#endif
 
   // Verify final state
   CHECK_THAT(X.value(0, N), WithinAbs(x_final[0], T(1e-8)));
