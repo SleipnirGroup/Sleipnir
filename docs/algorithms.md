@@ -368,7 +368,7 @@ The iterates are applied like so
 ```
   xₖ₊₁ = xₖ + αₖᵐᵃˣpₖˣ
   sₖ₊₁ = sₖ + αₖᵐᵃˣpₖˢ
-  yₖ₊₁ = yₖ + αₖᶻpₖʸ
+  yₖ₊₁ = yₖ + αₖᵐᵃˣpₖʸ
   zₖ₊₁ = zₖ + αₖᶻpₖᶻ
 ```
 
