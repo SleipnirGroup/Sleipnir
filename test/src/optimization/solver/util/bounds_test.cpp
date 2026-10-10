@@ -26,9 +26,10 @@ TEMPLATE_TEST_CASE("Bounds - Detection", "[Bounds]", SCALAR_TYPES_UNDER_TEST) {
   using T = TestType;
 
   constexpr auto inf = std::numeric_limits<T>::infinity();
+  constexpr auto nan = std::numeric_limits<T>::quiet_NaN();
 
-  slp::Variable<T> x, y, z, w, v;
-  auto decision_variables = std::to_array<slp::Variable<T>>({x, y, z, w, v});
+  slp::Variable<T> x, y, z, w, v, u;
+  std::array decision_variables{x, y, z, w, v};
 
   slp::Variable a = -z - T(1e-12);
   // We assume these imply constraints in the form c(x) ≥ 0
@@ -46,6 +47,16 @@ TEMPLATE_TEST_CASE("Bounds - Detection", "[Bounds]", SCALAR_TYPES_UNDER_TEST) {
       -v + T(8),
       -v + T(7),
       -v + T(6.5),
+      // Linear, but terms cancel, so the Jacobian stores an explicit zero
+      x - x + T(1),
+      // Linear, but not in any decision variables, so the Jacobian row is empty
+      u - T(1),
+      // Linear, but nonfinite constant or coefficient
+      x + inf,
+      x - inf,
+      x - nan,
+      inf * x - T(1),
+      nan * x - T(1),
   });
 
   constexpr auto correct_bounds = std::to_array<std::pair<T, T>>({
@@ -58,8 +69,8 @@ TEMPLATE_TEST_CASE("Bounds - Detection", "[Bounds]", SCALAR_TYPES_UNDER_TEST) {
   static_assert(correct_bounds.size() == decision_variables.size());
   const Eigen::Vector<bool, inequality_constraint_variables.size()>
       correct_bound_constraint_mask{
-          false, false, false, true, true, true, false,
-          true,  true,  true,  true, true, true,
+          false, false, false, true,  true,  true,  false, true,  true,  true,
+          true,  true,  true,  false, false, false, false, false, false, false,
       };
   constexpr auto correct_conflicting_bounds =
       std::to_array<std::pair<Eigen::Index, Eigen::Index>>({
