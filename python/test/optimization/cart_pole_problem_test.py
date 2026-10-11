@@ -15,9 +15,11 @@ def lerp(a, b, t):
     return a + t * (b - a)
 
 
-def test_cart_pole_problem():
+# dt = 0.25 s is sensitive to small solver changes, so a failure here may just
+# mean the iterates found a different basin rather than a regression.
+@pytest.mark.parametrize("dt", [0.05, 0.125, 0.25])
+def test_cart_pole_problem(dt):
     TOTAL_TIME = 5.0  # s
-    dt = 0.05  # s
     N = int(TOTAL_TIME / dt)
 
     u_max = 20.0  # N

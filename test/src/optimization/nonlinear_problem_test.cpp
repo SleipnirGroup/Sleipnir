@@ -199,3 +199,39 @@ TEMPLATE_TEST_CASE("Problem - Wachter and Biegler line search failure",
     CHECK_THAT(s2.value(), WithinAbs(T(0), T(3e-5)));
   }
 }
+
+TEMPLATE_TEST_CASE("Problem - Hock-Schittkowski 13", "[Problem]",
+                   SCALAR_TYPES_UNDER_TEST) {
+  using T = TestType;
+
+  // Problem 13 of [1] (see
+  // https://vanderbei.princeton.edu/ampl/nlmodels/cute/hs013.mod) has
+  // constraint gradients that are linearly dependent at the solution.
+  //
+  // [1] Hock, W. and Schittkowski, K. "Test Examples for Nonlinear Programming
+  //     Codes", Springer, 1981.
+
+  slp::Problem<T> problem;
+
+  auto x = problem.decision_variable();
+  auto y = problem.decision_variable();
+  x.set_value(T(-2));
+  y.set_value(T(-2));
+
+  problem.minimize(pow(x - T(2), 2) + pow(y, 2));
+
+  problem.subject_to(pow(T(1) - x, 3) >= y);
+  problem.subject_to(x >= T(0));
+  problem.subject_to(y >= T(0));
+
+  CHECK(problem.cost_function_type() == slp::ExpressionType::QUADRATIC);
+  CHECK(problem.equality_constraint_type() == slp::ExpressionType::NONE);
+  CHECK(problem.inequality_constraint_type() == slp::ExpressionType::NONLINEAR);
+
+  CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
+
+  // The solution has no finite Lagrange multipliers, so the iterates only
+  // approach it to within the square root of the tolerance
+  CHECK_THAT(x.value(), WithinAbs(T(1), T(1e-4)));
+  CHECK_THAT(y.value(), WithinAbs(T(0), T(1e-4)));
+}
