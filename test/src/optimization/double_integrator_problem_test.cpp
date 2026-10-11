@@ -93,6 +93,8 @@ TEMPLATE_TEST_CASE("Problem - Double integrator", "[Problem]",
   Eigen::Matrix<T, 2, 1> x{T(0), T(0)};
   Eigen::Matrix<T, 1, 1> u{T(0)};
   for (int k = 0; k < N; ++k) {
+    INFO(std::format("  k = {}", k));
+
     // Verify state
     CHECK_THAT(X.value(0, k), WithinAbs(x[0], T(1e-2)));
     CHECK_THAT(X.value(1, k), WithinAbs(x[1], T(1e-2)));
@@ -122,8 +124,6 @@ TEMPLATE_TEST_CASE("Problem - Double integrator", "[Problem]",
     } else {
       CHECK_THAT(U.value(0, k), WithinAbs(u[0], T(1e-4)));
     }
-
-    INFO(std::format("  k = {}", k));
 
     // Project state forward
     x = A * x + B * u;

@@ -97,6 +97,8 @@ TEMPLATE_TEST_CASE("Problem - Differential drive", "[Problem]",
   Eigen::Vector<T, 5> x{T(0), T(0), T(0), T(0), T(0)};
   Eigen::Vector<T, 2> u{T(0), T(0)};
   for (int k = 0; k < N; ++k) {
+    INFO(std::format("  k = {}", k));
+
     u = U.col(k).value();
 
     // Input constraints
@@ -111,7 +113,6 @@ TEMPLATE_TEST_CASE("Problem - Differential drive", "[Problem]",
     CHECK_THAT(X.value(2, k), WithinAbs(x[2], T(1e-8)));
     CHECK_THAT(X.value(3, k), WithinAbs(x[3], T(1e-8)));
     CHECK_THAT(X.value(4, k), WithinAbs(x[4], T(1e-8)));
-    INFO(std::format("  k = {}", k));
 
     // Project state forward
     x = rk4<T>(DifferentialDriveUtil<T>::dynamics_scalar, x, u, dt);

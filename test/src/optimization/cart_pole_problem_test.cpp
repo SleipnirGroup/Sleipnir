@@ -112,8 +112,8 @@ TEMPLATE_TEST_CASE("Problem - Cart-pole", "[Problem]",
                U.col(k).value(), dt);
     Eigen::Vector<T, Eigen::Dynamic> actual_x_k1 = X.col(k + 1).value();
     for (int row = 0; row < actual_x_k1.rows(); ++row) {
-      CHECK_THAT(actual_x_k1[row], WithinAbs(expected_x_k1[row], T(1e-8)));
       INFO(std::format("  x({} @ k = {}", row, k));
+      CHECK_THAT(actual_x_k1[row], WithinAbs(expected_x_k1[row], T(1e-8)));
     }
   }
 

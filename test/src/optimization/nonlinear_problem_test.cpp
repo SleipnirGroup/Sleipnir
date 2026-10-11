@@ -100,12 +100,9 @@ TEMPLATE_TEST_CASE("Problem - Rosenbrock with disk constraint", "[Problem]",
 
       CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
-      CHECK_THAT(x.value(), WithinAbs(T(1), T(1e-3)));
       INFO(std::format("  (x₀, y₀) = ({}, {})", x0, y0));
-      INFO(std::format("  (x, y) = ({}, {})", x.value(), y.value()));
-      CHECK_THAT(y.value(), WithinAbs(T(1), T(1e-3)));
-      INFO(std::format("  (x₀, y₀) = ({}, {})", x0, y0));
-      INFO(std::format("  (x, y) = ({}, {})", x.value(), y.value()));
+      Eigen::Vector<T, 2> sol{x.value(), y.value()};
+      CHECK_THAT(sol, WithinAbs(Eigen::Vector<T, 2>{T(1), T(1)}, T(1e-3)));
     }
   }
 }
