@@ -634,12 +634,22 @@ ExitStatus feasibility_restoration(
                   fr_x, fr_s, fr_y, fr_z, fr_μ, iterations);
 
   x = fr_x.segment(0, x.rows());
-  s = fr_s.segment(0, s.rows());
 
   if (status == ExitStatus::CALLBACK_REQUESTED_STOP) {
-    auto g = matrices.g(x);
-    auto A_e = matrices.A_e(x);
-    auto A_i = matrices.A_i(x);
+    // Re-center the slacks on the original constraints cᵢ(x) if they're
+    // sufficiently feasible, and on 1 otherwise.
+    //
+    // We can't use the slacks of cᵢ(x) − pᵢ + nᵢ ≥ 0 because feasibility
+    // restoration's barrier parameter fr_μ drives them toward 0 independently
+    // of the original problem's barrier parameter μ. Slacks much smaller than μ
+    // make Σ = S⁻¹Z and μS⁻¹e very large, which causes very large dual steps
+    // after returning.
+    const DenseVector c_i = matrices.c_i(x);
+    s = (c_i.array() >= Scalar(1e-2)).select(c_i, Scalar(1));
+
+    const SparseVector g = matrices.g(x);
+    const SparseMatrix A_e = matrices.A_e(x);
+    const SparseMatrix A_i = matrices.A_i(x);
 
     auto [y_estimate, z_estimate] =
         lagrange_multiplier_estimate(g, A_e, A_i, s, μ);
@@ -654,6 +664,9 @@ ExitStatus feasibility_restoration(
     // infeasibility anywhere else risks false positives (e.g., a
     // point-in-time test can reject iterates the solver would otherwise
     // escape). See section 3.3, p. 14 of [2].
+
+    s = fr_s.segment(0, s.rows());
+
     DenseVector c_e = matrices.c_e(x);
     if (matrices.scaling.c_e.size() > 0) {
       c_e = matrices.scaling.c_e.cwiseInverse().cwiseProduct(c_e);
@@ -688,6 +701,7 @@ ExitStatus feasibility_restoration(
 
     return ExitStatus::FEASIBILITY_RESTORATION_FAILED;
   } else {
+    s = fr_s.segment(0, s.rows());
     return ExitStatus::FEASIBILITY_RESTORATION_FAILED;
   }
 }
