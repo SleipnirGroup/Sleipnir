@@ -232,14 +232,15 @@ ExitStatus newton(
 
         trial_x = x + α_max * p_x;
 
+        trial_f = matrices.f(trial_x);
+
         Scalar next_kkt_error =
             kkt_error<Scalar, KKTErrorType::ONE_NORM>(matrices.g(trial_x));
 
         // If the step using αᵐᵃˣ reduced the KKT error, accept it anyway
         if (next_kkt_error <= Scalar(0.999) * current_kkt_error) {
-          trial_f = matrices.f(trial_x);
-
           // Accept step
+          α = α_max;
           break;
         }
 
