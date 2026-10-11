@@ -636,6 +636,8 @@ ExitStatus feasibility_restoration(
   x = fr_x.segment(0, x.rows());
 
   if (status == ExitStatus::CALLBACK_REQUESTED_STOP) {
+    const DenseVector s_old = s;
+
     // Re-center the slacks on the original constraints cᵢ(x) if they're
     // sufficiently feasible, and on 1 otherwise.
     //
@@ -647,14 +649,24 @@ ExitStatus feasibility_restoration(
     const DenseVector c_i = matrices.c_i(x);
     s = (c_i.array() >= Scalar(1e-2)).select(c_i, Scalar(1));
 
-    const SparseVector g = matrices.g(x);
-    const SparseMatrix A_e = matrices.A_e(x);
-    const SparseMatrix A_i = matrices.A_i(x);
+    // Reset the equality constraint duals since the restoration phase didn't
+    // take the cost function into account
+    y.setZero();
 
-    auto [y_estimate, z_estimate] =
-        lagrange_multiplier_estimate(g, A_e, A_i, s, μ);
-    y = y_estimate;
-    z = z_estimate;
+    // Update the inequality constraint duals with a Newton step for
+    // complementarity, taking the change in slacks during the restoration
+    // phase as the primal step.
+    //
+    //   pᶻ = μS⁻¹e − z − Σpˢ
+    //
+    // If the result isn't strictly positive or is too large, reset all of them
+    // to 1.
+    const DenseVector Σ = z.cwiseQuotient(s_old);
+    const DenseVector p_s = s - s_old;
+    z += μ * s_old.cwiseInverse() - z - Σ.cwiseProduct(p_s);
+    if ((z.array() <= Scalar(0)).any() || (z.array() > Scalar(1e3)).any()) {
+      z.setOnes();
+    }
 
     return ExitStatus::SUCCESS;
   } else if (status == ExitStatus::SUCCESS) {
