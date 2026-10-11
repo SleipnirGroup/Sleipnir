@@ -99,7 +99,7 @@ jobs:
       - name: Set up sccache
         uses: mozilla-actions/sccache-action@v0.0.11
 
-      - run: ./tools/generate-coverage.sh sleipnir_test
+      - run: ./tools/generate_coverage.py --inputs sleipnir_autodiff_test sleipnir_optimization_test sleipnir_util_test --output sleipnir_test
 
       - uses: actions/upload-artifact@v7
         with:
