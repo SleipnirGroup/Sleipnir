@@ -39,6 +39,29 @@ ScalarWithinAbsMatcher<T> WithinAbs(T target, T margin) {
   return {std::move(target), std::move(margin)};
 }
 
+/// Scalar equality matcher.
+template <typename T>
+struct ScalarEqualsMatcher : Catch::Matchers::MatcherGenericBase {
+  explicit ScalarEqualsMatcher(T target) : target{std::move(target)} {}
+
+  bool match(const T& matchee) const { return matchee == target; }
+
+  std::string describe() const override { return std::format("== {}", target); }
+
+ private:
+  T target;
+};
+
+/// Creates a scalar equality matcher.
+///
+/// Rejects types convertible to std::string (e.g., const char*) so Catch2's
+/// std::string equality matcher is chosen instead.
+template <typename T>
+  requires(!std::convertible_to<const T&, std::string>)
+ScalarEqualsMatcher<T> Equals(T target) {
+  return ScalarEqualsMatcher<T>{std::move(target)};
+}
+
 /// Any Eigen::Matrix (i.e., not an expression template).
 template <typename T>
 concept DenseMatrix = std::same_as<

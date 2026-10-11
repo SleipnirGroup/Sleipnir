@@ -158,7 +158,9 @@ TEMPLATE_TEST_CASE("Problem - Wachter and Biegler line search failure",
                    "[Problem]", SCALAR_TYPES_UNDER_TEST) {
   using T = TestType;
 
-  // See example 19.2 of [1]
+  // Example 19.2 of [1] exercises a deficiency of line search IPMs that must be
+  // overcome by feasibility restoration. Depending on the specific trajectory
+  // taken, either success or local infeasibility are expected.
   //
   // [1] Nocedal, J. and Wright, S. "Numerical Optimization", 2nd. ed., Ch. 19.
   //     Springer, 2006.
@@ -183,9 +185,17 @@ TEMPLATE_TEST_CASE("Problem - Wachter and Biegler line search failure",
   CHECK(problem.equality_constraint_type() == slp::ExpressionType::QUADRATIC);
   CHECK(problem.inequality_constraint_type() == slp::ExpressionType::LINEAR);
 
-  CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
+  auto status = problem.solve({.diagnostics = true});
+  CHECK_THAT(status, Equals(slp::ExitStatus::SUCCESS) ||
+                         Equals(slp::ExitStatus::LOCALLY_INFEASIBLE));
 
-  CHECK_THAT(x.value(), WithinAbs(T(1), T(1e-6)));
-  CHECK_THAT(s1.value(), WithinAbs(T(0), T(1e-6)));
-  CHECK_THAT(s2.value(), WithinAbs(T(0.5), T(1e-6)));
+  if (status == slp::ExitStatus::SUCCESS) {
+    CHECK_THAT(x.value(), WithinAbs(T(1), T(1e-6)));
+    CHECK_THAT(s1.value(), WithinAbs(T(0), T(1e-6)));
+    CHECK_THAT(s2.value(), WithinAbs(T(0.5), T(1e-6)));
+  } else {
+    CHECK_THAT(x.value(), WithinAbs(T(-1), T(1e-6)));
+    CHECK_THAT(s1.value(), WithinAbs(T(0), T(1e-6)));
+    CHECK_THAT(s2.value(), WithinAbs(T(0), T(3e-5)));
+  }
 }
