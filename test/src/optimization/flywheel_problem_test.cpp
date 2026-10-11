@@ -81,6 +81,8 @@ TEMPLATE_TEST_CASE("Problem - Flywheel", "[Problem]", SCALAR_TYPES_UNDER_TEST) {
   T x(0);
   T u(0);
   for (int k = 0; k < N; ++k) {
+    INFO(std::format("  k = {}", k));
+
     // Verify state
     CHECK_THAT(X.value(0, k), WithinAbs(x, T(1e-2)));
 
@@ -104,8 +106,6 @@ TEMPLATE_TEST_CASE("Problem - Flywheel", "[Problem]", SCALAR_TYPES_UNDER_TEST) {
     } else {
       CHECK_THAT(U.value(0, k), WithinAbs(u, T(1e-4)));
     }
-
-    INFO(std::format("  k = {}", k));
 
     // Project state forward
     x = A * x + B * u;

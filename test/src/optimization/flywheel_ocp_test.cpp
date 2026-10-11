@@ -81,6 +81,8 @@ void flywheel_test(
   T x(0);
   T u(0);
   for (int k = 0; k < N; ++k) {
+    INFO(std::format("  k = {}", k));
+
     // Verify state
     CHECK_THAT(problem.X().value(0, k), WithinAbs(x, T(1e-2)));
 
@@ -113,8 +115,6 @@ void flywheel_test(
         CHECK_THAT(problem.U().value(0, k), WithinAbs(u, T(2e-4)));
       }
     }
-
-    INFO(std::format("  k = {}", k));
 
     // Project state forward
     x = A_discrete * x + B_discrete * u;
