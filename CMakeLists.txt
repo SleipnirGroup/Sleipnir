@@ -206,17 +206,71 @@ if(PROJECT_IS_TOP_LEVEL AND BUILD_TESTING AND NOT CMAKE_CROSSCOMPILING)
     list(APPEND CMAKE_MODULE_PATH ${Catch2_SOURCE_DIR}/extras)
     include(Catch)
 
-    # Build Sleipnir tests
-    file(GLOB_RECURSE sleipnir_test_src test/src/*.cpp)
-    add_executable(sleipnir_test ${sleipnir_test_src})
-    compiler_flags(sleipnir_test)
+    # Build autodiff explicit instantiations shared by autodiff and
+    # optimization tests
+    file(
+        GLOB_RECURSE sleipnir_autodiff_explicit_double_src
+        test/src/autodiff/*_explicit_double.cpp
+    )
+    add_library(
+        sleipnir_autodiff_explicit_double
+        OBJECT
+        ${sleipnir_autodiff_explicit_double_src}
+    )
+    compiler_flags(sleipnir_autodiff_explicit_double)
     target_include_directories(
-        sleipnir_test
+        sleipnir_autodiff_explicit_double
         PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/test/include
     )
-    target_link_libraries(sleipnir_test PUBLIC Sleipnir Catch2::Catch2WithMain)
+    target_link_libraries(sleipnir_autodiff_explicit_double PUBLIC Sleipnir)
+
+    # Build Sleipnir autodiff tests
+    file(GLOB_RECURSE sleipnir_autodiff_test_src test/src/autodiff/*_test.cpp)
+    add_executable(sleipnir_autodiff_test ${sleipnir_autodiff_test_src})
+    compiler_flags(sleipnir_autodiff_test)
+    target_include_directories(
+        sleipnir_autodiff_test
+        PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/test/include
+    )
+    target_link_libraries(
+        sleipnir_autodiff_test
+        PUBLIC Sleipnir sleipnir_autodiff_explicit_double Catch2::Catch2WithMain
+    )
+
+    # Build Sleipnir optimization tests
+    file(
+        GLOB_RECURSE sleipnir_optimization_test_src
+        test/src/optimization/*_explicit_double.cpp
+        test/src/optimization/*_test.cpp
+    )
+    add_executable(sleipnir_optimization_test ${sleipnir_optimization_test_src})
+    compiler_flags(sleipnir_optimization_test)
+    target_include_directories(
+        sleipnir_optimization_test
+        PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/test/include
+    )
+    target_link_libraries(
+        sleipnir_optimization_test
+        PUBLIC Sleipnir sleipnir_autodiff_explicit_double Catch2::Catch2WithMain
+    )
+
+    # Build Sleipnir util tests
+    file(GLOB_RECURSE sleipnir_util_test_src test/src/util/*_test.cpp)
+    add_executable(sleipnir_util_test ${sleipnir_util_test_src})
+    compiler_flags(sleipnir_util_test)
+    target_include_directories(
+        sleipnir_util_test
+        PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/test/include
+    )
+    target_link_libraries(
+        sleipnir_util_test
+        PUBLIC Sleipnir Catch2::Catch2WithMain
+    )
+
     if(NOT CMAKE_TOOLCHAIN_FILE)
-        catch_discover_tests(sleipnir_test)
+        catch_discover_tests(sleipnir_autodiff_test)
+        catch_discover_tests(sleipnir_optimization_test)
+        catch_discover_tests(sleipnir_util_test)
     endif()
 endif()
 
