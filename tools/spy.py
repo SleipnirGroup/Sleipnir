@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+"""
+Displays sparsity pattern (.spy) files.
+"""
+
 import argparse
 import struct
 import sys
@@ -103,9 +107,7 @@ def plot_csv(filename: str) -> animation.FuncAnimation:
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Displays sparsity pattern (.spy) files."
-    )
+    parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("filename", nargs="+")
     args = parser.parse_args()
 

@@ -1,14 +1,16 @@
 #!/usr/bin/env python
 
+"""
+Updates version string in pyproject.toml.
+"""
+
 import argparse
 import re
 import subprocess
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Updates version string in pyproject.toml."
-    )
+    parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--release", action="store_true")
     args = parser.parse_args()
 

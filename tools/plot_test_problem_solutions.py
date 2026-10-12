@@ -107,7 +107,7 @@ def make_groups(files):
 def main():
     plt.rcParams.update({"figure.max_open_warning": 0})
 
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("-ymin", dest="ymin", type=float, help="Y minimum for plots")
     parser.add_argument("-ymax", dest="ymax", type=float, help="Y maximum for plots")
     parser.add_argument("regex", nargs="?")
