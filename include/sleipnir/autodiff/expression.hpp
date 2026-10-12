@@ -21,8 +21,6 @@
 
 namespace slp::detail {
 
-// The global pool allocator uses a thread-local static pool resource, which
-// isn't guaranteed to be initialized properly across DLL boundaries on Windows
 #ifdef _WIN32
 inline constexpr bool USE_POOL_ALLOCATOR = false;
 #else
