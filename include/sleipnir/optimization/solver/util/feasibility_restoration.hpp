@@ -19,7 +19,6 @@
 #include "sleipnir/optimization/solver/options.hpp"
 #include "sleipnir/optimization/solver/sqp_matrix_callbacks.hpp"
 #include "sleipnir/optimization/solver/util/append_as_triplets.hpp"
-#include "sleipnir/optimization/solver/util/lagrange_multiplier_estimate.hpp"
 #include "sleipnir/optimization/solver/util/problem_scaling.hpp"
 #include "sleipnir/util/print_diagnostics.hpp"
 
@@ -317,7 +316,9 @@ ExitStatus feasibility_restoration(
     auto g = matrices.g(x);
     auto A_e = matrices.A_e(x);
 
-    y = lagrange_multiplier_estimate(g, A_e);
+    // Reset the equality constraint duals since feasibility restoration didn't
+    // account for the cost function
+    y.setZero();
 
     return ExitStatus::SUCCESS;
   } else if (status == ExitStatus::SUCCESS) {
@@ -649,8 +650,8 @@ ExitStatus feasibility_restoration(
     const DenseVector c_i = matrices.c_i(x);
     s = (c_i.array() >= Scalar(1e-2)).select(c_i, Scalar(1));
 
-    // Reset the equality constraint duals since the restoration phase didn't
-    // take the cost function into account
+    // Reset the equality constraint duals since feasibility restoration didn't
+    // account for the cost function
     y.setZero();
 
     // Update the inequality constraint duals with a Newton step for
