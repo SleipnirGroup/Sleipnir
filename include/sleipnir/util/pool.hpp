@@ -199,19 +199,20 @@ class PoolAllocator {
 
   /// Returns a block of memory from the pool.
   ///
-  /// @param n Number of bytes in the block.
+  /// @param n Number of objects in the block.
   /// @return A block of memory from the pool.
   [[nodiscard]]
   constexpr T* allocate(size_t n) {
-    return static_cast<T*>(m_memory_resource->allocate(n, alignof(T)));
+    return static_cast<T*>(
+        m_memory_resource->allocate(n * sizeof(T), alignof(T)));
   }
 
   /// Gives a block of memory back to the pool.
   ///
   /// @param p A pointer to the block of memory.
-  /// @param n Number of bytes in the block.
+  /// @param n Number of objects in the block.
   constexpr void deallocate(T* p, size_t n) {
-    m_memory_resource->deallocate(p, n, alignof(T));
+    m_memory_resource->deallocate(p, n * sizeof(T), alignof(T));
   }
 
  private:

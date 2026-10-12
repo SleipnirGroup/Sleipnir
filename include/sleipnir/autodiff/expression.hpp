@@ -772,8 +772,7 @@ constexpr void dec_ref_count(Expression<Scalar>* expr) {
       // refcounts, which was already done above.
       if constexpr (USE_POOL_ALLOCATOR) {
         auto alloc = global_pool_allocator<Expression<Scalar>>();
-        std::allocator_traits<decltype(alloc)>::deallocate(
-            alloc, elem, sizeof(Expression<Scalar>));
+        std::allocator_traits<decltype(alloc)>::deallocate(alloc, elem, 1);
       } else {
         operator delete(elem);
       }
