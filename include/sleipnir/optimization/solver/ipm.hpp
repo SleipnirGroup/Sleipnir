@@ -777,28 +777,28 @@ ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
       y = trial_y;
       z = trial_z;
 
-      // A requirement for the convergence proof is that the primal-dual barrier
-      // term Hessian Σₖ₊₁ does not deviate arbitrarily much from the primal
-      // barrier term Hessian μSₖ₊₁⁻².
-      //
-      //   Σₖ₊₁ = μSₖ₊₁⁻²
-      //   Sₖ₊₁⁻¹Zₖ₊₁ = μSₖ₊₁⁻²
-      //   Zₖ₊₁ = μSₖ₊₁⁻¹
-      //
-      // We ensure this by resetting
-      //
-      //   zₖ₊₁ = clamp(zₖ₊₁, 1/κ_Σ μ/sₖ₊₁, κ_Σ μ/sₖ₊₁)
-      //
-      // for some fixed κ_Σ ≥ 1 after each step. See equation (16) of [2].
-      for (int row = 0; row < z.rows(); ++row) {
-        constexpr Scalar κ_Σ(1e10);
-        z[row] =
-            std::clamp(z[row], Scalar(1) / κ_Σ * μ / s[row], κ_Σ * μ / s[row]);
-      }
-
       f = trial_f;
       c_e = trial_c_e;
       c_i = trial_c_i;
+    }
+
+    // A requirement for the convergence proof is that the primal-dual barrier
+    // term Hessian Σₖ₊₁ does not deviate arbitrarily much from the primal
+    // barrier term Hessian μSₖ₊₁⁻².
+    //
+    //   Σₖ₊₁ = μSₖ₊₁⁻²
+    //   Sₖ₊₁⁻¹Zₖ₊₁ = μSₖ₊₁⁻²
+    //   Zₖ₊₁ = μSₖ₊₁⁻¹
+    //
+    // We ensure this by resetting
+    //
+    //   zₖ₊₁ = clamp(zₖ₊₁, 1/κ_Σ μ/sₖ₊₁, κ_Σ μ/sₖ₊₁)
+    //
+    // for some fixed κ_Σ ≥ 1 after each step. See equation (16) of [2].
+    for (int row = 0; row < z.rows(); ++row) {
+      constexpr Scalar κ_Σ(1e10);
+      z[row] =
+          std::clamp(z[row], Scalar(1) / κ_Σ * μ / s[row], κ_Σ * μ / s[row]);
     }
 
     // Update autodiff for Jacobians and Hessian
