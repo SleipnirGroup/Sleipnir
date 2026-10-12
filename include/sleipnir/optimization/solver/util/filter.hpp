@@ -130,15 +130,11 @@ class Filter {
         trial_entry.cost <= current_entry.cost + η_ϕ * α * D_ϕ;
 
     // Sufficient decrease condition
-    //
-    // See equation (2.13) of [3].
-    Scalar ϕ = pow(α, Scalar(1.5));
     bool sufficient_decrease =
         trial_entry.cost <=
-            current_entry.cost -
-                ϕ * γ_cost * current_entry.constraint_violation ||
+            current_entry.cost - γ_cost * current_entry.constraint_violation ||
         trial_entry.constraint_violation <=
-            (Scalar(1) - ϕ * γ_constraint) * current_entry.constraint_violation;
+            (Scalar(1) - γ_constraint) * current_entry.constraint_violation;
 
     // If constraint violation is below threshold and switching condition is
     // true, check Armijo condition for step rejection. Otherwise, check
@@ -164,8 +160,8 @@ class Filter {
     // condition are false
     if (!switching_condition || !armijo_condition) {
       add(FilterEntry{
-          current_entry.cost - ϕ * γ_cost * current_entry.constraint_violation,
-          (Scalar(1) - ϕ * γ_constraint) * current_entry.constraint_violation});
+          current_entry.cost - γ_cost * current_entry.constraint_violation,
+          (Scalar(1) - γ_constraint) * current_entry.constraint_violation});
     }
 
     return true;
