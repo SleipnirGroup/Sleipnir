@@ -238,7 +238,7 @@ class StallDetector {
       ++m_stalled_step_counter;
 
       // If there were too many consecutive tiny steps, report a stall
-      if (++m_stalled_step_counter >= 5) {
+      if (m_stalled_step_counter >= 5) {
         m_stalled_step_counter = 0;
         return true;
       }
