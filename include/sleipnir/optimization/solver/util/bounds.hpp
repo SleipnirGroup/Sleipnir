@@ -225,7 +225,7 @@ void project_onto_bounds(
     // We assume that bound infeasibility is handled elsewhere.
     slp_assert(lower <= upper);
 
-    // See appendix B.2 of [4] and section 3.6 of [2]
+    // See section 3.6 of [2]
     if (isfinite(lower) && isfinite(upper)) {
       auto p_L = std::min(κ_1 * std::max(Scalar(1), abs(lower)),
                           κ_2 * (upper - lower));
