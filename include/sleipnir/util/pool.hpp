@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include <algorithm>
 #include <cstddef>
 #include <memory>
 
@@ -24,8 +23,10 @@ class SLEIPNIR_DLLEXPORT PoolResource {
   /// Constructs a default PoolResource.
   ///
   /// @param blocks_per_chunk Number of blocks per chunk of memory.
-  explicit PoolResource(size_t blocks_per_chunk)
-      : blocks_per_chunk{blocks_per_chunk} {}
+  explicit PoolResource(size_t blocks_per_chunk);
+
+  /// Destructor.
+  ~PoolResource();
 
   /// Copy constructor.
   PoolResource(const PoolResource&) = delete;
@@ -36,12 +37,12 @@ class SLEIPNIR_DLLEXPORT PoolResource {
   PoolResource& operator=(const PoolResource&) = delete;
 
   /// Move constructor.
-  PoolResource(PoolResource&&) = default;
+  PoolResource(PoolResource&&);
 
   /// Move assignment operator.
   ///
   /// @return This pool resource.
-  PoolResource& operator=(PoolResource&&) = default;
+  PoolResource& operator=(PoolResource&&);
 
   /// Returns a block of memory from the pool.
   ///
@@ -50,27 +51,7 @@ class SLEIPNIR_DLLEXPORT PoolResource {
   ///     than alignof(std::max_align_t).
   /// @return A block of memory from the pool.
   [[nodiscard]]
-  void* allocate(size_t bytes, size_t alignment = alignof(std::max_align_t)) {
-    // Round up to a multiple of the alignment so consecutive blocks in a chunk
-    // stay aligned. `alignment` is a power of two, so `alignment - 1` is a mask
-    // of the bits below it.
-    //
-    // 1. Add `alignment - 1` so the round-down in step 4 becomes a round-up
-    // 2. Create mask `alignment - 1` with every bit below the alignment set
-    // 3. Invert mask via `~(alignment - 1)` so only higher bits are set
-    // 4. Bitwise AND to zero out lower bits, rounding down to a multiple of the
-    //    alignment
-    size_t block_size = (bytes + alignment - 1) & ~(alignment - 1);
-
-    auto& pool = get_pool(block_size);
-    if (pool.free_list.empty()) {
-      add_chunk(pool);
-    }
-
-    auto ptr = pool.free_list.back();
-    pool.free_list.pop_back();
-    return ptr;
-  }
+  void* allocate(size_t bytes, size_t alignment = alignof(std::max_align_t));
 
   /// Gives a block of memory back to the pool.
   ///
@@ -80,17 +61,8 @@ class SLEIPNIR_DLLEXPORT PoolResource {
   /// @param p A pointer to the block of memory.
   /// @param bytes Number of bytes in the block (unused).
   /// @param alignment Alignment of the block (unused).
-  void deallocate(
-      void* p, [[maybe_unused]] size_t bytes,
-      [[maybe_unused]] size_t alignment = alignof(std::max_align_t)) {
-    // Find the last chunk that starts at or before p
-    auto chunk = std::upper_bound(
-        m_chunks.begin(), m_chunks.end(), static_cast<std::byte*>(p),
-        [](const std::byte* ptr, const Chunk& c) { return ptr < c.begin; });
-    --chunk;
-
-    m_pools[chunk->pool_index].free_list.emplace_back(p);
-  }
+  void deallocate(void* p, size_t bytes,
+                  size_t alignment = alignof(std::max_align_t));
 
   /// Returns true if this pool resource has the same backing storage as
   /// another.
@@ -144,35 +116,13 @@ class SLEIPNIR_DLLEXPORT PoolResource {
   ///
   /// @param block_size Number of bytes per block.
   /// @return The pool for the given block size.
-  Pool& get_pool(size_t block_size) {
-    for (auto& pool : m_pools) {
-      if (pool.block_size == block_size) {
-        return pool;
-      }
-    }
-
-    return m_pools.emplace_back(Pool{block_size, {}});
-  }
+  Pool& get_pool(size_t block_size);
 
   /// Adds a memory chunk to the given pool, partitions it into blocks with the
   /// pool's block size, and appends pointers to them to the pool's free list.
   ///
   /// @param pool The pool.
-  void add_chunk(Pool& pool) {
-    auto begin =
-        m_buffer.emplace_back(new std::byte[pool.block_size * blocks_per_chunk])
-            .get();
-
-    size_t pool_index = &pool - m_pools.data();
-    auto pos = std::upper_bound(
-        m_chunks.begin(), m_chunks.end(), begin,
-        [](const std::byte* ptr, const Chunk& c) { return ptr < c.begin; });
-    m_chunks.insert(pos, Chunk{begin, pool_index});
-
-    for (int i = blocks_per_chunk - 1; i >= 0; --i) {
-      pool.free_list.emplace_back(begin + pool.block_size * i);
-    }
-  }
+  void add_chunk(Pool& pool);
 };
 
 /// This class is an allocator for the pool resource.
