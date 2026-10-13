@@ -153,7 +153,7 @@ install(
 
 # Add benchmark executables
 if(SLEIPNIR_BUILD_BENCHMARKS)
-    # Optimization benchmarks (if CasADi exists)
+    # Autodiff and optimization benchmarks (if CasADi exists)
     find_package(casadi QUIET)
     if(casadi_FOUND)
         # benchmark dependency
@@ -181,6 +181,27 @@ if(SLEIPNIR_BUILD_BENCHMARKS)
         else()
             find_package(benchmark CONFIG REQUIRED)
         endif()
+
+        # Autodiff benchmarks
+        foreach(benchmark "gradient" "jacobian" "hessian")
+            file(
+                GLOB ${benchmark}_autodiff_benchmark_src
+                benchmarks/${benchmark}_autodiff/*.cpp
+            )
+            add_executable(
+                ${benchmark}_autodiff_benchmark
+                ${${benchmark}_autodiff_benchmark_src}
+            )
+            compiler_flags(${benchmark}_autodiff_benchmark)
+            target_include_directories(
+                ${benchmark}_autodiff_benchmark
+                PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks
+            )
+            target_link_libraries(
+                ${benchmark}_autodiff_benchmark
+                PUBLIC Sleipnir casadi benchmark::benchmark
+            )
+        endforeach()
 
         # Optimization benchmarks
         foreach(benchmark "cart_pole" "flywheel")

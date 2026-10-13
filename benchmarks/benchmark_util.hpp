@@ -4,6 +4,8 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cmath>
+#include <cstddef>
 #include <format>
 #include <span>
 #include <string_view>
@@ -20,6 +22,79 @@ inline void add_min_max_statistics(benchmark::Benchmark* b) {
       "min", [](const std::vector<double>& v) { return std::ranges::min(v); });
   b->ComputeStatistics(
       "max", [](const std::vector<double>& v) { return std::ranges::max(v); });
+}
+
+/// Registers setup and evaluation benchmarks for a derivative.
+///
+/// The benchmarks are named "<library>/Setup/<N>" and
+/// "<library>/Evaluation/<N>", where N is the number of variables.
+///
+/// @param library The autodiff library's name.
+/// @param nums_variables The numbers of variables for which to record results.
+/// @param setup A function that takes a number of variables and returns an
+///     object whose evaluate(std::span<const double>) member function computes
+///     the derivative at the given input.
+template <typename Setup>
+void register_autodiff_benchmarks(std::string_view library,
+                                  std::span<const int> nums_variables,
+                                  Setup setup) {
+  // Variable counts for which to record results
+  auto args = [=](benchmark::Benchmark* b) {
+    for (int N : nums_variables) {
+      b->Arg(N);
+    }
+  };
+
+  // Setup time includes building the expression graph and the autodiff object.
+  // Manual timing excludes their destruction.
+  benchmark::RegisterBenchmark(
+      std::format("{}/Setup", library),
+      [=](benchmark::State& state) {
+        int N = static_cast<int>(state.range(0));
+        for (auto _ : state) {
+          auto start_time = std::chrono::steady_clock::now();
+          auto evaluator = setup(N);
+          benchmark::DoNotOptimize(evaluator);
+          auto end_time = std::chrono::steady_clock::now();
+          state.SetIterationTime(
+              std::chrono::duration<double>{end_time - start_time}.count());
+        }
+      })
+      ->Apply(args)
+      ->Apply(add_min_max_statistics)
+      ->UseManualTime()
+      ->Unit(benchmark::kMillisecond);
+
+  // Evaluation time is the time to compute the derivative at a new input
+  benchmark::RegisterBenchmark(std::format("{}/Evaluation", library),
+                               [=](benchmark::State& state) {
+                                 int N = static_cast<int>(state.range(0));
+
+                                 // Precompute inputs at which to evaluate the
+                                 // derivative so their construction isn't timed
+                                 std::vector<std::vector<double>> inputs;
+                                 for (int i = 0; i < 5; ++i) {
+                                   std::vector<double> x(N);
+                                   for (int j = 0; j < N; ++j) {
+                                     x[j] = std::sin(0.1 * j + 0.01 * i);
+                                   }
+
+                                   inputs.emplace_back(x);
+                                 }
+
+                                 auto evaluator = setup(N);
+
+                                 // Cycle through inputs so the library doesn't
+                                 // return the previous result from cache
+                                 size_t i = 0;
+                                 for (auto _ : state) {
+                                   evaluator.evaluate(inputs[i]);
+                                   i = (i + 1) % inputs.size();
+                                 }
+                               })
+      ->Apply(args)
+      ->Apply(add_min_max_statistics)
+      ->Unit(benchmark::kMicrosecond);
 }
 
 /// Registers setup and solve benchmarks for an optimization problem.

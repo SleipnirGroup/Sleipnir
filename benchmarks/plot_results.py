@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Plots optimization benchmark results from CSV files.
+Plots autodiff and optimization benchmark results from CSV files.
 """
 
 import argparse
@@ -239,6 +239,32 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     subparsers = parser.add_subparsers(dest="benchmark", required=True)
 
+    autodiff_parser = subparsers.add_parser(
+        "autodiff", parents=[common_parser], help="plot autodiff benchmark results"
+    )
+    autodiff_parser.add_argument(
+        "--filename",
+        dest="filename",
+        type=str,
+        required=True,
+        help="filename of Google Benchmark CSV results to plot",
+    )
+    autodiff_parser.add_argument(
+        "--libraries",
+        dest="libraries",
+        type=str,
+        nargs="+",
+        default=["CasADi", "Sleipnir"],
+        help="autodiff libraries whose results to plot",
+    )
+    autodiff_parser.add_argument(
+        "--title",
+        dest="title",
+        type=str,
+        required=True,
+        help="plot title",
+    )
+
     optimization_parser = subparsers.add_parser(
         "optimization",
         parents=[common_parser],
@@ -276,7 +302,14 @@ def main() -> None:
 
     args = parser.parse_args()
 
-    if args.benchmark == "optimization":
+    if args.benchmark == "autodiff":
+        kinds = ["Setup", "Evaluation"]
+        prefixes = args.libraries
+        labels = args.libraries
+        title = f"{args.title} autodiff runtime vs variables"
+        xlabel = "Variables"
+        output = f"{args.title.lower()}-autodiff-results.png"
+    elif args.benchmark == "optimization":
         kinds = ["Setup", "Solve"]
         prefixes = args.libraries
         if args.labels is None:
