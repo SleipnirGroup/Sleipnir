@@ -68,7 +68,7 @@ if(NOT MSVC)
       "Asan"
       "${CMAKE_C_FLAGS_RELWITHDEBINFO} -fsanitize=address -fno-omit-frame-pointer"
       "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -fsanitize=address -fno-omit-frame-pointer"
-      "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO} -fsanitize=address"
+      "${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO} -fsanitize=address"
       "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO} -fsanitize=address"
     )
 
@@ -77,7 +77,7 @@ if(NOT MSVC)
       "Tsan"
       "${CMAKE_C_FLAGS_RELWITHDEBINFO} -fsanitize=thread -fno-omit-frame-pointer"
       "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -fsanitize=thread -fno-omit-frame-pointer"
-      "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO} -fsanitize=thread"
+      "${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO} -fsanitize=thread"
       "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO} -fsanitize=thread"
     )
 
@@ -86,7 +86,7 @@ if(NOT MSVC)
       "Ubsan"
       "${CMAKE_C_FLAGS_RELWITHDEBINFO} -fsanitize=undefined -fno-sanitize-recover=all -fno-omit-frame-pointer"
       "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -fsanitize=undefined -fno-sanitize-recover=all -fno-omit-frame-pointer"
-      "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO} -fsanitize=undefined -fno-sanitize-recover=all"
+      "${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO} -fsanitize=undefined"
       "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO} -fsanitize=undefined"
     )
 
@@ -95,7 +95,7 @@ if(NOT MSVC)
       "Coverage"
       "${CMAKE_C_FLAGS_RELWITHDEBINFO} -fprofile-instr-generate -fcoverage-mapping"
       "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -fprofile-instr-generate -fcoverage-mapping"
-      "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO}"
+      "${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO}"
       "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO}"
     )
 
