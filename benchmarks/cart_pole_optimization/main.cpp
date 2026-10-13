@@ -1,48 +1,34 @@
 // Copyright (c) Sleipnir contributors
 
-#include <chrono>
-#include <print>
-#include <vector>
+#include <algorithm>
+#include <array>
+#include <string_view>
 
-#include <casadi/casadi.hpp>
-#include <sleipnir/optimization/problem.hpp>
+#include <benchmark/benchmark.h>
 
-#include "benchmark_util.hpp"
 #include "casadi.hpp"
-#include "cmdline_args.hpp"
 #include "sleipnir.hpp"
 
-int main(int argc, const char* argv[]) {
-  using namespace std::chrono_literals;
+int main(int argc, char* argv[]) {
+  benchmark::Initialize(&argc, argv);
 
-  CmdlineArgs args{argv, argc};
+  // Remove flags Google Benchmark doesn't recognize after processing them
+  int new_argc = std::remove(argv + 1, argv + argc,
+                             std::string_view{"--enable-diagnostics"}) -
+                 argv;
+  bool diagnostics = new_argc < argc;
+  argc = new_argc;
 
-  bool run_casadi = args.contains("--casadi");
-  bool run_sleipnir = args.contains("--sleipnir");
-  if (!run_casadi && !run_sleipnir) {
-    run_casadi = true;
-    run_sleipnir = true;
+  if (benchmark::ReportUnrecognizedArguments(argc, argv)) {
+    return 1;
   }
-  bool diagnostics = args.contains("--enable-diagnostics");
 
-  constexpr std::chrono::duration<double> T = 5s;
+  // Sample counts for which to record results
+  constexpr std::array nums_samples{100, 150, 200, 250, 300};
 
-  std::vector<int> sample_sizes_to_test;
-  for (int N = 100; N < 300; N += 50) {
-    sample_sizes_to_test.emplace_back(N);
-  }
-  sample_sizes_to_test.emplace_back(300);
+  register_casadi_benchmarks(nums_samples, diagnostics);
+  register_sleipnir_benchmarks(nums_samples, diagnostics);
 
-  std::println("Solving cart-pole problem from N = {} to N = {}.",
-               sample_sizes_to_test.front(), sample_sizes_to_test.back());
-  if (run_casadi) {
-    run_benchmarks_and_log<casadi::Opti>(
-        "cart-pole-optimization-results-casadi.csv", diagnostics, T,
-        sample_sizes_to_test, &cart_pole_casadi);
-  }
-  if (run_sleipnir) {
-    run_benchmarks_and_log<slp::Problem<double>>(
-        "cart-pole-optimization-results-sleipnir.csv", diagnostics, T,
-        sample_sizes_to_test, &cart_pole_sleipnir);
-  }
+  benchmark::RunSpecifiedBenchmarks();
+  benchmark::Shutdown();
 }

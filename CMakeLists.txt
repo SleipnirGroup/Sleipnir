@@ -38,6 +38,7 @@ option(
 )
 
 # Options for using a package manager (e.g., vcpkg) for certain dependencies
+option(SLEIPNIR_USE_SYSTEM_BENCHMARK "Use system benchmark" OFF)
 option(SLEIPNIR_USE_SYSTEM_EIGEN "Use system eigen" OFF)
 option(SLEIPNIR_USE_SYSTEM_NANOBIND "Use system nanobind" OFF)
 
@@ -152,9 +153,36 @@ install(
 
 # Add benchmark executables
 if(SLEIPNIR_BUILD_BENCHMARKS)
-    # Optimization benchmark (if CasADi exists)
+    # Optimization benchmarks (if CasADi exists)
     find_package(casadi QUIET)
     if(casadi_FOUND)
+        # benchmark dependency
+        option(
+            BENCHMARK_ENABLE_TESTING
+            "Enable testing of the benchmark library."
+            OFF
+        )
+        option(
+            BENCHMARK_ENABLE_WERROR
+            "Build Release candidates with -Werror."
+            OFF
+        )
+        option(BENCHMARK_ENABLE_INSTALL "Enable installation of benchmark." OFF)
+        if(NOT SLEIPNIR_USE_SYSTEM_BENCHMARK)
+            FetchContent_Declare(
+                benchmark
+                GIT_REPOSITORY https://github.com/google/benchmark.git
+                GIT_TAG v1.9.5
+                GIT_SHALLOW ON
+                EXCLUDE_FROM_ALL
+                SYSTEM
+            )
+            FetchContent_MakeAvailable(benchmark)
+        else()
+            find_package(benchmark CONFIG REQUIRED)
+        endif()
+
+        # Optimization benchmarks
         foreach(benchmark "cart_pole" "flywheel")
             file(
                 GLOB ${benchmark}_optimization_benchmark_src
@@ -171,7 +199,7 @@ if(SLEIPNIR_BUILD_BENCHMARKS)
             )
             target_link_libraries(
                 ${benchmark}_optimization_benchmark
-                PUBLIC Sleipnir casadi
+                PUBLIC Sleipnir casadi benchmark::benchmark
             )
         endforeach()
     endif()

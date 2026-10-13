@@ -1,41 +1,22 @@
 #!/bin/bash
 
-../build/flywheel_optimization_benchmark --casadi
+set -e
 
-echo -n "15 second cooldown..."
-sleep 15
-echo " done."
+for problem in flywheel cart_pole; do
+  ../build/${problem}_optimization_benchmark \
+    --benchmark_min_time=0.05s \
+    --benchmark_repetitions=5 \
+    --benchmark_report_aggregates_only=true \
+    --benchmark_out=${problem//_/-}-optimization-results.csv \
+    --benchmark_out_format=csv
+done
 
-../build/flywheel_optimization_benchmark --sleipnir
-
-./plot_optimization_results.py \
-  --filenames \
-    flywheel-optimization-results-casadi.csv \
-    flywheel-optimization-results-sleipnir.csv \
-  --labels \
-    "CasADi + Ipopt + MUMPS" \
-    "Sleipnir" \
+./plot_results.py optimization \
+  --filename flywheel-optimization-results.csv \
   --title Flywheel \
   --noninteractive
 
-echo -n "15 second cooldown..."
-sleep 15
-echo " done."
-
-../build/cart_pole_optimization_benchmark --casadi
-
-echo -n "30 second cooldown..."
-sleep 30
-echo " done."
-
-../build/cart_pole_optimization_benchmark --sleipnir
-
-./plot_optimization_results.py \
-  --filenames \
-    cart-pole-optimization-results-casadi.csv \
-    cart-pole-optimization-results-sleipnir.csv \
-  --labels \
-    "CasADi + Ipopt + MUMPS" \
-    "Sleipnir" \
+./plot_results.py optimization \
+  --filename cart-pole-optimization-results.csv \
   --title Cart-pole \
   --noninteractive

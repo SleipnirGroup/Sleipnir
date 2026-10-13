@@ -4,11 +4,21 @@
 
 #include <chrono>
 #include <cmath>
+#include <span>
 
 #include <Eigen/Core>
 #include <sleipnir/autodiff/variable.hpp>
 #include <sleipnir/optimization/problem.hpp>
+#include <sleipnir/optimization/solver/exit_status.hpp>
 
+#include "benchmark_util.hpp"
+
+namespace {
+
+/// Creates a flywheel quadratic optimization problem with Sleipnir.
+///
+/// @param dt Timestep duration.
+/// @param N Number of samples in the problem.
 slp::Problem<double> flywheel_sleipnir(std::chrono::duration<double> dt,
                                        int N) {
   // Flywheel model:
@@ -39,4 +49,16 @@ slp::Problem<double> flywheel_sleipnir(std::chrono::duration<double> dt,
   problem.minimize(J);
 
   return problem;
+}
+
+}  // namespace
+
+void register_sleipnir_benchmarks(std::span<const int> nums_samples,
+                                  bool diagnostics) {
+  register_optimization_benchmarks(
+      "Sleipnir", nums_samples, &flywheel_sleipnir,
+      [=](slp::Problem<double>& problem) {
+        return problem.solve({.diagnostics = diagnostics}) ==
+               slp::ExitStatus::SUCCESS;
+      });
 }

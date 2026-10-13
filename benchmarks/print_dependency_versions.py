@@ -25,7 +25,12 @@ def run_benchmark(binary: Path) -> tuple[str, list[Path]]:
     Returns the Ipopt banner line and the list of loaded shared libraries.
     """
     result = subprocess.run(
-        [binary, "--enable-diagnostics"],
+        [
+            binary,
+            "--enable-diagnostics",
+            "--benchmark_filter=^CasADi/Solve/100/",
+            "--benchmark_min_time=1x",
+        ],
         env=dict(os.environ, LD_DEBUG="libs"),
         capture_output=True,
         text=True,
