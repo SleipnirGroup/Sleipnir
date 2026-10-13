@@ -152,27 +152,6 @@ install(
 
 # Add benchmark executables
 if(SLEIPNIR_BUILD_BENCHMARKS)
-    # Perf benchmark
-    foreach(benchmark "cart_pole" "flywheel")
-        file(
-            GLOB ${benchmark}_perf_benchmark_src
-            benchmarks/perf/*.cpp
-            benchmarks/perf/${benchmark}/*.cpp
-        )
-        add_executable(
-            ${benchmark}_perf_benchmark
-            ${${benchmark}_perf_benchmark_src}
-        )
-        compiler_flags(${benchmark}_perf_benchmark)
-        target_include_directories(
-            ${benchmark}_perf_benchmark
-            PRIVATE
-                ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks
-                ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/perf
-        )
-        target_link_libraries(${benchmark}_perf_benchmark PUBLIC Sleipnir)
-    endforeach()
-
     # Scalability benchmark (if CasADi exists)
     find_package(casadi QUIET)
     if(casadi_FOUND)

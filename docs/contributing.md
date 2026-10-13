@@ -65,8 +65,6 @@ The following build types can be specified via `-DCMAKE_BUILD_TYPE` during CMake
   * Enables thread sanitizer
 * Ubsan
   * Enables undefined behavior sanitizer
-* Perf
-  * RelWithDebInfo build type, but with frame pointer so perf utility can use it
 
 #### Python library
 

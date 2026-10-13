@@ -92,15 +92,6 @@ if(NOT MSVC)
 
     add_build_type(
       allowedBuildTypes
-      "Perf"
-      "${CMAKE_C_FLAGS_RELWITHDEBINFO} -fno-omit-frame-pointer"
-      "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -fno-omit-frame-pointer"
-      "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO}"
-      "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO}"
-    )
-
-    add_build_type(
-      allowedBuildTypes
       "Coverage"
       "${CMAKE_C_FLAGS_RELWITHDEBINFO} -fprofile-instr-generate -fcoverage-mapping"
       "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -fprofile-instr-generate -fcoverage-mapping"
