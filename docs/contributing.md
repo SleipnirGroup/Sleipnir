@@ -65,6 +65,8 @@ The following build types can be specified via `-DCMAKE_BUILD_TYPE` during CMake
   * Enables thread sanitizer
 * Ubsan
   * Enables undefined behavior sanitizer
+* Coverage
+  * Enables Clang source-based code coverage instrumentation (see `tools/generate_coverage.py`)
 
 #### Python library
 
