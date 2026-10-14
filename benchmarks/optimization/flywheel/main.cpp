@@ -40,12 +40,12 @@ int main(int argc, const char* argv[]) {
                sample_sizes_to_test.front(), sample_sizes_to_test.back());
   if (run_casadi) {
     run_benchmarks_and_log<casadi::Opti, true>(
-        "flywheel-scalability-results-casadi.csv", diagnostics, T,
+        "flywheel-optimization-results-casadi.csv", diagnostics, T,
         sample_sizes_to_test, &flywheel_casadi);
   }
   if (run_sleipnir) {
     run_benchmarks_and_log<slp::Problem<double>, true>(
-        "flywheel-scalability-results-sleipnir.csv", diagnostics, T,
+        "flywheel-optimization-results-sleipnir.csv", diagnostics, T,
         sample_sizes_to_test, &flywheel_sleipnir);
   }
 }
