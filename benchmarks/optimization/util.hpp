@@ -26,9 +26,9 @@ constexpr double to_ms(const std::chrono::duration<Rep, Period>& duration) {
   return duration_cast<microseconds>(duration).count() / 1e3;
 }
 
-/// Runs scalability benchmarks for CasADi and Sleipnir versions of an
+/// Runs optimization benchmarks for CasADi and Sleipnir versions of an
 /// optimization problem, records the setup time and solve time for each, then
-/// writes them to scalability-results.csv.
+/// writes them to optimization-results.csv.
 ///
 /// The scale of the problem is iteratively increased by increasing the number
 /// of timesteps within the time horizon.

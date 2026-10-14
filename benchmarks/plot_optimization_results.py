@@ -148,7 +148,7 @@ def main():
     ax2.legend()
 
     if args.noninteractive:
-        plt.savefig(f"{args.title.lower()}-scalability-results.png")
+        plt.savefig(f"{args.title.lower()}-optimization-results.png")
     else:
         plt.show()
 

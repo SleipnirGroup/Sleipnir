@@ -152,28 +152,28 @@ install(
 
 # Add benchmark executables
 if(SLEIPNIR_BUILD_BENCHMARKS)
-    # Scalability benchmark (if CasADi exists)
+    # Optimization benchmark (if CasADi exists)
     find_package(casadi QUIET)
     if(casadi_FOUND)
         foreach(benchmark "cart_pole" "flywheel")
             file(
-                GLOB ${benchmark}_scalability_benchmark_src
-                benchmarks/scalability/*.cpp
-                benchmarks/scalability/${benchmark}/*.cpp
+                GLOB ${benchmark}_optimization_benchmark_src
+                benchmarks/optimization/*.cpp
+                benchmarks/optimization/${benchmark}/*.cpp
             )
             add_executable(
-                ${benchmark}_scalability_benchmark
-                ${${benchmark}_scalability_benchmark_src}
+                ${benchmark}_optimization_benchmark
+                ${${benchmark}_optimization_benchmark_src}
             )
-            compiler_flags(${benchmark}_scalability_benchmark)
+            compiler_flags(${benchmark}_optimization_benchmark)
             target_include_directories(
-                ${benchmark}_scalability_benchmark
+                ${benchmark}_optimization_benchmark
                 PRIVATE
                     ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks
-                    ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/scalability
+                    ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/optimization
             )
             target_link_libraries(
-                ${benchmark}_scalability_benchmark
+                ${benchmark}_optimization_benchmark
                 PUBLIC Sleipnir casadi
             )
         endforeach()

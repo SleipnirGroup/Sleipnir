@@ -37,12 +37,12 @@ int main(int argc, const char* argv[]) {
                sample_sizes_to_test.front(), sample_sizes_to_test.back());
   if (run_casadi) {
     run_benchmarks_and_log<casadi::Opti>(
-        "cart-pole-scalability-results-casadi.csv", diagnostics, T,
+        "cart-pole-optimization-results-casadi.csv", diagnostics, T,
         sample_sizes_to_test, &cart_pole_casadi);
   }
   if (run_sleipnir) {
     run_benchmarks_and_log<slp::Problem<double>>(
-        "cart-pole-scalability-results-sleipnir.csv", diagnostics, T,
+        "cart-pole-optimization-results-sleipnir.csv", diagnostics, T,
         sample_sizes_to_test, &cart_pole_sleipnir);
   }
 }
