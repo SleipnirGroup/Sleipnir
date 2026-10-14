@@ -158,8 +158,7 @@ if(SLEIPNIR_BUILD_BENCHMARKS)
         foreach(benchmark "cart_pole" "flywheel")
             file(
                 GLOB ${benchmark}_optimization_benchmark_src
-                benchmarks/optimization/*.cpp
-                benchmarks/optimization/${benchmark}/*.cpp
+                benchmarks/${benchmark}_optimization/*.cpp
             )
             add_executable(
                 ${benchmark}_optimization_benchmark
@@ -168,9 +167,7 @@ if(SLEIPNIR_BUILD_BENCHMARKS)
             compiler_flags(${benchmark}_optimization_benchmark)
             target_include_directories(
                 ${benchmark}_optimization_benchmark
-                PRIVATE
-                    ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks
-                    ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/optimization
+                PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks
             )
             target_link_libraries(
                 ${benchmark}_optimization_benchmark

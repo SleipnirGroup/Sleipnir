@@ -7,10 +7,10 @@
 #include <casadi/casadi.hpp>
 #include <sleipnir/optimization/problem.hpp>
 
+#include "benchmark_util.hpp"
 #include "casadi.hpp"
 #include "cmdline_args.hpp"
 #include "sleipnir.hpp"
-#include "util.hpp"
 
 int main(int argc, const char* argv[]) {
   using namespace std::chrono_literals;
@@ -28,24 +28,21 @@ int main(int argc, const char* argv[]) {
   constexpr std::chrono::duration<double> T = 5s;
 
   std::vector<int> sample_sizes_to_test;
-  for (int N = 100; N < 1000; N += 100) {
+  for (int N = 100; N < 300; N += 50) {
     sample_sizes_to_test.emplace_back(N);
   }
-  for (int N = 1000; N < 5000; N += 1000) {
-    sample_sizes_to_test.emplace_back(N);
-  }
-  sample_sizes_to_test.emplace_back(5000);
+  sample_sizes_to_test.emplace_back(300);
 
-  std::println("Solving flywheel problem from N = {} to N = {}.",
+  std::println("Solving cart-pole problem from N = {} to N = {}.",
                sample_sizes_to_test.front(), sample_sizes_to_test.back());
   if (run_casadi) {
-    run_benchmarks_and_log<casadi::Opti, true>(
-        "flywheel-optimization-results-casadi.csv", diagnostics, T,
-        sample_sizes_to_test, &flywheel_casadi);
+    run_benchmarks_and_log<casadi::Opti>(
+        "cart-pole-optimization-results-casadi.csv", diagnostics, T,
+        sample_sizes_to_test, &cart_pole_casadi);
   }
   if (run_sleipnir) {
-    run_benchmarks_and_log<slp::Problem<double>, true>(
-        "flywheel-optimization-results-sleipnir.csv", diagnostics, T,
-        sample_sizes_to_test, &flywheel_sleipnir);
+    run_benchmarks_and_log<slp::Problem<double>>(
+        "cart-pole-optimization-results-sleipnir.csv", diagnostics, T,
+        sample_sizes_to_test, &cart_pole_sleipnir);
   }
 }
