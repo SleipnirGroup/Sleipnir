@@ -9,8 +9,8 @@ restricts which CSVs are plotted to those that match the regex.
 """
 
 import argparse
-import os
 import re
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -47,21 +47,16 @@ def num_lines(filename):
 
 def get_file_list(regex):
     # Get list of files in current directory
-    files = [
-        os.path.join(dp, f)
-        for dp, dn, fn in os.walk(".")
-        for f in fn
-        if f.endswith(".csv")
-    ]
+    files = list(Path(".").rglob("*.csv"))
 
     # Ignore files not matching optional pattern
     if regex:
-        files = [f for f in files if re.search(regex, f)]
+        files = [f for f in files if re.search(regex, str(f))]
 
     # Maps problem name to csv_group (group is set of files with states,
     # inputs, or outputs suffixes and the same name stub like "Flywheel")
-    file_rgx = re.compile(r"(?P<name>^\./.*?[A-Za-z ]+)\.csv$")
-    files = [f for f in files if file_rgx.search(f) and num_lines(f) > 2]
+    file_rgx = re.compile(r"(?P<name>^.*?[A-Za-z ]+)\.csv$")
+    files = [f for f in files if file_rgx.search(f.name) and num_lines(f) > 2]
 
     return files
 
@@ -69,9 +64,7 @@ def get_file_list(regex):
 def make_groups(files):
     # Group files by category (sets of files with states, inputs, or outputs
     # suffixes and the same name stub like "Flywheel")
-    category_rgx = re.compile(
-        r"^\./.*?(?P<category>[A-Za-z\- ]+) (states|inputs|outputs)"
-    )
+    category_rgx = re.compile(r"^.*?(?P<category>[A-Za-z\- ]+) (states|inputs|outputs)")
     file_groups = {}
     if files:
         print("Loading CSVs...")
@@ -83,13 +76,13 @@ def make_groups(files):
     # ["inputs", "outputs", "references", "states"] (references are logged
     # before states). This produces the desired dataset layering on plots.
     for f in sorted(files):
-        print(f"  {os.path.split(f)[1]}")
+        print(f"  {f.name}")
 
-        match = category_rgx.search(f)
+        match = category_rgx.search(f.name)
 
         if not match:
             # Couldn't find the file's category, so put it in its own category
-            substr = os.path.split(f)[1]
+            substr = f.name
             substr = substr[: substr.find("-")]
             file_groups[substr] = [f]
         else:

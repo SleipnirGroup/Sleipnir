@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-import os
 import shutil
 import subprocess
 import sys
+from pathlib import Path
 
 
 def clear_python_workspace():
@@ -49,10 +49,9 @@ def prep_python_api_docs():
 
     for package in ["autodiff", "optimization"]:
         # Read .pyi
-        with open(
-            os.path.join("build", "install", "sleipnir", package, "__init__.pyi")
-        ) as f:
-            package_content = f.read()
+        package_content = Path(
+            "build", "install", "sleipnir", package, "__init__.pyi"
+        ).read_text()
 
         # Remove redundant prefixes for documentation
         if package == "autodiff":
@@ -65,22 +64,17 @@ def prep_python_api_docs():
             ).replace("_sleipnir.autodiff.", "")
 
         # Replace _sleipnir.package import with contents
-        with open(os.path.join("../python/src/sleipnir", package, "__init__.py")) as f:
-            init_content = f.read()
-        with open(
-            os.path.join("../python/src/sleipnir", package, "__init__.py"),
-            mode="w",
-        ) as f:
-            f.write(
-                init_content.replace(
-                    f"from .._sleipnir.{package} import *", package_content
-                )
+        init_path = Path("../python/src/sleipnir", package, "__init__.py")
+        init_path.write_text(
+            init_path.read_text().replace(
+                f"from .._sleipnir.{package} import *", package_content
             )
+        )
 
 
 def main():
     shutil.rmtree("build", ignore_errors=True)
-    os.makedirs("build/html/docs", exist_ok=True)
+    Path("build/html/docs").mkdir(parents=True, exist_ok=True)
 
     if "--doxygen-only" not in sys.argv:
         clear_python_workspace()

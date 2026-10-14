@@ -7,8 +7,9 @@ Generates merged coverage of CMake target executables with llvm-cov.
 import argparse
 import os
 import subprocess
+from pathlib import Path
 
-BUILD_DIR = "build-coverage"
+BUILD_DIR = Path("build-coverage")
 IGNORE_REGEX = "_deps/|test/"
 
 
@@ -89,16 +90,14 @@ def main():
     ]
 
     # Generate reports
-    with open(
-        os.path.join(BUILD_DIR, f"coverage-line-by-line-{args.output}.html"), "w"
-    ) as f:
+    with open(BUILD_DIR / f"coverage-line-by-line-{args.output}.html", "w") as f:
         subprocess.run(
             ["llvm-cov", "show", *cov_args, "-format=html"],
             cwd=BUILD_DIR,
             stdout=f,
             check=True,
         )
-    with open(os.path.join(BUILD_DIR, f"coverage-report-{args.output}.txt"), "w") as f:
+    with open(BUILD_DIR / f"coverage-report-{args.output}.txt", "w") as f:
         subprocess.run(
             ["llvm-cov", "report", *cov_args], cwd=BUILD_DIR, stdout=f, check=True
         )
