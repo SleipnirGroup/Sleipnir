@@ -1,8 +1,9 @@
 import math
 
 import numpy as np
+import numpy.typing as npt
 from sleipnir import autodiff
-from sleipnir.autodiff import Variable, VariableMatrix
+from sleipnir.autodiff import Variable, VariableBlock, VariableMatrix
 
 # https://underactuated.mit.edu/acrobot.html#cart_pole
 #
@@ -34,7 +35,9 @@ l = 0.5  # Pole length (m)
 g = 9.806  # Acceleration due to gravity (m/s²)
 
 
-def cart_pole_dynamics_double(x, u):
+def cart_pole_dynamics_double(
+    x: npt.NDArray[np.float64], u: npt.NDArray[np.float64]
+) -> npt.NDArray[np.float64]:
     q = x[:2, :]
     qdot = x[2:, :]
     theta = q[1, 0]
@@ -68,7 +71,9 @@ def cart_pole_dynamics_double(x, u):
     return qddot
 
 
-def cart_pole_dynamics_variable(x, u):
+def cart_pole_dynamics_variable(
+    x: VariableMatrix | VariableBlock, u: VariableMatrix | VariableBlock
+) -> VariableMatrix:
     q = x[:2, :]
     qdot = x[2:, :]
     theta = q[1, 0]

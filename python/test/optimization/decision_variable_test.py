@@ -2,7 +2,7 @@ import numpy as np
 from sleipnir.optimization import Problem
 
 
-def test_scalar_init_assign():
+def test_scalar_init_assign() -> None:
     problem = Problem()
 
     # Scalar zero init
@@ -16,7 +16,7 @@ def test_scalar_init_assign():
     assert x.value() == 2.0
 
 
-def test_vector_init_assign():
+def test_vector_init_assign() -> None:
     problem = Problem()
 
     # Vector zero init
@@ -35,7 +35,7 @@ def test_vector_init_assign():
     assert y.value(1) == 4.0
 
 
-def test_matrix_init_assign():
+def test_matrix_init_assign() -> None:
     problem = Problem()
 
     # Matrix zero init
@@ -70,7 +70,7 @@ def test_matrix_init_assign():
     assert (z.value() == np.array([[2.0, 8.0], [2.0, 10.0], [11.0, 12.0]])).all()
 
 
-def test_symmetric_matrix():
+def test_symmetric_matrix() -> None:
     problem = Problem()
 
     # Matrix zero init

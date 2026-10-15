@@ -3,7 +3,7 @@
 from current_manager import CurrentManager
 
 
-def main():
+def main() -> None:
     manager = CurrentManager([1.0, 5.0, 10.0, 5.0], 40.0)
     currents = manager.calculate([25.0, 10.0, 5.0, 0.0])
     print(f"currents = {currents}")

@@ -4,7 +4,7 @@ from sleipnir.autodiff import ExpressionType
 from sleipnir.optimization import ExitStatus, Problem, bounds
 
 
-def test_double_integrator_problem():
+def test_double_integrator_problem() -> None:
     TOTAL_TIME = 3.5
     dt = 0.005
     N = int(TOTAL_TIME / dt)

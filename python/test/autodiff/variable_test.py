@@ -1,13 +1,13 @@
 from sleipnir.autodiff import ExpressionType, Variable
 
 
-def test_default_constructor():
+def test_default_constructor() -> None:
     a = Variable()
     assert a.value() == 0.0
     assert a.type() == ExpressionType.LINEAR
 
 
-def test_constant_constructor():
+def test_constant_constructor() -> None:
     # float
     a = Variable(1.0)
     assert a.value() == 1.0
@@ -19,7 +19,7 @@ def test_constant_constructor():
     assert b.type() == ExpressionType.CONSTANT
 
 
-def test_set_value():
+def test_set_value() -> None:
     a = Variable()
 
     # float

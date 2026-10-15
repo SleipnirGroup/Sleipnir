@@ -3,7 +3,7 @@ from sleipnir.autodiff import Variable, VariableMatrix
 from sleipnir.optimization import EqualityConstraints, InequalityConstraints
 
 
-def test_equality_constraint_boolean_comparisons():
+def test_equality_constraint_boolean_comparisons() -> None:
     args = [(1.0, 1.0), (1.0, 2.0), (2.0, 1.0)]
 
     # double-Variable
@@ -57,7 +57,7 @@ def test_equality_constraint_boolean_comparisons():
 
 # For the purposes of optimization, a < constraint is treated the same as a <=
 # constraint
-def test_inequality_constraint_boolean_comparisons():
+def test_inequality_constraint_boolean_comparisons() -> None:
     args = [(1.0, 1.0), (1.0, 2.0), (2.0, 1.0)]
 
     # double-Variable
@@ -138,7 +138,7 @@ def test_inequality_constraint_boolean_comparisons():
         assert bool(VariableMatrix([[lhs]])[:, :] >= np.array([[rhs]])) == (lhs >= rhs)
 
 
-def test_equality_constraint_concatenation():
+def test_equality_constraint_concatenation() -> None:
     eq1 = Variable(1.0) == Variable(1.0)
     eq2 = Variable(1.0) == Variable(2.0)
     eqs = EqualityConstraints([eq1, eq2])
@@ -148,7 +148,7 @@ def test_equality_constraint_concatenation():
     assert not bool(eqs)
 
 
-def test_inequality_constraint_concatenation():
+def test_inequality_constraint_concatenation() -> None:
     ineq1 = Variable(2.0) < Variable(1.0)
     ineq2 = Variable(1.0) < Variable(2.0)
     ineqs = InequalityConstraints([ineq1, ineq2])

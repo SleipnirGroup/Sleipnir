@@ -301,7 +301,9 @@ if(SLEIPNIR_BUILD_PYTHON)
     if(DEFINED PY_BUILD_CMAKE_MODULE_NAME)
         set(PY_DEST ${PY_BUILD_CMAKE_MODULE_NAME})
     else()
-        set(PY_DEST lib/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR})
+        set(PY_DEST
+            lib/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}/sleipnir
+        )
     endif()
 
     # nanobind dependency
@@ -343,32 +345,53 @@ if(SLEIPNIR_BUILD_PYTHON)
         LIBRARY DESTINATION ${PY_DEST}
     )
 
+    # Generate stubs at install time because only the install tree has the
+    # sleipnir/ package layout needed to import the module by its fully
+    # qualified name `sleipnir._sleipnir`.
+    #
+    # Importing sleipnir._sleipnir requires the directory containing the
+    # sleipnir package (i.e., PY_DEST's parent) to be on the Python path. For
+    # py-build-cmake builds, PY_DEST has no parent. For plain CMake installs,
+    # PY_DEST's parent is lib/pythonX.Y.
+    cmake_path(GET PY_DEST PARENT_PATH PY_DEST_PARENT)
     nanobind_add_stub(
         _sleipnir_stub
         INSTALL_TIME
-        MARKER_FILE sleipnir/py.typed
-        MODULE _sleipnir
-        OUTPUT sleipnir/__init__.pyi
-        PYTHON_PATH $<TARGET_FILE_DIR:_sleipnir>
+        MARKER_FILE ${PY_DEST}/py.typed
+        MODULE sleipnir._sleipnir
+        OUTPUT ${PY_DEST}/_sleipnir/__init__.pyi
+        PYTHON_PATH ${PY_DEST_PARENT}
         DEPENDS _sleipnir
         COMPONENT python_modules
     )
     nanobind_add_stub(
         _sleipnir_autodiff_stub
         INSTALL_TIME
-        MODULE _sleipnir.autodiff
-        OUTPUT sleipnir/autodiff/__init__.pyi
-        PYTHON_PATH $<TARGET_FILE_DIR:_sleipnir>
+        MODULE sleipnir._sleipnir.autodiff
+        OUTPUT ${PY_DEST}/_sleipnir/autodiff.pyi
+        PYTHON_PATH ${PY_DEST_PARENT}
         DEPENDS _sleipnir
         COMPONENT python_modules
     )
     nanobind_add_stub(
         _sleipnir_optimization_stub
         INSTALL_TIME
-        MODULE _sleipnir.optimization
-        OUTPUT sleipnir/optimization/__init__.pyi
-        PYTHON_PATH $<TARGET_FILE_DIR:_sleipnir>
+        MODULE sleipnir._sleipnir.optimization
+        OUTPUT ${PY_DEST}/_sleipnir/optimization.pyi
+        PYTHON_PATH ${PY_DEST_PARENT}
         DEPENDS _sleipnir
+        COMPONENT python_modules
+    )
+    install(
+        CODE
+            "execute_process(
+                COMMAND \"${Python_EXECUTABLE}\"
+                    \"${CMAKE_CURRENT_SOURCE_DIR}/python/postprocess_stubs.py\"
+                    ${PY_DEST}/_sleipnir/autodiff.pyi
+                    ${PY_DEST}/_sleipnir/optimization.pyi
+                WORKING_DIRECTORY \"\${CMAKE_INSTALL_PREFIX}\"
+                COMMAND_ERROR_IS_FATAL ANY
+            )"
         COMPONENT python_modules
     )
 

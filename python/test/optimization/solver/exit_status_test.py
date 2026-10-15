@@ -5,7 +5,7 @@ from sleipnir.autodiff import ExpressionType, sqrt
 from sleipnir.optimization import ExitStatus, Problem
 
 
-def test_callback_requested_stop():
+def test_callback_requested_stop() -> None:
     problem = Problem()
     x = problem.decision_variable()
     problem.minimize(x * x)
@@ -24,7 +24,7 @@ def test_callback_requested_stop():
     assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
 
 
-def test_too_few_dofs():
+def test_too_few_dofs() -> None:
     problem = Problem()
 
     x, y, z = problem.decision_variable(3)
@@ -41,7 +41,7 @@ def test_too_few_dofs():
     assert problem.solve(diagnostics=True) == ExitStatus.TOO_FEW_DOFS
 
 
-def test_locally_infeasible_equality_constraints():
+def test_locally_infeasible_equality_constraints() -> None:
     problem = Problem()
 
     x, y, z = problem.decision_variable(3)
@@ -57,7 +57,7 @@ def test_locally_infeasible_equality_constraints():
     assert problem.solve(diagnostics=True) == ExitStatus.LOCALLY_INFEASIBLE
 
 
-def test_locally_infeasible_inequality_constraints():
+def test_locally_infeasible_inequality_constraints() -> None:
     problem = Problem()
 
     x, y, z = problem.decision_variable(3)
@@ -73,7 +73,7 @@ def test_locally_infeasible_inequality_constraints():
     assert problem.solve(diagnostics=True) == ExitStatus.LOCALLY_INFEASIBLE
 
 
-def test_small_equality_constraint_scaling_is_feasible():
+def test_small_equality_constraint_scaling_is_feasible() -> None:
     problem = Problem()
 
     x = problem.decision_variable()
@@ -89,7 +89,7 @@ def test_small_equality_constraint_scaling_is_feasible():
     assert x.value() == pytest.approx(5, abs=1e-3)
 
 
-def test_small_inequality_constraint_scaling_is_feasible():
+def test_small_inequality_constraint_scaling_is_feasible() -> None:
     problem = Problem()
 
     x = problem.decision_variable()
@@ -105,7 +105,7 @@ def test_small_inequality_constraint_scaling_is_feasible():
     assert x.value() <= 5 + 1e-3
 
 
-def test_nonfinite_cost():
+def test_nonfinite_cost() -> None:
     problem = Problem()
     x = problem.decision_variable()
     problem.minimize(1 / x)
@@ -113,7 +113,7 @@ def test_nonfinite_cost():
     assert problem.solve() == ExitStatus.NONFINITE_INITIAL_GUESS
 
 
-def test_nonfinite_gradient():
+def test_nonfinite_gradient() -> None:
     problem = Problem()
     x = problem.decision_variable()
     problem.minimize(sqrt(x))
@@ -121,7 +121,7 @@ def test_nonfinite_gradient():
     assert problem.solve() == ExitStatus.NONFINITE_INITIAL_GUESS
 
 
-def test_nonfinite_equality_constraint():
+def test_nonfinite_equality_constraint() -> None:
     problem = Problem()
     x = problem.decision_variable()
     problem.subject_to(1 / x == 1)
@@ -129,7 +129,7 @@ def test_nonfinite_equality_constraint():
     assert problem.solve() == ExitStatus.NONFINITE_INITIAL_GUESS
 
 
-def test_nonfinite_equality_constraint_jacobian():
+def test_nonfinite_equality_constraint_jacobian() -> None:
     problem = Problem()
     x = problem.decision_variable()
     problem.subject_to(sqrt(x) == 1)
@@ -137,7 +137,7 @@ def test_nonfinite_equality_constraint_jacobian():
     assert problem.solve() == ExitStatus.NONFINITE_INITIAL_GUESS
 
 
-def test_nonfinite_inequality_constraint():
+def test_nonfinite_inequality_constraint() -> None:
     problem = Problem()
     x = problem.decision_variable()
     problem.subject_to(1 / x > 1)
@@ -145,7 +145,7 @@ def test_nonfinite_inequality_constraint():
     assert problem.solve() == ExitStatus.NONFINITE_INITIAL_GUESS
 
 
-def test_nonfinite_inequality_constraint_jacobian():
+def test_nonfinite_inequality_constraint_jacobian() -> None:
     problem = Problem()
     x = problem.decision_variable()
     problem.subject_to(sqrt(x) > 1)
@@ -153,7 +153,7 @@ def test_nonfinite_inequality_constraint_jacobian():
     assert problem.solve() == ExitStatus.NONFINITE_INITIAL_GUESS
 
 
-def test_diverging_iterates():
+def test_diverging_iterates() -> None:
     problem = Problem()
 
     x = problem.decision_variable()
@@ -167,7 +167,7 @@ def test_diverging_iterates():
     assert problem.solve(diagnostics=True) == ExitStatus.DIVERGING_ITERATES
 
 
-def test_max_iterations_exceeded():
+def test_max_iterations_exceeded() -> None:
     problem = Problem()
 
     x = problem.decision_variable()
@@ -185,7 +185,7 @@ def test_max_iterations_exceeded():
     )
 
 
-def test_timeout():
+def test_timeout() -> None:
     problem = Problem()
 
     x = problem.decision_variable()

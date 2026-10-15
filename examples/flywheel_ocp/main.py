@@ -12,7 +12,7 @@ from sleipnir.optimization import (
 )
 
 
-def main():
+def main() -> None:
     T = 5.0  # s
     dt = 0.005  # s
     N = int(T / dt)
@@ -26,7 +26,7 @@ def main():
     A_discrete = math.exp(A * dt)
     B_discrete = (1.0 - A_discrete) * B
 
-    def f_discrete(x: VariableMatrix, u: VariableMatrix):
+    def f_discrete(x: VariableMatrix, u: VariableMatrix) -> VariableMatrix:
         return A_discrete * x + B_discrete * u
 
     r = 10.0

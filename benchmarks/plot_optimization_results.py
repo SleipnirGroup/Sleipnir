@@ -3,13 +3,23 @@
 import argparse
 import math
 import sys
+from collections.abc import Callable
 
 import matplotlib.pyplot as plt
 import numpy as np
+import numpy.typing as npt
+from matplotlib.axes import Axes
 from scipy.optimize import curve_fit
 
 
-def plot_poly_fit(ax, x, y, func, bases, color):
+def plot_poly_fit(
+    ax: Axes,
+    x: npt.NDArray[np.float64],
+    y: npt.NDArray[np.float64],
+    func: Callable[..., npt.NDArray[np.float64]],
+    bases: list[str],
+    color: str,
+) -> None:
     """
     Plots a polynomial curve fit for the given x-y function.
 
@@ -43,7 +53,7 @@ def plot_poly_fit(ax, x, y, func, bases, color):
     )
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Runs all formatting tasks on the code base. This should be invoked from a directory within the project."
     )

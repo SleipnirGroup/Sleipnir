@@ -1,9 +1,8 @@
 import pytest
-
 from current_manager import CurrentManager
 
 
-def test_current_manager_enough_current():
+def test_current_manager_enough_current() -> None:
     manager = CurrentManager([1.0, 5.0, 10.0, 5.0], 40.0)
 
     currents = manager.calculate([25.0, 10.0, 5.0, 0.0])
@@ -14,7 +13,7 @@ def test_current_manager_enough_current():
     assert currents[3] == pytest.approx(0.0, abs=1e-3)
 
 
-def test_current_manager_not_enough_current():
+def test_current_manager_not_enough_current() -> None:
     manager = CurrentManager([1.0, 5.0, 10.0, 5.0], 40.0)
 
     currents = manager.calculate([30.0, 10.0, 5.0, 0.0])

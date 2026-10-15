@@ -1,5 +1,6 @@
 import math
 import operator
+from collections.abc import Iterable
 from functools import reduce
 
 import numpy as np
@@ -8,11 +9,11 @@ from sleipnir import autodiff
 from sleipnir.autodiff import Gradient, Hessian, Jacobian, Variable, VariableMatrix
 
 
-def prod(iterable):
-    return reduce(operator.mul, iterable, 1)
+def prod[T](iterable: Iterable[T]) -> T:
+    return reduce(operator.mul, iterable)
 
 
-def test_linear():
+def test_linear() -> None:
     # y = x
     x = VariableMatrix(1)
     x[0].set_value(3)
@@ -28,7 +29,7 @@ def test_linear():
     assert H.value()[0, 0] == 0.0
 
 
-def test_quadratic():
+def test_quadratic() -> None:
     # y = x²
     x = VariableMatrix(1)
     x[0].set_value(3)
@@ -44,7 +45,7 @@ def test_quadratic():
     assert H.value()[0, 0] == 2.0
 
 
-def test_cubic():
+def test_cubic() -> None:
     # y = x³
     x = VariableMatrix(1)
     x[0].set_value(3)
@@ -60,7 +61,7 @@ def test_cubic():
     assert H.value()[0, 0] == 18.0
 
 
-def test_quartic():
+def test_quartic() -> None:
     # y = x⁴
     x = VariableMatrix(1)
     x[0].set_value(3)
@@ -76,25 +77,25 @@ def test_quartic():
     assert H.value()[0, 0] == 108.0
 
 
-def test_sum():
+def test_sum() -> None:
     y = Variable()
     x = VariableMatrix(5)
     for i in range(5):
         x[i].set_value(i + 1)
 
-    y = sum(x)
+    y = sum(x, Variable(0.0))
     assert y.value() == 15.0
 
     g = Gradient(y, x)
     assert (g.get().value() == np.full((5, 1), 1.0)).all()
-    assert (g.value() == np.full((5, 1), 1.0)).all()
+    assert (g.value().todense() == np.full((5, 1), 1.0)).all()
 
     H = Hessian(y, x)
     assert (H.get().value() == np.zeros((5, 5))).all()
-    assert (H.value() == np.zeros((5, 5))).all()
+    assert (H.value().todense() == np.zeros((5, 5))).all()
 
 
-def test_sum_of_products():
+def test_sum_of_products() -> None:
     x = VariableMatrix(5)
     for i in range(5):
         x[i].set_value(i + 1)
@@ -105,16 +106,16 @@ def test_sum_of_products():
 
     g = Gradient(y, x)
     assert (g.get().value() == 2 * x.value()).all()
-    assert (g.value() == 2 * x.value()).all()
+    assert (g.value().todense() == 2 * x.value()).all()
 
     H = Hessian(y, x)
 
     expected_H = np.diag([2.0] * 5)
     assert (H.get().value() == expected_H).all()
-    assert (H.value() == expected_H).all()
+    assert (H.value().todense() == expected_H).all()
 
 
-def test_product_of_sines():
+def test_product_of_sines() -> None:
     x = VariableMatrix(5)
     for i in range(5):
         x[i].set_value(i + 1)
@@ -147,13 +148,13 @@ def test_product_of_sines():
     np.testing.assert_allclose(H.value().todense(), expected_H)
 
 
-def test_sum_of_squared_residuals():
+def test_sum_of_squared_residuals() -> None:
     x = VariableMatrix(5)
     for i in range(5):
         x[i].set_value(1)
 
     # y = sum(diff(x).^2)
-    y = sum((x[:4, :1] - x[1:5, :1]) ** 2)
+    y = sum((x[:4, :1] - x[1:5, :1]) ** 2, Variable(0.0))
     g = Gradient(y, x).value()
 
     assert y.value() == 0.0
@@ -178,7 +179,7 @@ def test_sum_of_squared_residuals():
     assert (H.value().todense() == expected_H).all()
 
 
-def test_sum_of_squares():
+def test_sum_of_squares() -> None:
     r = VariableMatrix(4)
     r.set_value(np.array([[25.0], [10.0], [5.0], [0.0]]))
 
@@ -186,15 +187,15 @@ def test_sum_of_squares():
     for i in range(4):
         x[i].set_value(0.0)
 
-    J = sum((r[i] - x[i]) * (r[i] - x[i]) for i in range(4))
+    J = sum(((r[i] - x[i]) * (r[i] - x[i]) for i in range(4)), Variable(0.0))
     H = Hessian(J, x)
 
     expected_H = np.diag([2.0] * 4)
     assert (H.get().value() == expected_H).all()
-    assert (H.value() == expected_H).all()
+    assert (H.value().todense() == expected_H).all()
 
 
-def test_nested_powers():
+def test_nested_powers() -> None:
     x0 = 3.0
 
     x = Variable()
@@ -209,12 +210,12 @@ def test_nested_powers():
     assert H[0, 0] == pytest.approx(12 * x0 * x0, abs=1e-12)
 
 
-def test_max_and_min():
+def test_max_and_min() -> None:
     input = VariableMatrix(2)
     expected_y = np.array([[0.0, 0.0], [0.0, 2.0]])
     expected_x = np.array([[2.0, 0.0], [0.0, 0.0]])
 
-    def check(f, x0, y0, x1, y1):
+    def check(f: Variable, x0: float, y0: float, x1: float, y1: float) -> None:
         hessian = Hessian(f, input)
         symbolic_H = hessian.get()
 
@@ -239,7 +240,7 @@ def test_max_and_min():
     check(autodiff.min(x_squared, y_squared), 2.0, 1.0, 2.0, 3.0)
 
 
-def test_pow():
+def test_pow() -> None:
     input = VariableMatrix(2)
     f = autodiff.pow(input[0] + 1.0, input[1])
     hessian = Hessian(f, input)
@@ -265,7 +266,7 @@ def test_pow():
     )
 
 
-def test_rosenbrock():
+def test_rosenbrock() -> None:
     # z = (1 − x)² + 100(y − x²)²
     #   = 100(−x² + y)² + (−x + 1)²
     #
@@ -296,7 +297,7 @@ def test_rosenbrock():
             assert H[1, 1] == 200
 
 
-def test_edge_pushing_wang_example_1():
+def test_edge_pushing_wang_example_1() -> None:
     # See example 1 of [1]
     #
     # [1] Wang, M., et al. "Capitalizing on live variables: new algorithms for
@@ -315,7 +316,7 @@ def test_edge_pushing_wang_example_1():
     J = Jacobian(y, x)
     expected_J = np.array([[6.0 * math.sin(4.0), 9.0 * math.cos(4.0)]])
     assert (J.get().value() == expected_J).all()
-    assert (J.value() == expected_J).all()
+    assert (J.value().todense() == expected_J).all()
 
     #           [ 2sin(x₁)    2x₀cos(x₁)]
     # d²y/dx² = [2x₀cos(x₁)  −x₀²sin(x₁)]
@@ -330,10 +331,10 @@ def test_edge_pushing_wang_example_1():
         ]
     )
     assert (H.get().value() == expected_H).all()
-    assert (H.value() == expected_H).all()
+    assert (H.value().todense() == expected_H).all()
 
 
-def test_edge_pushing_petro_figure_1():
+def test_edge_pushing_petro_figure_1() -> None:
     # See figure 1 of [1]
     #
     # [1] Petro, C. G., et al. "On efficient Hessian computation using the edge
@@ -354,10 +355,10 @@ def test_edge_pushing_petro_figure_1():
         [-p_1.value() / x[0].value() ** 2, -p_1.value() / x[1].value() ** 2]
     )
     assert (H.get().value() == expected_H).all()
-    assert (H.value() == expected_H).all()
+    assert (H.value().todense() == expected_H).all()
 
 
-def test_variable_reuse():
+def test_variable_reuse() -> None:
     y = Variable()
     x = VariableMatrix(1)
 

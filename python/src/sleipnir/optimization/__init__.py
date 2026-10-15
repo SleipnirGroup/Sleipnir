@@ -1,9 +1,13 @@
 import concurrent.futures
+from collections.abc import Callable, Sequence
 
 from .._sleipnir.optimization import *
 
 
-def multistart(solve, initial_guesses):
+def multistart[T](
+    solve: Callable[[T], tuple[ExitStatus, float, T]],
+    initial_guesses: Sequence[T],
+) -> tuple[ExitStatus, float, T]:
     """
     Solves an optimization problem from different starting points in parallel,
     then returns the solution with the lowest cost.

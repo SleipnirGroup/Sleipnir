@@ -2,7 +2,7 @@ import numpy as np
 from sleipnir.autodiff import Jacobian, VariableMatrix
 
 
-def test_y_eq_x():
+def test_y_eq_x() -> None:
     x = VariableMatrix(3)
     for i in range(3):
         x[i].set_value(i + 1)
@@ -17,10 +17,10 @@ def test_y_eq_x():
 
     expected_J = np.diag([1.0, 1.0, 1.0])
     assert (J.get().value() == expected_J).all()
-    assert (J.value() == expected_J).all()
+    assert (J.value().todense() == expected_J).all()
 
 
-def test_y_eq_3x():
+def test_y_eq_3x() -> None:
     x = VariableMatrix(3)
     for i in range(3):
         x[i].set_value(i + 1)
@@ -35,10 +35,10 @@ def test_y_eq_3x():
 
     expected_J = np.diag([3.0, 3.0, 3.0])
     assert (J.get().value() == expected_J).all()
-    assert (J.value() == expected_J).all()
+    assert (J.value().todense() == expected_J).all()
 
 
-def test_products():
+def test_products() -> None:
     x = VariableMatrix(3)
     for i in range(3):
         x[i].set_value(i + 1)
@@ -62,10 +62,10 @@ def test_products():
 
     expected_J = np.array([[2.0, 1.0, 0.0], [0.0, 3.0, 2.0], [3.0, 0.0, 1.0]])
     assert (J.get().value() == expected_J).all()
-    assert (J.value() == expected_J).all()
+    assert (J.value().todense() == expected_J).all()
 
 
-def test_nested_products():
+def test_nested_products() -> None:
     x = VariableMatrix(1)
     x[0].set_value(3)
     assert x.value(0) == 3.0
@@ -117,7 +117,7 @@ def test_nested_products():
     J = Jacobian(z, y)
     expected_J = np.array([[21.0, 15.0, 0.0], [0.0, 33.0, 21.0], [33.0, 0.0, 15.0]])
     assert (J.get().value() == expected_J).all()
-    assert (J.value() == expected_J).all()
+    assert (J.value().todense() == expected_J).all()
 
     #     [y₁y₂]   [5x⋅ 7x]   [35x²]
     # z = [y₂y₃] = [7x⋅11x] = [77x²]
@@ -129,10 +129,10 @@ def test_nested_products():
     J = Jacobian(z, x)
     expected_J = np.array([[210.0], [462.0], [330.0]])
     assert (J.get().value() == expected_J).all()
-    assert (J.value() == expected_J).all()
+    assert (J.value().todense() == expected_J).all()
 
 
-def test_non_square():
+def test_non_square() -> None:
     x = VariableMatrix(3)
     for i in range(3):
         x[i].set_value(i + 1)
@@ -155,7 +155,7 @@ def test_non_square():
     assert (J_value == expected_J).all()
 
 
-def test_variable_reuse():
+def test_variable_reuse() -> None:
     x = VariableMatrix(2)
     for i in range(2):
         x[i].set_value(i + 1)

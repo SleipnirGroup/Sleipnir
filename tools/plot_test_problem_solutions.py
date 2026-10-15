@@ -14,30 +14,33 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
+import numpy.typing as npt
 
 
 class UnitGroup:
-    def __init__(self):
+    def __init__(self) -> None:
         # List of DataSeries objects (time and data column pairs)
-        self.series = []
+        self.series: list[DataSeries] = []
 
         # List of data labels
-        self.labels = []
+        self.labels: list[str] = []
 
 
 class NameGroup:
-    def __init__(self, filename, series):
+    def __init__(self, filename: Path, series: npt.NDArray[np.float64]) -> None:
         self.filename = filename
         self.series = series
 
 
 class DataSeries:
-    def __init__(self, time, data):
+    def __init__(
+        self, time: npt.NDArray[np.float64], data: npt.NDArray[np.float64]
+    ) -> None:
         self.time = time
         self.data = data
 
 
-def num_lines(filename):
+def num_lines(filename: Path) -> int:
     with open(filename) as f:
         i = 0
         for i, _ in enumerate(f):
@@ -45,7 +48,7 @@ def num_lines(filename):
     return i + 1
 
 
-def get_file_list(regex):
+def get_file_list(regex: str | None) -> list[Path]:
     # Get list of files in current directory
     files = list(Path(".").rglob("*.csv"))
 
@@ -61,11 +64,11 @@ def get_file_list(regex):
     return files
 
 
-def make_groups(files):
+def make_groups(files: list[Path]) -> dict[str, list[Path]]:
     # Group files by category (sets of files with states, inputs, or outputs
     # suffixes and the same name stub like "Flywheel")
     category_rgx = re.compile(r"^.*?(?P<category>[A-Za-z\- ]+) (states|inputs|outputs)")
-    file_groups = {}
+    file_groups: dict[str, list[Path]] = {}
     if files:
         print("Loading CSVs...")
     else:
@@ -97,7 +100,7 @@ def make_groups(files):
     return file_groups
 
 
-def main():
+def main() -> None:
     plt.rcParams.update({"figure.max_open_warning": 0})
 
     parser = argparse.ArgumentParser(description=__doc__)
@@ -114,8 +117,8 @@ def main():
     # each group on their own figure
     unit_rgx = re.compile(r"^(?P<name>[\w\- ]+) \((?P<unit>.*?)\)$")
     for category, file_group in file_groups.items():
-        unit_groups = {}
-        name_groups = {}
+        unit_groups: dict[str, UnitGroup] = {}
+        name_groups: dict[str, NameGroup] = {}
         for filename in file_group:
             # Get labels from first row of file
             with open(filename) as f:
@@ -136,6 +139,9 @@ def main():
             # Skips label in first column because that's always "Time (s)"
             for i, label in enumerate(labels[1:]):
                 match = unit_rgx.search(label)
+                if not match:
+                    # Skip columns whose label isn't of the form "Name (unit)"
+                    continue
                 name = match.group("name")
                 unit = match.group("unit")
 

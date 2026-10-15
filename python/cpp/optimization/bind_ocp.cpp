@@ -21,6 +21,23 @@
 
 namespace nb = nanobind;
 
+namespace nanobind::detail {
+
+// nanobind's duration caster accepts a float in seconds as well as a
+// timedelta, but its type annotation only advertises timedelta because float is
+// an implicit conversion. Advertise float in the stub's input type so mypy
+// accepts passing a float to the dt parameter of OCP's constructor,
+// set_min_timestep(), and set_max_timestep().
+template <>
+class type_caster<std::chrono::duration<double>>
+    : public duration_caster<std::chrono::duration<double>> {
+ public:
+  static constexpr auto Name =
+      io_name("datetime.timedelta | float", "datetime.timedelta");
+};
+
+}  // namespace nanobind::detail
+
 namespace slp {
 
 void bind_ocp(nb::class_<OCP<double>, Problem<double>>& cls) {

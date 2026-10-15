@@ -4,12 +4,14 @@ from sleipnir.optimization import ExitStatus, Problem, multistart
 
 
 class DecisionVariables:
-    def __init__(self, x, y):
+    def __init__(self, x: float, y: float) -> None:
         self.x = x
         self.y = y
 
 
-def mishras_bird_function_solve(input: DecisionVariables):
+def mishras_bird_function_solve(
+    input: DecisionVariables,
+) -> tuple[ExitStatus, float, DecisionVariables]:
     problem = Problem()
 
     x, y = problem.decision_variable(2)
@@ -29,7 +31,7 @@ def mishras_bird_function_solve(input: DecisionVariables):
     return problem.solve(), J.value(), DecisionVariables(x.value(), y.value())
 
 
-def test_mishras_bird_function():
+def test_mishras_bird_function() -> None:
     status, _cost, variables = multistart(
         mishras_bird_function_solve,
         [DecisionVariables(-3, -8), DecisionVariables(-3, -1.5)],

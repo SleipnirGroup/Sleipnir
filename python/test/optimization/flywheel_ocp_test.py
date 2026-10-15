@@ -21,7 +21,7 @@ def flywheel_test(
     f: Callable[[VariableMatrix, VariableMatrix], VariableMatrix],
     dynamics_type: DynamicsType,
     transcription_method: TranscriptionMethod,
-):
+) -> None:
     TOTAL_TIME = 5.0  # s
     dt = 0.005  # s
     N = int(TOTAL_TIME / dt)
@@ -122,11 +122,11 @@ def flywheel_test(
                 file.write(f"{k * dt},0.0\n")
 
 
-def test_flywheel_explicit_ocp():
+def test_flywheel_explicit_ocp() -> None:
     A = -1.0
     B = 1.0
 
-    def f_ode(x: VariableMatrix, u: VariableMatrix):
+    def f_ode(x: VariableMatrix, u: VariableMatrix) -> VariableMatrix:
         return A * x + B * u
 
     flywheel_test(
@@ -155,7 +155,7 @@ def test_flywheel_explicit_ocp():
     )
 
 
-def test_flywheel_discrete_ocp():
+def test_flywheel_discrete_ocp() -> None:
     A = -1.0
     B = 1.0
     dt = 0.005  # s
@@ -163,7 +163,7 @@ def test_flywheel_discrete_ocp():
     A_discrete = math.exp(A * dt)
     B_discrete = (1.0 - A_discrete) * B
 
-    def f_discrete(x: VariableMatrix, u: VariableMatrix):
+    def f_discrete(x: VariableMatrix, u: VariableMatrix) -> VariableMatrix:
         return A_discrete * x + B_discrete * u
 
     flywheel_test(

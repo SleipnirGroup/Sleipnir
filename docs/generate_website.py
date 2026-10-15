@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 
-def clear_python_workspace():
+def clear_python_workspace() -> None:
     subprocess.run(
         [
             "git",
@@ -18,7 +18,7 @@ def clear_python_workspace():
     )
 
 
-def prep_python_api_docs():
+def prep_python_api_docs() -> None:
     # Generate .pyi files
     subprocess.run(
         [
@@ -47,21 +47,21 @@ def prep_python_api_docs():
         check=True,
     )
 
+    stub_dir = next(Path("build", "install").glob("lib/python*/sleipnir/_sleipnir"))
+
     for package in ["autodiff", "optimization"]:
         # Read .pyi
-        package_content = Path(
-            "build", "install", "sleipnir", package, "__init__.pyi"
-        ).read_text()
+        package_content = (stub_dir / f"{package}.pyi").read_text()
 
         # Remove redundant prefixes for documentation
         if package == "autodiff":
             package_content = package_content.replace(
-                "import _sleipnir.optimization\n", ""
-            ).replace("_sleipnir.optimization.", "")
+                "import sleipnir._sleipnir.optimization\n", ""
+            ).replace("sleipnir._sleipnir.optimization.", "")
         elif package == "optimization":
             package_content = package_content.replace(
-                "import _sleipnir.autodiff\n", ""
-            ).replace("_sleipnir.autodiff.", "")
+                "import sleipnir._sleipnir.autodiff\n", ""
+            ).replace("sleipnir._sleipnir.autodiff.", "")
 
         # Replace _sleipnir.package import with contents
         init_path = Path("../python/src/sleipnir", package, "__init__.py")
@@ -72,7 +72,7 @@ def prep_python_api_docs():
         )
 
 
-def main():
+def main() -> None:
     shutil.rmtree("build", ignore_errors=True)
     Path("build/html/docs").mkdir(parents=True, exist_ok=True)
 

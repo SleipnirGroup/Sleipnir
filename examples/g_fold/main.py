@@ -25,7 +25,7 @@ from scipy.signal import cont2discrete
 from sleipnir.optimization import ExitStatus, Problem, bounds
 
 
-def lerp(a, b, t):
+def lerp(a: float, b: float, t: float) -> float:
     return a + t * (b - a)
 
 
@@ -75,7 +75,7 @@ class Solution:
     def cost(self) -> float:
         return self.σ_value.sum()
 
-    def __lt__(self, other) -> bool:
+    def __lt__(self, other: "Solution") -> bool:
         if self.status != other.status:
             return self.status == ExitStatus.SUCCESS
         else:
@@ -88,7 +88,7 @@ class Solution:
             return "infeasible"
 
 
-def main():
+def main() -> None:
     # From section IV of [1]:
 
     # Initial lander mass including fuel (kg)
@@ -440,8 +440,8 @@ def main():
     )
     ax.legend()
 
-    plt.figure()
-    ax = plt.axes(projection="3d")
+    fig = plt.figure()
+    ax = fig.add_subplot(projection="3d")
     ax.set_xlabel("x (m)")
     ax.set_ylabel("y (m)")
     ax.set_zlabel("z (m)")

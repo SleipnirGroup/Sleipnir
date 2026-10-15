@@ -17,11 +17,11 @@ from sleipnir.optimization import (
 )
 
 
-def lerp(a, b, t):
+def lerp(a: float, b: float, t: float) -> float:
     return a + t * (b - a)
 
 
-def test_cart_pole_ocp():
+def test_cart_pole_ocp() -> None:
     TOTAL_TIME = 5  # s
     dt = 0.05  # s
     N = int(TOTAL_TIME / dt)
@@ -58,7 +58,7 @@ def test_cart_pole_ocp():
     problem.constrain_final_state(x_final)
 
     # Cart position constraints
-    def each(x: VariableMatrix, u: VariableMatrix):
+    def each(x: VariableMatrix, u: VariableMatrix) -> None:
         problem.subject_to(bounds(0.0, x[0], d_max))
 
     problem.for_each_step(each)

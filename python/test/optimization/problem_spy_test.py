@@ -3,7 +3,7 @@ from typing import BinaryIO
 
 import pytest
 from sleipnir.autodiff import ExpressionType
-from sleipnir.optimization import ExitStatus, Problem
+from sleipnir.optimization import ExitStatus, IterationInfo, Problem
 
 
 def read_char(spy: BinaryIO) -> bytes:
@@ -20,12 +20,14 @@ def read_str(spy: BinaryIO) -> str:
 
 
 class Coord:
-    def __init__(self, row: int, col: int, sign: bytes):
+    def __init__(self, row: int, col: int, sign: bytes) -> None:
         self.row = row
         self.col = col
         self.sign = sign
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Coord):
+            return NotImplemented
         return (
             self.row == other.row and self.col == other.col and self.sign == other.sign
         )
@@ -38,7 +40,7 @@ def read_coord(spy: BinaryIO) -> Coord:
 iterations = 0
 
 
-def test_problem_spy():
+def test_problem_spy() -> None:
     problem = Problem()
 
     x, y = problem.decision_variable(2)
@@ -54,7 +56,7 @@ def test_problem_spy():
     global iterations
     iterations = 0
 
-    def callback(info):
+    def callback(info: IterationInfo) -> bool:
         global iterations
         iterations += 1
         return False

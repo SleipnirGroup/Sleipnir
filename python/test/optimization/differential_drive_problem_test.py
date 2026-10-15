@@ -9,11 +9,11 @@ from sleipnir.autodiff import ExpressionType
 from sleipnir.optimization import ExitStatus, Problem, bounds
 
 
-def lerp(a, b, t):
+def lerp(a: float, b: float, t: float) -> float:
     return a + t * (b - a)
 
 
-def test_differential_drive_problem():
+def test_differential_drive_problem() -> None:
     TOTAL_TIME = 5.0  # s
     dt = 0.05  # s
     N = int(TOTAL_TIME / dt)

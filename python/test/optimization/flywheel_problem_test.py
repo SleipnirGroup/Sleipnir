@@ -7,7 +7,7 @@ from sleipnir.autodiff import ExpressionType
 from sleipnir.optimization import ExitStatus, Problem, bounds
 
 
-def test_flywheel_problem():
+def test_flywheel_problem() -> None:
     TOTAL_TIME = 5.0
     dt = 0.005
     N = int(TOTAL_TIME / dt)

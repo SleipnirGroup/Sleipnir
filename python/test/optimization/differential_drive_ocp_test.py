@@ -15,7 +15,7 @@ from sleipnir.optimization import (
 )
 
 
-def test_differential_drive_ocp():
+def test_differential_drive_ocp() -> None:
     N = 50
 
     min_timestep = 0.05  # s
