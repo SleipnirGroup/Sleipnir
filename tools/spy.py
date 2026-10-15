@@ -9,9 +9,9 @@ import struct
 import sys
 
 import matplotlib.pyplot as plt
-import matplotlib.ticker as mticker
 import numpy as np
 from matplotlib import animation
+from matplotlib.artist import Artist
 from matplotlib.colors import ListedColormap
 
 
@@ -76,7 +76,6 @@ def plot_csv(filename: str) -> animation.FuncAnimation:
     # Display colorbar
     colorbar = fig.colorbar(sc)
     ticklabels = ["Negative", "Positive"]
-    colorbar.ax.yaxis.set_major_locator(mticker.FixedLocator(ticklabels))
     colorbar.ax.set_yticks([-1, 1])
     colorbar.ax.set_yticklabels(ticklabels)
 
@@ -89,7 +88,7 @@ def plot_csv(filename: str) -> animation.FuncAnimation:
     ax.invert_yaxis()
     ax.set_aspect(1.0)
 
-    def animate(i: int):
+    def animate(i: int) -> tuple[Artist, ...]:
         sc.set_offsets(np.c_[xs[i], ys[i]])
         sc.set_array(vs[i])
         iteration.set_text(f"iter {i}/{max(0, len(vs) - 1)}")
@@ -106,7 +105,7 @@ def plot_csv(filename: str) -> animation.FuncAnimation:
     )
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("filename", nargs="+")
     args = parser.parse_args()

@@ -6,7 +6,7 @@ from sleipnir import autodiff
 from sleipnir.autodiff import Gradient, Variable, VariableMatrix
 
 
-def test_trivial_case():
+def test_trivial_case() -> None:
     a = Variable()
     a.set_value(10)
     b = Variable()
@@ -19,7 +19,7 @@ def test_trivial_case():
     assert Gradient(c, b).value()[0, 0] == 0.0
 
 
-def test_unary_plus():
+def test_unary_plus() -> None:
     a = Variable()
     a.set_value(10)
     c = +a
@@ -28,7 +28,7 @@ def test_unary_plus():
     assert Gradient(c, a).value()[0, 0] == 1.0
 
 
-def test_unary_minus():
+def test_unary_minus() -> None:
     a = Variable()
     a.set_value(10)
     c = -a
@@ -37,7 +37,7 @@ def test_unary_minus():
     assert Gradient(c, a).value()[0, 0] == -1.0
 
 
-def test_identical_variables():
+def test_identical_variables() -> None:
     a = Variable()
     a.set_value(10)
     x = a
@@ -50,7 +50,7 @@ def test_identical_variables():
     )
 
 
-def test_elementary():
+def test_elementary() -> None:
     a = Variable()
     a.set_value(1.0)
     b = Variable()
@@ -81,7 +81,7 @@ def test_elementary():
     assert Gradient(c, a).value()[0, 0] == 1.0
 
 
-def test_comparison():
+def test_comparison() -> None:
     x = Variable()
     x.set_value(10.0)
     a = Variable()
@@ -142,7 +142,7 @@ def test_comparison():
     assert a.value() >= (a - a).value()
 
 
-def test_trigonometry():
+def test_trigonometry() -> None:
     x = Variable()
     x.set_value(0.5)
 
@@ -189,7 +189,7 @@ def test_trigonometry():
     assert g.value()[0, 0] == 1.0 / (1 + x.value() * x.value())
 
 
-def test_hyperbolic():
+def test_hyperbolic() -> None:
     x = Variable()
     x.set_value(1.0)
 
@@ -215,7 +215,7 @@ def test_hyperbolic():
     assert g.value()[0, 0] == 1.0 / (math.cosh(x.value()) * math.cosh(x.value()))
 
 
-def test_exponential():
+def test_exponential() -> None:
     x = Variable()
     x.set_value(1.0)
 
@@ -241,7 +241,7 @@ def test_exponential():
     assert g.value()[0, 0] == math.exp(x.value())
 
 
-def test_power():
+def test_power() -> None:
     x = Variable()
     x.set_value(1.0)
     a = Variable()
@@ -344,7 +344,7 @@ def test_power():
     assert g.value()[0, 0] == math.log(x.value()) * math.pow(x.value(), y.value())
 
 
-def test_abs():
+def test_abs() -> None:
     x = Variable()
     g = Gradient(autodiff.abs(x), x)
 
@@ -378,7 +378,7 @@ def test_abs():
     assert g.get().value()[0, 0] == -2.0
 
 
-def test_atan2():
+def test_atan2() -> None:
     x = Variable()
     y = Variable()
 
@@ -479,7 +479,7 @@ def test_atan2():
     )
 
 
-def test_hypot():
+def test_hypot() -> None:
     x = Variable()
     y = Variable()
 
@@ -563,7 +563,7 @@ def test_hypot():
     assert g.value()[0, 0] == z.value() / math.hypot(x.value(), y.value(), z.value())
 
 
-def test_max():
+def test_max() -> None:
     x = Variable()
     x.set_value(2)
 
@@ -589,7 +589,7 @@ def test_max():
     assert g.value()[0, 0] == 1
 
 
-def test_min():
+def test_min() -> None:
     x = Variable()
     x.set_value(2)
 
@@ -615,7 +615,7 @@ def test_min():
     assert g.value()[0, 0] == 1
 
 
-def test_miscellaneous():
+def test_miscellaneous() -> None:
     x = Variable()
 
     # dx/dx
@@ -639,7 +639,7 @@ def test_miscellaneous():
     )
 
 
-def test_reuse():
+def test_reuse() -> None:
     a = Variable()
     a.set_value(10)
 
@@ -658,8 +658,8 @@ def test_reuse():
     assert g.value()[0] == 10.0
 
 
-def test_sign():
-    def sign(x):
+def test_sign() -> None:
+    def sign(x: float) -> float:
         if x < 0.0:
             return -1.0
         elif x == 0.0:
@@ -694,7 +694,7 @@ def test_sign():
     assert g.value()[0, 0] == 0.0
 
 
-def test_non_scalar():
+def test_non_scalar() -> None:
     x = VariableMatrix(3)
     x[0].set_value(1)
     x[1].set_value(2)

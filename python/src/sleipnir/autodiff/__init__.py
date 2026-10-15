@@ -3,7 +3,7 @@ import scipy.sparse
 from .._sleipnir.autodiff import *
 
 
-def spy(mat: scipy.sparse.csc_matrix):
+def spy(mat: scipy.sparse.csc_matrix) -> None:
     """
     Plot the sparsity pattern of a sparse matrix.
 
@@ -14,7 +14,6 @@ def spy(mat: scipy.sparse.csc_matrix):
         mat: The sparse matrix.
     """
     import matplotlib.pyplot as plt
-    import matplotlib.ticker as mticker
     from matplotlib.colors import ListedColormap
 
     xs = []
@@ -42,7 +41,6 @@ def spy(mat: scipy.sparse.csc_matrix):
     # Display colorbar
     colorbar = fig.colorbar(sc)
     ticklabels = ["Negative", "Positive"]
-    colorbar.ax.yaxis.set_major_locator(mticker.FixedLocator(ticklabels))
     colorbar.ax.set_yticks([-1, 1])
     colorbar.ax.set_yticklabels(ticklabels)
 

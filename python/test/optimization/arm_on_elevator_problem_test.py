@@ -6,7 +6,7 @@ from sleipnir.autodiff import ExpressionType
 from sleipnir.optimization import ExitStatus, Problem, bounds
 
 
-def test_arm_on_elevator_problem():
+def test_arm_on_elevator_problem() -> None:
     N = 800
 
     ELEVATOR_START_HEIGHT = 1.0  # m

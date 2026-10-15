@@ -11,7 +11,7 @@ from sleipnir.autodiff import Variable, VariableMatrix, cos, sin, solve
 from sleipnir.optimization import Problem
 
 
-def main():
+def main() -> None:
     problem = Problem()
 
     # camera calibration

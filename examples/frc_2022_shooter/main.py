@@ -12,12 +12,15 @@ dynamics, including air resistance.
 """
 
 import math
+from collections.abc import Callable
 
 import matplotlib.pyplot as plt
 import numpy as np
+import numpy.typing as npt
+from mpl_toolkits.mplot3d import Axes3D
 from numpy.linalg import norm
 from sleipnir import autodiff
-from sleipnir.autodiff import VariableMatrix, block, sqrt
+from sleipnir.autodiff import VariableBlock, VariableMatrix, block, sqrt
 from sleipnir.optimization import Problem
 
 field_width = 8.2296  # 27 ft -> m
@@ -30,11 +33,13 @@ cone_angle = math.pi / 4  # rad
 g = np.array([[0], [0], [9.806]])  # m/s²
 
 
-def lerp(a, b, t):
+def lerp(a: float, b: float, t: float) -> float:
     return a + t * (b - a)
 
 
-def cross(a, b) -> VariableMatrix:
+def cross(
+    a: VariableMatrix | VariableBlock, b: npt.NDArray[np.float64]
+) -> VariableMatrix:
     return VariableMatrix(
         [
             [a[1, 0] * b[2, 0] - a[2, 0] * b[1, 0]],
@@ -44,7 +49,7 @@ def cross(a, b) -> VariableMatrix:
     )
 
 
-def f(x):
+def f(x: VariableMatrix | VariableBlock) -> VariableMatrix:
     # x' = x'
     # y' = y'
     # z' = z'
@@ -83,7 +88,7 @@ def f(x):
     return block([[v], [-g - F_D / m * v_hat - F_L / m * cross(v, ω)]])
 
 
-def main():
+def main() -> None:
     # Robot initial state
     robot_wrt_field = np.array(
         [[field_length / 4.0], [field_width / 4.0], [0.0], [1.524], [-1.524], [0.0]]
@@ -253,10 +258,16 @@ def main():
     print(f"Total time = {T.value():.03f} s")
     print(f"dt = {dt.value() * 1e3:.03f} ms")
 
-    plt.figure()
-    ax = plt.axes(projection="3d")
+    fig = plt.figure()
+    ax = fig.add_subplot(projection="3d")
 
-    def plot_wireframe(ax, f, x_range, y_range, color):
+    def plot_wireframe(
+        ax: Axes3D,
+        f: Callable[[float, float], float],
+        x_range: list[float],
+        y_range: list[float],
+        color: str,
+    ) -> None:
         x, y = np.mgrid[x_range[0] : x_range[1] : 25j, y_range[0] : y_range[1] : 25j]
 
         # Need an (N, 2) array of (x, y) pairs.

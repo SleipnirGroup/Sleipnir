@@ -21,7 +21,9 @@ build-backend = "py_build_cmake.build"
 
 [dependency-groups]
 dev = [
+    "mypy>=2.4.0",
     "pytest>=9.1.1",
+    "scipy-stubs",
 ]
 
 [tool.py-build-cmake.cmake]
@@ -54,8 +56,27 @@ exclude = []
 python_abi = "abi3"
 abi3_minimum_cpython_version = 312
 
+[tool.mypy]
+files = [
+  "benchmarks",
+  "docs/generate_website.py",
+  "examples",
+  "python/postprocess_stubs.py",
+  "python/test",
+  "tools",
+]
+allow_redefinition_new = true
+explicit_package_bases = true
+local_partial_types = true
+mypy_path = ["examples/current_manager", "python/test/optimization"]
+
+  [[tool.mypy.overrides]]
+  module = "mpl_toolkits.*"
+  ignore_missing_imports = true
+
 [tool.pytest.ini_options]
 minversion = "6.0"
+pythonpath = ["examples/current_manager"]
 testpaths = ["python/test", "examples/current_manager/test"]
 
 [tool.uv]
@@ -68,6 +89,7 @@ cache-keys = [
     { file = "python/cpp/**/*.cpp" },
     { file = "python/cpp/binders.hpp" },
     { file = "python/cpp/for_each_type.hpp" },
+    { file = "python/cpp/slice_tuple.hpp" },
     { file = "python/cpp/try_cast.hpp" },
     { file = "python/src/**" },
     { file = "src/**" },

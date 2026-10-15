@@ -158,6 +158,44 @@ jobs:
       - run: pytest
         shell: bash
 
+  mypy:
+    name: mypy
+    runs-on: ubuntu-24.04
+    needs: [build-wheel]
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: 3.14
+
+      - uses: actions/download-artifact@v8
+        with:
+          path: dist
+          pattern: 'Linux x86_64 wheel'
+
+      - run: pip install --group dev dist/sleipnirgroup_jormungandr-*.whl
+        shell: bash
+      - run: mypy
+      - name: mypy (stubs)
+        run: |
+          args=(
+            --warn-unused-ignores
+            # Comparison operators deliberately return constraints instead of
+            # bool
+            --disable-error-code override
+            # Indexing returns a Variable for int indices and a VariableBlock
+            # otherwise
+            --disable-error-code overload-overlap
+            # The bindings have int overloads alongside float ones so ints
+            # dispatch without a conversion pass, but type checkers promote int
+            # to float
+            --disable-error-code overload-cannot-match
+            -p sleipnir._sleipnir
+          )
+          mypy "${args[@]}"
+        shell: bash
+
   build-sdist:
     name: sdist
     runs-on: ubuntu-slim

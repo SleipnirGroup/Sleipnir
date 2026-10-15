@@ -3,7 +3,7 @@ from sleipnir.autodiff import ExpressionType
 from sleipnir.optimization import ExitStatus, Problem
 
 
-def test_empty():
+def test_empty() -> None:
     problem = Problem()
 
     assert problem.cost_function_type() == ExpressionType.NONE
@@ -13,7 +13,7 @@ def test_empty():
     assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
 
 
-def test_no_cost_unconstrained_1():
+def test_no_cost_unconstrained_1() -> None:
     problem = Problem()
 
     X = problem.decision_variable(2, 3)
@@ -29,7 +29,7 @@ def test_no_cost_unconstrained_1():
             assert X.value(row, col) == 0.0
 
 
-def test_no_cost_unconstrained_2():
+def test_no_cost_unconstrained_2() -> None:
     problem = Problem()
 
     X = problem.decision_variable(2, 3)

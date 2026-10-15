@@ -6,6 +6,7 @@
 #include <nanobind/operators.h>
 #include <nanobind/stl/function.h>
 #include <nanobind/stl/string.h>
+#include <nanobind/stl/tuple.h>
 #include <nanobind/stl/vector.h>
 
 #include <stdint.h>
@@ -15,6 +16,7 @@
 #include <functional>
 #include <stdexcept>
 #include <string>
+#include <tuple>
 #include <vector>
 
 #include <Eigen/Core>
@@ -26,6 +28,7 @@
 
 #include "docstrings.hpp"
 #include "for_each_type.hpp"
+#include "slice_tuple.hpp"
 #include "try_cast.hpp"
 
 namespace nb = nanobind;
@@ -90,7 +93,7 @@ void bind_variable_matrix(nb::module_& autodiff,
       "row"_a, "value"_a);
   cls.def(
       "__setitem__",
-      [](VariableMatrix<double>& self, nb::tuple slices, nb::object value) {
+      [](VariableMatrix<double>& self, SliceTuple slices, nb::object value) {
         if (slices.size() != 2) {
           throw nb::index_error(
               std::format("Expected 2 slices, got {}.", slices.size()).c_str());
@@ -170,29 +173,31 @@ void bind_variable_matrix(nb::module_& autodiff,
       DOC(slp, VariableMatrix, operator, array, 3));
   cls.def(
       "__getitem__",
-      [](VariableMatrix<double>& self, nb::tuple slices) -> nb::object {
+      [](VariableMatrix<double>& self,
+         std::tuple<int, int> slices) -> Variable<double>& {
+        auto [row, col] = slices;
+
+        if (row >= self.rows() || col >= self.cols()) {
+          throw std::out_of_range("Index out of bounds");
+        }
+
+        if (row < 0) {
+          row += self.rows();
+        }
+        if (col < 0) {
+          col += self.cols();
+        }
+        return self[row, col];
+      },
+      nb::rv_policy::reference_internal, "slices"_a,
+      DOC(slp, VariableMatrix, operator, array));
+  cls.def(
+      "__getitem__",
+      [](VariableMatrix<double>& self,
+         SliceTuple slices) -> VariableBlock<VariableMatrix<double>> {
         if (slices.size() != 2) {
           throw nb::index_error(
               std::format("Expected 2 slices, got {}.", slices.size()).c_str());
-        }
-
-        // If both indices are integers instead of slices, return Variable
-        // instead of VariableBlock
-        if (nb::isinstance<int>(slices[0]) && nb::isinstance<int>(slices[1])) {
-          int row = nb::cast<int>(slices[0]);
-          int col = nb::cast<int>(slices[1]);
-
-          if (row >= self.rows() || col >= self.cols()) {
-            throw std::out_of_range("Index out of bounds");
-          }
-
-          if (row < 0) {
-            row += self.rows();
-          }
-          if (col < 0) {
-            col += self.cols();
-          }
-          return nb::cast(self[row, col]);
         }
 
         Slice row_slice;
@@ -227,8 +232,7 @@ void bind_variable_matrix(nb::module_& autodiff,
           col_slice_length = 1;
         }
 
-        return nb::cast(
-            self[row_slice, row_slice_length, col_slice, col_slice_length]);
+        return self[row_slice, row_slice_length, col_slice, col_slice_length];
       },
       nb::keep_alive<0, 1>(), "slices"_a,
       DOC(slp, VariableMatrix, operator, array));
@@ -237,43 +241,46 @@ void bind_variable_matrix(nb::module_& autodiff,
   cls.def("col", nb::overload_cast<int>(&VariableMatrix<double>::col), "col"_a,
           DOC(slp, VariableMatrix, col));
 
-  // Matrix-matrix multiplication
+  // Matrix-matrix multiplication. Products with a VariableBlock on the left are
+  // bound on VariableBlock.
+  for (const char* name : {"__mul__", "__matmul__"}) {
+    cls.def(
+        name,
+        [](const VariableMatrix<double>& lhs,
+           const VariableMatrix<double>& rhs) { return lhs * rhs; },
+        nb::is_operator(), "rhs"_a);
+    cls.def(
+        name,
+        [](const VariableMatrix<double>& lhs,
+           const VariableBlock<VariableMatrix<double>>& rhs) {
+          return lhs * rhs;
+        },
+        nb::is_operator(), "rhs"_a);
+  }
+  for (const char* name : {"__rmul__", "__rmatmul__"}) {
+    cls.def(
+        name,
+        [](const VariableMatrix<double>& rhs,
+           const VariableBlock<VariableMatrix<double>>& lhs) {
+          return lhs * rhs;
+        },
+        nb::is_operator(), "lhs"_a);
+  }
+
+  // Matrix multiplication with NumPy arrays. These are also handled by
+  // __array_ufunc__ below, but type checkers only see these overloads.
   cls.def(
-      "__mul__",
-      [](const VariableMatrix<double>& lhs, const VariableMatrix<double>& rhs) {
+      "__matmul__",
+      [](const VariableMatrix<double>& lhs, nb::DRef<Eigen::MatrixXd> rhs) {
         return lhs * rhs;
       },
       nb::is_operator(), "rhs"_a);
   cls.def(
-      "__mul__",
-      [](const VariableMatrix<double>& lhs,
-         const VariableBlock<VariableMatrix<double>>& rhs) {
-        return lhs * rhs;
-      },
-      nb::is_operator(), "rhs"_a);
-  cls.def(
-      "__rmul__",
-      [](const VariableMatrix<double>& rhs,
-         const VariableBlock<VariableMatrix<double>>& lhs) {
+      "__rmatmul__",
+      [](const VariableMatrix<double>& rhs, nb::DRef<Eigen::MatrixXd> lhs) {
         return lhs * rhs;
       },
       nb::is_operator(), "lhs"_a);
-  cls.def(
-      "__mul__",
-      [](const VariableBlock<VariableMatrix<double>>& lhs,
-         const VariableBlock<VariableMatrix<double>>& rhs) {
-        return lhs * rhs;
-      },
-      nb::is_operator(), "rhs"_a);
-  for_each_type<VariableMatrix<double>, VariableBlock<VariableMatrix<double>>>(
-      [&]<typename L> {
-        for_each_type<VariableMatrix<double>,
-                      VariableBlock<VariableMatrix<double>>>([&]<typename R> {
-          cls.def(
-              "__matmul__", [](L&& lhs, R&& rhs) { return lhs * rhs; },
-              nb::is_operator(), "rhs"_a);
-        });
-      });
 
   // https://numpy.org/doc/stable/user/basics.dispatch.html
   cls.def(

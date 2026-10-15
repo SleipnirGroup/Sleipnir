@@ -4,7 +4,7 @@ from sleipnir.autodiff import ExpressionType
 from sleipnir.optimization import ExitStatus, Problem
 
 
-def test_unconstrained1d():
+def test_unconstrained1d() -> None:
     problem = Problem()
 
     x = problem.decision_variable()
@@ -21,7 +21,7 @@ def test_unconstrained1d():
     assert x.value() == pytest.approx(3.0, abs=1e-6)
 
 
-def test_unconstrained2d_1():
+def test_unconstrained2d_1() -> None:
     problem = Problem()
 
     x, y = problem.decision_variable(2)
@@ -40,7 +40,7 @@ def test_unconstrained2d_1():
     assert y.value() == pytest.approx(0.0, abs=1e-6)
 
 
-def test_unconstrained2d_2():
+def test_unconstrained2d_2() -> None:
     problem = Problem()
 
     x = problem.decision_variable(2)
@@ -98,7 +98,7 @@ def test_unconstrained2d_2():
 # [x]   [18]
 # [y] = [ 6]
 # [λ]   [ 6]
-def test_equality_constrained_1():
+def test_equality_constrained_1() -> None:
     problem = Problem()
 
     x, y = problem.decision_variable(2)
@@ -117,7 +117,7 @@ def test_equality_constrained_1():
     assert y.value() == pytest.approx(6.0, abs=1e-5)
 
 
-def test_equality_constrained_2():
+def test_equality_constrained_2() -> None:
     problem = Problem()
 
     x = problem.decision_variable(2)
@@ -138,7 +138,7 @@ def test_equality_constrained_2():
     assert x.value(1) == pytest.approx(3.0, abs=1e-5)
 
 
-def test_inequality_constrained_2d():
+def test_inequality_constrained_2d() -> None:
     problem = Problem()
 
     x, y = problem.decision_variable(2)

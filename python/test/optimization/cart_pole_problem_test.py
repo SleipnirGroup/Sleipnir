@@ -11,14 +11,14 @@ from sleipnir.autodiff import ExpressionType
 from sleipnir.optimization import ExitStatus, Problem, bounds
 
 
-def lerp(a, b, t):
+def lerp(a: float, b: float, t: float) -> float:
     return a + t * (b - a)
 
 
 # dt = 0.25 s is sensitive to small solver changes, so a failure here may just
 # mean the iterates found a different basin rather than a regression.
 @pytest.mark.parametrize("dt", [0.05, 0.125, 0.25])
-def test_cart_pole_problem(dt):
+def test_cart_pole_problem(dt: float) -> None:
     TOTAL_TIME = 5.0  # s
     N = int(TOTAL_TIME / dt)
 

@@ -9,7 +9,7 @@ import re
 import subprocess
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--release", action="store_true")
     args = parser.parse_args()
@@ -18,6 +18,8 @@ def main():
     print(f"git describe: {output}")
 
     m = re.search(r"^v(\d+)\.(\d+)\.(\d+)(-(\d+)-g([a-z0-9]+))?", output)
+    if not m:
+        raise ValueError(f"Unexpected git describe output: {output}")
     major = m.group(1)
     minor = m.group(2)
     patch = m.group(3)

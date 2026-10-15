@@ -6,6 +6,7 @@
 #include <nanobind/operators.h>
 #include <nanobind/stl/function.h>
 #include <nanobind/stl/string.h>
+#include <nanobind/stl/tuple.h>
 #include <nanobind/stl/vector.h>
 
 #include <stdint.h>
@@ -15,6 +16,7 @@
 #include <functional>
 #include <stdexcept>
 #include <string>
+#include <tuple>
 
 #include <Eigen/Core>
 #include <sleipnir/autodiff/slice.hpp>
@@ -25,6 +27,7 @@
 
 #include "docstrings.hpp"
 #include "for_each_type.hpp"
+#include "slice_tuple.hpp"
 #include "try_cast.hpp"
 
 namespace nb = nanobind;
@@ -68,7 +71,7 @@ void bind_variable_block(
       "row"_a, "value"_a);
   cls.def(
       "__setitem__",
-      [](VariableBlock<VariableMatrix<double>>& self, nb::tuple slices,
+      [](VariableBlock<VariableMatrix<double>>& self, SliceTuple slices,
          nb::object value) {
         if (slices.size() != 2) {
           throw nb::index_error(
@@ -151,29 +154,30 @@ void bind_variable_block(
   cls.def(
       "__getitem__",
       [](VariableBlock<VariableMatrix<double>>& self,
-         nb::tuple slices) -> nb::object {
+         std::tuple<int, int> slices) -> Variable<double>& {
+        auto [row, col] = slices;
+
+        if (row >= self.rows() || col >= self.cols()) {
+          throw std::out_of_range("Index out of bounds");
+        }
+
+        if (row < 0) {
+          row += self.rows();
+        }
+        if (col < 0) {
+          col += self.cols();
+        }
+        return self[row, col];
+      },
+      nb::rv_policy::reference_internal, "slices"_a,
+      DOC(slp, VariableBlock, operator, array));
+  cls.def(
+      "__getitem__",
+      [](VariableBlock<VariableMatrix<double>>& self,
+         SliceTuple slices) -> VariableBlock<VariableMatrix<double>> {
         if (slices.size() != 2) {
           throw nb::index_error(
               std::format("Expected 2 slices, got {}.", slices.size()).c_str());
-        }
-
-        // If both indices are integers instead of slices, return Variable
-        // instead of VariableBlock
-        if (nb::isinstance<int>(slices[0]) && nb::isinstance<int>(slices[1])) {
-          int row = nb::cast<int>(slices[0]);
-          int col = nb::cast<int>(slices[1]);
-
-          if (row >= self.rows() || col >= self.cols()) {
-            throw std::out_of_range("Index out of bounds");
-          }
-
-          if (row < 0) {
-            row += self.rows();
-          }
-          if (col < 0) {
-            col += self.cols();
-          }
-          return nb::cast(self[row, col]);
         }
 
         Slice row_slice;
@@ -211,8 +215,7 @@ void bind_variable_block(
           col_slice_length = 1;
         }
 
-        return nb::cast(
-            self[row_slice, row_slice_length, col_slice, col_slice_length]);
+        return self[row_slice, row_slice_length, col_slice, col_slice_length];
       },
       nb::keep_alive<0, 1>(), DOC(slp, VariableBlock, operator, array),
       "slices"_a);
@@ -222,6 +225,31 @@ void bind_variable_block(
   cls.def("col",
           nb::overload_cast<int>(&VariableBlock<VariableMatrix<double>>::col),
           "col"_a, DOC(slp, VariableBlock, col));
+
+  // Matrix-matrix multiplication. Products with a VariableMatrix on the left
+  // are bound on VariableMatrix.
+  for (const char* name : {"__mul__", "__matmul__"}) {
+    cls.def(
+        name,
+        [](const VariableBlock<VariableMatrix<double>>& lhs,
+           const VariableBlock<VariableMatrix<double>>& rhs) {
+          return lhs * rhs;
+        },
+        nb::is_operator(), "rhs"_a);
+  }
+
+  // Matrix multiplication with NumPy arrays. These are also handled by
+  // __array_ufunc__ below, but type checkers only see these overloads.
+  cls.def(
+      "__matmul__",
+      [](const VariableBlock<VariableMatrix<double>>& lhs,
+         nb::DRef<Eigen::MatrixXd> rhs) { return lhs * rhs; },
+      nb::is_operator(), "rhs"_a);
+  cls.def(
+      "__rmatmul__",
+      [](const VariableBlock<VariableMatrix<double>>& rhs,
+         nb::DRef<Eigen::MatrixXd> lhs) { return lhs * rhs; },
+      nb::is_operator(), "lhs"_a);
 
   // https://numpy.org/doc/stable/user/basics.dispatch.html
   cls.def(

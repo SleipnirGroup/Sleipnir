@@ -1,8 +1,9 @@
 import math
 
 import numpy as np
+import numpy.typing as npt
 from sleipnir import autodiff
-from sleipnir.autodiff import VariableMatrix
+from sleipnir.autodiff import VariableBlock, VariableMatrix
 
 # x = [x, y, heading, left velocity, right velocity]ᵀ
 # u = [left voltage, right voltage]ᵀ
@@ -20,7 +21,9 @@ A = np.array([[A1, A2], [A2, A1]])
 B = np.array([[B1, B2], [B2, B1]])
 
 
-def differential_drive_dynamics_double(x, u):
+def differential_drive_dynamics_double(
+    x: npt.NDArray[np.float64], u: npt.NDArray[np.float64]
+) -> npt.NDArray[np.float64]:
     xdot = np.empty((5, 1))
 
     v = (x[3, 0] + x[4, 0]) / 2.0
@@ -32,7 +35,9 @@ def differential_drive_dynamics_double(x, u):
     return xdot
 
 
-def differential_drive_dynamics_variable(x, u):
+def differential_drive_dynamics_variable(
+    x: VariableMatrix | VariableBlock, u: VariableMatrix | VariableBlock
+) -> VariableMatrix:
     xdot = VariableMatrix(5, 1)
 
     v = (x[3, 0] + x[4, 0]) / 2.0

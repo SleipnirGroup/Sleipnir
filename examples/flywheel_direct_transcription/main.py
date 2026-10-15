@@ -6,7 +6,7 @@ import numpy as np
 from sleipnir.optimization import Problem, bounds
 
 
-def main():
+def main() -> None:
     T = 5.0  # s
     dt = 0.005  # s
     N = int(T / dt)

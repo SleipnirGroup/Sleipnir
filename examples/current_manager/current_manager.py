@@ -10,7 +10,7 @@ class CurrentManager:
     Subsystems with a smaller tolerance are given higher priority.
     """
 
-    def __init__(self, current_tolerances: list[float], max_current: float):
+    def __init__(self, current_tolerances: list[float], max_current: float) -> None:
         """
         Constructs a CurrentManager.
 
@@ -32,7 +32,7 @@ class CurrentManager:
             self.__desired_currents[row] = Variable(float("inf"))
 
         J = 0.0
-        current_sum = 0.0
+        current_sum = Variable(0.0)
         for i in range(len(current_tolerances)):
             # The weight is 1/tolᵢ² where tolᵢ is the tolerance between the
             # desired and allocated current for subsystem i

@@ -5,7 +5,7 @@ from sleipnir.autodiff import ExpressionType
 from sleipnir.optimization import ExitStatus, Problem, bounds
 
 
-def test_quartic():
+def test_quartic() -> None:
     problem = Problem()
 
     x = problem.decision_variable()
@@ -24,7 +24,7 @@ def test_quartic():
     assert x.value() == pytest.approx(1.0, abs=1e-6)
 
 
-def test_rosenbrock_with_cubic_and_line_constraint():
+def test_rosenbrock_with_cubic_and_line_constraint() -> None:
     # https://en.wikipedia.org/wiki/Test_functions_for_optimization#Test_functions_for_constrained_optimization
 
     problem = Problem()
@@ -57,7 +57,7 @@ def test_rosenbrock_with_cubic_and_line_constraint():
             )
 
 
-def test_rosenbrock_with_disk_constraint():
+def test_rosenbrock_with_disk_constraint() -> None:
     # https://en.wikipedia.org/wiki/Test_functions_for_optimization#Test_functions_for_constrained_optimization
 
     problem = Problem()
@@ -85,7 +85,7 @@ def test_rosenbrock_with_disk_constraint():
             assert sol == pytest.approx((1.0, 1.0), abs=1e-3)
 
 
-def test_minimum_2d_distance_with_linear_constraint():
+def test_minimum_2d_distance_with_linear_constraint() -> None:
     problem = Problem()
 
     x, y = problem.decision_variable(2)
@@ -106,7 +106,7 @@ def test_minimum_2d_distance_with_linear_constraint():
     assert y.value() == pytest.approx(2.5, abs=1e-2)
 
 
-def test_conflicting_bounds():
+def test_conflicting_bounds() -> None:
     problem = Problem()
 
     x, y = problem.decision_variable(2)
@@ -123,7 +123,7 @@ def test_conflicting_bounds():
     assert problem.solve(diagnostics=True) == ExitStatus.GLOBALLY_INFEASIBLE
 
 
-def test_wachter_and_biegler_line_search_failure():
+def test_wachter_and_biegler_line_search_failure() -> None:
     # Example 19.2 of [1] exercises a deficiency of line search IPMs that must
     # be overcome by feasibility restoration. Depending on the specific
     # trajectory taken, either success or local infeasibility are expected.
@@ -162,7 +162,7 @@ def test_wachter_and_biegler_line_search_failure():
         assert s2.value() == pytest.approx(0.0, abs=3e-5)
 
 
-def test_hock_schittkowski_13():
+def test_hock_schittkowski_13() -> None:
     # Problem 13 of [1] (see
     # https://vanderbei.princeton.edu/ampl/nlmodels/cute/hs013.mod) has
     # constraint gradients that are linearly dependent at the solution.

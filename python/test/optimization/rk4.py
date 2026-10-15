@@ -1,4 +1,30 @@
-def rk4(f, x, u, dt):
+from collections.abc import Callable
+from typing import Any, overload
+
+import numpy as np
+import numpy.typing as npt
+from sleipnir.autodiff import VariableBlock, VariableMatrix
+
+type Matrix = npt.NDArray[np.float64]
+type SymbolicMatrix = VariableMatrix | VariableBlock
+
+
+@overload
+def rk4(
+    f: Callable[[Matrix, Matrix], Matrix], x: Matrix, u: Matrix, dt: float
+) -> Matrix: ...
+
+
+@overload
+def rk4(
+    f: Callable[[SymbolicMatrix, SymbolicMatrix], VariableMatrix],
+    x: SymbolicMatrix,
+    u: SymbolicMatrix,
+    dt: float,
+) -> VariableMatrix: ...
+
+
+def rk4(f: Callable[[Any, Any], Any], x: Any, u: Any, dt: float) -> Any:
     """
     Performs 4th order Runge-Kutta integration of dx/dt = f(x, u) for dt.
 

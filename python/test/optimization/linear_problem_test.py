@@ -3,7 +3,7 @@ from sleipnir.autodiff import ExpressionType
 from sleipnir.optimization import ExitStatus, Problem
 
 
-def test_maximize():
+def test_maximize() -> None:
     problem = Problem()
 
     x, y = problem.decision_variable(2)
@@ -28,7 +28,7 @@ def test_maximize():
     assert y.value() == pytest.approx(250.0, abs=1e-6)
 
 
-def test_free_variable():
+def test_free_variable() -> None:
     problem = Problem()
 
     x = problem.decision_variable(2)

@@ -5,7 +5,7 @@ from sleipnir import autodiff
 from sleipnir.autodiff import VariableMatrix
 
 
-def test_assignment_to_default():
+def test_assignment_to_default() -> None:
     mat = VariableMatrix()
 
     assert mat.rows() == 0
@@ -33,7 +33,7 @@ def test_assignment_to_default():
     assert mat[1, 1].value() == 4.0
 
 
-def test_assignment_aliasing():
+def test_assignment_aliasing() -> None:
     A = VariableMatrix([[1.0, 2.0], [3.0, 4.0]])
     B = VariableMatrix([[5.0, 6.0], [7.0, 8.0]])
 
@@ -55,7 +55,7 @@ def test_assignment_aliasing():
     assert (B.value() == expected_B).all()
 
 
-def test_slicing():
+def test_slicing() -> None:
     mat = VariableMatrix(
         [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]]
     )
@@ -141,7 +141,7 @@ def test_slicing():
     ).all()
 
 
-def test_subslicing():
+def test_subslicing() -> None:
     # Block-of-block assignment (row skip forward)
     mat = VariableMatrix(5, 5)
     assert mat[::2, ::1][1:3, 1:4].shape == (2, 3)
@@ -215,7 +215,7 @@ def test_subslicing():
     ).all()
 
 
-def test_compound_assignment_operators():
+def test_compound_assignment_operators() -> None:
     A1 = VariableMatrix([[1]])
     A2 = VariableMatrix([[1, 2], [3, 4]])
     B = VariableMatrix([[1, 2], [3, 4]])
@@ -241,9 +241,9 @@ def test_compound_assignment_operators():
 
     # VariableMatrix matrix-scalar operators
     A1 += b
-    assert (A1.value() == np.array([[3]])).all()
+    assert A1.value() == 3
     A1 -= b
-    assert (A1.value() == np.array([[1]])).all()
+    assert A1.value() == 1
     A2 *= b
     assert (A2.value() == np.array([[2, 4], [6, 8]])).all()
     A2 /= b
@@ -260,7 +260,7 @@ def test_compound_assignment_operators():
     assert (A2.value() == np.array([[1, 2], [3, 4]])).all()
 
 
-def test_iterators():
+def test_iterators() -> None:
     A = VariableMatrix([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]])
     sub_A = A[2:3, 1:3]
 
@@ -278,7 +278,7 @@ def test_iterators():
         i += 1
 
 
-def test_value():
+def test_value() -> None:
     A = VariableMatrix([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]])
     expected = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]])
 
@@ -298,7 +298,7 @@ def test_value():
     assert A[1:3, 1:3].T[:, 1:].value(1) == 9.0
 
 
-def test_pow():
+def test_pow() -> None:
     # VariableMatrix coefficient-wise power
     A = VariableMatrix([[-2.0, -3.0, -4.0], [-5.0, -6.0, -7.0]])
     assert A**2 == np.array([[4.0, 9.0, 16.0], [25.0, 36.0, 49.0]])
@@ -310,7 +310,7 @@ def test_pow():
     assert sub_A**3 == np.array([[-8.0, -27.0], [-125.0, -216.0]])
 
 
-def test_cwise_map():
+def test_cwise_map() -> None:
     # VariableMatrix cwise_map
     A = VariableMatrix([[-2.0, -3.0, -4.0], [-5.0, -6.0, -7.0]])
 
@@ -335,7 +335,7 @@ def test_cwise_map():
     assert (result2.value() == expected2).all()
 
 
-def test_unary_broadcast():
+def test_unary_broadcast() -> None:
     # VariableMatrix broadcast
     A = VariableMatrix([[-2.0, -3.0, -4.0], [-5.0, -6.0, -7.0]])
 
@@ -360,7 +360,7 @@ def test_unary_broadcast():
     assert (result2.value() == expected2).all()
 
 
-def test_identity_static_function():
+def test_identity_static_function() -> None:
     A = VariableMatrix.identity(3)
 
     assert A.shape == (3, 3)
@@ -368,7 +368,7 @@ def test_identity_static_function():
     assert (A.value() == np.identity(3)).all()
 
 
-def test_zero_static_function():
+def test_zero_static_function() -> None:
     A = VariableMatrix.zero(2, 3)
 
     assert A.shape == (2, 3)
@@ -378,7 +378,7 @@ def test_zero_static_function():
             assert A[row, col].value() == 0.0
 
 
-def test_one_static_function():
+def test_one_static_function() -> None:
     A = VariableMatrix.one(2, 3)
 
     assert A.shape == (2, 3)
@@ -388,7 +388,7 @@ def test_one_static_function():
             assert A[row, col].value() == 1.0
 
 
-def test_constant_static_function():
+def test_constant_static_function() -> None:
     A = VariableMatrix.constant(2, 3, 2.0)
 
     assert A.shape == (2, 3)
@@ -398,7 +398,7 @@ def test_constant_static_function():
             assert A[row, col].value() == 2.0
 
 
-def test_cwise_reduce():
+def test_cwise_reduce() -> None:
     A = VariableMatrix([[2.0, 3.0, 4.0], [5.0, 6.0, 7.0]])
     B = VariableMatrix([[8.0, 9.0, 10.0], [11.0, 12.0, 13.0]])
     result = autodiff.cwise_reduce(A, B, lambda a, b: a * b)
@@ -406,7 +406,7 @@ def test_cwise_reduce():
     assert (result.value() == np.array([[16.0, 27.0, 40.0], [55.0, 72.0, 91.0]])).all()
 
 
-def test_exp():
+def test_exp() -> None:
     # Scalar
     A1 = VariableMatrix([[4.0]])
     np.testing.assert_allclose(A1.exp().value(), np.array([[math.exp(4.0)]]))
@@ -466,7 +466,7 @@ def test_exp():
     np.testing.assert_allclose(pascal[:, :].exp().value(), expected_pascal, atol=1e-14)
 
 
-def test_block_free_function():
+def test_block_free_function() -> None:
     A = VariableMatrix([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
     B = VariableMatrix([[7.0], [8.0]])
 
@@ -485,7 +485,7 @@ def test_block_free_function():
     assert (mat2.value() == expected2).all()
 
 
-def check_solve(A: VariableMatrix, B: VariableMatrix):
+def check_solve(A: VariableMatrix, B: VariableMatrix) -> None:
     print(f"solve(A, B) {A.shape[0]}x{A.shape[1]}")
 
     X = autodiff.solve(A, B)
@@ -494,7 +494,7 @@ def check_solve(A: VariableMatrix, B: VariableMatrix):
     assert np.linalg.norm(A.value() @ X.value() - B.value()) < 1e-12
 
 
-def test_solve_free_function():
+def test_solve_free_function() -> None:
     # 1x1 special case
     check_solve(VariableMatrix([[2.0]]), VariableMatrix([[5.0]]))
 
