@@ -361,6 +361,10 @@ void bind_variable_matrix(nb::module_& autodiff,
 
         return nb::not_implemented();
       },
+      // nanobind can't annotate nb::args or nb::kwargs, so the stub needs an
+      // explicit signature
+      nb::sig("def __array_ufunc__(self, ufunc: object, method: str, "
+              "*inputs: object, **kwargs: object) -> object"),
       "ufunc"_a, "method"_a, "inputs"_a, "kwargs"_a);
 
   cls.def(nb::self + nb::self, "rhs"_a);
