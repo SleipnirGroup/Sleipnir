@@ -91,6 +91,8 @@ pip install --user dist/sleipnirgroup_jormungandr-*.whl
 pytest
 ```
 
+When configuring CMake directly with `-DSLEIPNIR_BUILD_PYTHON=ON` instead of building a wheel, install pybind11_mkdoc first via `pip install --group docstrings`. It regenerates the Python docstrings from the C++ headers.
+
 ## Development
 
 ### Running C++ tests

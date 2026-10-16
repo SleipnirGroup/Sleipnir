@@ -1,6 +1,20 @@
 function(pybind11_mkdoc target headers)
     find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
+    # Check that pybind11_mkdoc is installed
+    execute_process(
+        COMMAND ${Python3_EXECUTABLE} -c "import pybind11_mkdoc"
+        RESULT_VARIABLE pybind11_mkdoc_result
+        OUTPUT_QUIET
+        ERROR_QUIET
+    )
+    if(NOT pybind11_mkdoc_result EQUAL 0)
+        message(
+            FATAL_ERROR
+            "pybind11_mkdoc not found for ${Python3_EXECUTABLE}. Install it with `pip install --group docstrings`."
+        )
+    endif()
+
     # Target compiler flags
     get_target_property(target_flags ${target} INCLUDE_DIRECTORIES)
     list(TRANSFORM target_flags PREPEND "-I")

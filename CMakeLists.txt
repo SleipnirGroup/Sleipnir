@@ -396,17 +396,6 @@ if(SLEIPNIR_BUILD_PYTHON)
     )
 
     if(NOT CMAKE_CROSSCOMPILING)
-        # pybind11_mkdoc dependency
-        FetchContent_Declare(
-            pybind11_mkdoc
-            GIT_REPOSITORY https://github.com/pybind/pybind11_mkdoc.git
-            GIT_TAG v3.0.0
-            GIT_SHALLOW ON
-            EXCLUDE_FROM_ALL
-            SYSTEM
-        )
-        FetchContent_MakeAvailable(pybind11_mkdoc)
-
         set(sleipnir_headers
             ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/autodiff/expression_type.hpp
             ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/autodiff/gradient.hpp
