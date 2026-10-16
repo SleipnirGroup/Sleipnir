@@ -33,6 +33,7 @@ The benchmarks use the following thirdparty software:
 * CasADi 3.8.1 (autodiff and NLP solver frontend)
 * Ipopt 3.14.20 (NLP solver backend)
 * MUMPS 5.8.1 (linear solver)
+* OpenBLAS 0.3.34 (BLAS)
 
 Ipopt uses MUMPS by default because it has free licensing. Commercial linear solvers may be much faster.
 
