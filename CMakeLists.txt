@@ -345,6 +345,19 @@ if(SLEIPNIR_BUILD_PYTHON)
         LIBRARY DESTINATION ${PY_DEST}
     )
 
+    # py-build-cmake copies the pure Python sources into the wheel itself.
+    # Install them for plain CMake installs as well.
+    if(NOT DEFINED PY_BUILD_CMAKE_MODULE_NAME)
+        install(
+            DIRECTORY python/src/sleipnir/
+            DESTINATION ${PY_DEST}
+            COMPONENT python_modules
+            FILES_MATCHING
+            PATTERN "*.py"
+            PATTERN "__pycache__" EXCLUDE
+        )
+    endif()
+
     # Generate stubs at install time because only the install tree has the
     # sleipnir/ package layout needed to import the module by its fully
     # qualified name `sleipnir._sleipnir`.
