@@ -3,10 +3,15 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/function.h>
 
+#include <algorithm>
+#include <array>
 #include <chrono>
-#include <format>
+#include <cstddef>
 #include <functional>
+#include <ranges>
+#include <stdexcept>
 #include <string>
+#include <string_view>
 #include <utility>
 
 #include <sleipnir/autodiff/variable.hpp>
@@ -15,12 +20,103 @@
 #include <sleipnir/optimization/solver/iteration_info.hpp>
 #include <sleipnir/optimization/solver/options.hpp>
 
+#include "arity.hpp"
 #include "docstrings.hpp"
 #include "for_each_type.hpp"
+#include "text_wrap.hpp"
 
 namespace nb = nanobind;
 
 namespace slp {
+
+namespace {
+
+/// Name and docs of an Options member.
+struct OptionDoc {
+  /// Member name, which is also the solve() binding's keyword argument name.
+  const char* name;
+
+  /// Member docs.
+  const char* doc;
+};
+
+/// Name and docs of each Options member in declaration order.
+///
+/// See include/sleipnir/optimization/solver/options.hpp.
+constexpr OptionDoc option_docs[] = {
+    {"tolerance", DOC(slp, Options, tolerance)},
+    {"max_iterations", DOC(slp, Options, max_iterations)},
+    {"timeout", DOC(slp, Options, timeout)},
+    {"feasible_ipm", DOC(slp, Options, feasible_ipm)},
+    {"diagnostics", DOC(slp, Options, diagnostics)}};
+static_assert(member_count<Options>() == std::size(option_docs),
+              "Every Options member must be documented here and be a "
+              "keyword argument of the solve() binding");
+
+/// Returns the Python docstring for Problem.solve().
+///
+/// C++'s Problem<double>::solve() takes an Options object instead of keyword
+/// arguments, so its generated docstring documents a single `options` argument.
+/// This replaces that entry with the docs for each Options member.
+consteval const char* solve_doc() {
+  static constexpr auto doc = [] {
+    constexpr auto make_doc = [] {
+      std::string args;
+      for (const auto& [name, option_doc] : option_docs) {
+        // The Options member docs were wrapped without the "    name: " prefix,
+        // so they need to be rewrapped. pybind11_mkdoc's default docstring
+        // width is 70.
+        args += wrap(std::string{"    "} + std::string{name} + ": ", option_doc,
+                     70);
+        args += '\n';
+      }
+
+      // Find the start of the `options` entry
+      std::string result = DOC(slp, Problem, solve);
+      constexpr std::string_view options_entry = "    options: ";
+      auto begin = result.find(options_entry);
+      if (begin == std::string::npos) {
+        throw std::logic_error{
+            "Problem::solve() docs have no options argument"};
+      }
+
+      // Find the end of the `options` entry's last line. Each following line
+      // indented past the argument names is a continuation of the entry, as are
+      // any blank lines before it.
+      std::string_view rest = std::string_view{result}.substr(begin);
+      auto lines = rest | std::views::split('\n');
+      auto entry_end = std::ranges::end(lines.front());
+      for (auto line :
+           lines | std::views::drop(1) | std::views::take_while([](auto line) {
+             return line.empty() || std::string_view{line}.starts_with("     ");
+           })) {
+        if (!line.empty()) {
+          entry_end = line.end();
+        }
+      }
+
+      // Include the entry's trailing newline if it has one
+      size_t end = entry_end - rest.begin();
+      if (entry_end != rest.end()) {
+        ++end;
+      }
+
+      // Replace the `options` entry with the Options member entries
+      result.replace(begin, end, args);
+
+      return result;
+    };
+
+    std::array<char, make_doc().size() + 1> doc;
+    std::ranges::copy(make_doc(), doc.begin());
+    doc.back() = '\0';
+    return doc;
+  }();
+
+  return doc.data();
+}
+
+}  // namespace
 
 void bind_problem(nb::class_<Problem<double>>& cls) {
   using namespace nb::literals;
@@ -77,71 +173,35 @@ void bind_problem(nb::class_<Problem<double>>& cls) {
   cls.def("inequality_constraint_type",
           &Problem<double>::inequality_constraint_type,
           DOC(slp, Problem, inequality_constraint_type));
-  cls.def(
-      "solve",
-      [](Problem<double>& self, const nb::kwargs& kwargs) {
-        Options options;
-        bool spy = false;
 
-        for (auto [key, value] : kwargs) {
-          // XXX: The keyword arguments are manually copied from the struct
-          // members in include/sleipnir/optimization/solver/options.hpp.
-          //
-          // C++'s Problem<double>::solve() takes an Options object instead of
-          // keyword arguments, so there's no compile-time checking that the
-          // arguments match.
-          auto key_str = nb::cast<std::string>(key);
-          if (key_str == "tolerance") {
-            options.tolerance = nb::cast<double>(value);
-          } else if (key_str == "max_iterations") {
-            options.max_iterations = nb::cast<int>(value);
-          } else if (key_str == "timeout") {
-            options.timeout =
-                std::chrono::duration<double>{nb::cast<double>(value)};
-          } else if (key_str == "feasible_ipm") {
-            options.feasible_ipm = nb::cast<bool>(value);
-          } else if (key_str == "diagnostics") {
-            options.diagnostics = nb::cast<bool>(value);
-          } else if (key_str == "spy") {
-            spy = nb::cast<bool>(value);
-          } else {
-            throw nb::key_error(
-                std::format("Invalid keyword argument: {}", key_str).c_str());
-          }
-        }
+  // Maps Python's Problem.solve(**kwargs) to
+  // C++'s Problem::solve(Options, bool)
+  constexpr auto solve = [](Problem<double>& self, double tolerance,
+                            int max_iterations, double timeout,
+                            bool feasible_ipm, bool diagnostics, bool spy) {
+    return self.solve({.tolerance = tolerance,
+                       .max_iterations = max_iterations,
+                       .timeout = std::chrono::duration<double>{timeout},
+                       .feasible_ipm = feasible_ipm,
+                       .diagnostics = diagnostics},
+                      spy);
+  };
+  static_assert(
+      lambda_param_count<decltype(solve)>() == 1 + member_count<Options>() + 1,
+      "Every Options member must be a keyword argument of the solve() binding");
 
-        return self.solve(options, spy);
-      },
-      // XXX: The keyword argument docs are manually copied from the struct
-      // member docs in include/sleipnir/optimization/solver/options.hpp.
-      //
-      // C++'s Problem<double>::solve() takes an Options object instead of
-      // keyword arguments, so pybind11_mkdoc generates the wrong docs.
-      R"doc(Solves the optimization problem. The solution will be stored in the
-original variables used to construct the problem.
+  cls.def("solve", solve, nb::kw_only(),
+          nb::arg(option_docs[0].name) = Options{}.tolerance,
+          nb::arg(option_docs[1].name) = Options{}.max_iterations,
+          // nanobind renders defaults in signatures and stubs via repr(), and
+          // repr(float("inf")) is "inf", which isn't valid Python. Override the
+          // displayed default with sig().
+          nb::arg(option_docs[2].name).sig("float('inf')") =
+              Options{}.timeout.count(),
+          nb::arg(option_docs[3].name) = Options{}.feasible_ipm,
+          nb::arg(option_docs[4].name) = Options{}.diagnostics, "spy"_a = false,
+          solve_doc());
 
-Args:
-    tolerance: The solver will stop once the error is below this tolerance.
-        (default: 1e-8)
-    max_iterations: The maximum number of solver iterations before returning a
-        solution. (default: 5000)
-    timeout: The maximum elapsed wall clock time before returning a solution.
-        (default: infinity)
-    feasible_ipm: Enables the feasible interior-point method.
-
-        When the inequality constraints are all feasible, step sizes are reduced
-        when necessary to prevent them becoming infeasible again. This is useful
-        when parts of the problem are ill-conditioned in infeasible regions
-        (e.g., square root of a negative value). This can slow or prevent
-        progress toward a solution though, so only enable it if necessary.
-        (default: False)
-    diagnostics: Enables diagnostic output.
-
-        See https://sleipnirgroup.github.io/Sleipnir/md_usage.html#output for
-        more information. (default: False)
-    spy: Enables writing sparsity patterns of H, Aₑ, and Aᵢ to files named
-        H.spy, A_e.spy, and A_i.spy respectively during solve. Use tools/spy.py
-        to plot them. (default: False))doc");
   cls.def(
       "add_callback",
       [](Problem<double>& self,
