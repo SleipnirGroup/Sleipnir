@@ -67,6 +67,8 @@ files = [
   "tools",
 ]
 allow_redefinition_new = true
+disallow_incomplete_defs = true
+disallow_untyped_defs = true
 explicit_package_bases = true
 local_partial_types = true
 mypy_path = ["examples/current_manager", "python/test/optimization"]
