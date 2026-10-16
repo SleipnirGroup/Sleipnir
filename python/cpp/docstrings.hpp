@@ -23,11 +23,11 @@
 #endif
 
 
-static const char *mkd_doc_formatter = R"doc(Formatter for ExpressionType.)doc";
+constexpr char mkd_doc_formatter[] = R"doc(Formatter for ExpressionType.)doc";
 
-static const char *mkd_doc_formatter_2 = R"doc(Formatter for ExitStatus.)doc";
+constexpr char mkd_doc_formatter_2[] = R"doc(Formatter for ExitStatus.)doc";
 
-static const char *mkd_doc_formatter_format =
+constexpr char mkd_doc_formatter_format[] =
 R"doc(Formats ExpressionType.
 
 Args:
@@ -42,7 +42,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_formatter_format_2 =
+constexpr char mkd_doc_formatter_format_2[] =
 R"doc(Formats ExitStatus.
 
 Args:
@@ -57,11 +57,11 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_formatter_m_underlying = R"doc()doc";
+constexpr char mkd_doc_formatter_m_underlying[] = R"doc()doc";
 
-static const char *mkd_doc_formatter_m_underlying_2 = R"doc()doc";
+constexpr char mkd_doc_formatter_m_underlying_2[] = R"doc()doc";
 
-static const char *mkd_doc_formatter_parse =
+constexpr char mkd_doc_formatter_parse[] =
 R"doc(Parse format string.
 
 Args:
@@ -72,7 +72,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_formatter_parse_2 =
+constexpr char mkd_doc_formatter_parse_2[] =
 R"doc(Parses format string.
 
 Args:
@@ -83,29 +83,29 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp = R"doc()doc";
+constexpr char mkd_doc_slp[] = R"doc()doc";
 
-static const char *mkd_doc_slp_2 = R"doc()doc";
+constexpr char mkd_doc_slp_2[] = R"doc()doc";
 
-static const char *mkd_doc_slp_3 = R"doc()doc";
+constexpr char mkd_doc_slp_3[] = R"doc()doc";
 
-static const char *mkd_doc_slp_4 = R"doc()doc";
+constexpr char mkd_doc_slp_4[] = R"doc()doc";
 
-static const char *mkd_doc_slp_5 = R"doc()doc";
+constexpr char mkd_doc_slp_5[] = R"doc()doc";
 
-static const char *mkd_doc_slp_DynamicsType = R"doc(Enum describing a type of system dynamics constraints.)doc";
+constexpr char mkd_doc_slp_DynamicsType[] = R"doc(Enum describing a type of system dynamics constraints.)doc";
 
-static const char *mkd_doc_slp_DynamicsType_DISCRETE = R"doc(The dynamics are a function in the form xₖ₊₁ = f(t, xₖ, uₖ).)doc";
+constexpr char mkd_doc_slp_DynamicsType_DISCRETE[] = R"doc(The dynamics are a function in the form xₖ₊₁ = f(t, xₖ, uₖ).)doc";
 
-static const char *mkd_doc_slp_DynamicsType_EXPLICIT_ODE = R"doc(The dynamics are a function in the form dx/dt = f(t, x, u).)doc";
+constexpr char mkd_doc_slp_DynamicsType_EXPLICIT_ODE[] = R"doc(The dynamics are a function in the form dx/dt = f(t, x, u).)doc";
 
-static const char *mkd_doc_slp_EqualityConstraints =
+constexpr char mkd_doc_slp_EqualityConstraints[] =
 R"doc(A vector of equality constraints of the form cₑ(x) = 0.
 
 Template Args:
     Scalar: Scalar type.)doc";
 
-static const char *mkd_doc_slp_EqualityConstraints_EqualityConstraints =
+constexpr char mkd_doc_slp_EqualityConstraints_EqualityConstraints[] =
 R"doc(Concatenates multiple equality constraints.
 
 Args:
@@ -114,7 +114,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_EqualityConstraints_EqualityConstraints_2 =
+constexpr char mkd_doc_slp_EqualityConstraints_EqualityConstraints_2[] =
 R"doc(Concatenates multiple equality constraints.
 
 This overload is for Python bindings only.
@@ -125,7 +125,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_EqualityConstraints_EqualityConstraints_3 =
+constexpr char mkd_doc_slp_EqualityConstraints_EqualityConstraints_3[] =
 R"doc(Constructs an equality constraint from a left and right side.
 
 The standard form for equality constraints is c(x) = 0. This function
@@ -138,70 +138,70 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_EqualityConstraints_constraints = R"doc(A vector of scalar equality constraints.)doc";
+constexpr char mkd_doc_slp_EqualityConstraints_constraints[] = R"doc(A vector of scalar equality constraints.)doc";
 
-static const char *mkd_doc_slp_EqualityConstraints_operator_bool = R"doc(Implicit conversion operator to bool.)doc";
+constexpr char mkd_doc_slp_EqualityConstraints_operator_bool[] = R"doc(Implicit conversion operator to bool.)doc";
 
-static const char *mkd_doc_slp_ExitStatus = R"doc(Solver exit status. Negative values indicate failure.)doc";
+constexpr char mkd_doc_slp_ExitStatus[] = R"doc(Solver exit status. Negative values indicate failure.)doc";
 
-static const char *mkd_doc_slp_ExitStatus_CALLBACK_REQUESTED_STOP =
+constexpr char mkd_doc_slp_ExitStatus_CALLBACK_REQUESTED_STOP[] =
 R"doc(The solver returned its solution so far after the user requested a
 stop.)doc";
 
-static const char *mkd_doc_slp_ExitStatus_DIVERGING_ITERATES =
+constexpr char mkd_doc_slp_ExitStatus_DIVERGING_ITERATES[] =
 R"doc(The solver encountered diverging primal iterates xₖ and/or sₖ and gave
 up.)doc";
 
-static const char *mkd_doc_slp_ExitStatus_FACTORIZATION_FAILED = R"doc(The linear system factorization failed.)doc";
+constexpr char mkd_doc_slp_ExitStatus_FACTORIZATION_FAILED[] = R"doc(The linear system factorization failed.)doc";
 
-static const char *mkd_doc_slp_ExitStatus_FEASIBILITY_RESTORATION_FAILED =
+constexpr char mkd_doc_slp_ExitStatus_FEASIBILITY_RESTORATION_FAILED[] =
 R"doc(The solver failed to reach the desired tolerance, and feasibility
 restoration failed to converge.)doc";
 
-static const char *mkd_doc_slp_ExitStatus_GLOBALLY_INFEASIBLE =
+constexpr char mkd_doc_slp_ExitStatus_GLOBALLY_INFEASIBLE[] =
 R"doc(The problem setup frontend determined the problem to have an empty
 feasible region.)doc";
 
-static const char *mkd_doc_slp_ExitStatus_LINE_SEARCH_FAILED =
+constexpr char mkd_doc_slp_ExitStatus_LINE_SEARCH_FAILED[] =
 R"doc(The backtracking line search failed, and the problem isn't locally
 infeasible.)doc";
 
-static const char *mkd_doc_slp_ExitStatus_LOCALLY_INFEASIBLE =
+constexpr char mkd_doc_slp_ExitStatus_LOCALLY_INFEASIBLE[] =
 R"doc(The solver determined the problem to be locally infeasible and gave
 up.)doc";
 
-static const char *mkd_doc_slp_ExitStatus_MAX_ITERATIONS_EXCEEDED =
+constexpr char mkd_doc_slp_ExitStatus_MAX_ITERATIONS_EXCEEDED[] =
 R"doc(The solver returned its solution so far after exceeding the maximum
 number of iterations.)doc";
 
-static const char *mkd_doc_slp_ExitStatus_NONFINITE_INITIAL_GUESS =
+constexpr char mkd_doc_slp_ExitStatus_NONFINITE_INITIAL_GUESS[] =
 R"doc(The solver encountered nonfinite initial cost, constraints, or
 derivatives and gave up.)doc";
 
-static const char *mkd_doc_slp_ExitStatus_SUCCESS = R"doc(Solved the problem to the desired tolerance.)doc";
+constexpr char mkd_doc_slp_ExitStatus_SUCCESS[] = R"doc(Solved the problem to the desired tolerance.)doc";
 
-static const char *mkd_doc_slp_ExitStatus_TIMEOUT =
+constexpr char mkd_doc_slp_ExitStatus_TIMEOUT[] =
 R"doc(The solver returned its solution so far after exceeding the maximum
 elapsed wall clock time.)doc";
 
-static const char *mkd_doc_slp_ExitStatus_TOO_FEW_DOFS = R"doc(The solver determined the problem to be overconstrained and gave up.)doc";
+constexpr char mkd_doc_slp_ExitStatus_TOO_FEW_DOFS[] = R"doc(The solver determined the problem to be overconstrained and gave up.)doc";
 
-static const char *mkd_doc_slp_ExpressionType =
+constexpr char mkd_doc_slp_ExpressionType[] =
 R"doc(Expression type.
 
 Used for autodiff caching.)doc";
 
-static const char *mkd_doc_slp_ExpressionType_CONSTANT = R"doc(The expression is a constant.)doc";
+constexpr char mkd_doc_slp_ExpressionType_CONSTANT[] = R"doc(The expression is a constant.)doc";
 
-static const char *mkd_doc_slp_ExpressionType_LINEAR = R"doc(The expression is composed of linear and lower-order operators.)doc";
+constexpr char mkd_doc_slp_ExpressionType_LINEAR[] = R"doc(The expression is composed of linear and lower-order operators.)doc";
 
-static const char *mkd_doc_slp_ExpressionType_NONE = R"doc(There is no expression.)doc";
+constexpr char mkd_doc_slp_ExpressionType_NONE[] = R"doc(There is no expression.)doc";
 
-static const char *mkd_doc_slp_ExpressionType_NONLINEAR = R"doc(The expression is composed of nonlinear and lower-order operators.)doc";
+constexpr char mkd_doc_slp_ExpressionType_NONLINEAR[] = R"doc(The expression is composed of nonlinear and lower-order operators.)doc";
 
-static const char *mkd_doc_slp_ExpressionType_QUADRATIC = R"doc(The expression is composed of quadratic and lower-order operators.)doc";
+constexpr char mkd_doc_slp_ExpressionType_QUADRATIC[] = R"doc(The expression is composed of quadratic and lower-order operators.)doc";
 
-static const char *mkd_doc_slp_Gradient =
+constexpr char mkd_doc_slp_Gradient[] =
 R"doc(This class calculates the gradient of a variable with respect to a
 vector of variables.
 
@@ -211,9 +211,9 @@ quadratic or higher order.
 Template Args:
     Scalar: Scalar type.)doc";
 
-static const char *mkd_doc_slp_Gradient_2 = R"doc()doc";
+constexpr char mkd_doc_slp_Gradient_2[] = R"doc()doc";
 
-static const char *mkd_doc_slp_Gradient_Gradient =
+constexpr char mkd_doc_slp_Gradient_Gradient[] =
 R"doc(Constructs a Gradient object.
 
 Args:
@@ -222,7 +222,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_Gradient_Gradient_2 =
+constexpr char mkd_doc_slp_Gradient_Gradient_2[] =
 R"doc(Constructs a Gradient object.
 
 Args:
@@ -232,7 +232,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_Gradient_get =
+constexpr char mkd_doc_slp_Gradient_get[] =
 R"doc(Returns the gradient as a VariableMatrix.
 
 This is useful when constructing optimization problems with
@@ -243,11 +243,11 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_Gradient_m_g = R"doc()doc";
+constexpr char mkd_doc_slp_Gradient_m_g[] = R"doc()doc";
 
-static const char *mkd_doc_slp_Gradient_m_jacobian = R"doc()doc";
+constexpr char mkd_doc_slp_Gradient_m_jacobian[] = R"doc()doc";
 
-static const char *mkd_doc_slp_Gradient_value =
+constexpr char mkd_doc_slp_Gradient_value[] =
 R"doc(Evaluates the gradient at wrt's value.
 
 Returns:
@@ -255,7 +255,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_Hessian =
+constexpr char mkd_doc_slp_Hessian[] =
 R"doc(This class calculates the Hessian of a variable with respect to a
 vector of variables.
 
@@ -268,11 +268,11 @@ Template Args:
     UpLo: Which part of the Hessian to compute (Lower or Lower |
           Upper). Default is Lower | Upper.)doc";
 
-static const char *mkd_doc_slp_Hessian_2 = R"doc()doc";
+constexpr char mkd_doc_slp_Hessian_2[] = R"doc()doc";
 
-static const char *mkd_doc_slp_Hessian_3 = R"doc()doc";
+constexpr char mkd_doc_slp_Hessian_3[] = R"doc()doc";
 
-static const char *mkd_doc_slp_Hessian_Hessian =
+constexpr char mkd_doc_slp_Hessian_Hessian[] =
 R"doc(Constructs a Hessian object.
 
 Args:
@@ -281,7 +281,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_Hessian_Hessian_2 =
+constexpr char mkd_doc_slp_Hessian_Hessian_2[] =
 R"doc(Constructs a Hessian object.
 
 Args:
@@ -291,7 +291,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_Hessian_get =
+constexpr char mkd_doc_slp_Hessian_get[] =
 R"doc(Returns the Hessian as a VariableMatrix.
 
 This is useful when constructing optimization problems with
@@ -302,23 +302,23 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_Hessian_m_H = R"doc()doc";
+constexpr char mkd_doc_slp_Hessian_m_H[] = R"doc()doc";
 
-static const char *mkd_doc_slp_Hessian_m_cached_triplets = R"doc()doc";
+constexpr char mkd_doc_slp_Hessian_m_cached_triplets[] = R"doc()doc";
 
-static const char *mkd_doc_slp_Hessian_m_nonlinear_rows = R"doc()doc";
+constexpr char mkd_doc_slp_Hessian_m_nonlinear_rows[] = R"doc()doc";
 
-static const char *mkd_doc_slp_Hessian_m_output_lists = R"doc(List of output rows as column-node pairs)doc";
+constexpr char mkd_doc_slp_Hessian_m_output_lists[] = R"doc(List of output rows as column-node pairs)doc";
 
-static const char *mkd_doc_slp_Hessian_m_top_lists =
+constexpr char mkd_doc_slp_Hessian_m_top_lists[] =
 R"doc(List of topologically sorted graphs from parent to child, one for each
 row)doc";
 
-static const char *mkd_doc_slp_Hessian_m_variables = R"doc()doc";
+constexpr char mkd_doc_slp_Hessian_m_variables[] = R"doc()doc";
 
-static const char *mkd_doc_slp_Hessian_m_wrt = R"doc()doc";
+constexpr char mkd_doc_slp_Hessian_m_wrt[] = R"doc()doc";
 
-static const char *mkd_doc_slp_Hessian_value =
+constexpr char mkd_doc_slp_Hessian_value[] =
 R"doc(Evaluates the Hessian at wrt's value.
 
 Returns:
@@ -326,13 +326,13 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_InequalityConstraints =
+constexpr char mkd_doc_slp_InequalityConstraints[] =
 R"doc(A vector of inequality constraints of the form cᵢ(x) ≥ 0.
 
 Template Args:
     Scalar: Scalar type.)doc";
 
-static const char *mkd_doc_slp_InequalityConstraints_InequalityConstraints =
+constexpr char mkd_doc_slp_InequalityConstraints_InequalityConstraints[] =
 R"doc(Concatenates multiple inequality constraints.
 
 Args:
@@ -341,7 +341,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_InequalityConstraints_InequalityConstraints_2 =
+constexpr char mkd_doc_slp_InequalityConstraints_InequalityConstraints_2[] =
 R"doc(Concatenates multiple inequality constraints.
 
 This overload is for Python bindings only.
@@ -352,7 +352,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_InequalityConstraints_InequalityConstraints_3 =
+constexpr char mkd_doc_slp_InequalityConstraints_InequalityConstraints_3[] =
 R"doc(Constructs an inequality constraint from a left and right side.
 
 The standard form for inequality constraints is c(x) ≥ 0. This
@@ -365,35 +365,35 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_InequalityConstraints_constraints = R"doc(A vector of scalar inequality constraints.)doc";
+constexpr char mkd_doc_slp_InequalityConstraints_constraints[] = R"doc(A vector of scalar inequality constraints.)doc";
 
-static const char *mkd_doc_slp_InequalityConstraints_operator_bool = R"doc(Implicit conversion operator to bool.)doc";
+constexpr char mkd_doc_slp_InequalityConstraints_operator_bool[] = R"doc(Implicit conversion operator to bool.)doc";
 
-static const char *mkd_doc_slp_IterationInfo =
+constexpr char mkd_doc_slp_IterationInfo[] =
 R"doc(Solver iteration information exposed to an iteration callback.
 
 Template Args:
     Scalar: Scalar type.)doc";
 
-static const char *mkd_doc_slp_IterationInfo_A_e = R"doc(The equality constraint Jacobian.)doc";
+constexpr char mkd_doc_slp_IterationInfo_A_e[] = R"doc(The equality constraint Jacobian.)doc";
 
-static const char *mkd_doc_slp_IterationInfo_A_i = R"doc(The inequality constraint Jacobian.)doc";
+constexpr char mkd_doc_slp_IterationInfo_A_i[] = R"doc(The inequality constraint Jacobian.)doc";
 
-static const char *mkd_doc_slp_IterationInfo_H = R"doc(The Hessian of the Lagrangian.)doc";
+constexpr char mkd_doc_slp_IterationInfo_H[] = R"doc(The Hessian of the Lagrangian.)doc";
 
-static const char *mkd_doc_slp_IterationInfo_g = R"doc(The gradient of the cost function.)doc";
+constexpr char mkd_doc_slp_IterationInfo_g[] = R"doc(The gradient of the cost function.)doc";
 
-static const char *mkd_doc_slp_IterationInfo_iteration = R"doc(The solver iteration.)doc";
+constexpr char mkd_doc_slp_IterationInfo_iteration[] = R"doc(The solver iteration.)doc";
 
-static const char *mkd_doc_slp_IterationInfo_s = R"doc(The inequality constraint slack variables.)doc";
+constexpr char mkd_doc_slp_IterationInfo_s[] = R"doc(The inequality constraint slack variables.)doc";
 
-static const char *mkd_doc_slp_IterationInfo_x = R"doc(The decision variables.)doc";
+constexpr char mkd_doc_slp_IterationInfo_x[] = R"doc(The decision variables.)doc";
 
-static const char *mkd_doc_slp_IterationInfo_y = R"doc(The equality constraint dual variables.)doc";
+constexpr char mkd_doc_slp_IterationInfo_y[] = R"doc(The equality constraint dual variables.)doc";
 
-static const char *mkd_doc_slp_IterationInfo_z = R"doc(The inequality constraint dual variables.)doc";
+constexpr char mkd_doc_slp_IterationInfo_z[] = R"doc(The inequality constraint dual variables.)doc";
 
-static const char *mkd_doc_slp_Jacobian =
+constexpr char mkd_doc_slp_Jacobian[] =
 R"doc(This class calculates the Jacobian of a vector of variables with
 respect to a vector of variables.
 
@@ -403,11 +403,11 @@ quadratic or higher order.
 Template Args:
     Scalar: Scalar type.)doc";
 
-static const char *mkd_doc_slp_Jacobian_2 = R"doc()doc";
+constexpr char mkd_doc_slp_Jacobian_2[] = R"doc()doc";
 
-static const char *mkd_doc_slp_Jacobian_3 = R"doc()doc";
+constexpr char mkd_doc_slp_Jacobian_3[] = R"doc()doc";
 
-static const char *mkd_doc_slp_Jacobian_Jacobian =
+constexpr char mkd_doc_slp_Jacobian_Jacobian[] =
 R"doc(Constructs a Jacobian object.
 
 Args:
@@ -416,7 +416,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_Jacobian_Jacobian_2 =
+constexpr char mkd_doc_slp_Jacobian_Jacobian_2[] =
 R"doc(Constructs a Jacobian object.
 
 Args:
@@ -426,7 +426,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_Jacobian_Jacobian_3 =
+constexpr char mkd_doc_slp_Jacobian_Jacobian_3[] =
 R"doc(Constructs a Jacobian object.
 
 Args:
@@ -436,7 +436,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_Jacobian_get =
+constexpr char mkd_doc_slp_Jacobian_get[] =
 R"doc(Returns the Jacobian as a VariableMatrix.
 
 This is useful when constructing optimization problems with
@@ -447,25 +447,25 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_Jacobian_m_J = R"doc()doc";
+constexpr char mkd_doc_slp_Jacobian_m_J[] = R"doc()doc";
 
-static const char *mkd_doc_slp_Jacobian_m_cached_triplets = R"doc(Cached triplets for gradients of linear rows)doc";
+constexpr char mkd_doc_slp_Jacobian_m_cached_triplets[] = R"doc(Cached triplets for gradients of linear rows)doc";
 
-static const char *mkd_doc_slp_Jacobian_m_nonlinear_rows =
+constexpr char mkd_doc_slp_Jacobian_m_nonlinear_rows[] =
 R"doc(List of row indices for nonlinear rows whose graients will be computed
 in value())doc";
 
-static const char *mkd_doc_slp_Jacobian_m_output_lists = R"doc(List of output rows as column-node pairs)doc";
+constexpr char mkd_doc_slp_Jacobian_m_output_lists[] = R"doc(List of output rows as column-node pairs)doc";
 
-static const char *mkd_doc_slp_Jacobian_m_top_lists =
+constexpr char mkd_doc_slp_Jacobian_m_top_lists[] =
 R"doc(List of topologically sorted graphs from parent to child, one for each
 row)doc";
 
-static const char *mkd_doc_slp_Jacobian_m_variables = R"doc()doc";
+constexpr char mkd_doc_slp_Jacobian_m_variables[] = R"doc()doc";
 
-static const char *mkd_doc_slp_Jacobian_m_wrt = R"doc()doc";
+constexpr char mkd_doc_slp_Jacobian_m_wrt[] = R"doc()doc";
 
-static const char *mkd_doc_slp_Jacobian_value =
+constexpr char mkd_doc_slp_Jacobian_value[] =
 R"doc(Evaluates the Jacobian at wrt's value.
 
 Returns:
@@ -473,7 +473,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_OCP =
+constexpr char mkd_doc_slp_OCP[] =
 R"doc(This class allows the user to pose and solve a constrained optimal
 control problem (OCP) in a variety of ways.
 
@@ -503,9 +503,9 @@ each transcription method.
 Template Args:
     Scalar: Scalar type.)doc";
 
-static const char *mkd_doc_slp_OCP_2 = R"doc()doc";
+constexpr char mkd_doc_slp_OCP_2[] = R"doc()doc";
 
-static const char *mkd_doc_slp_OCP_OCP =
+constexpr char mkd_doc_slp_OCP_OCP[] =
 R"doc(Builds an optimization problem using a system evolution function
 (explicit ODE or discrete state transition function).
 
@@ -534,7 +534,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_OCP_OCP_2 =
+constexpr char mkd_doc_slp_OCP_OCP_2[] =
 R"doc(Builds an optimization problem using a system evolution function
 (explicit ODE or discrete state transition function).
 
@@ -563,7 +563,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_OCP_U =
+constexpr char mkd_doc_slp_OCP_U[] =
 R"doc(Gets the input variables. After the problem is solved, this will
 contain the inputs corresponding to the optimized trajectory.
 
@@ -575,7 +575,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_OCP_X =
+constexpr char mkd_doc_slp_OCP_X[] =
 R"doc(Gets the state variables. After the problem is solved, this will
 contain the optimized trajectory.
 
@@ -586,11 +586,11 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_OCP_constrain_direct_collocation = R"doc(Applies direct collocation dynamics constraints.)doc";
+constexpr char mkd_doc_slp_OCP_constrain_direct_collocation[] = R"doc(Applies direct collocation dynamics constraints.)doc";
 
-static const char *mkd_doc_slp_OCP_constrain_direct_transcription = R"doc(Applies direct transcription dynamics constraints.)doc";
+constexpr char mkd_doc_slp_OCP_constrain_direct_transcription[] = R"doc(Applies direct transcription dynamics constraints.)doc";
 
-static const char *mkd_doc_slp_OCP_constrain_final_state =
+constexpr char mkd_doc_slp_OCP_constrain_final_state[] =
 R"doc(Constrains the final state.
 
 Args:
@@ -598,7 +598,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_OCP_constrain_initial_state =
+constexpr char mkd_doc_slp_OCP_constrain_initial_state[] =
 R"doc(Constrains the initial state.
 
 Args:
@@ -606,9 +606,9 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_OCP_constrain_single_shooting = R"doc(Applies single shooting dynamics constraints.)doc";
+constexpr char mkd_doc_slp_OCP_constrain_single_shooting[] = R"doc(Applies single shooting dynamics constraints.)doc";
 
-static const char *mkd_doc_slp_OCP_dt =
+constexpr char mkd_doc_slp_OCP_dt[] =
 R"doc(Gets the timestep variables. After the problem is solved, this will
 contain the timesteps corresponding to the optimized trajectory.
 
@@ -620,7 +620,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_OCP_final_state =
+constexpr char mkd_doc_slp_OCP_final_state[] =
 R"doc(Gets the final state in the trajectory.
 
 Returns:
@@ -628,7 +628,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_OCP_for_each_step =
+constexpr char mkd_doc_slp_OCP_for_each_step[] =
 R"doc(Sets the constraint evaluation function. This function is called
 `num_steps+1` times, with the corresponding state and input
 VariableMatrices.
@@ -639,7 +639,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_OCP_for_each_step_2 =
+constexpr char mkd_doc_slp_OCP_for_each_step_2[] =
 R"doc(Sets the constraint evaluation function. This function is called
 `num_steps+1` times, with the corresponding state and input
 VariableMatrices.
@@ -651,7 +651,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_OCP_initial_state =
+constexpr char mkd_doc_slp_OCP_initial_state[] =
 R"doc(Gets the initial state in the trajectory.
 
 Returns:
@@ -659,19 +659,19 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_OCP_m_DT = R"doc()doc";
+constexpr char mkd_doc_slp_OCP_m_DT[] = R"doc()doc";
 
-static const char *mkd_doc_slp_OCP_m_U = R"doc()doc";
+constexpr char mkd_doc_slp_OCP_m_U[] = R"doc()doc";
 
-static const char *mkd_doc_slp_OCP_m_X = R"doc()doc";
+constexpr char mkd_doc_slp_OCP_m_X[] = R"doc()doc";
 
-static const char *mkd_doc_slp_OCP_m_dynamics = R"doc()doc";
+constexpr char mkd_doc_slp_OCP_m_dynamics[] = R"doc()doc";
 
-static const char *mkd_doc_slp_OCP_m_dynamics_type = R"doc()doc";
+constexpr char mkd_doc_slp_OCP_m_dynamics_type[] = R"doc()doc";
 
-static const char *mkd_doc_slp_OCP_m_num_steps = R"doc()doc";
+constexpr char mkd_doc_slp_OCP_m_num_steps[] = R"doc()doc";
 
-static const char *mkd_doc_slp_OCP_rk4 =
+constexpr char mkd_doc_slp_OCP_rk4[] =
 R"doc(Performs 4th order Runge-Kutta integration of dx/dt = f(t, x, u) for
 dt.
 
@@ -684,7 +684,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_OCP_set_lower_input_bound =
+constexpr char mkd_doc_slp_OCP_set_lower_input_bound[] =
 R"doc(Sets a lower bound on the input.
 
 Args:
@@ -693,7 +693,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_OCP_set_max_timestep =
+constexpr char mkd_doc_slp_OCP_set_max_timestep[] =
 R"doc(Sets an upper bound on the timestep.
 
 Args:
@@ -701,7 +701,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_OCP_set_min_timestep =
+constexpr char mkd_doc_slp_OCP_set_min_timestep[] =
 R"doc(Sets a lower bound on the timestep.
 
 Args:
@@ -709,7 +709,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_OCP_set_upper_input_bound =
+constexpr char mkd_doc_slp_OCP_set_upper_input_bound[] =
 R"doc(Sets an upper bound on the input.
 
 Args:
@@ -718,15 +718,15 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_Options = R"doc(Solver options.)doc";
+constexpr char mkd_doc_slp_Options[] = R"doc(Solver options.)doc";
 
-static const char *mkd_doc_slp_Options_diagnostics =
+constexpr char mkd_doc_slp_Options_diagnostics[] =
 R"doc(Enables diagnostic output.
 
 See https://sleipnirgroup.github.io/Sleipnir/md_usage.html#output for
 more information.)doc";
 
-static const char *mkd_doc_slp_Options_feasible_ipm =
+constexpr char mkd_doc_slp_Options_feasible_ipm[] =
 R"doc(Enables the feasible interior-point method.
 
 When the inequality constraints are all feasible, step sizes are
@@ -736,13 +736,13 @@ regions (e.g., square root of a negative value). This can slow or
 prevent progress toward a solution though, so only enable it if
 necessary.)doc";
 
-static const char *mkd_doc_slp_Options_max_iterations = R"doc(The maximum number of solver iterations before returning a solution.)doc";
+constexpr char mkd_doc_slp_Options_max_iterations[] = R"doc(The maximum number of solver iterations before returning a solution.)doc";
 
-static const char *mkd_doc_slp_Options_timeout = R"doc(The maximum elapsed wall clock time before returning a solution.)doc";
+constexpr char mkd_doc_slp_Options_timeout[] = R"doc(The maximum elapsed wall clock time before returning a solution.)doc";
 
-static const char *mkd_doc_slp_Options_tolerance = R"doc(The solver will stop once the error is below this tolerance.)doc";
+constexpr char mkd_doc_slp_Options_tolerance[] = R"doc(The solver will stop once the error is below this tolerance.)doc";
 
-static const char *mkd_doc_slp_Problem =
+constexpr char mkd_doc_slp_Problem[] =
 R"doc(This class allows the user to pose a constrained nonlinear
 optimization problem in natural mathematical notation and solve it.
 
@@ -770,11 +770,11 @@ mathematical form and it'll be converted for them.
 Template Args:
     Scalar: Scalar type.)doc";
 
-static const char *mkd_doc_slp_Problem_2 = R"doc()doc";
+constexpr char mkd_doc_slp_Problem_2[] = R"doc()doc";
 
-static const char *mkd_doc_slp_Problem_Problem = R"doc(Constructs the optimization problem.)doc";
+constexpr char mkd_doc_slp_Problem_Problem[] = R"doc(Constructs the optimization problem.)doc";
 
-static const char *mkd_doc_slp_Problem_add_callback =
+constexpr char mkd_doc_slp_Problem_add_callback[] =
 R"doc(Adds a callback to be called at the beginning of each solver
 iteration.
 
@@ -785,7 +785,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_Problem_add_callback_2 =
+constexpr char mkd_doc_slp_Problem_add_callback_2[] =
 R"doc(Adds a callback to be called at the beginning of each solver
 iteration.
 
@@ -798,7 +798,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_Problem_add_persistent_callback =
+constexpr char mkd_doc_slp_Problem_add_persistent_callback[] =
 R"doc(Adds a callback to be called at the beginning of each solver
 iteration.
 
@@ -813,9 +813,9 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_Problem_clear_callbacks = R"doc(Clears the registered callbacks.)doc";
+constexpr char mkd_doc_slp_Problem_clear_callbacks[] = R"doc(Clears the registered callbacks.)doc";
 
-static const char *mkd_doc_slp_Problem_cost_function_type =
+constexpr char mkd_doc_slp_Problem_cost_function_type[] =
 R"doc(Returns the cost function's type.
 
 Returns:
@@ -823,7 +823,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_Problem_decision_variable =
+constexpr char mkd_doc_slp_Problem_decision_variable[] =
 R"doc(Creates a decision variable in the optimization problem.
 
 Decision variables have an initial value of zero.
@@ -833,7 +833,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_Problem_decision_variable_2 =
+constexpr char mkd_doc_slp_Problem_decision_variable_2[] =
 R"doc(Creates a matrix of decision variables in the optimization problem.
 
 Decision variables have an initial value of zero.
@@ -847,7 +847,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_Problem_equality_constraint_type =
+constexpr char mkd_doc_slp_Problem_equality_constraint_type[] =
 R"doc(Returns the type of the highest order equality constraint.
 
 Returns:
@@ -855,7 +855,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_Problem_inequality_constraint_type =
+constexpr char mkd_doc_slp_Problem_inequality_constraint_type[] =
 R"doc(Returns the type of the highest order inequality constraint.
 
 Returns:
@@ -863,19 +863,19 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_Problem_m_decision_variables = R"doc()doc";
+constexpr char mkd_doc_slp_Problem_m_decision_variables[] = R"doc()doc";
 
-static const char *mkd_doc_slp_Problem_m_equality_constraints = R"doc()doc";
+constexpr char mkd_doc_slp_Problem_m_equality_constraints[] = R"doc()doc";
 
-static const char *mkd_doc_slp_Problem_m_f = R"doc()doc";
+constexpr char mkd_doc_slp_Problem_m_f[] = R"doc()doc";
 
-static const char *mkd_doc_slp_Problem_m_inequality_constraints = R"doc()doc";
+constexpr char mkd_doc_slp_Problem_m_inequality_constraints[] = R"doc()doc";
 
-static const char *mkd_doc_slp_Problem_m_iteration_callbacks = R"doc()doc";
+constexpr char mkd_doc_slp_Problem_m_iteration_callbacks[] = R"doc()doc";
 
-static const char *mkd_doc_slp_Problem_m_persistent_iteration_callbacks = R"doc()doc";
+constexpr char mkd_doc_slp_Problem_m_persistent_iteration_callbacks[] = R"doc()doc";
 
-static const char *mkd_doc_slp_Problem_maximize =
+constexpr char mkd_doc_slp_Problem_maximize[] =
 R"doc(Tells the solver to maximize the output of the given objective
 function.
 
@@ -890,7 +890,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_Problem_maximize_2 =
+constexpr char mkd_doc_slp_Problem_maximize_2[] =
 R"doc(Tells the solver to maximize the output of the given objective
 function.
 
@@ -905,7 +905,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_Problem_minimize =
+constexpr char mkd_doc_slp_Problem_minimize[] =
 R"doc(Tells the solver to minimize the output of the given cost function.
 
 Note that this is optional. If only constraints are specified, the
@@ -919,7 +919,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_Problem_minimize_2 =
+constexpr char mkd_doc_slp_Problem_minimize_2[] =
 R"doc(Tells the solver to minimize the output of the given cost function.
 
 Note that this is optional. If only constraints are specified, the
@@ -933,11 +933,11 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_Problem_print_exit_conditions = R"doc()doc";
+constexpr char mkd_doc_slp_Problem_print_exit_conditions[] = R"doc()doc";
 
-static const char *mkd_doc_slp_Problem_print_problem_analysis = R"doc()doc";
+constexpr char mkd_doc_slp_Problem_print_problem_analysis[] = R"doc()doc";
 
-static const char *mkd_doc_slp_Problem_solve =
+constexpr char mkd_doc_slp_Problem_solve[] =
 R"doc(Solves the optimization problem. The solution will be stored in the
 original variables used to construct the problem.
 
@@ -952,13 +952,13 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_Problem_solve_ipm = R"doc()doc";
+constexpr char mkd_doc_slp_Problem_solve_ipm[] = R"doc()doc";
 
-static const char *mkd_doc_slp_Problem_solve_newton = R"doc()doc";
+constexpr char mkd_doc_slp_Problem_solve_newton[] = R"doc()doc";
 
-static const char *mkd_doc_slp_Problem_solve_sqp = R"doc()doc";
+constexpr char mkd_doc_slp_Problem_solve_sqp[] = R"doc()doc";
 
-static const char *mkd_doc_slp_Problem_subject_to =
+constexpr char mkd_doc_slp_Problem_subject_to[] =
 R"doc(Tells the solver to solve the problem while satisfying the given
 equality constraint.
 
@@ -967,7 +967,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_Problem_subject_to_2 =
+constexpr char mkd_doc_slp_Problem_subject_to_2[] =
 R"doc(Tells the solver to solve the problem while satisfying the given
 equality constraint.
 
@@ -976,7 +976,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_Problem_subject_to_3 =
+constexpr char mkd_doc_slp_Problem_subject_to_3[] =
 R"doc(Tells the solver to solve the problem while satisfying the given
 inequality constraint.
 
@@ -985,7 +985,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_Problem_subject_to_4 =
+constexpr char mkd_doc_slp_Problem_subject_to_4[] =
 R"doc(Tells the solver to solve the problem while satisfying the given
 inequality constraint.
 
@@ -994,7 +994,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_Problem_symmetric_decision_variable =
+constexpr char mkd_doc_slp_Problem_symmetric_decision_variable[] =
 R"doc(Creates a symmetric matrix of decision variables in the optimization
 problem.
 
@@ -1012,43 +1012,43 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_TimestepMethod = R"doc(Enum describing the type of system timestep.)doc";
+constexpr char mkd_doc_slp_TimestepMethod[] = R"doc(Enum describing the type of system timestep.)doc";
 
-static const char *mkd_doc_slp_TimestepMethod_FIXED = R"doc(The timestep is a fixed constant.)doc";
+constexpr char mkd_doc_slp_TimestepMethod_FIXED[] = R"doc(The timestep is a fixed constant.)doc";
 
-static const char *mkd_doc_slp_TimestepMethod_VARIABLE = R"doc(The timesteps are allowed to vary as independent decision variables.)doc";
+constexpr char mkd_doc_slp_TimestepMethod_VARIABLE[] = R"doc(The timesteps are allowed to vary as independent decision variables.)doc";
 
-static const char *mkd_doc_slp_TimestepMethod_VARIABLE_SINGLE =
+constexpr char mkd_doc_slp_TimestepMethod_VARIABLE_SINGLE[] =
 R"doc(The timesteps are equal length but allowed to vary as a single
 decision variable.)doc";
 
-static const char *mkd_doc_slp_TranscriptionMethod = R"doc(Enum describing an OCP transcription method.)doc";
+constexpr char mkd_doc_slp_TranscriptionMethod[] = R"doc(Enum describing an OCP transcription method.)doc";
 
-static const char *mkd_doc_slp_TranscriptionMethod_DIRECT_COLLOCATION =
+constexpr char mkd_doc_slp_TranscriptionMethod_DIRECT_COLLOCATION[] =
 R"doc(The trajectory is modeled as a series of cubic polynomials where the
 centerpoint slope is constrained.)doc";
 
-static const char *mkd_doc_slp_TranscriptionMethod_DIRECT_TRANSCRIPTION =
+constexpr char mkd_doc_slp_TranscriptionMethod_DIRECT_TRANSCRIPTION[] =
 R"doc(Each state is a decision variable constrained to the integrated
 dynamics of the previous state.)doc";
 
-static const char *mkd_doc_slp_TranscriptionMethod_SINGLE_SHOOTING =
+constexpr char mkd_doc_slp_TranscriptionMethod_SINGLE_SHOOTING[] =
 R"doc(States depend explicitly as a function of all previous states and all
 previous inputs.)doc";
 
-static const char *mkd_doc_slp_Variable =
+constexpr char mkd_doc_slp_Variable[] =
 R"doc(An autodiff variable pointing to an expression node.
 
 Template Args:
     Scalar_: Scalar type.)doc";
 
-static const char *mkd_doc_slp_VariableBlock =
+constexpr char mkd_doc_slp_VariableBlock[] =
 R"doc(A submatrix of autodiff variables with reference semantics.
 
 Template Args:
     Mat: The type of the matrix whose storage this class points to.)doc";
 
-static const char *mkd_doc_slp_VariableBlock_T =
+constexpr char mkd_doc_slp_VariableBlock_T[] =
 R"doc(Returns the transpose of the variable matrix.
 
 Returns:
@@ -1056,11 +1056,11 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_VariableBlock = R"doc(Copy constructor.)doc";
+constexpr char mkd_doc_slp_VariableBlock_VariableBlock[] = R"doc(Copy constructor.)doc";
 
-static const char *mkd_doc_slp_VariableBlock_VariableBlock_2 = R"doc(Move constructor.)doc";
+constexpr char mkd_doc_slp_VariableBlock_VariableBlock_2[] = R"doc(Move constructor.)doc";
 
-static const char *mkd_doc_slp_VariableBlock_VariableBlock_3 =
+constexpr char mkd_doc_slp_VariableBlock_VariableBlock_3[] =
 R"doc(Constructs a Variable block pointing to all of the given matrix.
 
 Args:
@@ -1068,7 +1068,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_VariableBlock_4 =
+constexpr char mkd_doc_slp_VariableBlock_VariableBlock_4[] =
 R"doc(Constructs a Variable block pointing to a subset of the given matrix.
 
 Args:
@@ -1080,7 +1080,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_VariableBlock_5 =
+constexpr char mkd_doc_slp_VariableBlock_VariableBlock_5[] =
 R"doc(Constructs a Variable block pointing to a subset of the given matrix.
 
 Note that the slices are taken as is rather than adjusted.
@@ -1094,7 +1094,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_begin =
+constexpr char mkd_doc_slp_VariableBlock_begin[] =
 R"doc(Returns begin iterator.
 
 Returns:
@@ -1102,7 +1102,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_begin_2 =
+constexpr char mkd_doc_slp_VariableBlock_begin_2[] =
 R"doc(Returns begin iterator.
 
 Returns:
@@ -1110,7 +1110,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_block =
+constexpr char mkd_doc_slp_VariableBlock_block[] =
 R"doc(Returns a block of the variable matrix.
 
 Args:
@@ -1124,7 +1124,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_block_2 =
+constexpr char mkd_doc_slp_VariableBlock_block_2[] =
 R"doc(Returns a block slice of the variable matrix.
 
 Args:
@@ -1138,7 +1138,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_cbegin =
+constexpr char mkd_doc_slp_VariableBlock_cbegin[] =
 R"doc(Returns const begin iterator.
 
 Returns:
@@ -1146,7 +1146,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_cend =
+constexpr char mkd_doc_slp_VariableBlock_cend[] =
 R"doc(Returns const end iterator.
 
 Returns:
@@ -1154,7 +1154,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_col =
+constexpr char mkd_doc_slp_VariableBlock_col[] =
 R"doc(Returns a column slice of the variable matrix.
 
 Args:
@@ -1165,7 +1165,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_col_2 =
+constexpr char mkd_doc_slp_VariableBlock_col_2[] =
 R"doc(Returns a column slice of the variable matrix.
 
 Args:
@@ -1176,7 +1176,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_cols =
+constexpr char mkd_doc_slp_VariableBlock_cols[] =
 R"doc(Returns the number of columns in the matrix.
 
 Returns:
@@ -1184,29 +1184,29 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_const_iterator = R"doc()doc";
+constexpr char mkd_doc_slp_VariableBlock_const_iterator[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableBlock_const_iterator_const_iterator = R"doc()doc";
+constexpr char mkd_doc_slp_VariableBlock_const_iterator_const_iterator[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableBlock_const_iterator_const_iterator_2 = R"doc()doc";
+constexpr char mkd_doc_slp_VariableBlock_const_iterator_const_iterator_2[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableBlock_const_iterator_m_index = R"doc()doc";
+constexpr char mkd_doc_slp_VariableBlock_const_iterator_m_index[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableBlock_const_iterator_m_mat = R"doc()doc";
+constexpr char mkd_doc_slp_VariableBlock_const_iterator_m_mat[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableBlock_const_iterator_operator_dec = R"doc()doc";
+constexpr char mkd_doc_slp_VariableBlock_const_iterator_operator_dec[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableBlock_const_iterator_operator_dec_2 = R"doc()doc";
+constexpr char mkd_doc_slp_VariableBlock_const_iterator_operator_dec_2[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableBlock_const_iterator_operator_eq = R"doc()doc";
+constexpr char mkd_doc_slp_VariableBlock_const_iterator_operator_eq[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableBlock_const_iterator_operator_inc = R"doc()doc";
+constexpr char mkd_doc_slp_VariableBlock_const_iterator_operator_inc[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableBlock_const_iterator_operator_inc_2 = R"doc()doc";
+constexpr char mkd_doc_slp_VariableBlock_const_iterator_operator_inc_2[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableBlock_const_iterator_operator_mul = R"doc()doc";
+constexpr char mkd_doc_slp_VariableBlock_const_iterator_operator_mul[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableBlock_crbegin =
+constexpr char mkd_doc_slp_VariableBlock_crbegin[] =
 R"doc(Returns const reverse begin iterator.
 
 Returns:
@@ -1214,7 +1214,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_crend =
+constexpr char mkd_doc_slp_VariableBlock_crend[] =
 R"doc(Returns const reverse end iterator.
 
 Returns:
@@ -1222,7 +1222,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_cwise_transform =
+constexpr char mkd_doc_slp_VariableBlock_cwise_transform[] =
 R"doc(Transforms the matrix coefficient-wise with an unary operator.
 
 Args:
@@ -1233,7 +1233,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_end =
+constexpr char mkd_doc_slp_VariableBlock_end[] =
 R"doc(Returns end iterator.
 
 Returns:
@@ -1241,7 +1241,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_end_2 =
+constexpr char mkd_doc_slp_VariableBlock_end_2[] =
 R"doc(Returns end iterator.
 
 Returns:
@@ -1249,7 +1249,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_exp =
+constexpr char mkd_doc_slp_VariableBlock_exp[] =
 R"doc(Returns the matrix exponential.
 
 Returns:
@@ -1257,39 +1257,39 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_iterator = R"doc()doc";
+constexpr char mkd_doc_slp_VariableBlock_iterator[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableBlock_iterator_iterator = R"doc()doc";
+constexpr char mkd_doc_slp_VariableBlock_iterator_iterator[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableBlock_iterator_iterator_2 = R"doc()doc";
+constexpr char mkd_doc_slp_VariableBlock_iterator_iterator_2[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableBlock_iterator_m_index = R"doc()doc";
+constexpr char mkd_doc_slp_VariableBlock_iterator_m_index[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableBlock_iterator_m_mat = R"doc()doc";
+constexpr char mkd_doc_slp_VariableBlock_iterator_m_mat[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableBlock_iterator_operator_dec = R"doc()doc";
+constexpr char mkd_doc_slp_VariableBlock_iterator_operator_dec[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableBlock_iterator_operator_dec_2 = R"doc()doc";
+constexpr char mkd_doc_slp_VariableBlock_iterator_operator_dec_2[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableBlock_iterator_operator_eq = R"doc()doc";
+constexpr char mkd_doc_slp_VariableBlock_iterator_operator_eq[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableBlock_iterator_operator_inc = R"doc()doc";
+constexpr char mkd_doc_slp_VariableBlock_iterator_operator_inc[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableBlock_iterator_operator_inc_2 = R"doc()doc";
+constexpr char mkd_doc_slp_VariableBlock_iterator_operator_inc_2[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableBlock_iterator_operator_mul = R"doc()doc";
+constexpr char mkd_doc_slp_VariableBlock_iterator_operator_mul[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableBlock_m_col_slice = R"doc()doc";
+constexpr char mkd_doc_slp_VariableBlock_m_col_slice[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableBlock_m_col_slice_length = R"doc()doc";
+constexpr char mkd_doc_slp_VariableBlock_m_col_slice_length[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableBlock_m_mat = R"doc()doc";
+constexpr char mkd_doc_slp_VariableBlock_m_mat[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableBlock_m_row_slice = R"doc()doc";
+constexpr char mkd_doc_slp_VariableBlock_m_row_slice[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableBlock_m_row_slice_length = R"doc()doc";
+constexpr char mkd_doc_slp_VariableBlock_m_row_slice_length[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableBlock_operator_array =
+constexpr char mkd_doc_slp_VariableBlock_operator_array[] =
 R"doc(Returns a scalar subblock at the given row and column.
 
 Args:
@@ -1301,7 +1301,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_operator_array_2 =
+constexpr char mkd_doc_slp_VariableBlock_operator_array_2[] =
 R"doc(Returns a scalar subblock at the given row and column.
 
 Args:
@@ -1313,7 +1313,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_operator_array_3 =
+constexpr char mkd_doc_slp_VariableBlock_operator_array_3[] =
 R"doc(Returns a scalar subblock at the given index.
 
 Args:
@@ -1324,7 +1324,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_operator_array_4 =
+constexpr char mkd_doc_slp_VariableBlock_operator_array_4[] =
 R"doc(Returns a scalar subblock at the given index.
 
 Args:
@@ -1335,7 +1335,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_operator_array_5 =
+constexpr char mkd_doc_slp_VariableBlock_operator_array_5[] =
 R"doc(Returns a slice of the variable matrix.
 
 Args:
@@ -1347,7 +1347,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_operator_array_6 =
+constexpr char mkd_doc_slp_VariableBlock_operator_array_6[] =
 R"doc(Returns a slice of the variable matrix.
 
 Args:
@@ -1359,7 +1359,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_operator_array_7 =
+constexpr char mkd_doc_slp_VariableBlock_operator_array_7[] =
 R"doc(Returns a slice of the variable matrix.
 
 The given slices aren't adjusted. This overload is for Python bindings
@@ -1376,7 +1376,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_operator_array_8 =
+constexpr char mkd_doc_slp_VariableBlock_operator_array_8[] =
 R"doc(Returns a slice of the variable matrix.
 
 The given slices aren't adjusted. This overload is for Python bindings
@@ -1393,7 +1393,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_operator_assign =
+constexpr char mkd_doc_slp_VariableBlock_operator_assign[] =
 R"doc(Assigns a VariableBlock to the block.
 
 Args:
@@ -1404,7 +1404,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_operator_assign_2 =
+constexpr char mkd_doc_slp_VariableBlock_operator_assign_2[] =
 R"doc(Assigns a VariableBlock to the block.
 
 Args:
@@ -1415,7 +1415,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_operator_assign_3 =
+constexpr char mkd_doc_slp_VariableBlock_operator_assign_3[] =
 R"doc(Assigns a scalar to the block.
 
 This only works for blocks with one row and one column.
@@ -1428,7 +1428,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_operator_assign_4 =
+constexpr char mkd_doc_slp_VariableBlock_operator_assign_4[] =
 R"doc(Assigns an Eigen matrix to the block.
 
 Args:
@@ -1439,7 +1439,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_operator_assign_5 =
+constexpr char mkd_doc_slp_VariableBlock_operator_assign_5[] =
 R"doc(Assigns a VariableMatrix to the block.
 
 Args:
@@ -1450,7 +1450,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_operator_assign_6 =
+constexpr char mkd_doc_slp_VariableBlock_operator_assign_6[] =
 R"doc(Assigns a VariableMatrix to the block.
 
 Args:
@@ -1461,7 +1461,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_operator_iadd =
+constexpr char mkd_doc_slp_VariableBlock_operator_iadd[] =
 R"doc(Compound addition-assignment operator.
 
 Args:
@@ -1472,7 +1472,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_operator_iadd_2 =
+constexpr char mkd_doc_slp_VariableBlock_operator_iadd_2[] =
 R"doc(Compound addition-assignment operator.
 
 Args:
@@ -1483,7 +1483,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_operator_idiv =
+constexpr char mkd_doc_slp_VariableBlock_operator_idiv[] =
 R"doc(Compound matrix division-assignment operator.
 
 Args:
@@ -1494,7 +1494,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_operator_imul =
+constexpr char mkd_doc_slp_VariableBlock_operator_imul[] =
 R"doc(Compound matrix multiplication-assignment operator.
 
 Args:
@@ -1505,7 +1505,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_operator_imul_2 =
+constexpr char mkd_doc_slp_VariableBlock_operator_imul_2[] =
 R"doc(Compound matrix multiplication-assignment operator.
 
 Args:
@@ -1516,7 +1516,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_operator_isub =
+constexpr char mkd_doc_slp_VariableBlock_operator_isub[] =
 R"doc(Compound subtraction-assignment operator.
 
 Args:
@@ -1527,7 +1527,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_operator_isub_2 =
+constexpr char mkd_doc_slp_VariableBlock_operator_isub_2[] =
 R"doc(Compound subtraction-assignment operator.
 
 Args:
@@ -1538,9 +1538,9 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_operator_slp_Variable = R"doc(Implicit conversion operator from 1x1 VariableBlock to Variable.)doc";
+constexpr char mkd_doc_slp_VariableBlock_operator_slp_Variable[] = R"doc(Implicit conversion operator from 1x1 VariableBlock to Variable.)doc";
 
-static const char *mkd_doc_slp_VariableBlock_rbegin =
+constexpr char mkd_doc_slp_VariableBlock_rbegin[] =
 R"doc(Returns reverse begin iterator.
 
 Returns:
@@ -1548,7 +1548,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_rbegin_2 =
+constexpr char mkd_doc_slp_VariableBlock_rbegin_2[] =
 R"doc(Returns const reverse begin iterator.
 
 Returns:
@@ -1556,7 +1556,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_rend =
+constexpr char mkd_doc_slp_VariableBlock_rend[] =
 R"doc(Returns reverse end iterator.
 
 Returns:
@@ -1564,7 +1564,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_rend_2 =
+constexpr char mkd_doc_slp_VariableBlock_rend_2[] =
 R"doc(Returns const reverse end iterator.
 
 Returns:
@@ -1572,7 +1572,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_row =
+constexpr char mkd_doc_slp_VariableBlock_row[] =
 R"doc(Returns a row slice of the variable matrix.
 
 Args:
@@ -1583,7 +1583,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_row_2 =
+constexpr char mkd_doc_slp_VariableBlock_row_2[] =
 R"doc(Returns a row slice of the variable matrix.
 
 Args:
@@ -1594,7 +1594,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_rows =
+constexpr char mkd_doc_slp_VariableBlock_rows[] =
 R"doc(Returns the number of rows in the matrix.
 
 Returns:
@@ -1602,7 +1602,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_segment =
+constexpr char mkd_doc_slp_VariableBlock_segment[] =
 R"doc(Returns a segment of the variable vector.
 
 Args:
@@ -1614,7 +1614,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_segment_2 =
+constexpr char mkd_doc_slp_VariableBlock_segment_2[] =
 R"doc(Returns a segment of the variable vector.
 
 Args:
@@ -1626,7 +1626,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_set_value =
+constexpr char mkd_doc_slp_VariableBlock_set_value[] =
 R"doc(Assigns a scalar to the block.
 
 This only works for blocks with one row and one column.
@@ -1636,7 +1636,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_set_value_2 =
+constexpr char mkd_doc_slp_VariableBlock_set_value_2[] =
 R"doc(Sets block's internal values.
 
 Args:
@@ -1644,7 +1644,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_size =
+constexpr char mkd_doc_slp_VariableBlock_size[] =
 R"doc(Returns number of elements in matrix.
 
 Returns:
@@ -1652,7 +1652,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_value =
+constexpr char mkd_doc_slp_VariableBlock_value[] =
 R"doc(Returns an element of the variable matrix.
 
 Args:
@@ -1664,7 +1664,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_value_2 =
+constexpr char mkd_doc_slp_VariableBlock_value_2[] =
 R"doc(Returns an element of the variable block.
 
 Args:
@@ -1675,7 +1675,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableBlock_value_3 =
+constexpr char mkd_doc_slp_VariableBlock_value_3[] =
 R"doc(Returns the contents of the variable matrix.
 
 Returns:
@@ -1683,17 +1683,17 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix = R"doc()doc";
+constexpr char mkd_doc_slp_VariableMatrix[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableMatrix_2 =
+constexpr char mkd_doc_slp_VariableMatrix_2[] =
 R"doc(A matrix of autodiff variables.
 
 Template Args:
     Scalar_: Scalar type.)doc";
 
-static const char *mkd_doc_slp_VariableMatrix_3 = R"doc()doc";
+constexpr char mkd_doc_slp_VariableMatrix_3[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableMatrix_T =
+constexpr char mkd_doc_slp_VariableMatrix_T[] =
 R"doc(Returns the transpose of the variable matrix.
 
 Returns:
@@ -1701,9 +1701,9 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_VariableMatrix = R"doc(Constructs an empty VariableMatrix.)doc";
+constexpr char mkd_doc_slp_VariableMatrix_VariableMatrix[] = R"doc(Constructs an empty VariableMatrix.)doc";
 
-static const char *mkd_doc_slp_VariableMatrix_VariableMatrix_2 =
+constexpr char mkd_doc_slp_VariableMatrix_VariableMatrix_2[] =
 R"doc(Constructs a zero-initialized VariableMatrix column vector with the
 given rows.
 
@@ -1712,7 +1712,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_VariableMatrix_3 =
+constexpr char mkd_doc_slp_VariableMatrix_VariableMatrix_3[] =
 R"doc(Constructs a zero-initialized VariableMatrix with the given
 dimensions.
 
@@ -1722,7 +1722,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_VariableMatrix_4 =
+constexpr char mkd_doc_slp_VariableMatrix_VariableMatrix_4[] =
 R"doc(Constructs an empty VariableMatrix with the given dimensions.
 
 Args:
@@ -1731,7 +1731,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_VariableMatrix_5 =
+constexpr char mkd_doc_slp_VariableMatrix_VariableMatrix_5[] =
 R"doc(Constructs a scalar VariableMatrix from a nested list of Variables.
 
 Args:
@@ -1739,7 +1739,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_VariableMatrix_6 =
+constexpr char mkd_doc_slp_VariableMatrix_VariableMatrix_6[] =
 R"doc(Constructs a scalar VariableMatrix from a nested list of scalars.
 
 This overload is for Python bindings only.
@@ -1749,7 +1749,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_VariableMatrix_7 =
+constexpr char mkd_doc_slp_VariableMatrix_VariableMatrix_7[] =
 R"doc(Constructs a scalar VariableMatrix from a nested list of Variables.
 
 This overload is for Python bindings only.
@@ -1759,7 +1759,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_VariableMatrix_8 =
+constexpr char mkd_doc_slp_VariableMatrix_VariableMatrix_8[] =
 R"doc(Constructs a VariableMatrix from an Eigen matrix.
 
 Args:
@@ -1767,7 +1767,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_VariableMatrix_9 =
+constexpr char mkd_doc_slp_VariableMatrix_VariableMatrix_9[] =
 R"doc(Constructs a VariableMatrix from an Eigen diagonal matrix.
 
 Args:
@@ -1775,7 +1775,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_VariableMatrix_10 =
+constexpr char mkd_doc_slp_VariableMatrix_VariableMatrix_10[] =
 R"doc(Constructs a scalar VariableMatrix from a Variable.
 
 Args:
@@ -1783,7 +1783,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_VariableMatrix_11 =
+constexpr char mkd_doc_slp_VariableMatrix_VariableMatrix_11[] =
 R"doc(Constructs a scalar VariableMatrix from a Variable.
 
 Args:
@@ -1791,7 +1791,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_VariableMatrix_12 =
+constexpr char mkd_doc_slp_VariableMatrix_VariableMatrix_12[] =
 R"doc(Constructs a VariableMatrix from a VariableBlock.
 
 Args:
@@ -1799,7 +1799,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_VariableMatrix_13 =
+constexpr char mkd_doc_slp_VariableMatrix_VariableMatrix_13[] =
 R"doc(Constructs a VariableMatrix from a VariableBlock.
 
 Args:
@@ -1807,7 +1807,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_VariableMatrix_14 =
+constexpr char mkd_doc_slp_VariableMatrix_VariableMatrix_14[] =
 R"doc(Constructs a column vector wrapper around a Variable array.
 
 Args:
@@ -1815,7 +1815,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_VariableMatrix_15 =
+constexpr char mkd_doc_slp_VariableMatrix_VariableMatrix_15[] =
 R"doc(Constructs a matrix wrapper around a Variable array.
 
 Args:
@@ -1825,7 +1825,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_begin =
+constexpr char mkd_doc_slp_VariableMatrix_begin[] =
 R"doc(Returns begin iterator.
 
 Returns:
@@ -1833,7 +1833,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_begin_2 =
+constexpr char mkd_doc_slp_VariableMatrix_begin_2[] =
 R"doc(Returns const begin iterator.
 
 Returns:
@@ -1841,7 +1841,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_block =
+constexpr char mkd_doc_slp_VariableMatrix_block[] =
 R"doc(Returns a block of the variable matrix.
 
 Args:
@@ -1855,7 +1855,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_block_2 =
+constexpr char mkd_doc_slp_VariableMatrix_block_2[] =
 R"doc(Returns a block of the variable matrix.
 
 Args:
@@ -1869,7 +1869,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_cbegin =
+constexpr char mkd_doc_slp_VariableMatrix_cbegin[] =
 R"doc(Returns const begin iterator.
 
 Returns:
@@ -1877,7 +1877,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_cend =
+constexpr char mkd_doc_slp_VariableMatrix_cend[] =
 R"doc(Returns const end iterator.
 
 Returns:
@@ -1885,7 +1885,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_col =
+constexpr char mkd_doc_slp_VariableMatrix_col[] =
 R"doc(Returns a column slice of the variable matrix.
 
 Args:
@@ -1896,7 +1896,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_col_2 =
+constexpr char mkd_doc_slp_VariableMatrix_col_2[] =
 R"doc(Returns a column slice of the variable matrix.
 
 Args:
@@ -1907,7 +1907,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_cols =
+constexpr char mkd_doc_slp_VariableMatrix_cols[] =
 R"doc(Returns the number of columns in the matrix.
 
 Returns:
@@ -1915,27 +1915,27 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_const_iterator = R"doc()doc";
+constexpr char mkd_doc_slp_VariableMatrix_const_iterator[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableMatrix_const_iterator_const_iterator = R"doc()doc";
+constexpr char mkd_doc_slp_VariableMatrix_const_iterator_const_iterator[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableMatrix_const_iterator_const_iterator_2 = R"doc()doc";
+constexpr char mkd_doc_slp_VariableMatrix_const_iterator_const_iterator_2[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableMatrix_const_iterator_m_it = R"doc()doc";
+constexpr char mkd_doc_slp_VariableMatrix_const_iterator_m_it[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableMatrix_const_iterator_operator_dec = R"doc()doc";
+constexpr char mkd_doc_slp_VariableMatrix_const_iterator_operator_dec[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableMatrix_const_iterator_operator_dec_2 = R"doc()doc";
+constexpr char mkd_doc_slp_VariableMatrix_const_iterator_operator_dec_2[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableMatrix_const_iterator_operator_eq = R"doc()doc";
+constexpr char mkd_doc_slp_VariableMatrix_const_iterator_operator_eq[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableMatrix_const_iterator_operator_inc = R"doc()doc";
+constexpr char mkd_doc_slp_VariableMatrix_const_iterator_operator_inc[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableMatrix_const_iterator_operator_inc_2 = R"doc()doc";
+constexpr char mkd_doc_slp_VariableMatrix_const_iterator_operator_inc_2[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableMatrix_const_iterator_operator_mul = R"doc()doc";
+constexpr char mkd_doc_slp_VariableMatrix_const_iterator_operator_mul[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableMatrix_constant =
+constexpr char mkd_doc_slp_VariableMatrix_constant[] =
 R"doc(Returns a variable matrix filled with a constant.
 
 Args:
@@ -1948,7 +1948,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_crbegin =
+constexpr char mkd_doc_slp_VariableMatrix_crbegin[] =
 R"doc(Returns const reverse begin iterator.
 
 Returns:
@@ -1956,7 +1956,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_crend =
+constexpr char mkd_doc_slp_VariableMatrix_crend[] =
 R"doc(Returns const reverse end iterator.
 
 Returns:
@@ -1964,7 +1964,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_cwise_transform =
+constexpr char mkd_doc_slp_VariableMatrix_cwise_transform[] =
 R"doc(Transforms the matrix coefficient-wise with an unary operator.
 
 Args:
@@ -1975,7 +1975,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_end =
+constexpr char mkd_doc_slp_VariableMatrix_end[] =
 R"doc(Returns end iterator.
 
 Returns:
@@ -1983,7 +1983,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_end_2 =
+constexpr char mkd_doc_slp_VariableMatrix_end_2[] =
 R"doc(Returns const end iterator.
 
 Returns:
@@ -1991,7 +1991,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_exp =
+constexpr char mkd_doc_slp_VariableMatrix_exp[] =
 R"doc(Returns the matrix exponential.
 
 Returns:
@@ -1999,7 +1999,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_identity =
+constexpr char mkd_doc_slp_VariableMatrix_identity[] =
 R"doc(Returns an identity variable matrix.
 
 Args:
@@ -2010,33 +2010,33 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_iterator = R"doc()doc";
+constexpr char mkd_doc_slp_VariableMatrix_iterator[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableMatrix_iterator_iterator = R"doc()doc";
+constexpr char mkd_doc_slp_VariableMatrix_iterator_iterator[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableMatrix_iterator_iterator_2 = R"doc()doc";
+constexpr char mkd_doc_slp_VariableMatrix_iterator_iterator_2[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableMatrix_iterator_m_it = R"doc()doc";
+constexpr char mkd_doc_slp_VariableMatrix_iterator_m_it[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableMatrix_iterator_operator_dec = R"doc()doc";
+constexpr char mkd_doc_slp_VariableMatrix_iterator_operator_dec[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableMatrix_iterator_operator_dec_2 = R"doc()doc";
+constexpr char mkd_doc_slp_VariableMatrix_iterator_operator_dec_2[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableMatrix_iterator_operator_eq = R"doc()doc";
+constexpr char mkd_doc_slp_VariableMatrix_iterator_operator_eq[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableMatrix_iterator_operator_inc = R"doc()doc";
+constexpr char mkd_doc_slp_VariableMatrix_iterator_operator_inc[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableMatrix_iterator_operator_inc_2 = R"doc()doc";
+constexpr char mkd_doc_slp_VariableMatrix_iterator_operator_inc_2[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableMatrix_iterator_operator_mul = R"doc()doc";
+constexpr char mkd_doc_slp_VariableMatrix_iterator_operator_mul[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableMatrix_m_cols = R"doc()doc";
+constexpr char mkd_doc_slp_VariableMatrix_m_cols[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableMatrix_m_rows = R"doc()doc";
+constexpr char mkd_doc_slp_VariableMatrix_m_rows[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableMatrix_m_storage = R"doc()doc";
+constexpr char mkd_doc_slp_VariableMatrix_m_storage[] = R"doc()doc";
 
-static const char *mkd_doc_slp_VariableMatrix_one =
+constexpr char mkd_doc_slp_VariableMatrix_one[] =
 R"doc(Returns a variable matrix filled with ones.
 
 Args:
@@ -2048,7 +2048,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_operator_array =
+constexpr char mkd_doc_slp_VariableMatrix_operator_array[] =
 R"doc(Returns the element at the given row and column.
 
 Args:
@@ -2060,7 +2060,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_operator_array_2 =
+constexpr char mkd_doc_slp_VariableMatrix_operator_array_2[] =
 R"doc(Returns the element at the given row and column.
 
 Args:
@@ -2072,7 +2072,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_operator_array_3 =
+constexpr char mkd_doc_slp_VariableMatrix_operator_array_3[] =
 R"doc(Returns the element at the given index.
 
 Args:
@@ -2083,7 +2083,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_operator_array_4 =
+constexpr char mkd_doc_slp_VariableMatrix_operator_array_4[] =
 R"doc(Returns the element at the given index.
 
 Args:
@@ -2094,7 +2094,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_operator_array_5 =
+constexpr char mkd_doc_slp_VariableMatrix_operator_array_5[] =
 R"doc(Returns a slice of the variable matrix.
 
 Args:
@@ -2106,7 +2106,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_operator_array_6 =
+constexpr char mkd_doc_slp_VariableMatrix_operator_array_6[] =
 R"doc(Returns a slice of the variable matrix.
 
 Args:
@@ -2118,7 +2118,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_operator_array_7 =
+constexpr char mkd_doc_slp_VariableMatrix_operator_array_7[] =
 R"doc(Returns a slice of the variable matrix.
 
 The given slices aren't adjusted. This overload is for Python bindings
@@ -2135,7 +2135,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_operator_array_8 =
+constexpr char mkd_doc_slp_VariableMatrix_operator_array_8[] =
 R"doc(Returns a slice of the variable matrix.
 
 The given slices aren't adjusted. This overload is for Python bindings
@@ -2152,7 +2152,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_operator_assign =
+constexpr char mkd_doc_slp_VariableMatrix_operator_assign[] =
 R"doc(Assigns an Eigen matrix to a VariableMatrix.
 
 Args:
@@ -2163,7 +2163,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_operator_assign_2 =
+constexpr char mkd_doc_slp_VariableMatrix_operator_assign_2[] =
 R"doc(Assigns a scalar to the matrix.
 
 This only works for matrices with one row and one column.
@@ -2176,7 +2176,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_operator_iadd =
+constexpr char mkd_doc_slp_VariableMatrix_operator_iadd[] =
 R"doc(Compound addition-assignment operator.
 
 Args:
@@ -2187,7 +2187,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_operator_iadd_2 =
+constexpr char mkd_doc_slp_VariableMatrix_operator_iadd_2[] =
 R"doc(Compound addition-assignment operator.
 
 Args:
@@ -2198,7 +2198,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_operator_idiv =
+constexpr char mkd_doc_slp_VariableMatrix_operator_idiv[] =
 R"doc(Compound matrix division-assignment operator.
 
 Args:
@@ -2209,7 +2209,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_operator_imul =
+constexpr char mkd_doc_slp_VariableMatrix_operator_imul[] =
 R"doc(Compound matrix multiplication-assignment operator.
 
 Args:
@@ -2220,7 +2220,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_operator_imul_2 =
+constexpr char mkd_doc_slp_VariableMatrix_operator_imul_2[] =
 R"doc(Compound matrix-scalar multiplication-assignment operator.
 
 Args:
@@ -2231,7 +2231,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_operator_isub =
+constexpr char mkd_doc_slp_VariableMatrix_operator_isub[] =
 R"doc(Compound subtraction-assignment operator.
 
 Args:
@@ -2242,7 +2242,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_operator_isub_2 =
+constexpr char mkd_doc_slp_VariableMatrix_operator_isub_2[] =
 R"doc(Compound subtraction-assignment operator.
 
 Args:
@@ -2253,9 +2253,9 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_operator_slp_Variable = R"doc(Implicit conversion operator from 1x1 VariableMatrix to Variable.)doc";
+constexpr char mkd_doc_slp_VariableMatrix_operator_slp_Variable[] = R"doc(Implicit conversion operator from 1x1 VariableMatrix to Variable.)doc";
 
-static const char *mkd_doc_slp_VariableMatrix_rbegin =
+constexpr char mkd_doc_slp_VariableMatrix_rbegin[] =
 R"doc(Returns reverse begin iterator.
 
 Returns:
@@ -2263,7 +2263,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_rbegin_2 =
+constexpr char mkd_doc_slp_VariableMatrix_rbegin_2[] =
 R"doc(Returns const reverse begin iterator.
 
 Returns:
@@ -2271,7 +2271,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_rend =
+constexpr char mkd_doc_slp_VariableMatrix_rend[] =
 R"doc(Returns reverse end iterator.
 
 Returns:
@@ -2279,7 +2279,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_rend_2 =
+constexpr char mkd_doc_slp_VariableMatrix_rend_2[] =
 R"doc(Returns const reverse end iterator.
 
 Returns:
@@ -2287,7 +2287,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_row =
+constexpr char mkd_doc_slp_VariableMatrix_row[] =
 R"doc(Returns a row slice of the variable matrix.
 
 Args:
@@ -2298,7 +2298,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_row_2 =
+constexpr char mkd_doc_slp_VariableMatrix_row_2[] =
 R"doc(Returns a row slice of the variable matrix.
 
 Args:
@@ -2309,7 +2309,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_rows =
+constexpr char mkd_doc_slp_VariableMatrix_rows[] =
 R"doc(Returns the number of rows in the matrix.
 
 Returns:
@@ -2317,7 +2317,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_segment =
+constexpr char mkd_doc_slp_VariableMatrix_segment[] =
 R"doc(Returns a segment of the variable vector.
 
 Args:
@@ -2329,7 +2329,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_segment_2 =
+constexpr char mkd_doc_slp_VariableMatrix_segment_2[] =
 R"doc(Returns a segment of the variable vector.
 
 Args:
@@ -2341,7 +2341,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_set_value =
+constexpr char mkd_doc_slp_VariableMatrix_set_value[] =
 R"doc(Sets the VariableMatrix's internal values.
 
 Args:
@@ -2349,7 +2349,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_size =
+constexpr char mkd_doc_slp_VariableMatrix_size[] =
 R"doc(Returns number of elements in matrix.
 
 Returns:
@@ -2357,7 +2357,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_to_eigen =
+constexpr char mkd_doc_slp_VariableMatrix_to_eigen[] =
 R"doc(Converts the VariableMatrix to an Eigen matrix.
 
 Returns:
@@ -2365,7 +2365,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_value =
+constexpr char mkd_doc_slp_VariableMatrix_value[] =
 R"doc(Returns an element of the variable matrix.
 
 Args:
@@ -2377,7 +2377,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_value_2 =
+constexpr char mkd_doc_slp_VariableMatrix_value_2[] =
 R"doc(Returns an element of the variable matrix.
 
 Args:
@@ -2388,7 +2388,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_value_3 =
+constexpr char mkd_doc_slp_VariableMatrix_value_3[] =
 R"doc(Returns the contents of the variable matrix.
 
 Returns:
@@ -2396,7 +2396,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_VariableMatrix_zero =
+constexpr char mkd_doc_slp_VariableMatrix_zero[] =
 R"doc(Returns a variable matrix filled with zeros.
 
 Args:
@@ -2408,11 +2408,11 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_Variable_Variable = R"doc(Constructs a linear Variable with a value of zero.)doc";
+constexpr char mkd_doc_slp_Variable_Variable[] = R"doc(Constructs a linear Variable with a value of zero.)doc";
 
-static const char *mkd_doc_slp_Variable_Variable_2 = R"doc(Constructs an empty Variable.)doc";
+constexpr char mkd_doc_slp_Variable_Variable_2[] = R"doc(Constructs an empty Variable.)doc";
 
-static const char *mkd_doc_slp_Variable_Variable_3 =
+constexpr char mkd_doc_slp_Variable_Variable_3[] =
 R"doc(Constructs a Variable from a scalar type.
 
 Args:
@@ -2420,7 +2420,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_Variable_Variable_4 =
+constexpr char mkd_doc_slp_Variable_Variable_4[] =
 R"doc(Constructs a Variable from a scalar type.
 
 Args:
@@ -2428,7 +2428,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_Variable_Variable_5 =
+constexpr char mkd_doc_slp_Variable_Variable_5[] =
 R"doc(Constructs a Variable from a floating-point type.
 
 Args:
@@ -2436,7 +2436,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_Variable_Variable_6 =
+constexpr char mkd_doc_slp_Variable_Variable_6[] =
 R"doc(Constructs a Variable from an integral type.
 
 Args:
@@ -2444,7 +2444,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_Variable_Variable_7 =
+constexpr char mkd_doc_slp_Variable_Variable_7[] =
 R"doc(Constructs a Variable pointing to the specified expression.
 
 Args:
@@ -2452,7 +2452,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_Variable_Variable_8 =
+constexpr char mkd_doc_slp_Variable_Variable_8[] =
 R"doc(Constructs a Variable pointing to the specified expression.
 
 Args:
@@ -2460,15 +2460,15 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_Variable_expr = R"doc(The expression node)doc";
+constexpr char mkd_doc_slp_Variable_expr[] = R"doc(The expression node)doc";
 
-static const char *mkd_doc_slp_Variable_m_graph =
+constexpr char mkd_doc_slp_Variable_m_graph[] =
 R"doc(Used to update the value of this variable based on the values of its
 dependent variables)doc";
 
-static const char *mkd_doc_slp_Variable_m_graph_initialized = R"doc(Used for lazy initialization of m_graph)doc";
+constexpr char mkd_doc_slp_Variable_m_graph_initialized[] = R"doc(Used for lazy initialization of m_graph)doc";
 
-static const char *mkd_doc_slp_Variable_operator_assign =
+constexpr char mkd_doc_slp_Variable_operator_assign[] =
 R"doc(Assignment operator for scalar.
 
 Args:
@@ -2479,7 +2479,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_Variable_operator_iadd =
+constexpr char mkd_doc_slp_Variable_operator_iadd[] =
 R"doc(Variable-Variable compound addition operator.
 
 Args:
@@ -2490,7 +2490,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_Variable_operator_idiv =
+constexpr char mkd_doc_slp_Variable_operator_idiv[] =
 R"doc(Variable-Variable compound division operator.
 
 Args:
@@ -2501,7 +2501,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_Variable_operator_imul =
+constexpr char mkd_doc_slp_Variable_operator_imul[] =
 R"doc(Variable-Variable compound multiplication operator.
 
 Args:
@@ -2512,7 +2512,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_Variable_operator_isub =
+constexpr char mkd_doc_slp_Variable_operator_isub[] =
 R"doc(Variable-Variable compound subtraction operator.
 
 Args:
@@ -2523,7 +2523,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_Variable_set_value =
+constexpr char mkd_doc_slp_Variable_set_value[] =
 R"doc(Sets Variable's internal value.
 
 Args:
@@ -2531,7 +2531,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_Variable_type =
+constexpr char mkd_doc_slp_Variable_type[] =
 R"doc(Returns the type of this expression (constant, linear, quadratic, or
 nonlinear).
 
@@ -2540,7 +2540,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_Variable_value =
+constexpr char mkd_doc_slp_Variable_value[] =
 R"doc(Returns the value of this variable.
 
 Returns:
@@ -2548,7 +2548,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_abs =
+constexpr char mkd_doc_slp_abs[] =
 R"doc(abs() for Variables.
 
 Args:
@@ -2559,7 +2559,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_slp_acos =
+constexpr char mkd_doc_slp_acos[] =
 R"doc(acos() for Variables.
 
 Args:
@@ -2570,7 +2570,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_slp_asin =
+constexpr char mkd_doc_slp_asin[] =
 R"doc(asin() for Variables.
 
 Args:
@@ -2581,7 +2581,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_slp_atan =
+constexpr char mkd_doc_slp_atan[] =
 R"doc(atan() for Variables.
 
 Args:
@@ -2592,7 +2592,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_slp_atan2 =
+constexpr char mkd_doc_slp_atan2[] =
 R"doc(atan2() for Variables.
 
 Args:
@@ -2604,7 +2604,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_slp_atan2_2 =
+constexpr char mkd_doc_slp_atan2_2[] =
 R"doc(atan2() for Variables.
 
 Args:
@@ -2616,7 +2616,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_slp_atan2_3 =
+constexpr char mkd_doc_slp_atan2_3[] =
 R"doc(atan2() for Variables.
 
 Args:
@@ -2628,7 +2628,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_slp_block =
+constexpr char mkd_doc_slp_block[] =
 R"doc(Assembles a VariableMatrix from a nested list of blocks.
 
 Each row's blocks must have the same height, and the assembled block
@@ -2644,7 +2644,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_slp_block_2 =
+constexpr char mkd_doc_slp_block_2[] =
 R"doc(Assembles a VariableMatrix from a nested list of blocks.
 
 Each row's blocks must have the same height, and the assembled block
@@ -2662,7 +2662,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_slp_bounds =
+constexpr char mkd_doc_slp_bounds[] =
 R"doc(Helper function for creating bound constraints.
 
 Args:
@@ -2672,7 +2672,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_cbrt =
+constexpr char mkd_doc_slp_cbrt[] =
 R"doc(cbrt() for Variables.
 
 Args:
@@ -2683,7 +2683,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_slp_cos =
+constexpr char mkd_doc_slp_cos[] =
 R"doc(cos() for Variables.
 
 Args:
@@ -2694,7 +2694,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_slp_cosh =
+constexpr char mkd_doc_slp_cosh[] =
 R"doc(cosh() for Variables.
 
 Args:
@@ -2705,7 +2705,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_slp_cwise_reduce =
+constexpr char mkd_doc_slp_cwise_reduce[] =
 R"doc(Applies a coefficient-wise reduce operation to two matrices.
 
 Args:
@@ -2718,9 +2718,9 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_slp_detail_gradient_tree = R"doc()doc";
+constexpr char mkd_doc_slp_detail_gradient_tree[] = R"doc()doc";
 
-static const char *mkd_doc_slp_detail_gradient_tree_2 =
+constexpr char mkd_doc_slp_detail_gradient_tree_2[] =
 R"doc(Returns the variable's gradient tree.
 
 This function lazily allocates variables, so elements of the returned
@@ -2740,7 +2740,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_erf =
+constexpr char mkd_doc_slp_erf[] =
 R"doc(erf() for Variables.
 
 Args:
@@ -2751,7 +2751,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_slp_exp =
+constexpr char mkd_doc_slp_exp[] =
 R"doc(exp() for Variables.
 
 Args:
@@ -2762,7 +2762,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_slp_hypot =
+constexpr char mkd_doc_slp_hypot[] =
 R"doc(hypot() for Variables.
 
 Args:
@@ -2774,7 +2774,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_slp_hypot_2 =
+constexpr char mkd_doc_slp_hypot_2[] =
 R"doc(hypot() for Variables.
 
 Args:
@@ -2786,7 +2786,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_slp_hypot_3 =
+constexpr char mkd_doc_slp_hypot_3[] =
 R"doc(hypot() for Variables.
 
 Args:
@@ -2798,7 +2798,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_slp_hypot_4 =
+constexpr char mkd_doc_slp_hypot_4[] =
 R"doc(hypot() for Variables.
 
 Args:
@@ -2811,7 +2811,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_slp_if_else =
+constexpr char mkd_doc_slp_if_else[] =
 R"doc(if_else() for Variables.
 
 Returns t if cond(a, b) is true, otherwise f. The condition is
@@ -2830,7 +2830,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_slp_log =
+constexpr char mkd_doc_slp_log[] =
 R"doc(log() for Variables.
 
 Args:
@@ -2841,7 +2841,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_slp_log10 =
+constexpr char mkd_doc_slp_log10[] =
 R"doc(log10() for Variables.
 
 Args:
@@ -2852,15 +2852,15 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_slp_make_constraints = R"doc()doc";
+constexpr char mkd_doc_slp_make_constraints[] = R"doc()doc";
 
-static const char *mkd_doc_slp_make_constraints_2 = R"doc()doc";
+constexpr char mkd_doc_slp_make_constraints_2[] = R"doc()doc";
 
-static const char *mkd_doc_slp_make_constraints_3 = R"doc()doc";
+constexpr char mkd_doc_slp_make_constraints_3[] = R"doc()doc";
 
-static const char *mkd_doc_slp_make_constraints_4 = R"doc()doc";
+constexpr char mkd_doc_slp_make_constraints_4[] = R"doc()doc";
 
-static const char *mkd_doc_slp_max =
+constexpr char mkd_doc_slp_max[] =
 R"doc(max() for Variables.
 
 Returns the greater of a and b. If the values are equivalent, returns
@@ -2875,7 +2875,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_slp_max_2 =
+constexpr char mkd_doc_slp_max_2[] =
 R"doc(max() for Variables.
 
 Returns the greater of a and b. If the values are equivalent, returns
@@ -2890,7 +2890,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_slp_max_3 =
+constexpr char mkd_doc_slp_max_3[] =
 R"doc(max() for Variables.
 
 Returns the greater of a and b. If the values are equivalent, returns
@@ -2905,7 +2905,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_slp_min =
+constexpr char mkd_doc_slp_min[] =
 R"doc(min() for Variables.
 
 Returns the lesser of a and b. If the values are equivalent, returns
@@ -2920,7 +2920,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_slp_min_2 =
+constexpr char mkd_doc_slp_min_2[] =
 R"doc(min() for Variables.
 
 Returns the lesser of a and b. If the values are equivalent, returns
@@ -2935,7 +2935,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_slp_min_3 =
+constexpr char mkd_doc_slp_min_3[] =
 R"doc(min() for Variables.
 
 Returns the lesser of a and b. If the values are equivalent, returns
@@ -2950,7 +2950,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_slp_operator_eq =
+constexpr char mkd_doc_slp_operator_eq[] =
 R"doc(Equality operator that returns an equality constraint for two
 Variables.
 
@@ -2960,7 +2960,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_operator_eq_2 =
+constexpr char mkd_doc_slp_operator_eq_2[] =
 R"doc(Equality operator that returns an equality constraint for two
 Variables.
 
@@ -2970,7 +2970,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_operator_eq_3 =
+constexpr char mkd_doc_slp_operator_eq_3[] =
 R"doc(Equality operator that returns an equality constraint for two
 Variables.
 
@@ -2980,7 +2980,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_operator_ge =
+constexpr char mkd_doc_slp_operator_ge[] =
 R"doc(Greater-than-or-equal-to comparison operator that returns an
 inequality constraint for two Variables.
 
@@ -2990,7 +2990,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_operator_ge_2 =
+constexpr char mkd_doc_slp_operator_ge_2[] =
 R"doc(Greater-than-or-equal-to comparison operator that returns an
 inequality constraint for two Variables.
 
@@ -3000,7 +3000,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_operator_ge_3 =
+constexpr char mkd_doc_slp_operator_ge_3[] =
 R"doc(Greater-than-or-equal-to comparison operator that returns an
 inequality constraint for two Variables.
 
@@ -3010,7 +3010,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_operator_gt =
+constexpr char mkd_doc_slp_operator_gt[] =
 R"doc(Greater-than comparison operator that returns an inequality constraint
 for two Variables.
 
@@ -3020,7 +3020,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_operator_le =
+constexpr char mkd_doc_slp_operator_le[] =
 R"doc(Less-than-or-equal-to comparison operator that returns an inequality
 constraint for two Variables.
 
@@ -3030,7 +3030,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_operator_lt =
+constexpr char mkd_doc_slp_operator_lt[] =
 R"doc(Less-than comparison operator that returns an inequality constraint
 for two Variables.
 
@@ -3040,7 +3040,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_slp_pow =
+constexpr char mkd_doc_slp_pow[] =
 R"doc(pow() for Variables.
 
 Args:
@@ -3052,7 +3052,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_slp_pow_2 =
+constexpr char mkd_doc_slp_pow_2[] =
 R"doc(pow() for Variables.
 
 Args:
@@ -3064,7 +3064,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_slp_pow_3 =
+constexpr char mkd_doc_slp_pow_3[] =
 R"doc(pow() for Variables.
 
 Args:
@@ -3076,7 +3076,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_slp_sign =
+constexpr char mkd_doc_slp_sign[] =
 R"doc(sign() for Variables.
 
 Args:
@@ -3087,7 +3087,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_slp_sin =
+constexpr char mkd_doc_slp_sin[] =
 R"doc(sin() for Variables.
 
 Args:
@@ -3098,7 +3098,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_slp_sinh =
+constexpr char mkd_doc_slp_sinh[] =
 R"doc(sinh() for Variables.
 
 Args:
@@ -3109,7 +3109,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_slp_solve =
+constexpr char mkd_doc_slp_solve[] =
 R"doc(Solves the VariableMatrix equation AX = B for X.
 
 Args:
@@ -3124,7 +3124,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_slp_sqrt =
+constexpr char mkd_doc_slp_sqrt[] =
 R"doc(sqrt() for Variables.
 
 Args:
@@ -3135,7 +3135,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_slp_tan =
+constexpr char mkd_doc_slp_tan[] =
 R"doc(tan() for Variables.
 
 Args:
@@ -3146,7 +3146,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_slp_tanh =
+constexpr char mkd_doc_slp_tanh[] =
 R"doc(tanh() for Variables.
 
 Args:

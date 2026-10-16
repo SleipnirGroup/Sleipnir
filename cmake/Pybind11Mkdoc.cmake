@@ -74,7 +74,13 @@ function(pybind11_mkdoc target headers)
             ${CMAKE_CURRENT_SOURCE_DIR}/python/cpp/docstrings.hpp
             ${target_flags} ${clang_flags} ${eigen_flags} ${small_vector_flags}
             -std=c++23
-        DEPENDS ${headers}
+        COMMAND
+            ${CMAKE_COMMAND}
+            -DFILE=${CMAKE_CURRENT_SOURCE_DIR}/python/cpp/docstrings.hpp -P
+            ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Pybind11MkdocPostprocess.cmake
+        DEPENDS
+            ${headers}
+            ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Pybind11MkdocPostprocess.cmake
     )
 
     # Add docstrings target
