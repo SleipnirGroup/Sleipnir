@@ -25,6 +25,7 @@ dev = [
     "pytest>=9.1.1",
     "scipy-stubs",
 ]
+docstrings = ["pybind11-mkdoc~=3.0.0"]
 
 [tool.py-build-cmake.cmake]
 build_type = "Release"
