@@ -35,12 +35,13 @@
 #include "sleipnir/optimization/solver/sqp_matrix_callbacks.hpp"
 #include "sleipnir/optimization/solver/util/bounds.hpp"
 #include "sleipnir/optimization/solver/util/problem_scaling.hpp"
+#include "sleipnir/optimization/solver/util/time_trace.hpp"
 #include "sleipnir/util/empty.hpp"
 #include "sleipnir/util/print.hpp"
 #include "sleipnir/util/print_diagnostics.hpp"
-#include "sleipnir/util/profiler.hpp"
 #include "sleipnir/util/spy.hpp"
 #include "sleipnir/util/symbol_exports.hpp"
+#include "sleipnir/util/time_tracer.hpp"
 
 namespace slp {
 
@@ -413,6 +414,7 @@ class Problem {
                           DenseVector& x) {
     using SparseMatrix = Eigen::SparseMatrix<Scalar>;
     using SparseVector = Eigen::SparseVector<Scalar>;
+    using enum SetupTimeTracerID;
 
     VariableMatrix<Scalar> x_ad{m_decision_variables};
 
@@ -430,27 +432,23 @@ class Problem {
       iteration_callbacks.emplace_back(callback);
     }
 
-    gch::small_vector<SetupProfiler> ad_setup_profilers;
-    ad_setup_profilers.emplace_back("setup");
-    ad_setup_profilers.emplace_back("↳ ∇f(x)");
-    ad_setup_profilers.emplace_back("↳ ∇²ₓₓL");
-
-    ad_setup_profilers[0].start();
+    TimeTracerTree<SetupTimeTracer, newton_setup_time_trace> ad_setup_tracers{
+        options.diagnostics};
+    ScopedTimeTracer setup_tracer{ad_setup_tracers[SETUP]};
 
     // Set up gradient autodiff
-    ad_setup_profilers[1].start();
+    PhaseTimeTracer phase_tracer{ad_setup_tracers[GRADIENT]};
     Gradient g{f, x_ad};
-    ad_setup_profilers[1].stop();
 
     // Set up Lagrangian Hessian autodiff
-    ad_setup_profilers[2].start();
+    phase_tracer.next(ad_setup_tracers[HESSIAN]);
     Hessian<Scalar, Eigen::Lower> H{f, x_ad};
-    ad_setup_profilers[2].stop();
 
-    ad_setup_profilers[0].stop();
+    phase_tracer.stop();
+    setup_tracer.stop();
 
     if (options.diagnostics) {
-      print_setup_diagnostics(ad_setup_profilers);
+      print_setup_diagnostics(ad_setup_tracers);
     }
 
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
@@ -498,6 +496,7 @@ class Problem {
                        DenseVector& x) {
     using SparseMatrix = Eigen::SparseMatrix<Scalar>;
     using SparseVector = Eigen::SparseVector<Scalar>;
+    using enum SetupTimeTracerID;
 
     VariableMatrix<Scalar> x_ad{m_decision_variables};
 
@@ -519,44 +518,35 @@ class Problem {
     VariableMatrix<Scalar> c_e_ad{m_equality_constraints};
     VariableMatrix<Scalar> y_ad(num_equality_constraints);
 
-    gch::small_vector<SetupProfiler> ad_setup_profilers;
-    ad_setup_profilers.emplace_back("setup");
-    ad_setup_profilers.emplace_back("↳ ∇f(x)");
-    ad_setup_profilers.emplace_back("↳ ∇²ₓₓL");
-    ad_setup_profilers.emplace_back("  ↳ ∇²ₓₓL_f");
-    ad_setup_profilers.emplace_back("  ↳ ∇²ₓₓL_c");
-    ad_setup_profilers.emplace_back("↳ ∂cₑ/∂x");
-
-    ad_setup_profilers[0].start();
+    TimeTracerTree<SetupTimeTracer, sqp_setup_time_trace> ad_setup_tracers{
+        options.diagnostics};
+    ScopedTimeTracer setup_tracer{ad_setup_tracers[SETUP]};
 
     // Set up gradient autodiff
-    ad_setup_profilers[1].start();
+    PhaseTimeTracer phase_tracer{ad_setup_tracers[GRADIENT]};
     Gradient g{f, x_ad};
-    ad_setup_profilers[1].stop();
 
-    ad_setup_profilers[2].start();
+    phase_tracer.next(ad_setup_tracers[HESSIAN]);
 
     // Set up cost part of Lagrangian Hessian autodiff
-    ad_setup_profilers[3].start();
+    PhaseTimeTracer hessian_phase_tracer{ad_setup_tracers[HESSIAN_COST]};
     Hessian<Scalar, Eigen::Lower> H_f{f, x_ad};
-    ad_setup_profilers[3].stop();
 
     // Set up constraint part of Lagrangian Hessian autodiff
-    ad_setup_profilers[4].start();
+    hessian_phase_tracer.next(ad_setup_tracers[HESSIAN_CONSTRAINTS]);
     Hessian<Scalar, Eigen::Lower> H_c{-y_ad.T() * c_e_ad, x_ad};
-    ad_setup_profilers[4].stop();
 
-    ad_setup_profilers[2].stop();
+    hessian_phase_tracer.stop();
 
     // Set up equality constraint Jacobian autodiff
-    ad_setup_profilers[5].start();
+    phase_tracer.next(ad_setup_tracers[EQUALITY_JACOBIAN]);
     Jacobian A_e{c_e_ad, x_ad};
-    ad_setup_profilers[5].stop();
 
-    ad_setup_profilers[0].stop();
+    phase_tracer.stop();
+    setup_tracer.stop();
 
     if (options.diagnostics) {
-      print_setup_diagnostics(ad_setup_profilers);
+      print_setup_diagnostics(ad_setup_tracers);
     }
 
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
@@ -626,6 +616,7 @@ class Problem {
                        DenseVector& x) {
     using SparseMatrix = Eigen::SparseMatrix<Scalar>;
     using SparseVector = Eigen::SparseVector<Scalar>;
+    using enum SetupTimeTracerID;
 
     VariableMatrix<Scalar> x_ad{m_decision_variables};
 
@@ -650,51 +641,40 @@ class Problem {
     VariableMatrix<Scalar> y_ad(num_equality_constraints);
     VariableMatrix<Scalar> z_ad(num_inequality_constraints);
 
-    gch::small_vector<SetupProfiler> ad_setup_profilers;
-    ad_setup_profilers.emplace_back("setup");
-    ad_setup_profilers.emplace_back("↳ ∇f(x)");
-    ad_setup_profilers.emplace_back("↳ ∇²ₓₓL");
-    ad_setup_profilers.emplace_back("  ↳ ∇²ₓₓL_f");
-    ad_setup_profilers.emplace_back("  ↳ ∇²ₓₓL_c");
-    ad_setup_profilers.emplace_back("↳ ∂cₑ/∂x");
-    ad_setup_profilers.emplace_back("↳ ∂cᵢ/∂x");
-
-    ad_setup_profilers[0].start();
+    TimeTracerTree<SetupTimeTracer, ipm_setup_time_trace> ad_setup_tracers{
+        options.diagnostics};
+    ScopedTimeTracer setup_tracer{ad_setup_tracers[SETUP]};
 
     // Set up gradient autodiff
-    ad_setup_profilers[1].start();
+    PhaseTimeTracer phase_tracer{ad_setup_tracers[GRADIENT]};
     Gradient g{f, x_ad};
-    ad_setup_profilers[1].stop();
 
-    ad_setup_profilers[2].start();
+    phase_tracer.next(ad_setup_tracers[HESSIAN]);
 
     // Set up cost part of Lagrangian Hessian autodiff
-    ad_setup_profilers[3].start();
+    PhaseTimeTracer hessian_phase_tracer{ad_setup_tracers[HESSIAN_COST]};
     Hessian<Scalar, Eigen::Lower> H_f{f, x_ad};
-    ad_setup_profilers[3].stop();
 
     // Set up constraint part of Lagrangian Hessian autodiff
-    ad_setup_profilers[4].start();
+    hessian_phase_tracer.next(ad_setup_tracers[HESSIAN_CONSTRAINTS]);
     Hessian<Scalar, Eigen::Lower> H_c{-y_ad.T() * c_e_ad - z_ad.T() * c_i_ad,
                                       x_ad};
-    ad_setup_profilers[4].stop();
 
-    ad_setup_profilers[2].stop();
+    hessian_phase_tracer.stop();
 
     // Set up equality constraint Jacobian autodiff
-    ad_setup_profilers[5].start();
+    phase_tracer.next(ad_setup_tracers[EQUALITY_JACOBIAN]);
     Jacobian A_e{c_e_ad, x_ad};
-    ad_setup_profilers[5].stop();
 
     // Set up inequality constraint Jacobian autodiff
-    ad_setup_profilers[6].start();
+    phase_tracer.next(ad_setup_tracers[INEQUALITY_JACOBIAN]);
     Jacobian A_i{c_i_ad, x_ad};
-    ad_setup_profilers[6].stop();
 
-    ad_setup_profilers[0].stop();
+    phase_tracer.stop();
+    setup_tracer.stop();
 
     if (options.diagnostics) {
-      print_setup_diagnostics(ad_setup_profilers);
+      print_setup_diagnostics(ad_setup_tracers);
     }
 
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
