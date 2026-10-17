@@ -2,12 +2,12 @@
 
 #pragma once
 
-#include <chrono>
+#include <span>
 
-#include <sleipnir/optimization/problem.hpp>
-
-/// Creates a flywheel quadratic optimization problem with Sleipnir.
+/// Registers Sleipnir benchmarks for the flywheel quadratic optimization
+/// problem.
 ///
-/// @param dt Timestep duration.
-/// @param N Number of samples in the problem.
-slp::Problem<double> flywheel_sleipnir(std::chrono::duration<double> dt, int N);
+/// @param nums_samples The numbers of samples for which to record results.
+/// @param diagnostics True if diagnostic prints should be enabled.
+void register_sleipnir_benchmarks(std::span<const int> nums_samples,
+                                  bool diagnostics);

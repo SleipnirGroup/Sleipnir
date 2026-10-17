@@ -5,14 +5,23 @@
 #include <chrono>
 #include <cmath>
 #include <numbers>
+#include <span>
 
 #include <Eigen/Core>
 #include <sleipnir/autodiff/variable.hpp>
 #include <sleipnir/autodiff/variable_matrix.hpp>
 #include <sleipnir/optimization/problem.hpp>
+#include <sleipnir/optimization/solver/exit_status.hpp>
 
+#include "benchmark_util.hpp"
 #include "rk4.hpp"
 
+namespace {
+
+/// Returns the time derivative of the cart-pole state.
+///
+/// @param x The state [x, θ, ẋ, θ̇]ᵀ.
+/// @param u The input [f_x].
 slp::VariableMatrix<double> cart_pole_dynamics(
     const slp::VariableMatrix<double>& x,
     const slp::VariableMatrix<double>& u) {
@@ -73,6 +82,10 @@ slp::VariableMatrix<double> cart_pole_dynamics(
   return qddot;
 }
 
+/// Creates a cart-pole nonlinear optimization problem with Sleipnir.
+///
+/// @param dt Timestep duration.
+/// @param N Number of samples in the problem.
 slp::Problem<double> cart_pole_sleipnir(std::chrono::duration<double> dt,
                                         int N) {
   constexpr double u_max = 20.0;  // N
@@ -126,4 +139,16 @@ slp::Problem<double> cart_pole_sleipnir(std::chrono::duration<double> dt,
   problem.minimize(J);
 
   return problem;
+}
+
+}  // namespace
+
+void register_sleipnir_benchmarks(std::span<const int> nums_samples,
+                                  bool diagnostics) {
+  register_optimization_benchmarks(
+      "Sleipnir", nums_samples, &cart_pole_sleipnir,
+      [=](slp::Problem<double>& problem) {
+        return problem.solve({.diagnostics = diagnostics}) ==
+               slp::ExitStatus::SUCCESS;
+      });
 }

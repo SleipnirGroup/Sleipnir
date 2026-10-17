@@ -2,111 +2,93 @@
 
 #pragma once
 
+#include <algorithm>
 #include <chrono>
-#include <concepts>
-#include <fstream>
-#include <ostream>
-#include <print>
-#include <ratio>
+#include <format>
 #include <span>
-#include <string>
 #include <string_view>
+#include <vector>
 
-#include <casadi/casadi.hpp>
-#include <sleipnir/optimization/problem.hpp>
-#include <sleipnir/optimization/solver/exit_status.hpp>
-#include <sleipnir/util/function_ref.hpp>
+#include <benchmark/benchmark.h>
 
-/// Converts std::chrono::duration to a number of milliseconds rounded to three
-/// decimals.
-template <typename Rep, typename Period = std::ratio<1>>
-constexpr double to_ms(const std::chrono::duration<Rep, Period>& duration) {
-  using std::chrono::duration_cast;
-  using std::chrono::microseconds;
-  return duration_cast<microseconds>(duration).count() / 1e3;
+/// Adds minimum and maximum to the statistics computed over a benchmark's
+/// repetitions.
+///
+/// @param b The benchmark.
+inline void add_min_max_statistics(benchmark::Benchmark* b) {
+  b->ComputeStatistics(
+      "min", [](const std::vector<double>& v) { return std::ranges::min(v); });
+  b->ComputeStatistics(
+      "max", [](const std::vector<double>& v) { return std::ranges::max(v); });
 }
 
-/// Runs optimization benchmarks for CasADi and Sleipnir versions of an
-/// optimization problem, records the setup time and solve time for each, then
-/// writes them to optimization-results.csv.
+/// Registers setup and solve benchmarks for an optimization problem.
 ///
-/// The scale of the problem is iteratively increased by increasing the number
-/// of timesteps within the time horizon.
+/// The benchmarks are named "<library>/Setup/<N>" and "<library>/Solve/<N>",
+/// where N is the number of samples. The scale of the problem is increased by
+/// increasing the number of timesteps within the time horizon.
 ///
-/// @tparam Problem The optimization problem's type (casadi::Opti or
-///     slp::Problem).
-/// @tparam IsQuadratic Whether the problem is quadratic.
-/// @param filename Results CSV filename.
-/// @param diagnostics Whether to enable diagnostic prints.
-/// @param T The time horizon of the optimization problem.
-/// @param sample_sizes_to_test List of sample sizes for which to record
-///     results.
-/// @param min_power The minimum power of 10 for the number of samples in the
-///     problem.
-/// @param max_power The maximum power of 10 for the number of samples in the
-///     problem.
-/// @param setup A function that takes a time horizon and number of samples and
-///     returns an optimization problem instance.
-template <typename Problem, bool IsQuadratic = false>
-int run_benchmarks_and_log(
-    std::string_view filename, bool diagnostics,
-    std::chrono::duration<double> T, std::span<int> sample_sizes_to_test,
-    slp::function_ref<Problem(std::chrono::duration<double> dt, int N)> setup) {
-  std::ofstream results{std::string{filename}};
-  if (!results.is_open()) {
-    return 1;
-  }
+/// @param library The optimization library's name.
+/// @param nums_samples The numbers of samples for which to record results.
+/// @param setup A function that takes a timestep duration and number of samples
+///     and returns an optimization problem instance.
+/// @param solve A function that takes an optimization problem instance by
+///     reference, solves it, and returns true if the solve succeeded.
+template <typename Setup, typename Solve>
+void register_optimization_benchmarks(std::string_view library,
+                                      std::span<const int> nums_samples,
+                                      Setup setup, Solve solve) {
+  using namespace std::chrono_literals;
 
-  results << "Samples," << "Setup time (ms),Solve time (ms)\n";
-  std::flush(results);
+  // Time horizon of the optimization problem
+  constexpr std::chrono::duration<double> T = 5s;
 
-  for (int N : sample_sizes_to_test) {
-    auto dt = T / N;
-
-    std::print(stderr, "N = {}...", N);
-
-    // Record setup time
-    auto setup_start_time = std::chrono::steady_clock::now();
-    auto problem = setup(dt, N);
-    auto setup_end_time = std::chrono::steady_clock::now();
-
-    // Record solve time
-    bool success = true;
-    auto solve_start_time = std::chrono::steady_clock::now();
-    if constexpr (std::same_as<Problem, casadi::Opti>) {
-      casadi::Dict plugin_options{{"expand", true}};
-      casadi::Dict solver_options;
-
-      if constexpr (IsQuadratic) {
-        solver_options["hessian_constant"] = "yes";
-        solver_options["jac_c_constant"] = "yes";
-        solver_options["jac_d_constant"] = "yes";
-      }
-
-      if (!diagnostics) {
-        plugin_options["print_time"] = 0;
-        solver_options["print_level"] = 0;
-        solver_options["sb"] = "yes";
-      }
-
-      problem.solver("ipopt", plugin_options, solver_options);
-      problem.solve();
-    } else {
-      success = problem.solve({.diagnostics = diagnostics}) ==
-                slp::ExitStatus::SUCCESS;
+  // Sample counts for which to record results
+  auto args = [=](benchmark::Benchmark* b) {
+    for (int N : nums_samples) {
+      b->Arg(N);
     }
-    auto solve_end_time = std::chrono::steady_clock::now();
+  };
 
-    if (success) {
-      results << N << ',' << to_ms(setup_end_time - setup_start_time) << ','
-              << to_ms(solve_end_time - solve_start_time) << '\n';
-      std::flush(results);
-    } else {
-      std::print(stderr, " FAIL");
-    }
+  // Setup time includes building the problem
+  benchmark::RegisterBenchmark(
+      std::format("{}/Setup", library),
+      [=](benchmark::State& state) {
+        int N = static_cast<int>(state.range(0));
+        for (auto _ : state) {
+          auto start_time = std::chrono::steady_clock::now();
+          auto problem = setup(T / N, N);
+          benchmark::DoNotOptimize(problem);
+          auto end_time = std::chrono::steady_clock::now();
+          state.SetIterationTime(
+              std::chrono::duration<double>{end_time - start_time}.count());
+        }
+      })
+      ->Apply(args)
+      ->Apply(add_min_max_statistics)
+      ->UseManualTime()
+      ->Unit(benchmark::kMillisecond);
 
-    std::println(stderr, " done.");
-  }
-
-  return 0;
+  // Solve time is the time to solve a freshly built problem
+  benchmark::RegisterBenchmark(
+      std::format("{}/Solve", library),
+      [=](benchmark::State& state) {
+        int N = static_cast<int>(state.range(0));
+        for (auto _ : state) {
+          auto problem = setup(T / N, N);
+          auto start_time = std::chrono::steady_clock::now();
+          bool success = solve(problem);
+          auto end_time = std::chrono::steady_clock::now();
+          if (!success) {
+            state.SkipWithError("Solve failed");
+            break;
+          }
+          state.SetIterationTime(
+              std::chrono::duration<double>{end_time - start_time}.count());
+        }
+      })
+      ->Apply(args)
+      ->Apply(add_min_max_statistics)
+      ->UseManualTime()
+      ->Unit(benchmark::kMillisecond);
 }

@@ -4,10 +4,20 @@
 
 #include <chrono>
 #include <cmath>
+#include <exception>
+#include <span>
 
 #include <Eigen/Core>
 #include <casadi/casadi.hpp>
 
+#include "benchmark_util.hpp"
+
+namespace {
+
+/// Creates a flywheel quadratic optimization problem with CasADi.
+///
+/// @param dt Timestep duration.
+/// @param N Number of samples in the problem.
 casadi::Opti flywheel_casadi(std::chrono::duration<double> dt, int N) {
   // Flywheel model:
   // States: [velocity]
@@ -40,4 +50,43 @@ casadi::Opti flywheel_casadi(std::chrono::duration<double> dt, int N) {
   problem.minimize(J);
 
   return problem;
+}
+
+/// Solves a CasADi optimization problem.
+///
+/// @param problem The optimization problem.
+/// @param diagnostics True if diagnostic prints should be enabled.
+/// @return True if the solve succeeded.
+bool solve(casadi::Opti& problem, bool diagnostics) {
+  casadi::Dict plugin_options{{"expand", true}};
+  casadi::Dict solver_options;
+
+  // The problem is quadratic
+  solver_options["hessian_constant"] = "yes";
+  solver_options["jac_c_constant"] = "yes";
+  solver_options["jac_d_constant"] = "yes";
+
+  if (!diagnostics) {
+    plugin_options["print_time"] = 0;
+    solver_options["print_level"] = 0;
+    solver_options["sb"] = "yes";
+  }
+
+  problem.solver("ipopt", plugin_options, solver_options);
+
+  try {
+    problem.solve();
+  } catch (const std::exception&) {
+    return false;
+  }
+  return true;
+}
+
+}  // namespace
+
+void register_casadi_benchmarks(std::span<const int> nums_samples,
+                                bool diagnostics) {
+  register_optimization_benchmarks(
+      "CasADi", nums_samples, &flywheel_casadi,
+      [=](casadi::Opti& problem) { return solve(problem, diagnostics); });
 }

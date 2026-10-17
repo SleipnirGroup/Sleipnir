@@ -4,13 +4,22 @@
 
 #include <chrono>
 #include <cmath>
+#include <exception>
 #include <numbers>
+#include <span>
 
 #include <Eigen/Core>
 #include <casadi/casadi.hpp>
 
+#include "benchmark_util.hpp"
 #include "rk4.hpp"
 
+namespace {
+
+/// Returns the time derivative of the cart-pole state.
+///
+/// @param x The state [x, θ, ẋ, θ̇]ᵀ.
+/// @param u The input [f_x].
 casadi::MX cart_pole_dynamics(const casadi::MX& x, const casadi::MX& u) {
   // https://underactuated.mit.edu/acrobot.html#cart_pole
   //
@@ -81,6 +90,10 @@ casadi::MX cart_pole_dynamics(const casadi::MX& x, const casadi::MX& u) {
   return qddot;
 }
 
+/// Creates a cart-pole nonlinear optimization problem with CasADi.
+///
+/// @param dt Timestep duration.
+/// @param N Number of samples in the problem.
 casadi::Opti cart_pole_casadi(std::chrono::duration<double> dt, int N) {
   constexpr double u_max = 20.0;  // N
   constexpr double d_max = 2.0;   // m
@@ -139,4 +152,38 @@ casadi::Opti cart_pole_casadi(std::chrono::duration<double> dt, int N) {
   problem.minimize(J);
 
   return problem;
+}
+
+/// Solves a CasADi optimization problem.
+///
+/// @param problem The optimization problem.
+/// @param diagnostics True if diagnostic prints should be enabled.
+/// @return True if the solve succeeded.
+bool solve(casadi::Opti& problem, bool diagnostics) {
+  casadi::Dict plugin_options{{"expand", true}};
+  casadi::Dict solver_options;
+
+  if (!diagnostics) {
+    plugin_options["print_time"] = 0;
+    solver_options["print_level"] = 0;
+    solver_options["sb"] = "yes";
+  }
+
+  problem.solver("ipopt", plugin_options, solver_options);
+
+  try {
+    problem.solve();
+  } catch (const std::exception&) {
+    return false;
+  }
+  return true;
+}
+
+}  // namespace
+
+void register_casadi_benchmarks(std::span<const int> nums_samples,
+                                bool diagnostics) {
+  register_optimization_benchmarks(
+      "CasADi", nums_samples, &cart_pole_casadi,
+      [=](casadi::Opti& problem) { return solve(problem, diagnostics); });
 }
