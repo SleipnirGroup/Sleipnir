@@ -193,7 +193,7 @@ void print_initial_iterate_diagnostics(Scalar error, Scalar cost,
       "┃{:^4}   {:^9} {:^10} {:^11} {:^10} {:^8} {:^8} {:^5} {:^5} {:^8} {:^8} "
       "{:^8} {:^8} {:^2}┃",
       "iter", "duration", "error", "cost", "infeas.", "complem.", "μ", "δ", "γ",
-      "|p_pr|", "|p_du|", "α_pr", "α_du", "↩");
+      "|p_pr|", "|p_du|", "α", "α_z", "↩");
   slp::println("┡{:━^119}┩", "");
 
   slp::println(
@@ -220,28 +220,25 @@ void print_initial_iterate_diagnostics(Scalar error, Scalar cost,
 /// @param γ The constraint Jacobian regularization factor.
 /// @param full_primal_step_inf_norm The infinity norm of the full primal step.
 /// @param full_dual_step_inf_norm The infinity norm of the full dual step.
-/// @param primal_α The primal step size.
-/// @param primal_α_max The max primal step size.
-/// @param α_reduction_factor Factor by which primal_α is reduced during
-///     backtracking.
-/// @param dual_α The dual step size.
+/// @param α The step size for the decision variables, inequality constraint
+///     slack variables, and equality constraint dual variables.
+/// @param α_max The max step size for α.
+/// @param α_reduction_factor Factor by which α is reduced during backtracking.
+/// @param α_z The step size for the inequality constraint dual variables.
 template <typename Scalar, typename Rep, typename Period = std::ratio<1>>
-void print_iteration_diagnostics(int iterations, IterationType type,
-                                 const std::chrono::duration<Rep, Period>& time,
-                                 Scalar error, Scalar cost,
-                                 Scalar infeasibility, Scalar complementarity,
-                                 Scalar μ, Scalar δ, Scalar γ,
-                                 Scalar full_primal_step_inf_norm,
-                                 Scalar full_dual_step_inf_norm,
-                                 Scalar primal_α, Scalar primal_α_max,
-                                 Scalar α_reduction_factor, Scalar dual_α) {
+void print_iteration_diagnostics(
+    int iterations, IterationType type,
+    const std::chrono::duration<Rep, Period>& time, Scalar error, Scalar cost,
+    Scalar infeasibility, Scalar complementarity, Scalar μ, Scalar δ, Scalar γ,
+    Scalar full_primal_step_inf_norm, Scalar full_dual_step_inf_norm, Scalar α,
+    Scalar α_max, Scalar α_reduction_factor, Scalar α_z) {
   if (iterations > 0 && iterations % 20 == 0) {
     slp::println("┢{:━^119}┪", "");
     slp::println(
         "┃{:^4}   {:^9} {:^10} {:^11} {:^10} {:^8} {:^8} {:^5} {:^5} {:^8} "
         "{:^8} {:^8} {:^8} {:^2}┃",
         "iter", "duration", "error", "cost", "infeas.", "complem.", "μ", "δ",
-        "γ", "|p_pr|", "|p_du|", "α_pr", "α_du", "↩");
+        "γ", "|p_pr|", "|p_du|", "α", "α_z", "↩");
     slp::println("┡{:━^119}┩", "");
   }
 
@@ -256,8 +253,7 @@ void print_iteration_diagnostics(int iterations, IterationType type,
   //   x ln(r) = ln(α/αᵐᵃˣ)
   //   x = ln(α/αᵐᵃˣ)/ln(r)
   using std::log;
-  int backtracks =
-      static_cast<int>(log(primal_α / primal_α_max) / log(α_reduction_factor));
+  int backtracks = static_cast<int>(log(α / α_max) / log(α_reduction_factor));
 
   constexpr std::array ITERATION_TYPES{" ", "s", "r"};
   slp::println(
@@ -265,8 +261,7 @@ void print_iteration_diagnostics(int iterations, IterationType type,
       "{:<5} {:8.2e} {:8.2e} {:8.2e} {:8.2e} {:2d}│",
       iterations, ITERATION_TYPES[std::to_underlying(type)], to_ms(time), error,
       cost, infeasibility, complementarity, μ, power_of_10(δ), power_of_10(γ),
-      full_primal_step_inf_norm, full_dual_step_inf_norm, primal_α, dual_α,
-      backtracks);
+      full_primal_step_inf_norm, full_dual_step_inf_norm, α, α_z, backtracks);
 }
 #else
 #define print_iteration_diagnostics(...)

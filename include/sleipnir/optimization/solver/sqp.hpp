@@ -103,6 +103,20 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
     DenseVector p_x;
     /// Equality constraint dual step.
     DenseVector p_y;
+
+    /// Returns the infinity norm of the primal step.
+    ///
+    /// @return The infinity norm of the primal step.
+    Scalar primal_inf_norm() const {
+      return p_x.template lpNorm<Eigen::Infinity>();
+    }
+
+    /// Returns the infinity norm of the dual step.
+    ///
+    /// @return The infinity norm of the dual step.
+    Scalar dual_inf_norm() const {
+      return p_y.template lpNorm<Eigen::Infinity>();
+    }
   };
 
   using std::isfinite;
@@ -398,8 +412,7 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
                   trial_f, constraint_violation(trial_c_e), Scalar(0),
                   Scalar(0), solver.hessian_regularization(),
                   solver.constraint_jacobian_regularization(),
-                  soc_step.p_x.template lpNorm<Eigen::Infinity>(),
-                  soc_step.p_y.template lpNorm<Eigen::Infinity>(), α_soc,
+                  soc_step.primal_inf_norm(), soc_step.dual_inf_norm(), α_soc,
                   Scalar(1), α_reduction_factor, Scalar(1));
             }
           }};
@@ -580,9 +593,8 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
                                   f, constraint_violation(c_e), Scalar(0),
                                   Scalar(0), solver.hessian_regularization(),
                                   solver.constraint_jacobian_regularization(),
-                                  step.p_x.template lpNorm<Eigen::Infinity>(),
-                                  step.p_y.template lpNorm<Eigen::Infinity>(),
-                                  α, α_max, α_reduction_factor, α);
+                                  step.primal_inf_norm(), step.dual_inf_norm(),
+                                  α, α_max, α_reduction_factor, Scalar(1));
     }
 
     ++iterations;
