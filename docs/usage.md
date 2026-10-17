@@ -101,7 +101,7 @@ The headings are defined as follows:
 The solver prints a row of iterate diagnostics before taking any steps and after taking each step.
 ```
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃iter   duration    error       cost      infeas.   complem.    μ       δ     γ    |p_pr|   |p_du|    α_pr     α_du   ↩ ┃
+┃iter   duration    error       cost      infeas.   complem.    μ       δ     γ    |p_pr|   |p_du|     α       α_z    ↩ ┃
 ┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
 │init             3.6000e+01 -0.0000e+00 3.6000e+01 0.00e+00 0.00e+00                                                   │
 │   0       0.016 1.7998e-03 -1.0800e+02 6.0167e-10 0.00e+00 0.00e+00 10⁻⁴  10⁻¹⁰ 1.80e+01 6.00e+00 1.00e+00 1.00e+00  0│
@@ -167,12 +167,12 @@ The headings are defined as follows:
     <td>Infinity norm of full dual step</td>
   </tr>
   <tr>
-    <td>α_pr</td>
-    <td>Primal step size α_pr ∈ [0, 1] that scales down the full primal step</td>
+    <td>α</td>
+    <td>Step size α ∈ [0, 1] that scales down the full step for the decision variables, inequality constraint slack variables, and equality constraint dual variables</td>
   </tr>
   <tr>
-    <td>α_du</td>
-    <td>Dual step size α_du ∈ [0, 1] that scales down the full dual step</td>
+    <td>α_z</td>
+    <td>Step size α_z ∈ [0, 1] that scales down the full step for the inequality constraint dual variables</td>
   </tr>
   <tr>
     <td>↩</td>

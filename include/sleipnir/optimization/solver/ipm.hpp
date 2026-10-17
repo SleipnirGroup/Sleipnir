@@ -145,6 +145,22 @@ ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
     DenseVector p_y;
     /// Inequality constraint dual step.
     DenseVector p_z;
+
+    /// Returns the infinity norm of the primal step.
+    ///
+    /// @return The infinity norm of the primal step.
+    Scalar primal_inf_norm() const {
+      return std::max(p_x.template lpNorm<Eigen::Infinity>(),
+                      p_s.template lpNorm<Eigen::Infinity>());
+    }
+
+    /// Returns the infinity norm of the dual step.
+    ///
+    /// @return The infinity norm of the dual step.
+    Scalar dual_inf_norm() const {
+      return std::max(p_y.template lpNorm<Eigen::Infinity>(),
+                      p_z.template lpNorm<Eigen::Infinity>());
+    }
   };
 
   using std::isfinite;
@@ -570,11 +586,8 @@ ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
                   trial_f, constraint_violation(trial_c_e, trial_c_i, trial_s),
                   trial_s.dot(trial_z), μ, solver.hessian_regularization(),
                   solver.constraint_jacobian_regularization(),
-                  std::max(soc_step.p_x.template lpNorm<Eigen::Infinity>(),
-                           soc_step.p_s.template lpNorm<Eigen::Infinity>()),
-                  std::max(soc_step.p_y.template lpNorm<Eigen::Infinity>(),
-                           soc_step.p_z.template lpNorm<Eigen::Infinity>()),
-                  α_soc, Scalar(1), α_reduction_factor, α_z_soc);
+                  soc_step.primal_inf_norm(), soc_step.dual_inf_norm(), α_soc,
+                  Scalar(1), α_reduction_factor, α_z_soc);
             }
           }};
 
@@ -831,12 +844,8 @@ ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
           inner_iter_profiler.current_duration(), E_0, f,
           constraint_violation(c_e, c_i, s), s.dot(z), μ,
           solver.hessian_regularization(),
-          solver.constraint_jacobian_regularization(),
-          std::max(step.p_x.template lpNorm<Eigen::Infinity>(),
-                   step.p_s.template lpNorm<Eigen::Infinity>()),
-          std::max(step.p_y.template lpNorm<Eigen::Infinity>(),
-                   step.p_z.template lpNorm<Eigen::Infinity>()),
-          α, α_max, α_reduction_factor, α_z);
+          solver.constraint_jacobian_regularization(), step.primal_inf_norm(),
+          step.dual_inf_norm(), α, α_max, α_reduction_factor, α_z);
     }
 
     ++iterations;
