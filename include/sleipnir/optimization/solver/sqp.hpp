@@ -5,6 +5,7 @@
 #include <chrono>
 #include <cmath>
 #include <functional>
+#include <optional>
 #include <span>
 
 #include <Eigen/Core>
@@ -22,11 +23,12 @@
 #include "sleipnir/optimization/solver/util/filter.hpp"
 #include "sleipnir/optimization/solver/util/kkt_error.hpp"
 #include "sleipnir/optimization/solver/util/kkt_solver.hpp"
+#include "sleipnir/optimization/solver/util/time_trace.hpp"
 #include "sleipnir/util/assert.hpp"
 #include "sleipnir/util/print_diagnostics.hpp"
-#include "sleipnir/util/profiler.hpp"
 #include "sleipnir/util/scope_exit.hpp"
 #include "sleipnir/util/symbol_exports.hpp"
+#include "sleipnir/util/time_tracer.hpp"
 
 // See docs/algorithms.md#Works_cited for citation definitions.
 
@@ -123,78 +125,35 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
 
   const auto solve_start_time = std::chrono::steady_clock::now();
 
-  gch::small_vector<SolveProfiler> solve_profilers;
-  solve_profilers.emplace_back("solver");
-  solve_profilers.emplace_back("↳ setup");
-  solve_profilers.emplace_back("↳ iteration");
-  solve_profilers.emplace_back("  ↳ callbacks");
-  solve_profilers.emplace_back("  ↳ KKT matrix build");
-  solve_profilers.emplace_back("  ↳ KKT matrix decomp");
-  solve_profilers.emplace_back("  ↳ KKT system solve");
-  solve_profilers.emplace_back("  ↳ line search");
-  solve_profilers.emplace_back("    ↳ SOC");
-  solve_profilers.emplace_back("  ↳ feas. restoration");
-  solve_profilers.emplace_back("  ↳ f(x)");
-  solve_profilers.emplace_back("  ↳ ∇f(x)");
-  solve_profilers.emplace_back("  ↳ ∇²ₓₓL");
-  solve_profilers.emplace_back("  ↳ ∇²ₓₓL_c");
-  solve_profilers.emplace_back("  ↳ cₑ(x)");
-  solve_profilers.emplace_back("  ↳ ∂cₑ/∂x");
+  using enum SolveTimeTracerID;
 
-  auto& solver_prof = solve_profilers[0];
-  auto& setup_prof = solve_profilers[1];
-  auto& inner_iter_prof = solve_profilers[2];
-  auto& iter_callbacks_prof = solve_profilers[3];
-  auto& kkt_matrix_build_prof = solve_profilers[4];
-  auto& kkt_matrix_decomp_prof = solve_profilers[5];
-  auto& kkt_system_solve_prof = solve_profilers[6];
-  auto& line_search_prof = solve_profilers[7];
-  auto& soc_prof = solve_profilers[8];
-  auto& feasibility_restoration_prof = solve_profilers[9];
+  int iterations = 0;
 
-  // Set up profiled matrix callbacks
+  // Prints final solver diagnostics when the solver exits
+  SolveDiagnostics<sqp_time_trace> diagnostics{options.diagnostics,
+                                               options.diagnostics};
+
+  // Set up traced matrix callbacks if diagnostics are enabled
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-  auto& f_prof = solve_profilers[10];
-  auto& g_prof = solve_profilers[11];
-  auto& H_prof = solve_profilers[12];
-  auto& H_c_prof = solve_profilers[13];
-  auto& c_e_prof = solve_profilers[14];
-  auto& A_e_prof = solve_profilers[15];
-
-  SQPMatrixCallbacks<Scalar> matrices{
-      matrix_callbacks.num_decision_variables,
-      matrix_callbacks.num_equality_constraints,
-      [&](const DenseVector& x) -> Scalar {
-        ScopedProfiler prof{f_prof};
-        return matrix_callbacks.f(x);
-      },
-      [&](const DenseVector& x) -> SparseVector {
-        ScopedProfiler prof{g_prof};
-        return matrix_callbacks.g(x);
-      },
-      [&](const DenseVector& x, const DenseVector& y) -> SparseMatrix {
-        ScopedProfiler prof{H_prof};
-        return matrix_callbacks.H(x, y);
-      },
-      [&](const DenseVector& x, const DenseVector& y) -> SparseMatrix {
-        ScopedProfiler prof{H_c_prof};
-        return matrix_callbacks.H_c(x, y);
-      },
-      [&](const DenseVector& x) -> DenseVector {
-        ScopedProfiler prof{c_e_prof};
-        return matrix_callbacks.c_e(x);
-      },
-      [&](const DenseVector& x) -> SparseMatrix {
-        ScopedProfiler prof{A_e_prof};
-        return matrix_callbacks.A_e(x);
-      },
-      matrix_callbacks.scaling};
+  std::optional<SQPMatrixCallbacks<Scalar>> traced_matrices;
+  if (options.diagnostics) {
+    traced_matrices.emplace(
+        matrix_callbacks.num_decision_variables,
+        matrix_callbacks.num_equality_constraints,
+        traced(diagnostics[COST], matrix_callbacks.f),
+        traced(diagnostics[GRADIENT], matrix_callbacks.g),
+        traced(diagnostics[HESSIAN], matrix_callbacks.H),
+        traced(diagnostics[HESSIAN_CONSTRAINTS], matrix_callbacks.H_c),
+        traced(diagnostics[EQUALITY_CONSTRAINTS], matrix_callbacks.c_e),
+        traced(diagnostics[EQUALITY_JACOBIAN], matrix_callbacks.A_e),
+        matrix_callbacks.scaling);
+  }
+  const auto& matrices = traced_matrices ? *traced_matrices : matrix_callbacks;
 #else
   const auto& matrices = matrix_callbacks;
 #endif
 
-  solver_prof.start();
-  setup_prof.start();
+  ScopedTimeTracer setup_tracer{diagnostics[SETUP]};
 
   Scalar f = matrices.f(x);
   SparseVector g = matrices.g(x);
@@ -231,8 +190,6 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
     return ExitStatus::NONFINITE_INITIAL_GUESS;
   }
 
-  int iterations = 0;
-
   Filter<Scalar> filter{constraint_violation(c_e)};
 
   // Kept outside the loop so its storage can be reused
@@ -257,34 +214,23 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
   Scalar E_0 = unscaled_kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(
       matrices.scaling, g, A_e, c_e, y);
 
-  setup_prof.stop();
+  setup_tracer.stop();
 
-  // Prints final solver diagnostics when the solver exits
-  scope_exit exit{[&] {
-    if (options.diagnostics) {
-      solver_prof.stop();
-      if (iterations > 0) {
-        print_bottom_iteration_diagnostics();
-      }
-      print_solver_diagnostics(solve_profilers);
-    }
-  }};
-
-  // Print initial iterate diagnostics
-  if (options.diagnostics) {
-    print_initial_iterate_diagnostics(E_0, f, constraint_violation(c_e),
-                                      Scalar(0), Scalar(0));
-  }
+  // Prints initial iterate diagnostics now and closes the iterate diagnostics
+  // table when the solver exits
+  IterateDiagnosticsTable table{
+      options.diagnostics,       E_0,       f,
+      constraint_violation(c_e), Scalar(0), Scalar(0)};
 
   while (E_0 > Scalar(options.tolerance)) {
-    ScopedProfiler inner_iter_profiler{inner_iter_prof};
+    ScopedTimeTracer inner_iter_tracer{diagnostics[ITERATION]};
 
     // Check for diverging iterates
     if (x.template lpNorm<Eigen::Infinity>() > Scalar(1e10) || !x.allFinite()) {
       return ExitStatus::DIVERGING_ITERATES;
     }
 
-    ScopedProfiler iter_callbacks_profiler{iter_callbacks_prof};
+    PhaseTimeTracer phase_tracer{diagnostics[CALLBACKS]};
 
     // Call iteration callbacks
     for (const auto& callback : iteration_callbacks) {
@@ -293,8 +239,7 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
       }
     }
 
-    iter_callbacks_profiler.stop();
-    ScopedProfiler kkt_matrix_build_profiler{kkt_matrix_build_prof};
+    phase_tracer.next(diagnostics[KKT_MATRIX_BUILD]);
 
     // lhs = [H   Aₑᵀ]
     //       [Aₑ   0 ]
@@ -314,8 +259,7 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
     rhs.segment(0, x.rows()) = -g + A_e.transpose() * y;
     rhs.segment(x.rows(), y.rows()) = -c_e;
 
-    kkt_matrix_build_profiler.stop();
-    ScopedProfiler kkt_matrix_decomp_profiler{kkt_matrix_decomp_prof};
+    phase_tracer.next(diagnostics[KKT_MATRIX_DECOMP]);
 
     Step step;
     constexpr Scalar α_max(1);
@@ -330,8 +274,7 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
       return ExitStatus::FACTORIZATION_FAILED;
     }
 
-    kkt_matrix_decomp_profiler.stop();
-    ScopedProfiler kkt_system_solve_profiler{kkt_system_solve_prof};
+    phase_tracer.next(diagnostics[KKT_SYSTEM_SOLVE]);
 
     auto compute_step = [&](Step& step) {
       // p = [ pˣ]
@@ -342,8 +285,7 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
     };
     compute_step(step);
 
-    kkt_system_solve_profiler.stop();
-    ScopedProfiler line_search_profiler{line_search_prof};
+    phase_tracer.next(diagnostics[LINE_SEARCH]);
 
     α = α_max;
 
@@ -398,15 +340,15 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
         bool step_acceptable = false;
         for (int soc_iteration = 0; soc_iteration < 5 && !step_acceptable;
              ++soc_iteration) {
-          ScopedProfiler soc_profiler{soc_prof};
+          ScopedTimeTracer soc_tracer{diagnostics[SOC]};
 
           scope_exit soc_exit{[&] {
-            soc_profiler.stop();
+            soc_tracer.stop();
 
             if (options.diagnostics && step_acceptable) {
-              print_iteration_diagnostics(
+              print_iterate_diagnostics(
                   iterations, IterationType::SECOND_ORDER_CORRECTION,
-                  soc_profiler.current_duration(),
+                  soc_tracer.current_duration(),
                   kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(
                       g, A_e, trial_c_e, trial_y),
                   trial_f, constraint_violation(trial_c_e), Scalar(0),
@@ -513,7 +455,7 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
       }
     }
 
-    line_search_profiler.stop();
+    phase_tracer.stop();
 
     // If solver stalled, invoke feasibility restoration
     if (!call_feasibility_restoration) {
@@ -525,8 +467,8 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
     }
 
     if (call_feasibility_restoration) {
-      ScopedProfiler feasibility_restoration_profiler{
-          feasibility_restoration_prof};
+      ScopedTimeTracer feasibility_restoration_tracer{
+          diagnostics[FEASIBILITY_RESTORATION]};
 
       FilterEntry initial_entry{matrices.f(x), c_e};
 
@@ -585,16 +527,16 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
     E_0 = unscaled_kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(
         matrices.scaling, g, A_e, c_e, y);
 
-    inner_iter_profiler.stop();
+    inner_iter_tracer.stop();
 
     if (options.diagnostics) {
-      print_iteration_diagnostics(iterations, IterationType::NORMAL,
-                                  inner_iter_profiler.current_duration(), E_0,
-                                  f, constraint_violation(c_e), Scalar(0),
-                                  Scalar(0), solver.hessian_regularization(),
-                                  solver.constraint_jacobian_regularization(),
-                                  step.primal_inf_norm(), step.dual_inf_norm(),
-                                  α, α_max, α_reduction_factor, Scalar(1));
+      print_iterate_diagnostics(iterations, IterationType::NORMAL,
+                                inner_iter_tracer.current_duration(), E_0, f,
+                                constraint_violation(c_e), Scalar(0), Scalar(0),
+                                solver.hessian_regularization(),
+                                solver.constraint_jacobian_regularization(),
+                                step.primal_inf_norm(), step.dual_inf_norm(), α,
+                                α_max, α_reduction_factor, Scalar(1));
     }
 
     ++iterations;

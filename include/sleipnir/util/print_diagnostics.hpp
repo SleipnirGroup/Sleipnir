@@ -2,23 +2,26 @@
 
 #pragma once
 
+#include <stddef.h>
 #include <stdint.h>
 
 #include <algorithm>
 #include <array>
 #include <chrono>
 #include <cmath>
+#include <format>
 #include <ranges>
 #include <ratio>
 #include <span>
 #include <string>
+#include <string_view>
 #include <utility>
 
 #include <Eigen/Core>
 #include <gch/small_vector.hpp>
 
 #include "sleipnir/util/print.hpp"
-#include "sleipnir/util/profiler.hpp"
+#include "sleipnir/util/time_tracer.hpp"
 
 namespace slp {
 
@@ -205,7 +208,7 @@ void print_initial_iterate_diagnostics(Scalar error, Scalar cost,
 #endif
 
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-/// Prints diagnostics for the current iteration.
+/// Prints diagnostics for the current iterate.
 ///
 /// @tparam Scalar Scalar type.
 /// @param iterations Number of iterations.
@@ -226,12 +229,14 @@ void print_initial_iterate_diagnostics(Scalar error, Scalar cost,
 /// @param α_reduction_factor Factor by which α is reduced during backtracking.
 /// @param α_z The step size for the inequality constraint dual variables.
 template <typename Scalar, typename Rep, typename Period = std::ratio<1>>
-void print_iteration_diagnostics(
-    int iterations, IterationType type,
-    const std::chrono::duration<Rep, Period>& time, Scalar error, Scalar cost,
-    Scalar infeasibility, Scalar complementarity, Scalar μ, Scalar δ, Scalar γ,
-    Scalar full_primal_step_inf_norm, Scalar full_dual_step_inf_norm, Scalar α,
-    Scalar α_max, Scalar α_reduction_factor, Scalar α_z) {
+void print_iterate_diagnostics(int iterations, IterationType type,
+                               const std::chrono::duration<Rep, Period>& time,
+                               Scalar error, Scalar cost, Scalar infeasibility,
+                               Scalar complementarity, Scalar μ, Scalar δ,
+                               Scalar γ, Scalar full_primal_step_inf_norm,
+                               Scalar full_dual_step_inf_norm, Scalar α,
+                               Scalar α_max, Scalar α_reduction_factor,
+                               Scalar α_z) {
   if (iterations > 0 && iterations % 20 == 0) {
     slp::println("┢{:━^119}┪", "");
     slp::println(
@@ -264,17 +269,51 @@ void print_iteration_diagnostics(
       full_primal_step_inf_norm, full_dual_step_inf_norm, α, α_z, backtracks);
 }
 #else
-#define print_iteration_diagnostics(...)
+#define print_iterate_diagnostics(...)
 #endif
 
-#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-/// Prints bottom of iteration diagnostics table.
-inline void print_bottom_iteration_diagnostics() {
-  slp::println("└{:─^119}┘", "");
-}
-#else
-#define print_bottom_iteration_diagnostics(...)
-#endif
+/// Prints the iterate diagnostics table's heading and initial iterate on
+/// construction and the table's bottom on destruction.
+///
+/// Construct this where the iterate diagnostics table should start, so every
+/// solver exit after that closes the table and every exit before it doesn't.
+class IterateDiagnosticsTable {
+ public:
+  /// Prints the table heading and initial iterate diagnostics if requested.
+  ///
+  /// @tparam Scalar Scalar type.
+  /// @param print Whether to print the table.
+  /// @param error The error.
+  /// @param cost The cost.
+  /// @param infeasibility The infeasibility.
+  /// @param complementarity The complementarity.
+  /// @param μ The barrier parameter.
+  template <typename Scalar>
+  IterateDiagnosticsTable(bool print, [[maybe_unused]] Scalar error,
+                          [[maybe_unused]] Scalar cost,
+                          [[maybe_unused]] Scalar infeasibility,
+                          [[maybe_unused]] Scalar complementarity,
+                          [[maybe_unused]] Scalar μ)
+      : m_print{print} {
+    if (m_print) {
+      print_initial_iterate_diagnostics(error, cost, infeasibility,
+                                        complementarity, μ);
+    }
+  }
+
+  /// Prints the table bottom if requested.
+  ~IterateDiagnosticsTable() {
+    if (m_print) {
+      slp::println("└{:─^119}┘", "");
+    }
+  }
+
+  IterateDiagnosticsTable(const IterateDiagnosticsTable&) = delete;
+  IterateDiagnosticsTable& operator=(const IterateDiagnosticsTable&) = delete;
+
+ private:
+  bool m_print;
+};
 
 /// Renders histogram of the given normalized value.
 ///
@@ -309,26 +348,47 @@ std::string histogram(double value) {
 }
 
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
+/// Returns a time trace entry's name indented by its depth.
+///
+/// @param name Name of measurement.
+/// @param depth Nesting depth in the time trace.
+/// @return The indented name.
+inline std::string time_trace_label(std::string_view name, int depth) {
+  if (depth == 0) {
+    return std::string{name};
+  }
+  return std::format("{:{}}↳ {}", "", 2 * (depth - 1), name);
+}
+#endif
+
+#ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
 /// Prints solver diagnostics.
 ///
-/// @param solve_profilers Solve profilers.
-inline void print_solver_diagnostics(
-    const gch::small_vector<SolveProfiler>& solve_profilers) {
-  auto solve_duration = to_ms(solve_profilers[0].total_duration());
+/// @tparam Entries Time trace entries.
+/// @param solve_tracers Solve tracers.
+template <const auto& Entries>
+  requires(detail::is_valid_time_trace(Entries))
+void print_solver_diagnostics(
+    const TimeTracerTree<SolveTimeTracer, Entries>& solve_tracers) {
+  auto entries = solve_tracers.entries();
+  auto tracers = solve_tracers.tracers();
+  auto solve_duration = to_ms(tracers[0].total_duration());
 
   slp::println("┏{:━^66}┓", "");
   slp::println("┃{:^21} {:^18} {:^10} {:^9} {:^4}┃", "time trace", "percentage",
                "total", "each", "runs");
   slp::println("┡{:━^66}┩", "");
 
-  for (auto& profiler : solve_profilers) {
+  for (size_t i = 0; i < tracers.size(); ++i) {
+    const auto& tracer = tracers[i];
     double norm = solve_duration == 0.0
-                      ? (&profiler == &solve_profilers[0] ? 1.0 : 0.0)
-                      : to_ms(profiler.total_duration()) / solve_duration;
+                      ? (i == 0 ? 1.0 : 0.0)
+                      : to_ms(tracer.total_duration()) / solve_duration;
     slp::println("│{:<21} {:>6.2f}%▕{}▏ {:>10.3f} {:>9.3f} {:>4}│",
-                 profiler.name(), norm * 100.0, histogram<9>(norm),
-                 to_ms(profiler.total_duration()),
-                 to_ms(profiler.average_duration()), profiler.num_solves());
+                 time_trace_label(entries[i].name, entries[i].depth),
+                 norm * 100.0, histogram<9>(norm),
+                 to_ms(tracer.total_duration()),
+                 to_ms(tracer.average_duration()), tracer.num_solves());
   }
 
   slp::println("└{:─^66}┘", "");
@@ -340,10 +400,15 @@ inline void print_solver_diagnostics(
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
 /// Prints setup diagnostics.
 ///
-/// @param setup_profilers Setup profilers.
-inline void print_setup_diagnostics(
-    const gch::small_vector<SetupProfiler>& setup_profilers) {
-  auto setup_duration = to_ms(setup_profilers[0].duration());
+/// @tparam Entries Time trace entries.
+/// @param setup_tracers Setup tracers.
+template <const auto& Entries>
+  requires(detail::is_valid_time_trace(Entries))
+void print_setup_diagnostics(
+    const TimeTracerTree<SetupTimeTracer, Entries>& setup_tracers) {
+  auto entries = setup_tracers.entries();
+  auto tracers = setup_tracers.tracers();
+  auto setup_duration = to_ms(tracers[0].duration());
 
   // Print link to diagnostic output description
   slp::println(
@@ -355,13 +420,15 @@ inline void print_setup_diagnostics(
   slp::println("┃{:^21} {:^18} {:^9}┃", "time trace", "percentage", "duration");
   slp::println("┡{:━^50}┩", "");
 
-  // Print setup profilers
-  for (auto& profiler : setup_profilers) {
+  // Print setup tracers
+  for (size_t i = 0; i < tracers.size(); ++i) {
+    const auto& tracer = tracers[i];
     double norm = setup_duration == 0.0
-                      ? (&profiler == &setup_profilers[0] ? 1.0 : 0.0)
-                      : to_ms(profiler.duration()) / setup_duration;
-    slp::println("│{:<21} {:>6.2f}%▕{}▏ {:>9.3f}│", profiler.name(),
-                 norm * 100.0, histogram<9>(norm), to_ms(profiler.duration()));
+                      ? (i == 0 ? 1.0 : 0.0)
+                      : to_ms(tracer.duration()) / setup_duration;
+    slp::println("│{:<21} {:>6.2f}%▕{}▏ {:>9.3f}│",
+                 time_trace_label(entries[i].name, entries[i].depth),
+                 norm * 100.0, histogram<9>(norm), to_ms(tracer.duration()));
   }
 
   slp::println("└{:─^50}┘", "");
@@ -369,5 +436,52 @@ inline void print_setup_diagnostics(
 #else
 #define print_setup_diagnostics(...)
 #endif
+
+/// Owns a solver's tracers and times the whole solve with the root tracer.
+///
+/// When the solve exits, this prints the final solver diagnostics if
+/// requested. If tracing is disabled, the tracers don't measure time.
+///
+/// @tparam Entries Time trace entries.
+template <const auto& Entries>
+  requires(detail::is_valid_time_trace(Entries))
+class SolveDiagnostics {
+ public:
+  /// Starts the root tracer.
+  ///
+  /// @param trace Whether the tracers measure time.
+  /// @param print Whether to print the final solver diagnostics on exit. This
+  ///     requires trace to be true.
+  SolveDiagnostics(bool trace, bool print)
+      : m_tracers{trace}, m_print{trace && print} {
+    m_tracers.root().start();
+  }
+
+  /// Stops the root tracer and prints the final solver diagnostics if
+  /// requested.
+  ~SolveDiagnostics() {
+    m_tracers.root().stop();
+
+    if (m_print) {
+      print_solver_diagnostics(m_tracers);
+    }
+  }
+
+  SolveDiagnostics(const SolveDiagnostics&) = delete;
+  SolveDiagnostics& operator=(const SolveDiagnostics&) = delete;
+
+  /// Returns the tracer with the given ID.
+  ///
+  /// @param index Time tracer ID, converted to its index at compile time. It
+  ///     must be in the time trace.
+  /// @return The tracer with the given ID.
+  SolveTimeTracer& operator[](TimeTracerIndex<Entries> index) {
+    return m_tracers[index];
+  }
+
+ private:
+  TimeTracerTree<SolveTimeTracer, Entries> m_tracers;
+  bool m_print;
+};
 
 }  // namespace slp

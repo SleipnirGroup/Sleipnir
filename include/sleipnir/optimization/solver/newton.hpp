@@ -5,11 +5,11 @@
 #include <chrono>
 #include <cmath>
 #include <functional>
+#include <optional>
 #include <span>
 
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
-#include <gch/small_vector.hpp>
 
 #include "sleipnir/optimization/solver/exit_status.hpp"
 #include "sleipnir/optimization/solver/iteration_info.hpp"
@@ -19,11 +19,11 @@
 #include "sleipnir/optimization/solver/util/filter.hpp"
 #include "sleipnir/optimization/solver/util/kkt_error.hpp"
 #include "sleipnir/optimization/solver/util/kkt_solver.hpp"
+#include "sleipnir/optimization/solver/util/time_trace.hpp"
 #include "sleipnir/util/assert.hpp"
 #include "sleipnir/util/print_diagnostics.hpp"
-#include "sleipnir/util/profiler.hpp"
-#include "sleipnir/util/scope_exit.hpp"
 #include "sleipnir/util/symbol_exports.hpp"
+#include "sleipnir/util/time_tracer.hpp"
 
 // See docs/algorithms.md#Works_cited for citation definitions.
 
@@ -61,53 +61,30 @@ ExitStatus newton(
 
   const auto solve_start_time = std::chrono::steady_clock::now();
 
-  gch::small_vector<SolveProfiler> solve_profilers;
-  solve_profilers.emplace_back("solver");
-  solve_profilers.emplace_back("↳ setup");
-  solve_profilers.emplace_back("↳ iteration");
-  solve_profilers.emplace_back("  ↳ callbacks");
-  solve_profilers.emplace_back("  ↳ KKT matrix decomp");
-  solve_profilers.emplace_back("  ↳ KKT system solve");
-  solve_profilers.emplace_back("  ↳ line search");
-  solve_profilers.emplace_back("  ↳ f(x)");
-  solve_profilers.emplace_back("  ↳ ∇f(x)");
-  solve_profilers.emplace_back("  ↳ ∇²ₓₓL");
+  using enum SolveTimeTracerID;
 
-  auto& solver_prof = solve_profilers[0];
-  auto& setup_prof = solve_profilers[1];
-  auto& inner_iter_prof = solve_profilers[2];
-  auto& iter_callbacks_prof = solve_profilers[3];
-  auto& kkt_matrix_decomp_prof = solve_profilers[4];
-  auto& kkt_system_solve_prof = solve_profilers[5];
-  auto& line_search_prof = solve_profilers[6];
+  int iterations = 0;
 
-  // Set up profiled matrix callbacks
+  // Prints final solver diagnostics when the solver exits
+  SolveDiagnostics<newton_time_trace> diagnostics{options.diagnostics,
+                                                  options.diagnostics};
+
+  // Set up traced matrix callbacks if diagnostics are enabled
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
-  auto& f_prof = solve_profilers[7];
-  auto& g_prof = solve_profilers[8];
-  auto& H_prof = solve_profilers[9];
-
-  NewtonMatrixCallbacks<Scalar> matrices{
-      matrix_callbacks.num_decision_variables,
-      [&](const DenseVector& x) -> Scalar {
-        ScopedProfiler prof{f_prof};
-        return matrix_callbacks.f(x);
-      },
-      [&](const DenseVector& x) -> SparseVector {
-        ScopedProfiler prof{g_prof};
-        return matrix_callbacks.g(x);
-      },
-      [&](const DenseVector& x) -> SparseMatrix {
-        ScopedProfiler prof{H_prof};
-        return matrix_callbacks.H(x);
-      },
-      matrix_callbacks.scaling};
+  std::optional<NewtonMatrixCallbacks<Scalar>> traced_matrices;
+  if (options.diagnostics) {
+    traced_matrices.emplace(matrix_callbacks.num_decision_variables,
+                            traced(diagnostics[COST], matrix_callbacks.f),
+                            traced(diagnostics[GRADIENT], matrix_callbacks.g),
+                            traced(diagnostics[HESSIAN], matrix_callbacks.H),
+                            matrix_callbacks.scaling);
+  }
+  const auto& matrices = traced_matrices ? *traced_matrices : matrix_callbacks;
 #else
   const auto& matrices = matrix_callbacks;
 #endif
 
-  solver_prof.start();
-  setup_prof.start();
+  ScopedTimeTracer setup_tracer{diagnostics[SETUP]};
 
   Scalar f = matrices.f(x);
   SparseVector g = matrices.g(x);
@@ -127,8 +104,6 @@ ExitStatus newton(
     return ExitStatus::NONFINITE_INITIAL_GUESS;
   }
 
-  int iterations = 0;
-
   Filter<Scalar> filter;
 
   KKTSolver<Scalar> solver{
@@ -143,33 +118,22 @@ ExitStatus newton(
   Scalar E_0 = unscaled_kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(
       matrices.scaling, g);
 
-  setup_prof.stop();
+  setup_tracer.stop();
 
-  // Prints final solver diagnostics when the solver exits
-  scope_exit exit{[&] {
-    if (options.diagnostics) {
-      solver_prof.stop();
-      if (iterations > 0) {
-        print_bottom_iteration_diagnostics();
-      }
-      print_solver_diagnostics(solve_profilers);
-    }
-  }};
-
-  // Print initial iterate diagnostics
-  if (options.diagnostics) {
-    print_initial_iterate_diagnostics(E_0, f, Scalar(0), Scalar(0), Scalar(0));
-  }
+  // Prints initial iterate diagnostics now and closes the iterate diagnostics
+  // table when the solver exits
+  IterateDiagnosticsTable table{options.diagnostics, E_0,       f,
+                                Scalar(0),           Scalar(0), Scalar(0)};
 
   while (E_0 > Scalar(options.tolerance)) {
-    ScopedProfiler inner_iter_profiler{inner_iter_prof};
+    ScopedTimeTracer inner_iter_tracer{diagnostics[ITERATION]};
 
     // Check for diverging iterates
     if (x.template lpNorm<Eigen::Infinity>() > Scalar(1e10) || !x.allFinite()) {
       return ExitStatus::DIVERGING_ITERATES;
     }
 
-    ScopedProfiler iter_callbacks_profiler{iter_callbacks_prof};
+    PhaseTimeTracer phase_tracer{diagnostics[CALLBACKS]};
 
     // Call iteration callbacks
     for (const auto& callback : iteration_callbacks) {
@@ -178,21 +142,18 @@ ExitStatus newton(
       }
     }
 
-    iter_callbacks_profiler.stop();
-    ScopedProfiler kkt_matrix_decomp_profiler{kkt_matrix_decomp_prof};
+    phase_tracer.next(diagnostics[KKT_MATRIX_DECOMP]);
 
     // Solve the Newton-KKT system
     //
     // Hpˣ = −∇f
     solver.compute(H);
 
-    kkt_matrix_decomp_profiler.stop();
-    ScopedProfiler kkt_system_solve_profiler{kkt_system_solve_prof};
+    phase_tracer.next(diagnostics[KKT_SYSTEM_SOLVE]);
 
     DenseVector p_x = solver.solve(-g);
 
-    kkt_system_solve_profiler.stop();
-    ScopedProfiler line_search_profiler{line_search_prof};
+    phase_tracer.next(diagnostics[LINE_SEARCH]);
 
     constexpr Scalar α_max(1);
     Scalar α = α_max;
@@ -248,7 +209,7 @@ ExitStatus newton(
       }
     }
 
-    line_search_profiler.stop();
+    phase_tracer.stop();
 
     // Update iterates
     x = trial_x;
@@ -263,12 +224,12 @@ ExitStatus newton(
     E_0 = unscaled_kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(
         matrices.scaling, g);
 
-    inner_iter_profiler.stop();
+    inner_iter_tracer.stop();
 
     if (options.diagnostics) {
-      print_iteration_diagnostics(
+      print_iterate_diagnostics(
           iterations, IterationType::NORMAL,
-          inner_iter_profiler.current_duration(), E_0, f, Scalar(0), Scalar(0),
+          inner_iter_tracer.current_duration(), E_0, f, Scalar(0), Scalar(0),
           Scalar(0), solver.hessian_regularization(),
           solver.constraint_jacobian_regularization(),
           p_x.template lpNorm<Eigen::Infinity>(), Scalar(1), α, α_max,
