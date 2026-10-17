@@ -18,6 +18,7 @@
 #include "sleipnir/optimization/solver/options.hpp"
 #include "sleipnir/optimization/solver/util/all_finite.hpp"
 #include "sleipnir/optimization/solver/util/append_as_triplets.hpp"
+#include "sleipnir/optimization/solver/util/constraint_violation.hpp"
 #include "sleipnir/optimization/solver/util/feasibility_restoration.hpp"
 #include "sleipnir/optimization/solver/util/filter.hpp"
 #include "sleipnir/optimization/solver/util/fraction_to_the_boundary_rule.hpp"
@@ -296,8 +297,7 @@ ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
   // Fraction-to-the-boundary rule scale factor τ
   Scalar τ = τ_min;
 
-  Filter<Scalar> filter{c_e.template lpNorm<1>() +
-                        (c_i - s).template lpNorm<1>()};
+  Filter<Scalar> filter{constraint_violation(c_e, c_i, s)};
 
   // This should be run when the error is below a desired threshold for the
   // current barrier parameter
@@ -379,9 +379,8 @@ ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
 
   // Print initial iterate diagnostics
   if (options.diagnostics) {
-    print_initial_iterate_diagnostics(
-        E_0, f, c_e.template lpNorm<1>() + (c_i - s).template lpNorm<1>(),
-        s.dot(z), μ);
+    print_initial_iterate_diagnostics(E_0, f, constraint_violation(c_e, c_i, s),
+                                      s.dot(z), μ);
   }
 
   while (E_0 > Scalar(options.tolerance)) {
@@ -533,11 +532,9 @@ ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
         break;
       }
 
-      Scalar prev_constraint_violation =
-          c_e.template lpNorm<1>() + (c_i - s).template lpNorm<1>();
+      Scalar prev_constraint_violation = constraint_violation(c_e, c_i, s);
       Scalar next_constraint_violation =
-          trial_c_e.template lpNorm<1>() +
-          (trial_c_i - trial_s).template lpNorm<1>();
+          constraint_violation(trial_c_e, trial_c_i, trial_s);
 
       // Second-order corrections
       //
@@ -570,9 +567,7 @@ ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
                   unscaled_kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(
                       matrices.scaling, g, A_e, trial_c_e, A_i, trial_c_i,
                       trial_s, trial_y, trial_z, Scalar(0)),
-                  trial_f,
-                  trial_c_e.template lpNorm<1>() +
-                      (trial_c_i - trial_s).template lpNorm<1>(),
+                  trial_f, constraint_violation(trial_c_e, trial_c_i, trial_s),
                   trial_s.dot(trial_z), μ, solver.hessian_regularization(),
                   solver.constraint_jacobian_regularization(),
                   std::max(soc_step.p_x.template lpNorm<Eigen::Infinity>(),
@@ -633,8 +628,7 @@ ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
           // If constraint violation hasn't been sufficiently reduced, stop
           // making second-order corrections
           next_constraint_violation =
-              trial_c_e.template lpNorm<1>() +
-              (trial_c_i - trial_s).template lpNorm<1>();
+              constraint_violation(trial_c_e, trial_c_i, trial_s);
           if (next_constraint_violation > κ_soc * soc_constraint_violation) {
             break;
           }
@@ -835,8 +829,8 @@ ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
           in_feasibility_restoration ? IterationType::FEASIBILITY_RESTORATION
                                      : IterationType::NORMAL,
           inner_iter_profiler.current_duration(), E_0, f,
-          c_e.template lpNorm<1>() + (c_i - s).template lpNorm<1>(), s.dot(z),
-          μ, solver.hessian_regularization(),
+          constraint_violation(c_e, c_i, s), s.dot(z), μ,
+          solver.hessian_regularization(),
           solver.constraint_jacobian_regularization(),
           std::max(step.p_x.template lpNorm<Eigen::Infinity>(),
                    step.p_s.template lpNorm<Eigen::Infinity>()),

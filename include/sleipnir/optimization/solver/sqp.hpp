@@ -17,6 +17,7 @@
 #include "sleipnir/optimization/solver/sqp_matrix_callbacks.hpp"
 #include "sleipnir/optimization/solver/util/all_finite.hpp"
 #include "sleipnir/optimization/solver/util/append_as_triplets.hpp"
+#include "sleipnir/optimization/solver/util/constraint_violation.hpp"
 #include "sleipnir/optimization/solver/util/feasibility_restoration.hpp"
 #include "sleipnir/optimization/solver/util/filter.hpp"
 #include "sleipnir/optimization/solver/util/kkt_error.hpp"
@@ -218,7 +219,7 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
 
   int iterations = 0;
 
-  Filter<Scalar> filter{c_e.template lpNorm<1>()};
+  Filter<Scalar> filter{constraint_violation(c_e)};
 
   // Kept outside the loop so its storage can be reused
   gch::small_vector<Eigen::Triplet<Scalar>> triplets;
@@ -257,7 +258,7 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
 
   // Print initial iterate diagnostics
   if (options.diagnostics) {
-    print_initial_iterate_diagnostics(E_0, f, c_e.template lpNorm<1>(),
+    print_initial_iterate_diagnostics(E_0, f, constraint_violation(c_e),
                                       Scalar(0), Scalar(0));
   }
 
@@ -363,8 +364,8 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
         break;
       }
 
-      Scalar prev_constraint_violation = c_e.template lpNorm<1>();
-      Scalar next_constraint_violation = trial_c_e.template lpNorm<1>();
+      Scalar prev_constraint_violation = constraint_violation(c_e);
+      Scalar next_constraint_violation = constraint_violation(trial_c_e);
 
       // Second-order corrections
       //
@@ -394,8 +395,8 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
                   soc_profiler.current_duration(),
                   kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(
                       g, A_e, trial_c_e, trial_y),
-                  trial_f, trial_c_e.template lpNorm<1>(), Scalar(0), Scalar(0),
-                  solver.hessian_regularization(),
+                  trial_f, constraint_violation(trial_c_e), Scalar(0),
+                  Scalar(0), solver.hessian_regularization(),
                   solver.constraint_jacobian_regularization(),
                   soc_step.p_x.template lpNorm<Eigen::Infinity>(),
                   soc_step.p_y.template lpNorm<Eigen::Infinity>(), α_soc,
@@ -435,7 +436,7 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
 
           // If constraint violation hasn't been sufficiently reduced, stop
           // making second-order corrections
-          next_constraint_violation = trial_c_e.template lpNorm<1>();
+          next_constraint_violation = constraint_violation(trial_c_e);
           if (next_constraint_violation > κ_soc * soc_constraint_violation) {
             break;
           }
@@ -576,7 +577,7 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
     if (options.diagnostics) {
       print_iteration_diagnostics(iterations, IterationType::NORMAL,
                                   inner_iter_profiler.current_duration(), E_0,
-                                  f, c_e.template lpNorm<1>(), Scalar(0),
+                                  f, constraint_violation(c_e), Scalar(0),
                                   Scalar(0), solver.hessian_regularization(),
                                   solver.constraint_jacobian_regularization(),
                                   step.p_x.template lpNorm<Eigen::Infinity>(),

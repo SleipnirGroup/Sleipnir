@@ -8,6 +8,8 @@
 #include <Eigen/Core>
 #include <gch/small_vector.hpp>
 
+#include "sleipnir/optimization/solver/util/constraint_violation.hpp"
+
 // See docs/algorithms.md#Works_cited for citation definitions.
 
 namespace slp {
@@ -41,7 +43,7 @@ struct FilterEntry {
   /// @param f The cost function value.
   /// @param c_e The equality constraint values (nonzero means violation).
   FilterEntry(Scalar f, const DenseVector& c_e)
-      : FilterEntry{f, c_e.template lpNorm<1>()} {}
+      : FilterEntry{f, slp::constraint_violation(c_e)} {}
 
   /// Constructs an interior-point method filter entry.
   ///
@@ -53,8 +55,7 @@ struct FilterEntry {
   FilterEntry(Scalar f, DenseVector& s, const DenseVector& c_e,
               const DenseVector& c_i, Scalar μ)
       : FilterEntry{f - μ * s.array().log().sum(),
-                    c_e.template lpNorm<1>() + (c_i - s).template lpNorm<1>()} {
-  }
+                    slp::constraint_violation(c_e, c_i, s)} {}
 
   /// Returns true if this filter entry is dominated by another.
   ///
