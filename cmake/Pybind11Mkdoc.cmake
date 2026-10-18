@@ -15,9 +15,11 @@ function(pybind11_mkdoc target headers)
         )
     endif()
 
-    # Target compiler flags
-    get_target_property(target_flags ${target} INCLUDE_DIRECTORIES)
-    list(TRANSFORM target_flags PREPEND "-I")
+    # Target compiler flags (evaluated at build time since the include
+    # directories may contain generator expressions)
+    set(target_flags
+        "-I$<JOIN:$<TARGET_PROPERTY:${target},INCLUDE_DIRECTORIES>,$<SEMICOLON>-I>"
+    )
 
     if(UNIX AND NOT APPLE)
         # Get default clang version
@@ -45,25 +47,11 @@ function(pybind11_mkdoc target headers)
         set(clang_flags -I/usr/lib/clang/${clang_version}/include)
     endif()
 
-    # Eigen compiler flags
-    get_target_property(eigen_flags Eigen3::Eigen INTERFACE_INCLUDE_DIRECTORIES)
-    list(FILTER eigen_flags INCLUDE REGEX "\\$<BUILD_INTERFACE:.*>")
-    list(TRANSFORM eigen_flags PREPEND "-I")
-
     # clang on Windows aarch64 failed to parse Eigen's NEON headers
-    list(APPEND eigen_flags "-DEIGEN_DONT_VECTORIZE")
-
-    # small_vector compiler flags
-    get_target_property(
-        small_vector_flags
-        small_vector
-        INTERFACE_INCLUDE_DIRECTORIES
-    )
-    list(FILTER small_vector_flags INCLUDE REGEX "\\$<BUILD_INTERFACE:.*>")
-    list(TRANSFORM small_vector_flags PREPEND "-I")
+    list(APPEND clang_flags -DEIGEN_DONT_VECTORIZE)
 
     # TODO: Remove when Python 3.15 makes UTF-8 the default
-    set(env_vars ${env_vars} PYTHONUTF8=1)
+    list(APPEND env_vars PYTHONUTF8=1)
 
     # Generate docstrings.hpp
     add_custom_command(
@@ -72,8 +60,7 @@ function(pybind11_mkdoc target headers)
             ${CMAKE_COMMAND} -E env ${env_vars} ${Python3_EXECUTABLE} -m
             pybind11_mkdoc ${headers} -o
             ${CMAKE_CURRENT_SOURCE_DIR}/python/cpp/docstrings.hpp
-            ${target_flags} ${clang_flags} ${eigen_flags} ${small_vector_flags}
-            -std=c++23
+            ${target_flags} ${clang_flags} -std=c++23
         COMMAND
             ${CMAKE_COMMAND}
             -DFILE=${CMAKE_CURRENT_SOURCE_DIR}/python/cpp/docstrings.hpp -P
@@ -81,6 +68,7 @@ function(pybind11_mkdoc target headers)
         DEPENDS
             ${headers}
             ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Pybind11MkdocPostprocess.cmake
+        COMMAND_EXPAND_LISTS
     )
 
     # Add docstrings target
