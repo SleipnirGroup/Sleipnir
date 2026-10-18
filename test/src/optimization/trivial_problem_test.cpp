@@ -22,7 +22,7 @@ TEMPLATE_TEST_CASE("Problem - Empty", "[Problem]", SCALAR_TYPES_UNDER_TEST) {
   CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 }
 
-TEMPLATE_TEST_CASE("Problem - No cost, unconstrained", "[Problem]",
+TEMPLATE_TEST_CASE("Problem - No cost unconstrained", "[Problem]",
                    SCALAR_TYPES_UNDER_TEST) {
   using T = TestType;
 
