@@ -472,122 +472,6 @@ struct BinaryPlusExpression final : Expression<Scalar> {
   ExpressionPtr<Scalar> grad_expr_r() const { return this->adj_expr; }
 };
 
-/// Derived expression type for cbrt().
-///
-/// @tparam Scalar Scalar type.
-template <typename Scalar>
-struct CbrtExpression final : Expression<Scalar> {
-  /// Unary operator's operand.
-  ExpressionPtr<Scalar> x;
-
-  /// Constructs an unary expression (an operator with one argument).
-  ///
-  /// @param x Unary operator's operand.
-  explicit constexpr CbrtExpression(ExpressionPtr<Scalar> x)
-      : x{std::move(x)} {}
-
-  void visit_args(
-      function_ref<void(Expression<Scalar>* arg)> func) const override {
-    func(x.get());
-  }
-
-  Scalar value() const override {
-    using std::cbrt;
-    return cbrt(x->val);
-  }
-
-  ExpressionType type() const override { return ExpressionType::NONLINEAR; }
-
-  std::string_view name() const override { return "cbrt"; }
-
-  void accumulate_adjoints() const override { x->adj += grad_l(); }
-
-  void accumulate_adjoints_expr() const override {
-    x->adj_expr += grad_expr_l();
-  }
-
- private:
-  Scalar grad_l() const {
-    using std::cbrt;
-
-    Scalar c = cbrt(x->val);
-    return this->adj / (Scalar(3) * c * c);
-  }
-
-  ExpressionPtr<Scalar> grad_expr_l() const {
-    auto c = cbrt(x);
-    return this->adj_expr / (constant_ptr(Scalar(3)) * c * c);
-  }
-};
-
-/// cbrt() for Expressions.
-///
-/// @tparam Scalar Scalar type.
-/// @param x The argument.
-template <typename Scalar>
-ExpressionPtr<Scalar> cbrt(const ExpressionPtr<Scalar>& x) {
-  using enum ExpressionType;
-  using std::cbrt;
-
-  // Evaluate constant
-  if (x->type() == CONSTANT) {
-    if (x->val == Scalar(0)) {
-      // Return zero
-      return x;
-    } else if (x->val == Scalar(-1) || x->val == Scalar(1)) {
-      return x;
-    } else {
-      return constant_ptr(cbrt(x->val));
-    }
-  }
-
-  return make_expression_ptr<CbrtExpression<Scalar>>(x);
-}
-
-/// Derived expression type for constant.
-///
-/// @tparam Scalar Scalar type.
-template <typename Scalar>
-struct ConstantExpression final : Expression<Scalar> {
-  /// Constructs a nullary expression (an operator with no arguments).
-  ///
-  /// @param value The expression value.
-  explicit constexpr ConstantExpression(Scalar value)
-      : Expression<Scalar>{value} {}
-
-  Scalar value() const override { return this->val; }
-
-  ExpressionType type() const override { return ExpressionType::CONSTANT; }
-
-  std::string_view name() const override { return "constant"; }
-};
-
-template <typename Scalar>
-ExpressionPtr<Scalar> constant_ptr(Scalar value) {
-  return make_expression_ptr<ConstantExpression<Scalar>>(value);
-}
-
-/// Derived expression type for decision variable.
-///
-/// @tparam Scalar Scalar type.
-template <typename Scalar>
-struct DecisionVariableExpression final : Expression<Scalar> {
-  /// Constructs a decision variable expression with a value of zero.
-  constexpr DecisionVariableExpression() : Expression<Scalar>{Scalar(0)} {}
-
-  /// Constructs a nullary expression (an operator with no arguments).
-  ///
-  /// @param value The expression value.
-  explicit constexpr DecisionVariableExpression(Scalar value)
-      : Expression<Scalar>{value} {}
-
-  Scalar value() const override { return this->val; }
-
-  ExpressionType type() const override { return ExpressionType::LINEAR; }
-
-  std::string_view name() const override { return "decision variable"; }
-};
-
 /// Derived expression type for binary division operator.
 ///
 /// @tparam Scalar Scalar type.
@@ -1127,6 +1011,122 @@ ExpressionPtr<Scalar> atan2(const ExpressionPtr<Scalar>& y,
 
   return make_expression_ptr<Atan2Expression<Scalar>>(y, x);
 }
+
+/// Derived expression type for cbrt().
+///
+/// @tparam Scalar Scalar type.
+template <typename Scalar>
+struct CbrtExpression final : Expression<Scalar> {
+  /// Unary operator's operand.
+  ExpressionPtr<Scalar> x;
+
+  /// Constructs an unary expression (an operator with one argument).
+  ///
+  /// @param x Unary operator's operand.
+  explicit constexpr CbrtExpression(ExpressionPtr<Scalar> x)
+      : x{std::move(x)} {}
+
+  void visit_args(
+      function_ref<void(Expression<Scalar>* arg)> func) const override {
+    func(x.get());
+  }
+
+  Scalar value() const override {
+    using std::cbrt;
+    return cbrt(x->val);
+  }
+
+  ExpressionType type() const override { return ExpressionType::NONLINEAR; }
+
+  std::string_view name() const override { return "cbrt"; }
+
+  void accumulate_adjoints() const override { x->adj += grad_l(); }
+
+  void accumulate_adjoints_expr() const override {
+    x->adj_expr += grad_expr_l();
+  }
+
+ private:
+  Scalar grad_l() const {
+    using std::cbrt;
+
+    Scalar c = cbrt(x->val);
+    return this->adj / (Scalar(3) * c * c);
+  }
+
+  ExpressionPtr<Scalar> grad_expr_l() const {
+    auto c = cbrt(x);
+    return this->adj_expr / (constant_ptr(Scalar(3)) * c * c);
+  }
+};
+
+/// cbrt() for Expressions.
+///
+/// @tparam Scalar Scalar type.
+/// @param x The argument.
+template <typename Scalar>
+ExpressionPtr<Scalar> cbrt(const ExpressionPtr<Scalar>& x) {
+  using enum ExpressionType;
+  using std::cbrt;
+
+  // Evaluate constant
+  if (x->type() == CONSTANT) {
+    if (x->val == Scalar(0)) {
+      // Return zero
+      return x;
+    } else if (x->val == Scalar(-1) || x->val == Scalar(1)) {
+      return x;
+    } else {
+      return constant_ptr(cbrt(x->val));
+    }
+  }
+
+  return make_expression_ptr<CbrtExpression<Scalar>>(x);
+}
+
+/// Derived expression type for constant.
+///
+/// @tparam Scalar Scalar type.
+template <typename Scalar>
+struct ConstantExpression final : Expression<Scalar> {
+  /// Constructs a nullary expression (an operator with no arguments).
+  ///
+  /// @param value The expression value.
+  explicit constexpr ConstantExpression(Scalar value)
+      : Expression<Scalar>{value} {}
+
+  Scalar value() const override { return this->val; }
+
+  ExpressionType type() const override { return ExpressionType::CONSTANT; }
+
+  std::string_view name() const override { return "constant"; }
+};
+
+template <typename Scalar>
+ExpressionPtr<Scalar> constant_ptr(Scalar value) {
+  return make_expression_ptr<ConstantExpression<Scalar>>(value);
+}
+
+/// Derived expression type for decision variable.
+///
+/// @tparam Scalar Scalar type.
+template <typename Scalar>
+struct DecisionVariableExpression final : Expression<Scalar> {
+  /// Constructs a decision variable expression with a value of zero.
+  constexpr DecisionVariableExpression() : Expression<Scalar>{Scalar(0)} {}
+
+  /// Constructs a nullary expression (an operator with no arguments).
+  ///
+  /// @param value The expression value.
+  explicit constexpr DecisionVariableExpression(Scalar value)
+      : Expression<Scalar>{value} {}
+
+  Scalar value() const override { return this->val; }
+
+  ExpressionType type() const override { return ExpressionType::LINEAR; }
+
+  std::string_view name() const override { return "decision variable"; }
+};
 
 /// Derived expression type for cos().
 ///
