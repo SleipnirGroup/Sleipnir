@@ -423,20 +423,30 @@ if(SLEIPNIR_BUILD_PYTHON)
 
     file(GLOB_RECURSE python_ext_src python/cpp/*.cpp)
 
-    # Build Sleipnir dependency directly into the wheel to avoid having to
-    # configure RPATHs
+    # Build Sleipnir directly into the module and manually inherit its compile
+    # definitions, include directories, and link libraries. This avoids having
+    # to configure RPATHs to a Sleipnir shared library.
+    #
+    # SLEIPNIR_IMPORTS is excluded because consumers may add it to Sleipnir's
+    # interface compile definitions. It declares Sleipnir's symbols are defined
+    # in a separate DLL, but they're compiled into the module here.
     nanobind_add_module(_sleipnir STABLE_ABI ${python_ext_src} ${Sleipnir_src})
     compiler_flags(_sleipnir)
-    target_compile_definitions(_sleipnir PRIVATE SLEIPNIR_PYTHON=1)
+    target_compile_definitions(
+        _sleipnir
+        PRIVATE
+            $<FILTER:$<TARGET_PROPERTY:Sleipnir,INTERFACE_COMPILE_DEFINITIONS>,EXCLUDE,^SLEIPNIR_IMPORTS$|^SLEIPNIR_IMPORTS=>
+            SLEIPNIR_PYTHON=1
+    )
     target_include_directories(
         _sleipnir
         PRIVATE
-            ${CMAKE_CURRENT_SOURCE_DIR}/include
+            $<TARGET_PROPERTY:Sleipnir,INTERFACE_INCLUDE_DIRECTORIES>
             ${CMAKE_CURRENT_SOURCE_DIR}/python/cpp
     )
     target_link_libraries(
         _sleipnir
-        PUBLIC Threads::Threads Eigen3::Eigen small_vector
+        PRIVATE $<TARGET_PROPERTY:Sleipnir,INTERFACE_LINK_LIBRARIES>
     )
 
     install(
