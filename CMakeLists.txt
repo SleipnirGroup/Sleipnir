@@ -374,7 +374,7 @@ if(SLEIPNIR_BUILD_EXAMPLES)
             file(GLOB_RECURSE test_sources examples/${example}/test/*.cpp)
             add_executable(${example}_test ${sources} ${test_sources})
             compiler_flags(${example}_test)
-            target_compile_definitions(${example}_test PUBLIC RUNNING_TESTS)
+            target_compile_definitions(${example}_test PRIVATE RUNNING_TESTS)
             target_include_directories(
                 ${example}_test
                 PRIVATE
