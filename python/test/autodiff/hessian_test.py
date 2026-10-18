@@ -1,6 +1,6 @@
 import math
 import operator
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from functools import reduce
 
 import numpy as np
@@ -210,6 +210,222 @@ def test_nested_powers() -> None:
     assert H[0, 0] == pytest.approx(12 * x0 * x0, abs=1e-12)
 
 
+def check_unary_hessian(
+    f: Callable[[Variable], Variable],
+    df: Callable[[float], float],
+    d2f: Callable[[float], float],
+) -> None:
+    # y = f(u) where u = x₀x₁
+    #
+    # ∂²y/∂x₀² = f″(u) x₁²
+    # ∂²y/∂x₀∂x₁ = f″(u) x₀x₁ + f′(u)
+    # ∂²y/∂x₁² = f″(u) x₀²
+    x = VariableMatrix(2)
+    x[0].set_value(0.6)
+    x[1].set_value(0.7)
+    hessian = Hessian(f(x[0] * x[1]), x)
+    symbolic_H = hessian.get()
+
+    # Check symbolic Hessian at a point other than where it was built too
+    for x0, x1 in [(0.6, 0.7), (0.3, 0.7)]:
+        x[0].set_value(x0)
+        x[1].set_value(x1)
+
+        u = x0 * x1
+        mixed = d2f(u) * u + df(u)
+        expected = np.array([[d2f(u) * x1 * x1, mixed], [mixed, d2f(u) * x0 * x0]])
+        np.testing.assert_allclose(symbolic_H.value(), expected, rtol=0.0, atol=1e-12)
+        np.testing.assert_allclose(
+            hessian.value().todense(), expected, rtol=0.0, atol=1e-12
+        )
+
+
+def test_division() -> None:
+    # y = x₀/x₁
+    #
+    # ∂²y/∂x₀² = 0
+    # ∂²y/∂x₀∂x₁ = −1/x₁²
+    # ∂²y/∂x₁² = 2x₀/x₁³
+    x = VariableMatrix(2)
+    hessian = Hessian(x[0] / x[1], x)
+    symbolic_H = hessian.get()
+
+    for x0, x1 in [(3.0, 2.0), (-1.5, 0.5)]:
+        x[0].set_value(x0)
+        x[1].set_value(x1)
+
+        mixed = -1.0 / (x1 * x1)
+        expected = np.array([[0.0, mixed], [mixed, 2.0 * x0 / (x1 * x1 * x1)]])
+        np.testing.assert_allclose(symbolic_H.value(), expected, rtol=0.0, atol=1e-12)
+        np.testing.assert_allclose(
+            hessian.value().todense(), expected, rtol=0.0, atol=1e-12
+        )
+
+
+def test_unary_minus() -> None:
+    check_unary_hessian(lambda u: -u, lambda u: -1.0, lambda u: 0.0)
+
+
+def test_abs() -> None:
+    check_unary_hessian(autodiff.abs, lambda u: 1.0, lambda u: 0.0)
+
+
+def test_acos() -> None:
+    check_unary_hessian(
+        autodiff.acos,
+        lambda u: -1.0 / math.sqrt(1.0 - u * u),
+        lambda u: -u / math.sqrt(1.0 - u * u) ** 3,
+    )
+
+
+def test_asin() -> None:
+    check_unary_hessian(
+        autodiff.asin,
+        lambda u: 1.0 / math.sqrt(1.0 - u * u),
+        lambda u: u / math.sqrt(1.0 - u * u) ** 3,
+    )
+
+
+def test_atan() -> None:
+    check_unary_hessian(
+        autodiff.atan,
+        lambda u: 1.0 / (1.0 + u * u),
+        lambda u: -2.0 * u / ((1.0 + u * u) * (1.0 + u * u)),
+    )
+
+
+def test_atan2() -> None:
+    # z = atan2(y, x)
+    #
+    # ∂²z/∂y² = −2xy/(x² + y²)²
+    # ∂²z/∂y∂x = (y² − x²)/(x² + y²)²
+    # ∂²z/∂x² = 2xy/(x² + y²)²
+    input = VariableMatrix(2)
+    hessian = Hessian(autodiff.atan2(input[0], input[1]), input)
+    symbolic_H = hessian.get()
+
+    for y, x in [(1.5, 0.5), (-0.7, 1.3)]:
+        input[0].set_value(y)
+        input[1].set_value(x)
+
+        d = x * x + y * y
+        mixed = (y * y - x * x) / (d * d)
+        expected = np.array(
+            [[-2.0 * x * y / (d * d), mixed], [mixed, 2.0 * x * y / (d * d)]]
+        )
+        np.testing.assert_allclose(symbolic_H.value(), expected, rtol=0.0, atol=1e-12)
+        np.testing.assert_allclose(
+            hessian.value().todense(), expected, rtol=0.0, atol=1e-12
+        )
+
+
+def test_cbrt() -> None:
+    check_unary_hessian(
+        autodiff.cbrt,
+        lambda u: 1.0 / (3.0 * math.cbrt(u) * math.cbrt(u)),
+        lambda u: -2.0 / (9.0 * u * math.cbrt(u) * math.cbrt(u)),
+    )
+
+
+def test_cos() -> None:
+    check_unary_hessian(autodiff.cos, lambda u: -math.sin(u), lambda u: -math.cos(u))
+
+
+def test_cosh() -> None:
+    check_unary_hessian(autodiff.cosh, math.sinh, math.cosh)
+
+
+def test_erf() -> None:
+    check_unary_hessian(
+        autodiff.erf,
+        lambda u: 2.0 / math.sqrt(math.pi) * math.exp(-u * u),
+        lambda u: -4.0 / math.sqrt(math.pi) * u * math.exp(-u * u),
+    )
+
+
+def test_exp() -> None:
+    check_unary_hessian(autodiff.exp, math.exp, math.exp)
+
+
+def hypot_expected_H(v: np.ndarray) -> np.ndarray:
+    # y = ‖v‖
+    #
+    # ∂²y/∂vᵢ∂vⱼ = (‖v‖²δᵢⱼ − vᵢvⱼ)/‖v‖³
+    r2 = v @ v
+    return (r2 * np.eye(len(v)) - np.outer(v, v)) / (r2 * math.sqrt(r2))
+
+
+def test_hypot_two_arguments() -> None:
+    x = VariableMatrix(2)
+    hessian = Hessian(autodiff.hypot(x[0], x[1]), x)
+    symbolic_H = hessian.get()
+
+    for x0, x1 in [(1.3, 2.3), (-0.5, 1.5)]:
+        x[0].set_value(x0)
+        x[1].set_value(x1)
+
+        expected = hypot_expected_H(np.array([x0, x1]))
+        np.testing.assert_allclose(symbolic_H.value(), expected, rtol=0.0, atol=1e-12)
+        np.testing.assert_allclose(
+            hessian.value().todense(), expected, rtol=0.0, atol=1e-12
+        )
+
+
+def test_hypot_three_arguments() -> None:
+    x = VariableMatrix(3)
+    hessian = Hessian(autodiff.hypot(x[0], x[1], x[2]), x)
+    symbolic_H = hessian.get()
+
+    for v in [np.array([1.3, 2.3, 3.3]), np.array([-0.5, 1.5, -2.5])]:
+        x[0].set_value(v[0])
+        x[1].set_value(v[1])
+        x[2].set_value(v[2])
+
+        expected = hypot_expected_H(v)
+        np.testing.assert_allclose(symbolic_H.value(), expected, rtol=0.0, atol=1e-12)
+        np.testing.assert_allclose(
+            hessian.value().todense(), expected, rtol=0.0, atol=1e-12
+        )
+
+
+def test_hypot_repeated_argument() -> None:
+    # y = hypot(a, b, a) = √(2a² + b²)
+    #
+    # ∂²y/∂a² = (2y² − 4a²)/y³
+    # ∂²y/∂a∂b = −2ab/y³
+    # ∂²y/∂b² = (y² − b²)/y³
+    x = VariableMatrix(2)
+    hessian = Hessian(autodiff.hypot(x[0], x[1], x[0]), x)
+    symbolic_H = hessian.get()
+
+    for a, b in [(1.3, 2.3), (-0.5, 1.5)]:
+        x[0].set_value(a)
+        x[1].set_value(b)
+
+        y2 = 2.0 * a * a + b * b
+        y3 = y2 * math.sqrt(y2)
+        mixed = -2.0 * a * b / y3
+        expected = np.array(
+            [[(2.0 * y2 - 4.0 * a * a) / y3, mixed], [mixed, (y2 - b * b) / y3]]
+        )
+        np.testing.assert_allclose(symbolic_H.value(), expected, rtol=0.0, atol=1e-12)
+        np.testing.assert_allclose(
+            hessian.value().todense(), expected, rtol=0.0, atol=1e-12
+        )
+
+
+def test_log() -> None:
+    check_unary_hessian(autodiff.log, lambda u: 1.0 / u, lambda u: -1.0 / (u * u))
+
+
+def test_log10() -> None:
+    check_unary_hessian(
+        autodiff.log10,
+        lambda u: 1.0 / (math.log(10.0) * u),
+        lambda u: -1.0 / (math.log(10.0) * u * u),
+    )
+
+
 def test_max_and_min() -> None:
     input = VariableMatrix(2)
     expected_y = np.array([[0.0, 0.0], [0.0, 2.0]])
@@ -263,6 +479,42 @@ def test_pow() -> None:
     np.testing.assert_allclose(symbolic_H.value(), expected, rtol=0.0, atol=1e-12)
     np.testing.assert_allclose(
         hessian.value().todense(), expected, rtol=0.0, atol=1e-12
+    )
+
+
+def test_sign() -> None:
+    check_unary_hessian(autodiff.sign, lambda u: 0.0, lambda u: 0.0)
+
+
+def test_sin() -> None:
+    check_unary_hessian(autodiff.sin, math.cos, lambda u: -math.sin(u))
+
+
+def test_sinh() -> None:
+    check_unary_hessian(autodiff.sinh, math.cosh, math.sinh)
+
+
+def test_sqrt() -> None:
+    check_unary_hessian(
+        autodiff.sqrt,
+        lambda u: 1.0 / (2.0 * math.sqrt(u)),
+        lambda u: -1.0 / (4.0 * u * math.sqrt(u)),
+    )
+
+
+def test_tan() -> None:
+    check_unary_hessian(
+        autodiff.tan,
+        lambda u: 1.0 / (math.cos(u) * math.cos(u)),
+        lambda u: 2.0 * math.tan(u) / (math.cos(u) * math.cos(u)),
+    )
+
+
+def test_tanh() -> None:
+    check_unary_hessian(
+        autodiff.tanh,
+        lambda u: 1.0 / (math.cosh(u) * math.cosh(u)),
+        lambda u: -2.0 * math.tanh(u) / (math.cosh(u) * math.cosh(u)),
     )
 
 

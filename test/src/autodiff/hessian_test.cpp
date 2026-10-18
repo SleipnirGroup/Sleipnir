@@ -2,7 +2,9 @@
 
 #include <cmath>
 #include <functional>
+#include <numbers>
 #include <numeric>
+#include <utility>
 
 #include <Eigen/Core>
 #include <catch2/catch_template_test_macros.hpp>
@@ -12,6 +14,7 @@
 #include <sleipnir/autodiff/hessian.hpp>
 #include <sleipnir/autodiff/jacobian.hpp>
 #include <sleipnir/autodiff/variable.hpp>
+#include <sleipnir/autodiff/variable_matrix.hpp>
 #include <sleipnir/util/pool.hpp>
 #include <sleipnir/util/scope_exit.hpp>
 
@@ -294,6 +297,364 @@ TEMPLATE_TEST_CASE("Hessian - Nested powers", "[Hessian]",
   CHECK_THAT(H(0, 0), WithinAbs(T(12) * x0 * x0, T(1e-12)));
 }
 
+// Checks the Hessian of y = f(u) where u = x₀x₁
+//
+// ∂²y/∂x₀² = f″(u) x₁²
+// ∂²y/∂x₀∂x₁ = f″(u) x₀x₁ + f′(u)
+// ∂²y/∂x₁² = f″(u) x₀²
+template <typename T>
+void check_unary_hessian(
+    std::function<slp::Variable<T>(const slp::Variable<T>&)> f,
+    std::function<T(T)> df, std::function<T(T)> d2f) {
+  slp::VariableMatrix<T> x{2};
+  x[0].set_value(T(0.6));
+  x[1].set_value(T(0.7));
+  slp::Hessian hessian{f(x[0] * x[1]), x};
+  auto symbolic_H = hessian.get();
+
+  // Check symbolic Hessian at a point other than where it was built too
+  for (auto [x0, x1] : {std::pair{T(0.6), T(0.7)}, std::pair{T(0.3), T(0.7)}}) {
+    x[0].set_value(x0);
+    x[1].set_value(x1);
+
+    T u = x0 * x1;
+    T mixed = d2f(u) * u + df(u);
+    Eigen::Matrix<T, 2, 2> expected{{d2f(u) * x1 * x1, mixed},
+                                    {mixed, d2f(u) * x0 * x0}};
+    CHECK_THAT(symbolic_H.value(), WithinAbs(expected, T(1e-12)));
+    CHECK_THAT(hessian.value().toDense(), WithinAbs(expected, T(1e-12)));
+  }
+}
+
+TEMPLATE_TEST_CASE("Hessian - Division", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+  using T = TestType;
+
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
+
+  // y = x₀/x₁
+  //
+  // ∂²y/∂x₀² = 0
+  // ∂²y/∂x₀∂x₁ = −1/x₁²
+  // ∂²y/∂x₁² = 2x₀/x₁³
+  slp::VariableMatrix<T> x{2};
+  slp::Hessian hessian{x[0] / x[1], x};
+  auto symbolic_H = hessian.get();
+
+  for (auto [x0, x1] : {std::pair{T(3), T(2)}, std::pair{T(-1.5), T(0.5)}}) {
+    x[0].set_value(x0);
+    x[1].set_value(x1);
+
+    T mixed = T(-1) / (x1 * x1);
+    Eigen::Matrix<T, 2, 2> expected{{T(0), mixed},
+                                    {mixed, T(2) * x0 / (x1 * x1 * x1)}};
+    CHECK_THAT(symbolic_H.value(), WithinAbs(expected, T(1e-12)));
+    CHECK_THAT(hessian.value().toDense(), WithinAbs(expected, T(1e-12)));
+  }
+}
+
+TEMPLATE_TEST_CASE("Hessian - Unary minus", "[Hessian]",
+                   SCALAR_TYPES_UNDER_TEST) {
+  using T = TestType;
+
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
+
+  check_unary_hessian<T>([](const auto& u) { return -u; },
+                         [](T) { return T(-1); }, [](T) { return T(0); });
+}
+
+TEMPLATE_TEST_CASE("Hessian - abs()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+  using T = TestType;
+
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
+
+  check_unary_hessian<T>([](const auto& u) { return slp::abs(u); },
+                         [](T) { return T(1); }, [](T) { return T(0); });
+}
+
+TEMPLATE_TEST_CASE("Hessian - acos()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+  using T = TestType;
+  using std::sqrt;
+
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
+
+  check_unary_hessian<T>([](const auto& u) { return slp::acos(u); },
+                         [](T u) { return T(-1) / sqrt(T(1) - u * u); },
+                         [](T u) {
+                           T s = sqrt(T(1) - u * u);
+                           return -u / (s * s * s);
+                         });
+}
+
+TEMPLATE_TEST_CASE("Hessian - asin()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+  using T = TestType;
+  using std::sqrt;
+
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
+
+  check_unary_hessian<T>([](const auto& u) { return slp::asin(u); },
+                         [](T u) { return T(1) / sqrt(T(1) - u * u); },
+                         [](T u) {
+                           T s = sqrt(T(1) - u * u);
+                           return u / (s * s * s);
+                         });
+}
+
+TEMPLATE_TEST_CASE("Hessian - atan()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+  using T = TestType;
+
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
+
+  check_unary_hessian<T>(
+      [](const auto& u) { return slp::atan(u); },
+      [](T u) { return T(1) / (T(1) + u * u); },
+      [](T u) { return T(-2) * u / ((T(1) + u * u) * (T(1) + u * u)); });
+}
+
+TEMPLATE_TEST_CASE("Hessian - atan2()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+  using T = TestType;
+
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
+
+  // z = atan2(y, x)
+  //
+  // ∂²z/∂y² = −2xy/(x² + y²)²
+  // ∂²z/∂y∂x = (y² − x²)/(x² + y²)²
+  // ∂²z/∂x² = 2xy/(x² + y²)²
+  slp::VariableMatrix<T> input{2};
+  slp::Hessian hessian{slp::atan2(input[0], input[1]), input};
+  auto symbolic_H = hessian.get();
+
+  for (auto [y, x] : {std::pair{T(1.5), T(0.5)}, std::pair{T(-0.7), T(1.3)}}) {
+    input[0].set_value(y);
+    input[1].set_value(x);
+
+    T d = x * x + y * y;
+    T mixed = (y * y - x * x) / (d * d);
+    Eigen::Matrix<T, 2, 2> expected{{T(-2) * x * y / (d * d), mixed},
+                                    {mixed, T(2) * x * y / (d * d)}};
+    CHECK_THAT(symbolic_H.value(), WithinAbs(expected, T(1e-12)));
+    CHECK_THAT(hessian.value().toDense(), WithinAbs(expected, T(1e-12)));
+  }
+}
+
+TEMPLATE_TEST_CASE("Hessian - cbrt()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+  using T = TestType;
+  using std::cbrt;
+
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
+
+  check_unary_hessian<T>(
+      [](const auto& u) { return slp::cbrt(u); },
+      [](T u) { return T(1) / (T(3) * cbrt(u) * cbrt(u)); },
+      [](T u) { return T(-2) / (T(9) * u * cbrt(u) * cbrt(u)); });
+}
+
+TEMPLATE_TEST_CASE("Hessian - cos()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+  using T = TestType;
+  using std::cos;
+  using std::sin;
+
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
+
+  check_unary_hessian<T>([](const auto& u) { return slp::cos(u); },
+                         [](T u) { return -sin(u); },
+                         [](T u) { return -cos(u); });
+}
+
+TEMPLATE_TEST_CASE("Hessian - cosh()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+  using T = TestType;
+  using std::cosh;
+  using std::sinh;
+
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
+
+  check_unary_hessian<T>([](const auto& u) { return slp::cosh(u); },
+                         [](T u) { return sinh(u); },
+                         [](T u) { return cosh(u); });
+}
+
+TEMPLATE_TEST_CASE("Hessian - erf()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+  using T = TestType;
+  using std::exp;
+
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
+
+  check_unary_hessian<T>(
+      [](const auto& u) { return slp::erf(u); },
+      [](T u) { return T(2.0 * std::numbers::inv_sqrtpi) * exp(-u * u); },
+      [](T u) { return T(-4.0 * std::numbers::inv_sqrtpi) * u * exp(-u * u); });
+}
+
+TEMPLATE_TEST_CASE("Hessian - exp()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+  using T = TestType;
+  using std::exp;
+
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
+
+  check_unary_hessian<T>([](const auto& u) { return slp::exp(u); },
+                         [](T u) { return exp(u); },
+                         [](T u) { return exp(u); });
+}
+
+TEMPLATE_TEST_CASE("Hessian - hypot()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+  using T = TestType;
+  using std::sqrt;
+
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
+
+  // y = ‖v‖ where v = [x₀, x₁, x₂]ᵀ
+  //
+  // ∂²y/∂xᵢ∂xⱼ = (‖v‖²δᵢⱼ − xᵢxⱼ)/‖v‖³
+  auto expected_H = [](const Eigen::Vector<T, 3>& v) {
+    T r2 = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
+    T r3 = r2 * sqrt(r2);
+
+    Eigen::Matrix<T, 3, 3> H;
+    for (int i = 0; i < 3; ++i) {
+      for (int j = 0; j < 3; ++j) {
+        H(i, j) = ((i == j ? r2 : T(0)) - v[i] * v[j]) / r3;
+      }
+    }
+    return H;
+  };
+
+  SECTION("Two arguments") {
+    slp::VariableMatrix<T> x{2};
+    slp::Hessian hessian{slp::hypot(x[0], x[1]), x};
+    auto symbolic_H = hessian.get();
+
+    for (auto [x0, x1] :
+         {std::pair{T(1.3), T(2.3)}, std::pair{T(-0.5), T(1.5)}}) {
+      x[0].set_value(x0);
+      x[1].set_value(x1);
+
+      Eigen::Matrix<T, 2, 2> expected =
+          expected_H(Eigen::Vector<T, 3>{x0, x1, T(0)})
+              .template topLeftCorner<2, 2>();
+      CHECK_THAT(symbolic_H.value(), WithinAbs(expected, T(1e-12)));
+      CHECK_THAT(hessian.value().toDense(), WithinAbs(expected, T(1e-12)));
+    }
+  }
+
+  SECTION("Three arguments") {
+    slp::VariableMatrix<T> x{3};
+    slp::Hessian hessian{slp::hypot(x[0], x[1], x[2]), x};
+    auto symbolic_H = hessian.get();
+
+    for (auto v : {Eigen::Vector<T, 3>{T(1.3), T(2.3), T(3.3)},
+                   Eigen::Vector<T, 3>{T(-0.5), T(1.5), T(-2.5)}}) {
+      x[0].set_value(v[0]);
+      x[1].set_value(v[1]);
+      x[2].set_value(v[2]);
+
+      auto expected = expected_H(v);
+      CHECK_THAT(symbolic_H.value(), WithinAbs(expected, T(1e-12)));
+      CHECK_THAT(hessian.value().toDense(), WithinAbs(expected, T(1e-12)));
+    }
+  }
+
+  SECTION("Repeated argument") {
+    // y = hypot(a, b, a) = √(2a² + b²)
+    //
+    // ∂²y/∂a² = (2y² − 4a²)/y³
+    // ∂²y/∂a∂b = −2ab/y³
+    // ∂²y/∂b² = (y² − b²)/y³
+    slp::VariableMatrix<T> x{2};
+    slp::Hessian hessian{slp::hypot(x[0], x[1], x[0]), x};
+    auto symbolic_H = hessian.get();
+
+    for (auto [a, b] :
+         {std::pair{T(1.3), T(2.3)}, std::pair{T(-0.5), T(1.5)}}) {
+      x[0].set_value(a);
+      x[1].set_value(b);
+
+      T y2 = T(2) * a * a + b * b;
+      T y3 = y2 * sqrt(y2);
+      T mixed = T(-2) * a * b / y3;
+      Eigen::Matrix<T, 2, 2> expected{{(T(2) * y2 - T(4) * a * a) / y3, mixed},
+                                      {mixed, (y2 - b * b) / y3}};
+      CHECK_THAT(symbolic_H.value(), WithinAbs(expected, T(1e-12)));
+      CHECK_THAT(hessian.value().toDense(), WithinAbs(expected, T(1e-12)));
+    }
+  }
+}
+
+TEMPLATE_TEST_CASE("Hessian - if_else()", "[Hessian]",
+                   SCALAR_TYPES_UNDER_TEST) {
+  using T = TestType;
+
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
+
+  // y = x₀²x₁ if x₀ < x₁, otherwise x₁³
+  //
+  // The condition's arguments are decision variables, but they don't
+  // contribute to the Hessian.
+  slp::VariableMatrix<T> x{2};
+  auto f = slp::if_else([](T a, T b) { return a < b; }, x[0], x[1],
+                        x[0] * x[0] * x[1], x[1] * x[1] * x[1]);
+  slp::Hessian hessian{f, x};
+  auto symbolic_H = hessian.get();
+
+  // True branch
+  //
+  // ∂²y/∂x₀² = 2x₁
+  // ∂²y/∂x₀∂x₁ = 2x₀
+  // ∂²y/∂x₁² = 0
+  x[0].set_value(T(2));
+  x[1].set_value(T(3));
+  Eigen::Matrix<T, 2, 2> expected{{T(6), T(4)}, {T(4), T(0)}};
+  CHECK(symbolic_H.value() == expected);
+  CHECK(hessian.value().toDense() == expected);
+
+  // False branch
+  //
+  // ∂²y/∂x₀² = 0
+  // ∂²y/∂x₀∂x₁ = 0
+  // ∂²y/∂x₁² = 6x₁
+  x[0].set_value(T(3));
+  x[1].set_value(T(2));
+  expected = Eigen::Matrix<T, 2, 2>{{T(0), T(0)}, {T(0), T(12)}};
+  CHECK(symbolic_H.value() == expected);
+  CHECK(hessian.value().toDense() == expected);
+}
+
+TEMPLATE_TEST_CASE("Hessian - log()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+  using T = TestType;
+
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
+
+  check_unary_hessian<T>([](const auto& u) { return slp::log(u); },
+                         [](T u) { return T(1) / u; },
+                         [](T u) { return T(-1) / (u * u); });
+}
+
+TEMPLATE_TEST_CASE("Hessian - log10()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+  using T = TestType;
+
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
+
+  check_unary_hessian<T>(
+      [](const auto& u) { return slp::log10(u); },
+      [](T u) { return T(1) / (T(std::numbers::ln10) * u); },
+      [](T u) { return T(-1) / (T(std::numbers::ln10) * u * u); });
+}
+
 TEMPLATE_TEST_CASE("Hessian - max() and min()", "[Hessian]",
                    SCALAR_TYPES_UNDER_TEST) {
   using T = TestType;
@@ -360,6 +721,81 @@ TEMPLATE_TEST_CASE("Hessian - pow()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
                                     {mixed, T(16) * pow(log(T(4)), T(2))}};
   CHECK_THAT(symbolic_H.value(), WithinAbs(expected, T(1e-12)));
   CHECK_THAT(hessian.value().toDense(), WithinAbs(expected, T(1e-12)));
+}
+
+TEMPLATE_TEST_CASE("Hessian - sign()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+  using T = TestType;
+
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
+
+  check_unary_hessian<T>([](const auto& u) { return slp::sign(u); },
+                         [](T) { return T(0); }, [](T) { return T(0); });
+}
+
+TEMPLATE_TEST_CASE("Hessian - sin()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+  using T = TestType;
+  using std::cos;
+  using std::sin;
+
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
+
+  check_unary_hessian<T>([](const auto& u) { return slp::sin(u); },
+                         [](T u) { return cos(u); },
+                         [](T u) { return -sin(u); });
+}
+
+TEMPLATE_TEST_CASE("Hessian - sinh()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+  using T = TestType;
+  using std::cosh;
+  using std::sinh;
+
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
+
+  check_unary_hessian<T>([](const auto& u) { return slp::sinh(u); },
+                         [](T u) { return cosh(u); },
+                         [](T u) { return sinh(u); });
+}
+
+TEMPLATE_TEST_CASE("Hessian - sqrt()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+  using T = TestType;
+  using std::sqrt;
+
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
+
+  check_unary_hessian<T>([](const auto& u) { return slp::sqrt(u); },
+                         [](T u) { return T(1) / (T(2) * sqrt(u)); },
+                         [](T u) { return T(-1) / (T(4) * u * sqrt(u)); });
+}
+
+TEMPLATE_TEST_CASE("Hessian - tan()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+  using T = TestType;
+  using std::cos;
+  using std::tan;
+
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
+
+  check_unary_hessian<T>([](const auto& u) { return slp::tan(u); },
+                         [](T u) { return T(1) / (cos(u) * cos(u)); },
+                         [](T u) { return T(2) * tan(u) / (cos(u) * cos(u)); });
+}
+
+TEMPLATE_TEST_CASE("Hessian - tanh()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+  using T = TestType;
+  using std::cosh;
+  using std::tanh;
+
+  slp::scope_exit exit{
+      [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
+
+  check_unary_hessian<T>(
+      [](const auto& u) { return slp::tanh(u); },
+      [](T u) { return T(1) / (cosh(u) * cosh(u)); },
+      [](T u) { return T(-2) * tanh(u) / (cosh(u) * cosh(u)); });
 }
 
 TEMPLATE_TEST_CASE("Hessian - Rosenbrock", "[Hessian]",
