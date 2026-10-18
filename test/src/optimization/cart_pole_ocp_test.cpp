@@ -25,9 +25,9 @@
 #include "catch_matchers.hpp"
 #include "catch_string_converters.hpp"
 #include "lerp.hpp"
-#include "scalar_types_under_test.hpp"
+#include "scalar_types.hpp"
 
-TEMPLATE_TEST_CASE("OCP - Cart-pole", "[OCP]", SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("OCP - Cart-pole", "[OCP]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{

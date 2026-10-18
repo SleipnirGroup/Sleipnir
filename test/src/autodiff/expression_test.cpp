@@ -11,14 +11,13 @@
 
 #include "catch_matchers.hpp"
 #include "catch_string_converters.hpp"
-#include "scalar_types_under_test.hpp"
+#include "scalar_types.hpp"
 
 using slp::detail::constant_ptr;
 using slp::detail::DecisionVariableExpression;
 using slp::detail::make_expression_ptr;
 
-TEMPLATE_TEST_CASE("Expression - is_constant", "[Expression]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Expression - is_constant", "[Expression]", SCALAR_TYPES) {
   using T = TestType;
 
   // Constant zero
@@ -39,15 +38,14 @@ TEMPLATE_TEST_CASE("Expression - is_constant", "[Expression]",
   CHECK_FALSE(x->is_constant(T(1)));
 }
 
-TEMPLATE_TEST_CASE("Expression - constant_ptr", "[Expression]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Expression - constant_ptr", "[Expression]", SCALAR_TYPES) {
   using T = TestType;
 
   CHECK(constant_ptr(T(0))->is_constant(T(0)));
 }
 
 TEMPLATE_TEST_CASE("Expression - Prune multiply", "[Expression]",
-                   SCALAR_TYPES_UNDER_TEST) {
+                   SCALAR_TYPES) {
   using T = TestType;
 
   auto zero = constant_ptr(T(0));
@@ -62,8 +60,7 @@ TEMPLATE_TEST_CASE("Expression - Prune multiply", "[Expression]",
   CHECK(two * one == two);
 }
 
-TEMPLATE_TEST_CASE("Expression - Prune divide", "[Expression]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Expression - Prune divide", "[Expression]", SCALAR_TYPES) {
   using T = TestType;
 
   auto zero = constant_ptr(T(0));
@@ -76,7 +73,7 @@ TEMPLATE_TEST_CASE("Expression - Prune divide", "[Expression]",
 }
 
 TEMPLATE_TEST_CASE("Expression - Prune binary plus", "[Expression]",
-                   SCALAR_TYPES_UNDER_TEST) {
+                   SCALAR_TYPES) {
   using T = TestType;
 
   auto zero = constant_ptr(T(0));
@@ -91,7 +88,7 @@ TEMPLATE_TEST_CASE("Expression - Prune binary plus", "[Expression]",
 }
 
 TEMPLATE_TEST_CASE("Expression - Prune binary minus", "[Expression]",
-                   SCALAR_TYPES_UNDER_TEST) {
+                   SCALAR_TYPES) {
   using T = TestType;
 
   auto zero = constant_ptr(T(0));
@@ -104,7 +101,7 @@ TEMPLATE_TEST_CASE("Expression - Prune binary minus", "[Expression]",
 }
 
 TEMPLATE_TEST_CASE("Expression - Prune unary plus", "[Expression]",
-                   SCALAR_TYPES_UNDER_TEST) {
+                   SCALAR_TYPES) {
   using T = TestType;
 
   auto zero = constant_ptr(T(0));
@@ -117,7 +114,7 @@ TEMPLATE_TEST_CASE("Expression - Prune unary plus", "[Expression]",
 }
 
 TEMPLATE_TEST_CASE("Expression - Prune unary minus", "[Expression]",
-                   SCALAR_TYPES_UNDER_TEST) {
+                   SCALAR_TYPES) {
   using T = TestType;
 
   auto zero = constant_ptr(T(0));
@@ -125,8 +122,7 @@ TEMPLATE_TEST_CASE("Expression - Prune unary minus", "[Expression]",
   CHECK((-zero)->is_constant(T(0)));
 }
 
-TEMPLATE_TEST_CASE("Expression - Prune abs()", "[Expression]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Expression - Prune abs()", "[Expression]", SCALAR_TYPES) {
   using T = TestType;
 
   auto zero = constant_ptr(T(0));
@@ -136,8 +132,7 @@ TEMPLATE_TEST_CASE("Expression - Prune abs()", "[Expression]",
   CHECK(slp::detail::abs(one)->is_constant(T(1)));
 }
 
-TEMPLATE_TEST_CASE("Expression - Prune acos()", "[Expression]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Expression - Prune acos()", "[Expression]", SCALAR_TYPES) {
   using T = TestType;
   using std::acos;
 
@@ -148,8 +143,7 @@ TEMPLATE_TEST_CASE("Expression - Prune acos()", "[Expression]",
   CHECK(slp::detail::acos(one)->is_constant(acos(T(1))));
 }
 
-TEMPLATE_TEST_CASE("Expression - Prune asin()", "[Expression]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Expression - Prune asin()", "[Expression]", SCALAR_TYPES) {
   using T = TestType;
   using std::asin;
 
@@ -160,8 +154,7 @@ TEMPLATE_TEST_CASE("Expression - Prune asin()", "[Expression]",
   CHECK(slp::detail::asin(one)->is_constant(asin(T(1))));
 }
 
-TEMPLATE_TEST_CASE("Expression - Prune atan()", "[Expression]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Expression - Prune atan()", "[Expression]", SCALAR_TYPES) {
   using T = TestType;
   using std::atan;
 
@@ -172,8 +165,7 @@ TEMPLATE_TEST_CASE("Expression - Prune atan()", "[Expression]",
   CHECK(slp::detail::atan(one)->is_constant(atan(T(1))));
 }
 
-TEMPLATE_TEST_CASE("Expression - Prune atan2()", "[Expression]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Expression - Prune atan2()", "[Expression]", SCALAR_TYPES) {
   using T = TestType;
   using std::atan2;
 
@@ -190,8 +182,7 @@ TEMPLATE_TEST_CASE("Expression - Prune atan2()", "[Expression]",
   CHECK(slp::detail::atan2(one, one)->is_constant(atan2(T(1), T(1))));
 }
 
-TEMPLATE_TEST_CASE("Expression - Prune cbrt()", "[Expression]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Expression - Prune cbrt()", "[Expression]", SCALAR_TYPES) {
   using T = TestType;
   using std::cbrt;
 
@@ -209,8 +200,7 @@ TEMPLATE_TEST_CASE("Expression - Prune cbrt()", "[Expression]",
   CHECK_THAT(c->val, WithinAbs(T(cbrt(T(2))), T(1e-15)));
 }
 
-TEMPLATE_TEST_CASE("Expression - Prune cos()", "[Expression]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Expression - Prune cos()", "[Expression]", SCALAR_TYPES) {
   using T = TestType;
   using std::cos;
 
@@ -221,8 +211,7 @@ TEMPLATE_TEST_CASE("Expression - Prune cos()", "[Expression]",
   CHECK(slp::detail::cos(one)->is_constant(cos(T(1))));
 }
 
-TEMPLATE_TEST_CASE("Expression - Prune cosh()", "[Expression]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Expression - Prune cosh()", "[Expression]", SCALAR_TYPES) {
   using T = TestType;
   using std::cosh;
 
@@ -233,8 +222,7 @@ TEMPLATE_TEST_CASE("Expression - Prune cosh()", "[Expression]",
   CHECK(slp::detail::cosh(one)->is_constant(cosh(T(1))));
 }
 
-TEMPLATE_TEST_CASE("Expression - Prune erf()", "[Expression]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Expression - Prune erf()", "[Expression]", SCALAR_TYPES) {
   using T = TestType;
   using std::erf;
 
@@ -245,8 +233,7 @@ TEMPLATE_TEST_CASE("Expression - Prune erf()", "[Expression]",
   CHECK(slp::detail::erf(one)->is_constant(erf(T(1))));
 }
 
-TEMPLATE_TEST_CASE("Expression - Prune exp()", "[Expression]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Expression - Prune exp()", "[Expression]", SCALAR_TYPES) {
   using T = TestType;
   using std::exp;
 
@@ -257,8 +244,7 @@ TEMPLATE_TEST_CASE("Expression - Prune exp()", "[Expression]",
   CHECK(slp::detail::exp(one)->is_constant(exp(T(1))));
 }
 
-TEMPLATE_TEST_CASE("Expression - Prune hypot()", "[Expression]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Expression - Prune hypot()", "[Expression]", SCALAR_TYPES) {
   using T = TestType;
   using std::hypot;
 
@@ -292,7 +278,7 @@ TEMPLATE_TEST_CASE("Expression - Prune hypot()", "[Expression]",
 }
 
 TEMPLATE_TEST_CASE("Expression - Prune if_else()", "[Expression]",
-                   SCALAR_TYPES_UNDER_TEST) {
+                   SCALAR_TYPES) {
   using T = TestType;
 
   auto zero = constant_ptr(T(0));
@@ -317,8 +303,7 @@ TEMPLATE_TEST_CASE("Expression - Prune if_else()", "[Expression]",
   CHECK(slp::detail::if_else(lt, zero, y, x, y)->name() == "if-else");
 }
 
-TEMPLATE_TEST_CASE("Expression - Prune log()", "[Expression]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Expression - Prune log()", "[Expression]", SCALAR_TYPES) {
   using T = TestType;
   using std::log;
 
@@ -329,8 +314,7 @@ TEMPLATE_TEST_CASE("Expression - Prune log()", "[Expression]",
   CHECK(slp::detail::log(one)->is_constant(log(T(1))));
 }
 
-TEMPLATE_TEST_CASE("Expression - Prune log10()", "[Expression]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Expression - Prune log10()", "[Expression]", SCALAR_TYPES) {
   using T = TestType;
   using std::log10;
 
@@ -341,8 +325,7 @@ TEMPLATE_TEST_CASE("Expression - Prune log10()", "[Expression]",
   CHECK(slp::detail::log10(one)->is_constant(log10(T(1))));
 }
 
-TEMPLATE_TEST_CASE("Expression - Prune max()", "[Expression]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Expression - Prune max()", "[Expression]", SCALAR_TYPES) {
   using T = TestType;
 
   auto negative_one = constant_ptr(T(-1));
@@ -356,8 +339,7 @@ TEMPLATE_TEST_CASE("Expression - Prune max()", "[Expression]",
   CHECK(slp::detail::max(one, zero)->is_constant(T(1)));
 }
 
-TEMPLATE_TEST_CASE("Expression - Prune min()", "[Expression]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Expression - Prune min()", "[Expression]", SCALAR_TYPES) {
   using T = TestType;
 
   auto negative_one = constant_ptr(T(-1));
@@ -371,8 +353,7 @@ TEMPLATE_TEST_CASE("Expression - Prune min()", "[Expression]",
   CHECK(slp::detail::min(one, zero)->is_constant(T(0)));
 }
 
-TEMPLATE_TEST_CASE("Expression - Prune pow()", "[Expression]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Expression - Prune pow()", "[Expression]", SCALAR_TYPES) {
   using T = TestType;
   auto zero = constant_ptr(T(0));
   auto one = constant_ptr(T(1));
@@ -389,8 +370,7 @@ TEMPLATE_TEST_CASE("Expression - Prune pow()", "[Expression]",
   CHECK(slp::detail::pow(two, two)->is_constant(T(4)));
 }
 
-TEMPLATE_TEST_CASE("Expression - Prune sign()", "[Expression]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Expression - Prune sign()", "[Expression]", SCALAR_TYPES) {
   using T = TestType;
 
   auto zero = constant_ptr(T(0));
@@ -400,8 +380,7 @@ TEMPLATE_TEST_CASE("Expression - Prune sign()", "[Expression]",
   CHECK(slp::detail::sign(constant_ptr(T(2)))->is_constant(T(1)));
 }
 
-TEMPLATE_TEST_CASE("Expression - Prune sin()", "[Expression]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Expression - Prune sin()", "[Expression]", SCALAR_TYPES) {
   using T = TestType;
   using std::sin;
 
@@ -412,8 +391,7 @@ TEMPLATE_TEST_CASE("Expression - Prune sin()", "[Expression]",
   CHECK(slp::detail::sin(one)->is_constant(sin(T(1))));
 }
 
-TEMPLATE_TEST_CASE("Expression - Prune sinh()", "[Expression]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Expression - Prune sinh()", "[Expression]", SCALAR_TYPES) {
   using T = TestType;
   using std::sinh;
 
@@ -424,8 +402,7 @@ TEMPLATE_TEST_CASE("Expression - Prune sinh()", "[Expression]",
   CHECK(slp::detail::sinh(one)->is_constant(sinh(T(1))));
 }
 
-TEMPLATE_TEST_CASE("Expression - Prune sqrt()", "[Expression]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Expression - Prune sqrt()", "[Expression]", SCALAR_TYPES) {
   using T = TestType;
 
   auto zero = constant_ptr(T(0));
@@ -437,8 +414,7 @@ TEMPLATE_TEST_CASE("Expression - Prune sqrt()", "[Expression]",
   CHECK(slp::detail::sqrt(two)->is_constant(T(std::numbers::sqrt2)));
 }
 
-TEMPLATE_TEST_CASE("Expression - Prune tan()", "[Expression]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Expression - Prune tan()", "[Expression]", SCALAR_TYPES) {
   using T = TestType;
   using std::tan;
 
@@ -449,8 +425,7 @@ TEMPLATE_TEST_CASE("Expression - Prune tan()", "[Expression]",
   CHECK(slp::detail::tan(one)->is_constant(tan(T(1))));
 }
 
-TEMPLATE_TEST_CASE("Expression - Prune tanh()", "[Expression]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Expression - Prune tanh()", "[Expression]", SCALAR_TYPES) {
   using T = TestType;
   using std::tanh;
 

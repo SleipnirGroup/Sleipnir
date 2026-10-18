@@ -10,10 +10,9 @@
 
 #include "catch_matchers.hpp"
 #include "catch_string_converters.hpp"
-#include "scalar_types_under_test.hpp"
+#include "scalar_types.hpp"
 
-TEMPLATE_TEST_CASE("Problem - Unconstrained 1D", "[Problem]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Problem - Unconstrained 1D", "[Problem]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::Problem<T> problem;
@@ -32,8 +31,7 @@ TEMPLATE_TEST_CASE("Problem - Unconstrained 1D", "[Problem]",
   CHECK_THAT(x.value(), WithinAbs(T(3), T(1e-6)));
 }
 
-TEMPLATE_TEST_CASE("Problem - Unconstrained 2D", "[Problem]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Problem - Unconstrained 2D", "[Problem]", SCALAR_TYPES) {
   using T = TestType;
 
   {
@@ -77,7 +75,7 @@ TEMPLATE_TEST_CASE("Problem - Unconstrained 2D", "[Problem]",
 }
 
 TEMPLATE_TEST_CASE("Problem - Equality-constrained", "[Problem]",
-                   SCALAR_TYPES_UNDER_TEST) {
+                   SCALAR_TYPES) {
   using T = TestType;
 
   // Maximize xy subject to x + 3y = 36.
@@ -162,7 +160,7 @@ TEMPLATE_TEST_CASE("Problem - Equality-constrained", "[Problem]",
 }
 
 TEMPLATE_TEST_CASE("Problem - Inequality-constrained 2D", "[Problem]",
-                   SCALAR_TYPES_UNDER_TEST) {
+                   SCALAR_TYPES) {
   using T = TestType;
 
   slp::Problem<T> problem;

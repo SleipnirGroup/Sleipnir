@@ -9,9 +9,9 @@
 
 #include "catch_matchers.hpp"
 #include "catch_string_converters.hpp"
-#include "scalar_types_under_test.hpp"
+#include "scalar_types.hpp"
 
-TEMPLATE_TEST_CASE("Problem - Maximize", "[Problem]", SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Problem - Maximize", "[Problem]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::Problem<T> problem;
@@ -39,8 +39,7 @@ TEMPLATE_TEST_CASE("Problem - Maximize", "[Problem]", SCALAR_TYPES_UNDER_TEST) {
   CHECK_THAT(y.value(), WithinAbs(T(250), T(1e-6)));
 }
 
-TEMPLATE_TEST_CASE("Problem - Free variable", "[Problem]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Problem - Free variable", "[Problem]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::Problem<T> problem;

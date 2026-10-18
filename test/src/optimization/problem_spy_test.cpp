@@ -18,7 +18,7 @@
 #include "catch_matchers.hpp"
 #include "catch_string_converters.hpp"
 #include "coord.hpp"
-#include "scalar_types_under_test.hpp"
+#include "scalar_types.hpp"
 #include "sleipnir/optimization/solver/iteration_info.hpp"
 
 std::ifstream open(std::string_view filename) {
@@ -52,7 +52,7 @@ Coord read_coord(std::ifstream& spy) {
   return Coord{read_i32(spy), read_i32(spy), read_char(spy)};
 }
 
-TEMPLATE_TEST_CASE("Problem - Spy", "[Problem]", SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Problem - Spy", "[Problem]", SCALAR_TYPES) {
   using T = TestType;
 
 #ifdef SLEIPNIR_DISABLE_DIAGNOSTICS

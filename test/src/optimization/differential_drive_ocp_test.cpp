@@ -22,10 +22,9 @@
 #include "catch_string_converters.hpp"
 #include "differential_drive_util.hpp"
 #include "rk4.hpp"
-#include "scalar_types_under_test.hpp"
+#include "scalar_types.hpp"
 
-TEMPLATE_TEST_CASE("OCP - Differential drive", "[OCP]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("OCP - Differential drive", "[OCP]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{

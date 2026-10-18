@@ -14,9 +14,9 @@
 #include "catch_matchers.hpp"
 #include "catch_string_converters.hpp"
 #include "range.hpp"
-#include "scalar_types_under_test.hpp"
+#include "scalar_types.hpp"
 
-TEMPLATE_TEST_CASE("Problem - Quartic", "[Problem]", SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Problem - Quartic", "[Problem]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::Problem<T> problem;
@@ -38,7 +38,7 @@ TEMPLATE_TEST_CASE("Problem - Quartic", "[Problem]", SCALAR_TYPES_UNDER_TEST) {
 }
 
 TEMPLATE_TEST_CASE("Problem - Rosenbrock with cubic and line constraint",
-                   "[Problem]", SCALAR_TYPES_UNDER_TEST) {
+                   "[Problem]", SCALAR_TYPES) {
   // https://en.wikipedia.org/wiki/Test_functions_for_optimization#Test_functions_for_constrained_optimization
 
   using T = TestType;
@@ -75,7 +75,7 @@ TEMPLATE_TEST_CASE("Problem - Rosenbrock with cubic and line constraint",
 }
 
 TEMPLATE_TEST_CASE("Problem - Rosenbrock with disk constraint", "[Problem]",
-                   SCALAR_TYPES_UNDER_TEST) {
+                   SCALAR_TYPES) {
   // https://en.wikipedia.org/wiki/Test_functions_for_optimization#Test_functions_for_constrained_optimization
 
   using T = TestType;
@@ -108,7 +108,7 @@ TEMPLATE_TEST_CASE("Problem - Rosenbrock with disk constraint", "[Problem]",
 }
 
 TEMPLATE_TEST_CASE("Problem - Minimum 2D distance with linear constraint",
-                   "[Problem]", SCALAR_TYPES_UNDER_TEST) {
+                   "[Problem]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::Problem<T> problem;
@@ -132,8 +132,7 @@ TEMPLATE_TEST_CASE("Problem - Minimum 2D distance with linear constraint",
   CHECK_THAT(y.value(), WithinAbs(T(2.5), T(1e-2)));
 }
 
-TEMPLATE_TEST_CASE("Problem - Conflicting bounds", "[Problem]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Problem - Conflicting bounds", "[Problem]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::Problem<T> problem;
@@ -155,7 +154,7 @@ TEMPLATE_TEST_CASE("Problem - Conflicting bounds", "[Problem]",
 }
 
 TEMPLATE_TEST_CASE("Problem - Wachter and Biegler line search failure",
-                   "[Problem]", SCALAR_TYPES_UNDER_TEST) {
+                   "[Problem]", SCALAR_TYPES) {
   using T = TestType;
 
   // Example 19.2 of [1] exercises a deficiency of line search IPMs that must be
@@ -201,7 +200,7 @@ TEMPLATE_TEST_CASE("Problem - Wachter and Biegler line search failure",
 }
 
 TEMPLATE_TEST_CASE("Problem - Hock-Schittkowski 13", "[Problem]",
-                   SCALAR_TYPES_UNDER_TEST) {
+                   SCALAR_TYPES) {
   using T = TestType;
 
   // Problem 13 of [1] (see

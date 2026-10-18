@@ -20,9 +20,9 @@
 
 #include "catch_matchers.hpp"
 #include "range.hpp"
-#include "scalar_types_under_test.hpp"
+#include "scalar_types.hpp"
 
-TEMPLATE_TEST_CASE("Hessian - Linear", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Hessian - Linear", "[Hessian]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{
@@ -43,8 +43,7 @@ TEMPLATE_TEST_CASE("Hessian - Linear", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
   CHECK(H.value().coeff(0, 0) == T(0));
 }
 
-TEMPLATE_TEST_CASE("Hessian - Quadratic", "[Hessian]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Hessian - Quadratic", "[Hessian]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{
@@ -65,7 +64,7 @@ TEMPLATE_TEST_CASE("Hessian - Quadratic", "[Hessian]",
   CHECK(H.value().coeff(0, 0) == T(2));
 }
 
-TEMPLATE_TEST_CASE("Hessian - Cubic", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Hessian - Cubic", "[Hessian]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{
@@ -86,7 +85,7 @@ TEMPLATE_TEST_CASE("Hessian - Cubic", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
   CHECK(H.value().coeff(0, 0) == T(18));
 }
 
-TEMPLATE_TEST_CASE("Hessian - Quartic", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Hessian - Quartic", "[Hessian]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{
@@ -107,7 +106,7 @@ TEMPLATE_TEST_CASE("Hessian - Quartic", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
   CHECK(H.value().coeff(0, 0) == T(108));
 }
 
-TEMPLATE_TEST_CASE("Hessian - Sum", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Hessian - Sum", "[Hessian]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{
@@ -133,8 +132,7 @@ TEMPLATE_TEST_CASE("Hessian - Sum", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
   CHECK(H.value().toDense() == Eigen::Matrix<T, 5, 5>::Zero());
 }
 
-TEMPLATE_TEST_CASE("Hessian - Sum of products", "[Hessian]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Hessian - Sum of products", "[Hessian]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{
@@ -161,8 +159,7 @@ TEMPLATE_TEST_CASE("Hessian - Sum of products", "[Hessian]",
   CHECK(H.value().toDense() == expected_H);
 }
 
-TEMPLATE_TEST_CASE("Hessian - Product of sines", "[Hessian]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Hessian - Product of sines", "[Hessian]", SCALAR_TYPES) {
   using T = TestType;
   using std::sin;
   using std::tan;
@@ -208,7 +205,7 @@ TEMPLATE_TEST_CASE("Hessian - Product of sines", "[Hessian]",
 }
 
 TEMPLATE_TEST_CASE("Hessian - Sum of squared residuals", "[Hessian]",
-                   SCALAR_TYPES_UNDER_TEST) {
+                   SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{
@@ -248,8 +245,7 @@ TEMPLATE_TEST_CASE("Hessian - Sum of squared residuals", "[Hessian]",
   CHECK(H.value().toDense() == expected_H);
 }
 
-TEMPLATE_TEST_CASE("Hessian - Sum of squares", "[Hessian]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Hessian - Sum of squares", "[Hessian]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{
@@ -276,8 +272,7 @@ TEMPLATE_TEST_CASE("Hessian - Sum of squares", "[Hessian]",
   CHECK(H.value().toDense() == expected_H);
 }
 
-TEMPLATE_TEST_CASE("Hessian - Nested powers", "[Hessian]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Hessian - Nested powers", "[Hessian]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{
@@ -326,7 +321,7 @@ void check_unary_hessian(
   }
 }
 
-TEMPLATE_TEST_CASE("Hessian - Division", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Hessian - Division", "[Hessian]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{
@@ -353,8 +348,7 @@ TEMPLATE_TEST_CASE("Hessian - Division", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
   }
 }
 
-TEMPLATE_TEST_CASE("Hessian - Unary minus", "[Hessian]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Hessian - Unary minus", "[Hessian]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{
@@ -364,7 +358,7 @@ TEMPLATE_TEST_CASE("Hessian - Unary minus", "[Hessian]",
                          [](T) { return T(-1); }, [](T) { return T(0); });
 }
 
-TEMPLATE_TEST_CASE("Hessian - abs()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Hessian - abs()", "[Hessian]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{
@@ -374,7 +368,7 @@ TEMPLATE_TEST_CASE("Hessian - abs()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
                          [](T) { return T(1); }, [](T) { return T(0); });
 }
 
-TEMPLATE_TEST_CASE("Hessian - acos()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Hessian - acos()", "[Hessian]", SCALAR_TYPES) {
   using T = TestType;
   using std::sqrt;
 
@@ -389,7 +383,7 @@ TEMPLATE_TEST_CASE("Hessian - acos()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
                          });
 }
 
-TEMPLATE_TEST_CASE("Hessian - asin()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Hessian - asin()", "[Hessian]", SCALAR_TYPES) {
   using T = TestType;
   using std::sqrt;
 
@@ -404,7 +398,7 @@ TEMPLATE_TEST_CASE("Hessian - asin()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
                          });
 }
 
-TEMPLATE_TEST_CASE("Hessian - atan()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Hessian - atan()", "[Hessian]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{
@@ -416,7 +410,7 @@ TEMPLATE_TEST_CASE("Hessian - atan()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
       [](T u) { return T(-2) * u / ((T(1) + u * u) * (T(1) + u * u)); });
 }
 
-TEMPLATE_TEST_CASE("Hessian - atan2()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Hessian - atan2()", "[Hessian]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{
@@ -444,7 +438,7 @@ TEMPLATE_TEST_CASE("Hessian - atan2()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
   }
 }
 
-TEMPLATE_TEST_CASE("Hessian - cbrt()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Hessian - cbrt()", "[Hessian]", SCALAR_TYPES) {
   using T = TestType;
   using std::cbrt;
 
@@ -457,7 +451,7 @@ TEMPLATE_TEST_CASE("Hessian - cbrt()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
       [](T u) { return T(-2) / (T(9) * u * cbrt(u) * cbrt(u)); });
 }
 
-TEMPLATE_TEST_CASE("Hessian - cos()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Hessian - cos()", "[Hessian]", SCALAR_TYPES) {
   using T = TestType;
   using std::cos;
   using std::sin;
@@ -470,7 +464,7 @@ TEMPLATE_TEST_CASE("Hessian - cos()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
                          [](T u) { return -cos(u); });
 }
 
-TEMPLATE_TEST_CASE("Hessian - cosh()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Hessian - cosh()", "[Hessian]", SCALAR_TYPES) {
   using T = TestType;
   using std::cosh;
   using std::sinh;
@@ -483,7 +477,7 @@ TEMPLATE_TEST_CASE("Hessian - cosh()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
                          [](T u) { return cosh(u); });
 }
 
-TEMPLATE_TEST_CASE("Hessian - erf()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Hessian - erf()", "[Hessian]", SCALAR_TYPES) {
   using T = TestType;
   using std::exp;
 
@@ -496,7 +490,7 @@ TEMPLATE_TEST_CASE("Hessian - erf()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
       [](T u) { return T(-4.0 * std::numbers::inv_sqrtpi) * u * exp(-u * u); });
 }
 
-TEMPLATE_TEST_CASE("Hessian - exp()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Hessian - exp()", "[Hessian]", SCALAR_TYPES) {
   using T = TestType;
   using std::exp;
 
@@ -508,7 +502,7 @@ TEMPLATE_TEST_CASE("Hessian - exp()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
                          [](T u) { return exp(u); });
 }
 
-TEMPLATE_TEST_CASE("Hessian - hypot()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Hessian - hypot()", "[Hessian]", SCALAR_TYPES) {
   using T = TestType;
   using std::sqrt;
 
@@ -592,8 +586,7 @@ TEMPLATE_TEST_CASE("Hessian - hypot()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
   }
 }
 
-TEMPLATE_TEST_CASE("Hessian - if_else()", "[Hessian]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Hessian - if_else()", "[Hessian]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{
@@ -632,7 +625,7 @@ TEMPLATE_TEST_CASE("Hessian - if_else()", "[Hessian]",
   CHECK(hessian.value().toDense() == expected);
 }
 
-TEMPLATE_TEST_CASE("Hessian - log()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Hessian - log()", "[Hessian]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{
@@ -643,7 +636,7 @@ TEMPLATE_TEST_CASE("Hessian - log()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
                          [](T u) { return T(-1) / (u * u); });
 }
 
-TEMPLATE_TEST_CASE("Hessian - log10()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Hessian - log10()", "[Hessian]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{
@@ -655,8 +648,7 @@ TEMPLATE_TEST_CASE("Hessian - log10()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
       [](T u) { return T(-1) / (T(std::numbers::ln10) * u * u); });
 }
 
-TEMPLATE_TEST_CASE("Hessian - max() and min()", "[Hessian]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Hessian - max() and min()", "[Hessian]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{
@@ -692,7 +684,7 @@ TEMPLATE_TEST_CASE("Hessian - max() and min()", "[Hessian]",
   check(slp::min(x_squared, y_squared), T(2), T(1), T(2), T(3));
 }
 
-TEMPLATE_TEST_CASE("Hessian - pow()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Hessian - pow()", "[Hessian]", SCALAR_TYPES) {
   using T = TestType;
   using std::log;
   using std::pow;
@@ -723,7 +715,7 @@ TEMPLATE_TEST_CASE("Hessian - pow()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
   CHECK_THAT(hessian.value().toDense(), WithinAbs(expected, T(1e-12)));
 }
 
-TEMPLATE_TEST_CASE("Hessian - sign()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Hessian - sign()", "[Hessian]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{
@@ -733,7 +725,7 @@ TEMPLATE_TEST_CASE("Hessian - sign()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
                          [](T) { return T(0); }, [](T) { return T(0); });
 }
 
-TEMPLATE_TEST_CASE("Hessian - sin()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Hessian - sin()", "[Hessian]", SCALAR_TYPES) {
   using T = TestType;
   using std::cos;
   using std::sin;
@@ -746,7 +738,7 @@ TEMPLATE_TEST_CASE("Hessian - sin()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
                          [](T u) { return -sin(u); });
 }
 
-TEMPLATE_TEST_CASE("Hessian - sinh()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Hessian - sinh()", "[Hessian]", SCALAR_TYPES) {
   using T = TestType;
   using std::cosh;
   using std::sinh;
@@ -759,7 +751,7 @@ TEMPLATE_TEST_CASE("Hessian - sinh()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
                          [](T u) { return sinh(u); });
 }
 
-TEMPLATE_TEST_CASE("Hessian - sqrt()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Hessian - sqrt()", "[Hessian]", SCALAR_TYPES) {
   using T = TestType;
   using std::sqrt;
 
@@ -771,7 +763,7 @@ TEMPLATE_TEST_CASE("Hessian - sqrt()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
                          [](T u) { return T(-1) / (T(4) * u * sqrt(u)); });
 }
 
-TEMPLATE_TEST_CASE("Hessian - tan()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Hessian - tan()", "[Hessian]", SCALAR_TYPES) {
   using T = TestType;
   using std::cos;
   using std::tan;
@@ -784,7 +776,7 @@ TEMPLATE_TEST_CASE("Hessian - tan()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
                          [](T u) { return T(2) * tan(u) / (cos(u) * cos(u)); });
 }
 
-TEMPLATE_TEST_CASE("Hessian - tanh()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Hessian - tanh()", "[Hessian]", SCALAR_TYPES) {
   using T = TestType;
   using std::cosh;
   using std::tanh;
@@ -798,8 +790,7 @@ TEMPLATE_TEST_CASE("Hessian - tanh()", "[Hessian]", SCALAR_TYPES_UNDER_TEST) {
       [](T u) { return T(-2) * tanh(u) / (cosh(u) * cosh(u)); });
 }
 
-TEMPLATE_TEST_CASE("Hessian - Rosenbrock", "[Hessian]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Hessian - Rosenbrock", "[Hessian]", SCALAR_TYPES) {
   // z = (1 − x)² + 100(y − x²)²
   //   = 100(−x² + y)² + (−x + 1)²
   //
@@ -840,7 +831,7 @@ TEMPLATE_TEST_CASE("Hessian - Rosenbrock", "[Hessian]",
 }
 
 TEMPLATE_TEST_CASE("Hessian - Edge pushing (Wang) example 1", "[Hessian]",
-                   SCALAR_TYPES_UNDER_TEST) {
+                   SCALAR_TYPES) {
   // See example 1 of [1]
   //
   // [1] Wang, M., et al. "Capitalizing on live variables: new algorithms for
@@ -881,7 +872,7 @@ TEMPLATE_TEST_CASE("Hessian - Edge pushing (Wang) example 1", "[Hessian]",
 }
 
 TEMPLATE_TEST_CASE("Hessian - Edge pushing (Petro) figure 1", "[Hessian]",
-                   SCALAR_TYPES_UNDER_TEST) {
+                   SCALAR_TYPES) {
   // See figure 1 of [1]
   //
   // [1] Petro, C. G., et al. "On efficient Hessian computation using the edge
@@ -910,8 +901,7 @@ TEMPLATE_TEST_CASE("Hessian - Edge pushing (Petro) figure 1", "[Hessian]",
   CHECK(H.value().toDense() == expected_H);
 }
 
-TEMPLATE_TEST_CASE("Hessian - Variable reuse", "[Hessian]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Hessian - Variable reuse", "[Hessian]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{

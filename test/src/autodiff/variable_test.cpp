@@ -6,10 +6,10 @@
 #include <sleipnir/autodiff/variable.hpp>
 
 #include "catch_string_converters.hpp"
-#include "scalar_types_under_test.hpp"
+#include "scalar_types.hpp"
 
 TEMPLATE_TEST_CASE("Variable - Default constructor", "[Variable]",
-                   SCALAR_TYPES_UNDER_TEST) {
+                   SCALAR_TYPES) {
   using T = TestType;
 
   slp::Variable<T> a;
@@ -18,7 +18,7 @@ TEMPLATE_TEST_CASE("Variable - Default constructor", "[Variable]",
 }
 
 TEMPLATE_TEST_CASE("Variable - Constant constructor", "[Variable]",
-                   SCALAR_TYPES_UNDER_TEST) {
+                   SCALAR_TYPES) {
   using T = TestType;
 
   // float
@@ -32,8 +32,7 @@ TEMPLATE_TEST_CASE("Variable - Constant constructor", "[Variable]",
   CHECK(b.type() == slp::ExpressionType::CONSTANT);
 }
 
-TEMPLATE_TEST_CASE("Variable - Set value", "[Variable]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Variable - Set value", "[Variable]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::Variable<T> a;

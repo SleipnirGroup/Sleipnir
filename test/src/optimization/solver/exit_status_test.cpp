@@ -12,12 +12,12 @@
 
 #include "catch_matchers.hpp"
 #include "catch_string_converters.hpp"
-#include "scalar_types_under_test.hpp"
+#include "scalar_types.hpp"
 
 // These tests ensure coverage of the off-nominal exit statuses
 
 TEMPLATE_TEST_CASE("ExitStatus - Callback requested stop", "[ExitStatus]",
-                   SCALAR_TYPES_UNDER_TEST) {
+                   SCALAR_TYPES) {
   using T = TestType;
 
   slp::Problem<T> problem;
@@ -51,8 +51,7 @@ TEMPLATE_TEST_CASE("ExitStatus - Callback requested stop", "[ExitStatus]",
         slp::ExitStatus::CALLBACK_REQUESTED_STOP);
 }
 
-TEMPLATE_TEST_CASE("ExitStatus - Too few DOFs", "[ExitStatus]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("ExitStatus - Too few DOFs", "[ExitStatus]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::Problem<T> problem;
@@ -74,7 +73,7 @@ TEMPLATE_TEST_CASE("ExitStatus - Too few DOFs", "[ExitStatus]",
 }
 
 TEMPLATE_TEST_CASE("ExitStatus - Locally infeasible", "[ExitStatus]",
-                   SCALAR_TYPES_UNDER_TEST) {
+                   SCALAR_TYPES) {
   using T = TestType;
 
   // Equality constraints
@@ -119,7 +118,7 @@ TEMPLATE_TEST_CASE("ExitStatus - Locally infeasible", "[ExitStatus]",
 }
 
 TEMPLATE_TEST_CASE("ExitStatus - Small constraint scaling is feasible",
-                   "[ExitStatus]", SCALAR_TYPES_UNDER_TEST) {
+                   "[ExitStatus]", SCALAR_TYPES) {
   using T = TestType;
 
   // Equality constraints
@@ -158,7 +157,7 @@ TEMPLATE_TEST_CASE("ExitStatus - Small constraint scaling is feasible",
 }
 
 TEMPLATE_TEST_CASE("ExitStatus - Nonfinite initial guess", "[ExitStatus]",
-                   SCALAR_TYPES_UNDER_TEST) {
+                   SCALAR_TYPES) {
   using T = TestType;
 
   // Nonfinite cost
@@ -217,7 +216,7 @@ TEMPLATE_TEST_CASE("ExitStatus - Nonfinite initial guess", "[ExitStatus]",
 }
 
 TEMPLATE_TEST_CASE("ExitStatus - Diverging iterates", "[ExitStatus]",
-                   SCALAR_TYPES_UNDER_TEST) {
+                   SCALAR_TYPES) {
   using T = TestType;
 
   slp::Problem<T> problem;
@@ -235,7 +234,7 @@ TEMPLATE_TEST_CASE("ExitStatus - Diverging iterates", "[ExitStatus]",
 }
 
 TEMPLATE_TEST_CASE("ExitStatus - Max iterations exceeded", "[ExitStatus]",
-                   SCALAR_TYPES_UNDER_TEST) {
+                   SCALAR_TYPES) {
   using T = TestType;
 
   slp::Problem<T> problem;
@@ -253,8 +252,7 @@ TEMPLATE_TEST_CASE("ExitStatus - Max iterations exceeded", "[ExitStatus]",
         slp::ExitStatus::MAX_ITERATIONS_EXCEEDED);
 }
 
-TEMPLATE_TEST_CASE("ExitStatus - Timeout", "[ExitStatus]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("ExitStatus - Timeout", "[ExitStatus]", SCALAR_TYPES) {
   using T = TestType;
 
   using namespace std::chrono_literals;

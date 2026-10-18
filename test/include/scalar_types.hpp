@@ -15,6 +15,8 @@
 
 #include "explicit_double.hpp"
 
+// SCALAR_TYPES is defined by CMake from SLEIPNIR_TEST_SCALAR_TYPES
+
 extern template class slp::Gradient<ExplicitDouble>;
 
 extern template class slp::Hessian<ExplicitDouble, Eigen::Lower | Eigen::Upper>;
@@ -52,5 +54,3 @@ extern template slp::ExitStatus slp::sqp(
     const Options& options, Eigen::Vector<ExplicitDouble, Eigen::Dynamic>& x);
 
 extern template class slp::Problem<ExplicitDouble>;
-
-#define SCALAR_TYPES_UNDER_TEST double, ExplicitDouble

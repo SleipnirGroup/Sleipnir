@@ -10,10 +10,10 @@
 #include <sleipnir/autodiff/variable_matrix.hpp>
 
 #include "catch_string_converters.hpp"
-#include "scalar_types_under_test.hpp"
+#include "scalar_types.hpp"
 
 TEMPLATE_TEST_CASE("constraints - Equality constraint boolean comparison",
-                   "[constraints]", SCALAR_TYPES_UNDER_TEST) {
+                   "[constraints]", SCALAR_TYPES) {
   using T = TestType;
   using slp::Variable;
   using slp::VariableMatrix;
@@ -99,7 +99,7 @@ TEMPLATE_TEST_CASE("constraints - Equality constraint boolean comparison",
 // For the purposes of optimization, a < constraint is treated the same as a <=
 // constraint
 TEMPLATE_TEST_CASE("constraints - Inequality constraint boolean comparisons",
-                   "[constraints]", SCALAR_TYPES_UNDER_TEST) {
+                   "[constraints]", SCALAR_TYPES) {
   using T = TestType;
   using slp::Variable;
   using slp::VariableMatrix;
@@ -234,7 +234,7 @@ TEMPLATE_TEST_CASE("constraints - Inequality constraint boolean comparisons",
 }
 
 TEMPLATE_TEST_CASE("constraints - Equality constraint concatenation",
-                   "[constraints]", SCALAR_TYPES_UNDER_TEST) {
+                   "[constraints]", SCALAR_TYPES) {
   using T = TestType;
   using slp::EqualityConstraints;
   using slp::Variable;
@@ -256,7 +256,7 @@ TEMPLATE_TEST_CASE("constraints - Equality constraint concatenation",
 }
 
 TEMPLATE_TEST_CASE("constraints - Inequality constraint concatenation",
-                   "[constraints]", SCALAR_TYPES_UNDER_TEST) {
+                   "[constraints]", SCALAR_TYPES) {
   using T = TestType;
   using slp::InequalityConstraints;
   using slp::Variable;
