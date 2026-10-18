@@ -6,10 +6,10 @@
 #include <sleipnir/optimization/problem.hpp>
 
 #include "catch_string_converters.hpp"
-#include "scalar_types_under_test.hpp"
+#include "scalar_types.hpp"
 
 TEMPLATE_TEST_CASE("decision_variable - T init assign", "[decision_variable]",
-                   SCALAR_TYPES_UNDER_TEST) {
+                   SCALAR_TYPES) {
   using T = TestType;
 
   slp::Problem<T> problem;
@@ -26,7 +26,7 @@ TEMPLATE_TEST_CASE("decision_variable - T init assign", "[decision_variable]",
 }
 
 TEMPLATE_TEST_CASE("decision_variable - Vector init assign",
-                   "[decision_variable]", SCALAR_TYPES_UNDER_TEST) {
+                   "[decision_variable]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::Problem<T> problem;
@@ -48,7 +48,7 @@ TEMPLATE_TEST_CASE("decision_variable - Vector init assign",
 }
 
 TEMPLATE_TEST_CASE("decision_variable - Static matrix init assign",
-                   "[decision_variable]", SCALAR_TYPES_UNDER_TEST) {
+                   "[decision_variable]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::Problem<T> problem;
@@ -93,7 +93,7 @@ TEMPLATE_TEST_CASE("decision_variable - Static matrix init assign",
 }
 
 TEMPLATE_TEST_CASE("decision_variable - Dynamic matrix init assign",
-                   "[decision_variable]", SCALAR_TYPES_UNDER_TEST) {
+                   "[decision_variable]", SCALAR_TYPES) {
   using T = TestType;
   using MatrixXT = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
 
@@ -132,7 +132,7 @@ TEMPLATE_TEST_CASE("decision_variable - Dynamic matrix init assign",
 }
 
 TEMPLATE_TEST_CASE("decision_variable - Symmetric matrix",
-                   "[decision_variable]", SCALAR_TYPES_UNDER_TEST) {
+                   "[decision_variable]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::Problem<T> problem;

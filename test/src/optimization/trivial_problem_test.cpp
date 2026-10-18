@@ -8,9 +8,9 @@
 #include <sleipnir/optimization/solver/exit_status.hpp>
 
 #include "catch_string_converters.hpp"
-#include "scalar_types_under_test.hpp"
+#include "scalar_types.hpp"
 
-TEMPLATE_TEST_CASE("Problem - Empty", "[Problem]", SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Problem - Empty", "[Problem]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::Problem<T> problem;
@@ -23,7 +23,7 @@ TEMPLATE_TEST_CASE("Problem - Empty", "[Problem]", SCALAR_TYPES_UNDER_TEST) {
 }
 
 TEMPLATE_TEST_CASE("Problem - No cost unconstrained", "[Problem]",
-                   SCALAR_TYPES_UNDER_TEST) {
+                   SCALAR_TYPES) {
   using T = TestType;
 
   {

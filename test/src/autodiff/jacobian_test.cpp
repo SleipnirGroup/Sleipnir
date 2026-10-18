@@ -8,9 +8,9 @@
 #include <sleipnir/util/pool.hpp>
 #include <sleipnir/util/scope_exit.hpp>
 
-#include "scalar_types_under_test.hpp"
+#include "scalar_types.hpp"
 
-TEMPLATE_TEST_CASE("Jacobian - y = x", "[Jacobian]", SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Jacobian - y = x", "[Jacobian]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{
@@ -35,7 +35,7 @@ TEMPLATE_TEST_CASE("Jacobian - y = x", "[Jacobian]", SCALAR_TYPES_UNDER_TEST) {
   CHECK(J.value().toDense() == expected_J);
 }
 
-TEMPLATE_TEST_CASE("Jacobian - y = 3x", "[Jacobian]", SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Jacobian - y = 3x", "[Jacobian]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{
@@ -60,8 +60,7 @@ TEMPLATE_TEST_CASE("Jacobian - y = 3x", "[Jacobian]", SCALAR_TYPES_UNDER_TEST) {
   CHECK(J.value().toDense() == expected_J);
 }
 
-TEMPLATE_TEST_CASE("Jacobian - Products", "[Jacobian]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Jacobian - Products", "[Jacobian]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{
@@ -95,8 +94,7 @@ TEMPLATE_TEST_CASE("Jacobian - Products", "[Jacobian]",
   CHECK(J.value().toDense() == expected_J);
 }
 
-TEMPLATE_TEST_CASE("Jacobian - Nested products", "[Jacobian]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Jacobian - Nested products", "[Jacobian]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{
@@ -175,8 +173,7 @@ TEMPLATE_TEST_CASE("Jacobian - Nested products", "[Jacobian]",
   }
 }
 
-TEMPLATE_TEST_CASE("Jacobian - Non-square", "[Jacobian]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Jacobian - Non-square", "[Jacobian]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{
@@ -207,8 +204,7 @@ TEMPLATE_TEST_CASE("Jacobian - Non-square", "[Jacobian]",
   CHECK(J_value.toDense() == expected_J);
 }
 
-TEMPLATE_TEST_CASE("Jacobian - Variable reuse", "[Jacobian]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Jacobian - Variable reuse", "[Jacobian]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{

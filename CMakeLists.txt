@@ -36,6 +36,11 @@ option(
     "Enable projecting the state onto bound inequality constraints inside problem setup"
     OFF
 )
+set(SLEIPNIR_TEST_SCALAR_TYPES
+    "double"
+    CACHE STRING
+    "Semicolon-separated list of scalar types to test (double, ExplicitDouble)"
+)
 
 # Options for using a package manager (e.g., vcpkg) for certain dependencies
 option(SLEIPNIR_USE_SYSTEM_BENCHMARK "Use system benchmark" OFF)
@@ -231,52 +236,98 @@ if(PROJECT_IS_TOP_LEVEL AND BUILD_TESTING AND NOT CMAKE_CROSSCOMPILING)
     list(APPEND CMAKE_MODULE_PATH ${Catch2_SOURCE_DIR}/extras)
     include(Catch)
 
-    # Build autodiff explicit instantiations shared by autodiff and
-    # optimization tests
-    file(
-        GLOB_RECURSE sleipnir_autodiff_explicit_double_src
-        test/src/autodiff/*_explicit_double.cpp
-    )
-    add_library(
-        sleipnir_autodiff_explicit_double
-        OBJECT
-        ${sleipnir_autodiff_explicit_double_src}
-    )
-    compiler_flags(sleipnir_autodiff_explicit_double)
-    target_include_directories(
-        sleipnir_autodiff_explicit_double
-        PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/test/include
-    )
-    target_link_libraries(sleipnir_autodiff_explicit_double PUBLIC Sleipnir)
+    set(sleipnir_allowed_test_scalar_types double ExplicitDouble)
+    foreach(type IN LISTS SLEIPNIR_TEST_SCALAR_TYPES)
+        if(NOT type IN_LIST sleipnir_allowed_test_scalar_types)
+            message(
+                FATAL_ERROR
+                "Unknown scalar type \"${type}\" in SLEIPNIR_TEST_SCALAR_TYPES"
+            )
+        endif()
+    endforeach()
+    if(NOT SLEIPNIR_TEST_SCALAR_TYPES)
+        message(FATAL_ERROR "SLEIPNIR_TEST_SCALAR_TYPES is empty")
+    endif()
+    list(JOIN SLEIPNIR_TEST_SCALAR_TYPES "," sleipnir_test_scalar_types)
+
+    if("ExplicitDouble" IN_LIST SLEIPNIR_TEST_SCALAR_TYPES)
+        # Build autodiff explicit instantiations
+        file(
+            GLOB_RECURSE sleipnir_autodiff_explicit_src
+            test/src/autodiff/*_explicit_double.cpp
+        )
+        add_library(
+            sleipnir_autodiff_explicit
+            OBJECT
+            ${sleipnir_autodiff_explicit_src}
+        )
+        compiler_flags(sleipnir_autodiff_explicit)
+        target_include_directories(
+            sleipnir_autodiff_explicit
+            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/test/include
+        )
+        target_link_libraries(sleipnir_autodiff_explicit PUBLIC Sleipnir)
+
+        # Build optimization explicit instantiations
+        file(
+            GLOB_RECURSE sleipnir_optimization_explicit_src
+            test/src/optimization/*_explicit_double.cpp
+        )
+        add_library(
+            sleipnir_optimization_explicit
+            OBJECT
+            ${sleipnir_optimization_explicit_src}
+        )
+        compiler_flags(sleipnir_optimization_explicit)
+        target_include_directories(
+            sleipnir_optimization_explicit
+            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/test/include
+        )
+        target_link_libraries(sleipnir_optimization_explicit PUBLIC Sleipnir)
+    endif()
 
     # Build Sleipnir autodiff tests
     file(GLOB_RECURSE sleipnir_autodiff_test_src test/src/autodiff/*_test.cpp)
     add_executable(sleipnir_autodiff_test ${sleipnir_autodiff_test_src})
     compiler_flags(sleipnir_autodiff_test)
+    target_compile_definitions(
+        sleipnir_autodiff_test
+        PRIVATE SCALAR_TYPES=${sleipnir_test_scalar_types}
+    )
     target_include_directories(
         sleipnir_autodiff_test
         PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/test/include
     )
     target_link_libraries(
         sleipnir_autodiff_test
-        PUBLIC Sleipnir sleipnir_autodiff_explicit_double Catch2::Catch2WithMain
+        PUBLIC
+            Sleipnir
+            $<TARGET_NAME_IF_EXISTS:sleipnir_autodiff_explicit>
+            Catch2::Catch2WithMain
     )
 
     # Build Sleipnir optimization tests
     file(
         GLOB_RECURSE sleipnir_optimization_test_src
-        test/src/optimization/*_explicit_double.cpp
         test/src/optimization/*_test.cpp
     )
     add_executable(sleipnir_optimization_test ${sleipnir_optimization_test_src})
     compiler_flags(sleipnir_optimization_test)
+    target_compile_definitions(
+        sleipnir_optimization_test
+        PRIVATE SCALAR_TYPES=${sleipnir_test_scalar_types}
+    )
     target_include_directories(
         sleipnir_optimization_test
         PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/test/include
     )
     target_link_libraries(
         sleipnir_optimization_test
-        PUBLIC Sleipnir sleipnir_autodiff_explicit_double Catch2::Catch2WithMain
+        PUBLIC
+            Sleipnir
+            $<TARGET_NAME_IF_EXISTS:sleipnir_autodiff_explicit>
+            $<TARGET_NAME_IF_EXISTS:sleipnir_optimization_explicit>
+            Catch2::Catch2WithMain
     )
 
     # Build Sleipnir util tests

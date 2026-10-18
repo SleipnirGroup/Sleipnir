@@ -41,6 +41,6 @@ jobs:
       - name: Set up sccache
         uses: mozilla-actions/sccache-action@v0.0.11
 
-      - run: cmake -B build -S . -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache -DSLEIPNIR_BUILD_EXAMPLES=ON -DSLEIPNIR_BUILD_PYTHON=OFF ${{ matrix.cmake-args }}
+      - run: cmake -B build -S . -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache -DSLEIPNIR_BUILD_EXAMPLES=ON -DSLEIPNIR_BUILD_PYTHON=OFF -DSLEIPNIR_TEST_SCALAR_TYPES="double;ExplicitDouble" ${{ matrix.cmake-args }}
       - run: cmake --build build --target all --config RelWithDebInfo --parallel $(nproc)
       - run: ${{ matrix.ctest-env }} ctest --test-dir build -C RelWithDebInfo --output-on-failure

@@ -14,10 +14,9 @@
 #include <sleipnir/util/scope_exit.hpp>
 
 #include "catch_string_converters.hpp"
-#include "scalar_types_under_test.hpp"
+#include "scalar_types.hpp"
 
-TEMPLATE_TEST_CASE("Problem - Arm on elevator", "[Problem]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Problem - Arm on elevator", "[Problem]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{

@@ -25,7 +25,7 @@
 #include "catch_matchers.hpp"
 #include "catch_string_converters.hpp"
 #include "near.hpp"
-#include "scalar_types_under_test.hpp"
+#include "scalar_types.hpp"
 
 template <typename T>
 void flywheel_test(
@@ -150,8 +150,7 @@ void flywheel_test(
   }
 }
 
-TEMPLATE_TEST_CASE("OCP - Flywheel (explicit)", "[OCP]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("OCP - Flywheel (explicit)", "[OCP]", SCALAR_TYPES) {
   using T = TestType;
 
   constexpr T A(-1);
@@ -172,8 +171,7 @@ TEMPLATE_TEST_CASE("OCP - Flywheel (explicit)", "[OCP]",
                    slp::TranscriptionMethod::SINGLE_SHOOTING);
 }
 
-TEMPLATE_TEST_CASE("OCP - Flywheel (discrete)", "[OCP]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("OCP - Flywheel (discrete)", "[OCP]", SCALAR_TYPES) {
   using T = TestType;
 
   constexpr T A(-1);

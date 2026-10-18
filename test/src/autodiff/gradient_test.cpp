@@ -14,10 +14,9 @@
 #include <sleipnir/util/scope_exit.hpp>
 
 #include "catch_matchers.hpp"
-#include "scalar_types_under_test.hpp"
+#include "scalar_types.hpp"
 
-TEMPLATE_TEST_CASE("Gradient - Trivial case", "[Gradient]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Gradient - Trivial case", "[Gradient]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{
@@ -35,8 +34,7 @@ TEMPLATE_TEST_CASE("Gradient - Trivial case", "[Gradient]",
   CHECK(slp::Gradient(c, b).value().coeff(0) == T(0));
 }
 
-TEMPLATE_TEST_CASE("Gradient - Unary plus", "[Gradient]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Gradient - Unary plus", "[Gradient]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{
@@ -50,8 +48,7 @@ TEMPLATE_TEST_CASE("Gradient - Unary plus", "[Gradient]",
   CHECK(slp::Gradient(c, a).value().coeff(0) == T(1));
 }
 
-TEMPLATE_TEST_CASE("Gradient - Unary minus", "[Gradient]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Gradient - Unary minus", "[Gradient]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{
@@ -66,7 +63,7 @@ TEMPLATE_TEST_CASE("Gradient - Unary minus", "[Gradient]",
 }
 
 TEMPLATE_TEST_CASE("Gradient - Identical variables", "[Gradient]",
-                   SCALAR_TYPES_UNDER_TEST) {
+                   SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{
@@ -84,8 +81,7 @@ TEMPLATE_TEST_CASE("Gradient - Identical variables", "[Gradient]",
         T(2) * a.value() * slp::Gradient(a, x).value().coeff(0) + T(1));
 }
 
-TEMPLATE_TEST_CASE("Gradient - Elementary", "[Gradient]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Gradient - Elementary", "[Gradient]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{
@@ -121,8 +117,7 @@ TEMPLATE_TEST_CASE("Gradient - Elementary", "[Gradient]",
   CHECK(slp::Gradient(c, a).value().coeff(0) == T(1));
 }
 
-TEMPLATE_TEST_CASE("Gradient - Comparison", "[Gradient]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Gradient - Comparison", "[Gradient]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{
@@ -188,8 +183,7 @@ TEMPLATE_TEST_CASE("Gradient - Comparison", "[Gradient]",
   CHECK(a.value() >= (a - a).value());
 }
 
-TEMPLATE_TEST_CASE("Gradient - Trigonometry", "[Gradient]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Gradient - Trigonometry", "[Gradient]", SCALAR_TYPES) {
   using T = TestType;
   using std::acos;
   using std::asin;
@@ -248,8 +242,7 @@ TEMPLATE_TEST_CASE("Gradient - Trigonometry", "[Gradient]",
   CHECK(g.value().coeff(0) == T(1) / (T(1) + x.value() * x.value()));
 }
 
-TEMPLATE_TEST_CASE("Gradient - Hyperbolic", "[Gradient]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Gradient - Hyperbolic", "[Gradient]", SCALAR_TYPES) {
   using T = TestType;
   using std::cosh;
   using std::sinh;
@@ -283,8 +276,7 @@ TEMPLATE_TEST_CASE("Gradient - Hyperbolic", "[Gradient]",
   CHECK(g.value().coeff(0) == T(1) / (cosh(x.value()) * cosh(x.value())));
 }
 
-TEMPLATE_TEST_CASE("Gradient - Exponential", "[Gradient]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Gradient - Exponential", "[Gradient]", SCALAR_TYPES) {
   using T = TestType;
   using std::exp;
   using std::log;
@@ -318,7 +310,7 @@ TEMPLATE_TEST_CASE("Gradient - Exponential", "[Gradient]",
   CHECK(g.value().coeff(0) == exp(x.value()));
 }
 
-TEMPLATE_TEST_CASE("Gradient - Power", "[Gradient]", SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Gradient - Power", "[Gradient]", SCALAR_TYPES) {
   using T = TestType;
   using std::cbrt;
   using std::log;
@@ -426,7 +418,7 @@ TEMPLATE_TEST_CASE("Gradient - Power", "[Gradient]", SCALAR_TYPES_UNDER_TEST) {
   CHECK(g.value().coeff(0) == log(x.value()) * pow(x.value(), y.value()));
 }
 
-TEMPLATE_TEST_CASE("Gradient - abs()", "[Gradient]", SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Gradient - abs()", "[Gradient]", SCALAR_TYPES) {
   using T = TestType;
   using std::abs;
 
@@ -466,8 +458,7 @@ TEMPLATE_TEST_CASE("Gradient - abs()", "[Gradient]", SCALAR_TYPES_UNDER_TEST) {
   CHECK(g.get().value(0) == T(-2));
 }
 
-TEMPLATE_TEST_CASE("Gradient - atan2()", "[Gradient]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Gradient - atan2()", "[Gradient]", SCALAR_TYPES) {
   using T = TestType;
   using std::atan2;
   using std::cos;
@@ -575,8 +566,7 @@ TEMPLATE_TEST_CASE("Gradient - atan2()", "[Gradient]",
                 T(1e-15)));
 }
 
-TEMPLATE_TEST_CASE("Gradient - hypot()", "[Gradient]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Gradient - hypot()", "[Gradient]", SCALAR_TYPES) {
   using T = TestType;
   using std::hypot;
 
@@ -675,8 +665,7 @@ TEMPLATE_TEST_CASE("Gradient - hypot()", "[Gradient]",
         z.value() / hypot(x.value(), y.value(), z.value()));
 }
 
-TEMPLATE_TEST_CASE("Gradient - if_else()", "[Gradient]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Gradient - if_else()", "[Gradient]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{
@@ -706,7 +695,7 @@ TEMPLATE_TEST_CASE("Gradient - if_else()", "[Gradient]",
   CHECK(g.value().coeff(0) == slp::Gradient(x3, x).value().coeff(0));
 }
 
-TEMPLATE_TEST_CASE("Gradient - max()", "[Gradient]", SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Gradient - max()", "[Gradient]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{
@@ -737,7 +726,7 @@ TEMPLATE_TEST_CASE("Gradient - max()", "[Gradient]", SCALAR_TYPES_UNDER_TEST) {
   CHECK(g.value().coeff(0) == T(1));
 }
 
-TEMPLATE_TEST_CASE("Gradient - min()", "[Gradient]", SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Gradient - min()", "[Gradient]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{
@@ -768,8 +757,7 @@ TEMPLATE_TEST_CASE("Gradient - min()", "[Gradient]", SCALAR_TYPES_UNDER_TEST) {
   CHECK(g.value().coeff(0) == T(1));
 }
 
-TEMPLATE_TEST_CASE("Gradient - Miscellaneous", "[Gradient]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Gradient - Miscellaneous", "[Gradient]", SCALAR_TYPES) {
   using T = TestType;
   using std::abs;
   using std::exp;
@@ -798,8 +786,7 @@ TEMPLATE_TEST_CASE("Gradient - Miscellaneous", "[Gradient]",
         T(2) * T(std::numbers::inv_sqrtpi) * exp(-x.value() * x.value()));
 }
 
-TEMPLATE_TEST_CASE("Gradient - Variable reuse", "[Gradient]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Gradient - Variable reuse", "[Gradient]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{
@@ -823,7 +810,7 @@ TEMPLATE_TEST_CASE("Gradient - Variable reuse", "[Gradient]",
   CHECK(g.value().coeff(0) == T(10));
 }
 
-TEMPLATE_TEST_CASE("Gradient - sign()", "[Gradient]", SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Gradient - sign()", "[Gradient]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{
@@ -866,8 +853,7 @@ TEMPLATE_TEST_CASE("Gradient - sign()", "[Gradient]", SCALAR_TYPES_UNDER_TEST) {
   CHECK(g.value().coeff(0) == T(0));
 }
 
-TEMPLATE_TEST_CASE("Gradient - Non-scalar", "[Gradient]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Gradient - Non-scalar", "[Gradient]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{

@@ -20,9 +20,9 @@
 #include <sleipnir/autodiff/variable_matrix.hpp>
 #include <sleipnir/optimization/solver/util/bounds.hpp>
 
-#include "scalar_types_under_test.hpp"
+#include "scalar_types.hpp"
 
-TEMPLATE_TEST_CASE("Bounds - Detection", "[Bounds]", SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Bounds - Detection", "[Bounds]", SCALAR_TYPES) {
   using T = TestType;
 
   constexpr auto inf = std::numeric_limits<T>::infinity();
@@ -93,7 +93,7 @@ TEMPLATE_TEST_CASE("Bounds - Detection", "[Bounds]", SCALAR_TYPES_UNDER_TEST) {
              UnorderedRangeEquals(correct_conflicting_bounds));
 }
 
-TEMPLATE_TEST_CASE("Bounds - Projection", "[Bounds]", SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Bounds - Projection", "[Bounds]", SCALAR_TYPES) {
   using T = TestType;
   using std::abs;
   using std::isfinite;

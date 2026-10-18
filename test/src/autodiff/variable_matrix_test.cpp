@@ -15,10 +15,10 @@
 #include <sleipnir/autodiff/variable_matrix.hpp>
 
 #include "catch_matchers.hpp"
-#include "scalar_types_under_test.hpp"
+#include "scalar_types.hpp"
 
 TEMPLATE_TEST_CASE("VariableMatrix - Construct from Eigen::MatrixBase",
-                   "[VariableMatrix]", SCALAR_TYPES_UNDER_TEST) {
+                   "[VariableMatrix]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::VariableMatrix mat{
@@ -29,7 +29,7 @@ TEMPLATE_TEST_CASE("VariableMatrix - Construct from Eigen::MatrixBase",
 }
 
 TEMPLATE_TEST_CASE("VariableMatrix - Construct from Eigen::DiagonalBase",
-                   "[VariableMatrix]", SCALAR_TYPES_UNDER_TEST) {
+                   "[VariableMatrix]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::VariableMatrix mat{Eigen::Vector<T, 3>{{T(1), T(2), T(3)}}.asDiagonal()};
@@ -40,7 +40,7 @@ TEMPLATE_TEST_CASE("VariableMatrix - Construct from Eigen::DiagonalBase",
 }
 
 TEMPLATE_TEST_CASE("VariableMatrix - Assignment to default", "[VariableMatrix]",
-                   SCALAR_TYPES_UNDER_TEST) {
+                   SCALAR_TYPES) {
   using T = TestType;
 
   slp::VariableMatrix<T> mat;
@@ -69,7 +69,7 @@ TEMPLATE_TEST_CASE("VariableMatrix - Assignment to default", "[VariableMatrix]",
 }
 
 TEMPLATE_TEST_CASE("VariableMatrix - Assignment aliasing", "[VariableMatrix]",
-                   SCALAR_TYPES_UNDER_TEST) {
+                   SCALAR_TYPES) {
   using T = TestType;
 
   slp::VariableMatrix<T> A{{1, 2}, {3, 4}};
@@ -94,7 +94,7 @@ TEMPLATE_TEST_CASE("VariableMatrix - Assignment aliasing", "[VariableMatrix]",
 }
 
 TEMPLATE_TEST_CASE("VariableMatrix - block() member function",
-                   "[VariableMatrix]", SCALAR_TYPES_UNDER_TEST) {
+                   "[VariableMatrix]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::VariableMatrix<T> A{
@@ -116,7 +116,7 @@ TEMPLATE_TEST_CASE("VariableMatrix - block() member function",
 }
 
 TEMPLATE_TEST_CASE("VariableMatrix - Slicing", "[VariableMatrix]",
-                   SCALAR_TYPES_UNDER_TEST) {
+                   SCALAR_TYPES) {
   using T = TestType;
   using namespace slp::slicing;
 
@@ -216,7 +216,7 @@ TEMPLATE_TEST_CASE("VariableMatrix - Slicing", "[VariableMatrix]",
 }
 
 TEMPLATE_TEST_CASE("VariableMatrix - Subslicing", "[VariableMatrix]",
-                   SCALAR_TYPES_UNDER_TEST) {
+                   SCALAR_TYPES) {
   using T = TestType;
   using namespace slp::slicing;
 
@@ -290,7 +290,7 @@ TEMPLATE_TEST_CASE("VariableMatrix - Subslicing", "[VariableMatrix]",
 }
 
 TEMPLATE_TEST_CASE("VariableMatrix - Compound assignment operators",
-                   "[VariableMatrix]", SCALAR_TYPES_UNDER_TEST) {
+                   "[VariableMatrix]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::VariableMatrix<T> A1{{T(1)}};
@@ -338,7 +338,7 @@ TEMPLATE_TEST_CASE("VariableMatrix - Compound assignment operators",
 }
 
 TEMPLATE_TEST_CASE("VariableMatrix - Iterators", "[VariableMatrix]",
-                   SCALAR_TYPES_UNDER_TEST) {
+                   SCALAR_TYPES) {
   using T = TestType;
 
   slp::VariableMatrix<T> A{
@@ -379,8 +379,7 @@ TEMPLATE_TEST_CASE("VariableMatrix - Iterators", "[VariableMatrix]",
   }
 }
 
-TEMPLATE_TEST_CASE("VariableMatrix - Value", "[VariableMatrix]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("VariableMatrix - Value", "[VariableMatrix]", SCALAR_TYPES) {
   using T = TestType;
   using namespace slp::slicing;
 
@@ -421,7 +420,7 @@ TEMPLATE_TEST_CASE("VariableMatrix - Value", "[VariableMatrix]",
 }
 
 TEMPLATE_TEST_CASE("VariableMatrix - to_eigen()", "[VariableMatrix]",
-                   SCALAR_TYPES_UNDER_TEST) {
+                   SCALAR_TYPES) {
   using T = TestType;
 
   slp::VariableMatrix<T> A{{T(1), T(2), T(3)}, {T(4), T(5), T(6)}};
@@ -438,7 +437,7 @@ TEMPLATE_TEST_CASE("VariableMatrix - to_eigen()", "[VariableMatrix]",
 }
 
 TEMPLATE_TEST_CASE("VariableMatrix - cwise_transform()", "[VariableMatrix]",
-                   SCALAR_TYPES_UNDER_TEST) {
+                   SCALAR_TYPES) {
   using T = TestType;
 
   // VariableMatrix cwise_transform
@@ -466,7 +465,7 @@ TEMPLATE_TEST_CASE("VariableMatrix - cwise_transform()", "[VariableMatrix]",
 }
 
 TEMPLATE_TEST_CASE("VariableMatrix - identity() static function",
-                   "[VariableMatrix]", SCALAR_TYPES_UNDER_TEST) {
+                   "[VariableMatrix]", SCALAR_TYPES) {
   using T = TestType;
 
   auto A = slp::VariableMatrix<T>::identity(3);
@@ -478,7 +477,7 @@ TEMPLATE_TEST_CASE("VariableMatrix - identity() static function",
 }
 
 TEMPLATE_TEST_CASE("VariableMatrix - zero() static function",
-                   "[VariableMatrix]", SCALAR_TYPES_UNDER_TEST) {
+                   "[VariableMatrix]", SCALAR_TYPES) {
   using T = TestType;
 
   auto A = slp::VariableMatrix<T>::zero(2, 3);
@@ -492,7 +491,7 @@ TEMPLATE_TEST_CASE("VariableMatrix - zero() static function",
 }
 
 TEMPLATE_TEST_CASE("VariableMatrix - one() static function", "[VariableMatrix]",
-                   SCALAR_TYPES_UNDER_TEST) {
+                   SCALAR_TYPES) {
   using T = TestType;
 
   auto A = slp::VariableMatrix<T>::one(2, 3);
@@ -506,7 +505,7 @@ TEMPLATE_TEST_CASE("VariableMatrix - one() static function", "[VariableMatrix]",
 }
 
 TEMPLATE_TEST_CASE("VariableMatrix - constant() static function",
-                   "[VariableMatrix]", SCALAR_TYPES_UNDER_TEST) {
+                   "[VariableMatrix]", SCALAR_TYPES) {
   using T = TestType;
 
   auto A = slp::VariableMatrix<T>::constant(2, 3, T(2));
@@ -520,7 +519,7 @@ TEMPLATE_TEST_CASE("VariableMatrix - constant() static function",
 }
 
 TEMPLATE_TEST_CASE("VariableMatrix - cwise_reduce()", "[VariableMatrix]",
-                   SCALAR_TYPES_UNDER_TEST) {
+                   SCALAR_TYPES) {
   using T = TestType;
 
   slp::VariableMatrix<T> A{{T(2), T(3), T(4)}, {T(5), T(6), T(7)}};
@@ -531,8 +530,7 @@ TEMPLATE_TEST_CASE("VariableMatrix - cwise_reduce()", "[VariableMatrix]",
   CHECK(result.value() == expected);
 }
 
-TEMPLATE_TEST_CASE("VariableMatrix - exp()", "[VariableMatrix]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("VariableMatrix - exp()", "[VariableMatrix]", SCALAR_TYPES) {
   using T = TestType;
   using namespace slp::slicing;
   using std::exp;
@@ -595,7 +593,7 @@ TEMPLATE_TEST_CASE("VariableMatrix - exp()", "[VariableMatrix]",
 }
 
 TEMPLATE_TEST_CASE("VariableMatrix - block() free function", "[VariableMatrix]",
-                   SCALAR_TYPES_UNDER_TEST) {
+                   SCALAR_TYPES) {
   using T = TestType;
 
   slp::VariableMatrix<T> A{{T(1), T(2), T(3)}, {T(4), T(5), T(6)}};
@@ -631,7 +629,7 @@ void check_solve(slp::VariableMatrix<T> A, slp::VariableMatrix<T> B) {
 }
 
 TEMPLATE_TEST_CASE("VariableMatrix - solve() free function", "[VariableMatrix]",
-                   SCALAR_TYPES_UNDER_TEST) {
+                   SCALAR_TYPES) {
   using T = TestType;
 
   // 1x1 special case

@@ -19,10 +19,9 @@
 
 #include "catch_matchers.hpp"
 #include "catch_string_converters.hpp"
-#include "scalar_types_under_test.hpp"
+#include "scalar_types.hpp"
 
-TEMPLATE_TEST_CASE("Problem - Double integrator", "[Problem]",
-                   SCALAR_TYPES_UNDER_TEST) {
+TEMPLATE_TEST_CASE("Problem - Double integrator", "[Problem]", SCALAR_TYPES) {
   using T = TestType;
   using std::abs;
 
