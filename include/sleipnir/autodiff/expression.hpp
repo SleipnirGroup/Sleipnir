@@ -91,13 +91,6 @@ struct Expression {
   /// generation.
   ExpressionPtr<Scalar> adj_expr;
 
-  /// True if the expression is a leaf node (a nullary expression).
-  ///
-  /// Graph traversals check this to avoid virtual calls on leaves. The check
-  /// also feeds the branch predictor history that helps it predict the virtual
-  /// call targets of non-leaf nodes.
-  bool is_leaf = false;
-
   /// Scratch space for various graph algorithms.
   ///
   /// In expression_graph.hpp's topological_sort(), scratch counts incoming
@@ -110,7 +103,14 @@ struct Expression {
   int32_t scratch = -1;
 
   /// Reference count for intrusive shared pointer.
-  uint32_t ref_count = 0;
+  uint32_t ref_count : 31 = 0;
+
+  /// True if the expression is a leaf node (a nullary expression).
+  ///
+  /// Graph traversals check this to avoid virtual calls on leaves. The check
+  /// also feeds the branch predictor history that helps it predict the virtual
+  /// call targets of non-leaf nodes.
+  uint32_t is_leaf : 1 = 0;
 
   /// Constructs a constant expression with a value of zero.
   constexpr Expression() = default;
@@ -118,7 +118,7 @@ struct Expression {
   /// Constructs a nullary expression (an operator with no arguments).
   ///
   /// @param value The expression value.
-  explicit constexpr Expression(Scalar value) : val{value}, is_leaf{true} {}
+  explicit constexpr Expression(Scalar value) : val{value}, is_leaf{1} {}
 
   virtual ~Expression() = default;
 
