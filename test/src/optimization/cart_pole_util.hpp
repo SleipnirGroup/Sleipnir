@@ -51,20 +51,22 @@ class CartPoleUtil {
     auto theta = q[1];
     auto thetadot = qdot[1];
 
+    auto c = cos(theta);
+    auto s = sin(theta);
+
     //        [ m_c + m_p  m_p l cosθ]
     // M(q) = [m_p l cosθ    m_p l²  ]
-    Eigen::Matrix<Scalar, 2, 2> M{
-        {m_c + m_p, m_p * l * cos(theta)},
-        {m_p * l * cos(theta), m_p * pow(l, Scalar(2))}};
+    Eigen::Matrix<Scalar, 2, 2> M{{m_c + m_p, m_p * l * c},
+                                  {m_p * l * c, m_p * pow(l, Scalar(2))}};
 
     //           [0  −m_p lθ̇ sinθ]
     // C(q, q̇) = [0       0      ]
-    Eigen::Matrix<Scalar, 2, 2> C{{Scalar(0), -m_p * l * thetadot * sin(theta)},
+    Eigen::Matrix<Scalar, 2, 2> C{{Scalar(0), -m_p * l * thetadot * s},
                                   {Scalar(0), Scalar(0)}};
 
     //          [     0      ]
     // τ_g(q) = [-m_p gl sinθ]
-    Eigen::Vector<Scalar, 2> tau_g{{Scalar(0)}, {-m_p * g * l * sin(theta)}};
+    Eigen::Vector<Scalar, 2> tau_g{{Scalar(0)}, {-m_p * g * l * s}};
 
     //     [1]
     // B = [0]

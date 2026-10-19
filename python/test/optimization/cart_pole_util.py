@@ -79,12 +79,15 @@ def cart_pole_dynamics_variable(
     theta = q[1, 0]
     thetadot = qdot[1, 0]
 
+    c = autodiff.cos(theta)
+    s = autodiff.sin(theta)
+
     #        [ m_c + m_p  m_p l cosθ]
     # M(q) = [m_p l cosθ    m_p l²  ]
     M = VariableMatrix(
         [
-            [Variable(m_c + m_p), m_p * l * autodiff.cos(theta)],
-            [m_p * l * autodiff.cos(theta), Variable(m_p * l**2)],
+            [Variable(m_c + m_p), m_p * l * c],
+            [m_p * l * c, Variable(m_p * l**2)],
         ]
     )
 
@@ -92,14 +95,14 @@ def cart_pole_dynamics_variable(
     # C(q, q̇) = [0       0      ]
     C = VariableMatrix(
         [
-            [Variable(0.0), -m_p * l * thetadot * autodiff.sin(theta)],
+            [Variable(0.0), -m_p * l * thetadot * s],
             [Variable(0.0), Variable(0.0)],
         ]
     )
 
     #          [     0      ]
     # τ_g(q) = [-m_p gl sinθ]
-    tau_g = VariableMatrix([[Variable(0.0)], [-m_p * g * l * autodiff.sin(theta)]])
+    tau_g = VariableMatrix([[Variable(0.0)], [-m_p * g * l * s]])
 
     #     [1]
     # B = [0]
