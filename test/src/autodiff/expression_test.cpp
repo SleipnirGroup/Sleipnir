@@ -1,6 +1,7 @@
 // Copyright (c) Sleipnir contributors
 
 #include <cmath>
+#include <limits>
 #include <numbers>
 
 #include <catch2/catch_template_test_macros.hpp>
@@ -310,7 +311,8 @@ TEMPLATE_TEST_CASE("Expression - Prune log()", "[Expression]", SCALAR_TYPES) {
   auto zero = constant_ptr(T(0));
   auto one = constant_ptr(T(1));
 
-  CHECK(slp::detail::log(zero)->is_constant(T(0)));
+  CHECK(
+      slp::detail::log(zero)->is_constant(-std::numeric_limits<T>::infinity()));
   CHECK(slp::detail::log(one)->is_constant(log(T(1))));
 }
 
@@ -321,7 +323,8 @@ TEMPLATE_TEST_CASE("Expression - Prune log10()", "[Expression]", SCALAR_TYPES) {
   auto zero = constant_ptr(T(0));
   auto one = constant_ptr(T(1));
 
-  CHECK(slp::detail::log10(zero)->is_constant(T(0)));
+  CHECK(slp::detail::log10(zero)->is_constant(
+      -std::numeric_limits<T>::infinity()));
   CHECK(slp::detail::log10(one)->is_constant(log10(T(1))));
 }
 

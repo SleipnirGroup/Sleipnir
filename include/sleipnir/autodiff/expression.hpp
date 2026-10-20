@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <limits>
 #include <memory>
 #include <numbers>
 #include <string_view>
@@ -1720,8 +1721,7 @@ ExpressionPtr<Scalar> log(const ExpressionPtr<Scalar>& x) {
 
   // Prune expression
   if (x->is_constant(Scalar(0))) {
-    // Return zero, which x currently is
-    return x;
+    return constant_ptr(-std::numeric_limits<Scalar>::infinity());
   }
 
   // Evaluate constant
@@ -1787,8 +1787,7 @@ ExpressionPtr<Scalar> log10(const ExpressionPtr<Scalar>& x) {
 
   // Prune expression
   if (x->is_constant(Scalar(0))) {
-    // Return zero, which x currently is
-    return x;
+    return constant_ptr(-std::numeric_limits<Scalar>::infinity());
   }
 
   // Evaluate constant
