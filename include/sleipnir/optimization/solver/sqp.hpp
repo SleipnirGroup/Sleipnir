@@ -444,7 +444,9 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
             matrices.g(trial_x), matrices.A_e(trial_x), trial_c_e, trial_y);
 
         // If the step using αᵐᵃˣ reduced the KKT error, accept it anyway
-        if (next_kkt_error <= Scalar(0.999) * current_kkt_error) {
+        if (next_kkt_error <= Scalar(0.999) * current_kkt_error &&
+            constraint_violation(trial_c_e) <=
+                filter.max_constraint_violation) {
           // Accept step
           α = α_max;
           break;

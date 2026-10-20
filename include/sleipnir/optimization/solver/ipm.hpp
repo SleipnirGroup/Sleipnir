@@ -634,7 +634,9 @@ ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
             matrices.A_i(trial_x), trial_c_i, trial_s, trial_y, trial_z, μ);
 
         // If the step using αᵐᵃˣ reduced the KKT error, accept it anyway
-        if (next_kkt_error <= Scalar(0.999) * current_kkt_error) {
+        if (next_kkt_error <= Scalar(0.999) * current_kkt_error &&
+            constraint_violation(trial_c_e, trial_c_i, trial_s) <=
+                filter.max_constraint_violation) {
           // Accept step
           α = α_max;
           break;
