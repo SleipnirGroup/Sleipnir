@@ -58,18 +58,23 @@ class DenseKKTSolver {
   /// @param lhs Left-hand side of the system.
   /// @return The factorization.
   DenseKKTSolver& compute(const DenseMatrix& lhs) {
-    m_info = m_solver.compute(lhs).info();
+    // If the previous δ was small and nonzero, skip the δ = 0 attempt because
+    // it's almost always rejected for small pivots. If the previous δ was
+    // large, attempt δ = 0 so δ can drop to zero quickly.
+    if (m_prev_δ == Scalar(0) || m_prev_δ > Scalar(1e-2)) {
+      m_info = m_solver.compute(lhs).info();
 
-    if (m_info == Eigen::Success) {
-      auto D = m_solver.vectorD();
+      if (m_info == Eigen::Success) {
+        auto D = m_solver.vectorD();
 
-      // If the inertia is ideal and D from LDLT is sufficiently far from zero,
-      // don't regularize the system
-      if (Inertia{D} == ideal_inertia &&
-          (D.cwiseAbs().array() >= Scalar(1e-4)).all()) {
-        m_prev_δ = Scalar(0);
-        m_prev_γ = Scalar(0);
-        return *this;
+        // If the inertia is ideal and D from LDLT is sufficiently far from
+        // zero, don't regularize the system
+        if (Inertia{D} == ideal_inertia &&
+            (D.cwiseAbs().array() >= Scalar(1e-4)).all()) {
+          m_prev_δ = Scalar(0);
+          m_prev_γ = Scalar(0);
+          return *this;
+        }
       }
     }
 
