@@ -368,6 +368,11 @@ TEMPLATE_TEST_CASE("Expression - Prune pow()", "[Expression]", SCALAR_TYPES) {
   CHECK(slp::detail::pow(two, zero)->is_constant(T(1)));
   CHECK(slp::detail::pow(two, one) == two);
   CHECK(slp::detail::pow(two, two)->is_constant(T(4)));
+
+  auto x = make_expression_ptr<DecisionVariableExpression<T>>(T(2));
+  CHECK(slp::detail::pow(x, one) == x);
+  CHECK(slp::detail::pow(x, two)->name() == "multiplication");
+  CHECK(slp::detail::pow(x, constant_ptr(T(0.5)))->name() == "sqrt");
 }
 
 TEMPLATE_TEST_CASE("Expression - Prune sign()", "[Expression]", SCALAR_TYPES) {

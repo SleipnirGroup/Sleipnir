@@ -2071,6 +2071,8 @@ ExpressionPtr<Scalar> pow(const ExpressionPtr<Scalar>& base,
     } else {
       return make_expression_ptr<MultExpression<Scalar, NONLINEAR>>(base, base);
     }
+  } else if (power->is_constant(Scalar(0.5))) {
+    return sqrt(base);
   }
 
   return make_expression_ptr<PowExpression<Scalar, NONLINEAR>>(base, power);
