@@ -98,6 +98,35 @@ class Filter {
   void reset() {
     m_filter.clear();
     m_last_rejection_due_to_filter = false;
+    m_resets = 0;
+  }
+
+  /// Resets the filter and lowers the maximum constraint violation if the
+  /// filter may be impeding progress.
+  ///
+  /// @param current_entry The entry corresponding to the current iterate.
+  /// @return True if the filter was reset.
+  bool try_reset(const FilterEntry<Scalar>& current_entry) {
+    constexpr int max_resets = 5;
+
+    // The filter may be impeding progress if it rejected the most recent trial
+    // entry, and the maximum constraint violation is more than a tenth of the
+    // current iterate's. The number of resets is capped until the next reset().
+    //
+    // See section 3.2 case I of [2].
+    if (m_resets >= max_resets ||
+        max_constraint_violation <=
+            current_entry.constraint_violation / Scalar(10) ||
+        !m_last_rejection_due_to_filter) {
+      return false;
+    }
+
+    max_constraint_violation *= Scalar(0.1);
+    m_filter.clear();
+    m_last_rejection_due_to_filter = false;
+    ++m_resets;
+
+    return true;
   }
 
   /// Returns true if the given trial entry is acceptable to the filter.
@@ -119,8 +148,6 @@ class Filter {
     }
 
     // Switching condition
-    constexpr Scalar s_ϕ(2.3);
-    constexpr Scalar s_θ(1.1);
     bool switching_condition =
         D_ϕ < Scalar(0) &&
         α * pow(-D_ϕ, s_ϕ) > pow(current_entry.constraint_violation, s_θ);
@@ -160,41 +187,93 @@ class Filter {
     // Augment filter with accepted iterate if switching condition or Armijo
     // condition are false
     if (!switching_condition || !armijo_condition) {
-      add(FilterEntry{
-          current_entry.cost - γ_cost * current_entry.constraint_violation,
-          (Scalar(1) - γ_constraint) * current_entry.constraint_violation});
+      add(current_entry);
     }
 
     return true;
   }
 
-  /// Returns true if the most recent trial entry rejection was due to the
-  /// filter.
+  /// Adds the given entry to the filter.
   ///
-  /// @return True if the most recent trial entry rejection was due to the
-  /// filter.
-  bool last_rejection_due_to_filter() const {
-    return m_last_rejection_due_to_filter;
+  /// The entry is shifted by the sufficient decrease margins, so iterates that
+  /// don't sufficiently decrease the cost or constraint violation relative to
+  /// it are rejected afterward.
+  ///
+  /// @param entry The entry to add to the filter.
+  void add(const FilterEntry<Scalar>& entry) {
+    FilterEntry<Scalar> margin_entry{
+        entry.cost - γ_cost * entry.constraint_violation,
+        (Scalar(1) - γ_constraint) * entry.constraint_violation};
+
+    // Remove dominated entries
+    erase_if(m_filter,
+             [&](const auto& elem) { return elem.dominated_by(margin_entry); });
+
+    m_filter.push_back(margin_entry);
+  }
+
+  /// Returns true if the given entry is acceptable to the filter.
+  ///
+  /// @param entry The entry.
+  /// @return True if the given entry is acceptable to the filter.
+  bool is_acceptable(const FilterEntry<Scalar>& entry) const {
+    using std::isfinite;
+
+    return isfinite(entry.cost) &&
+           entry.constraint_violation <= max_constraint_violation &&
+           !in_filter(entry);
+  }
+
+  /// Returns the minimum step size of the backtracking line search.
+  ///
+  /// Below this step size, no trial iterate can satisfy the sufficient decrease
+  /// condition or both the switching condition and Armijo condition, so
+  /// feasibility restoration should be invoked.
+  ///
+  /// @param current_entry The entry corresponding to the current iterate.
+  /// @param D_ϕ Cost directional derivative along the search direction.
+  /// @return The minimum step size.
+  Scalar min_step_size(const FilterEntry<Scalar>& current_entry,
+                       Scalar D_ϕ) const {
+    // The minimum step size goes to zero as the constraint violation does so
+    // feasibility restoration is never invoked near feasible points where the
+    // search direction is a descent direction.
+    //
+    // See equation (23) of [2].
+
+    using std::min;
+    using std::pow;
+
+    // Minimum step size safety factor
+    constexpr Scalar γ_α(0.05);
+
+    const Scalar θ = current_entry.constraint_violation;
+
+    if (D_ϕ >= Scalar(0)) {
+      return γ_α * γ_constraint;
+    }
+
+    Scalar α_min = min(γ_constraint, γ_cost * θ / -D_ϕ);
+    if (θ <= min_constraint_violation) {
+      α_min = min(α_min, pow(θ, s_θ) / pow(-D_ϕ, s_ϕ));
+    }
+    return γ_α * α_min;
   }
 
  private:
   static constexpr Scalar γ_cost{1e-8};
   static constexpr Scalar γ_constraint{1e-5};
 
+  // Switching condition exponents
+  static constexpr Scalar s_ϕ{2.3};
+  static constexpr Scalar s_θ{1.1};
+
   gch::small_vector<FilterEntry<Scalar>> m_filter;
 
   bool m_last_rejection_due_to_filter = false;
 
-  /// Adds a new entry to the filter.
-  ///
-  /// @param entry The entry to add to the filter.
-  void add(const FilterEntry<Scalar>& entry) {
-    // Remove dominated entries
-    erase_if(m_filter,
-             [&](const auto& elem) { return elem.dominated_by(entry); });
-
-    m_filter.push_back(entry);
-  }
+  // The number of resets done by try_reset() since the last reset()
+  int m_resets = 0;
 
   /// Returns true if the given entry is in the filter.
   ///
