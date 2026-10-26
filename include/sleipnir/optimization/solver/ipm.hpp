@@ -21,6 +21,7 @@
 #include "sleipnir/optimization/solver/util/append_as_triplets.hpp"
 #include "sleipnir/optimization/solver/util/constraint_violation.hpp"
 #include "sleipnir/optimization/solver/util/feasibility_restoration.hpp"
+#include "sleipnir/optimization/solver/util/feasibility_restoration_cycle_detector.hpp"
 #include "sleipnir/optimization/solver/util/filter.hpp"
 #include "sleipnir/optimization/solver/util/fraction_to_the_boundary_rule.hpp"
 #include "sleipnir/optimization/solver/util/kkt_error.hpp"
@@ -322,6 +323,9 @@ ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
   int full_step_rejected_counter = 0;
 
   StallDetector<Scalar> stall_detector;
+
+  FeasibilityRestorationCycleDetector<Scalar>
+      feasibility_restoration_cycle_detector;
 
   // Error
   Scalar E_0 = unscaled_kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(
@@ -672,6 +676,11 @@ ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
 
       FilterEntry initial_entry{matrices.f(x), s, c_e, c_i, μ};
 
+      feasibility_restoration_cycle_detector.record_entry(
+          initial_entry.constraint_violation);
+      const bool run_feasibility_restoration_to_convergence =
+          feasibility_restoration_cycle_detector.is_cycling();
+
       // Feasibility restoration phase
       gch::small_vector<std::function<bool(const IterationInfo<Scalar>& info)>>
           callbacks;
@@ -679,6 +688,10 @@ ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
         callbacks.emplace_back(callback);
       }
       callbacks.emplace_back([&](const IterationInfo<Scalar>& info) {
+        if (run_feasibility_restoration_to_convergence) {
+          return false;
+        }
+
         DenseVector trial_x =
             info.x.segment(0, matrices.num_decision_variables);
         DenseVector trial_s =
