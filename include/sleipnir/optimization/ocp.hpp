@@ -4,9 +4,11 @@
 
 #include <stdint.h>
 
+#include <algorithm>
 #include <chrono>
 #include <utility>
 
+#include "sleipnir/autodiff/expression_type.hpp"
 #include "sleipnir/autodiff/variable.hpp"
 #include "sleipnir/autodiff/variable_matrix.hpp"
 #include "sleipnir/optimization/ocp/dynamics_type.hpp"
@@ -15,6 +17,7 @@
 #include "sleipnir/optimization/problem.hpp"
 #include "sleipnir/util/assert.hpp"
 #include "sleipnir/util/concepts.hpp"
+#include "sleipnir/util/empty.hpp"
 #include "sleipnir/util/function_ref.hpp"
 #include "sleipnir/util/symbol_exports.hpp"
 
@@ -117,7 +120,8 @@ class OCP : public Problem<Scalar> {
           TranscriptionMethod::DIRECT_TRANSCRIPTION)
       : m_num_steps{num_steps},
         m_dynamics{std::move(dynamics)},
-        m_dynamics_type{dynamics_type} {
+        m_dynamics_type{dynamics_type},
+        m_transcription_method{transcription_method} {
     // u is num_steps + 1 so that the final constraint function evaluation works
     m_U = this->decision_variable(num_inputs, m_num_steps + 1);
 
@@ -163,7 +167,29 @@ class OCP : public Problem<Scalar> {
   template <typename T>
     requires ScalarLike<T> || MatrixLike<T>
   void constrain_initial_state(const T& initial_state) {
-    this->subject_to(this->initial_state() == initial_state);
+    auto x_0 = this->initial_state();
+
+    // Broadcast scalars to the initial state's shape
+    VariableMatrix<Scalar> x_0_value;
+    if constexpr (ScalarLike<T>) {
+      x_0_value = VariableMatrix<Scalar>{detail::empty, x_0.rows(), x_0.cols()};
+      for (auto& elem : x_0_value) {
+        elem = initial_state;
+      }
+    } else {
+      x_0_value = VariableMatrix<Scalar>{initial_state};
+    }
+
+    // In single-shooting, the initial state isn't a decision variable, so set
+    // its value instead if it's constant
+    if (m_transcription_method == TranscriptionMethod::SINGLE_SHOOTING &&
+        std::ranges::all_of(x_0_value, [](const auto& elem) {
+          return elem.type() == ExpressionType::CONSTANT;
+        })) {
+      x_0.set_value(x_0_value.value());
+    } else {
+      this->subject_to(x_0 == x_0_value);
+    }
   }
 
   /// Constrains the final state.
@@ -296,6 +322,7 @@ class OCP : public Problem<Scalar> {
       const VariableMatrix<Scalar>& u, const Variable<Scalar>& dt)>
       m_dynamics;
   DynamicsType m_dynamics_type;
+  TranscriptionMethod m_transcription_method;
 
   VariableMatrix<Scalar> m_X;
   VariableMatrix<Scalar> m_U;
