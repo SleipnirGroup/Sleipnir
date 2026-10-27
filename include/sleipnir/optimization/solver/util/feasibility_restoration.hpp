@@ -678,15 +678,18 @@ ExitStatus feasibility_restoration(
     const DenseVector s_old = s;
 
     // Re-center the slacks on the original constraints cᵢ(x) if they're
-    // sufficiently feasible, and on 1 otherwise.
+    // sufficiently feasible, which zeroes their constraint violation.
+    // Otherwise, keep feasibility restoration's slacks.
     //
-    // We can't use the slacks of cᵢ(x) − pᵢ + nᵢ ≥ 0 because feasibility
-    // restoration's barrier parameter fr_μ drives them toward 0 independently
-    // of the original problem's barrier parameter μ. Slacks much smaller than μ
-    // make Σ = S⁻¹Z and μS⁻¹e very large, which causes very large dual steps
-    // after returning.
+    // Note that those slacks can make Σ = S⁻¹Z and μS⁻¹e very large because
+    // fr_μ drives them toward 0 independently of μ, so they can end up much
+    // smaller than μ. We can't fix that by raising the slacks because the added
+    // constraint violation would make the filter reject more returned iterates.
+    //
+    // The normal phase's early-exit callback computes the slacks the same way,
+    // so the returned iterate is the one the filter accepted.
     const DenseVector c_i = matrices.c_i(x);
-    s = (c_i.array() >= Scalar(1e-2)).select(c_i, Scalar(1));
+    s = (c_i.array() >= Scalar(1e-2)).select(c_i, fr_s.segment(0, s.rows()));
 
     // Reset the equality constraint duals since feasibility restoration didn't
     // account for the cost function

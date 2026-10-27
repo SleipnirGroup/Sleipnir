@@ -2,9 +2,11 @@
 
 #pragma once
 
+#include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <functional>
+#include <limits>
 #include <optional>
 #include <span>
 
@@ -110,9 +112,13 @@ ExitStatus newton(
       // Use sparse solver if lower triangle fills < 25% of system
       H.nonZeros() < 0.25 * H.size(), matrices.num_decision_variables, 0};
 
-  // Variables for determining when a step is acceptable
+  // Step size reduction factor
   constexpr Scalar α_reduction_factor(0.5);
-  constexpr Scalar α_min(1e-20);
+
+  // The smallest KKT error of a step accepted by the KKT error reduction
+  // fallback. Each fallback step must improve on it, so finitely many fallback
+  // steps are taken before the solver converges.
+  Scalar fallback_kkt_error = std::numeric_limits<Scalar>::infinity();
 
   // Error
   Scalar E_0 = unscaled_kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(
@@ -157,10 +163,33 @@ ExitStatus newton(
 
     constexpr Scalar α_max(1);
     Scalar α = α_max;
+    const FilterEntry<Scalar> current_entry{f};
     const Scalar D_ϕ = g.transpose() * p_x;
 
-    // Loop until a step is accepted. If a step becomes acceptable, the loop
-    // will exit early.
+    const Scalar α_min = filter.min_step_size(current_entry, D_ϕ);
+
+    // α_min is zero when the search direction is a descent direction, so also
+    // end the line search when the step becomes negligible relative to the
+    // iterate. This bounds the number of step size reductions.
+    //
+    // A step αpˣ is negligible if
+    //
+    //   ‖αpˣ/(1 + |x|)‖_∞ < 10ε
+    //
+    // where the absolute value and division are elementwise. Since α > 0, it
+    // factors out of the norm.
+    //
+    //   α‖pˣ/(1 + |x|)‖_∞ < 10ε
+    //
+    // Dividing both sides by the norm gives
+    //
+    //   α < 10ε / ‖pˣ/(1 + |x|)‖_∞
+    const Scalar α_tiny = Scalar(10) * std::numeric_limits<Scalar>::epsilon() /
+                          (p_x.array().abs() / (Scalar(1) + x.array().abs()))
+                              .matrix()
+                              .template lpNorm<Eigen::Infinity>();
+
+    // Loop until a step is accepted
     while (1) {
       trial_x = x + α * p_x;
 
@@ -171,14 +200,14 @@ ExitStatus newton(
         // Reduce step size
         α *= α_reduction_factor;
 
-        if (α < α_min) {
+        if (α < α_min || α < α_tiny) {
           return ExitStatus::LINE_SEARCH_FAILED;
         }
         continue;
       }
 
       // Check whether filter accepts trial iterate
-      if (filter.try_add(FilterEntry{f}, FilterEntry{trial_f}, D_ϕ, α)) {
+      if (filter.try_add(current_entry, FilterEntry{trial_f}, D_ϕ, α)) {
         // Accept step
         break;
       }
@@ -186,9 +215,9 @@ ExitStatus newton(
       // Reduce step size
       α *= α_reduction_factor;
 
-      // If step size hit a minimum, check if the KKT error was reduced. If it
-      // wasn't, report bad line search.
-      if (α < α_min) {
+      // If step size hit a minimum or the step became negligible, check if the
+      // KKT error was reduced. If it wasn't, report line search failure.
+      if (α < α_min || α < α_tiny) {
         Scalar current_kkt_error = kkt_error<Scalar, KKTErrorType::ONE_NORM>(g);
 
         trial_x = x + α_max * p_x;
@@ -198,9 +227,12 @@ ExitStatus newton(
         Scalar next_kkt_error =
             kkt_error<Scalar, KKTErrorType::ONE_NORM>(matrices.g(trial_x));
 
-        // If the step using αᵐᵃˣ reduced the KKT error, accept it anyway
-        if (next_kkt_error <= Scalar(0.999) * current_kkt_error) {
+        // If the step using αᵐᵃˣ reduced the KKT error below the current
+        // iterate's and every previous fallback step's, accept it anyway
+        if (next_kkt_error <=
+            Scalar(0.999) * std::min(current_kkt_error, fallback_kkt_error)) {
           // Accept step
+          fallback_kkt_error = next_kkt_error;
           α = α_max;
           break;
         }

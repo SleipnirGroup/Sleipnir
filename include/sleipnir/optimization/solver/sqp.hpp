@@ -2,9 +2,11 @@
 
 #pragma once
 
+#include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <functional>
+#include <limits>
 #include <optional>
 #include <span>
 
@@ -120,6 +122,31 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
     Scalar dual_inf_norm() const {
       return p_y.template lpNorm<Eigen::Infinity>();
     }
+
+    /// Returns the step size below which the primal step is negligible
+    /// relative to the iterate.
+    ///
+    /// @param x The decision variables.
+    /// @return The step size below which the primal step is negligible
+    ///     relative to the iterate.
+    Scalar tiny_step_size(const DenseVector& x) const {
+      // A primal step αpˣ is negligible if
+      //
+      //   ‖αpˣ/(1 + |x|)‖_∞ < 10ε
+      //
+      // where the absolute value and division are elementwise. Since α > 0, it
+      // factors out of the norm.
+      //
+      //   α‖pˣ/(1 + |x|)‖_∞ < 10ε
+      //
+      // Dividing both sides by the norm gives
+      //
+      //   α < 10ε / ‖pˣ/(1 + |x|)‖_∞
+      return Scalar(10) * std::numeric_limits<Scalar>::epsilon() /
+             (p_x.array().abs() / (Scalar(1) + x.array().abs()))
+                 .matrix()
+                 .template lpNorm<Eigen::Infinity>();
+    }
   };
 
   using std::isfinite;
@@ -203,11 +230,15 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
       H.nonZeros() + A_e.nonZeros() < 0.25 * lhs_rows * lhs_rows,
       matrices.num_decision_variables, matrices.num_equality_constraints};
 
-  // Variables for determining when a step is acceptable
+  // Step size reduction factor
   constexpr Scalar α_reduction_factor(0.5);
-  constexpr Scalar α_min(1e-7);
 
   int full_step_rejected_counter = 0;
+
+  // The smallest KKT error of a step accepted by the KKT error reduction
+  // fallback. Each fallback step must improve on it, so finitely many fallback
+  // steps are taken before the solver converges.
+  Scalar fallback_kkt_error = std::numeric_limits<Scalar>::infinity();
 
   StallDetector<Scalar> stall_detector;
 
@@ -296,6 +327,13 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
     const FilterEntry<Scalar> current_entry{f, c_e};
     const Scalar D_ϕ = g.transpose() * step.p_x;
 
+    const Scalar α_min = filter.min_step_size(current_entry, D_ϕ);
+
+    // α_min can be zero (e.g., when the constraint violation is zero), so also
+    // end the line search when the step becomes negligible relative to the
+    // iterate. This bounds the number of step size reductions.
+    const Scalar α_tiny = step.tiny_step_size(x);
+
     // Loop until a step is accepted
     while (1) {
       trial_x = x + α * step.p_x;
@@ -310,7 +348,7 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
         // Reduce step size
         α *= α_reduction_factor;
 
-        if (α < α_min) {
+        if (α < α_min || α < α_tiny) {
           call_feasibility_restoration = true;
           break;
         }
@@ -417,24 +455,17 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
       }
 
       // If the full step was rejected enough times in a row, reset the filter
-      // because it may be impeding progress.
-      //
-      // See section 3.2 case I of [2].
-      if (full_step_rejected_counter >= 4 &&
-          filter.max_constraint_violation >
-              current_entry.constraint_violation / Scalar(10) &&
-          filter.last_rejection_due_to_filter()) {
-        filter.max_constraint_violation *= Scalar(0.1);
-        filter.reset();
+      // if it may be impeding progress
+      if (full_step_rejected_counter >= 4 && filter.try_reset(current_entry)) {
         continue;
       }
 
       // Reduce step size
       α *= α_reduction_factor;
 
-      // If step size hit a minimum, check if the KKT error was reduced. If it
-      // wasn't, invoke feasibility restoration.
-      if (α < α_min) {
+      // If step size hit a minimum or the step became negligible, check if the
+      // KKT error was reduced. If it wasn't, invoke feasibility restoration.
+      if (α < α_min || α < α_tiny) {
         Scalar current_kkt_error =
             kkt_error<Scalar, KKTErrorType::ONE_NORM>(g, A_e, c_e, y);
 
@@ -447,11 +478,14 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
         Scalar next_kkt_error = kkt_error<Scalar, KKTErrorType::ONE_NORM>(
             matrices.g(trial_x), matrices.A_e(trial_x), trial_c_e, trial_y);
 
-        // If the step using αᵐᵃˣ reduced the KKT error, accept it anyway
-        if (next_kkt_error <= Scalar(0.999) * current_kkt_error &&
+        // If the step using αᵐᵃˣ reduced the KKT error below the current
+        // iterate's and every previous fallback step's, accept it anyway
+        if (next_kkt_error <= Scalar(0.999) * std::min(current_kkt_error,
+                                                       fallback_kkt_error) &&
             constraint_violation(trial_c_e) <=
                 filter.max_constraint_violation) {
           // Accept step
+          fallback_kkt_error = next_kkt_error;
           α = α_max;
           break;
         }
@@ -478,6 +512,10 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
 
       FilterEntry initial_entry{matrices.f(x), c_e};
 
+      // Augment the filter with the current iterate so the normal phase can't
+      // return to it
+      filter.add(initial_entry);
+
       feasibility_restoration_cycle_detector.record_entry(
           initial_entry.constraint_violation);
       const bool run_feasibility_restoration_to_convergence =
@@ -500,14 +538,12 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
         DenseVector trial_c_e = matrices.c_e(trial_x);
 
         FilterEntry trial_entry{matrices.f(trial_x), trial_c_e};
-        const Scalar D_ϕ_restoration = g.transpose() * (trial_x - x);
 
         // If the current iterate sufficiently reduces constraint violation and
         // is accepted by the normal filter, stop feasibility restoration
         return trial_entry.constraint_violation <
                    Scalar(0.9) * initial_entry.constraint_violation &&
-               filter.try_add(initial_entry, trial_entry, D_ϕ_restoration,
-                              Scalar(1));
+               filter.is_acceptable(trial_entry);
       });
       auto status = feasibility_restoration<Scalar>(matrices, callbacks,
                                                     options, x, y, iterations);
@@ -519,6 +555,18 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
 
       f = matrices.f(x);
       c_e = matrices.c_e(x);
+
+      // Resuming from an iterate the filter rejects would break the filter's
+      // convergence guarantee, and continuing feasibility restoration from its
+      // converged point would return that point again, so report failure.
+      //
+      // The returned iterate can be rejected because feasibility restoration
+      // stops at its own convergence tolerance instead of driving constraint
+      // violation to zero, so the filter can still hold entries with lower cost
+      // and constraint violation.
+      if (!filter.is_acceptable(FilterEntry{f, c_e})) {
+        return ExitStatus::FEASIBILITY_RESTORATION_FAILED;
+      }
     } else {
       // If full step was accepted, reset full-step rejected counter
       if (α == α_max) {
