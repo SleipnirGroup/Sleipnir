@@ -46,7 +46,11 @@ def flywheel_test(
     problem.minimize((r_mat - problem.X()) @ (r_mat - problem.X()).T)
 
     assert problem.cost_function_type() == ExpressionType.QUADRATIC
-    assert problem.equality_constraint_type() == ExpressionType.LINEAR
+    if transcription_method == TranscriptionMethod.SINGLE_SHOOTING:
+        # The initial state is set directly instead of constrained
+        assert problem.equality_constraint_type() == ExpressionType.NONE
+    else:
+        assert problem.equality_constraint_type() == ExpressionType.LINEAR
     assert problem.inequality_constraint_type() == ExpressionType.LINEAR
 
     assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS

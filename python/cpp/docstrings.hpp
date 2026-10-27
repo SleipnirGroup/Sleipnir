@@ -671,6 +671,8 @@ constexpr char mkd_doc_slp_OCP_m_dynamics_type[] = R"doc()doc";
 
 constexpr char mkd_doc_slp_OCP_m_num_steps[] = R"doc()doc";
 
+constexpr char mkd_doc_slp_OCP_m_transcription_method[] = R"doc()doc";
+
 constexpr char mkd_doc_slp_OCP_rk4[] =
 R"doc(Performs 4th order Runge-Kutta integration of dx/dt = f(t, x, u) for
 dt.

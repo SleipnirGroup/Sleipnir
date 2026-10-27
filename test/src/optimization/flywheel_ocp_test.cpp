@@ -61,7 +61,12 @@ void flywheel_test(
   problem.minimize((r_mat - problem.X()) * (r_mat - problem.X()).T());
 
   CHECK(problem.cost_function_type() == slp::ExpressionType::QUADRATIC);
-  CHECK(problem.equality_constraint_type() == slp::ExpressionType::LINEAR);
+  if (transcription_method == slp::TranscriptionMethod::SINGLE_SHOOTING) {
+    // The initial state is set directly instead of constrained
+    CHECK(problem.equality_constraint_type() == slp::ExpressionType::NONE);
+  } else {
+    CHECK(problem.equality_constraint_type() == slp::ExpressionType::LINEAR);
+  }
   CHECK(problem.inequality_constraint_type() == slp::ExpressionType::LINEAR);
 
   REQUIRE(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
