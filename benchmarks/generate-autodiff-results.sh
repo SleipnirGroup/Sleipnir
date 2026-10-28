@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 for derivative in gradient jacobian hessian; do
   ../build/${derivative}_autodiff_benchmark \
     --benchmark_min_time=0.05s \
