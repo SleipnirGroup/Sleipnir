@@ -14,7 +14,7 @@ import numpy as np
 import numpy.typing as npt
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
-from scipy.optimize import curve_fit
+from scipy.optimize import nnls
 
 # Conversion factors from Google Benchmark time units to milliseconds
 MS_PER_UNIT = {"ns": 1e-6, "us": 1e-3, "ms": 1.0, "s": 1e3}
@@ -121,41 +121,52 @@ def plot_poly_fit(
     ax: Axes,
     x: npt.NDArray[np.int64],
     y: npt.NDArray[np.float64],
-    func: Callable[..., npt.NDArray[np.float64]],
-    bases: list[str],
+    basis_funcs: list[Callable[[npt.NDArray[np.float64]], npt.NDArray[np.float64]]],
+    basis_labels: list[str],
     color: str,
 ) -> None:
     """
-    Plots a polynomial curve fit for the given x-y function.
+    Plots a least-squares fit of a linear combination of basis functions.
 
     Args:
         ax: The axis on which to plot.
         x: The list of x values.
         y: The list of y values.
-        func: The function to fit.
-        bases: A list of strings to print for the basis terms.
+        basis_funcs: The basis functions of x to combine. Each must be
+            nondecreasing for x ≥ 1.
+        basis_labels: A list of strings to print for the basis terms.
         color: The color to use for the plot.
     """
-    # Fit the coefficients, constraining them to be nonnegative since runtime
-    # can't decrease with problem size
-    coeffs = curve_fit(
-        func, x, y, p0=(1,) * len(bases), bounds=([0] * len(bases), np.inf)
-    )[0]
 
-    # Build the fit equation label, omitting terms with negligible coefficients
-    label = ""
-    for i in range(len(coeffs)):
-        if abs(coeffs[i]) > 1e-10:
-            if label:
-                label += " + " if coeffs[i] > 0 else " - "
-            label += f"{coeffs[i]:.4g}{bases[i]}"
-    label = "Fit: y = " + label
+    # Evaluates the basis functions as the columns of a matrix
+    def basis_matrix(x: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
+        return np.column_stack([f(x) for f in basis_funcs])
+
+    # Fit the coefficients with nonnegative least squares since runtime can't
+    # decrease with problem size. Scale the columns to unit maximum so the solve
+    # is well-conditioned.
+    A = basis_matrix(x.astype(np.float64))
+    scale = np.max(np.abs(A), axis=0)
+    coeffs = nnls(A / scale, y)[0] / scale
+
+    # Build the fit equation label, omitting terms whose largest contribution
+    # over the data range is below 0.1% of the data's magnitude. Such terms are
+    # visually indistinguishable from zero and far below measurement noise. The
+    # coefficients are nonnegative and the bases are nondecreasing, so each
+    # term's contribution peaks at the largest x.
+    contributions = coeffs * A[-1]
+    label = " + ".join(
+        f"{coeff:.4g}{basis_label}"
+        for coeff, contribution, basis_label in zip(coeffs, contributions, basis_labels)
+        if contribution > 1e-3 * np.max(np.abs(y))
+    )
+    label = "Fit: y = " + (label or "0")
 
     # Evaluate the fit on a finer grid spanning the data so the curve is smooth
-    resampled_x = np.arange(x[0], x[-1] + 10, 10)
+    resampled_x = np.arange(x[0], x[-1] + 10, 10, dtype=np.float64)
     ax.plot(
         resampled_x,
-        func(resampled_x, *coeffs),
+        basis_matrix(resampled_x) @ coeffs,
         color=color,
         label=label,
         linestyle="--",
@@ -211,7 +222,7 @@ def plot_results(
                 ax,
                 x,
                 y,
-                lambda x, a, b, c: a * x**2 + b * x + c,
+                [lambda x: x**2, lambda x: x, lambda x: np.ones_like(x)],
                 ["x²", "x", ""],
                 color=colors[i],
             )
