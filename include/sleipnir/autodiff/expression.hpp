@@ -5,13 +5,19 @@
 #include <stdint.h>
 
 #include <algorithm>
+#include <array>
+#include <concepts>
+#include <cstddef>
 #include <memory>
 #include <string_view>
+#include <tuple>
+#include <type_traits>
 #include <utility>
 
 #include <gch/small_vector.hpp>
 
 #include "sleipnir/autodiff/expression_type.hpp"
+#include "sleipnir/util/force_inline.hpp"
 #include "sleipnir/util/function_ref.hpp"
 #include "sleipnir/util/intrusive_shared_ptr.hpp"
 #include "sleipnir/util/pool.hpp"
@@ -26,6 +32,15 @@ inline constexpr bool USE_POOL_ALLOCATOR = true;
 
 template <typename Scalar>
 struct Expression;
+
+/// The maximum number of arguments an expression can have.
+inline constexpr size_t MAX_ARGS = 4;
+
+/// Array with one element per expression argument in visit_args() order.
+///
+/// @tparam T Element type.
+template <typename T>
+using ArgArray = std::array<T, MAX_ARGS>;
 
 /// Typedef for intrusive shared pointer to Expression.
 ///
@@ -63,12 +78,53 @@ struct MultExpression;
 template <typename Scalar, ExpressionType T>
 struct UnaryMinusExpression;
 
+/// Creates an intrusive shared pointer to a derived expression type templated
+/// on ExpressionType, instantiated with the given expression type.
+///
+/// @tparam T Derived expression type template.
+/// @tparam Scalar Scalar type.
+/// @tparam Args Argument types.
+/// @param type The expression's type.
+/// @param args The arguments.
+template <template <typename, ExpressionType> typename T, typename Scalar,
+          typename... Args>
+SLEIPNIR_FORCE_INLINE ExpressionPtr<Scalar> make_typed_expression_ptr(
+    ExpressionType type, const Args&... args) {
+  using enum ExpressionType;
+
+  if (type == LINEAR) {
+    return make_expression_ptr<T<Scalar, LINEAR>>(args...);
+  } else if (type == QUADRATIC) {
+    return make_expression_ptr<T<Scalar, QUADRATIC>>(args...);
+  } else {
+    return make_expression_ptr<T<Scalar, NONLINEAR>>(args...);
+  }
+}
+
 /// Creates an intrusive shared pointer to a constant expression.
 ///
 /// @tparam Scalar Scalar type.
 /// @param value The expression value.
 template <typename Scalar>
 ExpressionPtr<Scalar> constant_ptr(Scalar value);
+
+/// Returns a constant as the given value type.
+///
+/// Lets a derived expression type's derivative formulas be written once for
+/// both Scalar values and ExpressionPtrs.
+///
+/// @tparam Value Scalar or ExpressionPtr<Scalar>.
+/// @tparam Scalar Scalar type.
+/// @param value The constant.
+/// @return The constant as a Value.
+template <typename Value, typename Scalar>
+Value lit(Scalar value) {
+  if constexpr (std::same_as<Value, Scalar>) {
+    return value;
+  } else {
+    return constant_ptr(value);
+  }
+}
 
 /// An autodiff expression node.
 ///
@@ -155,28 +211,15 @@ struct Expression {
       return constant_ptr(lhs->val * rhs->val);
     }
 
-    // Evaluate expression type
-    if (lhs->type() == CONSTANT) {
-      if (rhs->type() == LINEAR) {
-        return make_expression_ptr<MultExpression<Scalar, LINEAR>>(lhs, rhs);
-      } else if (rhs->type() == QUADRATIC) {
-        return make_expression_ptr<MultExpression<Scalar, QUADRATIC>>(lhs, rhs);
-      } else {
-        return make_expression_ptr<MultExpression<Scalar, NONLINEAR>>(lhs, rhs);
-      }
-    } else if (rhs->type() == CONSTANT) {
-      if (lhs->type() == LINEAR) {
-        return make_expression_ptr<MultExpression<Scalar, LINEAR>>(lhs, rhs);
-      } else if (lhs->type() == QUADRATIC) {
-        return make_expression_ptr<MultExpression<Scalar, QUADRATIC>>(lhs, rhs);
-      } else {
-        return make_expression_ptr<MultExpression<Scalar, NONLINEAR>>(lhs, rhs);
-      }
+    // Evaluate expression type. Scaling by a constant keeps the other
+    // operand's type.
+    auto type = NONLINEAR;
+    if (lhs->type() == CONSTANT || rhs->type() == CONSTANT) {
+      type = std::max(lhs->type(), rhs->type());
     } else if (lhs->type() == LINEAR && rhs->type() == LINEAR) {
-      return make_expression_ptr<MultExpression<Scalar, QUADRATIC>>(lhs, rhs);
-    } else {
-      return make_expression_ptr<MultExpression<Scalar, NONLINEAR>>(lhs, rhs);
+      type = QUADRATIC;
     }
+    return make_typed_expression_ptr<MultExpression, Scalar>(type, lhs, rhs);
   }
 
   /// Expression-Expression division operator.
@@ -201,18 +244,10 @@ struct Expression {
       return constant_ptr(lhs->val / rhs->val);
     }
 
-    // Evaluate expression type
-    if (rhs->type() == CONSTANT) {
-      if (lhs->type() == LINEAR) {
-        return make_expression_ptr<DivExpression<Scalar, LINEAR>>(lhs, rhs);
-      } else if (lhs->type() == QUADRATIC) {
-        return make_expression_ptr<DivExpression<Scalar, QUADRATIC>>(lhs, rhs);
-      } else {
-        return make_expression_ptr<DivExpression<Scalar, NONLINEAR>>(lhs, rhs);
-      }
-    } else {
-      return make_expression_ptr<DivExpression<Scalar, NONLINEAR>>(lhs, rhs);
-    }
+    // Evaluate expression type. Dividing by a constant keeps the numerator's
+    // type.
+    auto type = rhs->type() == CONSTANT ? lhs->type() : NONLINEAR;
+    return make_typed_expression_ptr<DivExpression, Scalar>(type, lhs, rhs);
   }
 
   /// Expression-Expression addition operator.
@@ -239,16 +274,8 @@ struct Expression {
     }
 
     auto type = std::max(lhs->type(), rhs->type());
-    if (type == LINEAR) {
-      return make_expression_ptr<BinaryPlusExpression<Scalar, LINEAR>>(lhs,
-                                                                       rhs);
-    } else if (type == QUADRATIC) {
-      return make_expression_ptr<BinaryPlusExpression<Scalar, QUADRATIC>>(lhs,
-                                                                          rhs);
-    } else {
-      return make_expression_ptr<BinaryPlusExpression<Scalar, NONLINEAR>>(lhs,
-                                                                          rhs);
-    }
+    return make_typed_expression_ptr<BinaryPlusExpression, Scalar>(type, lhs,
+                                                                   rhs);
   }
 
   /// Expression-Expression compound addition operator.
@@ -288,16 +315,8 @@ struct Expression {
     }
 
     auto type = std::max(lhs->type(), rhs->type());
-    if (type == LINEAR) {
-      return make_expression_ptr<BinaryMinusExpression<Scalar, LINEAR>>(lhs,
-                                                                        rhs);
-    } else if (type == QUADRATIC) {
-      return make_expression_ptr<BinaryMinusExpression<Scalar, QUADRATIC>>(lhs,
-                                                                           rhs);
-    } else {
-      return make_expression_ptr<BinaryMinusExpression<Scalar, NONLINEAR>>(lhs,
-                                                                           rhs);
-    }
+    return make_typed_expression_ptr<BinaryMinusExpression, Scalar>(type, lhs,
+                                                                    rhs);
   }
 
   /// Unary minus operator.
@@ -317,13 +336,8 @@ struct Expression {
       return constant_ptr(-lhs->val);
     }
 
-    if (lhs->type() == LINEAR) {
-      return make_expression_ptr<UnaryMinusExpression<Scalar, LINEAR>>(lhs);
-    } else if (lhs->type() == QUADRATIC) {
-      return make_expression_ptr<UnaryMinusExpression<Scalar, QUADRATIC>>(lhs);
-    } else {
-      return make_expression_ptr<UnaryMinusExpression<Scalar, NONLINEAR>>(lhs);
-    }
+    return make_typed_expression_ptr<UnaryMinusExpression, Scalar>(lhs->type(),
+                                                                   lhs);
   }
 
   /// Unary plus operator.
@@ -365,56 +379,195 @@ struct Expression {
   virtual void accumulate_adjoints_expr() const {}
 };
 
+/// Base of the derived expression types of non-leaf operators.
+///
+/// Implements Expression's virtual functions from the derived expression type's
+/// eval(), eval_grad(), and NAME and the operator's properties.
+///
+/// The derived expression type computes its partial derivatives with
+/// `eval_grad<Value>(g, val, a₀, a₁, ...)`, which writes ∂/∂aₖ to g[k] given
+/// the expression's value followed by the argument values. Value is Scalar to
+/// evaluate them, or ExpressionPtr<Scalar> to build them as expressions. It's
+/// static unless the partial derivatives depend on the expression's state. If
+/// the derived expression type doesn't define it, all partial derivatives are
+/// structurally zero.
+///
+/// @tparam Derived Derived expression type.
+/// @tparam Scalar Scalar type.
+/// @tparam NumArgs The number of arguments.
+/// @tparam Type The expression's type.
+template <typename Derived, typename Scalar, size_t NumArgs,
+          ExpressionType Type = ExpressionType::NONLINEAR>
+struct NonLeafExpression : Expression<Scalar> {
+  /// The number of arguments.
+  static constexpr size_t NUM_ARGS = NumArgs;
+
+  // Ensure ArgArray is big enough to hold one element per argument
+  static_assert(NumArgs <= MAX_ARGS, "Increase MAX_ARGS");
+
+  /// The arguments in visit_args() order.
+  std::array<ExpressionPtr<Scalar>, NumArgs> args;
+
+  /// Constructs an expression from its arguments.
+  ///
+  /// @param args The arguments in visit_args() order.
+  template <typename... Args>
+    requires(sizeof...(Args) == NumArgs &&
+             (std::same_as<std::remove_cvref_t<Args>, ExpressionPtr<Scalar>> &&
+              ...))
+  explicit constexpr NonLeafExpression(Args&&... args)
+      : args{std::forward<Args>(args)...} {}
+
+  /// Runs a function on each argument.
+  ///
+  /// @param func The function to run.
+  void visit_args(
+      function_ref<void(Expression<Scalar>* arg)> func) const final {
+    [&]<size_t... Is>(std::index_sequence<Is...>) {
+      (func(args[Is].get()), ...);
+    }(std::make_index_sequence<NumArgs>{});
+  }
+
+  /// Returns the node's value computed from its arguments's values.
+  ///
+  /// @return The node's value.
+  Scalar value() const final {
+    return [&]<size_t... Is>(std::index_sequence<Is...>) {
+      return static_cast<const Derived&>(*this).eval(args[Is]->val...);
+    }(std::make_index_sequence<NumArgs>{});
+  }
+
+  /// Returns the type of this expression.
+  ///
+  /// @return The type of this expression.
+  ExpressionType type() const final { return Type; }
+
+  /// Returns the name of this expression.
+  ///
+  /// @return The name of this expression.
+  std::string_view name() const final { return Derived::NAME; }
+
+  /// Accumulates the child adjoints as Scalars.
+  void accumulate_adjoints() const final {
+    [&]<size_t... Is>(std::index_sequence<Is...>) {
+      if constexpr (requires { Derived::UNIT_PARTIAL_SIGNS; }) {
+        // If every partial derivative is 1 or −1 (e.g., for a + b and a − b),
+        // add or subtract the adjoint directly instead of multiplying it by
+        // eval_grad()'s partial derivatives
+        ((args[Is]->adj +=
+          Derived::UNIT_PARTIAL_SIGNS[Is] > 0 ? this->adj : -this->adj),
+         ...);
+      } else {
+        ArgArray<Scalar> g{};
+        grad(g, this->val, args[Is]->val...);
+        ((args[Is]->adj += this->adj * g[Is]), ...);
+      }
+    }(std::make_index_sequence<NumArgs>{});
+  }
+
+  /// Accumulates the child adjoints as Expressions.
+  void accumulate_adjoints_expr() const final {
+    [&]<size_t... Is>(std::index_sequence<Is...>) {
+      if constexpr (requires { Derived::UNIT_PARTIAL_SIGNS; }) {
+        // If every partial derivative is 1 or −1 (e.g., for a + b and a − b),
+        // add the adjoint or its negation directly. Going through eval_grad()
+        // would allocate a constant node per partial derivative, and turn
+        // −adj_expr into adj_expr * −1, which is a multiplication node instead
+        // of a unary minus node.
+        ((args[Is]->adj_expr += Derived::UNIT_PARTIAL_SIGNS[Is] > 0
+                                    ? this->adj_expr
+                                    : -this->adj_expr),
+         ...);
+      } else {
+        ArgArray<ExpressionPtr<Scalar>> g;
+        grad(g, ExpressionPtr<Scalar>{const_cast<NonLeafExpression*>(this)},
+             args[Is]...);
+        (
+            [&] {
+              // A null partial derivative is structurally zero
+              if (g[Is] != nullptr) {
+                args[Is]->adj_expr += this->adj_expr * g[Is];
+              }
+            }(),
+            ...);
+      }
+    }(std::make_index_sequence<NumArgs>{});
+  }
+
+ private:
+  /// Computes the partial derivatives with the derived expression type's
+  /// eval_grad(), or leaves them unwritten if it doesn't define one.
+  ///
+  /// This is a function template instead of a generic lambda because MSVC
+  /// treats an invalid expression in a generic lambda's requires-expression as
+  /// a hard error instead of false.
+  ///
+  /// @tparam Value Scalar or ExpressionPtr<Scalar>.
+  /// @tparam Args Argument types.
+  /// @param g The partial derivatives in visit_args() order.
+  /// @param val The expression's value.
+  /// @param x The argument values in visit_args() order.
+  template <typename Value, typename... Args>
+  void grad(ArgArray<Value>& g, const Value& val, const Args&... x) const {
+    if constexpr (requires(const Derived& expr) {
+                    expr.eval_grad(g, val, x...);
+                  }) {
+      static_cast<const Derived&>(*this).eval_grad(g, val, x...);
+    }
+  }
+};
+
+/// Creates an intrusive shared pointer to a derived expression type, or to a
+/// constant if all its arguments are constant.
+///
+/// A unary operator that maps its constant argument to itself (e.g., sin(0) =
+/// 0) returns the argument instead of allocating a new constant.
+///
+/// @tparam T Derived expression type.
+/// @tparam Args Argument types.
+/// @param args The arguments.
+template <typename T, typename... Args>
+ExpressionPtr<typename T::Scalar> fold_or_make(const Args&... args) {
+  using Scalar = typename T::Scalar;
+
+  if (((args->type() == ExpressionType::CONSTANT) && ...)) {
+    Scalar val = T::eval(args->val...);
+    if constexpr (sizeof...(Args) == 1) {
+      const auto& x = std::get<0>(std::forward_as_tuple(args...));
+      if (x->val == val) {
+        return x;
+      }
+    }
+    return constant_ptr(val);
+  }
+
+  return make_expression_ptr<T>(args...);
+}
+
 /// Derived expression type for binary minus operator.
 ///
 /// @tparam Scalar Scalar type.
 /// @tparam T Expression type.
 template <typename Scalar, ExpressionType T>
-struct BinaryMinusExpression final : Expression<Scalar> {
-  /// Binary operator's left operand.
-  ExpressionPtr<Scalar> lhs;
+struct BinaryMinusExpression final
+    : NonLeafExpression<BinaryMinusExpression<Scalar, T>, Scalar, 2, T> {
+  using BinaryMinusExpression::NonLeafExpression::NonLeafExpression;
 
-  /// Binary operator's right operand.
-  ExpressionPtr<Scalar> rhs;
+  /// The expression's name.
+  static constexpr std::string_view NAME = "binary minus";
 
-  /// Constructs a binary expression (an operator with two arguments).
-  ///
-  /// @param lhs Binary operator's left operand.
-  /// @param rhs Binary operator's right operand.
-  constexpr BinaryMinusExpression(ExpressionPtr<Scalar> lhs,
-                                  ExpressionPtr<Scalar> rhs)
-      : lhs{std::move(lhs)}, rhs{std::move(rhs)} {}
+  /// ∂(a − b)/∂a = 1 and ∂(a − b)/∂b = −1.
+  static constexpr std::array<int, 2> UNIT_PARTIAL_SIGNS{1, -1};
 
-  void visit_args(
-      function_ref<void(Expression<Scalar>* arg)> func) const override {
-    func(lhs.get());
-    func(rhs.get());
+  static Scalar eval(Scalar lhs, Scalar rhs) { return lhs - rhs; }
+
+  template <typename Value>
+  static void eval_grad(ArgArray<Value>& g, [[maybe_unused]] const Value& val,
+                        [[maybe_unused]] const Value& lhs,
+                        [[maybe_unused]] const Value& rhs) {
+    g[0] = lit<Value>(Scalar(1));
+    g[1] = lit<Value>(Scalar(-1));
   }
-
-  Scalar value() const override { return lhs->val - rhs->val; }
-
-  ExpressionType type() const override { return T; }
-
-  std::string_view name() const override { return "binary minus"; }
-
-  void accumulate_adjoints() const override {
-    lhs->adj += grad_l();
-    rhs->adj += grad_r();
-  }
-
-  void accumulate_adjoints_expr() const override {
-    lhs->adj_expr += grad_expr_l();
-    rhs->adj_expr += grad_expr_r();
-  }
-
- private:
-  Scalar grad_l() const { return this->adj; }
-
-  Scalar grad_r() const { return -this->adj; }
-
-  ExpressionPtr<Scalar> grad_expr_l() const { return this->adj_expr; }
-
-  ExpressionPtr<Scalar> grad_expr_r() const { return -this->adj_expr; }
 };
 
 /// Derived expression type for binary plus operator.
@@ -422,51 +575,25 @@ struct BinaryMinusExpression final : Expression<Scalar> {
 /// @tparam Scalar Scalar type.
 /// @tparam T Expression type.
 template <typename Scalar, ExpressionType T>
-struct BinaryPlusExpression final : Expression<Scalar> {
-  /// Binary operator's left operand.
-  ExpressionPtr<Scalar> lhs;
+struct BinaryPlusExpression final
+    : NonLeafExpression<BinaryPlusExpression<Scalar, T>, Scalar, 2, T> {
+  using BinaryPlusExpression::NonLeafExpression::NonLeafExpression;
 
-  /// Binary operator's right operand.
-  ExpressionPtr<Scalar> rhs;
+  /// The expression's name.
+  static constexpr std::string_view NAME = "binary plus";
 
-  /// Constructs a binary expression (an operator with two arguments).
-  ///
-  /// @param lhs Binary operator's left operand.
-  /// @param rhs Binary operator's right operand.
-  constexpr BinaryPlusExpression(ExpressionPtr<Scalar> lhs,
-                                 ExpressionPtr<Scalar> rhs)
-      : lhs{std::move(lhs)}, rhs{std::move(rhs)} {}
+  /// ∂(a + b)/∂a = 1 and ∂(a + b)/∂b = 1.
+  static constexpr std::array<int, 2> UNIT_PARTIAL_SIGNS{1, 1};
 
-  void visit_args(
-      function_ref<void(Expression<Scalar>* arg)> func) const override {
-    func(lhs.get());
-    func(rhs.get());
+  static Scalar eval(Scalar lhs, Scalar rhs) { return lhs + rhs; }
+
+  template <typename Value>
+  static void eval_grad(ArgArray<Value>& g, [[maybe_unused]] const Value& val,
+                        [[maybe_unused]] const Value& lhs,
+                        [[maybe_unused]] const Value& rhs) {
+    g[0] = lit<Value>(Scalar(1));
+    g[1] = lit<Value>(Scalar(1));
   }
-
-  Scalar value() const override { return lhs->val + rhs->val; }
-
-  ExpressionType type() const override { return T; }
-
-  std::string_view name() const override { return "binary plus"; }
-
-  void accumulate_adjoints() const override {
-    lhs->adj += grad_l();
-    rhs->adj += grad_r();
-  }
-
-  void accumulate_adjoints_expr() const override {
-    lhs->adj_expr += grad_expr_l();
-    rhs->adj_expr += grad_expr_r();
-  }
-
- private:
-  Scalar grad_l() const { return this->adj; }
-
-  Scalar grad_r() const { return this->adj; }
-
-  ExpressionPtr<Scalar> grad_expr_l() const { return this->adj_expr; }
-
-  ExpressionPtr<Scalar> grad_expr_r() const { return this->adj_expr; }
 };
 
 /// Derived expression type for binary division operator.
@@ -474,53 +601,20 @@ struct BinaryPlusExpression final : Expression<Scalar> {
 /// @tparam Scalar Scalar type.
 /// @tparam T Expression type.
 template <typename Scalar, ExpressionType T>
-struct DivExpression final : Expression<Scalar> {
-  /// @param lhs Binary operator's left operand.
-  ExpressionPtr<Scalar> lhs;
+struct DivExpression final
+    : NonLeafExpression<DivExpression<Scalar, T>, Scalar, 2, T> {
+  using DivExpression::NonLeafExpression::NonLeafExpression;
 
-  /// @param rhs Binary operator's right operand.
-  ExpressionPtr<Scalar> rhs;
+  /// The expression's name.
+  static constexpr std::string_view NAME = "division";
 
-  /// Constructs a binary expression (an operator with two arguments).
-  ///
-  /// @param lhs Binary operator's left operand.
-  /// @param rhs Binary operator's right operand.
-  constexpr DivExpression(ExpressionPtr<Scalar> lhs, ExpressionPtr<Scalar> rhs)
-      : lhs{std::move(lhs)}, rhs{std::move(rhs)} {}
+  static Scalar eval(Scalar lhs, Scalar rhs) { return lhs / rhs; }
 
-  void visit_args(
-      function_ref<void(Expression<Scalar>* arg)> func) const override {
-    func(lhs.get());
-    func(rhs.get());
-  }
-
-  Scalar value() const override { return lhs->val / rhs->val; }
-
-  ExpressionType type() const override { return T; }
-
-  std::string_view name() const override { return "division"; }
-
-  void accumulate_adjoints() const override {
-    lhs->adj += grad_l();
-    rhs->adj += grad_r();
-  }
-
-  void accumulate_adjoints_expr() const override {
-    lhs->adj_expr += grad_expr_l();
-    rhs->adj_expr += grad_expr_r();
-  }
-
- private:
-  Scalar grad_l() const { return this->adj / rhs->val; };
-
-  Scalar grad_r() const {
-    return this->adj * -lhs->val / (rhs->val * rhs->val);
-  }
-
-  ExpressionPtr<Scalar> grad_expr_l() const { return this->adj_expr / rhs; }
-
-  ExpressionPtr<Scalar> grad_expr_r() const {
-    return this->adj_expr * -lhs / (rhs * rhs);
+  template <typename Value>
+  static void eval_grad(ArgArray<Value>& g, [[maybe_unused]] const Value& val,
+                        const Value& lhs, const Value& rhs) {
+    g[0] = lit<Value>(Scalar(1)) / rhs;
+    g[1] = -lhs / (rhs * rhs);
   }
 };
 
@@ -529,50 +623,21 @@ struct DivExpression final : Expression<Scalar> {
 /// @tparam Scalar Scalar type.
 /// @tparam T Expression type.
 template <typename Scalar, ExpressionType T>
-struct MultExpression final : Expression<Scalar> {
-  /// Binary operator's left operand.
-  ExpressionPtr<Scalar> lhs;
+struct MultExpression final
+    : NonLeafExpression<MultExpression<Scalar, T>, Scalar, 2, T> {
+  using MultExpression::NonLeafExpression::NonLeafExpression;
 
-  /// Binary operator's right operand.
-  ExpressionPtr<Scalar> rhs;
+  /// The expression's name.
+  static constexpr std::string_view NAME = "multiplication";
 
-  /// Constructs a binary expression (an operator with two arguments).
-  ///
-  /// @param lhs Binary operator's left operand.
-  /// @param rhs Binary operator's right operand.
-  constexpr MultExpression(ExpressionPtr<Scalar> lhs, ExpressionPtr<Scalar> rhs)
-      : lhs{std::move(lhs)}, rhs{std::move(rhs)} {}
+  static Scalar eval(Scalar lhs, Scalar rhs) { return lhs * rhs; }
 
-  void visit_args(
-      function_ref<void(Expression<Scalar>* arg)> func) const override {
-    func(lhs.get());
-    func(rhs.get());
+  template <typename Value>
+  static void eval_grad(ArgArray<Value>& g, [[maybe_unused]] const Value& val,
+                        const Value& lhs, const Value& rhs) {
+    g[0] = rhs;
+    g[1] = lhs;
   }
-
-  Scalar value() const override { return lhs->val * rhs->val; }
-
-  ExpressionType type() const override { return T; }
-
-  std::string_view name() const override { return "multiplication"; }
-
-  void accumulate_adjoints() const override {
-    lhs->adj += grad_l();
-    rhs->adj += grad_r();
-  }
-
-  void accumulate_adjoints_expr() const override {
-    lhs->adj_expr += grad_expr_l();
-    rhs->adj_expr += grad_expr_r();
-  }
-
- private:
-  Scalar grad_l() const { return this->adj * rhs->val; }
-
-  Scalar grad_r() const { return this->adj * lhs->val; }
-
-  ExpressionPtr<Scalar> grad_expr_l() const { return this->adj_expr * rhs; }
-
-  ExpressionPtr<Scalar> grad_expr_r() const { return this->adj_expr * lhs; }
 };
 
 /// Derived expression type for unary minus operator.
@@ -580,37 +645,23 @@ struct MultExpression final : Expression<Scalar> {
 /// @tparam Scalar Scalar type.
 /// @tparam T Expression type.
 template <typename Scalar, ExpressionType T>
-struct UnaryMinusExpression final : Expression<Scalar> {
-  /// Unary operator's operand.
-  ExpressionPtr<Scalar> lhs;
+struct UnaryMinusExpression final
+    : NonLeafExpression<UnaryMinusExpression<Scalar, T>, Scalar, 1, T> {
+  using UnaryMinusExpression::NonLeafExpression::NonLeafExpression;
 
-  /// Constructs an unary expression (an operator with one argument).
-  ///
-  /// @param lhs Unary operator's operand.
-  explicit constexpr UnaryMinusExpression(ExpressionPtr<Scalar> lhs)
-      : lhs{std::move(lhs)} {}
+  /// The expression's name.
+  static constexpr std::string_view NAME = "unary minus";
 
-  void visit_args(
-      function_ref<void(Expression<Scalar>* arg)> func) const override {
-    func(lhs.get());
+  /// ∂(−a)/∂a = −1.
+  static constexpr std::array<int, 1> UNIT_PARTIAL_SIGNS{-1};
+
+  static Scalar eval(Scalar lhs) { return -lhs; }
+
+  template <typename Value>
+  static void eval_grad(ArgArray<Value>& g, [[maybe_unused]] const Value& val,
+                        [[maybe_unused]] const Value& lhs) {
+    g[0] = lit<Value>(Scalar(-1));
   }
-
-  Scalar value() const override { return -lhs->val; }
-
-  ExpressionType type() const override { return T; }
-
-  std::string_view name() const override { return "unary minus"; }
-
-  void accumulate_adjoints() const override { lhs->adj += grad_l(); }
-
-  void accumulate_adjoints_expr() const override {
-    lhs->adj_expr += grad_expr_l();
-  }
-
- private:
-  Scalar grad_l() const { return -this->adj; }
-
-  ExpressionPtr<Scalar> grad_expr_l() const { return -this->adj_expr; }
 };
 
 /// Refcount increment for intrusive shared pointer.
