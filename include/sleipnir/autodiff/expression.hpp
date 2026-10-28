@@ -392,6 +392,10 @@ struct Expression {
 /// the derived expression type doesn't define it, all partial derivatives are
 /// structurally zero.
 ///
+/// If the derived expression type sets CONSTANT_PARTIALS to true, gradient
+/// trees evaluate the partial derivatives as Scalars instead of building them
+/// as expressions.
+///
 /// @tparam Derived Derived expression type.
 /// @tparam Scalar Scalar type.
 /// @tparam NumArgs The number of arguments.
@@ -404,6 +408,9 @@ struct NonLeafExpression : Expression<Scalar> {
 
   // Ensure ArgArray is big enough to hold one element per argument
   static_assert(NumArgs <= MAX_ARGS, "Increase MAX_ARGS");
+
+  /// Whether the partial derivatives are the same at every argument value.
+  static constexpr bool CONSTANT_PARTIALS = false;
 
   /// The arguments in visit_args() order.
   std::array<ExpressionPtr<Scalar>, NumArgs> args;
@@ -450,38 +457,46 @@ struct NonLeafExpression : Expression<Scalar> {
   /// Accumulates the child adjoints as Scalars.
   void accumulate_adjoints() const final {
     [&]<size_t... Is>(std::index_sequence<Is...>) {
-      if constexpr (requires { Derived::UNIT_PARTIAL_SIGNS; }) {
-        // If every partial derivative is 1 or −1 (e.g., for a + b and a − b),
-        // add or subtract the adjoint directly instead of multiplying it by
-        // eval_grad()'s partial derivatives
-        ((args[Is]->adj +=
-          Derived::UNIT_PARTIAL_SIGNS[Is] > 0 ? this->adj : -this->adj),
-         ...);
-      } else {
-        ArgArray<Scalar> g{};
-        grad(g, this->val, args[Is]->val...);
-        ((args[Is]->adj += this->adj * g[Is]), ...);
-      }
+      // Evaluate gradients
+      ArgArray<Scalar> g{};
+      grad(g, this->val, args[Is]->val...);
+
+      // Accumulate adjoints
+      ((args[Is]->adj += this->adj * g[Is]), ...);
     }(std::make_index_sequence<NumArgs>{});
   }
 
   /// Accumulates the child adjoints as Expressions.
   void accumulate_adjoints_expr() const final {
     [&]<size_t... Is>(std::index_sequence<Is...>) {
-      if constexpr (requires { Derived::UNIT_PARTIAL_SIGNS; }) {
-        // If every partial derivative is 1 or −1 (e.g., for a + b and a − b),
-        // add the adjoint or its negation directly. Going through eval_grad()
-        // would allocate a constant node per partial derivative, and turn
-        // −adj_expr into adj_expr * −1, which is a multiplication node instead
-        // of a unary minus node.
-        ((args[Is]->adj_expr += Derived::UNIT_PARTIAL_SIGNS[Is] > 0
-                                    ? this->adj_expr
-                                    : -this->adj_expr),
-         ...);
+      // If the partial derivatives are constant, evaluate them as Scalars
+      // instead of building them as expressions
+      if constexpr (Derived::CONSTANT_PARTIALS) {
+        // Evaluate gradients
+        ArgArray<Scalar> g{};
+        grad(g, this->val, args[Is]->val...);
+
+        // Accumulate adjoints
+        (
+            [&] {
+              // Fold the adjoint accumulation expression if the gradient is
+              // 1, -1, or 0
+              if (g[Is] == Scalar(1)) {
+                args[Is]->adj_expr += this->adj_expr;
+              } else if (g[Is] == Scalar(-1)) {
+                args[Is]->adj_expr += -this->adj_expr;
+              } else if (g[Is] != Scalar(0)) {
+                args[Is]->adj_expr += this->adj_expr * constant_ptr(g[Is]);
+              }
+            }(),
+            ...);
       } else {
+        // Evaluate gradients
         ArgArray<ExpressionPtr<Scalar>> g;
         grad(g, ExpressionPtr<Scalar>{const_cast<NonLeafExpression*>(this)},
              args[Is]...);
+
+        // Accumulate adjoints
         (
             [&] {
               // A null partial derivative is structurally zero
@@ -556,8 +571,8 @@ struct BinaryMinusExpression final
   /// The expression's name.
   static constexpr std::string_view NAME = "binary minus";
 
-  /// ∂(a − b)/∂a = 1 and ∂(a − b)/∂b = −1.
-  static constexpr std::array<int, 2> UNIT_PARTIAL_SIGNS{1, -1};
+  /// Whether the partial derivatives are the same at every argument value.
+  static constexpr bool CONSTANT_PARTIALS = true;
 
   static Scalar eval(Scalar lhs, Scalar rhs) { return lhs - rhs; }
 
@@ -582,8 +597,8 @@ struct BinaryPlusExpression final
   /// The expression's name.
   static constexpr std::string_view NAME = "binary plus";
 
-  /// ∂(a + b)/∂a = 1 and ∂(a + b)/∂b = 1.
-  static constexpr std::array<int, 2> UNIT_PARTIAL_SIGNS{1, 1};
+  /// Whether the partial derivatives are the same at every argument value.
+  static constexpr bool CONSTANT_PARTIALS = true;
 
   static Scalar eval(Scalar lhs, Scalar rhs) { return lhs + rhs; }
 
@@ -652,8 +667,8 @@ struct UnaryMinusExpression final
   /// The expression's name.
   static constexpr std::string_view NAME = "unary minus";
 
-  /// ∂(−a)/∂a = −1.
-  static constexpr std::array<int, 1> UNIT_PARTIAL_SIGNS{-1};
+  /// Whether the partial derivatives are the same at every argument value.
+  static constexpr bool CONSTANT_PARTIALS = true;
 
   static Scalar eval(Scalar lhs) { return -lhs; }
 
