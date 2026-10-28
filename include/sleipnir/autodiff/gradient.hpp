@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <algorithm>
 #include <utility>
 
 #include <Eigen/SparseCore>
@@ -51,7 +52,18 @@ class Gradient {
   ///
   /// @return The gradient at wrt's value.
   const Eigen::SparseVector<Scalar>& value() {
-    m_g = m_jacobian.value().transpose();
+    const auto& J = m_jacobian.value();
+
+    if (m_g.rows() == 0) {
+      m_g = J.transpose();
+    } else {
+      // J's sparsity pattern is constant, so m_g's indices from the first
+      // transpose are still valid. J is column-major with one row, so each
+      // column holds at most one value and the values are sorted by column
+      // index. This matches m_g's index order, so we can copy the values
+      // directly.
+      std::copy_n(J.valuePtr(), J.nonZeros(), m_g.valuePtr());
+    }
 
     return m_g;
   }
