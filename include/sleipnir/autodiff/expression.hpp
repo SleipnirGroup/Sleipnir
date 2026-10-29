@@ -688,12 +688,13 @@ constexpr void inc_ref_count(Expression<Scalar>* expr) {
   ++expr->ref_count;
 }
 
-/// Refcount decrement for intrusive shared pointer.
+/// Deallocates an expression whose refcount reached zero, along with any of
+/// its descendants whose refcounts reach zero as a result.
 ///
 /// @tparam Scalar Scalar type.
-/// @param expr The shared pointer's managed object.
+/// @param expr The expression to deallocate.
 template <typename Scalar>
-constexpr void dec_ref_count(Expression<Scalar>* expr) {
+void deallocate_expression(Expression<Scalar>* expr) {
   // If a deeply nested tree is being deallocated all at once, calling the
   // Expression destructor when expr's refcount reaches zero can cause a stack
   // overflow. Instead, we iterate over its children to decrement their
@@ -701,27 +702,42 @@ constexpr void dec_ref_count(Expression<Scalar>* expr) {
   gch::small_vector<Expression<Scalar>*> stack;
   stack.emplace_back(expr);
 
+  // Decrements a child's refcount and enqueues it for deallocation if it
+  // reaches zero
+  auto release = [&stack](Expression<Scalar>* child) {
+    if (--child->ref_count == 0) {
+      stack.emplace_back(child);
+    }
+  };
+
   while (!stack.empty()) {
     auto elem = stack.back();
     stack.pop_back();
 
-    // Decrement the current node's refcount. If it reaches zero, deallocate the
-    // node and enqueue its children so their refcounts are decremented too.
-    if (--elem->ref_count == 0) {
-      if (elem->adj_expr != nullptr) {
-        stack.emplace_back(elem->adj_expr.get());
-      }
-      elem->visit_args([&stack](const auto& arg) { stack.emplace_back(arg); });
-
-      // Not calling the destructor here is safe because it only decrements
-      // refcounts, which was already done above.
-      if constexpr (USE_POOL_ALLOCATOR) {
-        auto alloc = global_pool_allocator<Expression<Scalar>>();
-        std::allocator_traits<decltype(alloc)>::deallocate(alloc, elem, 1);
-      } else {
-        operator delete(elem);
-      }
+    if (elem->adj_expr != nullptr) {
+      release(elem->adj_expr.get());
     }
+    elem->visit_args(release);
+
+    // Not calling the destructor here is safe because it only decrements
+    // refcounts, which was already done above
+    if constexpr (USE_POOL_ALLOCATOR) {
+      auto alloc = global_pool_allocator<Expression<Scalar>>();
+      std::allocator_traits<decltype(alloc)>::deallocate(alloc, elem, 1);
+    } else {
+      operator delete(elem);
+    }
+  }
+}
+
+/// Refcount decrement for intrusive shared pointer.
+///
+/// @tparam Scalar Scalar type.
+/// @param expr The shared pointer's managed object.
+template <typename Scalar>
+constexpr void dec_ref_count(Expression<Scalar>* expr) {
+  if (--expr->ref_count == 0) {
+    deallocate_expression(expr);
   }
 }
 
