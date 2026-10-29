@@ -179,7 +179,7 @@ struct Expression {
   ///
   /// @param constant The constant.
   /// @return True if the expression is the given constant.
-  constexpr bool is_constant(Scalar constant) const {
+  SLEIPNIR_FORCE_INLINE constexpr bool is_constant(Scalar constant) const {
     return type() == ExpressionType::CONSTANT && val == constant;
   }
 
