@@ -44,7 +44,8 @@ try_cast_to_eigen(const nb::object& obj) {
                       alignof(Scalar), Stride>{
         arr.data(), static_cast<Eigen::Index>(arr.shape(0)),
         static_cast<Eigen::Index>(arr.shape(1)),
-        Stride{arr.stride(0), arr.stride(1)}};
+        Stride{static_cast<Eigen::Index>(arr.stride(0)),
+               static_cast<Eigen::Index>(arr.stride(1))}};
   } else {
     return std::nullopt;
   }
