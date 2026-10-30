@@ -106,8 +106,12 @@ FetchContent_MakeAvailable(small_vector)
 
 target_link_libraries(Sleipnir PUBLIC small_vector)
 
-if(PROJECT_IS_TOP_LEVEL AND BUILD_TESTING AND NOT CMAKE_CROSSCOMPILING)
+if(PROJECT_IS_TOP_LEVEL AND BUILD_TESTING)
     # Catch2 dependency
+    if(CMAKE_SYSTEM_NAME STREQUAL "Generic")
+        # Bare-metal targets don't support POSIX signals
+        set(CATCH_CONFIG_NO_POSIX_SIGNALS ON)
+    endif()
     FetchContent_Declare(
         Catch2
         GIT_REPOSITORY https://github.com/catchorg/Catch2.git
@@ -231,7 +235,7 @@ if(SLEIPNIR_BUILD_BENCHMARKS)
     endif()
 endif()
 
-if(PROJECT_IS_TOP_LEVEL AND BUILD_TESTING AND NOT CMAKE_CROSSCOMPILING)
+if(PROJECT_IS_TOP_LEVEL AND BUILD_TESTING)
     enable_testing()
     list(APPEND CMAKE_MODULE_PATH ${Catch2_SOURCE_DIR}/extras)
     include(Catch)
@@ -311,6 +315,14 @@ if(PROJECT_IS_TOP_LEVEL AND BUILD_TESTING AND NOT CMAKE_CROSSCOMPILING)
         GLOB_RECURSE sleipnir_optimization_test_src
         test/src/optimization/*_test.cpp
     )
+    if(CMAKE_SYSTEM_NAME STREQUAL "Generic")
+        # Bare-metal targets don't support threads
+        list(
+            FILTER sleipnir_optimization_test_src
+            EXCLUDE
+            REGEX "/multistart_test\\.cpp$"
+        )
+    endif()
     add_executable(sleipnir_optimization_test ${sleipnir_optimization_test_src})
     compiler_flags(sleipnir_optimization_test)
     target_compile_definitions(
@@ -343,7 +355,7 @@ if(PROJECT_IS_TOP_LEVEL AND BUILD_TESTING AND NOT CMAKE_CROSSCOMPILING)
         PUBLIC Sleipnir Catch2::Catch2WithMain
     )
 
-    if(NOT CMAKE_TOOLCHAIN_FILE)
+    if(NOT CMAKE_CROSSCOMPILING OR CMAKE_CROSSCOMPILING_EMULATOR)
         catch_discover_tests(sleipnir_autodiff_test)
         catch_discover_tests(sleipnir_optimization_test)
         catch_discover_tests(sleipnir_util_test)
@@ -385,7 +397,7 @@ if(SLEIPNIR_BUILD_EXAMPLES)
                 ${example}_test
                 PUBLIC Sleipnir Catch2::Catch2WithMain
             )
-            if(NOT CMAKE_TOOLCHAIN_FILE)
+            if(NOT CMAKE_CROSSCOMPILING OR CMAKE_CROSSCOMPILING_EMULATOR)
                 catch_discover_tests(${example}_test)
             endif()
         endif()
@@ -393,6 +405,12 @@ if(SLEIPNIR_BUILD_EXAMPLES)
 endif()
 
 if(SLEIPNIR_BUILD_PYTHON)
+    if(CMAKE_SYSTEM_NAME STREQUAL "Generic")
+        message(
+            FATAL_ERROR
+            "SLEIPNIR_BUILD_PYTHON isn't supported on bare-metal targets"
+        )
+    endif()
     find_package(
         Python
         REQUIRED
@@ -468,78 +486,78 @@ if(SLEIPNIR_BUILD_PYTHON)
         )
     endif()
 
-    # Generate stubs at install time because only the install tree has the
-    # sleipnir/ package layout needed to import the module by its fully
-    # qualified name `sleipnir._sleipnir`.
-    #
-    # Importing sleipnir._sleipnir requires the directory containing the
-    # sleipnir package (i.e., PY_DEST's parent) to be on the Python path. For
-    # py-build-cmake builds, PY_DEST has no parent. For plain CMake installs,
-    # PY_DEST's parent is lib/pythonX.Y.
-    cmake_path(GET PY_DEST PARENT_PATH PY_DEST_PARENT)
-    nanobind_add_stub(
-        _sleipnir_stub
-        INSTALL_TIME
-        MARKER_FILE ${PY_DEST}/py.typed
-        MODULE sleipnir._sleipnir
-        OUTPUT ${PY_DEST}/_sleipnir/__init__.pyi
-        PYTHON_PATH ${PY_DEST_PARENT}
-        DEPENDS _sleipnir
-        COMPONENT python_modules
-    )
-    nanobind_add_stub(
-        _sleipnir_autodiff_stub
-        INSTALL_TIME
-        MODULE sleipnir._sleipnir.autodiff
-        OUTPUT ${PY_DEST}/_sleipnir/autodiff.pyi
-        PYTHON_PATH ${PY_DEST_PARENT}
-        DEPENDS _sleipnir
-        COMPONENT python_modules
-    )
-    nanobind_add_stub(
-        _sleipnir_optimization_stub
-        INSTALL_TIME
-        MODULE sleipnir._sleipnir.optimization
-        OUTPUT ${PY_DEST}/_sleipnir/optimization.pyi
-        PYTHON_PATH ${PY_DEST_PARENT}
-        DEPENDS _sleipnir
-        COMPONENT python_modules
-    )
-    install(
-        CODE
-            "execute_process(
-                COMMAND \"${Python_EXECUTABLE}\"
-                    \"${CMAKE_CURRENT_SOURCE_DIR}/python/postprocess_stubs.py\"
-                    ${PY_DEST}/_sleipnir/autodiff.pyi
-                    ${PY_DEST}/_sleipnir/optimization.pyi
-                WORKING_DIRECTORY \"\${CMAKE_INSTALL_PREFIX}\"
-                COMMAND_ERROR_IS_FATAL ANY
-            )"
-        COMPONENT python_modules
-    )
-
     if(NOT CMAKE_CROSSCOMPILING)
-        set(sleipnir_headers
-            ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/autodiff/expression_type.hpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/autodiff/gradient.hpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/autodiff/hessian.hpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/autodiff/jacobian.hpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/autodiff/variable.hpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/autodiff/variable_block.hpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/autodiff/variable_matrix.hpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/optimization/ocp.hpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/optimization/ocp/dynamics_type.hpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/optimization/ocp/timestep_method.hpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/optimization/ocp/transcription_method.hpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/optimization/problem.hpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/optimization/solver/exit_status.hpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/optimization/solver/iteration_info.hpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/optimization/solver/options.hpp
+        # Generate stubs at install time because only the install tree has the
+        # sleipnir/ package layout needed to import the module by its fully
+        # qualified name `sleipnir._sleipnir`.
+        #
+        # Importing sleipnir._sleipnir requires the directory containing the
+        # sleipnir package (i.e., PY_DEST's parent) to be on the Python path.
+        # For py-build-cmake builds, PY_DEST has no parent. For plain CMake
+        # installs, PY_DEST's parent is lib/pythonX.Y.
+        cmake_path(GET PY_DEST PARENT_PATH PY_DEST_PARENT)
+        nanobind_add_stub(
+            _sleipnir_stub
+            INSTALL_TIME
+            MARKER_FILE ${PY_DEST}/py.typed
+            MODULE sleipnir._sleipnir
+            OUTPUT ${PY_DEST}/_sleipnir/__init__.pyi
+            PYTHON_PATH ${PY_DEST_PARENT}
+            DEPENDS _sleipnir
+            COMPONENT python_modules
         )
-
-        # Generate docs for the Python module
-        include(Pybind11Mkdoc)
-        pybind11_mkdoc(_sleipnir "${sleipnir_headers}")
-        add_dependencies(_sleipnir _sleipnir_docstrings)
+        nanobind_add_stub(
+            _sleipnir_autodiff_stub
+            INSTALL_TIME
+            MODULE sleipnir._sleipnir.autodiff
+            OUTPUT ${PY_DEST}/_sleipnir/autodiff.pyi
+            PYTHON_PATH ${PY_DEST_PARENT}
+            DEPENDS _sleipnir
+            COMPONENT python_modules
+        )
+        nanobind_add_stub(
+            _sleipnir_optimization_stub
+            INSTALL_TIME
+            MODULE sleipnir._sleipnir.optimization
+            OUTPUT ${PY_DEST}/_sleipnir/optimization.pyi
+            PYTHON_PATH ${PY_DEST_PARENT}
+            DEPENDS _sleipnir
+            COMPONENT python_modules
+        )
+        install(
+            CODE
+                "execute_process(
+                    COMMAND \"${Python_EXECUTABLE}\"
+                        \"${CMAKE_CURRENT_SOURCE_DIR}/python/postprocess_stubs.py\"
+                        ${PY_DEST}/_sleipnir/autodiff.pyi
+                        ${PY_DEST}/_sleipnir/optimization.pyi
+                    WORKING_DIRECTORY \"\${CMAKE_INSTALL_PREFIX}\"
+                    COMMAND_ERROR_IS_FATAL ANY
+                )"
+            COMPONENT python_modules
+        )
     endif()
+
+    set(sleipnir_headers
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/autodiff/expression_type.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/autodiff/gradient.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/autodiff/hessian.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/autodiff/jacobian.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/autodiff/variable.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/autodiff/variable_block.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/autodiff/variable_matrix.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/optimization/ocp.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/optimization/ocp/dynamics_type.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/optimization/ocp/timestep_method.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/optimization/ocp/transcription_method.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/optimization/problem.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/optimization/solver/exit_status.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/optimization/solver/iteration_info.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/sleipnir/optimization/solver/options.hpp
+    )
+
+    # Generate docs for the Python module
+    include(Pybind11Mkdoc)
+    pybind11_mkdoc(_sleipnir "${sleipnir_headers}")
+    add_dependencies(_sleipnir _sleipnir_docstrings)
 endif()
