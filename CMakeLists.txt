@@ -209,7 +209,7 @@ if(SLEIPNIR_BUILD_BENCHMARKS)
         endforeach()
 
         # Optimization benchmarks
-        foreach(benchmark "cart_pole" "flywheel")
+        foreach(benchmark "cart_pole" "double_integrator" "flywheel")
             file(
                 GLOB ${benchmark}_optimization_benchmark_src
                 benchmarks/${benchmark}_optimization/*.cpp

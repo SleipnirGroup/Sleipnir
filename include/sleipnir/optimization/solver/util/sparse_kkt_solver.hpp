@@ -3,7 +3,6 @@
 #pragma once
 
 #include <algorithm>
-#include <limits>
 
 #include <Eigen/Core>
 #include <Eigen/SparseCholesky>
@@ -64,10 +63,10 @@ class SparseKKTSolver {
   SparseKKTSolver& compute(const SparseMatrix& lhs) {
     // Regularization with zeros ensures the pattern analysis in the sparse
     // solver is reused by all factorizations
-    SparseMatrix unregularized_lhs = lhs + regularization(Scalar(0), Scalar(0));
+    m_lhs = lhs + regularization(Scalar(0), Scalar(0));
 
     if (!m_analyzed_pattern) {
-      m_solver.analyzePattern(unregularized_lhs);
+      m_solver.analyzePattern(m_lhs);
       m_analyzed_pattern = true;
     }
 
@@ -75,7 +74,7 @@ class SparseKKTSolver {
     // it's almost always rejected for small pivots. If the previous δ was
     // large, attempt δ = 0 so δ can drop to zero quickly.
     if (m_prev_δ == Scalar(0) || m_prev_δ > Scalar(1e-2)) {
-      m_solver.factorize(unregularized_lhs);
+      m_solver.factorize(m_lhs);
       m_info = m_solver.info();
 
       if (m_info == Eigen::Success) {
@@ -95,19 +94,28 @@ class SparseKKTSolver {
     // We'll give lhs the correct inertia by adding [δI, 0; 0, −γI] where δ and
     // γ regularize the Hessian and equality constraint Jacobian respectively.
 
+    // The minimum nonzero Hessian regularization
+    constexpr Scalar δ_min(1e-10);
+
+    // The maximum constraint regularization. Larger values distort the equality
+    // constraint Jacobian more than they help a rank-deficient one.
+    constexpr Scalar γ_max(1e-8);
+
     // If the previous δ was zero, attempt a small value. Otherwise, attempt a
-    // smaller value than the previous δ so δ trends downward.
-    Scalar δ = m_prev_δ == Scalar(0)
-                   ? Scalar(1e-4)
-                   : std::max(m_prev_δ / Scalar(2),
-                              std::numeric_limits<Scalar>::epsilon());
+    // smaller value than the previous δ so δ trends downward. δ has a floor
+    // because Hessian rows with no curvature (e.g., states in linear dynamics)
+    // have only δ on their diagonal, and pivots that small cause element growth
+    // that corrupts the inertia and solution.
+    Scalar δ = m_prev_δ == Scalar(0) ? Scalar(1e-4)
+                                     : std::max(m_prev_δ / Scalar(2), δ_min);
 
     // Start γ at the minimum to minimize equality constraint Jacobian
     // distortion.
     Scalar γ = m_γ_min;
 
     while (true) {
-      m_solver.factorize(lhs + regularization(δ, γ));
+      m_lhs = lhs + regularization(δ, γ);
+      m_solver.factorize(m_lhs);
       m_info = m_solver.info();
 
       if (m_info == Eigen::Success) {
@@ -127,22 +135,33 @@ class SparseKKTSolver {
             // If there's zero eigenvalues and γ > 0, increase δ and γ to drive
             // all eigenvalues away from zero
             δ *= Scalar(10);
-            γ *= Scalar(10);
+            γ = std::min(γ * Scalar(10), γ_max);
           }
         } else if (inertia.negative > ideal_inertia.negative) {
           // If there's too many negative eigenvalues, increase δ to add more
           // positive eigenvalues
           δ *= Scalar(10);
         } else if (inertia.positive > ideal_inertia.positive) {
-          // If there's too many positive eigenvalues, increase γ to add more
-          // negative eigenvalues
-          γ = γ == Scalar(0) ? Scalar(1e-10) : γ * Scalar(10);
+          // If there's too many positive eigenvalues and the smallest pivot is
+          // from the equality constraint Jacobian block, increase γ to add more
+          // negative eigenvalues.
+          //
+          // Otherwise, the smallest pivot is from the Hessian block, or γ is
+          // already large enough that increasing it further would distort the
+          // equality constraint Jacobian more than it helps. Increase δ to
+          // reduce element growth from Hessian pivots instead.
+          if (γ < γ_max && !smallest_pivot_is_hessian()) {
+            γ = γ == Scalar(0) ? Scalar(1e-10)
+                               : std::min(γ * Scalar(10), γ_max);
+          } else {
+            δ *= Scalar(10);
+          }
         }
       } else {
         // If the decomposition failed, increase δ and γ to drive all
         // eigenvalues away from zero
         δ *= Scalar(10);
-        γ = γ == Scalar(0) ? Scalar(1e-10) : γ * Scalar(10);
+        γ = γ == Scalar(0) ? Scalar(1e-10) : std::min(γ * Scalar(10), γ_max);
       }
 
       // If the lhs perturbation is too high, report failure. This can be caused
@@ -162,7 +181,21 @@ class SparseKKTSolver {
   /// @return The solution.
   template <typename Rhs>
   DenseVector solve(const Eigen::MatrixBase<Rhs>& rhs) const {
-    return m_solver.solve(rhs);
+    DenseVector x = m_solver.solve(rhs);
+
+    // Element growth in the factorization can make the solution inaccurate
+    // (e.g., from small Hessian pivots in rows with no curvature), so apply
+    // iterative refinement with the same factorization
+    constexpr int max_refinement_steps = 3;
+    for (int i = 0; i < max_refinement_steps; ++i) {
+      DenseVector r = rhs - m_lhs.template selfadjointView<Eigen::Lower>() * x;
+      if (r.norm() <= Scalar(1e-12) * rhs.norm()) {
+        break;
+      }
+      x += m_solver.solve(r);
+    }
+
+    return x;
   }
 
   /// Solves the system of equations.
@@ -171,7 +204,7 @@ class SparseKKTSolver {
   /// @return The solution.
   template <typename Rhs>
   DenseVector solve(const Eigen::SparseMatrixBase<Rhs>& rhs) const {
-    return m_solver.solve(rhs);
+    return solve(rhs.toDense());
   }
 
   /// Returns the Hessian regularization factor.
@@ -189,6 +222,9 @@ class SparseKKTSolver {
 
   Solver m_solver;
   bool m_analyzed_pattern = false;
+
+  /// The most recently factorized KKT matrix's lower triangle.
+  SparseMatrix m_lhs;
 
   Eigen::ComputationInfo m_info = Eigen::Success;
 
@@ -210,6 +246,18 @@ class SparseKKTSolver {
 
   /// The value of γ from the previous run of compute().
   Scalar m_prev_γ{0};
+
+  /// Returns true if the smallest-magnitude pivot of the most recent
+  /// factorization corresponds to a row of the Hessian block.
+  ///
+  /// @return True if the smallest pivot is from the Hessian block.
+  bool smallest_pivot_is_hessian() const {
+    Eigen::Index k;
+    m_solver.vectorD().cwiseAbs().minCoeff(&k);
+
+    // The factorization is of PAP⁻¹, so the original row of pivot k is P⁻¹k
+    return m_solver.permutationPinv().indices()(k) < m_num_decision_variables;
+  }
 
   /// Returns regularization matrix.
   ///
