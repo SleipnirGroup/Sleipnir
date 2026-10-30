@@ -8,6 +8,7 @@ import argparse
 import csv
 import sys
 from collections.abc import Callable, Sequence
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -319,7 +320,6 @@ def main() -> None:
         labels = args.libraries
         title = f"{args.title} autodiff runtime vs variables"
         xlabel = "Variables"
-        output = f"{args.title.lower()}-autodiff-results.png"
     elif args.benchmark == "optimization":
         kinds = ["Setup", "Solve"]
         prefixes = args.libraries
@@ -330,7 +330,6 @@ def main() -> None:
             labels = args.labels
         title = f"{args.title} problem runtime vs samples"
         xlabel = "Samples"
-        output = f"{args.title.lower()}-optimization-results.png"
 
     if len(labels) != len(prefixes):
         print(f"Got {len(prefixes)} libraries but {len(labels)} labels.")
@@ -350,7 +349,7 @@ def main() -> None:
     )
 
     if args.noninteractive:
-        fig.savefig(output)
+        fig.savefig(Path(args.filename).with_suffix(".png"))
     else:
         plt.show()
 
