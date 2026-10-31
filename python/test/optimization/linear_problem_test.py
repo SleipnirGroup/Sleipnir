@@ -1,6 +1,7 @@
 import pytest
 from sleipnir.autodiff import ExpressionType
 from sleipnir.optimization import ExitStatus, Problem
+from tolerance import solution_tolerance
 
 
 def test_maximize() -> None:
@@ -24,8 +25,8 @@ def test_maximize() -> None:
 
     assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
 
-    assert x.value() == pytest.approx(375.0, abs=1e-6)
-    assert y.value() == pytest.approx(250.0, abs=1e-6)
+    assert x.value() == pytest.approx(375.0, abs=solution_tolerance(1))
+    assert y.value() == pytest.approx(250.0, abs=solution_tolerance(1))
 
 
 def test_free_variable() -> None:
@@ -43,5 +44,5 @@ def test_free_variable() -> None:
 
     assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
 
-    assert x[0].value() == pytest.approx(0.0, abs=1e-6)
-    assert x[1].value() == pytest.approx(2.0, abs=1e-6)
+    assert x[0].value() == pytest.approx(0.0, abs=solution_tolerance(1))
+    assert x[1].value() == pytest.approx(2.0, abs=solution_tolerance(1))

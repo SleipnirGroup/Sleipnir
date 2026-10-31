@@ -13,6 +13,7 @@
 #include "catch_matchers.hpp"
 #include "catch_string_converters.hpp"
 #include "scalar_types.hpp"
+#include "tolerance.hpp"
 
 // These tests ensure coverage of the off-nominal exit statuses
 
@@ -121,6 +122,11 @@ TEMPLATE_TEST_CASE("ExitStatus - Small constraint scaling is feasible",
                    "[ExitStatus]", SCALAR_TYPES) {
   using T = TestType;
 
+  // The solver bounds the unscaled constraint violation by the tolerance, so a
+  // constraint scaled by 1e-5 bounds x's error by the tolerance / 1e-5
+  constexpr T scale(1e-5);
+  const T x_tolerance = solution_tolerance<T>(1) / scale;
+
   // Equality constraints
   {
     slp::Problem<T> problem;
@@ -128,14 +134,14 @@ TEMPLATE_TEST_CASE("ExitStatus - Small constraint scaling is feasible",
     auto x = problem.decision_variable();
     x.set_value(T(5005));
 
-    problem.subject_to(T(1e-5) * (x - T(5)) == T(0));
+    problem.subject_to(scale * (x - T(5)) == T(0));
 
     CHECK(problem.cost_function_type() == slp::ExpressionType::NONE);
     CHECK(problem.equality_constraint_type() == slp::ExpressionType::LINEAR);
     CHECK(problem.inequality_constraint_type() == slp::ExpressionType::NONE);
 
     CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
-    CHECK_THAT(x.value(), WithinAbs(T(5), T(1e-3)));
+    CHECK_THAT(x.value(), WithinAbs(T(5), x_tolerance));
   }
 
   // Inequality constraints
@@ -145,14 +151,14 @@ TEMPLATE_TEST_CASE("ExitStatus - Small constraint scaling is feasible",
     auto x = problem.decision_variable();
     x.set_value(T(5005));
 
-    problem.subject_to(T(1e-5) * (T(5) - x) >= T(0));
+    problem.subject_to(scale * (T(5) - x) >= T(0));
 
     CHECK(problem.cost_function_type() == slp::ExpressionType::NONE);
     CHECK(problem.equality_constraint_type() == slp::ExpressionType::NONE);
     CHECK(problem.inequality_constraint_type() == slp::ExpressionType::LINEAR);
 
     CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
-    CHECK(x.value() <= T(5) + T(1e-3));
+    CHECK(x.value() <= T(5) + x_tolerance);
   }
 }
 
@@ -222,15 +228,37 @@ TEMPLATE_TEST_CASE("ExitStatus - Diverging iterates", "[ExitStatus]",
   slp::Problem<T> problem;
 
   auto x = problem.decision_variable();
+  x.set_value(T(1));
 
-  problem.minimize(x);
+  problem.minimize(-x * x);
 
-  CHECK(problem.cost_function_type() == slp::ExpressionType::LINEAR);
+  CHECK(problem.cost_function_type() == slp::ExpressionType::QUADRATIC);
   CHECK(problem.equality_constraint_type() == slp::ExpressionType::NONE);
   CHECK(problem.inequality_constraint_type() == slp::ExpressionType::NONE);
 
   CHECK(problem.solve({.diagnostics = true}) ==
         slp::ExitStatus::DIVERGING_ITERATES);
+}
+
+TEMPLATE_TEST_CASE("ExitStatus - Large iterates aren't diverging",
+                   "[ExitStatus]", SCALAR_TYPES) {
+  using T = TestType;
+
+  // Variables and slacks in the 1e5–1e6 range are common in unscaled problems
+  // with physical units, so they shouldn't trigger the divergence check
+  slp::Problem<T> problem;
+
+  auto x = problem.decision_variable();
+  x.set_value(T(0));
+
+  problem.minimize((x - T(1e6)) * (x - T(1e6)));
+  problem.subject_to(x >= T(0));
+
+  CHECK(problem.cost_function_type() == slp::ExpressionType::QUADRATIC);
+  CHECK(problem.equality_constraint_type() == slp::ExpressionType::NONE);
+  CHECK(problem.inequality_constraint_type() == slp::ExpressionType::LINEAR);
+
+  CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 }
 
 TEMPLATE_TEST_CASE("ExitStatus - Max iterations exceeded", "[ExitStatus]",

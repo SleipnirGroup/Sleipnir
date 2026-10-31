@@ -57,7 +57,7 @@ option(
 set(SLEIPNIR_TEST_SCALAR_TYPES
     "double"
     CACHE STRING
-    "Semicolon-separated list of scalar types to test (double, ExplicitDouble)"
+    "Semicolon-separated list of scalar types to test (float, double, ExplicitDouble)"
 )
 
 # Options for using a package manager (e.g., vcpkg) for certain dependencies
@@ -246,7 +246,7 @@ if(PROJECT_IS_TOP_LEVEL AND BUILD_TESTING)
     list(APPEND CMAKE_MODULE_PATH ${Catch2_SOURCE_DIR}/extras)
     include(Catch)
 
-    set(sleipnir_allowed_test_scalar_types double ExplicitDouble)
+    set(sleipnir_allowed_test_scalar_types float double ExplicitDouble)
     foreach(type IN LISTS SLEIPNIR_TEST_SCALAR_TYPES)
         if(NOT type IN_LIST sleipnir_allowed_test_scalar_types)
             message(
@@ -260,43 +260,42 @@ if(PROJECT_IS_TOP_LEVEL AND BUILD_TESTING)
     endif()
     list(JOIN SLEIPNIR_TEST_SCALAR_TYPES "," sleipnir_test_scalar_types)
 
-    if("ExplicitDouble" IN_LIST SLEIPNIR_TEST_SCALAR_TYPES)
-        # Build autodiff explicit instantiations
-        file(
-            GLOB_RECURSE sleipnir_autodiff_explicit_src
-            CONFIGURE_DEPENDS
-            test/src/autodiff/*_explicit_double.cpp
-        )
-        add_library(
-            sleipnir_autodiff_explicit
-            OBJECT
-            ${sleipnir_autodiff_explicit_src}
-        )
-        compiler_flags(sleipnir_autodiff_explicit)
-        target_include_directories(
-            sleipnir_autodiff_explicit
-            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/test/include
-        )
-        target_link_libraries(sleipnir_autodiff_explicit PUBLIC Sleipnir)
+    # Build explicit template instantiations for each tested scalar type other
+    # than double (Sleipnir itself instantiates double). The instantiations for
+    # <type> are in test/src/<module>/*_<suffix>.cpp.
+    set(sleipnir_explicit_test_scalar_types float ExplicitDouble)
+    set(sleipnir_explicit_test_scalar_suffixes float explicit_double)
+    set(sleipnir_autodiff_explicit_targets)
+    set(sleipnir_optimization_explicit_targets)
+    foreach(
+        type
+        suffix
+        IN
+        ZIP_LISTS
+            sleipnir_explicit_test_scalar_types
+            sleipnir_explicit_test_scalar_suffixes
+    )
+        if(NOT type IN_LIST SLEIPNIR_TEST_SCALAR_TYPES)
+            continue()
+        endif()
 
-        # Build optimization explicit instantiations
-        file(
-            GLOB_RECURSE sleipnir_optimization_explicit_src
-            CONFIGURE_DEPENDS
-            test/src/optimization/*_explicit_double.cpp
-        )
-        add_library(
-            sleipnir_optimization_explicit
-            OBJECT
-            ${sleipnir_optimization_explicit_src}
-        )
-        compiler_flags(sleipnir_optimization_explicit)
-        target_include_directories(
-            sleipnir_optimization_explicit
-            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/test/include
-        )
-        target_link_libraries(sleipnir_optimization_explicit PUBLIC Sleipnir)
-    endif()
+        foreach(module autodiff optimization)
+            file(
+                GLOB_RECURSE src
+                CONFIGURE_DEPENDS
+                test/src/${module}/*_${suffix}.cpp
+            )
+            set(target sleipnir_${module}_${suffix})
+            add_library(${target} OBJECT ${src})
+            compiler_flags(${target})
+            target_include_directories(
+                ${target}
+                PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/test/include
+            )
+            target_link_libraries(${target} PUBLIC Sleipnir)
+            list(APPEND sleipnir_${module}_explicit_targets ${target})
+        endforeach()
+    endforeach()
 
     # Adds a Catch2 test executable named <name> built from the source list
     # <src>. Any further arguments are linked as extra libraries.
@@ -329,7 +328,7 @@ if(PROJECT_IS_TOP_LEVEL AND BUILD_TESTING)
     sleipnir_add_test(
         sleipnir_autodiff_test
         "${sleipnir_autodiff_test_src}"
-        $<TARGET_NAME_IF_EXISTS:sleipnir_autodiff_explicit>
+        ${sleipnir_autodiff_explicit_targets}
     )
 
     # Build Sleipnir optimization tests
@@ -349,8 +348,8 @@ if(PROJECT_IS_TOP_LEVEL AND BUILD_TESTING)
     sleipnir_add_test(
         sleipnir_optimization_test
         "${sleipnir_optimization_test_src}"
-        $<TARGET_NAME_IF_EXISTS:sleipnir_autodiff_explicit>
-        $<TARGET_NAME_IF_EXISTS:sleipnir_optimization_explicit>
+        ${sleipnir_autodiff_explicit_targets}
+        ${sleipnir_optimization_explicit_targets}
     )
 
     # Build Sleipnir util tests

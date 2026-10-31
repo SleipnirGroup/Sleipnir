@@ -5,6 +5,7 @@ import pytest
 from flywheel_util import optimal_flywheel_trajectory
 from sleipnir.autodiff import ExpressionType
 from sleipnir.optimization import ExitStatus, Problem, bounds
+from tolerance import solution_tolerance
 
 
 def test_flywheel_problem() -> None:
@@ -48,11 +49,11 @@ def test_flywheel_problem() -> None:
 
     # The cost depends on uₖ only through the Buₖ it adds to xₖ₊₁, so U is
     # determined 1/B times less precisely than X
-    x_tolerance = 1e-4
+    x_tolerance = solution_tolerance(1000)
     u_tolerance = x_tolerance / B
 
     # Verify initial state
-    assert X.value(0, 0) == pytest.approx(0.0, abs=1e-8)
+    assert X.value(0, 0) == pytest.approx(0.0, abs=solution_tolerance(1))
 
     # Verify solution
     for k in range(N + 1):

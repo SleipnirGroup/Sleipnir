@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 from sleipnir.autodiff import ExpressionType
 from sleipnir.optimization import ExitStatus, Problem
+from tolerance import solution_tolerance
 
 
 def test_unconstrained1d() -> None:
@@ -18,7 +19,7 @@ def test_unconstrained1d() -> None:
 
     assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
 
-    assert x.value() == pytest.approx(3.0, abs=1e-6)
+    assert x.value() == pytest.approx(3.0, abs=solution_tolerance(1))
 
 
 def test_unconstrained2d_1() -> None:
@@ -36,8 +37,8 @@ def test_unconstrained2d_1() -> None:
 
     assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
 
-    assert x.value() == pytest.approx(0.0, abs=1e-6)
-    assert y.value() == pytest.approx(0.0, abs=1e-6)
+    assert x.value() == pytest.approx(0.0, abs=solution_tolerance(1))
+    assert y.value() == pytest.approx(0.0, abs=solution_tolerance(1))
 
 
 def test_unconstrained2d_2() -> None:
@@ -55,8 +56,8 @@ def test_unconstrained2d_2() -> None:
 
     assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
 
-    assert x.value(0) == pytest.approx(0.0, abs=1e-6)
-    assert x.value(1) == pytest.approx(0.0, abs=1e-6)
+    assert x.value(0) == pytest.approx(0.0, abs=solution_tolerance(1))
+    assert x.value(1) == pytest.approx(0.0, abs=solution_tolerance(1))
 
 
 # Maximize xy subject to x + 3y = 36.
@@ -113,8 +114,8 @@ def test_equality_constrained_1() -> None:
 
     assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
 
-    assert x.value() == pytest.approx(18.0, abs=1e-5)
-    assert y.value() == pytest.approx(6.0, abs=1e-5)
+    assert x.value() == pytest.approx(18.0, abs=solution_tolerance(1))
+    assert y.value() == pytest.approx(6.0, abs=solution_tolerance(1))
 
 
 def test_equality_constrained_2() -> None:
@@ -134,8 +135,8 @@ def test_equality_constrained_2() -> None:
 
     assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
 
-    assert x.value(0) == pytest.approx(3.0, abs=1e-5)
-    assert x.value(1) == pytest.approx(3.0, abs=1e-5)
+    assert x.value(0) == pytest.approx(3.0, abs=solution_tolerance(1))
+    assert x.value(1) == pytest.approx(3.0, abs=solution_tolerance(1))
 
 
 def test_inequality_constrained_2d() -> None:
@@ -154,5 +155,5 @@ def test_inequality_constrained_2d() -> None:
 
     assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
 
-    assert x.value() == pytest.approx(3.0 + 1.0 / 3.0, abs=1e-6)
-    assert y.value() == pytest.approx(1.0 + 2.0 / 3.0, abs=1e-6)
+    assert x.value() == pytest.approx(3.0 + 1.0 / 3.0, abs=solution_tolerance(1))
+    assert y.value() == pytest.approx(1.0 + 2.0 / 3.0, abs=solution_tolerance(1))

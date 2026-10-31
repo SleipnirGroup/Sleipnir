@@ -79,7 +79,7 @@ mypy_path = ["examples/current_manager", "python/test/optimization"]
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-pythonpath = ["examples/current_manager"]
+pythonpath = ["examples/current_manager", "python/test/optimization"]
 testpaths = ["python/test", "examples/current_manager/test"]
 
 [tool.uv]

@@ -20,6 +20,7 @@
 #include "coord.hpp"
 #include "scalar_types.hpp"
 #include "sleipnir/optimization/solver/iteration_info.hpp"
+#include "tolerance.hpp"
 
 std::ifstream open(std::string_view filename) {
   std::ifstream file{std::string{filename}, std::ios::binary};
@@ -81,8 +82,8 @@ TEMPLATE_TEST_CASE("Problem - Spy", "[Problem]", SCALAR_TYPES) {
 
   CHECK(problem.solve({.diagnostics = true}, true) == slp::ExitStatus::SUCCESS);
 
-  CHECK_THAT(x.value(), WithinAbs(T(1), T(1e-8)));
-  CHECK_THAT(y.value(), WithinAbs(T(2), T(1e-8)));
+  CHECK_THAT(x.value(), WithinAbs(T(1), solution_tolerance<T>(1)));
+  CHECK_THAT(y.value(), WithinAbs(T(2), solution_tolerance<T>(1)));
 
   // Check H.spy
   {

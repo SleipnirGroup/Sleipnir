@@ -11,6 +11,7 @@
 
 #include "sleipnir/optimization/solver/util/inertia.hpp"
 #include "sleipnir/optimization/solver/util/kkt_ordering.hpp"
+#include "sleipnir/optimization/solver/util/regularization_limits.hpp"
 
 namespace slp {
 
@@ -84,7 +85,9 @@ class SparseKKTSolver {
         // If the inertia is ideal and D from LDLT is sufficiently far from
         // zero, don't regularize the system
         if (inertia() == ideal_inertia &&
-            (m_solver.vectorD().cwiseAbs().array() >= Scalar(1e-4)).all()) {
+            (m_solver.vectorD().cwiseAbs().array() >=
+             min_unregularized_pivot<Scalar>())
+                .all()) {
           m_prev_δ = Scalar(0);
           m_prev_γ = Scalar(0);
           return *this;
@@ -96,14 +99,14 @@ class SparseKKTSolver {
     // γ regularize the Hessian and equality constraint Jacobian respectively.
 
     // The minimum nonzero Hessian regularization
-    constexpr Scalar δ_min(1e-10);
+    const Scalar δ_min = min_hessian_regularization<Scalar>();
 
     // The maximum constraint regularization. Larger values distort the equality
     // constraint Jacobian more than they help a rank-deficient one.
-    constexpr Scalar γ_max(1e-8);
+    const Scalar γ_max = max_constraint_regularization<Scalar>();
 
     // The initial nonzero constraint regularization
-    constexpr Scalar γ_initial(1e-10);
+    const Scalar γ_initial = min_constraint_regularization<Scalar>();
 
     // If the previous δ was zero, attempt a small value. Otherwise, attempt a
     // smaller value than the previous δ so δ trends downward. δ has a floor
@@ -184,6 +187,8 @@ class SparseKKTSolver {
   /// @return The solution.
   template <typename Rhs>
   DenseVector solve(const Eigen::MatrixBase<Rhs>& rhs) const {
+    using std::pow;
+
     DenseVector x = m_ordering.inverse_permutation() *
                     m_solver.solve(m_ordering.permutation() * rhs);
 
@@ -191,9 +196,16 @@ class SparseKKTSolver {
     // (e.g., from small Hessian pivots in rows with no curvature), so apply
     // iterative refinement with the same factorization
     constexpr int max_refinement_steps = 3;
+
+    // Stop once the relative residual is ε^(3/4), which is halfway (on a log
+    // scale) between the solver's default tolerance of √ε and the
+    // factorization's rounding error floor of a small multiple of ε
+    const Scalar refinement_tolerance =
+        pow(std::numeric_limits<Scalar>::epsilon(), Scalar(0.75));
+
     for (int i = 0; i < max_refinement_steps; ++i) {
       DenseVector r = rhs - m_lhs.template selfadjointView<Eigen::Lower>() * x;
-      if (r.norm() <= Scalar(1e-12) * rhs.norm()) {
+      if (r.norm() <= refinement_tolerance * rhs.norm()) {
         break;
       }
       x += m_ordering.inverse_permutation() *
@@ -246,7 +258,7 @@ class SparseKKTSolver {
   int m_num_equality_constraints = 0;
 
   /// The minimum constraint regularization.
-  Scalar m_γ_min{1e-10};
+  Scalar m_γ_min = min_constraint_regularization<Scalar>();
 
   /// The ideal system inertia.
   Inertia ideal_inertia{m_num_decision_variables, m_num_equality_constraints,
@@ -261,18 +273,18 @@ class SparseKKTSolver {
   /// Returns the inertia of the most recently factorized KKT matrix.
   ///
   /// By Sylvester's law of inertia, the KKT matrix's inertia is the inertia of
-  /// D from its LDLT factorization. Pivots within ε of zero are counted as
-  /// zero.
+  /// D from its LDLT factorization. Pivots within zero_pivot_threshold() of
+  /// zero are counted as zero.
   ///
   /// @return The inertia of the most recently factorized KKT matrix.
   Inertia inertia() const {
-    constexpr Scalar ε = std::numeric_limits<Scalar>::epsilon();
+    const Scalar threshold = zero_pivot_threshold<Scalar>();
 
     Inertia inertia;
     for (const auto& d : m_solver.vectorD()) {
-      if (d > ε) {
+      if (d > threshold) {
         ++inertia.positive;
-      } else if (d < -ε) {
+      } else if (d < -threshold) {
         ++inertia.negative;
       } else {
         ++inertia.zero;

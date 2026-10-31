@@ -746,7 +746,10 @@ constexpr char mkd_doc_slp_Options_max_iterations[] = R"doc(The maximum number o
 
 constexpr char mkd_doc_slp_Options_timeout[] = R"doc(The maximum elapsed wall clock time before returning a solution.)doc";
 
-constexpr char mkd_doc_slp_Options_tolerance[] = R"doc(The solver will stop once the error is below this tolerance.)doc";
+constexpr char mkd_doc_slp_Options_tolerance[] =
+R"doc(The solver will stop once the error is below this tolerance.
+
+Defaults to the square root of the scalar type's machine epsilon.)doc";
 
 constexpr char mkd_doc_slp_Problem[] =
 R"doc(This class allows the user to pose a constrained nonlinear

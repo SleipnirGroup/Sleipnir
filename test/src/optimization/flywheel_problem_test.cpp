@@ -21,6 +21,7 @@
 #include "catch_string_converters.hpp"
 #include "flywheel_util.hpp"
 #include "scalar_types.hpp"
+#include "tolerance.hpp"
 
 TEMPLATE_TEST_CASE("Problem - Flywheel", "[Problem]", SCALAR_TYPES) {
   using T = TestType;
@@ -70,11 +71,11 @@ TEMPLATE_TEST_CASE("Problem - Flywheel", "[Problem]", SCALAR_TYPES) {
 
   // The cost depends on uₖ only through the B·uₖ it adds to xₖ₊₁, so U is
   // determined 1/B times less precisely than X
-  const T x_tolerance = T(1e-4);
+  const T x_tolerance = solution_tolerance<T>(1000);
   const T u_tolerance = x_tolerance / B;
 
   // Verify initial state
-  CHECK_THAT(X.value(0, 0), WithinAbs(T(0), T(1e-8)));
+  CHECK_THAT(X.value(0, 0), WithinAbs(T(0), solution_tolerance<T>(1)));
 
   // Verify solution
   for (int k = 0; k < N + 1; ++k) {

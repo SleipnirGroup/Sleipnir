@@ -926,11 +926,25 @@ TEMPLATE_TEST_CASE("Hessian - Edge pushing (Petro) figure 1", "[Hessian]",
   // d²y/dx² = [−p₁/x₁²     0   ]
   //           [   0     −p₁/x₂²]
   slp::Hessian H{y, x};
-  Eigen::Matrix2<T> expected_H{
-      {-p_1.value() / (x[0].value() * x[0].value()), T(0)},
-      {T(0), -p_1.value() / (x[1].value() * x[1].value())}};
-  CHECK(H.get().value() == expected_H);
-  CHECK(H.value().toDense() == expected_H);
+  T p = p_1.value();
+  T x0 = x[0].value();
+  T x1 = x[1].value();
+  T u = x0 * x1;
+
+  // The mixed partial is −p₁/u + p₁/u for u = x₁x₂, which cancels to zero, so
+  // its rounding error scales with the terms instead of with the result (e.g.,
+  // when the compiler contracts the sum into an FMA)
+  constexpr T ε = std::numeric_limits<T>::epsilon();
+  T mixed_margin = T(8) * ε * (T(2) * p / u);
+
+  for (const Eigen::Matrix2<T>& H_value :
+       {Eigen::Matrix2<T>{H.get().value()},
+        Eigen::Matrix2<T>{H.value().toDense()}}) {
+    CHECK_THAT(H_value(0, 0), WithinRel(-p / (x0 * x0), T(8) * ε));
+    CHECK_THAT(H_value(0, 1), WithinAbs(T(0), mixed_margin));
+    CHECK_THAT(H_value(1, 0), WithinAbs(T(0), mixed_margin));
+    CHECK_THAT(H_value(1, 1), WithinRel(-p / (x1 * x1), T(8) * ε));
+  }
 }
 
 TEMPLATE_TEST_CASE("Hessian - Variable reuse", "[Hessian]", SCALAR_TYPES) {

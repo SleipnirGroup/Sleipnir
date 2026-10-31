@@ -23,6 +23,7 @@
 #include "differential_drive_util.hpp"
 #include "rk4.hpp"
 #include "scalar_types.hpp"
+#include "tolerance.hpp"
 
 TEMPLATE_TEST_CASE("OCP - Differential drive", "[OCP]", SCALAR_TYPES) {
   using T = TestType;
@@ -71,11 +72,11 @@ TEMPLATE_TEST_CASE("OCP - Differential drive", "[OCP]", SCALAR_TYPES) {
   auto U = problem.U();
 
   // Verify initial state
-  CHECK_THAT(X.value(0, 0), WithinAbs(x_initial[0], T(1e-8)));
-  CHECK_THAT(X.value(1, 0), WithinAbs(x_initial[1], T(1e-8)));
-  CHECK_THAT(X.value(2, 0), WithinAbs(x_initial[2], T(1e-8)));
-  CHECK_THAT(X.value(3, 0), WithinAbs(x_initial[3], T(1e-8)));
-  CHECK_THAT(X.value(4, 0), WithinAbs(x_initial[4], T(1e-8)));
+  CHECK_THAT(X.value(0, 0), WithinAbs(x_initial[0], solution_tolerance<T>(1)));
+  CHECK_THAT(X.value(1, 0), WithinAbs(x_initial[1], solution_tolerance<T>(1)));
+  CHECK_THAT(X.value(2, 0), WithinAbs(x_initial[2], solution_tolerance<T>(1)));
+  CHECK_THAT(X.value(3, 0), WithinAbs(x_initial[3], solution_tolerance<T>(1)));
+  CHECK_THAT(X.value(4, 0), WithinAbs(x_initial[4], solution_tolerance<T>(1)));
 
   // Verify solution
   for (int k = 0; k < N; ++k) {
@@ -92,16 +93,17 @@ TEMPLATE_TEST_CASE("OCP - Differential drive", "[OCP]", SCALAR_TYPES) {
     Eigen::Vector<T, 5> actual_x_k1 = X.col(k + 1).value();
     for (int row = 0; row < actual_x_k1.rows(); ++row) {
       INFO(std::format("  x({}) @ k = {}", row, k));
-      CHECK_THAT(actual_x_k1[row], WithinAbs(expected_x_k1[row], T(1e-8)));
+      CHECK_THAT(actual_x_k1[row],
+                 WithinAbs(expected_x_k1[row], solution_tolerance<T>(1)));
     }
   }
 
   // Verify final state
-  CHECK_THAT(X.value(0, N), WithinAbs(x_final[0], T(1e-8)));
-  CHECK_THAT(X.value(1, N), WithinAbs(x_final[1], T(1e-8)));
-  CHECK_THAT(X.value(2, N), WithinAbs(x_final[2], T(1e-8)));
-  CHECK_THAT(X.value(3, N), WithinAbs(x_final[3], T(1e-8)));
-  CHECK_THAT(X.value(4, N), WithinAbs(x_final[4], T(1e-8)));
+  CHECK_THAT(X.value(0, N), WithinAbs(x_final[0], solution_tolerance<T>(1)));
+  CHECK_THAT(X.value(1, N), WithinAbs(x_final[1], solution_tolerance<T>(1)));
+  CHECK_THAT(X.value(2, N), WithinAbs(x_final[2], solution_tolerance<T>(1)));
+  CHECK_THAT(X.value(3, N), WithinAbs(x_final[3], solution_tolerance<T>(1)));
+  CHECK_THAT(X.value(4, N), WithinAbs(x_final[4], solution_tolerance<T>(1)));
 
   // Log states for offline viewing
   std::ofstream states{"OCP - Differential drive states.csv"};

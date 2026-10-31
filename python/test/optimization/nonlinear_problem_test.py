@@ -3,6 +3,7 @@ import pytest
 from sleipnir import autodiff
 from sleipnir.autodiff import ExpressionType
 from sleipnir.optimization import ExitStatus, Problem, bounds
+from tolerance import SolutionType, solution_tolerance
 
 
 def test_quartic() -> None:
@@ -21,12 +22,10 @@ def test_quartic() -> None:
 
     assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
 
-    assert x.value() == pytest.approx(1.0, abs=1e-6)
+    assert x.value() == pytest.approx(1.0, abs=solution_tolerance(1))
 
 
 def test_rosenbrock_with_cubic_and_line_constraint() -> None:
-    # https://en.wikipedia.org/wiki/Test_functions_for_optimization#Test_functions_for_constrained_optimization
-
     problem = Problem()
 
     x, y = problem.decision_variable(2)
@@ -49,11 +48,37 @@ def test_rosenbrock_with_cubic_and_line_constraint() -> None:
 
             assert problem.solve() == ExitStatus.SUCCESS
 
-            # Local minimum at (0.0, 0.0)
-            # Global minimum at (1.0, 1.0)
+            # Local minimum on the cubic constraint y = (x − 1)³ + 1.
+            # Substituting the constraint into the cost gives a univariate
+            # polynomial whose smallest stationary point is the local minimum.
+            # The constants below were generated with:
+            #
+            # ```python
+            # #!/usr/bin/env python
+            #
+            # import sympy as sp
+            #
+            # x = sp.symbols("x")
+            # y = (x - 1) ** 3 + 1
+            # f = 100 * (y - x**2) ** 2 + (1 - x) ** 2
+            #
+            # print(f"f′(x) = {sp.factor(sp.diff(f, x))}")
+            #
+            # x_min = min(sp.real_roots(sp.diff(f, x)))
+            # y_min = y.subs(x, x_min)
+            #
+            # print(f"({sp.N(x_min, 17)}, {sp.N(y_min, 17)})")
+            # ```
+            #
+            # Global minimum at (1, 1). Both constraints are weakly active
+            # (their Lagrange multipliers are zero), so the iterates only
+            # approach it to within the square root of the tolerance.
             sol = (x.value(), y.value())
-            assert sol == pytest.approx((0.0, 0.0), abs=1e-2) or sol == pytest.approx(
-                (1.0, 1.0), abs=1e-2
+            assert sol == pytest.approx(
+                (0.0011148370795454122, 0.0033407840390827719),
+                abs=solution_tolerance(5),
+            ) or sol == pytest.approx(
+                (1.0, 1.0), abs=solution_tolerance(10, SolutionType.DEGENERATE)
             )
 
 
@@ -81,8 +106,13 @@ def test_rosenbrock_with_disk_constraint() -> None:
 
             assert problem.solve() == ExitStatus.SUCCESS
 
+            # The disk constraint is weakly active at the minimum (its Lagrange
+            # multiplier is zero), so the iterates only approach it to within the
+            # square root of the tolerance
             sol = (x.value(), y.value())
-            assert sol == pytest.approx((1.0, 1.0), abs=1e-3)
+            assert sol == pytest.approx(
+                (1.0, 1.0), abs=solution_tolerance(20, SolutionType.DEGENERATE)
+            )
 
 
 def test_minimum_2d_distance_with_linear_constraint() -> None:
@@ -102,8 +132,8 @@ def test_minimum_2d_distance_with_linear_constraint() -> None:
 
     assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
 
-    assert x.value() == pytest.approx(2.5, abs=1e-2)
-    assert y.value() == pytest.approx(2.5, abs=1e-2)
+    assert x.value() == pytest.approx(2.5, abs=solution_tolerance(10))
+    assert y.value() == pytest.approx(2.5, abs=solution_tolerance(10))
 
 
 def test_conflicting_bounds() -> None:
@@ -153,17 +183,17 @@ def test_wachter_and_biegler_line_search_failure() -> None:
     assert status in (ExitStatus.SUCCESS, ExitStatus.LOCALLY_INFEASIBLE)
 
     if status == ExitStatus.SUCCESS:
-        assert x.value() == pytest.approx(1.0, abs=1e-6)
-        assert s1.value() == pytest.approx(0.0, abs=1e-6)
-        assert s2.value() == pytest.approx(0.5, abs=1e-6)
+        assert x.value() == pytest.approx(1.0, abs=solution_tolerance(5))
+        assert s1.value() == pytest.approx(0.0, abs=solution_tolerance(5))
+        assert s2.value() == pytest.approx(0.5, abs=solution_tolerance(5))
     else:
-        assert x.value() == pytest.approx(-1.0, abs=1e-6)
-        assert s1.value() == pytest.approx(0.0, abs=1e-6)
+        assert x.value() == pytest.approx(-1.0, abs=solution_tolerance(1))
+        assert s1.value() == pytest.approx(0.0, abs=solution_tolerance(1))
 
         # At x = −1 and s₁ = 0, the ℓ₁ constraint violation
         # |x − s₂ − 0.5| + max(0, −s₂) is 1.5 for every s₂ ∈ [−1.5, 0], so
         # feasibility restoration can converge to any of them
-        assert -1.5 - 1e-6 <= s2.value() <= 1e-6
+        assert -1.5 - solution_tolerance(5) <= s2.value() <= solution_tolerance(5)
 
 
 def test_hock_schittkowski_13() -> None:
@@ -194,5 +224,7 @@ def test_hock_schittkowski_13() -> None:
 
     # The solution has no finite Lagrange multipliers, so the iterates only
     # approach it to within the square root of the tolerance
-    assert x.value() == pytest.approx(1.0, abs=1e-4)
-    assert y.value() == pytest.approx(0.0, abs=1e-4)
+    assert x.value() == pytest.approx(
+        1.0, abs=solution_tolerance(10, SolutionType.DEGENERATE)
+    )
+    assert y.value() == pytest.approx(0.0, abs=solution_tolerance(1))

@@ -10,6 +10,7 @@
 #include <Eigen/Core>
 
 #include "sleipnir/optimization/solver/util/inertia.hpp"
+#include "sleipnir/optimization/solver/util/regularization_limits.hpp"
 
 namespace slp {
 
@@ -73,14 +74,14 @@ class DenseKKTSolver {
     // γ regularize the Hessian and equality constraint Jacobian respectively.
 
     // The minimum nonzero Hessian regularization
-    constexpr Scalar δ_min(1e-10);
+    const Scalar δ_min = min_hessian_regularization<Scalar>();
 
     // The maximum constraint regularization. Larger values distort the equality
     // constraint Jacobian more than they help a rank-deficient one.
-    constexpr Scalar γ_max(1e-8);
+    const Scalar γ_max = max_constraint_regularization<Scalar>();
 
     // The initial nonzero constraint regularization
-    constexpr Scalar γ_initial(1e-10);
+    const Scalar γ_initial = min_constraint_regularization<Scalar>();
 
     // If the previous δ was zero, attempt a small value. Otherwise, attempt a
     // smaller value than the previous δ so δ trends downward. δ has a floor
@@ -88,7 +89,7 @@ class DenseKKTSolver {
     // directions, so the KKT matrix's smallest eigenvalues shrink with δ. Too
     // small a δ makes the matrix ill-conditioned, which amplifies the
     // factorization's rounding error in the solution, and eventually puts those
-    // eigenvalues within ε of zero, where the inertia check counts them as
+    // eigenvalues near zero, where the inertia check counts them as
     // zero.
     Scalar δ = m_prev_δ == Scalar(0) ? Scalar(1e-4)
                                      : std::max(m_prev_δ / Scalar(2), δ_min);
@@ -161,15 +162,24 @@ class DenseKKTSolver {
   /// @return The solution.
   template <typename Rhs>
   DenseVector solve(const Eigen::MatrixBase<Rhs>& rhs) const {
+    using std::pow;
+
     DenseVector x = m_solver.solve(rhs);
 
     // The factorization is backward stable, but the matrix's conditioning
     // amplifies its rounding error in the solution, so apply iterative
     // refinement with the same factorization
     constexpr int max_refinement_steps = 3;
+
+    // Stop once the relative residual is ε^(3/4), which is halfway (on a log
+    // scale) between the solver's default tolerance of √ε and the
+    // factorization's rounding error floor of a small multiple of ε
+    const Scalar refinement_tolerance =
+        pow(std::numeric_limits<Scalar>::epsilon(), Scalar(0.75));
+
     for (int i = 0; i < max_refinement_steps; ++i) {
       DenseVector r = rhs - m_lhs.template selfadjointView<Eigen::Lower>() * x;
-      if (r.norm() <= Scalar(1e-12) * rhs.norm()) {
+      if (r.norm() <= refinement_tolerance * rhs.norm()) {
         break;
       }
       x += m_solver.solve(r);
@@ -214,7 +224,7 @@ class DenseKKTSolver {
   int m_num_equality_constraints = 0;
 
   /// The minimum constraint regularization.
-  Scalar m_γ_min{1e-10};
+  Scalar m_γ_min = min_constraint_regularization<Scalar>();
 
   /// The ideal system inertia.
   Inertia ideal_inertia{m_num_decision_variables, m_num_equality_constraints,
@@ -230,24 +240,24 @@ class DenseKKTSolver {
   ///
   /// D from the Bunch-Kaufman factorization has 1x1 and 2x2 diagonal blocks.
   /// By Sylvester's law of inertia, the KKT matrix's inertia is the inertia of
-  /// D, which is the inertia of the blocks' eigenvalues. Eigenvalues within ε
-  /// of zero are counted as zero.
+  /// D, which is the inertia of the blocks's eigenvalues. Eigenvalues within
+  /// zero_pivot_threshold() of zero are counted as zero.
   ///
   /// @return The inertia of the most recently factorized KKT matrix.
   Inertia inertia() const {
     using std::abs;
     using std::hypot;
 
-    constexpr Scalar ε = std::numeric_limits<Scalar>::epsilon();
+    const Scalar threshold = zero_pivot_threshold<Scalar>();
 
     const auto D = m_solver.vectorD();
     const auto& D_sub = m_solver.subDiagonal();
 
     Inertia inertia;
     auto count = [&](Scalar λ) {
-      if (λ > ε) {
+      if (λ > threshold) {
         ++inertia.positive;
-      } else if (λ < -ε) {
+      } else if (λ < -threshold) {
         ++inertia.negative;
       } else {
         ++inertia.zero;

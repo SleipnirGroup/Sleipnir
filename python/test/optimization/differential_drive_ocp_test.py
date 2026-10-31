@@ -13,6 +13,7 @@ from sleipnir.optimization import (
     TimestepMethod,
     TranscriptionMethod,
 )
+from tolerance import solution_tolerance
 
 
 def test_differential_drive_ocp() -> None:
@@ -62,11 +63,11 @@ def test_differential_drive_ocp() -> None:
     U = problem.U()
 
     # Verify initial state
-    assert X.value(0, 0) == pytest.approx(x_initial[0, 0], abs=1e-8)
-    assert X.value(1, 0) == pytest.approx(x_initial[1, 0], abs=1e-8)
-    assert X.value(2, 0) == pytest.approx(x_initial[2, 0], abs=1e-8)
-    assert X.value(3, 0) == pytest.approx(x_initial[3, 0], abs=1e-8)
-    assert X.value(4, 0) == pytest.approx(x_initial[4, 0], abs=1e-8)
+    assert X.value(0, 0) == pytest.approx(x_initial[0, 0], abs=solution_tolerance(1))
+    assert X.value(1, 0) == pytest.approx(x_initial[1, 0], abs=solution_tolerance(1))
+    assert X.value(2, 0) == pytest.approx(x_initial[2, 0], abs=solution_tolerance(1))
+    assert X.value(3, 0) == pytest.approx(x_initial[3, 0], abs=solution_tolerance(1))
+    assert X.value(4, 0) == pytest.approx(x_initial[4, 0], abs=solution_tolerance(1))
 
     # Verify solution
     for k in range(N):
@@ -85,14 +86,16 @@ def test_differential_drive_ocp() -> None:
         )
         actual_x_k1 = X[:, k + 1 : k + 2].value()
         for row in range(actual_x_k1.shape[0]):
-            assert actual_x_k1[row, 0] == pytest.approx(expected_x_k1[row, 0], abs=1e-8)
+            assert actual_x_k1[row, 0] == pytest.approx(
+                expected_x_k1[row, 0], abs=solution_tolerance(1)
+            )
 
     # Verify final state
-    assert X.value(0, N) == pytest.approx(x_final[0, 0], abs=1e-8)
-    assert X.value(1, N) == pytest.approx(x_final[1, 0], abs=1e-8)
-    assert X.value(2, N) == pytest.approx(x_final[2, 0], abs=1e-8)
-    assert X.value(3, N) == pytest.approx(x_final[3, 0], abs=1e-8)
-    assert X.value(4, N) == pytest.approx(x_final[4, 0], abs=1e-8)
+    assert X.value(0, N) == pytest.approx(x_final[0, 0], abs=solution_tolerance(1))
+    assert X.value(1, N) == pytest.approx(x_final[1, 0], abs=solution_tolerance(1))
+    assert X.value(2, N) == pytest.approx(x_final[2, 0], abs=solution_tolerance(1))
+    assert X.value(3, N) == pytest.approx(x_final[3, 0], abs=solution_tolerance(1))
+    assert X.value(4, N) == pytest.approx(x_final[4, 0], abs=solution_tolerance(1))
 
     # Log states for offline viewing
     with open("Differential drive states.csv", "w") as f:

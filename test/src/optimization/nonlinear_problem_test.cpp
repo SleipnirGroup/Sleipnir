@@ -15,6 +15,7 @@
 #include "catch_string_converters.hpp"
 #include "range.hpp"
 #include "scalar_types.hpp"
+#include "tolerance.hpp"
 
 TEMPLATE_TEST_CASE("Problem - Quartic", "[Problem]", SCALAR_TYPES) {
   using T = TestType;
@@ -34,13 +35,11 @@ TEMPLATE_TEST_CASE("Problem - Quartic", "[Problem]", SCALAR_TYPES) {
 
   CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
-  CHECK_THAT(x.value(), WithinAbs(T(1), T(1e-6)));
+  CHECK_THAT(x.value(), WithinAbs(T(1), solution_tolerance<T>(1)));
 }
 
 TEMPLATE_TEST_CASE("Problem - Rosenbrock with cubic and line constraint",
                    "[Problem]", SCALAR_TYPES) {
-  // https://en.wikipedia.org/wiki/Test_functions_for_optimization#Test_functions_for_constrained_optimization
-
   using T = TestType;
 
   slp::Problem<T> problem;
@@ -64,12 +63,39 @@ TEMPLATE_TEST_CASE("Problem - Rosenbrock with cubic and line constraint",
 
       CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
-      // Local minimum at (0, 0)
-      // Global minimum at (1, 1)
+      // Local minimum on the cubic constraint y = (x − 1)³ + 1. Substituting
+      // the constraint into the cost gives a univariate polynomial whose
+      // smallest stationary point is the local minimum. The constants below
+      // were generated with:
+      //
+      // ```python
+      // #!/usr/bin/env python
+      //
+      // import sympy as sp
+      //
+      // x = sp.symbols("x")
+      // y = (x - 1) ** 3 + 1
+      // f = 100 * (y - x**2) ** 2 + (1 - x) ** 2
+      //
+      // print(f"f′(x) = {sp.factor(sp.diff(f, x))}")
+      //
+      // x_min = min(sp.real_roots(sp.diff(f, x)))
+      // y_min = y.subs(x, x_min)
+      //
+      // print(f"T({sp.N(x_min, 17)}), T({sp.N(y_min, 17)})")
+      // ```
+      //
+      // Global minimum at (1, 1). Both constraints are weakly active (their
+      // Lagrange multipliers are zero), so the iterates only approach it to
+      // within the square root of the tolerance.
       INFO(std::format("  (x₀, y₀) = ({}, {})", x0, y0));
       Eigen::Vector2<T> sol{x.value(), y.value()};
-      CHECK_THAT(sol, WithinAbs(Eigen::Vector2<T>{T(0), T(0)}, T(1e-2)) ||
-                          WithinAbs(Eigen::Vector2<T>{T(1), T(1)}, T(1e-2)));
+      CHECK_THAT(sol, WithinAbs(Eigen::Vector2<T>{T(0.0011148370795454122),
+                                                  T(0.0033407840390827719)},
+                                solution_tolerance<T>(5)) ||
+                          WithinAbs(Eigen::Vector2<T>{T(1), T(1)},
+                                    solution_tolerance<T>(
+                                        10, SolutionType::DEGENERATE)));
     }
   }
 }
@@ -100,9 +126,14 @@ TEMPLATE_TEST_CASE("Problem - Rosenbrock with disk constraint", "[Problem]",
 
       CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
+      // The disk constraint is weakly active at the minimum (its Lagrange
+      // multiplier is zero), so the iterates only approach it to within the
+      // square root of the tolerance
       INFO(std::format("  (x₀, y₀) = ({}, {})", x0, y0));
       Eigen::Vector2<T> sol{x.value(), y.value()};
-      CHECK_THAT(sol, WithinAbs(Eigen::Vector2<T>{T(1), T(1)}, T(1e-3)));
+      CHECK_THAT(
+          sol, WithinAbs(Eigen::Vector2<T>{T(1), T(1)},
+                         solution_tolerance<T>(20, SolutionType::DEGENERATE)));
     }
   }
 }
@@ -128,8 +159,8 @@ TEMPLATE_TEST_CASE("Problem - Minimum 2D distance with linear constraint",
 
   CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
-  CHECK_THAT(x.value(), WithinAbs(T(2.5), T(1e-2)));
-  CHECK_THAT(y.value(), WithinAbs(T(2.5), T(1e-2)));
+  CHECK_THAT(x.value(), WithinAbs(T(2.5), solution_tolerance<T>(10)));
+  CHECK_THAT(y.value(), WithinAbs(T(2.5), solution_tolerance<T>(10)));
 }
 
 TEMPLATE_TEST_CASE("Problem - Conflicting bounds", "[Problem]", SCALAR_TYPES) {
@@ -189,18 +220,18 @@ TEMPLATE_TEST_CASE("Problem - Wachter and Biegler line search failure",
                          Equals(slp::ExitStatus::LOCALLY_INFEASIBLE));
 
   if (status == slp::ExitStatus::SUCCESS) {
-    CHECK_THAT(x.value(), WithinAbs(T(1), T(1e-6)));
-    CHECK_THAT(s1.value(), WithinAbs(T(0), T(1e-6)));
-    CHECK_THAT(s2.value(), WithinAbs(T(0.5), T(1e-6)));
+    CHECK_THAT(x.value(), WithinAbs(T(1), solution_tolerance<T>(5)));
+    CHECK_THAT(s1.value(), WithinAbs(T(0), solution_tolerance<T>(5)));
+    CHECK_THAT(s2.value(), WithinAbs(T(0.5), solution_tolerance<T>(5)));
   } else {
-    CHECK_THAT(x.value(), WithinAbs(T(-1), T(1e-6)));
-    CHECK_THAT(s1.value(), WithinAbs(T(0), T(1e-6)));
+    CHECK_THAT(x.value(), WithinAbs(T(-1), solution_tolerance<T>(1)));
+    CHECK_THAT(s1.value(), WithinAbs(T(0), solution_tolerance<T>(1)));
 
     // At x = −1 and s₁ = 0, the ℓ₁ constraint violation
     // |x − s₂ − 0.5| + max(0, −s₂) is 1.5 for every s₂ ∈ [−1.5, 0], so
     // feasibility restoration can converge to any of them
-    CHECK(s2.value() >= T(-1.5) - T(1e-6));
-    CHECK(s2.value() <= T(1e-6));
+    CHECK(s2.value() >= T(-1.5) - solution_tolerance<T>(5));
+    CHECK(s2.value() <= solution_tolerance<T>(5));
   }
 }
 
@@ -236,6 +267,7 @@ TEMPLATE_TEST_CASE("Problem - Hock-Schittkowski 13", "[Problem]",
 
   // The solution has no finite Lagrange multipliers, so the iterates only
   // approach it to within the square root of the tolerance
-  CHECK_THAT(x.value(), WithinAbs(T(1), T(1e-4)));
-  CHECK_THAT(y.value(), WithinAbs(T(0), T(1e-4)));
+  CHECK_THAT(x.value(), WithinAbs(T(1), solution_tolerance<T>(
+                                            10, SolutionType::DEGENERATE)));
+  CHECK_THAT(y.value(), WithinAbs(T(0), solution_tolerance<T>(1)));
 }

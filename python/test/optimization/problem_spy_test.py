@@ -4,6 +4,7 @@ from typing import BinaryIO
 import pytest
 from sleipnir.autodiff import ExpressionType
 from sleipnir.optimization import ExitStatus, IterationInfo, Problem
+from tolerance import solution_tolerance
 
 
 def read_char(spy: BinaryIO) -> bytes:
@@ -69,8 +70,8 @@ def test_problem_spy() -> None:
 
     assert problem.solve(diagnostics=True, spy=True) == ExitStatus.SUCCESS
 
-    assert x.value() == pytest.approx(1.0, abs=1e-8)
-    assert y.value() == pytest.approx(2.0, abs=1e-8)
+    assert x.value() == pytest.approx(1.0, abs=solution_tolerance(1))
+    assert y.value() == pytest.approx(2.0, abs=solution_tolerance(1))
 
     # Check H.spy
     with open("H.spy", mode="rb") as spy:

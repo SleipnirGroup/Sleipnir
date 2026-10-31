@@ -10,6 +10,7 @@
 #include "catch_matchers.hpp"
 #include "catch_string_converters.hpp"
 #include "scalar_types.hpp"
+#include "tolerance.hpp"
 
 TEMPLATE_TEST_CASE("Problem - Maximize", "[Problem]", SCALAR_TYPES) {
   using T = TestType;
@@ -35,8 +36,8 @@ TEMPLATE_TEST_CASE("Problem - Maximize", "[Problem]", SCALAR_TYPES) {
 
   CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
-  CHECK_THAT(x.value(), WithinAbs(T(375), T(1e-6)));
-  CHECK_THAT(y.value(), WithinAbs(T(250), T(1e-6)));
+  CHECK_THAT(x.value(), WithinAbs(T(375), solution_tolerance<T>(1)));
+  CHECK_THAT(y.value(), WithinAbs(T(250), solution_tolerance<T>(1)));
 }
 
 TEMPLATE_TEST_CASE("Problem - Free variable", "[Problem]", SCALAR_TYPES) {
@@ -56,6 +57,6 @@ TEMPLATE_TEST_CASE("Problem - Free variable", "[Problem]", SCALAR_TYPES) {
 
   CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
-  CHECK_THAT(x[0].value(), WithinAbs(T(0), T(1e-6)));
-  CHECK_THAT(x[1].value(), WithinAbs(T(2), T(1e-6)));
+  CHECK_THAT(x[0].value(), WithinAbs(T(0), solution_tolerance<T>(1)));
+  CHECK_THAT(x[1].value(), WithinAbs(T(2), solution_tolerance<T>(1)));
 }

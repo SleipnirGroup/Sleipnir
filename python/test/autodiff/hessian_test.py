@@ -615,12 +615,22 @@ def test_edge_pushing_petro_figure_1() -> None:
 
     # d²y/dx² = [−p₁/x₁²     0   ]
     #           [   0     −p₁/x₂²]
-    H = Hessian(y, x)
-    expected_H = np.diag(
-        [-p_1.value() / x[0].value() ** 2, -p_1.value() / x[1].value() ** 2]
-    )
-    assert (H.get().value() == expected_H).all()
-    assert (H.value().todense() == expected_H).all()
+    hessian = Hessian(y, x)
+    p = p_1.value()
+    x0 = x[0].value()
+    x1 = x[1].value()
+    u = x0 * x1
+
+    # The mixed partial is −p₁/u + p₁/u for u = x₁x₂, which cancels to zero, so
+    # its rounding error scales with the terms instead of with the result (e.g.,
+    # when the compiler contracts the sum into an FMA)
+    mixed_margin = 8 * ε * (2 * p / u)
+
+    for H in [hessian.get().value(), hessian.value().todense()]:
+        assert H[0, 0] == pytest.approx(-p / (x0 * x0), rel=8 * ε, abs=0)
+        assert H[0, 1] == pytest.approx(0.0, abs=mixed_margin)
+        assert H[1, 0] == pytest.approx(0.0, abs=mixed_margin)
+        assert H[1, 1] == pytest.approx(-p / (x1 * x1), rel=8 * ε, abs=0)
 
 
 def test_variable_reuse() -> None:
