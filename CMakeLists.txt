@@ -10,17 +10,20 @@ set(CMAKE_OSX_DEPLOYMENT_TARGET "14.0" CACHE STRING "")
 
 project(Sleipnir LANGUAGES CXX)
 
-include(BuildTypes)
 include(CMakePackageConfigHelpers)
 include(CTest)
 include(CompilerFlags)
 include(FetchContent)
 
-# Control where the static and shared libraries are built so that on Windows,
-# we don't need to tinker with the path to run the executable
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
+if(PROJECT_IS_TOP_LEVEL)
+    include(BuildTypes)
+
+    # Control where the static and shared libraries are built so that on
+    # Windows, we don't need to tinker with the path to run the executable
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
+endif()
 
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 option(SLEIPNIR_BUILD_BENCHMARKS "Build CasADi and Sleipnir benchmarks" OFF)
@@ -49,10 +52,9 @@ option(SLEIPNIR_USE_SYSTEM_NANOBIND "Use system nanobind" OFF)
 
 file(GLOB_RECURSE Sleipnir_src CONFIGURE_DEPENDS src/*.cpp)
 
-set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS FALSE)
 add_library(Sleipnir ${Sleipnir_src})
 add_library(Sleipnir::Sleipnir ALIAS Sleipnir)
-set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+set_target_properties(Sleipnir PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS OFF)
 
 compiler_flags(Sleipnir)
 target_compile_definitions(Sleipnir PRIVATE SLEIPNIR_EXPORTS)
