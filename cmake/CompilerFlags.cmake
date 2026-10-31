@@ -1,4 +1,4 @@
-macro(compiler_flags target)
+function(compiler_flags target)
     if(NOT MSVC)
         target_compile_options(${target} PRIVATE -Wall -Wextra -pedantic)
 
@@ -29,4 +29,4 @@ macro(compiler_flags target)
             target_compile_options(${target} PUBLIC /Zf)
         endif()
     endif()
-endmacro()
+endfunction()
