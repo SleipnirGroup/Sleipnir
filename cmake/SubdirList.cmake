@@ -1,5 +1,5 @@
 function(subdir_list result curdir)
-    file(GLOB children RELATIVE ${curdir} ${curdir}/*)
+    file(GLOB children RELATIVE ${curdir} CONFIGURE_DEPENDS ${curdir}/*)
     set(dirlist "")
     foreach(child ${children})
         if(IS_DIRECTORY ${curdir}/${child})

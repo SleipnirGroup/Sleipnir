@@ -47,7 +47,7 @@ option(SLEIPNIR_USE_SYSTEM_BENCHMARK "Use system benchmark" OFF)
 option(SLEIPNIR_USE_SYSTEM_EIGEN "Use system eigen" OFF)
 option(SLEIPNIR_USE_SYSTEM_NANOBIND "Use system nanobind" OFF)
 
-file(GLOB_RECURSE Sleipnir_src src/*.cpp)
+file(GLOB_RECURSE Sleipnir_src CONFIGURE_DEPENDS src/*.cpp)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS FALSE)
 add_library(Sleipnir ${Sleipnir_src})
@@ -56,7 +56,7 @@ set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 
 compiler_flags(Sleipnir)
 target_compile_definitions(Sleipnir PRIVATE SLEIPNIR_EXPORTS)
-file(GLOB_RECURSE Sleipnir_headers include/*.hpp)
+file(GLOB_RECURSE Sleipnir_headers CONFIGURE_DEPENDS include/*.hpp)
 target_sources(
     Sleipnir
     PUBLIC FILE_SET HEADERS BASE_DIRS include FILES ${Sleipnir_headers}
@@ -193,6 +193,7 @@ if(SLEIPNIR_BUILD_BENCHMARKS)
         foreach(benchmark "gradient" "jacobian" "hessian")
             file(
                 GLOB ${benchmark}_autodiff_benchmark_src
+                CONFIGURE_DEPENDS
                 benchmarks/${benchmark}_autodiff/*.cpp
             )
             add_executable(
@@ -214,6 +215,7 @@ if(SLEIPNIR_BUILD_BENCHMARKS)
         foreach(benchmark "cart_pole" "double_integrator" "flywheel")
             file(
                 GLOB ${benchmark}_optimization_benchmark_src
+                CONFIGURE_DEPENDS
                 benchmarks/${benchmark}_optimization/*.cpp
             )
             add_executable(
@@ -256,6 +258,7 @@ if(PROJECT_IS_TOP_LEVEL AND BUILD_TESTING)
         # Build autodiff explicit instantiations
         file(
             GLOB_RECURSE sleipnir_autodiff_explicit_src
+            CONFIGURE_DEPENDS
             test/src/autodiff/*_explicit_double.cpp
         )
         add_library(
@@ -273,6 +276,7 @@ if(PROJECT_IS_TOP_LEVEL AND BUILD_TESTING)
         # Build optimization explicit instantiations
         file(
             GLOB_RECURSE sleipnir_optimization_explicit_src
+            CONFIGURE_DEPENDS
             test/src/optimization/*_explicit_double.cpp
         )
         add_library(
@@ -289,7 +293,11 @@ if(PROJECT_IS_TOP_LEVEL AND BUILD_TESTING)
     endif()
 
     # Build Sleipnir autodiff tests
-    file(GLOB_RECURSE sleipnir_autodiff_test_src test/src/autodiff/*_test.cpp)
+    file(
+        GLOB_RECURSE sleipnir_autodiff_test_src
+        CONFIGURE_DEPENDS
+        test/src/autodiff/*_test.cpp
+    )
     add_executable(sleipnir_autodiff_test ${sleipnir_autodiff_test_src})
     compiler_flags(sleipnir_autodiff_test)
     target_compile_definitions(
@@ -311,6 +319,7 @@ if(PROJECT_IS_TOP_LEVEL AND BUILD_TESTING)
     # Build Sleipnir optimization tests
     file(
         GLOB_RECURSE sleipnir_optimization_test_src
+        CONFIGURE_DEPENDS
         test/src/optimization/*_test.cpp
     )
     if(CMAKE_SYSTEM_NAME STREQUAL "Generic")
@@ -341,7 +350,11 @@ if(PROJECT_IS_TOP_LEVEL AND BUILD_TESTING)
     )
 
     # Build Sleipnir util tests
-    file(GLOB_RECURSE sleipnir_util_test_src test/src/util/*_test.cpp)
+    file(
+        GLOB_RECURSE sleipnir_util_test_src
+        CONFIGURE_DEPENDS
+        test/src/util/*_test.cpp
+    )
     add_executable(sleipnir_util_test ${sleipnir_util_test_src})
     compiler_flags(sleipnir_util_test)
     target_include_directories(
@@ -366,7 +379,11 @@ if(SLEIPNIR_BUILD_EXAMPLES)
     subdir_list(EXAMPLES ${CMAKE_CURRENT_SOURCE_DIR}/examples)
     foreach(example ${EXAMPLES})
         # Build example
-        file(GLOB_RECURSE sources examples/${example}/src/*.cpp)
+        file(
+            GLOB_RECURSE sources
+            CONFIGURE_DEPENDS
+            examples/${example}/src/*.cpp
+        )
         add_executable(${example} ${sources})
         compiler_flags(${example})
         target_include_directories(
@@ -381,7 +398,11 @@ if(SLEIPNIR_BUILD_EXAMPLES)
             AND BUILD_TESTING
             AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/examples/${example}/test
         )
-            file(GLOB_RECURSE test_sources examples/${example}/test/*.cpp)
+            file(
+                GLOB_RECURSE test_sources
+                CONFIGURE_DEPENDS
+                examples/${example}/test/*.cpp
+            )
             add_executable(${example}_test ${sources} ${test_sources})
             compiler_flags(${example}_test)
             target_compile_definitions(${example}_test PRIVATE RUNNING_TESTS)
@@ -437,7 +458,7 @@ if(SLEIPNIR_BUILD_PYTHON)
         find_package(nanobind CONFIG REQUIRED)
     endif()
 
-    file(GLOB_RECURSE python_ext_src python/cpp/*.cpp)
+    file(GLOB_RECURSE python_ext_src CONFIGURE_DEPENDS python/cpp/*.cpp)
 
     # Build Sleipnir directly into the module and manually inherit its compile
     # definitions, include directories, and link libraries. This avoids having
