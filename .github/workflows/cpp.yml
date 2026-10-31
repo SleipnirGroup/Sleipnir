@@ -54,6 +54,12 @@ jobs:
       - run: ctest --test-dir build -C RelWithDebInfo --output-on-failure
       - run: cmake --install build --config RelWithDebInfo --prefix pkg
 
+      - name: Build and run a consumer of the installed package
+        run: |
+          cmake -B build-install-test -S .github/install_test -DCMAKE_PREFIX_PATH="${{ github.workspace }}/pkg"
+          cmake --build build-install-test --config RelWithDebInfo
+          ctest --test-dir build-install-test -C RelWithDebInfo --output-on-failure
+
       - uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.name }}

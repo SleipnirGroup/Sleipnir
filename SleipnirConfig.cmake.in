@@ -1,7 +1,24 @@
 @PACKAGE_INIT@
 
 include(CMakeFindDependencyMacro)
-find_dependency(Threads)
-find_dependency(small_vector)
+
+if(@Threads_FOUND@)
+    find_dependency(Threads)
+endif()
+
+if(@SLEIPNIR_USE_SYSTEM_EIGEN@)
+    find_dependency(Eigen3 CONFIG)
+else()
+    # Use the Eigen that was fetched and installed alongside Sleipnir
+    find_dependency(Eigen3 CONFIG PATHS "${PACKAGE_PREFIX_DIR}" NO_DEFAULT_PATH)
+endif()
+
+# Use the small_vector that was fetched and installed alongside Sleipnir
+find_dependency(
+    small_vector
+    CONFIG
+    PATHS "${PACKAGE_PREFIX_DIR}"
+    NO_DEFAULT_PATH
+)
 
 include("${CMAKE_CURRENT_LIST_DIR}/Sleipnir.cmake")
