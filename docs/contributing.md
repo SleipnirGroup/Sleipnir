@@ -66,7 +66,46 @@ The following build types can be specified via `-DCMAKE_BUILD_TYPE` during CMake
 * Ubsan
   * Enables undefined behavior sanitizer
 * Coverage
-  * Enables Clang source-based code coverage instrumentation (see `tools/generate_coverage.py`)
+  * Enables code coverage instrumentation: source-based coverage with Clang, gcov-based coverage with GCC (see `tools/generate_coverage.py`)
+
+##### CMake presets
+
+`CMakePresets.json` provides presets for common build configurations. Each preset uses the Ninja generator and its own build directory, so multiple configurations can coexist. Pass the same preset name to each step.
+
+```bash
+# Configure
+cmake --preset asan
+
+# Build
+cmake --build --preset asan
+
+# Test
+ctest --preset asan
+```
+
+Run `cmake --list-presets=all` to list the available presets.
+
+| Preset                | Build directory             | Description                           |
+|-----------------------|-----------------------------|---------------------------------------|
+| `default`             | `build`                     | RelWithDebInfo with benchmarks        |
+| `debug`               | `build-debug`               | Debug                                 |
+| `bound-projection`    | `build-bound-projection`    | `SLEIPNIR_ENABLE_BOUND_PROJECTION=ON` |
+| `disable-diagnostics` | `build-disable-diagnostics` | `SLEIPNIR_DISABLE_DIAGNOSTICS=ON`     |
+| `examples`            | `build-examples`            | Examples                              |
+| `python`              | `build-python`              | Python module                         |
+| `asan`                | `build-asan`                | Address sanitizer                     |
+| `tsan`                | `build-tsan`                | Thread sanitizer                      |
+| `ubsan`               | `build-ubsan`               | Undefined behavior sanitizer          |
+| `coverage-clang`      | `build-coverage-clang`      | Clang source-based code coverage      |
+| `coverage-gcc`        | `build-coverage-gcc`        | GCC gcov-based code coverage          |
+| `aarch64-linux-gnu`   | `build-aarch64-linux-gnu`   | Cross-compile for aarch64 Linux       |
+| `arm-none-eabi`       | `build-arm-none-eabi`       | Cross-compile for bare-metal ARM      |
+
+The `aarch64-linux-gnu` and `arm-none-eabi` presets have no test preset. The presets build only the `double` test variants; pass `-DSLEIPNIR_TEST_SCALAR_TYPES="double;ExplicitDouble"` during configure to also build the `ExplicitDouble` variants like CI does.
+
+The `coverage-clang` test preset writes raw profiles to `build-coverage-clang/ctest-*.profraw` (one per test executable), which can be merged with `llvm-profdata merge` and reported with `llvm-cov`. The `coverage-gcc` test preset writes gcov counters to `.gcda` files next to the object files, which can be reported with `gcovr`. Both presets accumulate counters across runs, and rebuilding the Clang test executables leaves stale `.profraw` files behind, so delete the `.profraw` or `.gcda` files before rerunning. To generate HTML and text reports for specific test executables instead, run `tools/generate_coverage.py`, which builds in a separate `build-coverage` directory.
+
+To use a compiler cache like ccache, set the `CMAKE_C_COMPILER_LAUNCHER` and `CMAKE_CXX_COMPILER_LAUNCHER` environment variables before configuring. Personal presets can be added in `CMakeUserPresets.json`, which is ignored by Git.
 
 #### Python library
 

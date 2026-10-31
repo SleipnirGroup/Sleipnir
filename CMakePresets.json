@@ -1,0 +1,204 @@
+{
+  "version": 8,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 28,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "generator": "Ninja",
+      "cacheVariables": {
+        "SLEIPNIR_TEST_SCALAR_TYPES": "double"
+      }
+    },
+    {
+      "name": "default",
+      "displayName": "RelWithDebInfo with benchmarks",
+      "inherits": "base",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "SLEIPNIR_BUILD_BENCHMARKS": "ON"
+      }
+    },
+    {
+      "name": "debug",
+      "displayName": "Debug",
+      "inherits": "base",
+      "binaryDir": "${sourceDir}/build-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "bound-projection",
+      "displayName": "Bound projection enabled",
+      "inherits": "base",
+      "binaryDir": "${sourceDir}/build-bound-projection",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "SLEIPNIR_ENABLE_BOUND_PROJECTION": "ON"
+      }
+    },
+    {
+      "name": "disable-diagnostics",
+      "displayName": "Diagnostics disabled",
+      "inherits": "base",
+      "binaryDir": "${sourceDir}/build-disable-diagnostics",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "SLEIPNIR_DISABLE_DIAGNOSTICS": "ON"
+      }
+    },
+    {
+      "name": "examples",
+      "displayName": "Examples",
+      "inherits": "base",
+      "binaryDir": "${sourceDir}/build-examples",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "SLEIPNIR_BUILD_EXAMPLES": "ON"
+      }
+    },
+    {
+      "name": "python",
+      "displayName": "Python module",
+      "inherits": "base",
+      "binaryDir": "${sourceDir}/build-python",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "SLEIPNIR_BUILD_PYTHON": "ON"
+      }
+    },
+    {
+      "name": "asan",
+      "displayName": "Address sanitizer",
+      "inherits": "base",
+      "binaryDir": "${sourceDir}/build-asan",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Asan"
+      }
+    },
+    {
+      "name": "tsan",
+      "displayName": "Thread sanitizer",
+      "inherits": "base",
+      "binaryDir": "${sourceDir}/build-tsan",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Tsan"
+      }
+    },
+    {
+      "name": "ubsan",
+      "displayName": "Undefined behavior sanitizer",
+      "inherits": "base",
+      "binaryDir": "${sourceDir}/build-ubsan",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Ubsan"
+      }
+    },
+    {
+      "name": "coverage-base",
+      "hidden": true,
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Coverage"
+      }
+    },
+    {
+      "name": "coverage-clang",
+      "displayName": "Clang source-based code coverage",
+      "inherits": "coverage-base",
+      "binaryDir": "${sourceDir}/build-coverage-clang",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "clang",
+        "CMAKE_CXX_COMPILER": "clang++"
+      }
+    },
+    {
+      "name": "coverage-gcc",
+      "displayName": "GCC gcov-based code coverage",
+      "inherits": "coverage-base",
+      "binaryDir": "${sourceDir}/build-coverage-gcc",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_CXX_COMPILER": "g++"
+      }
+    },
+    {
+      "name": "aarch64-linux-gnu",
+      "displayName": "Cross-compile for aarch64 Linux",
+      "inherits": "base",
+      "binaryDir": "${sourceDir}/build-aarch64-linux-gnu",
+      "toolchainFile": "${sourceDir}/cmake/aarch64-linux-gnu.cmake",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+      }
+    },
+    {
+      "name": "arm-none-eabi",
+      "displayName": "Cross-compile for bare-metal ARM",
+      "inherits": "base",
+      "binaryDir": "${sourceDir}/build-arm-none-eabi",
+      "toolchainFile": "${sourceDir}/cmake/arm-none-eabi.cmake",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+      }
+    }
+  ],
+  "buildPresets": [
+    { "name": "default", "configurePreset": "default" },
+    { "name": "debug", "configurePreset": "debug" },
+    { "name": "bound-projection", "configurePreset": "bound-projection" },
+    { "name": "disable-diagnostics", "configurePreset": "disable-diagnostics" },
+    { "name": "examples", "configurePreset": "examples" },
+    { "name": "python", "configurePreset": "python" },
+    { "name": "asan", "configurePreset": "asan" },
+    { "name": "tsan", "configurePreset": "tsan" },
+    { "name": "ubsan", "configurePreset": "ubsan" },
+    { "name": "coverage-clang", "configurePreset": "coverage-clang" },
+    { "name": "coverage-gcc", "configurePreset": "coverage-gcc" },
+    { "name": "aarch64-linux-gnu", "configurePreset": "aarch64-linux-gnu" },
+    { "name": "arm-none-eabi", "configurePreset": "arm-none-eabi" }
+  ],
+  "testPresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "output": { "outputOnFailure": true }
+    },
+    { "name": "default", "inherits": "base", "configurePreset": "default" },
+    { "name": "debug", "inherits": "base", "configurePreset": "debug" },
+    {
+      "name": "bound-projection",
+      "inherits": "base",
+      "configurePreset": "bound-projection"
+    },
+    {
+      "name": "disable-diagnostics",
+      "inherits": "base",
+      "configurePreset": "disable-diagnostics"
+    },
+    { "name": "examples", "inherits": "base", "configurePreset": "examples" },
+    { "name": "python", "inherits": "base", "configurePreset": "python" },
+    { "name": "asan", "inherits": "base", "configurePreset": "asan" },
+    { "name": "tsan", "inherits": "base", "configurePreset": "tsan" },
+    { "name": "ubsan", "inherits": "base", "configurePreset": "ubsan" },
+    {
+      "name": "coverage-clang",
+      "inherits": "base",
+      "configurePreset": "coverage-clang",
+      "environment": {
+        "LLVM_PROFILE_FILE": "${sourceDir}/build-coverage-clang/ctest-%m.profraw"
+      }
+    },
+    {
+      "name": "coverage-gcc",
+      "inherits": "base",
+      "configurePreset": "coverage-gcc"
+    }
+  ]
+}
