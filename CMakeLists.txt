@@ -213,46 +213,28 @@ if(SLEIPNIR_BUILD_BENCHMARKS)
             find_package(benchmark CONFIG REQUIRED)
         endif()
 
-        # Autodiff benchmarks
-        foreach(benchmark "gradient" "jacobian" "hessian")
+        foreach(
+            benchmark
+            "gradient_autodiff"
+            "jacobian_autodiff"
+            "hessian_autodiff"
+            "cart_pole_optimization"
+            "double_integrator_optimization"
+            "flywheel_optimization"
+        )
             file(
-                GLOB ${benchmark}_autodiff_benchmark_src
+                GLOB ${benchmark}_benchmark_src
                 CONFIGURE_DEPENDS
-                benchmarks/${benchmark}_autodiff/*.cpp
+                benchmarks/${benchmark}/*.cpp
             )
-            add_executable(
-                ${benchmark}_autodiff_benchmark
-                ${${benchmark}_autodiff_benchmark_src}
-            )
-            compiler_flags(${benchmark}_autodiff_benchmark)
+            add_executable(${benchmark}_benchmark ${${benchmark}_benchmark_src})
+            compiler_flags(${benchmark}_benchmark)
             target_include_directories(
-                ${benchmark}_autodiff_benchmark
+                ${benchmark}_benchmark
                 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks
             )
             target_link_libraries(
-                ${benchmark}_autodiff_benchmark
-                PUBLIC Sleipnir casadi benchmark::benchmark
-            )
-        endforeach()
-
-        # Optimization benchmarks
-        foreach(benchmark "cart_pole" "double_integrator" "flywheel")
-            file(
-                GLOB ${benchmark}_optimization_benchmark_src
-                CONFIGURE_DEPENDS
-                benchmarks/${benchmark}_optimization/*.cpp
-            )
-            add_executable(
-                ${benchmark}_optimization_benchmark
-                ${${benchmark}_optimization_benchmark_src}
-            )
-            compiler_flags(${benchmark}_optimization_benchmark)
-            target_include_directories(
-                ${benchmark}_optimization_benchmark
-                PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks
-            )
-            target_link_libraries(
-                ${benchmark}_optimization_benchmark
+                ${benchmark}_benchmark
                 PUBLIC Sleipnir casadi benchmark::benchmark
             )
         endforeach()
@@ -316,28 +298,38 @@ if(PROJECT_IS_TOP_LEVEL AND BUILD_TESTING)
         target_link_libraries(sleipnir_optimization_explicit PUBLIC Sleipnir)
     endif()
 
+    # Adds a Catch2 test executable named <name> built from the source list
+    # <src>. Any further arguments are linked as extra libraries.
+    function(sleipnir_add_test name src)
+        add_executable(${name} ${src})
+        compiler_flags(${name})
+        target_compile_definitions(
+            ${name}
+            PRIVATE SCALAR_TYPES=${sleipnir_test_scalar_types}
+        )
+        target_include_directories(
+            ${name}
+            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/test/include
+        )
+        target_link_libraries(
+            ${name}
+            PUBLIC Sleipnir ${ARGN} Catch2::Catch2WithMain
+        )
+        if(NOT CMAKE_CROSSCOMPILING OR CMAKE_CROSSCOMPILING_EMULATOR)
+            catch_discover_tests(${name})
+        endif()
+    endfunction()
+
     # Build Sleipnir autodiff tests
     file(
         GLOB_RECURSE sleipnir_autodiff_test_src
         CONFIGURE_DEPENDS
         test/src/autodiff/*_test.cpp
     )
-    add_executable(sleipnir_autodiff_test ${sleipnir_autodiff_test_src})
-    compiler_flags(sleipnir_autodiff_test)
-    target_compile_definitions(
+    sleipnir_add_test(
         sleipnir_autodiff_test
-        PRIVATE SCALAR_TYPES=${sleipnir_test_scalar_types}
-    )
-    target_include_directories(
-        sleipnir_autodiff_test
-        PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/test/include
-    )
-    target_link_libraries(
-        sleipnir_autodiff_test
-        PUBLIC
-            Sleipnir
-            $<TARGET_NAME_IF_EXISTS:sleipnir_autodiff_explicit>
-            Catch2::Catch2WithMain
+        "${sleipnir_autodiff_test_src}"
+        $<TARGET_NAME_IF_EXISTS:sleipnir_autodiff_explicit>
     )
 
     # Build Sleipnir optimization tests
@@ -354,23 +346,11 @@ if(PROJECT_IS_TOP_LEVEL AND BUILD_TESTING)
             REGEX "/multistart_test\\.cpp$"
         )
     endif()
-    add_executable(sleipnir_optimization_test ${sleipnir_optimization_test_src})
-    compiler_flags(sleipnir_optimization_test)
-    target_compile_definitions(
+    sleipnir_add_test(
         sleipnir_optimization_test
-        PRIVATE SCALAR_TYPES=${sleipnir_test_scalar_types}
-    )
-    target_include_directories(
-        sleipnir_optimization_test
-        PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/test/include
-    )
-    target_link_libraries(
-        sleipnir_optimization_test
-        PUBLIC
-            Sleipnir
-            $<TARGET_NAME_IF_EXISTS:sleipnir_autodiff_explicit>
-            $<TARGET_NAME_IF_EXISTS:sleipnir_optimization_explicit>
-            Catch2::Catch2WithMain
+        "${sleipnir_optimization_test_src}"
+        $<TARGET_NAME_IF_EXISTS:sleipnir_autodiff_explicit>
+        $<TARGET_NAME_IF_EXISTS:sleipnir_optimization_explicit>
     )
 
     # Build Sleipnir util tests
@@ -379,22 +359,7 @@ if(PROJECT_IS_TOP_LEVEL AND BUILD_TESTING)
         CONFIGURE_DEPENDS
         test/src/util/*_test.cpp
     )
-    add_executable(sleipnir_util_test ${sleipnir_util_test_src})
-    compiler_flags(sleipnir_util_test)
-    target_include_directories(
-        sleipnir_util_test
-        PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/test/include
-    )
-    target_link_libraries(
-        sleipnir_util_test
-        PUBLIC Sleipnir Catch2::Catch2WithMain
-    )
-
-    if(NOT CMAKE_CROSSCOMPILING OR CMAKE_CROSSCOMPILING_EMULATOR)
-        catch_discover_tests(sleipnir_autodiff_test)
-        catch_discover_tests(sleipnir_optimization_test)
-        catch_discover_tests(sleipnir_util_test)
-    endif()
+    sleipnir_add_test(sleipnir_util_test "${sleipnir_util_test_src}")
 endif()
 
 # Build examples and example tests
