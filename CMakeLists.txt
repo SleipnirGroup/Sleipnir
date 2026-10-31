@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.21)
+cmake_minimum_required(VERSION 3.28)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "")
@@ -56,11 +56,10 @@ set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 
 compiler_flags(Sleipnir)
 target_compile_definitions(Sleipnir PRIVATE SLEIPNIR_EXPORTS)
-target_include_directories(
+file(GLOB_RECURSE Sleipnir_headers include/*.hpp)
+target_sources(
     Sleipnir
-    PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:include>
+    PUBLIC FILE_SET HEADERS BASE_DIRS include FILES ${Sleipnir_headers}
 )
 
 # Required for std::async()
@@ -133,10 +132,9 @@ install(
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
     RUNTIME DESTINATION bin
-    INCLUDES DESTINATION include
+    FILE_SET HEADERS DESTINATION include
 )
 export(TARGETS Sleipnir FILE Sleipnir.cmake NAMESPACE Sleipnir::)
-install(DIRECTORY include/ COMPONENT Sleipnir DESTINATION include)
 install(
     EXPORT SleipnirTargets
     FILE Sleipnir.cmake
