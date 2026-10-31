@@ -61,12 +61,21 @@ if(NOT MSVC)
       "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO} -fsanitize=undefined"
     )
 
+    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        # Source-based coverage for llvm-cov
+        set(coverageCompileFlags "-fprofile-instr-generate -fcoverage-mapping")
+        set(coverageLinkFlags "")
+    else()
+        # gcov-based coverage
+        set(coverageCompileFlags "--coverage")
+        set(coverageLinkFlags "--coverage")
+    endif()
     add_build_type(
       "Coverage"
-      "${CMAKE_C_FLAGS_RELWITHDEBINFO} -fprofile-instr-generate -fcoverage-mapping"
-      "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -fprofile-instr-generate -fcoverage-mapping"
-      "${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO}"
-      "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO}"
+      "${CMAKE_C_FLAGS_RELWITHDEBINFO} ${coverageCompileFlags}"
+      "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} ${coverageCompileFlags}"
+      "${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO} ${coverageLinkFlags}"
+      "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO} ${coverageLinkFlags}"
     )
 
     block(PROPAGATE CMAKE_CONFIGURATION_TYPES)
