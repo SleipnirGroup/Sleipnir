@@ -28,6 +28,7 @@ include(CMakePackageConfigHelpers)
 include(CTest)
 include(CompilerFlags)
 include(FetchContent)
+include(GNUInstallDirs)
 
 if(PROJECT_IS_TOP_LEVEL)
     include(BuildTypes)
@@ -145,24 +146,24 @@ install(
     TARGETS Sleipnir
     COMPONENT Sleipnir
     EXPORT SleipnirTargets
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-    RUNTIME DESTINATION bin
-    FILE_SET HEADERS DESTINATION include
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 export(TARGETS Sleipnir FILE Sleipnir.cmake NAMESPACE Sleipnir::)
 install(
     EXPORT SleipnirTargets
     FILE Sleipnir.cmake
     NAMESPACE Sleipnir::
-    DESTINATION lib/cmake/Sleipnir
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Sleipnir
 )
 
 # Generate the config file that includes the exports
 configure_package_config_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/SleipnirConfig.cmake.in
     ${CMAKE_CURRENT_BINARY_DIR}/SleipnirConfig.cmake
-    INSTALL_DESTINATION lib/cmake/Sleipnir
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Sleipnir
     NO_SET_AND_CHECK_MACRO
     NO_CHECK_REQUIRED_COMPONENTS_MACRO
 )
@@ -178,7 +179,7 @@ install(
         ${CMAKE_CURRENT_BINARY_DIR}/SleipnirConfig.cmake
         ${CMAKE_CURRENT_BINARY_DIR}/SleipnirConfigVersion.cmake
     COMPONENT Sleipnir
-    DESTINATION lib/cmake/Sleipnir
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Sleipnir
 )
 
 # Add benchmark executables
