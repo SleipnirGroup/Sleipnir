@@ -27,11 +27,11 @@ class DifferentialDriveUtil {
       Scalar(0.5) / Ka_linear + Scalar(0.5) / Ka_angular;
   static constexpr Scalar B2 =
       Scalar(0.5) / Ka_linear - Scalar(0.5) / Ka_angular;
-  static constexpr Eigen::Matrix<Scalar, 2, 2> A{{A1, A2}, {A2, A1}};
-  static constexpr Eigen::Matrix<Scalar, 2, 2> B{{B1, B2}, {B2, B1}};
+  static constexpr Eigen::Matrix2<Scalar> A{{A1, A2}, {A2, A1}};
+  static constexpr Eigen::Matrix2<Scalar> B{{B1, B2}, {B2, B1}};
 
   static Eigen::Vector<Scalar, 5> dynamics_scalar(
-      const Eigen::Vector<Scalar, 5>& x, const Eigen::Vector<Scalar, 2>& u) {
+      const Eigen::Vector<Scalar, 5>& x, const Eigen::Vector2<Scalar>& u) {
     using std::cos;
     using std::sin;
 

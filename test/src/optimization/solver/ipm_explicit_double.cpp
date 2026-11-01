@@ -12,4 +12,4 @@ template slp::ExitStatus slp::ipm(
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
     const Eigen::ArrayX<bool>& bound_constraint_mask,
 #endif
-    Eigen::Vector<ExplicitDouble, Eigen::Dynamic>& x);
+    Eigen::VectorX<ExplicitDouble>& x);

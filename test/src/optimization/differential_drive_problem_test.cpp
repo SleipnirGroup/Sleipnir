@@ -94,7 +94,7 @@ TEMPLATE_TEST_CASE("Problem - Differential drive", "[Problem]", SCALAR_TYPES) {
 
   // Verify solution
   Eigen::Vector<T, 5> x{T(0), T(0), T(0), T(0), T(0)};
-  Eigen::Vector<T, 2> u{T(0), T(0)};
+  Eigen::Vector2<T> u{T(0), T(0)};
   for (int k = 0; k < N; ++k) {
     INFO(std::format("  k = {}", k));
 

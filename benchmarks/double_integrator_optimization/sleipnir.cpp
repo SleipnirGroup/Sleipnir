@@ -28,17 +28,17 @@ slp::Problem<double> double_integrator_sleipnir(
   constexpr double a_max = 3.0;  // m/s²
   constexpr double ε = 0.1;      // Fuel cost smoothing (m/s²)
 
-  constexpr Eigen::Vector<double, 4> x_initial{{0.0, 0.0, 0.0, 0.0}};
-  constexpr Eigen::Vector<double, 4> x_final{{10.0, 5.0, 0.0, 0.0}};
+  constexpr Eigen::Vector4d x_initial{{0.0, 0.0, 0.0, 0.0}};
+  constexpr Eigen::Vector4d x_final{{10.0, 5.0, 0.0, 0.0}};
 
   // Double integrator model:
   // States: [x, y, ẋ, ẏ]
   // Inputs: [ẍ, ÿ]
   double T = dt.count();
-  Eigen::Matrix<double, 4, 4> A{{1.0, 0.0, T, 0.0},
-                                {0.0, 1.0, 0.0, T},
-                                {0.0, 0.0, 1.0, 0.0},
-                                {0.0, 0.0, 0.0, 1.0}};
+  Eigen::Matrix4d A{{1.0, 0.0, T, 0.0},
+                    {0.0, 1.0, 0.0, T},
+                    {0.0, 0.0, 1.0, 0.0},
+                    {0.0, 0.0, 0.0, 1.0}};
   Eigen::Matrix<double, 4, 2> B{
       {0.5 * T * T, 0.0}, {0.0, 0.5 * T * T}, {T, 0.0}, {0.0, T}};
 

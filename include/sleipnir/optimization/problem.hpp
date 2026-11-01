@@ -390,7 +390,7 @@ class Problem {
   }
 
  private:
-  using DenseVector = Eigen::Vector<Scalar, Eigen::Dynamic>;
+  using DenseVector = Eigen::VectorX<Scalar>;
 
   // The list of decision variables, which are the root of the problem's
   // expression tree

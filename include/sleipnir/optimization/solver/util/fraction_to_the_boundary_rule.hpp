@@ -17,9 +17,9 @@ namespace slp {
 /// @param τ Fraction-to-the-boundary rule scaling factor within (0, 1].
 /// @return Fraction of the iterate step size within (0, 1].
 template <typename Scalar>
-Scalar fraction_to_the_boundary_rule(
-    const Eigen::Vector<Scalar, Eigen::Dynamic>& x,
-    const Eigen::Vector<Scalar, Eigen::Dynamic>& p, Scalar τ) {
+Scalar fraction_to_the_boundary_rule(const Eigen::VectorX<Scalar>& x,
+                                     const Eigen::VectorX<Scalar>& p,
+                                     Scalar τ) {
   // The fraction-to-the-boundary rule is defined as:
   //
   //   α = max(α ∈ (0, 1] : x + αp ≥ (1 − τ)x)   (1)

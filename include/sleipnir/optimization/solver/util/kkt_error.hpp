@@ -27,7 +27,7 @@ enum class KKTErrorType {
 /// @tparam T Type of KKT error to compute.
 /// @param g Cost function gradient ∇f.
 template <typename Scalar, KKTErrorType T>
-Scalar kkt_error(const Eigen::Vector<Scalar, Eigen::Dynamic>& g) {
+Scalar kkt_error(const Eigen::VectorX<Scalar>& g) {
   // The KKT conditions from docs/algorithms.md:
   //
   //   ∇f = 0
@@ -48,10 +48,10 @@ Scalar kkt_error(const Eigen::Vector<Scalar, Eigen::Dynamic>& g) {
 /// @param c_e Equality constraints cₑ(x).
 /// @param y Equality constraint dual variables.
 template <typename Scalar, KKTErrorType T>
-Scalar kkt_error(const Eigen::Vector<Scalar, Eigen::Dynamic>& g,
+Scalar kkt_error(const Eigen::VectorX<Scalar>& g,
                  const Eigen::SparseMatrix<Scalar>& A_e,
-                 const Eigen::Vector<Scalar, Eigen::Dynamic>& c_e,
-                 const Eigen::Vector<Scalar, Eigen::Dynamic>& y) {
+                 const Eigen::VectorX<Scalar>& c_e,
+                 const Eigen::VectorX<Scalar>& y) {
   // The KKT conditions from docs/algorithms.md:
   //
   //   ∇f − Aₑᵀy = 0
@@ -90,14 +90,14 @@ Scalar kkt_error(const Eigen::Vector<Scalar, Eigen::Dynamic>& g,
 /// @param z Inequality constraint dual variables.
 /// @param μ Barrier parameter.
 template <typename Scalar, KKTErrorType T>
-Scalar kkt_error(const Eigen::Vector<Scalar, Eigen::Dynamic>& g,
+Scalar kkt_error(const Eigen::VectorX<Scalar>& g,
                  const Eigen::SparseMatrix<Scalar>& A_e,
-                 const Eigen::Vector<Scalar, Eigen::Dynamic>& c_e,
+                 const Eigen::VectorX<Scalar>& c_e,
                  const Eigen::SparseMatrix<Scalar>& A_i,
-                 const Eigen::Vector<Scalar, Eigen::Dynamic>& c_i,
-                 const Eigen::Vector<Scalar, Eigen::Dynamic>& s,
-                 const Eigen::Vector<Scalar, Eigen::Dynamic>& y,
-                 const Eigen::Vector<Scalar, Eigen::Dynamic>& z, Scalar μ) {
+                 const Eigen::VectorX<Scalar>& c_i,
+                 const Eigen::VectorX<Scalar>& s,
+                 const Eigen::VectorX<Scalar>& y,
+                 const Eigen::VectorX<Scalar>& z, Scalar μ) {
   // The KKT conditions from docs/algorithms.md:
   //
   //   ∇f − Aₑᵀy − Aᵢᵀz = 0
@@ -120,8 +120,8 @@ Scalar kkt_error(const Eigen::Vector<Scalar, Eigen::Dynamic>& g,
         std::max(s_max, z.template lpNorm<1>() / Scalar(z.rows())) / s_max;
 
     const auto S = s.asDiagonal();
-    const Eigen::Vector<Scalar, Eigen::Dynamic> μe =
-        Eigen::Vector<Scalar, Eigen::Dynamic>::Constant(s.rows(), μ);
+    const Eigen::VectorX<Scalar> μe =
+        Eigen::VectorX<Scalar>::Constant(s.rows(), μ);
 
     // ‖∇f − Aₑᵀy − Aᵢᵀz‖_∞ / s_d
     // ‖Sz − μe‖_∞ / s_c
@@ -135,8 +135,8 @@ Scalar kkt_error(const Eigen::Vector<Scalar, Eigen::Dynamic>& g,
                      (c_i - s).template lpNorm<Eigen::Infinity>()});
   } else if constexpr (T == KKTErrorType::ONE_NORM) {
     const auto S = s.asDiagonal();
-    const Eigen::Vector<Scalar, Eigen::Dynamic> μe =
-        Eigen::Vector<Scalar, Eigen::Dynamic>::Constant(s.rows(), μ);
+    const Eigen::VectorX<Scalar> μe =
+        Eigen::VectorX<Scalar>::Constant(s.rows(), μ);
 
     return (g - A_e.transpose() * y - A_i.transpose() * z)
                .template lpNorm<1>() +
@@ -153,8 +153,8 @@ Scalar kkt_error(const Eigen::Vector<Scalar, Eigen::Dynamic>& g,
 /// @param g Scaled cost function gradient d_f·∇f.
 template <typename Scalar, KKTErrorType T>
 Scalar unscaled_kkt_error(const ProblemScaling<Scalar>& scaling,
-                          const Eigen::Vector<Scalar, Eigen::Dynamic>& g) {
-  using DenseVector = Eigen::Vector<Scalar, Eigen::Dynamic>;
+                          const Eigen::VectorX<Scalar>& g) {
+  using DenseVector = Eigen::VectorX<Scalar>;
 
   if (scaling.is_identity()) {
     return kkt_error<Scalar, T>(g);
@@ -176,11 +176,11 @@ Scalar unscaled_kkt_error(const ProblemScaling<Scalar>& scaling,
 /// @param y Scaled equality constraint dual variables.
 template <typename Scalar, KKTErrorType T>
 Scalar unscaled_kkt_error(const ProblemScaling<Scalar>& scaling,
-                          const Eigen::Vector<Scalar, Eigen::Dynamic>& g,
+                          const Eigen::VectorX<Scalar>& g,
                           const Eigen::SparseMatrix<Scalar>& A_e,
-                          const Eigen::Vector<Scalar, Eigen::Dynamic>& c_e,
-                          const Eigen::Vector<Scalar, Eigen::Dynamic>& y) {
-  using DenseVector = Eigen::Vector<Scalar, Eigen::Dynamic>;
+                          const Eigen::VectorX<Scalar>& c_e,
+                          const Eigen::VectorX<Scalar>& y) {
+  using DenseVector = Eigen::VectorX<Scalar>;
   using SparseMatrix = Eigen::SparseMatrix<Scalar>;
 
   if (scaling.is_identity()) {
@@ -214,17 +214,13 @@ Scalar unscaled_kkt_error(const ProblemScaling<Scalar>& scaling,
 /// @param z Scaled inequality constraint dual variables.
 /// @param μ Scaled barrier parameter.
 template <typename Scalar, KKTErrorType T>
-Scalar unscaled_kkt_error(const ProblemScaling<Scalar>& scaling,
-                          const Eigen::Vector<Scalar, Eigen::Dynamic>& g,
-                          const Eigen::SparseMatrix<Scalar>& A_e,
-                          const Eigen::Vector<Scalar, Eigen::Dynamic>& c_e,
-                          const Eigen::SparseMatrix<Scalar>& A_i,
-                          const Eigen::Vector<Scalar, Eigen::Dynamic>& c_i,
-                          const Eigen::Vector<Scalar, Eigen::Dynamic>& s,
-                          const Eigen::Vector<Scalar, Eigen::Dynamic>& y,
-                          const Eigen::Vector<Scalar, Eigen::Dynamic>& z,
-                          Scalar μ) {
-  using DenseVector = Eigen::Vector<Scalar, Eigen::Dynamic>;
+Scalar unscaled_kkt_error(
+    const ProblemScaling<Scalar>& scaling, const Eigen::VectorX<Scalar>& g,
+    const Eigen::SparseMatrix<Scalar>& A_e, const Eigen::VectorX<Scalar>& c_e,
+    const Eigen::SparseMatrix<Scalar>& A_i, const Eigen::VectorX<Scalar>& c_i,
+    const Eigen::VectorX<Scalar>& s, const Eigen::VectorX<Scalar>& y,
+    const Eigen::VectorX<Scalar>& z, Scalar μ) {
+  using DenseVector = Eigen::VectorX<Scalar>;
   using SparseMatrix = Eigen::SparseMatrix<Scalar>;
 
   if (scaling.is_identity()) {

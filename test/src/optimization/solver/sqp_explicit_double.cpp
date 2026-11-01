@@ -9,4 +9,4 @@ template slp::ExitStatus slp::sqp(
     std::span<std::function<bool(const IterationInfo<ExplicitDouble>& info)>>
         iteration_callbacks,
     const slp::Options<ExplicitDouble>& options,
-    Eigen::Vector<ExplicitDouble, Eigen::Dynamic>& x);
+    Eigen::VectorX<ExplicitDouble>& x);

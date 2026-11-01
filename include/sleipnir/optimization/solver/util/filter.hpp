@@ -20,7 +20,7 @@ namespace slp {
 template <typename Scalar>
 struct FilterEntry {
   /// Type alias for dense vector.
-  using DenseVector = Eigen::Vector<Scalar, Eigen::Dynamic>;
+  using DenseVector = Eigen::VectorX<Scalar>;
 
   /// The cost function's value
   Scalar cost{0};

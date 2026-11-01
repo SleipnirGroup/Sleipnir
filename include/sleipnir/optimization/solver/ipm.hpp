@@ -71,8 +71,8 @@ ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
                const Eigen::ArrayX<bool>& bound_constraint_mask,
 #endif
-               Eigen::Vector<Scalar, Eigen::Dynamic>& x) {
-  using DenseVector = Eigen::Vector<Scalar, Eigen::Dynamic>;
+               Eigen::VectorX<Scalar>& x) {
+  using DenseVector = Eigen::VectorX<Scalar>;
 
   // If cᵢ(x) is sufficiently feasible, start the constraint with zero
   // violation. Otherwise, make Σ = S⁻¹Z ≈ I.
@@ -133,12 +133,10 @@ ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
                const Eigen::ArrayX<bool>& bound_constraint_mask,
 #endif
-               Eigen::Vector<Scalar, Eigen::Dynamic>& x,
-               Eigen::Vector<Scalar, Eigen::Dynamic>& s,
-               Eigen::Vector<Scalar, Eigen::Dynamic>& y,
-               Eigen::Vector<Scalar, Eigen::Dynamic>& z, Scalar& μ,
+               Eigen::VectorX<Scalar>& x, Eigen::VectorX<Scalar>& s,
+               Eigen::VectorX<Scalar>& y, Eigen::VectorX<Scalar>& z, Scalar& μ,
                int& iterations) {
-  using DenseVector = Eigen::Vector<Scalar, Eigen::Dynamic>;
+  using DenseVector = Eigen::VectorX<Scalar>;
   using SparseMatrix = Eigen::SparseMatrix<Scalar>;
   using SparseVector = Eigen::SparseVector<Scalar>;
 
@@ -888,6 +886,6 @@ ipm(const IPMMatrixCallbacks<double>& matrix_callbacks,
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
     const Eigen::ArrayX<bool>& bound_constraint_mask,
 #endif
-    Eigen::Vector<double, Eigen::Dynamic>& x);
+    Eigen::VectorX<double>& x);
 
 }  // namespace slp

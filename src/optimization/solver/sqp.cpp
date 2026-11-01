@@ -8,5 +8,4 @@ template SLEIPNIR_DLLEXPORT slp::ExitStatus slp::sqp(
     const SQPMatrixCallbacks<double>& matrix_callbacks,
     std::span<std::function<bool(const IterationInfo<double>& info)>>
         iteration_callbacks,
-    const slp::Options<double>& options,
-    Eigen::Vector<double, Eigen::Dynamic>& x);
+    const slp::Options<double>& options, Eigen::VectorX<double>& x);

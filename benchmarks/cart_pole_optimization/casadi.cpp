@@ -101,8 +101,8 @@ casadi::Opti cart_pole_casadi(std::chrono::duration<double> dt, int N) {
   constexpr double u_max = 20.0;  // N
   constexpr double d_max = 2.0;   // m
 
-  constexpr Eigen::Vector<double, 4> x_initial{{0.0, 0.0, 0.0, 0.0}};
-  constexpr Eigen::Vector<double, 4> x_final{{1.0, std::numbers::pi, 0.0, 0.0}};
+  constexpr Eigen::Vector4d x_initial{{0.0, 0.0, 0.0, 0.0}};
+  constexpr Eigen::Vector4d x_final{{1.0, std::numbers::pi, 0.0, 0.0}};
 
   casadi::Opti problem;
   casadi::Slice all;

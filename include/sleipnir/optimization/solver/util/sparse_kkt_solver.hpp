@@ -21,7 +21,7 @@ template <typename Scalar>
 class SparseKKTSolver {
  public:
   /// Type alias for dense vector.
-  using DenseVector = Eigen::Vector<Scalar, Eigen::Dynamic>;
+  using DenseVector = Eigen::VectorX<Scalar>;
   /// Type alias for sparse matrix.
   using SparseMatrix = Eigen::SparseMatrix<Scalar>;
 

@@ -69,14 +69,13 @@ TEMPLATE_TEST_CASE("Problem - Arm on elevator", "[Problem]", SCALAR_TYPES) {
 
   // Elevator start and end conditions
   problem.subject_to(elevator.col(0) ==
-                     Eigen::Vector<T, 2>({ELEVATOR_START_HEIGHT, T(0)}));
+                     Eigen::Vector2<T>({ELEVATOR_START_HEIGHT, T(0)}));
   problem.subject_to(elevator.col(N) ==
-                     Eigen::Vector<T, 2>({ELEVATOR_END_HEIGHT, T(0)}));
+                     Eigen::Vector2<T>({ELEVATOR_END_HEIGHT, T(0)}));
 
   // Arm start and end conditions
-  problem.subject_to(arm.col(0) ==
-                     Eigen::Vector<T, 2>({ARM_START_ANGLE, T(0)}));
-  problem.subject_to(arm.col(N) == Eigen::Vector<T, 2>({ARM_END_ANGLE, T(0)}));
+  problem.subject_to(arm.col(0) == Eigen::Vector2<T>({ARM_START_ANGLE, T(0)}));
+  problem.subject_to(arm.col(N) == Eigen::Vector2<T>({ARM_END_ANGLE, T(0)}));
 
   // Elevator velocity limits
   problem.subject_to(slp::bounds(-ELEVATOR_MAX_VELOCITY, elevator.row(1),

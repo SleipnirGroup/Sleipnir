@@ -874,7 +874,7 @@ TEMPLATE_TEST_CASE("Gradient - Non-scalar", "[Gradient]", SCALAR_TYPES) {
   auto y = x[0] + T(3) * x[1] - T(5) * x[2];
   auto g = slp::Gradient(y, x);
 
-  Eigen::Matrix<T, 3, 1> expected_g{{T(1)}, {T(3)}, {T(-5)}};
+  Eigen::Vector3<T> expected_g{{T(1)}, {T(3)}, {T(-5)}};
 
   auto g_get_value = g.get().value();
   CHECK(g_get_value.rows() == 3);

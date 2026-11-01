@@ -16,16 +16,16 @@ struct IterationInfo {
   int iteration;
 
   /// The decision variables.
-  const Eigen::Vector<Scalar, Eigen::Dynamic>& x;
+  const Eigen::VectorX<Scalar>& x;
 
   /// The inequality constraint slack variables.
-  const Eigen::Vector<Scalar, Eigen::Dynamic>& s;
+  const Eigen::VectorX<Scalar>& s;
 
   /// The equality constraint dual variables.
-  const Eigen::Vector<Scalar, Eigen::Dynamic>& y;
+  const Eigen::VectorX<Scalar>& y;
 
   /// The inequality constraint dual variables.
-  const Eigen::Vector<Scalar, Eigen::Dynamic>& z;
+  const Eigen::VectorX<Scalar>& z;
 
   /// The gradient of the cost function.
   const Eigen::SparseVector<Scalar>& g;
