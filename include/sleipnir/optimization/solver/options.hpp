@@ -5,14 +5,15 @@
 #include <chrono>
 #include <limits>
 
-#include "sleipnir/util/symbol_exports.hpp"
-
 namespace slp {
 
 /// Solver options.
-struct SLEIPNIR_DLLEXPORT Options {
+///
+/// @tparam Scalar Scalar type.
+template <typename Scalar>
+struct Options {
   /// The solver will stop once the error is below this tolerance.
-  double tolerance = 1e-8;
+  Scalar tolerance = Scalar(1e-8);
 
   /// The maximum number of solver iterations before returning a solution.
   int max_iterations = 5000;

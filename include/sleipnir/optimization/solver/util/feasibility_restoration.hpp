@@ -28,7 +28,7 @@ template <typename Scalar>
 ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
                std::span<std::function<bool(const IterationInfo<Scalar>& info)>>
                    iteration_callbacks,
-               const Options& options, bool in_feasibility_restoration,
+               const Options<Scalar>& options, bool in_feasibility_restoration,
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
                const Eigen::ArrayX<bool>& bound_constraint_mask,
 #endif
@@ -119,7 +119,7 @@ ExitStatus feasibility_restoration(
     const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
     std::span<std::function<bool(const IterationInfo<Scalar>& info)>>
         iteration_callbacks,
-    const Options& options, Eigen::Vector<Scalar, Eigen::Dynamic>& x,
+    const Options<Scalar>& options, Eigen::Vector<Scalar, Eigen::Dynamic>& x,
     Eigen::Vector<Scalar, Eigen::Dynamic>& y, int& iterations) {
   // Feasibility restoration
   //
@@ -149,7 +149,7 @@ ExitStatus feasibility_restoration(
   const auto& num_eq = matrices.num_equality_constraints;
 
   constexpr Scalar ρ(1e3);
-  const Scalar μ(options.tolerance / 10.0);
+  const Scalar μ = options.tolerance / Scalar(10);
 
   const DenseVector c_e = matrices.c_e(x);
 
@@ -323,8 +323,8 @@ ExitStatus feasibility_restoration(
           matrices.scaling.c_e.cwiseInverse().cwiseProduct(c_e_unscaled);
     }
 
-    c_e_violated = c_e_unscaled.template lpNorm<Eigen::Infinity>() >
-                   Scalar(options.tolerance);
+    c_e_violated =
+        c_e_unscaled.template lpNorm<Eigen::Infinity>() > options.tolerance;
   }
 
   // Return to the normal phase if feasibility restoration stopped early, or if
@@ -344,8 +344,7 @@ ExitStatus feasibility_restoration(
     // point-in-time test can reject iterates the solver would otherwise
     // escape). See section 3.3, p. 14 of [2].
     if (options.diagnostics) {
-      print_c_e_local_infeasibility_error(c_e_unscaled,
-                                          Scalar(options.tolerance));
+      print_c_e_local_infeasibility_error(c_e_unscaled, options.tolerance);
     }
 
     return ExitStatus::LOCALLY_INFEASIBLE;
@@ -378,7 +377,7 @@ ExitStatus feasibility_restoration(
     const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
     std::span<std::function<bool(const IterationInfo<Scalar>& info)>>
         iteration_callbacks,
-    const Options& options,
+    const Options<Scalar>& options,
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
     const Eigen::ArrayX<bool>& bound_constraint_mask,
 #endif
@@ -664,11 +663,11 @@ ExitStatus feasibility_restoration(
 
     // Inequality constraints cᵢ(x) ≥ 0 are only violated where they're
     // negative
-    c_e_violated = c_e_unscaled.template lpNorm<Eigen::Infinity>() >
-                   Scalar(options.tolerance);
+    c_e_violated =
+        c_e_unscaled.template lpNorm<Eigen::Infinity>() > options.tolerance;
     c_i_violated =
         (-c_i_unscaled).cwiseMax(Scalar(0)).template lpNorm<Eigen::Infinity>() >
-        Scalar(options.tolerance);
+        options.tolerance;
   }
 
   // Return to the normal phase if feasibility restoration stopped early, or if
@@ -723,12 +722,10 @@ ExitStatus feasibility_restoration(
 
     if (options.diagnostics) {
       if (c_e_violated) {
-        print_c_e_local_infeasibility_error(c_e_unscaled,
-                                            Scalar(options.tolerance));
+        print_c_e_local_infeasibility_error(c_e_unscaled, options.tolerance);
       }
       if (c_i_violated) {
-        print_c_i_local_infeasibility_error(c_i_unscaled,
-                                            Scalar(options.tolerance));
+        print_c_i_local_infeasibility_error(c_i_unscaled, options.tolerance);
       }
     }
 

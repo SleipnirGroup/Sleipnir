@@ -35,7 +35,7 @@ extern template slp::ExitStatus slp::ipm(
     const IPMMatrixCallbacks<ExplicitDouble>& matrix_callbacks,
     std::span<std::function<bool(const IterationInfo<ExplicitDouble>& info)>>
         iteration_callbacks,
-    const Options& options,
+    const Options<ExplicitDouble>& options,
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
     const Eigen::ArrayX<bool>& bound_constraint_mask,
 #endif
@@ -45,12 +45,14 @@ extern template slp::ExitStatus slp::newton(
     const NewtonMatrixCallbacks<ExplicitDouble>& matrix_callbacks,
     std::span<std::function<bool(const IterationInfo<ExplicitDouble>& info)>>
         iteration_callbacks,
-    const Options& options, Eigen::Vector<ExplicitDouble, Eigen::Dynamic>& x);
+    const Options<ExplicitDouble>& options,
+    Eigen::Vector<ExplicitDouble, Eigen::Dynamic>& x);
 
 extern template slp::ExitStatus slp::sqp(
     const SQPMatrixCallbacks<ExplicitDouble>& matrix_callbacks,
     std::span<std::function<bool(const IterationInfo<ExplicitDouble>& info)>>
         iteration_callbacks,
-    const Options& options, Eigen::Vector<ExplicitDouble, Eigen::Dynamic>& x);
+    const Options<ExplicitDouble>& options,
+    Eigen::Vector<ExplicitDouble, Eigen::Dynamic>& x);
 
 extern template class slp::Problem<ExplicitDouble>;

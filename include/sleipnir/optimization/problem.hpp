@@ -283,7 +283,8 @@ class Problem {
   ///     named H.spy, A_e.spy, and A_i.spy respectively during solve. Use
   ///     tools/spy.py to plot them.
   /// @return The solver status.
-  ExitStatus solve(const Options& options = Options{}, bool spy = false) {
+  ExitStatus solve(const Options<Scalar>& options = Options<Scalar>{},
+                   bool spy = false) {
     if (options.diagnostics) {
       print_exit_conditions(options);
       print_problem_analysis();
@@ -410,8 +411,8 @@ class Problem {
   gch::small_vector<std::function<bool(const IterationInfo<Scalar>& info)>>
       m_persistent_iteration_callbacks;
 
-  ExitStatus solve_newton(const Options& options, [[maybe_unused]] bool spy,
-                          DenseVector& x) {
+  ExitStatus solve_newton(const Options<Scalar>& options,
+                          [[maybe_unused]] bool spy, DenseVector& x) {
     using SparseMatrix = Eigen::SparseMatrix<Scalar>;
     using SparseVector = Eigen::SparseVector<Scalar>;
     using enum SetupTimeTracerID;
@@ -492,8 +493,8 @@ class Problem {
     return newton<Scalar>(matrix_callbacks, iteration_callbacks, options, x);
   }
 
-  ExitStatus solve_sqp(const Options& options, [[maybe_unused]] bool spy,
-                       DenseVector& x) {
+  ExitStatus solve_sqp(const Options<Scalar>& options,
+                       [[maybe_unused]] bool spy, DenseVector& x) {
     using SparseMatrix = Eigen::SparseMatrix<Scalar>;
     using SparseVector = Eigen::SparseVector<Scalar>;
     using enum SetupTimeTracerID;
@@ -612,8 +613,8 @@ class Problem {
     return sqp<Scalar>(matrix_callbacks, iteration_callbacks, options, x);
   }
 
-  ExitStatus solve_ipm(const Options& options, [[maybe_unused]] bool spy,
-                       DenseVector& x) {
+  ExitStatus solve_ipm(const Options<Scalar>& options,
+                       [[maybe_unused]] bool spy, DenseVector& x) {
     using SparseMatrix = Eigen::SparseMatrix<Scalar>;
     using SparseVector = Eigen::SparseVector<Scalar>;
     using enum SetupTimeTracerID;
@@ -778,7 +779,7 @@ class Problem {
                        x);
   }
 
-  void print_exit_conditions(const Options& options) {
+  void print_exit_conditions(const Options<Scalar>& options) {
     // Print possible exit conditions
     slp::println("User-configured exit conditions:");
     slp::println("  ↳ error below {}", options.tolerance);
