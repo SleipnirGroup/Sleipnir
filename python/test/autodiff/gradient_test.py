@@ -1,9 +1,13 @@
 import math
+import sys
 
 import numpy as np
 import pytest
 from sleipnir import autodiff
 from sleipnir.autodiff import Gradient, Variable, VariableMatrix
+
+# Machine epsilon for the binding's scalar type (double)
+ε = sys.float_info.epsilon
 
 
 def test_trivial_case() -> None:
@@ -389,10 +393,10 @@ def test_atan2() -> None:
 
     g = Gradient(autodiff.atan2(2.0, x), x)
     assert g.get().value()[0, 0] == pytest.approx(
-        -2.0 / (2 * 2 + x.value() * x.value()), abs=1e-15
+        -2.0 / (2 * 2 + x.value() * x.value()), rel=8 * ε, abs=0
     )
     assert g.value()[0, 0] == pytest.approx(
-        -2.0 / (2 * 2 + x.value() * x.value()), abs=1e-15
+        -2.0 / (2 * 2 + x.value() * x.value()), rel=8 * ε, abs=0
     )
 
     # Testing atan2 function on (var, double)
@@ -402,10 +406,10 @@ def test_atan2() -> None:
 
     g = Gradient(autodiff.atan2(x, 2.0), x)
     assert g.get().value()[0, 0] == pytest.approx(
-        (2.0 / (2 * 2 + x * x)).value(), abs=1e-15
+        (2.0 / (2 * 2 + x * x)).value(), rel=8 * ε, abs=0
     )
     assert g.value()[0, 0] == pytest.approx(
-        2.0 / (2 * 2 + x.value() * x.value()), abs=1e-15
+        2.0 / (2 * 2 + x.value() * x.value()), rel=8 * ε, abs=0
     )
 
     # Testing atan2 function on (var, var)
@@ -415,18 +419,18 @@ def test_atan2() -> None:
 
     g = Gradient(autodiff.atan2(y, x), y)
     assert g.get().value()[0, 0] == pytest.approx(
-        (x / (x * x + y * y)).value(), abs=1e-15
+        (x / (x * x + y * y)).value(), rel=8 * ε, abs=0
     )
     assert g.value()[0, 0] == pytest.approx(
-        x.value() / (x.value() * x.value() + y.value() * y.value()), abs=1e-15
+        x.value() / (x.value() * x.value() + y.value() * y.value()), rel=8 * ε, abs=0
     )
 
     g = Gradient(autodiff.atan2(y, x), x)
     assert g.get().value()[0, 0] == pytest.approx(
-        -y.value() / (x.value() * x.value() + y.value() * y.value()), abs=1e-15
+        -y.value() / (x.value() * x.value() + y.value() * y.value()), rel=8 * ε, abs=0
     )
     assert g.value()[0, 0] == pytest.approx(
-        -y.value() / (x.value() * x.value() + y.value() * y.value()), abs=1e-15
+        -y.value() / (x.value() * x.value() + y.value() * y.value()), rel=8 * ε, abs=0
     )
 
     # Testing atan2 function on (expr, expr)
@@ -443,7 +447,8 @@ def test_atan2() -> None:
             (2 * x.value() + 1) * (2 * x.value() + 1)
             + math.sin(y.value()) * math.sin(y.value())
         ),
-        abs=1e-15,
+        rel=8 * ε,
+        abs=0,
     )
     assert g.value()[0, 0] == pytest.approx(
         3
@@ -453,7 +458,8 @@ def test_atan2() -> None:
             (2 * x.value() + 1) * (2 * x.value() + 1)
             + math.sin(y.value()) * math.sin(y.value())
         ),
-        abs=1e-15,
+        rel=8 * ε,
+        abs=0,
     )
 
     g = Gradient(3 * autodiff.atan2(autodiff.sin(y), 2 * x + 1), x)
@@ -465,7 +471,8 @@ def test_atan2() -> None:
             (2 * x.value() + 1) * (2 * x.value() + 1)
             + math.sin(y.value()) * math.sin(y.value())
         ),
-        abs=1e-15,
+        rel=8 * ε,
+        abs=0,
     )
     assert g.value()[0, 0] == pytest.approx(
         3
@@ -475,7 +482,8 @@ def test_atan2() -> None:
             (2 * x.value() + 1) * (2 * x.value() + 1)
             + math.sin(y.value()) * math.sin(y.value())
         ),
-        abs=1e-15,
+        rel=8 * ε,
+        abs=0,
     )
 
 

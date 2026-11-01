@@ -1,8 +1,12 @@
 import math
+import sys
 
 import numpy as np
 from sleipnir import autodiff
 from sleipnir.autodiff import VariableMatrix
+
+# Machine epsilon for the binding's scalar type (double)
+ε = sys.float_info.epsilon
 
 
 def test_assignment_to_default() -> None:
@@ -409,38 +413,65 @@ def test_cwise_reduce() -> None:
 def test_exp() -> None:
     # Scalar
     A1 = VariableMatrix([[4.0]])
-    np.testing.assert_allclose(A1.exp().value(), np.array([[math.exp(4.0)]]))
-    np.testing.assert_allclose(A1[:, :].exp().value(), np.array([[math.exp(4.0)]]))
+    np.testing.assert_allclose(
+        A1.exp().value(), np.array([[math.exp(4.0)]]), rtol=16 * ε, atol=0
+    )
+    np.testing.assert_allclose(
+        A1[:, :].exp().value(), np.array([[math.exp(4.0)]]), rtol=16 * ε, atol=0
+    )
+
+    # exp(A) exp(−A) = I cancels terms as large as ‖exp(A)‖‖exp(−A)‖, so the
+    # rounding error scales with that product instead of with I
+    def exp_product_margin(A: VariableMatrix) -> float:
+        return float(
+            8 * ε * np.linalg.norm(A.exp().value()) * np.linalg.norm((-A).exp().value())
+        )
 
     A2 = VariableMatrix([[0.0, 1.0], [0.0, -0.5]])
     np.testing.assert_allclose(
-        A2.exp().value() @ (-A2).exp().value(), np.identity(2), atol=1e-15
+        A2.exp().value() @ (-A2).exp().value(),
+        np.identity(2),
+        atol=exp_product_margin(A2),
     )
     np.testing.assert_allclose(
-        A2[:, :].exp().value() @ (-A2[:, :]).exp().value(), np.identity(2), atol=1e-15
+        A2[:, :].exp().value() @ (-A2[:, :]).exp().value(),
+        np.identity(2),
+        atol=exp_product_margin(A2),
     )
 
     A3 = VariableMatrix([[0.0, 1.0], [0.0, 10.0]])
     np.testing.assert_allclose(
-        A3.exp().value() @ (-A3).exp().value(), np.identity(2), atol=1e-15
+        A3.exp().value() @ (-A3).exp().value(),
+        np.identity(2),
+        atol=exp_product_margin(A3),
     )
     np.testing.assert_allclose(
-        A3[:, :].exp().value() @ (-A3[:, :]).exp().value(), np.identity(2), atol=1e-15
+        A3[:, :].exp().value() @ (-A3[:, :]).exp().value(),
+        np.identity(2),
+        atol=exp_product_margin(A3),
     )
     A4 = VariableMatrix([[1.0, 10.0], [0.0, 0.0]])
     np.testing.assert_allclose(
-        A4.exp().value() @ (-A4).exp().value(), np.identity(2), atol=1e-15
+        A4.exp().value() @ (-A4).exp().value(),
+        np.identity(2),
+        atol=exp_product_margin(A4),
     )
     np.testing.assert_allclose(
-        A4[:, :].exp().value() @ (-A4[:, :]).exp().value(), np.identity(2), atol=1e-15
+        A4[:, :].exp().value() @ (-A4[:, :]).exp().value(),
+        np.identity(2),
+        atol=exp_product_margin(A4),
     )
 
     A5 = VariableMatrix([[2.0, 3.0], [4.0, 5.0]])
     np.testing.assert_allclose(
-        A5.exp().value() @ (-A5).exp().value(), np.identity(2), atol=1e-12
+        A5.exp().value() @ (-A5).exp().value(),
+        np.identity(2),
+        atol=exp_product_margin(A5),
     )
     np.testing.assert_allclose(
-        A5[:, :].exp().value() @ (-A5[:, :]).exp().value(), np.identity(2), atol=1e-12
+        A5[:, :].exp().value() @ (-A5[:, :]).exp().value(),
+        np.identity(2),
+        atol=exp_product_margin(A5),
     )
 
     # Pascal matrix
@@ -462,8 +493,12 @@ def test_exp() -> None:
             expected_pascal[row, col] = (
                 expected_pascal[row - 1, col - 1] + expected_pascal[row - 1, col]
             )
-    np.testing.assert_allclose(pascal.exp().value(), expected_pascal, atol=1e-14)
-    np.testing.assert_allclose(pascal[:, :].exp().value(), expected_pascal, atol=1e-14)
+    np.testing.assert_allclose(
+        pascal.exp().value(), expected_pascal, rtol=32 * ε, atol=0
+    )
+    np.testing.assert_allclose(
+        pascal[:, :].exp().value(), expected_pascal, rtol=32 * ε, atol=0
+    )
 
 
 def test_block_free_function() -> None:
@@ -491,7 +526,10 @@ def check_solve(A: VariableMatrix, B: VariableMatrix) -> None:
     X = autodiff.solve(A, B)
 
     assert X.shape == (A.shape[1], B.shape[1])
-    assert np.linalg.norm(A.value() @ X.value() - B.value()) < 1e-12
+
+    # Backward error bound of a stable solve
+    residual = np.linalg.norm(A.value() @ X.value() - B.value())
+    assert residual <= 8 * ε * np.linalg.norm(A.value()) * np.linalg.norm(X.value())
 
 
 def test_solve_free_function() -> None:

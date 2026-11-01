@@ -2,9 +2,11 @@
 
 #pragma once
 
+#include <algorithm>
 #include <cmath>
 #include <concepts>
 #include <format>
+#include <limits>
 #include <string>
 #include <utility>
 
@@ -37,6 +39,54 @@ struct ScalarWithinAbsMatcher : Catch::Matchers::MatcherGenericBase {
 template <typename T>
 ScalarWithinAbsMatcher<T> WithinAbs(T target, T margin) {
   return {std::move(target), std::move(margin)};
+}
+
+/// Returns the relative error |a − b|/max(|a|, |b|) in units of machine
+/// epsilon, or zero if a and b are equal.
+template <typename T>
+T relative_error_in_eps(const T& a, const T& b) {
+  using std::abs;
+  using std::max;
+
+  if (a == b) {
+    return T(0);
+  }
+  return abs(a - b) / max(abs(a), abs(b)) / std::numeric_limits<T>::epsilon();
+}
+
+/// Scalar relative tolerance matcher.
+///
+/// Matches if |target − matchee| ≤ epsilon · max(|target|, |matchee|), but for
+/// any scalar type.
+template <typename T>
+struct ScalarWithinRelMatcher : Catch::Matchers::MatcherGenericBase {
+  ScalarWithinRelMatcher(T target, T epsilon)
+      : target{std::move(target)}, epsilon{std::move(epsilon)} {}
+
+  bool match(const T& matchee) const {
+    using std::isnan;
+
+    error = relative_error_in_eps(target, matchee);
+    return !isnan(error) &&
+           error <= epsilon / std::numeric_limits<T>::epsilon();
+  }
+
+  std::string describe() const override {
+    return std::format("is within {}ε relative of {} (error is {}ε)",
+                       epsilon / std::numeric_limits<T>::epsilon(), target,
+                       error);
+  }
+
+ private:
+  T target;
+  T epsilon;
+  mutable T error{0};
+};
+
+/// Creates a scalar relative tolerance matcher.
+template <typename T>
+ScalarWithinRelMatcher<T> WithinRel(T target, T epsilon) {
+  return {std::move(target), std::move(epsilon)};
 }
 
 /// Scalar equality matcher.
@@ -153,4 +203,70 @@ MatrixWithinAbsMatcher<Eigen::SparseMatrix<typename Derived::Scalar>> WithinAbs(
     const Eigen::SparseMatrixBase<Derived>& target,
     typename Derived::Scalar margin) {
   return {target, margin};
+}
+
+/// Dense matrix relative tolerance matcher.
+///
+/// Matches if each element is within the scalar relative tolerance of the
+/// corresponding target element. Zero target elements must match exactly, so
+/// use WithinAbs() for matrices with zeros that have rounding error.
+template <typename Matrix>
+  requires DenseMatrix<Matrix>
+struct MatrixWithinRelMatcher : Catch::Matchers::MatcherGenericBase {
+  using Scalar = typename Matrix::Scalar;
+
+  MatrixWithinRelMatcher(Matrix target, Scalar epsilon)
+      : target{std::move(target)}, epsilon{epsilon} {}
+
+  bool match(const Matrix& matchee) const {
+    using std::isnan;
+    using std::max;
+
+    if (target.rows() != matchee.rows() || target.cols() != matchee.cols()) {
+      return false;
+    }
+
+    error = Scalar(0);
+    for (int row = 0; row < target.rows(); ++row) {
+      for (int col = 0; col < target.cols(); ++col) {
+        Scalar elem_error =
+            relative_error_in_eps(target(row, col), matchee(row, col));
+        if (isnan(elem_error)) {
+          error = elem_error;
+          return false;
+        }
+        error = max(error, elem_error);
+      }
+    }
+
+    return error <= epsilon / std::numeric_limits<Scalar>::epsilon();
+  }
+
+  /// Prevents implicit sparse-to-dense conversion of matchee.
+  template <typename Derived>
+  bool match(const Eigen::SparseMatrixBase<Derived>& matchee) const = delete;
+
+  std::string describe() const override {
+    return std::format(
+        "\nis within {}ε relative elementwise of\n{}\n(max error is {}ε)",
+        epsilon / std::numeric_limits<Scalar>::epsilon(),
+        Catch::StringMaker<Matrix>::convert(target), error);
+  }
+
+ private:
+  Matrix target;
+  Scalar epsilon;
+  mutable Scalar error{0};
+};
+
+/// Creates a dense matrix relative tolerance matcher.
+///
+/// Uses a dynamic-size target so matchees with mismatched sizes fail the match
+/// instead of Eigen producing a resize assertion.
+template <typename Derived>
+MatrixWithinRelMatcher<
+    Eigen::Matrix<typename Derived::Scalar, Eigen::Dynamic, Eigen::Dynamic>>
+WithinRel(const Eigen::DenseBase<Derived>& target,
+          typename Derived::Scalar epsilon) {
+  return {target, epsilon};
 }

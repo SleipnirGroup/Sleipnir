@@ -4,6 +4,7 @@
 #include <format>
 #include <functional>
 #include <iterator>
+#include <limits>
 #include <ranges>
 
 #include <Eigen/Core>
@@ -535,36 +536,52 @@ TEMPLATE_TEST_CASE("VariableMatrix - exp()", "[VariableMatrix]", SCALAR_TYPES) {
   using namespace slp::slicing;
   using std::exp;
 
+  constexpr T ε = std::numeric_limits<T>::epsilon();
+
   // Scalar
   auto A1 = slp::VariableMatrix<T>{{T(4)}};
   CHECK_THAT(A1.exp().value(),
-             WithinAbs(Eigen::Matrix<T, 1, 1>{exp(T(4))}, T(1e-13)));
+             WithinRel(Eigen::Matrix<T, 1, 1>{exp(T(4))}, T(16) * ε));
   CHECK_THAT((A1[_, _].exp().value()),
-             WithinAbs(Eigen::Matrix<T, 1, 1>{exp(T(4))}, T(1e-13)));
+             WithinRel(Eigen::Matrix<T, 1, 1>{exp(T(4))}, T(16) * ε));
+
+  // exp(A) exp(−A) = I cancels terms as large as ‖exp(A)‖‖exp(−A)‖, so the
+  // rounding error scales with that product instead of with I
+  auto exp_product_margin = [&](const slp::VariableMatrix<T>& A) {
+    return T(8) * ε * A.exp().value().norm() * (-A).exp().value().norm();
+  };
 
   auto A2 = slp::VariableMatrix<T>{{T(0), T(1)}, {T(0), T(-0.5)}};
-  CHECK_THAT(A2.exp().value() * (-A2).exp().value(),
-             WithinAbs(Eigen::Matrix<T, 2, 2>::Identity(), T(1e-15)));
-  CHECK_THAT((A2[_, _].exp().value() * (-A2[_, _]).exp().value()),
-             WithinAbs(Eigen::Matrix<T, 2, 2>::Identity(), T(1e-15)));
+  CHECK_THAT(
+      A2.exp().value() * (-A2).exp().value(),
+      WithinAbs(Eigen::Matrix<T, 2, 2>::Identity(), exp_product_margin(A2)));
+  CHECK_THAT(
+      (A2[_, _].exp().value() * (-A2[_, _]).exp().value()),
+      WithinAbs(Eigen::Matrix<T, 2, 2>::Identity(), exp_product_margin(A2)));
 
   auto A3 = slp::VariableMatrix<T>{{T(0), T(1)}, {T(0), T(10)}};
-  CHECK_THAT(A3.exp().value() * (-A3).exp().value(),
-             WithinAbs(Eigen::Matrix<T, 2, 2>::Identity(), T(1e-15)));
-  CHECK_THAT((A3[_, _].exp().value() * (-A3[_, _]).exp().value()),
-             WithinAbs(Eigen::Matrix<T, 2, 2>::Identity(), T(1e-15)));
+  CHECK_THAT(
+      A3.exp().value() * (-A3).exp().value(),
+      WithinAbs(Eigen::Matrix<T, 2, 2>::Identity(), exp_product_margin(A3)));
+  CHECK_THAT(
+      (A3[_, _].exp().value() * (-A3[_, _]).exp().value()),
+      WithinAbs(Eigen::Matrix<T, 2, 2>::Identity(), exp_product_margin(A3)));
 
   auto A4 = slp::VariableMatrix<T>{{T(1), T(10)}, {T(0), T(0)}};
-  CHECK_THAT(A4.exp().value() * (-A4).exp().value(),
-             WithinAbs(Eigen::Matrix<T, 2, 2>::Identity(), T(1e-15)));
-  CHECK_THAT((A4[_, _].exp().value() * (-A4[_, _]).exp().value()),
-             WithinAbs(Eigen::Matrix<T, 2, 2>::Identity(), T(1e-15)));
+  CHECK_THAT(
+      A4.exp().value() * (-A4).exp().value(),
+      WithinAbs(Eigen::Matrix<T, 2, 2>::Identity(), exp_product_margin(A4)));
+  CHECK_THAT(
+      (A4[_, _].exp().value() * (-A4[_, _]).exp().value()),
+      WithinAbs(Eigen::Matrix<T, 2, 2>::Identity(), exp_product_margin(A4)));
 
   auto A5 = slp::VariableMatrix<T>{{T(2), T(3)}, {T(4), T(5)}};
-  CHECK_THAT(A5.exp().value() * (-A5).exp().value(),
-             WithinAbs(Eigen::Matrix<T, 2, 2>::Identity(), T(1e-12)));
-  CHECK_THAT((A5[_, _].exp().value() * (-A5[_, _]).exp().value()),
-             WithinAbs(Eigen::Matrix<T, 2, 2>::Identity(), T(1e-12)));
+  CHECK_THAT(
+      A5.exp().value() * (-A5).exp().value(),
+      WithinAbs(Eigen::Matrix<T, 2, 2>::Identity(), exp_product_margin(A5)));
+  CHECK_THAT(
+      (A5[_, _].exp().value() * (-A5[_, _]).exp().value()),
+      WithinAbs(Eigen::Matrix<T, 2, 2>::Identity(), exp_product_margin(A5)));
 
   // Pascal matrix
   //
@@ -587,9 +604,9 @@ TEMPLATE_TEST_CASE("VariableMatrix - exp()", "[VariableMatrix]", SCALAR_TYPES) {
           expected_pascal[row - 1, col - 1] + expected_pascal[row - 1, col];
     }
   }
-  CHECK_THAT(pascal.exp().value(), WithinAbs(expected_pascal, T(1e-14)));
+  CHECK_THAT(pascal.exp().value(), WithinRel(expected_pascal, T(32) * ε));
   CHECK_THAT((pascal[_, _].exp().value()),
-             WithinAbs(expected_pascal, T(1e-14)));
+             WithinRel(expected_pascal, T(32) * ε));
 }
 
 TEMPLATE_TEST_CASE("VariableMatrix - block() free function", "[VariableMatrix]",
@@ -619,13 +636,18 @@ TEMPLATE_TEST_CASE("VariableMatrix - block() free function", "[VariableMatrix]",
 
 template <typename T>
 void check_solve(slp::VariableMatrix<T> A, slp::VariableMatrix<T> B) {
+  constexpr T ε = std::numeric_limits<T>::epsilon();
+
   INFO(std::format("solve(A, B) {}x{}", A.rows(), A.cols()));
 
   auto X = solve(A, B);
 
   CHECK(X.rows() == A.cols());
   CHECK(X.cols() == B.cols());
-  CHECK(T((A.value() * X.value() - B.value()).norm()) < T(1e-12));
+
+  // Backward error bound of a stable solve
+  T residual = (A.value() * X.value() - B.value()).norm();
+  CHECK(residual <= T(8) * ε * A.value().norm() * X.value().norm());
 }
 
 TEMPLATE_TEST_CASE("VariableMatrix - solve() free function", "[VariableMatrix]",

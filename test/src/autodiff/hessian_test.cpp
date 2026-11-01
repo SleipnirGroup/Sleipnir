@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <functional>
+#include <limits>
 #include <numbers>
 #include <numeric>
 #include <utility>
@@ -164,6 +165,8 @@ TEMPLATE_TEST_CASE("Hessian - Product of sines", "[Hessian]", SCALAR_TYPES) {
   using std::sin;
   using std::tan;
 
+  constexpr T ε = std::numeric_limits<T>::epsilon();
+
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
@@ -176,16 +179,16 @@ TEMPLATE_TEST_CASE("Hessian - Product of sines", "[Hessian]", SCALAR_TYPES) {
   auto temp = x.cwise_transform(slp::sin<T>);
   auto y = std::accumulate(temp.begin(), temp.end(), slp::Variable{T(1)},
                            std::multiplies{});
-  CHECK_THAT(y.value(), WithinAbs(sin(T(1)) * sin(T(2)) * sin(T(3)) *
+  CHECK_THAT(y.value(), WithinRel(sin(T(1)) * sin(T(2)) * sin(T(3)) *
                                       sin(T(4)) * sin(T(5)),
-                                  T(1e-15)));
+                                  T(8) * ε));
 
   auto g = slp::Gradient(y, x);
   for (int i = 0; i < x.rows(); ++i) {
     CHECK_THAT(g.get().value(i),
-               WithinAbs(y.value() / tan(x[i].value()), T(1e-15)));
+               WithinRel(y.value() / tan(x[i].value()), T(8) * ε));
     CHECK_THAT(g.value().coeff(i),
-               WithinAbs(y.value() / tan(x[i].value()), T(1e-15)));
+               WithinRel(y.value() / tan(x[i].value()), T(8) * ε));
   }
 
   auto H = slp::Hessian(y, x);
@@ -200,8 +203,8 @@ TEMPLATE_TEST_CASE("Hessian - Product of sines", "[Hessian]", SCALAR_TYPES) {
       }
     }
   }
-  CHECK_THAT(H.get().value(), WithinAbs(expected_H, T(1e-15)));
-  CHECK_THAT(H.value().toDense(), WithinAbs(expected_H, T(1e-15)));
+  CHECK_THAT(H.get().value(), WithinRel(expected_H, T(8) * ε));
+  CHECK_THAT(H.value().toDense(), WithinRel(expected_H, T(8) * ε));
 }
 
 TEMPLATE_TEST_CASE("Hessian - Sum of squared residuals", "[Hessian]",
@@ -275,6 +278,8 @@ TEMPLATE_TEST_CASE("Hessian - Sum of squares", "[Hessian]", SCALAR_TYPES) {
 TEMPLATE_TEST_CASE("Hessian - Nested powers", "[Hessian]", SCALAR_TYPES) {
   using T = TestType;
 
+  constexpr T ε = std::numeric_limits<T>::epsilon();
+
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
@@ -286,10 +291,10 @@ TEMPLATE_TEST_CASE("Hessian - Nested powers", "[Hessian]", SCALAR_TYPES) {
   auto y = slp::pow(slp::pow(x, T(2)), T(2));
 
   auto J = slp::Jacobian(y, x).value().toDense();
-  CHECK_THAT(J(0, 0), WithinAbs(T(4) * x0 * x0 * x0, T(1e-12)));
+  CHECK_THAT(J(0, 0), WithinRel(T(4) * x0 * x0 * x0, T(8) * ε));
 
   auto H = slp::Hessian(y, x).value().toDense();
-  CHECK_THAT(H(0, 0), WithinAbs(T(12) * x0 * x0, T(1e-12)));
+  CHECK_THAT(H(0, 0), WithinRel(T(12) * x0 * x0, T(8) * ε));
 }
 
 // Checks the Hessian of y = f(u) where u = x₀x₁
@@ -301,6 +306,10 @@ template <typename T>
 void check_unary_hessian(
     std::function<slp::Variable<T>(const slp::Variable<T>&)> f,
     std::function<T(T)> df, std::function<T(T)> d2f) {
+  using std::abs;
+
+  constexpr T ε = std::numeric_limits<T>::epsilon();
+
   slp::VariableMatrix<T> x{2};
   x[0].set_value(T(0.6));
   x[1].set_value(T(0.7));
@@ -313,16 +322,28 @@ void check_unary_hessian(
     x[1].set_value(x1);
 
     T u = x0 * x1;
+
+    // The mixed partial is a sum of two terms that can cancel (e.g., to zero
+    // for log10()), so its rounding error scales with the terms instead of
+    // with the result
     T mixed = d2f(u) * u + df(u);
-    Eigen::Matrix<T, 2, 2> expected{{d2f(u) * x1 * x1, mixed},
-                                    {mixed, d2f(u) * x0 * x0}};
-    CHECK_THAT(symbolic_H.value(), WithinAbs(expected, T(1e-12)));
-    CHECK_THAT(hessian.value().toDense(), WithinAbs(expected, T(1e-12)));
+    T mixed_margin = T(8) * ε * (abs(d2f(u) * u) + abs(df(u)));
+
+    for (const Eigen::Matrix<T, 2, 2>& H :
+         {Eigen::Matrix<T, 2, 2>{symbolic_H.value()},
+          Eigen::Matrix<T, 2, 2>{hessian.value().toDense()}}) {
+      CHECK_THAT(H(0, 0), WithinRel(d2f(u) * x1 * x1, T(8) * ε));
+      CHECK_THAT(H(0, 1), WithinAbs(mixed, mixed_margin));
+      CHECK_THAT(H(1, 0), WithinAbs(mixed, mixed_margin));
+      CHECK_THAT(H(1, 1), WithinRel(d2f(u) * x0 * x0, T(8) * ε));
+    }
   }
 }
 
 TEMPLATE_TEST_CASE("Hessian - Division", "[Hessian]", SCALAR_TYPES) {
   using T = TestType;
+
+  constexpr T ε = std::numeric_limits<T>::epsilon();
 
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
@@ -343,8 +364,8 @@ TEMPLATE_TEST_CASE("Hessian - Division", "[Hessian]", SCALAR_TYPES) {
     T mixed = T(-1) / (x1 * x1);
     Eigen::Matrix<T, 2, 2> expected{{T(0), mixed},
                                     {mixed, T(2) * x0 / (x1 * x1 * x1)}};
-    CHECK_THAT(symbolic_H.value(), WithinAbs(expected, T(1e-12)));
-    CHECK_THAT(hessian.value().toDense(), WithinAbs(expected, T(1e-12)));
+    CHECK_THAT(symbolic_H.value(), WithinRel(expected, T(8) * ε));
+    CHECK_THAT(hessian.value().toDense(), WithinRel(expected, T(8) * ε));
   }
 }
 
@@ -413,6 +434,8 @@ TEMPLATE_TEST_CASE("Hessian - atan()", "[Hessian]", SCALAR_TYPES) {
 TEMPLATE_TEST_CASE("Hessian - atan2()", "[Hessian]", SCALAR_TYPES) {
   using T = TestType;
 
+  constexpr T ε = std::numeric_limits<T>::epsilon();
+
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
@@ -433,8 +456,8 @@ TEMPLATE_TEST_CASE("Hessian - atan2()", "[Hessian]", SCALAR_TYPES) {
     T mixed = (y * y - x * x) / (d * d);
     Eigen::Matrix<T, 2, 2> expected{{T(-2) * x * y / (d * d), mixed},
                                     {mixed, T(2) * x * y / (d * d)}};
-    CHECK_THAT(symbolic_H.value(), WithinAbs(expected, T(1e-12)));
-    CHECK_THAT(hessian.value().toDense(), WithinAbs(expected, T(1e-12)));
+    CHECK_THAT(symbolic_H.value(), WithinRel(expected, T(8) * ε));
+    CHECK_THAT(hessian.value().toDense(), WithinRel(expected, T(8) * ε));
   }
 }
 
@@ -506,6 +529,8 @@ TEMPLATE_TEST_CASE("Hessian - hypot()", "[Hessian]", SCALAR_TYPES) {
   using T = TestType;
   using std::sqrt;
 
+  constexpr T ε = std::numeric_limits<T>::epsilon();
+
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
@@ -538,8 +563,8 @@ TEMPLATE_TEST_CASE("Hessian - hypot()", "[Hessian]", SCALAR_TYPES) {
       Eigen::Matrix<T, 2, 2> expected =
           expected_H(Eigen::Vector<T, 3>{x0, x1, T(0)})
               .template topLeftCorner<2, 2>();
-      CHECK_THAT(symbolic_H.value(), WithinAbs(expected, T(1e-12)));
-      CHECK_THAT(hessian.value().toDense(), WithinAbs(expected, T(1e-12)));
+      CHECK_THAT(symbolic_H.value(), WithinRel(expected, T(32) * ε));
+      CHECK_THAT(hessian.value().toDense(), WithinRel(expected, T(32) * ε));
     }
   }
 
@@ -555,8 +580,8 @@ TEMPLATE_TEST_CASE("Hessian - hypot()", "[Hessian]", SCALAR_TYPES) {
       x[2].set_value(v[2]);
 
       auto expected = expected_H(v);
-      CHECK_THAT(symbolic_H.value(), WithinAbs(expected, T(1e-12)));
-      CHECK_THAT(hessian.value().toDense(), WithinAbs(expected, T(1e-12)));
+      CHECK_THAT(symbolic_H.value(), WithinRel(expected, T(8) * ε));
+      CHECK_THAT(hessian.value().toDense(), WithinRel(expected, T(8) * ε));
     }
   }
 
@@ -580,8 +605,8 @@ TEMPLATE_TEST_CASE("Hessian - hypot()", "[Hessian]", SCALAR_TYPES) {
       T mixed = T(-2) * a * b / y3;
       Eigen::Matrix<T, 2, 2> expected{{(T(2) * y2 - T(4) * a * a) / y3, mixed},
                                       {mixed, (y2 - b * b) / y3}};
-      CHECK_THAT(symbolic_H.value(), WithinAbs(expected, T(1e-12)));
-      CHECK_THAT(hessian.value().toDense(), WithinAbs(expected, T(1e-12)));
+      CHECK_THAT(symbolic_H.value(), WithinRel(expected, T(16) * ε));
+      CHECK_THAT(hessian.value().toDense(), WithinRel(expected, T(16) * ε));
     }
   }
 }
@@ -689,6 +714,8 @@ TEMPLATE_TEST_CASE("Hessian - pow()", "[Hessian]", SCALAR_TYPES) {
   using std::log;
   using std::pow;
 
+  constexpr T ε = std::numeric_limits<T>::epsilon();
+
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
@@ -703,16 +730,16 @@ TEMPLATE_TEST_CASE("Hessian - pow()", "[Hessian]", SCALAR_TYPES) {
   T mixed = T(9) * (T(1) + T(3) * log(T(3)));
   Eigen::Matrix<T, 2, 2> expected{{T(18), mixed},
                                   {mixed, T(27) * pow(log(T(3)), T(2))}};
-  CHECK_THAT(symbolic_H.value(), WithinAbs(expected, T(1e-12)));
-  CHECK_THAT(hessian.value().toDense(), WithinAbs(expected, T(1e-12)));
+  CHECK_THAT(symbolic_H.value(), WithinRel(expected, T(8) * ε));
+  CHECK_THAT(hessian.value().toDense(), WithinRel(expected, T(8) * ε));
 
   input[0].set_value(T(3));
   input[1].set_value(T(2));
   mixed = T(4) * (T(1) + T(2) * log(T(4)));
   expected = Eigen::Matrix<T, 2, 2>{{T(2), mixed},
                                     {mixed, T(16) * pow(log(T(4)), T(2))}};
-  CHECK_THAT(symbolic_H.value(), WithinAbs(expected, T(1e-12)));
-  CHECK_THAT(hessian.value().toDense(), WithinAbs(expected, T(1e-12)));
+  CHECK_THAT(symbolic_H.value(), WithinRel(expected, T(8) * ε));
+  CHECK_THAT(hessian.value().toDense(), WithinRel(expected, T(8) * ε));
 }
 
 TEMPLATE_TEST_CASE("Hessian - sign()", "[Hessian]", SCALAR_TYPES) {
@@ -805,6 +832,9 @@ TEMPLATE_TEST_CASE("Hessian - Rosenbrock", "[Hessian]", SCALAR_TYPES) {
   // ∂²z/∂y² = 200
 
   using T = TestType;
+  using std::abs;
+
+  constexpr T ε = std::numeric_limits<T>::epsilon();
 
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
@@ -821,8 +851,12 @@ TEMPLATE_TEST_CASE("Hessian - Rosenbrock", "[Hessian]", SCALAR_TYPES) {
       y.set_value(y0);
 
       auto H = hessian.value().toDense();
-      CHECK_THAT(H(0, 0),
-                 WithinAbs(T(1200) * x0 * x0 - T(400) * y0 + T(2), T(1e-11)));
+      // 1200x₀² − 400y₀ + 2 cancels terms, so the rounding error scales with
+      // their magnitudes instead of with the result
+      CHECK_THAT(
+          H(0, 0),
+          WithinAbs(T(1200) * x0 * x0 - T(400) * y0 + T(2),
+                    T(8) * ε * (T(1200) * x0 * x0 + T(400) * abs(y0) + T(2))));
       CHECK(H(0, 1) == T(-400) * x0);
       CHECK(H(1, 0) == T(-400) * x0);
       CHECK(H(1, 1) == T(200));
