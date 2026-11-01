@@ -3,9 +3,6 @@
 #pragma once
 
 #include <format>
-#include <limits>
-
-#include <Eigen/Core>
 
 namespace slp {
 
@@ -30,42 +27,6 @@ class Inertia {
   /// @param zero The number of zero eigenvalues.
   constexpr Inertia(int positive, int negative, int zero)
       : positive{positive}, negative{negative}, zero{zero} {}
-
-  /// Constructs Inertia from the D matrix of an LDLT decomposition
-  /// (see https://en.wikipedia.org/wiki/Sylvester's_law_of_inertia).
-  ///
-  /// @tparam Scalar Scalar type.
-  /// @param D The D matrix of an LDLT decomposition in vector form.
-  template <typename Scalar>
-  explicit Inertia(const Eigen::VectorX<Scalar>& D) {
-    for (const auto& elem : D) {
-      if (elem > std::numeric_limits<Scalar>::epsilon()) {
-        ++positive;
-      } else if (elem < -std::numeric_limits<Scalar>::epsilon()) {
-        ++negative;
-      } else {
-        ++zero;
-      }
-    }
-  }
-
-  /// Constructs Inertia from the D matrix of an LDLT decomposition
-  /// (see https://en.wikipedia.org/wiki/Sylvester's_law_of_inertia).
-  ///
-  /// @tparam Scalar Scalar type.
-  /// @param D The D matrix of an LDLT decomposition in vector form.
-  template <typename Scalar>
-  explicit Inertia(const Eigen::Diagonal<const Eigen::MatrixX<Scalar>>& D) {
-    for (const auto& elem : D) {
-      if (elem > std::numeric_limits<Scalar>::epsilon()) {
-        ++positive;
-      } else if (elem < -std::numeric_limits<Scalar>::epsilon()) {
-        ++negative;
-      } else {
-        ++zero;
-      }
-    }
-  }
 
   /// Inertia equality operator.
   ///

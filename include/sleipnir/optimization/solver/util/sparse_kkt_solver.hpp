@@ -3,6 +3,7 @@
 #pragma once
 
 #include <algorithm>
+#include <limits>
 
 #include <Eigen/Core>
 #include <Eigen/SparseCholesky>
@@ -78,12 +79,10 @@ class SparseKKTSolver {
       m_info = m_solver.info();
 
       if (m_info == Eigen::Success) {
-        auto D = m_solver.vectorD();
-
         // If the inertia is ideal and D from LDLT is sufficiently far from
         // zero, don't regularize the system
-        if (Inertia{D} == ideal_inertia &&
-            (D.cwiseAbs().array() >= Scalar(1e-4)).all()) {
+        if (inertia() == ideal_inertia &&
+            (m_solver.vectorD().cwiseAbs().array() >= Scalar(1e-4)).all()) {
           m_prev_δ = Scalar(0);
           m_prev_γ = Scalar(0);
           return *this;
@@ -100,6 +99,9 @@ class SparseKKTSolver {
     // The maximum constraint regularization. Larger values distort the equality
     // constraint Jacobian more than they help a rank-deficient one.
     constexpr Scalar γ_max(1e-8);
+
+    // The initial nonzero constraint regularization
+    constexpr Scalar γ_initial(1e-10);
 
     // If the previous δ was zero, attempt a small value. Otherwise, attempt a
     // smaller value than the previous δ so δ trends downward. δ has a floor
@@ -119,7 +121,7 @@ class SparseKKTSolver {
       m_info = m_solver.info();
 
       if (m_info == Eigen::Success) {
-        Inertia inertia{m_solver.vectorD()};
+        Inertia inertia = this->inertia();
 
         if (inertia == ideal_inertia) {
           // If the inertia is ideal, report success
@@ -130,7 +132,7 @@ class SparseKKTSolver {
           if (γ == Scalar(0)) {
             // If there's zero eigenvalues and γ = 0, increase γ to potentially
             // compensate for a rank-deficient equality constraint Jacobian
-            γ = Scalar(1e-10);
+            γ = γ_initial;
           } else {
             // If there's zero eigenvalues and γ > 0, increase δ and γ to drive
             // all eigenvalues away from zero
@@ -151,8 +153,7 @@ class SparseKKTSolver {
           // equality constraint Jacobian more than it helps. Increase δ to
           // reduce element growth from Hessian pivots instead.
           if (γ < γ_max && !smallest_pivot_is_hessian()) {
-            γ = γ == Scalar(0) ? Scalar(1e-10)
-                               : std::min(γ * Scalar(10), γ_max);
+            γ = γ == Scalar(0) ? γ_initial : std::min(γ * Scalar(10), γ_max);
           } else {
             δ *= Scalar(10);
           }
@@ -161,7 +162,7 @@ class SparseKKTSolver {
         // If the decomposition failed, increase δ and γ to drive all
         // eigenvalues away from zero
         δ *= Scalar(10);
-        γ = γ == Scalar(0) ? Scalar(1e-10) : std::min(γ * Scalar(10), γ_max);
+        γ = γ == Scalar(0) ? γ_initial : std::min(γ * Scalar(10), γ_max);
       }
 
       // If the lhs perturbation is too high, report failure. This can be caused
@@ -246,6 +247,30 @@ class SparseKKTSolver {
 
   /// The value of γ from the previous run of compute().
   Scalar m_prev_γ{0};
+
+  /// Returns the inertia of the most recently factorized KKT matrix.
+  ///
+  /// By Sylvester's law of inertia, the KKT matrix's inertia is the inertia of
+  /// D from its LDLT factorization. Pivots within ε of zero are counted as
+  /// zero.
+  ///
+  /// @return The inertia of the most recently factorized KKT matrix.
+  Inertia inertia() const {
+    constexpr Scalar ε = std::numeric_limits<Scalar>::epsilon();
+
+    Inertia inertia;
+    for (const auto& d : m_solver.vectorD()) {
+      if (d > ε) {
+        ++inertia.positive;
+      } else if (d < -ε) {
+        ++inertia.negative;
+      } else {
+        ++inertia.zero;
+      }
+    }
+
+    return inertia;
+  }
 
   /// Returns true if the smallest-magnitude pivot of the most recent
   /// factorization corresponds to a row of the Hessian block.
