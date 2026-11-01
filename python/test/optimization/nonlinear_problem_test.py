@@ -159,7 +159,11 @@ def test_wachter_and_biegler_line_search_failure() -> None:
     else:
         assert x.value() == pytest.approx(-1.0, abs=1e-6)
         assert s1.value() == pytest.approx(0.0, abs=1e-6)
-        assert s2.value() == pytest.approx(0.0, abs=3e-5)
+
+        # At x = −1 and s₁ = 0, the ℓ₁ constraint violation
+        # |x − s₂ − 0.5| + max(0, −s₂) is 1.5 for every s₂ ∈ [−1.5, 0], so
+        # feasibility restoration can converge to any of them
+        assert -1.5 - 1e-6 <= s2.value() <= 1e-6
 
 
 def test_hock_schittkowski_13() -> None:
