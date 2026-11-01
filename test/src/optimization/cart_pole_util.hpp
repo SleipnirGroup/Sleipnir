@@ -40,8 +40,8 @@ class CartPoleUtil {
   static constexpr Scalar l{0.5};    // Pole length (m)
   static constexpr Scalar g{9.806};  // Acceleration due to gravity (m/s²)
 
-  static Eigen::Vector<Scalar, 4> dynamics_scalar(
-      const Eigen::Vector<Scalar, 4>& x, const Eigen::Vector<Scalar, 1>& u) {
+  static Eigen::Vector4<Scalar> dynamics_scalar(
+      const Eigen::Vector4<Scalar>& x, const Eigen::Vector<Scalar, 1>& u) {
     using std::cos;
     using std::pow;
     using std::sin;
@@ -56,24 +56,24 @@ class CartPoleUtil {
 
     //        [ m_c + m_p  m_p l cosθ]
     // M(q) = [m_p l cosθ    m_p l²  ]
-    Eigen::Matrix<Scalar, 2, 2> M{{m_c + m_p, m_p * l * c},
-                                  {m_p * l * c, m_p * pow(l, Scalar(2))}};
+    Eigen::Matrix2<Scalar> M{{m_c + m_p, m_p * l * c},
+                             {m_p * l * c, m_p * pow(l, Scalar(2))}};
 
     //           [0  −m_p lθ̇ sinθ]
     // C(q, q̇) = [0       0      ]
-    Eigen::Matrix<Scalar, 2, 2> C{{Scalar(0), -m_p * l * thetadot * s},
-                                  {Scalar(0), Scalar(0)}};
+    Eigen::Matrix2<Scalar> C{{Scalar(0), -m_p * l * thetadot * s},
+                             {Scalar(0), Scalar(0)}};
 
     //          [     0      ]
     // τ_g(q) = [-m_p gl sinθ]
-    Eigen::Vector<Scalar, 2> tau_g{{Scalar(0)}, {-m_p * g * l * s}};
+    Eigen::Vector2<Scalar> tau_g{{Scalar(0)}, {-m_p * g * l * s}};
 
     //     [1]
     // B = [0]
     constexpr Eigen::Matrix<Scalar, 2, 1> B{{Scalar(1)}, {Scalar(0)}};
 
     // q̈ = M⁻¹(q)(τ_g(q) − C(q, q̇)q̇ + Bu)
-    Eigen::Vector<Scalar, 4> qddot;
+    Eigen::Vector4<Scalar> qddot;
     qddot.segment(0, 2) = qdot;
     qddot.segment(2, 2) = M.householderQr().solve(tau_g - C * qdot + B * u);
     return qddot;

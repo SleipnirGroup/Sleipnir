@@ -93,8 +93,7 @@ std::string power_of_10(Scalar value) {
 /// @param c_e The problem's equality constraints cₑ(x) evaluated at the current
 ///     iterate.
 template <typename Scalar>
-void print_too_few_dofs_error(
-    const Eigen::Vector<Scalar, Eigen::Dynamic>& c_e) {
+void print_too_few_dofs_error(const Eigen::VectorX<Scalar>& c_e) {
   slp::println("The problem has too few degrees of freedom.");
   slp::println("Violated constraints (cₑ(x) = 0) in order of declaration:");
   for (int row = 0; row < c_e.rows(); ++row) {
@@ -116,8 +115,8 @@ void print_too_few_dofs_error(
 /// @param tolerance Constraint violations at or below this tolerance aren't
 ///     printed.
 template <typename Scalar>
-void print_c_e_local_infeasibility_error(
-    const Eigen::Vector<Scalar, Eigen::Dynamic>& c_e, Scalar tolerance) {
+void print_c_e_local_infeasibility_error(const Eigen::VectorX<Scalar>& c_e,
+                                         Scalar tolerance) {
   using std::abs;
 
   slp::println(
@@ -143,8 +142,8 @@ void print_c_e_local_infeasibility_error(
 /// @param tolerance Constraint violations at or below this tolerance aren't
 ///     printed.
 template <typename Scalar>
-void print_c_i_local_infeasibility_error(
-    const Eigen::Vector<Scalar, Eigen::Dynamic>& c_i, Scalar tolerance) {
+void print_c_i_local_infeasibility_error(const Eigen::VectorX<Scalar>& c_i,
+                                         Scalar tolerance) {
   slp::println(
       "The problem is locally infeasible due to violated inequality "
       "constraints.");

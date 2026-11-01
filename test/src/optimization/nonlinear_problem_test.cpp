@@ -67,9 +67,9 @@ TEMPLATE_TEST_CASE("Problem - Rosenbrock with cubic and line constraint",
       // Local minimum at (0, 0)
       // Global minimum at (1, 1)
       INFO(std::format("  (x₀, y₀) = ({}, {})", x0, y0));
-      Eigen::Vector<T, 2> sol{x.value(), y.value()};
-      CHECK_THAT(sol, WithinAbs(Eigen::Vector<T, 2>{T(0), T(0)}, T(1e-2)) ||
-                          WithinAbs(Eigen::Vector<T, 2>{T(1), T(1)}, T(1e-2)));
+      Eigen::Vector2<T> sol{x.value(), y.value()};
+      CHECK_THAT(sol, WithinAbs(Eigen::Vector2<T>{T(0), T(0)}, T(1e-2)) ||
+                          WithinAbs(Eigen::Vector2<T>{T(1), T(1)}, T(1e-2)));
     }
   }
 }
@@ -101,8 +101,8 @@ TEMPLATE_TEST_CASE("Problem - Rosenbrock with disk constraint", "[Problem]",
       CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
       INFO(std::format("  (x₀, y₀) = ({}, {})", x0, y0));
-      Eigen::Vector<T, 2> sol{x.value(), y.value()};
-      CHECK_THAT(sol, WithinAbs(Eigen::Vector<T, 2>{T(1), T(1)}, T(1e-3)));
+      Eigen::Vector2<T> sol{x.value(), y.value()};
+      CHECK_THAT(sol, WithinAbs(Eigen::Vector2<T>{T(1), T(1)}, T(1e-3)));
     }
   }
 }

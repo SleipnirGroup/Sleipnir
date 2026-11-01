@@ -16,9 +16,9 @@ namespace slp {
 ///         corresponding row of the sparse matrix.
 template <typename Derived>
 auto sparse_inf_norms(const Eigen::SparseCompressedBase<Derived>& mat)
-    -> Eigen::Vector<typename Derived::Scalar, Eigen::Dynamic> {
+    -> Eigen::VectorX<typename Derived::Scalar> {
   using Scalar = typename Derived::Scalar;
-  using DenseVector = Eigen::Vector<Scalar, Eigen::Dynamic>;
+  using DenseVector = Eigen::VectorX<Scalar>;
 
   DenseVector norms = DenseVector::Zero(mat.rows());
   for (int k = 0; k < mat.outerSize(); ++k) {

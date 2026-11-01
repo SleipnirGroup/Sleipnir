@@ -593,9 +593,8 @@ class VariableBlock : public SleipnirBase {
   /// Returns the contents of the variable matrix.
   ///
   /// @return The contents of the variable matrix.
-  Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> value() {
-    Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> result{rows(),
-                                                                 cols()};
+  Eigen::MatrixX<Scalar> value() {
+    Eigen::MatrixX<Scalar> result{rows(), cols()};
 
     for (int row = 0; row < rows(); ++row) {
       for (int col = 0; col < cols(); ++col) {

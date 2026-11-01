@@ -80,14 +80,14 @@ TEMPLATE_TEST_CASE("decision_variable - Static matrix init assign",
   }
 
   // Block assignment
-  z.block(0, 0, 2, 1).set_value(Eigen::Matrix<T, 2, 1>{{T(1)}, {T(1)}});
+  z.block(0, 0, 2, 1).set_value(Eigen::Vector2<T>{{T(1)}, {T(1)}});
   CHECK(z.value() ==
         Eigen::Matrix<T, 3, 2>{{T(1), T(8)}, {T(1), T(10)}, {T(11), T(12)}});
 
   // Segment assignment
   z.block(0, 0, 3, 1)
       .segment(0, 2)
-      .set_value(Eigen::Matrix<T, 2, 1>{{T(2)}, {T(2)}});
+      .set_value(Eigen::Vector2<T>{{T(2)}, {T(2)}});
   CHECK(z.value() ==
         Eigen::Matrix<T, 3, 2>{{T(2), T(8)}, {T(2), T(10)}, {T(11), T(12)}});
 }
@@ -95,7 +95,6 @@ TEMPLATE_TEST_CASE("decision_variable - Static matrix init assign",
 TEMPLATE_TEST_CASE("decision_variable - Dynamic matrix init assign",
                    "[decision_variable]", SCALAR_TYPES) {
   using T = TestType;
-  using MatrixXT = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
 
   slp::Problem<T> problem;
 
@@ -109,7 +108,7 @@ TEMPLATE_TEST_CASE("decision_variable - Dynamic matrix init assign",
   CHECK(z.value(2, 1) == T(0));
 
   // Matrix assignment; element comparison
-  z.set_value(MatrixXT{{T(1), T(2)}, {T(3), T(4)}, {T(5), T(6)}});
+  z.set_value(Eigen::MatrixX<T>{{T(1), T(2)}, {T(3), T(4)}, {T(5), T(6)}});
   CHECK(z.value(0, 0) == T(1));
   CHECK(z.value(0, 1) == T(2));
   CHECK(z.value(1, 0) == T(3));
@@ -118,17 +117,21 @@ TEMPLATE_TEST_CASE("decision_variable - Dynamic matrix init assign",
   CHECK(z.value(2, 1) == T(6));
 
   // Matrix assignment; matrix comparison
-  MatrixXT expected{{T(7), T(8)}, {T(9), T(10)}, {T(11), T(12)}};
+  Eigen::MatrixX<T> expected{{T(7), T(8)}, {T(9), T(10)}, {T(11), T(12)}};
   z.set_value(expected);
   CHECK(z.value() == expected);
 
   // Block assignment
-  z.block(0, 0, 2, 1).set_value(MatrixXT{{T(1)}, {T(1)}});
-  CHECK(z.value() == MatrixXT{{T(1), T(8)}, {T(1), T(10)}, {T(11), T(12)}});
+  z.block(0, 0, 2, 1).set_value(Eigen::MatrixX<T>{{T(1)}, {T(1)}});
+  CHECK(z.value() ==
+        Eigen::MatrixX<T>{{T(1), T(8)}, {T(1), T(10)}, {T(11), T(12)}});
 
   // Segment assignment
-  z.block(0, 0, 3, 1).segment(0, 2).set_value(MatrixXT{{T(2)}, {T(2)}});
-  CHECK(z.value() == MatrixXT{{T(2), T(8)}, {T(2), T(10)}, {T(11), T(12)}});
+  z.block(0, 0, 3, 1)
+      .segment(0, 2)
+      .set_value(Eigen::MatrixX<T>{{T(2)}, {T(2)}});
+  CHECK(z.value() ==
+        Eigen::MatrixX<T>{{T(2), T(8)}, {T(2), T(10)}, {T(11), T(12)}});
 }
 
 TEMPLATE_TEST_CASE("decision_variable - Symmetric matrix",

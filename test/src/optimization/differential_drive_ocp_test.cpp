@@ -35,8 +35,8 @@ TEMPLATE_TEST_CASE("OCP - Differential drive", "[OCP]", SCALAR_TYPES) {
   constexpr std::chrono::duration<T> min_timestep{T(0.05)};
   constexpr Eigen::Vector<T, 5> x_initial{{T(0), T(0), T(0), T(0), T(0)}};
   constexpr Eigen::Vector<T, 5> x_final{{T(1), T(1), T(0), T(0), T(0)}};
-  constexpr Eigen::Matrix<T, 2, 1> u_min{{T(-12), T(-12)}};
-  constexpr Eigen::Matrix<T, 2, 1> u_max{{T(12), T(12)}};
+  constexpr Eigen::Vector2<T> u_min{{T(-12), T(-12)}};
+  constexpr Eigen::Vector2<T> u_max{{T(12), T(12)}};
 
   slp::OCP<T> problem(
       5, 2, min_timestep, N, DifferentialDriveUtil<T>::dynamics_variable,
@@ -59,7 +59,7 @@ TEMPLATE_TEST_CASE("OCP - Differential drive", "[OCP]", SCALAR_TYPES) {
   problem.set_max_timestep(std::chrono::duration<T>{T(3)});
 
   // Set up cost
-  problem.minimize(problem.dt() * Eigen::Matrix<T, N + 1, 1>::Ones());
+  problem.minimize(problem.dt() * Eigen::Vector<T, N + 1>::Ones());
 
   CHECK(problem.cost_function_type() == slp::ExpressionType::LINEAR);
   CHECK(problem.equality_constraint_type() == slp::ExpressionType::NONLINEAR);

@@ -32,10 +32,8 @@ ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
                const Eigen::ArrayX<bool>& bound_constraint_mask,
 #endif
-               Eigen::Vector<Scalar, Eigen::Dynamic>& x,
-               Eigen::Vector<Scalar, Eigen::Dynamic>& s,
-               Eigen::Vector<Scalar, Eigen::Dynamic>& y,
-               Eigen::Vector<Scalar, Eigen::Dynamic>& z, Scalar& μ,
+               Eigen::VectorX<Scalar>& x, Eigen::VectorX<Scalar>& s,
+               Eigen::VectorX<Scalar>& y, Eigen::VectorX<Scalar>& z, Scalar& μ,
                int& iterations);
 
 /// Computes initial values for p and n in feasibility restoration.
@@ -47,10 +45,8 @@ ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
 /// @return Tuple of positive and negative constraint relaxation slack variables
 ///     respectively.
 template <typename Scalar>
-std::tuple<Eigen::Vector<Scalar, Eigen::Dynamic>,
-           Eigen::Vector<Scalar, Eigen::Dynamic>>
-compute_p_n(const Eigen::Vector<Scalar, Eigen::Dynamic>& c, Scalar ρ,
-            Scalar μ) {
+std::tuple<Eigen::VectorX<Scalar>, Eigen::VectorX<Scalar>> compute_p_n(
+    const Eigen::VectorX<Scalar>& c, Scalar ρ, Scalar μ) {
   // From equation (33) of [2]:
   //                       ______________________
   //       μ − ρ c(x)     /(μ − ρ c(x))²   μ c(x)
@@ -81,7 +77,7 @@ compute_p_n(const Eigen::Vector<Scalar, Eigen::Dynamic>& c, Scalar ρ,
   //
   //   p = c(x) + n                                   (6)
 
-  using DenseVector = Eigen::Vector<Scalar, Eigen::Dynamic>;
+  using DenseVector = Eigen::VectorX<Scalar>;
 
   using std::sqrt;
 
@@ -119,8 +115,8 @@ ExitStatus feasibility_restoration(
     const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
     std::span<std::function<bool(const IterationInfo<Scalar>& info)>>
         iteration_callbacks,
-    const Options<Scalar>& options, Eigen::Vector<Scalar, Eigen::Dynamic>& x,
-    Eigen::Vector<Scalar, Eigen::Dynamic>& y, int& iterations) {
+    const Options<Scalar>& options, Eigen::VectorX<Scalar>& x,
+    Eigen::VectorX<Scalar>& y, int& iterations) {
   // Feasibility restoration
   //
   //        min  ρ Σ (pₑ + nₑ) + ζ/2 (x - xᵣ)ᵀDᵣ(x - xᵣ)
@@ -137,7 +133,7 @@ ExitStatus feasibility_restoration(
   //
   //   Dᵣ = diag(min(1, 1/xᵣ[i]²) for i in x.rows())
 
-  using DenseVector = Eigen::Vector<Scalar, Eigen::Dynamic>;
+  using DenseVector = Eigen::VectorX<Scalar>;
   using DiagonalMatrix = Eigen::DiagonalMatrix<Scalar, Eigen::Dynamic>;
   using SparseMatrix = Eigen::SparseMatrix<Scalar>;
   using SparseVector = Eigen::SparseVector<Scalar>;
@@ -381,10 +377,9 @@ ExitStatus feasibility_restoration(
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
     const Eigen::ArrayX<bool>& bound_constraint_mask,
 #endif
-    Eigen::Vector<Scalar, Eigen::Dynamic>& x,
-    Eigen::Vector<Scalar, Eigen::Dynamic>& s,
-    Eigen::Vector<Scalar, Eigen::Dynamic>& y,
-    Eigen::Vector<Scalar, Eigen::Dynamic>& z, Scalar μ, int& iterations) {
+    Eigen::VectorX<Scalar>& x, Eigen::VectorX<Scalar>& s,
+    Eigen::VectorX<Scalar>& y, Eigen::VectorX<Scalar>& z, Scalar μ,
+    int& iterations) {
   // Feasibility restoration
   //
   //        min  ρ Σ (pₑ + nₑ + pᵢ + nᵢ) + ζ/2 (x - xᵣ)ᵀDᵣ(x - xᵣ)
@@ -405,7 +400,7 @@ ExitStatus feasibility_restoration(
   //
   //   Dᵣ = diag(min(1, 1/xᵣ[i]²) for i in x.rows())
 
-  using DenseVector = Eigen::Vector<Scalar, Eigen::Dynamic>;
+  using DenseVector = Eigen::VectorX<Scalar>;
   using DiagonalMatrix = Eigen::DiagonalMatrix<Scalar, Eigen::Dynamic>;
   using SparseMatrix = Eigen::SparseMatrix<Scalar>;
   using SparseVector = Eigen::SparseVector<Scalar>;

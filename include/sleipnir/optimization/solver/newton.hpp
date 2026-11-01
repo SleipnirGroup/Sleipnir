@@ -54,8 +54,8 @@ ExitStatus newton(
     const NewtonMatrixCallbacks<Scalar>& matrix_callbacks,
     std::span<std::function<bool(const IterationInfo<Scalar>& info)>>
         iteration_callbacks,
-    const Options<Scalar>& options, Eigen::Vector<Scalar, Eigen::Dynamic>& x) {
-  using DenseVector = Eigen::Vector<Scalar, Eigen::Dynamic>;
+    const Options<Scalar>& options, Eigen::VectorX<Scalar>& x) {
+  using DenseVector = Eigen::VectorX<Scalar>;
   using SparseMatrix = Eigen::SparseMatrix<Scalar>;
   using SparseVector = Eigen::SparseVector<Scalar>;
 
@@ -288,10 +288,10 @@ ExitStatus newton(
   }
 }
 
-extern template SLEIPNIR_DLLEXPORT ExitStatus newton(
-    const NewtonMatrixCallbacks<double>& matrix_callbacks,
-    std::span<std::function<bool(const IterationInfo<double>& info)>>
-        iteration_callbacks,
-    const Options<double>& options, Eigen::Vector<double, Eigen::Dynamic>& x);
+extern template SLEIPNIR_DLLEXPORT ExitStatus
+newton(const NewtonMatrixCallbacks<double>& matrix_callbacks,
+       std::span<std::function<bool(const IterationInfo<double>& info)>>
+           iteration_callbacks,
+       const Options<double>& options, Eigen::VectorX<double>& x);
 
 }  // namespace slp

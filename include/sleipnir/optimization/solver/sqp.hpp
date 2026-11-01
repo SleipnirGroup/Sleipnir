@@ -61,9 +61,8 @@ template <typename Scalar>
 ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
                std::span<std::function<bool(const IterationInfo<Scalar>& info)>>
                    iteration_callbacks,
-               const Options<Scalar>& options,
-               Eigen::Vector<Scalar, Eigen::Dynamic>& x) {
-  using DenseVector = Eigen::Vector<Scalar, Eigen::Dynamic>;
+               const Options<Scalar>& options, Eigen::VectorX<Scalar>& x) {
+  using DenseVector = Eigen::VectorX<Scalar>;
 
   DenseVector y = DenseVector::Zero(matrix_callbacks.num_equality_constraints);
 
@@ -96,10 +95,9 @@ template <typename Scalar>
 ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
                std::span<std::function<bool(const IterationInfo<Scalar>& info)>>
                    iteration_callbacks,
-               const Options<Scalar>& options,
-               Eigen::Vector<Scalar, Eigen::Dynamic>& x,
-               Eigen::Vector<Scalar, Eigen::Dynamic>& y) {
-  using DenseVector = Eigen::Vector<Scalar, Eigen::Dynamic>;
+               const Options<Scalar>& options, Eigen::VectorX<Scalar>& x,
+               Eigen::VectorX<Scalar>& y) {
+  using DenseVector = Eigen::VectorX<Scalar>;
   using SparseMatrix = Eigen::SparseMatrix<Scalar>;
   using SparseVector = Eigen::SparseVector<Scalar>;
 
@@ -627,6 +625,6 @@ extern template SLEIPNIR_DLLEXPORT ExitStatus
 sqp(const SQPMatrixCallbacks<double>& matrix_callbacks,
     std::span<std::function<bool(const IterationInfo<double>& info)>>
         iteration_callbacks,
-    const Options<double>& options, Eigen::Vector<double, Eigen::Dynamic>& x);
+    const Options<double>& options, Eigen::VectorX<double>& x);
 
 }  // namespace slp

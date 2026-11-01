@@ -75,8 +75,8 @@ Next, we'll apply the state and input constraints.
 
 ```cpp
 // Start and end at rest
-problem.subject_to(X.Col(0) == Eigen::Matrix<double, 2, 1>{{0.0}, {0.0}});
-problem.subject_to(X.Col(N) == Eigen::Matrix<double, 2, 1>{{r}, {0.0}});
+problem.subject_to(X.Col(0) == Eigen::Vector2d{{0.0}, {0.0}});
+problem.subject_to(X.Col(N) == Eigen::Vector2d{{r}, {0.0}});
 
 // Limit velocity
 problem.subject_to(-1 <= X.row(1));

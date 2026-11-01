@@ -37,8 +37,6 @@ namespace slp {
 void bind_variable_block(
     nb::class_<VariableBlock<VariableMatrix<double>>>& cls) {
   using namespace nb::literals;
-  using MatrixXi64 = Eigen::Matrix<int64_t, Eigen::Dynamic, Eigen::Dynamic>;
-  using MatrixXi32 = Eigen::Matrix<int32_t, Eigen::Dynamic, Eigen::Dynamic>;
 
   cls.def(
       "set_value",
@@ -51,7 +49,8 @@ void bind_variable_block(
       [](VariableBlock<VariableMatrix<double>>& self,
          nb::DRef<Eigen::MatrixXd> values) { self.set_value(values); },
       "values"_a, DOC(slp, VariableBlock, set_value, 2));
-  for_each_type<Eigen::MatrixXf, MatrixXi64, MatrixXi32>([&]<typename T> {
+  for_each_type<Eigen::MatrixXf, Eigen::MatrixX<int64_t>,
+                Eigen::MatrixX<int32_t>>([&]<typename T> {
     cls.def(
         "set_value",
         [](VariableBlock<VariableMatrix<double>>& self, nb::DRef<T> values) {

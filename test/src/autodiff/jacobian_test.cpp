@@ -29,7 +29,7 @@ TEMPLATE_TEST_CASE("Jacobian - y = x", "[Jacobian]", SCALAR_TYPES) {
   auto y = x;
   auto J = slp::Jacobian(y, x);
 
-  Eigen::Matrix<T, 3, 3> expected_J{
+  Eigen::Matrix3<T> expected_J{
       {T(1), T(0), T(0)}, {T(0), T(1), T(0)}, {T(0), T(0), T(1)}};
   CHECK(J.get().value() == expected_J);
   CHECK(J.value().toDense() == expected_J);
@@ -54,7 +54,7 @@ TEMPLATE_TEST_CASE("Jacobian - y = 3x", "[Jacobian]", SCALAR_TYPES) {
   auto y = T(3) * x;
   auto J = slp::Jacobian(y, x);
 
-  Eigen::Matrix<T, 3, 3> expected_J{
+  Eigen::Matrix3<T> expected_J{
       {T(3), T(0), T(0)}, {T(0), T(3), T(0)}, {T(0), T(0), T(3)}};
   CHECK(J.get().value() == expected_J);
   CHECK(J.value().toDense() == expected_J);
@@ -88,7 +88,7 @@ TEMPLATE_TEST_CASE("Jacobian - Products", "[Jacobian]", SCALAR_TYPES) {
   y[2] = x[0] * x[2];
   auto J = slp::Jacobian(y, x);
 
-  Eigen::Matrix<T, 3, 3> expected_J{
+  Eigen::Matrix3<T> expected_J{
       {T(2), T(1), T(0)}, {T(0), T(3), T(2)}, {T(3), T(0), T(1)}};
   CHECK(J.get().value() == expected_J);
   CHECK(J.value().toDense() == expected_J);
@@ -152,7 +152,7 @@ TEMPLATE_TEST_CASE("Jacobian - Nested products", "[Jacobian]", SCALAR_TYPES) {
   //         [y₃  0   y₁]   [33   0  15]
   {
     auto J = slp::Jacobian(z, y);
-    Eigen::Matrix<T, 3, 3> expected_J{
+    Eigen::Matrix3<T> expected_J{
         {T(21), T(15), T(0)}, {T(0), T(33), T(21)}, {T(33), T(0), T(15)}};
     CHECK(J.get().value() == expected_J);
     CHECK(J.value().toDense() == expected_J);

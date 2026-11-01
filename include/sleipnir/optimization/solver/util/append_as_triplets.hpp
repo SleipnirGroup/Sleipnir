@@ -57,7 +57,7 @@ void append_as_triplets(
 template <typename Scalar>
 void append_diagonal_as_triplets(
     gch::small_vector<Eigen::Triplet<Scalar>>& triplets, int row_offset,
-    int col_offset, const Eigen::Vector<Scalar, Eigen::Dynamic>& diag) {
+    int col_offset, const Eigen::VectorX<Scalar>& diag) {
   for (int row = 0; row < diag.rows(); ++row) {
     triplets.emplace_back(row_offset + row, col_offset + row, diag[row]);
   }

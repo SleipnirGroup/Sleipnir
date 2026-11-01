@@ -190,10 +190,8 @@ struct MatrixWithinAbsMatcher : Catch::Matchers::MatcherGenericBase {
 /// Uses a dynamic-size target so matchees with mismatched sizes fail the match
 /// instead of Eigen producing a resize assertion.
 template <typename Derived>
-MatrixWithinAbsMatcher<
-    Eigen::Matrix<typename Derived::Scalar, Eigen::Dynamic, Eigen::Dynamic>>
-WithinAbs(const Eigen::DenseBase<Derived>& target,
-          typename Derived::Scalar margin) {
+MatrixWithinAbsMatcher<Eigen::MatrixX<typename Derived::Scalar>> WithinAbs(
+    const Eigen::DenseBase<Derived>& target, typename Derived::Scalar margin) {
   return {target, margin};
 }
 
@@ -264,9 +262,7 @@ struct MatrixWithinRelMatcher : Catch::Matchers::MatcherGenericBase {
 /// Uses a dynamic-size target so matchees with mismatched sizes fail the match
 /// instead of Eigen producing a resize assertion.
 template <typename Derived>
-MatrixWithinRelMatcher<
-    Eigen::Matrix<typename Derived::Scalar, Eigen::Dynamic, Eigen::Dynamic>>
-WithinRel(const Eigen::DenseBase<Derived>& target,
-          typename Derived::Scalar epsilon) {
+MatrixWithinRelMatcher<Eigen::MatrixX<typename Derived::Scalar>> WithinRel(
+    const Eigen::DenseBase<Derived>& target, typename Derived::Scalar epsilon) {
   return {target, epsilon};
 }

@@ -37,7 +37,7 @@ class Inertia {
   /// @tparam Scalar Scalar type.
   /// @param D The D matrix of an LDLT decomposition in vector form.
   template <typename Scalar>
-  explicit Inertia(const Eigen::Vector<Scalar, Eigen::Dynamic>& D) {
+  explicit Inertia(const Eigen::VectorX<Scalar>& D) {
     for (const auto& elem : D) {
       if (elem > std::numeric_limits<Scalar>::epsilon()) {
         ++positive;
@@ -55,9 +55,7 @@ class Inertia {
   /// @tparam Scalar Scalar type.
   /// @param D The D matrix of an LDLT decomposition in vector form.
   template <typename Scalar>
-  explicit Inertia(
-      const Eigen::Diagonal<
-          const Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>>& D) {
+  explicit Inertia(const Eigen::Diagonal<const Eigen::MatrixX<Scalar>>& D) {
     for (const auto& elem : D) {
       if (elem > std::numeric_limits<Scalar>::epsilon()) {
         ++positive;

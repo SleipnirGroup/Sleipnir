@@ -20,9 +20,9 @@ template <typename Scalar>
 class DenseKKTSolver {
  public:
   /// Type alias for dense matrix.
-  using DenseMatrix = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>;
+  using DenseMatrix = Eigen::MatrixX<Scalar>;
   /// Type alias for dense vector.
-  using DenseVector = Eigen::Vector<Scalar, Eigen::Dynamic>;
+  using DenseVector = Eigen::VectorX<Scalar>;
 
   /// Constructs a DenseKKTSolver instance.
   ///

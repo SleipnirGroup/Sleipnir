@@ -33,9 +33,9 @@ TEMPLATE_TEST_CASE("VariableMatrix - Construct from Eigen::DiagonalBase",
                    "[VariableMatrix]", SCALAR_TYPES) {
   using T = TestType;
 
-  slp::VariableMatrix mat{Eigen::Vector<T, 3>{{T(1), T(2), T(3)}}.asDiagonal()};
+  slp::VariableMatrix mat{Eigen::Vector3<T>{{T(1), T(2), T(3)}}.asDiagonal()};
 
-  Eigen::Matrix<T, 3, 3> expected{
+  Eigen::Matrix3<T> expected{
       {T(1), T(0), T(0)}, {T(0), T(2), T(0)}, {T(0), T(0), T(3)}};
   CHECK(mat.value() == expected);
 }
@@ -77,8 +77,8 @@ TEMPLATE_TEST_CASE("VariableMatrix - Assignment aliasing", "[VariableMatrix]",
   slp::VariableMatrix<T> B{{5, 6}, {7, 8}};
 
   // A and B initially contain different values
-  Eigen::Matrix<T, 2, 2> expected_A{{T(1), T(2)}, {T(3), T(4)}};
-  Eigen::Matrix<T, 2, 2> expected_B{{T(5), T(6)}, {T(7), T(8)}};
+  Eigen::Matrix2<T> expected_A{{T(1), T(2)}, {T(3), T(4)}};
+  Eigen::Matrix2<T> expected_B{{T(5), T(6)}, {T(7), T(8)}};
   CHECK(A.value() == expected_A);
   CHECK(B.value() == expected_B);
 
@@ -102,16 +102,16 @@ TEMPLATE_TEST_CASE("VariableMatrix - block() member function",
       {T(1), T(2), T(3)}, {T(4), T(5), T(6)}, {T(7), T(8), T(9)}};
 
   // Block assignment
-  A.block(1, 1, 2, 2) = Eigen::Matrix<T, 2, 2>{{T(10), T(11)}, {T(12), T(13)}};
+  A.block(1, 1, 2, 2) = Eigen::Matrix2<T>{{T(10), T(11)}, {T(12), T(13)}};
 
-  Eigen::Matrix<T, 3, 3> expected1{
+  Eigen::Matrix3<T> expected1{
       {T(1), T(2), T(3)}, {T(4), T(10), T(11)}, {T(7), T(12), T(13)}};
   CHECK(A.value() == expected1);
 
   // Block-of-block assignment
   A.block(1, 1, 2, 2).block(1, 1, 1, 1) = T(14);
 
-  Eigen::Matrix<T, 3, 3> expected2{
+  Eigen::Matrix3<T> expected2{
       {T(1), T(2), T(3)}, {T(4), T(10), T(11)}, {T(7), T(12), T(14)}};
   CHECK(A.value() == expected2);
 }
@@ -192,7 +192,7 @@ TEMPLATE_TEST_CASE("VariableMatrix - Slicing", "[VariableMatrix]",
     auto s = mat[slp::Slice{1, _}, -1];
     CHECK(s.rows() == 3);
     CHECK(s.cols() == 1);
-    CHECK(s.value() == Eigen::Matrix<T, 3, 1>{{T(8)}, {T(12)}, {T(16)}});
+    CHECK(s.value() == Eigen::Vector3<T>{{T(8)}, {T(12)}, {T(16)}});
   }
 
   // Slice from start and column -2
@@ -200,7 +200,7 @@ TEMPLATE_TEST_CASE("VariableMatrix - Slicing", "[VariableMatrix]",
     auto s = mat[slp::Slice{1, _}, -2];
     CHECK(s.rows() == 3);
     CHECK(s.cols() == 1);
-    CHECK(s.value() == Eigen::Matrix<T, 3, 1>{{T(7)}, {T(11)}, {T(15)}});
+    CHECK(s.value() == Eigen::Vector3<T>{{T(7)}, {T(11)}, {T(15)}});
   }
 
   // Block assignment
@@ -208,11 +208,11 @@ TEMPLATE_TEST_CASE("VariableMatrix - Slicing", "[VariableMatrix]",
     auto s = mat[slp::Slice{_, _, 2}, slp::Slice{_, _, 2}];
     CHECK(s.rows() == 2);
     CHECK(s.cols() == 2);
-    s = Eigen::Matrix<T, 2, 2>{{T(17), T(18)}, {T(19), T(20)}};
-    CHECK(mat.value() == Eigen::Matrix<T, 4, 4>{{T(17), T(2), T(18), T(4)},
-                                                {T(5), T(6), T(7), T(8)},
-                                                {T(19), T(10), T(20), T(12)},
-                                                {T(13), T(14), T(15), T(16)}});
+    s = Eigen::Matrix2<T>{{T(17), T(18)}, {T(19), T(20)}};
+    CHECK(mat.value() == Eigen::Matrix4<T>{{T(17), T(2), T(18), T(4)},
+                                           {T(5), T(6), T(7), T(8)},
+                                           {T(19), T(10), T(20), T(12)},
+                                           {T(13), T(14), T(15), T(16)}});
   }
 }
 
@@ -301,21 +301,21 @@ TEMPLATE_TEST_CASE("VariableMatrix - Compound assignment operators",
 
   // VariableMatrix matrix-matrix operators
   A2 += B;
-  CHECK(A2.value() == Eigen::Matrix<T, 2, 2>{{T(2), T(4)}, {T(6), T(8)}});
+  CHECK(A2.value() == Eigen::Matrix2<T>{{T(2), T(4)}, {T(6), T(8)}});
   A2 -= B;
-  CHECK(A2.value() == Eigen::Matrix<T, 2, 2>{{T(1), T(2)}, {T(3), T(4)}});
+  CHECK(A2.value() == Eigen::Matrix2<T>{{T(1), T(2)}, {T(3), T(4)}});
   A2 *= B;
-  CHECK(A2.value() == Eigen::Matrix<T, 2, 2>{{T(7), T(10)}, {T(15), T(22)}});
-  A2.set_value(Eigen::Matrix<T, 2, 2>{{T(1), T(2)}, {T(3), T(4)}});
+  CHECK(A2.value() == Eigen::Matrix2<T>{{T(7), T(10)}, {T(15), T(22)}});
+  A2.set_value(Eigen::Matrix2<T>{{T(1), T(2)}, {T(3), T(4)}});
 
   // VariableBlock matrix-matrix operators
   A2.block(0, 0, A2.rows(), A2.cols()) += B;
-  CHECK(A2.value() == Eigen::Matrix<T, 2, 2>{{T(2), T(4)}, {T(6), T(8)}});
+  CHECK(A2.value() == Eigen::Matrix2<T>{{T(2), T(4)}, {T(6), T(8)}});
   A2.block(0, 0, A2.rows(), A2.cols()) -= B;
-  CHECK(A2.value() == Eigen::Matrix<T, 2, 2>{{T(1), T(2)}, {T(3), T(4)}});
+  CHECK(A2.value() == Eigen::Matrix2<T>{{T(1), T(2)}, {T(3), T(4)}});
   A2.block(0, 0, A2.rows(), A2.cols()) *= B;
-  CHECK(A2.value() == Eigen::Matrix<T, 2, 2>{{T(7), T(10)}, {T(15), T(22)}});
-  A2.set_value(Eigen::Matrix<T, 2, 2>{{T(1), T(2)}, {T(3), T(4)}});
+  CHECK(A2.value() == Eigen::Matrix2<T>{{T(7), T(10)}, {T(15), T(22)}});
+  A2.set_value(Eigen::Matrix2<T>{{T(1), T(2)}, {T(3), T(4)}});
 
   // VariableMatrix matrix-scalar operators
   A1 += b;
@@ -323,19 +323,19 @@ TEMPLATE_TEST_CASE("VariableMatrix - Compound assignment operators",
   A1 -= b;
   CHECK(A1.value() == Eigen::Matrix<T, 1, 1>{{T(1)}});
   A2 *= b;
-  CHECK(A2.value() == Eigen::Matrix<T, 2, 2>{{T(2), T(4)}, {T(6), T(8)}});
+  CHECK(A2.value() == Eigen::Matrix2<T>{{T(2), T(4)}, {T(6), T(8)}});
   A2 /= b;
-  CHECK(A2.value() == Eigen::Matrix<T, 2, 2>{{T(1), T(2)}, {T(3), T(4)}});
+  CHECK(A2.value() == Eigen::Matrix2<T>{{T(1), T(2)}, {T(3), T(4)}});
 
   // VariableBlock matrix-scalar operators
   A2.block(0, 0, 1, 1) += b;
-  CHECK(A2.value() == Eigen::Matrix<T, 2, 2>{{T(3), T(2)}, {T(3), T(4)}});
+  CHECK(A2.value() == Eigen::Matrix2<T>{{T(3), T(2)}, {T(3), T(4)}});
   A2.block(0, 0, 1, 1) -= b;
-  CHECK(A2.value() == Eigen::Matrix<T, 2, 2>{{T(1), T(2)}, {T(3), T(4)}});
+  CHECK(A2.value() == Eigen::Matrix2<T>{{T(1), T(2)}, {T(3), T(4)}});
   A2.block(0, 0, A2.rows(), A2.cols()) *= b;
-  CHECK(A2.value() == Eigen::Matrix<T, 2, 2>{{T(2), T(4)}, {T(6), T(8)}});
+  CHECK(A2.value() == Eigen::Matrix2<T>{{T(2), T(4)}, {T(6), T(8)}});
   A2.block(0, 0, A2.rows(), A2.cols()) /= b;
-  CHECK(A2.value() == Eigen::Matrix<T, 2, 2>{{T(1), T(2)}, {T(3), T(4)}});
+  CHECK(A2.value() == Eigen::Matrix2<T>{{T(1), T(2)}, {T(3), T(4)}});
 }
 
 TEMPLATE_TEST_CASE("VariableMatrix - Iterators", "[VariableMatrix]",
@@ -386,7 +386,7 @@ TEMPLATE_TEST_CASE("VariableMatrix - Value", "[VariableMatrix]", SCALAR_TYPES) {
 
   slp::VariableMatrix<T> A{
       {T(1), T(2), T(3)}, {T(4), T(5), T(6)}, {T(7), T(8), T(9)}};
-  Eigen::Matrix<T, 3, 3> expected{
+  Eigen::Matrix3<T> expected{
       {T(1), T(2), T(3)}, {T(4), T(5), T(6)}, {T(7), T(8), T(9)}};
 
   // Full matrix
@@ -456,7 +456,7 @@ TEMPLATE_TEST_CASE("VariableMatrix - cwise_transform()", "[VariableMatrix]",
   auto sub_A = A.block(0, 0, 2, 2);
 
   slp::VariableMatrix result2 = sub_A.cwise_transform(slp::abs<T>);
-  Eigen::Matrix<T, 2, 2> expected2{{T(2), T(3)}, {T(5), T(6)}};
+  Eigen::Matrix2<T> expected2{{T(2), T(3)}, {T(5), T(6)}};
 
   // Don't modify original matrix
   CHECK(A.value() == -expected1);
@@ -474,7 +474,7 @@ TEMPLATE_TEST_CASE("VariableMatrix - identity() static function",
   CHECK(A.rows() == 3);
   CHECK(A.cols() == 3);
 
-  CHECK(A.value() == Eigen::Matrix<T, 3, 3>::Identity());
+  CHECK(A.value() == Eigen::Matrix3<T>::Identity());
 }
 
 TEMPLATE_TEST_CASE("VariableMatrix - zero() static function",
@@ -552,36 +552,28 @@ TEMPLATE_TEST_CASE("VariableMatrix - exp()", "[VariableMatrix]", SCALAR_TYPES) {
   };
 
   auto A2 = slp::VariableMatrix<T>{{T(0), T(1)}, {T(0), T(-0.5)}};
-  CHECK_THAT(
-      A2.exp().value() * (-A2).exp().value(),
-      WithinAbs(Eigen::Matrix<T, 2, 2>::Identity(), exp_product_margin(A2)));
-  CHECK_THAT(
-      (A2[_, _].exp().value() * (-A2[_, _]).exp().value()),
-      WithinAbs(Eigen::Matrix<T, 2, 2>::Identity(), exp_product_margin(A2)));
+  CHECK_THAT(A2.exp().value() * (-A2).exp().value(),
+             WithinAbs(Eigen::Matrix2<T>::Identity(), exp_product_margin(A2)));
+  CHECK_THAT((A2[_, _].exp().value() * (-A2[_, _]).exp().value()),
+             WithinAbs(Eigen::Matrix2<T>::Identity(), exp_product_margin(A2)));
 
   auto A3 = slp::VariableMatrix<T>{{T(0), T(1)}, {T(0), T(10)}};
-  CHECK_THAT(
-      A3.exp().value() * (-A3).exp().value(),
-      WithinAbs(Eigen::Matrix<T, 2, 2>::Identity(), exp_product_margin(A3)));
-  CHECK_THAT(
-      (A3[_, _].exp().value() * (-A3[_, _]).exp().value()),
-      WithinAbs(Eigen::Matrix<T, 2, 2>::Identity(), exp_product_margin(A3)));
+  CHECK_THAT(A3.exp().value() * (-A3).exp().value(),
+             WithinAbs(Eigen::Matrix2<T>::Identity(), exp_product_margin(A3)));
+  CHECK_THAT((A3[_, _].exp().value() * (-A3[_, _]).exp().value()),
+             WithinAbs(Eigen::Matrix2<T>::Identity(), exp_product_margin(A3)));
 
   auto A4 = slp::VariableMatrix<T>{{T(1), T(10)}, {T(0), T(0)}};
-  CHECK_THAT(
-      A4.exp().value() * (-A4).exp().value(),
-      WithinAbs(Eigen::Matrix<T, 2, 2>::Identity(), exp_product_margin(A4)));
-  CHECK_THAT(
-      (A4[_, _].exp().value() * (-A4[_, _]).exp().value()),
-      WithinAbs(Eigen::Matrix<T, 2, 2>::Identity(), exp_product_margin(A4)));
+  CHECK_THAT(A4.exp().value() * (-A4).exp().value(),
+             WithinAbs(Eigen::Matrix2<T>::Identity(), exp_product_margin(A4)));
+  CHECK_THAT((A4[_, _].exp().value() * (-A4[_, _]).exp().value()),
+             WithinAbs(Eigen::Matrix2<T>::Identity(), exp_product_margin(A4)));
 
   auto A5 = slp::VariableMatrix<T>{{T(2), T(3)}, {T(4), T(5)}};
-  CHECK_THAT(
-      A5.exp().value() * (-A5).exp().value(),
-      WithinAbs(Eigen::Matrix<T, 2, 2>::Identity(), exp_product_margin(A5)));
-  CHECK_THAT(
-      (A5[_, _].exp().value() * (-A5[_, _]).exp().value()),
-      WithinAbs(Eigen::Matrix<T, 2, 2>::Identity(), exp_product_margin(A5)));
+  CHECK_THAT(A5.exp().value() * (-A5).exp().value(),
+             WithinAbs(Eigen::Matrix2<T>::Identity(), exp_product_margin(A5)));
+  CHECK_THAT((A5[_, _].exp().value() * (-A5[_, _]).exp().value()),
+             WithinAbs(Eigen::Matrix2<T>::Identity(), exp_product_margin(A5)));
 
   // Pascal matrix
   //

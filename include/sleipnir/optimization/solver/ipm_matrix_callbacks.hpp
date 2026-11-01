@@ -17,7 +17,7 @@ namespace slp {
 template <typename Scalar>
 struct IPMMatrixCallbacks {
   /// Type alias for dense vector.
-  using DenseVector = Eigen::Vector<Scalar, Eigen::Dynamic>;
+  using DenseVector = Eigen::VectorX<Scalar>;
   /// Type alias for sparse matrix.
   using SparseMatrix = Eigen::SparseMatrix<Scalar>;
   /// Type alias for sparse vector.

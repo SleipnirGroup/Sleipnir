@@ -42,9 +42,8 @@ TEMPLATE_TEST_CASE("Problem - Cart-pole", "[Problem]", SCALAR_TYPES) {
   constexpr T u_max(20);  // N
   constexpr T d_max(2);   // m
 
-  constexpr Eigen::Vector<T, 4> x_initial{{T(0), T(0), T(0), T(0)}};
-  constexpr Eigen::Vector<T, 4> x_final{
-      {T(1), T(std::numbers::pi), T(0), T(0)}};
+  constexpr Eigen::Vector4<T> x_initial{{T(0), T(0), T(0), T(0)}};
+  constexpr Eigen::Vector4<T> x_final{{T(1), T(std::numbers::pi), T(0), T(0)}};
 
   slp::Problem<T> problem;
 
@@ -111,10 +110,10 @@ TEMPLATE_TEST_CASE("Problem - Cart-pole", "[Problem]", SCALAR_TYPES) {
     CHECK(U[0, k] <= u_max);
 
     // Dynamics constraints
-    Eigen::Vector<T, Eigen::Dynamic> expected_x_k1 =
+    Eigen::VectorX<T> expected_x_k1 =
         rk4<T>(&CartPoleUtil<T>::dynamics_scalar, X.col(k).value(),
                U.col(k).value(), dt);
-    Eigen::Vector<T, Eigen::Dynamic> actual_x_k1 = X.col(k + 1).value();
+    Eigen::VectorX<T> actual_x_k1 = X.col(k + 1).value();
     for (int row = 0; row < actual_x_k1.rows(); ++row) {
       INFO(std::format("  x({} @ k = {}", row, k));
       CHECK_THAT(actual_x_k1[row], WithinAbs(expected_x_k1[row], T(1e-8)));

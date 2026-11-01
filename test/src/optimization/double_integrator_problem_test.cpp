@@ -142,13 +142,13 @@ Eigen::RowVectorX<T> optimal_double_integrator_inputs(T r, T dt, int N) {
   U.segment(k_4 + 1, N - 1 - k_4).setConstant(a_max);
 
   // Continuous dynamics ẋ = Ax + Bu with state x = [p  v]ᵀ and input u = a
-  Eigen::Matrix<T, 2, 2> A{{T(0), T(1)}, {T(0), T(0)}};
+  Eigen::Matrix2<T> A{{T(0), T(1)}, {T(0), T(0)}};
   Eigen::Matrix<T, 2, 1> B{T(0), T(1)};
   auto [A_d, B_d] = discretize_ab(A, B, dt);
 
   // Returns the state at timestep N reached from rest at 0 with the inputs
   auto final_state = [&](const Eigen::RowVectorX<T>& inputs) {
-    Eigen::Vector<T, 2> x = Eigen::Vector<T, 2>::Zero();
+    Eigen::Vector2<T> x = Eigen::Vector2<T>::Zero();
     for (int k = 0; k < N; ++k) {
       x = A_d * x + B_d * inputs(k);
     }
@@ -169,11 +169,11 @@ Eigen::RowVectorX<T> optimal_double_integrator_inputs(T r, T dt, int N) {
   //   [c₃  c₄][uₖ₄] = [0] − x_fixed
   //
   // which is a 2×2 linear system for the fractional inputs.
-  Eigen::Vector<T, 2> x_fixed = final_state(U);
-  Eigen::Matrix<T, 2, 2> C;
+  Eigen::Vector2<T> x_fixed = final_state(U);
+  Eigen::Matrix2<T> C;
   C << final_state(Eigen::RowVectorX<T>::Unit(N, k_3)),
       final_state(Eigen::RowVectorX<T>::Unit(N, k_4));
-  Eigen::Vector<T, 2> u = C.lu().solve(Eigen::Vector<T, 2>{r, T(0)} - x_fixed);
+  Eigen::Vector2<T> u = C.lu().solve(Eigen::Vector2<T>{r, T(0)} - x_fixed);
   U(k_3) = u(0);
   U(k_4) = u(1);
 
@@ -217,8 +217,8 @@ TEMPLATE_TEST_CASE("Problem - Double integrator", "[Problem]", SCALAR_TYPES) {
   }
 
   // Start and end at rest
-  problem.subject_to(X.col(0) == Eigen::Matrix<T, 2, 1>{{T(0)}, {T(0)}});
-  problem.subject_to(X.col(N) == Eigen::Matrix<T, 2, 1>{{r}, {T(0)}});
+  problem.subject_to(X.col(0) == Eigen::Vector2<T>{{T(0)}, {T(0)}});
+  problem.subject_to(X.col(N) == Eigen::Vector2<T>{{r}, {T(0)}});
 
   // Limit velocity
   problem.subject_to(slp::bounds(T(-1), X.row(1), T(1)));
@@ -239,7 +239,7 @@ TEMPLATE_TEST_CASE("Problem - Double integrator", "[Problem]", SCALAR_TYPES) {
 
   REQUIRE(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
-  Eigen::Matrix<T, 2, 2> A{{T(0), T(1)}, {T(0), T(0)}};
+  Eigen::Matrix2<T> A{{T(0), T(1)}, {T(0), T(0)}};
   Eigen::Matrix<T, 2, 1> B{T(0), T(1)};
   auto [A_d, B_d] = discretize_ab(A, B, dt.count());
 
@@ -258,7 +258,7 @@ TEMPLATE_TEST_CASE("Problem - Double integrator", "[Problem]", SCALAR_TYPES) {
   CHECK_THAT(X.value(1, 0), WithinAbs(T(0), T(1e-8)));
 
   // Verify solution
-  Eigen::Matrix<T, 2, 1> x_ref{T(0), T(0)};
+  Eigen::Vector2<T> x_ref{T(0), T(0)};
   for (int k = 0; k < N + 1; ++k) {
     INFO(std::format("  k = {}", k));
 
