@@ -188,6 +188,8 @@ TEMPLATE_TEST_CASE("Expression - Prune cbrt()", "[Expression]", SCALAR_TYPES) {
   using T = TestType;
   using std::cbrt;
 
+  constexpr T ε = std::numeric_limits<T>::epsilon();
+
   auto negative_one = constant_ptr(T(-1));
   auto zero = constant_ptr(T(0));
   auto one = constant_ptr(T(1));
@@ -199,7 +201,7 @@ TEMPLATE_TEST_CASE("Expression - Prune cbrt()", "[Expression]", SCALAR_TYPES) {
 
   auto c = slp::detail::cbrt(two);
   CHECK(c->type() == slp::ExpressionType::CONSTANT);
-  CHECK_THAT(c->val, WithinAbs(T(cbrt(T(2))), T(1e-15)));
+  CHECK_THAT(c->val, WithinRel(T(cbrt(T(2))), T(8) * ε));
 }
 
 TEMPLATE_TEST_CASE("Expression - Prune cos()", "[Expression]", SCALAR_TYPES) {
