@@ -19,7 +19,7 @@
 
 #include "catch_matchers.hpp"
 #include "catch_string_converters.hpp"
-#include "near.hpp"
+#include "flywheel_util.hpp"
 #include "scalar_types.hpp"
 
 TEMPLATE_TEST_CASE("Problem - Flywheel", "[Problem]", SCALAR_TYPES) {
@@ -66,53 +66,25 @@ TEMPLATE_TEST_CASE("Problem - Flywheel", "[Problem]", SCALAR_TYPES) {
 
   REQUIRE(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
-  // Voltage for steady-state velocity:
-  //
-  // rₖ₊₁ = Arₖ + Buₖ
-  // uₖ = B⁺(rₖ₊₁ − Arₖ)
-  // uₖ = B⁺(rₖ − Arₖ)
-  // uₖ = B⁺(I − A)rₖ
-  T u_ss = T(1) / B * (T(1) - A) * r[0];
+  auto [X_ref, U_ref] = optimal_flywheel_trajectory(A, B, r[0], T(12), N);
+
+  // The cost depends on uₖ only through the B·uₖ it adds to xₖ₊₁, so U is
+  // determined 1/B times less precisely than X
+  const T x_tolerance = T(1e-4);
+  const T u_tolerance = x_tolerance / B;
 
   // Verify initial state
   CHECK_THAT(X.value(0, 0), WithinAbs(T(0), T(1e-8)));
 
   // Verify solution
-  T x(0);
-  T u(0);
-  for (int k = 0; k < N; ++k) {
+  for (int k = 0; k < N + 1; ++k) {
     INFO(std::format("  k = {}", k));
 
-    // Verify state
-    CHECK_THAT(X.value(0, k), WithinAbs(x, T(1e-2)));
-
-    // Determine expected input for this timestep
-    T error = r[0] - x;
-    if (error > T(1e-2)) {
-      // Max control input until the reference is reached
-      u = T(12);
-    } else {
-      // Maintain speed
-      u = u_ss;
+    CHECK_THAT(X.value(0, k), WithinAbs(X_ref(k), x_tolerance));
+    if (k < N) {
+      CHECK_THAT(U.value(0, k), WithinAbs(U_ref(k), u_tolerance));
     }
-
-    // Verify input
-    if (k > 0 && k < N - 1 && near(T(12), U.value(0, k - 1), T(1e-2)) &&
-        near(u_ss, U.value(0, k + 1), T(1e-2))) {
-      // If control input is transitioning between 12 and u_ss, ensure it's
-      // within (u_ss, 12)
-      CHECK(U.value(0, k) >= u_ss);
-      CHECK(U.value(0, k) <= T(12));
-    } else {
-      CHECK_THAT(U.value(0, k), WithinAbs(u, T(2e-4)));
-    }
-
-    // Project state forward
-    x = A * x + B * u;
   }
-
-  // Verify final state
-  CHECK_THAT(X.value(0, N), WithinAbs(r[0], T(2e-7)));
 
   // Log states for offline viewing
   std::ofstream states{"Problem - Flywheel states.csv"};

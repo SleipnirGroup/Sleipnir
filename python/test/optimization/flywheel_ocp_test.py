@@ -3,7 +3,7 @@ from collections.abc import Callable
 
 import numpy as np
 import pytest
-from near import near
+from flywheel_util import optimal_flywheel_trajectory
 from sleipnir.autodiff import ExpressionType, VariableMatrix
 from sleipnir.optimization import (
     OCP,
@@ -55,58 +55,29 @@ def flywheel_test(
 
     assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
 
-    # Voltage for steady-state velocity:
-    #
-    # rₖ₊₁ = Arₖ + Buₖ
-    # uₖ = B⁺(rₖ₊₁ − Arₖ)
-    # uₖ = B⁺(rₖ − Arₖ)
-    # uₖ = B⁺(I − A)rₖ
-    u_ss = 1.0 / B_discrete * (1.0 - A_discrete) * r
+    X_ref, U_ref = optimal_flywheel_trajectory(A_discrete, B_discrete, r, 12.0, N)
+
+    # The cost depends on uₖ only through the Buₖ it adds to xₖ₊₁, so U is
+    # determined 1/B times less precisely than X
+    x_tolerance = 1e-4
+    u_tolerance = x_tolerance / B_discrete
 
     # Verify initial state
     assert problem.X().value(0, 0) == pytest.approx(0.0, abs=1e-8)
 
     # Verify solution
-    x = 0.0
-    u = 0.0
-    for k in range(N):
-        # Verify state
-        assert problem.X().value(0, k) == pytest.approx(x, abs=1e-2)
-
-        # Determine expected input for this timestep
-        error = r - x
-        if error > 1e-2:
-            # Max control input until the reference is reached
-            u = 12.0
-        else:
-            # Maintain speed
-            u = u_ss
-
-        # Verify input
-        if (
-            k > 0
-            and k < N - 1
-            and near(12.0, problem.U().value(0, k - 1), 1e-2)
-            and near(u_ss, problem.U().value(0, k + 1), 1e-2)
-        ):
-            # If control input is transitioning between 12 and u_ss, ensure it's
-            # within (u_ss, 12)
-            assert problem.U().value(0, k) >= u_ss
-            assert problem.U().value(0, k) <= 12.0
-        else:
+    for k in range(N + 1):
+        assert problem.X().value(0, k) == pytest.approx(X_ref[k], abs=x_tolerance)
+        if k < N:
             if transcription_method == TranscriptionMethod.DIRECT_COLLOCATION:
                 # The tolerance is large because the trajectory is represented by a
                 # spline, and splines chatter when transitioning quickly between
                 # steady-states.
-                assert problem.U().value(0, k) == pytest.approx(u, abs=2.0)
+                assert problem.U().value(0, k) == pytest.approx(U_ref[k], abs=2.0)
             else:
-                assert problem.U().value(0, k) == pytest.approx(u, abs=2e-4)
-
-        # Project state forward
-        x = A_discrete * x + B_discrete * u
-
-    # Verify final state
-    assert problem.X().value(0, N) == pytest.approx(r, abs=2e-6)
+                assert problem.U().value(0, k) == pytest.approx(
+                    U_ref[k], abs=u_tolerance
+                )
 
     # Log states for offline viewing
     with open(f"{test_name} states.csv", "w") as file:

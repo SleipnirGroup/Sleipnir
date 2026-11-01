@@ -130,6 +130,9 @@ class ExplicitDouble {
   friend ExplicitDouble exp(const ExplicitDouble& x) {
     return ExplicitDouble{std::exp(x.m_value)};
   }
+  friend ExplicitDouble floor(const ExplicitDouble& x) {
+    return ExplicitDouble{std::floor(x.m_value)};
+  }
   friend ExplicitDouble hypot(const ExplicitDouble& x,
                               const ExplicitDouble& y) {
     return ExplicitDouble{std::hypot(x.m_value, y.m_value)};
@@ -156,6 +159,9 @@ class ExplicitDouble {
   friend ExplicitDouble pow(const ExplicitDouble& base,
                             const ExplicitDouble& power) {
     return ExplicitDouble{std::pow(base.m_value, power.m_value)};
+  }
+  friend ExplicitDouble round(const ExplicitDouble& x) {
+    return ExplicitDouble{std::round(x.m_value)};
   }
   friend ExplicitDouble sin(const ExplicitDouble& x) {
     return ExplicitDouble{std::sin(x.m_value)};
