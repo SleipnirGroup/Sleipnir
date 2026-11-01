@@ -1,5 +1,6 @@
 import math
 import operator
+import sys
 from collections.abc import Callable, Iterable
 from functools import reduce
 
@@ -7,6 +8,9 @@ import numpy as np
 import pytest
 from sleipnir import autodiff
 from sleipnir.autodiff import Gradient, Hessian, Jacobian, Variable, VariableMatrix
+
+# Machine epsilon for the binding's scalar type (double)
+ε = sys.float_info.epsilon
 
 
 def prod[T](iterable: Iterable[T]) -> T:
@@ -122,15 +126,17 @@ def test_product_of_sines() -> None:
 
     # y = prod(sin(x))
     y = prod(autodiff.sin(x))
-    assert y.value() == pytest.approx(prod(math.sin(x) for x in range(1, 6)), abs=1e-15)
+    assert y.value() == pytest.approx(
+        prod(math.sin(x) for x in range(1, 6)), rel=8 * ε, abs=0
+    )
 
     g = Gradient(y, x)
     for i in range(x.rows()):
         assert g.get().value()[i, 0] == pytest.approx(
-            y.value() / math.tan(x[i].value()), abs=1e-15
+            y.value() / math.tan(x[i].value()), rel=8 * ε, abs=0
         )
         assert g.value()[i, 0] == pytest.approx(
-            y.value() / math.tan(x[i].value()), abs=1e-15
+            y.value() / math.tan(x[i].value()), rel=8 * ε, abs=0
         )
 
     H = Hessian(y, x)
@@ -144,8 +150,8 @@ def test_product_of_sines() -> None:
                 expected_H[i, j] = y.value() / (
                     math.tan(x[i].value()) * math.tan(x[j].value())
                 )
-    np.testing.assert_allclose(H.get().value(), expected_H)
-    np.testing.assert_allclose(H.value().todense(), expected_H)
+    np.testing.assert_allclose(H.get().value(), expected_H, rtol=8 * ε, atol=0)
+    np.testing.assert_allclose(H.value().todense(), expected_H, rtol=8 * ε, atol=0)
 
 
 def test_sum_of_squared_residuals() -> None:
@@ -204,10 +210,10 @@ def test_nested_powers() -> None:
     y = (x**2) ** 2
 
     J = Jacobian(y, x).value()
-    assert J[0, 0] == pytest.approx(4 * x0 * x0 * x0, abs=1e-12)
+    assert J[0, 0] == pytest.approx(4 * x0 * x0 * x0, rel=8 * ε, abs=0)
 
     H = Hessian(y, x).value()
-    assert H[0, 0] == pytest.approx(12 * x0 * x0, abs=1e-12)
+    assert H[0, 0] == pytest.approx(12 * x0 * x0, rel=8 * ε, abs=0)
 
 
 def check_unary_hessian(
@@ -232,12 +238,18 @@ def check_unary_hessian(
         x[1].set_value(x1)
 
         u = x0 * x1
+
+        # The mixed partial is a sum of two terms that can cancel (e.g., to zero
+        # for log10()), so its rounding error scales with the terms instead of
+        # with the result
         mixed = d2f(u) * u + df(u)
-        expected = np.array([[d2f(u) * x1 * x1, mixed], [mixed, d2f(u) * x0 * x0]])
-        np.testing.assert_allclose(symbolic_H.value(), expected, rtol=0.0, atol=1e-12)
-        np.testing.assert_allclose(
-            hessian.value().todense(), expected, rtol=0.0, atol=1e-12
-        )
+        mixed_margin = 8 * ε * (abs(d2f(u) * u) + abs(df(u)))
+
+        for H in [symbolic_H.value(), hessian.value().todense()]:
+            assert H[0, 0] == pytest.approx(d2f(u) * x1 * x1, rel=8 * ε, abs=0)
+            assert H[0, 1] == pytest.approx(mixed, abs=mixed_margin)
+            assert H[1, 0] == pytest.approx(mixed, abs=mixed_margin)
+            assert H[1, 1] == pytest.approx(d2f(u) * x0 * x0, rel=8 * ε, abs=0)
 
 
 def test_division() -> None:
@@ -256,9 +268,9 @@ def test_division() -> None:
 
         mixed = -1.0 / (x1 * x1)
         expected = np.array([[0.0, mixed], [mixed, 2.0 * x0 / (x1 * x1 * x1)]])
-        np.testing.assert_allclose(symbolic_H.value(), expected, rtol=0.0, atol=1e-12)
+        np.testing.assert_allclose(symbolic_H.value(), expected, rtol=8 * ε, atol=0)
         np.testing.assert_allclose(
-            hessian.value().todense(), expected, rtol=0.0, atol=1e-12
+            hessian.value().todense(), expected, rtol=8 * ε, atol=0
         )
 
 
@@ -313,9 +325,9 @@ def test_atan2() -> None:
         expected = np.array(
             [[-2.0 * x * y / (d * d), mixed], [mixed, 2.0 * x * y / (d * d)]]
         )
-        np.testing.assert_allclose(symbolic_H.value(), expected, rtol=0.0, atol=1e-12)
+        np.testing.assert_allclose(symbolic_H.value(), expected, rtol=8 * ε, atol=0)
         np.testing.assert_allclose(
-            hessian.value().todense(), expected, rtol=0.0, atol=1e-12
+            hessian.value().todense(), expected, rtol=8 * ε, atol=0
         )
 
 
@@ -365,9 +377,9 @@ def test_hypot_two_arguments() -> None:
         x[1].set_value(x1)
 
         expected = hypot_expected_H(np.array([x0, x1]))
-        np.testing.assert_allclose(symbolic_H.value(), expected, rtol=0.0, atol=1e-12)
+        np.testing.assert_allclose(symbolic_H.value(), expected, rtol=32 * ε, atol=0)
         np.testing.assert_allclose(
-            hessian.value().todense(), expected, rtol=0.0, atol=1e-12
+            hessian.value().todense(), expected, rtol=32 * ε, atol=0
         )
 
 
@@ -382,9 +394,9 @@ def test_hypot_three_arguments() -> None:
         x[2].set_value(v[2])
 
         expected = hypot_expected_H(v)
-        np.testing.assert_allclose(symbolic_H.value(), expected, rtol=0.0, atol=1e-12)
+        np.testing.assert_allclose(symbolic_H.value(), expected, rtol=8 * ε, atol=0)
         np.testing.assert_allclose(
-            hessian.value().todense(), expected, rtol=0.0, atol=1e-12
+            hessian.value().todense(), expected, rtol=8 * ε, atol=0
         )
 
 
@@ -408,9 +420,9 @@ def test_hypot_repeated_argument() -> None:
         expected = np.array(
             [[(2.0 * y2 - 4.0 * a * a) / y3, mixed], [mixed, (y2 - b * b) / y3]]
         )
-        np.testing.assert_allclose(symbolic_H.value(), expected, rtol=0.0, atol=1e-12)
+        np.testing.assert_allclose(symbolic_H.value(), expected, rtol=16 * ε, atol=0)
         np.testing.assert_allclose(
-            hessian.value().todense(), expected, rtol=0.0, atol=1e-12
+            hessian.value().todense(), expected, rtol=16 * ε, atol=0
         )
 
 
@@ -467,19 +479,15 @@ def test_pow() -> None:
     input[1].set_value(3.0)
     mixed = 9.0 * (1.0 + 3.0 * math.log(3.0))
     expected = np.array([[18.0, mixed], [mixed, 27.0 * math.log(3.0) ** 2]])
-    np.testing.assert_allclose(symbolic_H.value(), expected, rtol=0.0, atol=1e-12)
-    np.testing.assert_allclose(
-        hessian.value().todense(), expected, rtol=0.0, atol=1e-12
-    )
+    np.testing.assert_allclose(symbolic_H.value(), expected, rtol=8 * ε, atol=0)
+    np.testing.assert_allclose(hessian.value().todense(), expected, rtol=8 * ε, atol=0)
 
     input[0].set_value(3.0)
     input[1].set_value(2.0)
     mixed = 4.0 * (1.0 + 2.0 * math.log(4.0))
     expected = np.array([[2.0, mixed], [mixed, 16.0 * math.log(4.0) ** 2]])
-    np.testing.assert_allclose(symbolic_H.value(), expected, rtol=0.0, atol=1e-12)
-    np.testing.assert_allclose(
-        hessian.value().todense(), expected, rtol=0.0, atol=1e-12
-    )
+    np.testing.assert_allclose(symbolic_H.value(), expected, rtol=8 * ε, atol=0)
+    np.testing.assert_allclose(hessian.value().todense(), expected, rtol=8 * ε, atol=0)
 
 
 def test_sign() -> None:
@@ -543,7 +551,12 @@ def test_rosenbrock() -> None:
             y.set_value(y0)
 
             H = hessian.value().todense()
-            assert H[0, 0] == pytest.approx(1200 * x0**2 - 400 * y0 + 2, abs=1e-11)
+            # 1200x₀² − 400y₀ + 2 cancels terms, so the rounding error scales
+            # with their magnitudes instead of with the result
+            assert H[0, 0] == pytest.approx(
+                1200 * x0**2 - 400 * y0 + 2,
+                abs=8 * ε * (1200 * x0**2 + 400 * abs(y0) + 2),
+            )
             assert H[0, 1] == -400 * x0
             assert H[1, 0] == -400 * x0
             assert H[1, 1] == 200
