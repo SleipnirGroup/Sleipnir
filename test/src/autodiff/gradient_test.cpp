@@ -760,6 +760,7 @@ TEMPLATE_TEST_CASE("Gradient - min()", "[Gradient]", SCALAR_TYPES) {
 TEMPLATE_TEST_CASE("Gradient - Miscellaneous", "[Gradient]", SCALAR_TYPES) {
   using T = TestType;
   using std::abs;
+  using std::erf;
   using std::exp;
 
   slp::scope_exit exit{
