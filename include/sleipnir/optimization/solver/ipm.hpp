@@ -67,7 +67,7 @@ template <typename Scalar>
 ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
                std::span<std::function<bool(const IterationInfo<Scalar>& info)>>
                    iteration_callbacks,
-               const Options& options,
+               const Options<Scalar>& options,
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
                const Eigen::ArrayX<bool>& bound_constraint_mask,
 #endif
@@ -129,7 +129,7 @@ template <typename Scalar>
 ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
                std::span<std::function<bool(const IterationInfo<Scalar>& info)>>
                    iteration_callbacks,
-               const Options& options, bool in_feasibility_restoration,
+               const Options<Scalar>& options, bool in_feasibility_restoration,
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
                const Eigen::ArrayX<bool>& bound_constraint_mask,
 #endif
@@ -289,8 +289,7 @@ ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
 #endif
 
   // Barrier parameter minimum
-  const Scalar μ_min =
-      matrices.scaling.f * Scalar(options.tolerance) / Scalar(10);
+  const Scalar μ_min = matrices.scaling.f * options.tolerance / Scalar(10);
 
   // Fraction-to-the-boundary rule scale factor minimum
   constexpr Scalar τ_min(0.99);
@@ -384,7 +383,7 @@ ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
       s.dot(z),
       μ};
 
-  while (E_0 > Scalar(options.tolerance)) {
+  while (E_0 > options.tolerance) {
     ScopedTimeTracer inner_iter_tracer{diagnostics[ITERATION]};
 
     // Check for diverging iterates
@@ -832,7 +831,7 @@ ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
         matrices.scaling, g, A_e, c_e, A_i, c_i, s, y, z, Scalar(0));
 
     // Update the barrier parameter if necessary
-    if (E_0 > Scalar(options.tolerance)) {
+    if (E_0 > options.tolerance) {
       // Barrier parameter scale factor for tolerance checks
       constexpr Scalar κ_ε(10);
 
@@ -885,7 +884,7 @@ extern template SLEIPNIR_DLLEXPORT ExitStatus
 ipm(const IPMMatrixCallbacks<double>& matrix_callbacks,
     std::span<std::function<bool(const IterationInfo<double>& info)>>
         iteration_callbacks,
-    const Options& options,
+    const Options<double>& options,
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
     const Eigen::ArrayX<bool>& bound_constraint_mask,
 #endif

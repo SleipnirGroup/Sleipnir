@@ -54,7 +54,7 @@ ExitStatus newton(
     const NewtonMatrixCallbacks<Scalar>& matrix_callbacks,
     std::span<std::function<bool(const IterationInfo<Scalar>& info)>>
         iteration_callbacks,
-    const Options& options, Eigen::Vector<Scalar, Eigen::Dynamic>& x) {
+    const Options<Scalar>& options, Eigen::Vector<Scalar, Eigen::Dynamic>& x) {
   using DenseVector = Eigen::Vector<Scalar, Eigen::Dynamic>;
   using SparseMatrix = Eigen::SparseMatrix<Scalar>;
   using SparseVector = Eigen::SparseVector<Scalar>;
@@ -131,7 +131,7 @@ ExitStatus newton(
   IterateDiagnosticsTable table{options.diagnostics, E_0,       f,
                                 Scalar(0),           Scalar(0), Scalar(0)};
 
-  while (E_0 > Scalar(options.tolerance)) {
+  while (E_0 > options.tolerance) {
     ScopedTimeTracer inner_iter_tracer{diagnostics[ITERATION]};
 
     // Check for diverging iterates
@@ -288,10 +288,10 @@ ExitStatus newton(
   }
 }
 
-extern template SLEIPNIR_DLLEXPORT ExitStatus
-newton(const NewtonMatrixCallbacks<double>& matrix_callbacks,
-       std::span<std::function<bool(const IterationInfo<double>& info)>>
-           iteration_callbacks,
-       const Options& options, Eigen::Vector<double, Eigen::Dynamic>& x);
+extern template SLEIPNIR_DLLEXPORT ExitStatus newton(
+    const NewtonMatrixCallbacks<double>& matrix_callbacks,
+    std::span<std::function<bool(const IterationInfo<double>& info)>>
+        iteration_callbacks,
+    const Options<double>& options, Eigen::Vector<double, Eigen::Dynamic>& x);
 
 }  // namespace slp

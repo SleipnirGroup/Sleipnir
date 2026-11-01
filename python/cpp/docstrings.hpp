@@ -720,7 +720,11 @@ Args:
 
 )doc";
 
-constexpr char mkd_doc_slp_Options[] = R"doc(Solver options.)doc";
+constexpr char mkd_doc_slp_Options[] =
+R"doc(Solver options.
+
+Template Args:
+    Scalar: Scalar type.)doc";
 
 constexpr char mkd_doc_slp_Options_diagnostics[] =
 R"doc(Enables diagnostic output.

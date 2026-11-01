@@ -61,7 +61,7 @@ template <typename Scalar>
 ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
                std::span<std::function<bool(const IterationInfo<Scalar>& info)>>
                    iteration_callbacks,
-               const Options& options,
+               const Options<Scalar>& options,
                Eigen::Vector<Scalar, Eigen::Dynamic>& x) {
   using DenseVector = Eigen::Vector<Scalar, Eigen::Dynamic>;
 
@@ -96,7 +96,8 @@ template <typename Scalar>
 ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
                std::span<std::function<bool(const IterationInfo<Scalar>& info)>>
                    iteration_callbacks,
-               const Options& options, Eigen::Vector<Scalar, Eigen::Dynamic>& x,
+               const Options<Scalar>& options,
+               Eigen::Vector<Scalar, Eigen::Dynamic>& x,
                Eigen::Vector<Scalar, Eigen::Dynamic>& y) {
   using DenseVector = Eigen::Vector<Scalar, Eigen::Dynamic>;
   using SparseMatrix = Eigen::SparseMatrix<Scalar>;
@@ -257,7 +258,7 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
       options.diagnostics,       E_0,       f,
       constraint_violation(c_e), Scalar(0), Scalar(0)};
 
-  while (E_0 > Scalar(options.tolerance)) {
+  while (E_0 > options.tolerance) {
     ScopedTimeTracer inner_iter_tracer{diagnostics[ITERATION]};
 
     // Check for diverging iterates
@@ -626,6 +627,6 @@ extern template SLEIPNIR_DLLEXPORT ExitStatus
 sqp(const SQPMatrixCallbacks<double>& matrix_callbacks,
     std::span<std::function<bool(const IterationInfo<double>& info)>>
         iteration_callbacks,
-    const Options& options, Eigen::Vector<double, Eigen::Dynamic>& x);
+    const Options<double>& options, Eigen::Vector<double, Eigen::Dynamic>& x);
 
 }  // namespace slp

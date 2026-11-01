@@ -49,7 +49,7 @@ constexpr OptionDoc option_docs[] = {
     {"timeout", DOC(slp, Options, timeout)},
     {"feasible_ipm", DOC(slp, Options, feasible_ipm)},
     {"diagnostics", DOC(slp, Options, diagnostics)}};
-static_assert(member_count<Options>() == std::size(option_docs),
+static_assert(member_count<Options<double>>() == std::size(option_docs),
               "Every Options member must be documented here and be a "
               "keyword argument of the solve() binding");
 
@@ -187,20 +187,21 @@ void bind_problem(nb::class_<Problem<double>>& cls) {
                       spy);
   };
   static_assert(
-      lambda_param_count<decltype(solve)>() == 1 + member_count<Options>() + 1,
+      lambda_param_count<decltype(solve)>() ==
+          1 + member_count<Options<double>>() + 1,
       "Every Options member must be a keyword argument of the solve() binding");
 
   cls.def("solve", solve, nb::kw_only(),
-          nb::arg(option_docs[0].name) = Options{}.tolerance,
-          nb::arg(option_docs[1].name) = Options{}.max_iterations,
+          nb::arg(option_docs[0].name) = Options<double>{}.tolerance,
+          nb::arg(option_docs[1].name) = Options<double>{}.max_iterations,
           // nanobind renders defaults in signatures and stubs via repr(), and
           // repr(float("inf")) is "inf", which isn't valid Python. Override the
           // displayed default with sig().
           nb::arg(option_docs[2].name).sig("float('inf')") =
-              Options{}.timeout.count(),
-          nb::arg(option_docs[3].name) = Options{}.feasible_ipm,
-          nb::arg(option_docs[4].name) = Options{}.diagnostics, "spy"_a = false,
-          solve_doc());
+              Options<double>{}.timeout.count(),
+          nb::arg(option_docs[3].name) = Options<double>{}.feasible_ipm,
+          nb::arg(option_docs[4].name) = Options<double>{}.diagnostics,
+          "spy"_a = false, solve_doc());
 
   cls.def(
       "add_callback",
