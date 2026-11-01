@@ -3,6 +3,8 @@
 #pragma once
 
 #include <algorithm>
+#include <cmath>
+#include <limits>
 
 #include <Eigen/Cholesky>
 #include <Eigen/Core>
@@ -57,25 +59,14 @@ class DenseKKTSolver {
   /// @param lhs Left-hand side of the system.
   /// @return The factorization.
   DenseKKTSolver& compute(const DenseMatrix& lhs) {
-    // If the previous δ was small and nonzero, skip the δ = 0 attempt because
-    // it's almost always rejected for small pivots. If the previous δ was
-    // large, attempt δ = 0 so δ can drop to zero quickly.
-    if (m_prev_δ == Scalar(0) || m_prev_δ > Scalar(1e-2)) {
-      m_lhs = lhs;
-      m_info = m_solver.compute(m_lhs).info();
-
-      if (m_info == Eigen::Success) {
-        auto D = m_solver.vectorD();
-
-        // If the inertia is ideal and D from LDLT is sufficiently far from
-        // zero, don't regularize the system
-        if (Inertia{D} == ideal_inertia &&
-            (D.cwiseAbs().array() >= Scalar(1e-4)).all()) {
-          m_prev_δ = Scalar(0);
-          m_prev_γ = Scalar(0);
-          return *this;
-        }
-      }
+    // Bunch-Kaufman pivoting is backward stable for indefinite matrices, so the
+    // unregularized system is accepted whenever its inertia is ideal
+    m_lhs = lhs;
+    m_info = m_solver.compute(m_lhs).info();
+    if (m_info == Eigen::Success && inertia() == ideal_inertia) {
+      m_prev_δ = Scalar(0);
+      m_prev_γ = Scalar(0);
+      return *this;
     }
 
     // We'll give lhs the correct inertia by adding [δI, 0; 0, −γI] where δ and
@@ -88,11 +79,17 @@ class DenseKKTSolver {
     // constraint Jacobian more than they help a rank-deficient one.
     constexpr Scalar γ_max(1e-8);
 
+    // The initial nonzero constraint regularization
+    constexpr Scalar γ_initial(1e-10);
+
     // If the previous δ was zero, attempt a small value. Otherwise, attempt a
     // smaller value than the previous δ so δ trends downward. δ has a floor
-    // because Hessian rows with no curvature (e.g., states in linear dynamics)
-    // have only δ on their diagonal, and pivots that small cause element growth
-    // that corrupts the inertia and solution.
+    // because when regularization is needed, δ is the only curvature in some
+    // directions, so the KKT matrix's smallest eigenvalues shrink with δ. Too
+    // small a δ makes the matrix ill-conditioned, which amplifies the
+    // factorization's rounding error in the solution, and eventually puts those
+    // eigenvalues within ε of zero, where the inertia check counts them as
+    // zero.
     Scalar δ = m_prev_δ == Scalar(0) ? Scalar(1e-4)
                                      : std::max(m_prev_δ / Scalar(2), δ_min);
 
@@ -105,7 +102,7 @@ class DenseKKTSolver {
       m_info = m_solver.compute(m_lhs).info();
 
       if (m_info == Eigen::Success) {
-        Inertia inertia{m_solver.vectorD()};
+        Inertia inertia = this->inertia();
 
         if (inertia == ideal_inertia) {
           // If the inertia is ideal, report success
@@ -116,7 +113,7 @@ class DenseKKTSolver {
           if (γ == Scalar(0)) {
             // If there's zero eigenvalues and γ = 0, increase γ to potentially
             // compensate for a rank-deficient equality constraint Jacobian
-            γ = Scalar(1e-10);
+            γ = γ_initial;
           } else {
             // If there's zero eigenvalues and γ > 0, increase δ and γ to drive
             // all eigenvalues away from zero
@@ -128,26 +125,23 @@ class DenseKKTSolver {
           // positive eigenvalues
           δ *= Scalar(10);
         } else if (inertia.positive > ideal_inertia.positive) {
-          // If there's too many positive eigenvalues and the smallest pivot is
-          // from the equality constraint Jacobian block, increase γ to add more
-          // negative eigenvalues.
+          // The KKT matrix has at least as many negative eigenvalues as
+          // equality constraints if γ > 0 (from the −γI block) or if the
+          // equality constraint Jacobian has full row rank (as in feasibility
+          // restoration, where γ = 0). Too many positive eigenvalues can then
+          // only come from rounding error, so increase δ and γ to drive all
+          // eigenvalues away from zero.
           //
-          // Otherwise, the smallest pivot is from the Hessian block, or γ is
-          // already large enough that increasing it further would distort the
-          // equality constraint Jacobian more than it helps. Increase δ to
-          // reduce element growth from Hessian pivots instead.
-          if (γ < γ_max && !smallest_pivot_is_hessian()) {
-            γ = γ == Scalar(0) ? Scalar(1e-10)
-                               : std::min(γ * Scalar(10), γ_max);
-          } else {
-            δ *= Scalar(10);
-          }
+          // Unlike LDLT, Bunch-Kaufman pivoting avoids small pivots, so
+          // there's no need to find which block the error came from.
+          δ *= Scalar(10);
+          γ = std::min(γ * Scalar(10), γ_max);
         }
       } else {
         // If the decomposition failed, increase δ and γ to drive all
         // eigenvalues away from zero
         δ *= Scalar(10);
-        γ = γ == Scalar(0) ? Scalar(1e-10) : std::min(γ * Scalar(10), γ_max);
+        γ = γ == Scalar(0) ? γ_initial : std::min(γ * Scalar(10), γ_max);
       }
 
       // If the lhs perturbation is too high, report failure. This can be caused
@@ -169,9 +163,9 @@ class DenseKKTSolver {
   DenseVector solve(const Eigen::MatrixBase<Rhs>& rhs) const {
     DenseVector x = m_solver.solve(rhs);
 
-    // Element growth in the factorization can make the solution inaccurate
-    // (e.g., from small Hessian pivots in rows with no curvature), so apply
-    // iterative refinement with the same factorization
+    // The factorization is backward stable, but the matrix's conditioning
+    // amplifies its rounding error in the solution, so apply iterative
+    // refinement with the same factorization
     constexpr int max_refinement_steps = 3;
     for (int i = 0; i < max_refinement_steps; ++i) {
       DenseVector r = rhs - m_lhs.template selfadjointView<Eigen::Lower>() * x;
@@ -204,7 +198,7 @@ class DenseKKTSolver {
   Scalar constraint_jacobian_regularization() const { return m_prev_γ; }
 
  private:
-  using Solver = Eigen::LDLT<DenseMatrix>;
+  using Solver = Eigen::BunchKaufman<DenseMatrix>;
 
   Solver m_solver;
 
@@ -232,18 +226,52 @@ class DenseKKTSolver {
   /// The value of γ from the previous run of compute().
   Scalar m_prev_γ{0};
 
-  /// Returns true if the smallest-magnitude pivot of the most recent
-  /// factorization corresponds to a row of the Hessian block.
+  /// Returns the inertia of the most recently factorized KKT matrix.
   ///
-  /// @return True if the smallest pivot is from the Hessian block.
-  bool smallest_pivot_is_hessian() const {
-    Eigen::Index k;
-    m_solver.vectorD().cwiseAbs().minCoeff(&k);
+  /// D from the Bunch-Kaufman factorization has 1x1 and 2x2 diagonal blocks.
+  /// By Sylvester's law of inertia, the KKT matrix's inertia is the inertia of
+  /// D, which is the inertia of the blocks' eigenvalues. Eigenvalues within ε
+  /// of zero are counted as zero.
+  ///
+  /// @return The inertia of the most recently factorized KKT matrix.
+  Inertia inertia() const {
+    using std::abs;
+    using std::hypot;
 
-    // The factorization is of PAPᵀ, so the original row of pivot k is Pᵀk
-    Eigen::PermutationMatrix<Eigen::Dynamic> P{m_solver.transpositionsP()};
-    Eigen::PermutationMatrix<Eigen::Dynamic> P_inv = P.inverse();
-    return P_inv.indices()(k) < m_num_decision_variables;
+    constexpr Scalar ε = std::numeric_limits<Scalar>::epsilon();
+
+    const auto D = m_solver.vectorD();
+    const auto& D_sub = m_solver.subDiagonal();
+
+    Inertia inertia;
+    auto count = [&](Scalar λ) {
+      if (λ > ε) {
+        ++inertia.positive;
+      } else if (λ < -ε) {
+        ++inertia.negative;
+      } else {
+        ++inertia.zero;
+      }
+    };
+
+    for (int k = 0; k < D.size(); ++k) {
+      if (k + 1 < D.size() && D_sub[k] != Scalar(0)) {
+        // The 2x2 block [a  b; b  c] has eigenvalues (a + c)/2 ± r where
+        // r = √(((a − c)/2)² + b²)
+        const Scalar a = D[k];
+        const Scalar b = D_sub[k];
+        const Scalar c = D[k + 1];
+        const Scalar mid = (a + c) / Scalar(2);
+        const Scalar r = hypot((a - c) / Scalar(2), abs(b));
+        count(mid + r);
+        count(mid - r);
+        ++k;
+      } else {
+        count(D[k]);
+      }
+    }
+
+    return inertia;
   }
 
   /// Returns regularization matrix.
