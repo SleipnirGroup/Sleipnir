@@ -195,7 +195,12 @@ TEMPLATE_TEST_CASE("Problem - Wachter and Biegler line search failure",
   } else {
     CHECK_THAT(x.value(), WithinAbs(T(-1), T(1e-6)));
     CHECK_THAT(s1.value(), WithinAbs(T(0), T(1e-6)));
-    CHECK_THAT(s2.value(), WithinAbs(T(0), T(3e-5)));
+
+    // At x = −1 and s₁ = 0, the ℓ₁ constraint violation
+    // |x − s₂ − 0.5| + max(0, −s₂) is 1.5 for every s₂ ∈ [−1.5, 0], so
+    // feasibility restoration can converge to any of them
+    CHECK(s2.value() >= T(-1.5) - T(1e-6));
+    CHECK(s2.value() <= T(1e-6));
   }
 }
 
