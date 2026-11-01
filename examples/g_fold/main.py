@@ -163,7 +163,7 @@ def main() -> None:
     # B = [I]
     B = np.block([[np.zeros((3, 3))], [np.identity(3)]])
 
-    A_d, B_d, _, _, _ = cont2discrete((A, B, np.identity(3), np.zeros((3, 3))), dt)
+    A_d, B_d, *_ = cont2discrete((A, B, np.identity(3), np.zeros((3, 3))), dt)
 
     def solve(N: int) -> Solution:
         problem = Problem()

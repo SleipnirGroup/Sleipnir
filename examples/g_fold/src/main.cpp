@@ -31,29 +31,28 @@
 ///
 /// @tparam States Number of states.
 /// @tparam Inputs Number of inputs.
-/// @param cont_A Continuous system matrix.
-/// @param cont_B Continuous input matrix.
+/// @param A_c Continuous system matrix.
+/// @param B_c Continuous input matrix.
 /// @param dt Discretization timestep.
-/// @param disc_A Storage for discrete system matrix.
-/// @param disc_B Storage for discrete input matrix.
+/// @return Discrete system and input matrices.
 template <int States, int Inputs>
-void discretize_ab(const Eigen::Matrix<double, States, States>& cont_A,
-                   const Eigen::Matrix<double, States, Inputs>& cont_B,
-                   double dt, Eigen::Matrix<double, States, States>* disc_A,
-                   Eigen::Matrix<double, States, Inputs>* disc_B) {
-  // M = [A  B]
-  //     [0  0]
+std::tuple<Eigen::Matrix<double, States, States>,
+           Eigen::Matrix<double, States, Inputs>>
+discretize_ab(const Eigen::Matrix<double, States, States>& A_c,
+              const Eigen::Matrix<double, States, Inputs>& B_c, double dt) {
+  // M = [A_c  B_c]
+  //     [ 0    0 ]
   Eigen::Matrix<double, States + Inputs, States + Inputs> M;
-  M.template block<States, States>(0, 0) = cont_A;
-  M.template block<States, Inputs>(0, States) = cont_B;
+  M.template block<States, States>(0, 0) = A_c;
+  M.template block<States, Inputs>(0, States) = B_c;
   M.template block<Inputs, States + Inputs>(States, 0).setZero();
 
   // ϕ = eᴹᵀ = [A_d  B_d]
   //           [ 0    I ]
   Eigen::Matrix<double, States + Inputs, States + Inputs> phi = (M * dt).exp();
 
-  *disc_A = phi.template block<States, States>(0, 0);
-  *disc_B = phi.template block<States, Inputs>(0, States);
+  return {phi.template block<States, States>(0, 0),
+          phi.template block<States, Inputs>(0, States)};
 }
 
 /// Returns the index and value of the unimodal function f's minimum within
@@ -220,9 +219,7 @@ int main() {
   B.block<3, 3>(0, 0).setZero();
   B.block<3, 3>(3, 0).setIdentity();
 
-  Eigen::Matrix<double, 6, 6> A_d;
-  Eigen::Matrix<double, 6, 3> B_d;
-  discretize_ab<6, 3>(A, B, dt, &A_d, &B_d);
+  auto [A_d, B_d] = discretize_ab(A, B, dt);
 
   auto solve = [&](int N) -> Solution {
     slp::Problem<double> problem;
