@@ -27,6 +27,7 @@ TEST_CASE("CurrentManager - Not enough current", "[CurrentManager]") {
 
   // Expected values are from the following program:
   //
+  // ```python
   // #!/usr/bin/env python
   //
   // from scipy.optimize import minimize
@@ -43,6 +44,7 @@ TEST_CASE("CurrentManager - Not enough current", "[CurrentManager]") {
   //     ],
   // )
   // print(result.x)
+  // ```
   CHECK_THAT(currents[0], WithinAbs(29.960, 1e-3));
   CHECK_THAT(currents[1], WithinAbs(9.008, 1e-3));
   CHECK_THAT(currents[2], WithinAbs(1.032, 1e-3));

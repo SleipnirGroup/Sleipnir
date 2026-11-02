@@ -1044,6 +1044,7 @@ class VariableMatrix : public SleipnirBase {
     // Coefficients for (13, 13) Padé approximant of exp(A) are from the
     // following program:
     //
+    // ```python
     // #!/usr/bin/env python
     //
     // import mpmath as mp
@@ -1061,6 +1062,7 @@ class VariableMatrix : public SleipnirBase {
     // print("constexpr std::array q{")
     // for k, q_k in enumerate(q):
     //     print(f"Scalar({q_k}L){',' if k < len(q) - 1 else '};'}")
+    // ```
     constexpr size_t NUM_COEFFS = 14;
     constexpr std::array p{Scalar(1.0L),
                            Scalar(0.499999999999999999999987615564159L),
