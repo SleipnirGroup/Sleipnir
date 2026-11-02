@@ -364,7 +364,8 @@ ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
 
   // Error
   Scalar E_0 = unscaled_kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(
-      matrices.scaling, g, A_e, c_e, A_i, c_i, s, y, z, Scalar(0));
+      matrices.scaling, g, A_e, c_e, A_i, c_i, s, y, z, Scalar(0),
+      options.tolerance);
 
   setup_tracer.stop();
 
@@ -567,7 +568,7 @@ ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
                   soc_tracer.current_duration(),
                   unscaled_kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(
                       matrices.scaling, g, A_e, trial_c_e, A_i, trial_c_i,
-                      trial_s, trial_y, trial_z, Scalar(0)),
+                      trial_s, trial_y, trial_z, Scalar(0), options.tolerance),
                   trial_f, constraint_violation(trial_c_e, trial_c_i, trial_s),
                   trial_s.dot(trial_z), μ, solver.hessian_regularization(),
                   solver.constraint_jacobian_regularization(),
@@ -660,7 +661,7 @@ ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
       // KKT error was reduced. If it wasn't, invoke feasibility restoration.
       if (α < α_min || α < α_tiny) {
         Scalar current_kkt_error = kkt_error<Scalar, KKTErrorType::ONE_NORM>(
-            g, A_e, c_e, A_i, c_i, s, y, z, μ);
+            g, A_e, c_e, A_i, c_i, s, y, z, μ, options.tolerance);
 
         trial_x = x + α_max * step.p_x;
         trial_s = s + α_max * step.p_s;
@@ -673,7 +674,8 @@ ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
 
         Scalar next_kkt_error = kkt_error<Scalar, KKTErrorType::ONE_NORM>(
             matrices.g(trial_x), matrices.A_e(trial_x), trial_c_e,
-            matrices.A_i(trial_x), trial_c_i, trial_s, trial_y, trial_z, μ);
+            matrices.A_i(trial_x), trial_c_i, trial_s, trial_y, trial_z, μ,
+            options.tolerance);
 
         // If the step using αᵐᵃˣ reduced the KKT error below the current
         // iterate's and every previous fallback step's, accept it anyway
@@ -826,7 +828,8 @@ ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
 
     // Update the error
     E_0 = unscaled_kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(
-        matrices.scaling, g, A_e, c_e, A_i, c_i, s, y, z, Scalar(0));
+        matrices.scaling, g, A_e, c_e, A_i, c_i, s, y, z, Scalar(0),
+        options.tolerance);
 
     // Update the barrier parameter if necessary
     if (E_0 > options.tolerance) {
@@ -836,11 +839,11 @@ ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
       // While the error is below the desired threshold for this barrier
       // parameter value, decrease the barrier parameter further
       Scalar E_μ = kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(
-          g, A_e, c_e, A_i, c_i, s, y, z, μ);
+          g, A_e, c_e, A_i, c_i, s, y, z, μ, options.tolerance);
       while (μ > μ_min && E_μ <= κ_ε * μ) {
         update_barrier_parameter_and_reset_filter();
-        E_μ = kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(g, A_e, c_e, A_i,
-                                                               c_i, s, y, z, μ);
+        E_μ = kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(
+            g, A_e, c_e, A_i, c_i, s, y, z, μ, options.tolerance);
       }
     }
 

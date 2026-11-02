@@ -3,6 +3,8 @@
 #pragma once
 
 #include <algorithm>
+#include <cmath>
+#include <limits>
 
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
@@ -47,23 +49,42 @@ Scalar kkt_error(const Eigen::VectorX<Scalar>& g) {
 /// @param A_e Equality constraint Jacobian Aₑ(x).
 /// @param c_e Equality constraints cₑ(x).
 /// @param y Equality constraint dual variables.
+/// @param tolerance Solver tolerance.
 template <typename Scalar, KKTErrorType T>
 Scalar kkt_error(const Eigen::VectorX<Scalar>& g,
                  const Eigen::SparseMatrix<Scalar>& A_e,
                  const Eigen::VectorX<Scalar>& c_e,
-                 const Eigen::VectorX<Scalar>& y) {
+                 const Eigen::VectorX<Scalar>& y, Scalar tolerance) {
+  using std::pow;
+
   // The KKT conditions from docs/algorithms.md:
   //
   //   ∇f − Aₑᵀy = 0
   //   cₑ = 0
 
   if constexpr (T == KKTErrorType::INF_NORM_SCALED) {
-    // See equation (5) of [2].
+    constexpr Scalar ε = std::numeric_limits<Scalar>::epsilon();
 
-    // s_d = max(sₘₐₓ, ‖y‖₁ / m) / sₘₐₓ
-    constexpr Scalar s_max(100);
-    Scalar s_d =
-        std::max(s_max, y.template lpNorm<1>() / Scalar(y.rows())) / s_max;
+    // The stationarity residual must not go below its rounding error
+    // floor κεω, where κ is how much the problem amplifies rounding
+    // error and ω is the size of the largest stationarity terms. If
+    // κεω > tol, the solver stalls instead of terminating.
+    //
+    // κ is unknown, so assume κ ≤ ε^(-3/8) (≈ 7.4e5 for double, 395 for
+    // float). Then the floor is at most
+    //
+    //   κεω ≤ ε^(-3/8) εω = ε^(5/8) ω
+    //
+    // and dividing the residual by ε^(5/8) ω/tol makes it meet tol at the
+    // floor. Dividing by less than 1 would tighten tol instead, so
+    //
+    //   s_d = max(1, ε^(5/8) ω/tol)
+
+    // ω = ‖|∇f| + |Aₑ|ᵀ|y|‖_∞
+    const Scalar ω = (g.cwiseAbs() + A_e.cwiseAbs().transpose() * y.cwiseAbs())
+                         .template lpNorm<Eigen::Infinity>();
+
+    Scalar s_d = std::max(Scalar(1), pow(ε, Scalar(0.625)) * ω / tolerance);
 
     // ‖∇f − Aₑᵀy‖_∞ / s_d
     // ‖cₑ‖_∞
@@ -89,6 +110,7 @@ Scalar kkt_error(const Eigen::VectorX<Scalar>& g,
 /// @param y Equality constraint dual variables.
 /// @param z Inequality constraint dual variables.
 /// @param μ Barrier parameter.
+/// @param tolerance Solver tolerance.
 template <typename Scalar, KKTErrorType T>
 Scalar kkt_error(const Eigen::VectorX<Scalar>& g,
                  const Eigen::SparseMatrix<Scalar>& A_e,
@@ -97,7 +119,9 @@ Scalar kkt_error(const Eigen::VectorX<Scalar>& g,
                  const Eigen::VectorX<Scalar>& c_i,
                  const Eigen::VectorX<Scalar>& s,
                  const Eigen::VectorX<Scalar>& y,
-                 const Eigen::VectorX<Scalar>& z, Scalar μ) {
+                 const Eigen::VectorX<Scalar>& z, Scalar μ, Scalar tolerance) {
+  using std::pow;
+
   // The KKT conditions from docs/algorithms.md:
   //
   //   ∇f − Aₑᵀy − Aᵢᵀz = 0
@@ -106,16 +130,34 @@ Scalar kkt_error(const Eigen::VectorX<Scalar>& g,
   //   cᵢ − s = 0
 
   if constexpr (T == KKTErrorType::INF_NORM_SCALED) {
-    // See equation (5) of [2].
+    constexpr Scalar ε = std::numeric_limits<Scalar>::epsilon();
 
-    // s_d = max(sₘₐₓ, (‖y‖₁ + ‖z‖₁) / (m + n)) / sₘₐₓ
-    constexpr Scalar s_max(100);
-    Scalar s_d =
-        std::max(s_max, (y.template lpNorm<1>() + z.template lpNorm<1>()) /
-                            Scalar(y.rows() + z.rows())) /
-        s_max;
+    // The stationarity residual must not go below its rounding error
+    // floor κεω, where κ is how much the problem amplifies rounding
+    // error and ω is the size of the largest stationarity terms. If
+    // κεω > tol, the solver stalls instead of terminating.
+    //
+    // κ is unknown, so assume κ ≤ ε^(-3/8) (≈ 7.4e5 for double, 395 for
+    // float). Then the floor is at most
+    //
+    //   κεω ≤ ε^(-3/8) εω = ε^(5/8) ω
+    //
+    // and dividing the residual by ε^(5/8) ω/tol makes it meet tol at the
+    // floor. Dividing by less than 1 would tighten tol instead, so
+    //
+    //   s_d = max(1, ε^(5/8) ω/tol)
+
+    // ω = ‖|∇f| + |Aₑ|ᵀ|y| + |Aᵢ|ᵀ|z|‖_∞
+    const Scalar ω = (g.cwiseAbs() + A_e.cwiseAbs().transpose() * y.cwiseAbs() +
+                      A_i.cwiseAbs().transpose() * z.cwiseAbs())
+                         .template lpNorm<Eigen::Infinity>();
+
+    Scalar s_d = std::max(Scalar(1), pow(ε, Scalar(0.625)) * ω / tolerance);
 
     // s_c = max(sₘₐₓ, ‖z‖₁ / n) / sₘₐₓ
+    //
+    // See equation (5) of [2].
+    constexpr Scalar s_max(100);
     Scalar s_c =
         std::max(s_max, z.template lpNorm<1>() / Scalar(z.rows())) / s_max;
 
@@ -174,17 +216,18 @@ Scalar unscaled_kkt_error(const ProblemScaling<Scalar>& scaling,
 /// @param A_e Scaled equality constraint Jacobian D_cₑ·Aₑ(x).
 /// @param c_e Scaled equality constraints D_cₑ·cₑ(x).
 /// @param y Scaled equality constraint dual variables.
+/// @param tolerance Solver tolerance.
 template <typename Scalar, KKTErrorType T>
 Scalar unscaled_kkt_error(const ProblemScaling<Scalar>& scaling,
                           const Eigen::VectorX<Scalar>& g,
                           const Eigen::SparseMatrix<Scalar>& A_e,
                           const Eigen::VectorX<Scalar>& c_e,
-                          const Eigen::VectorX<Scalar>& y) {
+                          const Eigen::VectorX<Scalar>& y, Scalar tolerance) {
   using DenseVector = Eigen::VectorX<Scalar>;
   using SparseMatrix = Eigen::SparseMatrix<Scalar>;
 
   if (scaling.is_identity()) {
-    return kkt_error<Scalar, T>(g, A_e, c_e, y);
+    return kkt_error<Scalar, T>(g, A_e, c_e, y, tolerance);
   }
 
   const Scalar inv_d_f = Scalar(1) / scaling.f;
@@ -196,7 +239,7 @@ Scalar unscaled_kkt_error(const ProblemScaling<Scalar>& scaling,
   const DenseVector y_unscaled = scaling.c_e.cwiseProduct(y) * inv_d_f;
 
   return kkt_error<Scalar, T>(g_unscaled, A_e_unscaled, c_e_unscaled,
-                              y_unscaled);
+                              y_unscaled, tolerance);
 }
 
 /// Returns the unscaled KKT error for the interior-point method.
@@ -213,18 +256,19 @@ Scalar unscaled_kkt_error(const ProblemScaling<Scalar>& scaling,
 /// @param y Scaled equality constraint dual variables.
 /// @param z Scaled inequality constraint dual variables.
 /// @param μ Scaled barrier parameter.
+/// @param tolerance Solver tolerance.
 template <typename Scalar, KKTErrorType T>
 Scalar unscaled_kkt_error(
     const ProblemScaling<Scalar>& scaling, const Eigen::VectorX<Scalar>& g,
     const Eigen::SparseMatrix<Scalar>& A_e, const Eigen::VectorX<Scalar>& c_e,
     const Eigen::SparseMatrix<Scalar>& A_i, const Eigen::VectorX<Scalar>& c_i,
     const Eigen::VectorX<Scalar>& s, const Eigen::VectorX<Scalar>& y,
-    const Eigen::VectorX<Scalar>& z, Scalar μ) {
+    const Eigen::VectorX<Scalar>& z, Scalar μ, Scalar tolerance) {
   using DenseVector = Eigen::VectorX<Scalar>;
   using SparseMatrix = Eigen::SparseMatrix<Scalar>;
 
   if (scaling.is_identity()) {
-    return kkt_error<Scalar, T>(g, A_e, c_e, A_i, c_i, s, y, z, μ);
+    return kkt_error<Scalar, T>(g, A_e, c_e, A_i, c_i, s, y, z, μ, tolerance);
   }
 
   const Scalar inv_d_f = Scalar(1) / scaling.f;
@@ -243,7 +287,7 @@ Scalar unscaled_kkt_error(
 
   return kkt_error<Scalar, T>(g_unscaled, A_e_unscaled, c_e_unscaled,
                               A_i_unscaled, c_i_unscaled, s_unscaled,
-                              y_unscaled, z_unscaled, μ_unscaled);
+                              y_unscaled, z_unscaled, μ_unscaled, tolerance);
 }
 
 }  // namespace slp
