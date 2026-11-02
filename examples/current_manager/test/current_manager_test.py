@@ -20,6 +20,7 @@ def test_current_manager_not_enough_current() -> None:
 
     # Expected values are from the following program:
     #
+    # ```python
     # #!/usr/bin/env python
     #
     # from scipy.optimize import minimize
@@ -36,6 +37,7 @@ def test_current_manager_not_enough_current() -> None:
     #     ],
     # )
     # print(result.x)
+    # ```
     assert currents[0] == pytest.approx(29.960, abs=1e-3)
     assert currents[1] == pytest.approx(9.008, abs=1e-3)
     assert currents[2] == pytest.approx(1.032, abs=1e-3)
