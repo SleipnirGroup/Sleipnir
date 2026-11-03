@@ -13,7 +13,7 @@ namespace slp {
 template <typename Scalar>
 struct Options {
   /// The solver will stop once the error is below this tolerance.
-  Scalar tolerance = Scalar(1e-8);
+  Scalar tolerance = Scalar(1e-8);  // NOLINT(google-readability-casting)
 
   /// The maximum number of solver iterations before returning a solution.
   int max_iterations = 5000;

@@ -73,4 +73,4 @@ Checks:
   modernize-use-using,
   readability-braces-around-statements'
 FormatStyle: file
-HeaderFilterRegex: '^sleipnir/.*?$'
+ExcludeHeaderFilterRegex: '/_deps/'
