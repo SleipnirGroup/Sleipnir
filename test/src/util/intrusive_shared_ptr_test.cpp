@@ -9,8 +9,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include <sleipnir/util/intrusive_shared_ptr.hpp>
 
-// NOLINTBEGIN (clang-analyzer-cplusplus.NewDeleteLeaks)
-
 struct Mock {
   uint32_t ref_count = 0;
 };
@@ -176,5 +174,3 @@ TEST_CASE("IntrusiveSharedPtr - Self-assignment", "[IntrusiveSharedPtr]") {
   CHECK(ptr2.get() == object);
   CHECK(object->ref_count == 2u);
 }
-
-// NOLINTEND (clang-analyzer-cplusplus.NewDeleteLeaks)
