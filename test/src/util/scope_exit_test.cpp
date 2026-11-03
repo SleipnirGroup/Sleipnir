@@ -23,8 +23,7 @@ TEST_CASE("scope_exit - Release", "[scope_exit]") {
   {
     slp::scope_exit exit1{[&] { ++exit_count; }};
     slp::scope_exit exit2 = std::move(exit1);
-    slp::scope_exit exit3 =
-        std::move(exit1);  // NOLINT (clang-analyzer-cplusplus.Move)
+    slp::scope_exit exit3 = std::move(exit1);
     CHECK(exit_count == 0);
   }
   CHECK(exit_count == 1);

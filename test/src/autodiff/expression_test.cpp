@@ -24,9 +24,7 @@ TEMPLATE_TEST_CASE("Expression - is_constant", "[Expression]", SCALAR_TYPES) {
 
   // Constant zero
   auto zero = constant_ptr(T(0));
-  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   CHECK(zero->is_constant(T(0)));
-  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   CHECK_FALSE(zero->is_constant(T(1)));
 
   // Constant one
