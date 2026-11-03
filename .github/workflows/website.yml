@@ -48,6 +48,8 @@ jobs:
       - run: sudo apt-get install -y doxygen
       - run: ./generate_website.py
         working-directory: ./docs
+        env:
+          SCCACHE_GHA_ENABLED: true
 
       - uses: actions/configure-pages@v6
 

@@ -3,9 +3,13 @@ function(compiler_flags target)
         target_compile_options(${target} PRIVATE -Wall -Wextra -pedantic)
 
         if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
-            # Suppress the following false positive warnings:
-            #   * -Warray-bounds=
-            target_compile_options(${target} PRIVATE -Wno-array-bounds)
+            # Suppress the following warnings:
+            #   * -Warray-bounds= (false positives)
+            #   * -Wpsabi (notes about a GCC 10.1 ABI change on aarch64)
+            target_compile_options(
+                ${target}
+                PRIVATE -Wno-array-bounds -Wno-psabi
+            )
         endif()
     else()
         # Suppress the following warnings:

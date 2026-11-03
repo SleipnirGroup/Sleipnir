@@ -46,11 +46,34 @@ jobs:
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 200
           sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14 200
 
+      - uses: TheMrMilchmann/setup-msvc-dev@v4
+        if: runner.os == 'Windows'
+        with:
+          arch: ${{ runner.arch }}
+
       - name: Set up sccache
         uses: mozilla-actions/sccache-action@v0.0.11
 
-      - run: cmake -B build -S . -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache -DSLEIPNIR_BUILD_EXAMPLES=ON -DSLEIPNIR_TEST_SCALAR_TYPES="double;ExplicitDouble" ${{ matrix.cmake-args }}
+      # In MSVC RelWithDebInfo builds, CMake writes debug info to a PDB shared
+      # by the whole target by default, which sccache doesn't cache. Use
+      # -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=Embedded to embed debug info in
+      # each object file instead.
+      - run: >-
+          cmake -B build -S .
+          ${{ runner.os == 'Windows' && '-G "Ninja Multi-Config"' || '' }}
+          -DCMAKE_C_COMPILER_LAUNCHER=sccache
+          -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
+          -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=Embedded
+          -DSLEIPNIR_BUILD_EXAMPLES=ON
+          -DSLEIPNIR_TEST_SCALAR_TYPES="double;ExplicitDouble"
+          ${{ matrix.cmake-args }}
+        env:
+          SCCACHE_CACHE_MULTIARCH: true
+          SCCACHE_GHA_ENABLED: true
       - run: cmake --build build --config RelWithDebInfo --parallel 4
+        env:
+          SCCACHE_CACHE_MULTIARCH: true
+          SCCACHE_GHA_ENABLED: true
       - run: ctest --test-dir build -C RelWithDebInfo --output-on-failure
       - run: cmake --install build --config RelWithDebInfo --prefix pkg
 
@@ -106,6 +129,8 @@ jobs:
         uses: mozilla-actions/sccache-action@v0.0.11
 
       - run: ./tools/generate_coverage.py --inputs sleipnir_autodiff_test sleipnir_optimization_test sleipnir_util_test --output sleipnir_test
+        env:
+          SCCACHE_GHA_ENABLED: true
 
       - uses: actions/upload-artifact@v7
         with:

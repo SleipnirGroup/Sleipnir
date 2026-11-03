@@ -42,6 +42,11 @@ jobs:
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 200
           sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14 200
 
+      - uses: TheMrMilchmann/setup-msvc-dev@v4
+        if: runner.os == 'Windows'
+        with:
+          arch: ${{ runner.arch }}
+
       - name: Set up sccache
         uses: mozilla-actions/sccache-action@v0.0.11
 
@@ -60,6 +65,12 @@ jobs:
           pip install build
           python .github/workflows/print_constraints.py > constraints.txt
           python -m build --wheel --dependency-constraints-txt constraints.txt
+        env:
+          CMAKE_C_COMPILER_LAUNCHER: sccache
+          CMAKE_CXX_COMPILER_LAUNCHER: sccache
+          CMAKE_GENERATOR: Ninja
+          SCCACHE_CACHE_MULTIARCH: true
+          SCCACHE_GHA_ENABLED: true
 
       - name: Repair wheel (Windows)
         run: |
