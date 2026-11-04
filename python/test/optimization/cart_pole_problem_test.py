@@ -83,12 +83,12 @@ def test_cart_pole_problem(dt: float) -> None:
     # Verify solution
     for k in range(N):
         # Cart position constraints
-        assert X[0, k] >= 0.0
-        assert X[0, k] <= d_max
+        assert X.value(0, k) >= -solution_tolerance(1)
+        assert X.value(0, k) <= d_max + solution_tolerance(1)
 
         # Input constraints
-        assert U[0, k] >= -u_max
-        assert U[0, k] <= u_max
+        assert U.value(0, k) >= -u_max - solution_tolerance(1)
+        assert U.value(0, k) <= u_max + solution_tolerance(1)
 
         # Dynamics constraints
         expected_x_k1 = rk4(

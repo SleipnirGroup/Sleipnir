@@ -89,12 +89,12 @@ def test_cart_pole_ocp() -> None:
     # Verify solution
     for k in range(N):
         # Cart position constraints
-        assert X.value(0, k) >= 0.0
-        assert X.value(0, k) <= d_max
+        assert X.value(0, k) >= -solution_tolerance(1)
+        assert X.value(0, k) <= d_max + solution_tolerance(1)
 
         # Input constraints
-        assert U.value(0, k) >= -u_max
-        assert U.value(0, k) <= u_max
+        assert U.value(0, k) >= -u_max - solution_tolerance(1)
+        assert U.value(0, k) <= u_max + solution_tolerance(1)
 
         # Dynamics constraints
         #

@@ -99,8 +99,8 @@ if(NOT SLEIPNIR_USE_SYSTEM_EIGEN)
     FetchContent_Declare(
         Eigen3
         GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
-        # master on 2026-10-17
-        GIT_TAG 3c3bf4532bf9e059e3999827b00b7452c2bcde7d
+        # master on 2026-11-16
+        GIT_TAG cc54e1fa13e1917c13813b741325d35eed5fc49f
         SYSTEM
     )
     FetchContent_MakeAvailable(Eigen3)
