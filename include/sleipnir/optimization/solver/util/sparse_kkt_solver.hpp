@@ -10,6 +10,7 @@
 #include <Eigen/SparseCore>
 
 #include "sleipnir/optimization/solver/util/inertia.hpp"
+#include "sleipnir/optimization/solver/util/kkt_ordering.hpp"
 
 namespace slp {
 
@@ -67,7 +68,8 @@ class SparseKKTSolver {
     m_lhs = lhs + regularization(Scalar(0), Scalar(0));
 
     if (!m_analyzed_pattern) {
-      m_solver.analyzePattern(m_lhs);
+      m_ordering.analyze(m_lhs, m_num_decision_variables);
+      m_solver.analyzePattern(m_ordering.permute(m_lhs));
       m_analyzed_pattern = true;
     }
 
@@ -75,7 +77,7 @@ class SparseKKTSolver {
     // it's almost always rejected for small pivots. If the previous δ was
     // large, attempt δ = 0 so δ can drop to zero quickly.
     if (m_prev_δ == Scalar(0) || m_prev_δ > Scalar(1e-2)) {
-      m_solver.factorize(m_lhs);
+      m_solver.factorize(m_ordering.permute(m_lhs));
       m_info = m_solver.info();
 
       if (m_info == Eigen::Success) {
@@ -117,7 +119,7 @@ class SparseKKTSolver {
 
     while (true) {
       m_lhs = lhs + regularization(δ, γ);
-      m_solver.factorize(m_lhs);
+      m_solver.factorize(m_ordering.permute(m_lhs));
       m_info = m_solver.info();
 
       if (m_info == Eigen::Success) {
@@ -182,7 +184,8 @@ class SparseKKTSolver {
   /// @return The solution.
   template <typename Rhs>
   DenseVector solve(const Eigen::MatrixBase<Rhs>& rhs) const {
-    DenseVector x = m_solver.solve(rhs);
+    DenseVector x = m_ordering.inverse_permutation() *
+                    m_solver.solve(m_ordering.permutation() * rhs);
 
     // Element growth in the factorization can make the solution inaccurate
     // (e.g., from small Hessian pivots in rows with no curvature), so apply
@@ -193,7 +196,8 @@ class SparseKKTSolver {
       if (r.norm() <= Scalar(1e-12) * rhs.norm()) {
         break;
       }
-      x += m_solver.solve(r);
+      x += m_ordering.inverse_permutation() *
+           m_solver.solve(m_ordering.permutation() * r);
     }
 
     return x;
@@ -219,9 +223,15 @@ class SparseKKTSolver {
   Scalar constraint_jacobian_regularization() const { return m_prev_γ; }
 
  private:
-  using Solver = Eigen::SimplicialLDLT<SparseMatrix>;
+  // KKTOrdering permutes the KKT matrix before factorization, so the solver
+  // factors it as given. The upper triangle is the one it can factor without a
+  // copy.
+  using Solver = Eigen::SimplicialLDLT<
+      SparseMatrix, Eigen::Upper,
+      Eigen::NaturalOrdering<typename SparseMatrix::StorageIndex>>;
 
   Solver m_solver;
+  KKTOrdering<Scalar> m_ordering;
   bool m_analyzed_pattern = false;
 
   /// The most recently factorized KKT matrix's lower triangle.
@@ -281,7 +291,8 @@ class SparseKKTSolver {
     m_solver.vectorD().cwiseAbs().minCoeff(&k);
 
     // The factorization is of PAP⁻¹, so the original row of pivot k is P⁻¹k
-    return m_solver.permutationPinv().indices()(k) < m_num_decision_variables;
+    return m_ordering.inverse_permutation().indices()(k) <
+           m_num_decision_variables;
   }
 
   /// Returns regularization matrix.
