@@ -256,15 +256,43 @@ class DenseKKTSolver {
 
     for (int k = 0; k < D.size(); ++k) {
       if (k + 1 < D.size() && D_sub[k] != Scalar(0)) {
-        // The 2x2 block [a  b; b  c] has eigenvalues (a + c)/2 ± r where
-        // r = √(((a − c)/2)² + b²)
+        // The eigenvalues of the 2x2 block [a  b; b  c] are the roots of its
+        // characteristic polynomial.
+        //
+        //   det([a − λ  b; b  c − λ]) = (a − λ)(c − λ) − b²
+        //                             = ac − aλ − cλ + λ² − b²
+        //                             = λ² − (a + c)λ + (ac − b²)
+        //
+        //   λ = (a + c)/2 ± r where r = √(((a − c)/2)² + b²)
+        //
+        // Let λ₁ be the root farther from zero. Its two terms have the same
+        // sign, so it has no cancellation. The two terms of the other root λ₂
+        // have opposite signs, so λ₂ loses accuracy if |a| >> |c|. Instead,
+        // compute λ₂ from λ₁ and the product of the roots.
+        //
+        //   λ₁λ₂ = ((a + c)/2 + r)((a + c)/2 − r)
+        //   λ₁λ₂ = ((a + c)/2)² − r²
+        //   λ₁λ₂ = ((a + c)/2)² − (((a − c)/2)² + b²)
+        //   λ₁λ₂ = (a + c)²/4 − (a − c)²/4 − b²
+        //   λ₁λ₂ = ((a² + 2ac + c²) − (a² − 2ac + c²))/4 − b²
+        //   λ₁λ₂ = 4ac/4 − b²
+        //   λ₁λ₂ = ac − b²
+        //   λ₂ = (ac − b²)/λ₁
+        //   λ₂ = ac/λ₁ − b²/λ₁
+        //   λ₂ = (a/λ₁)c − (b/λ₁)b
+        //
+        // Dividing first prevents ac and b² from overflowing. |λ₁| is the
+        // block's spectral radius (its largest eigenvalue magnitude), which for
+        // a symmetric matrix is the most it can stretch a unit vector. The
+        // block maps [1, 0]ᵀ to [a, b]ᵀ, so |a| ≤ |λ₁| and |b| ≤ |λ₁|.
         const Scalar a = D[k];
         const Scalar b = D_sub[k];
         const Scalar c = D[k + 1];
         const Scalar mid = (a + c) / Scalar(2);
         const Scalar r = hypot((a - c) / Scalar(2), abs(b));
-        count(mid + r);
-        count(mid - r);
+        const Scalar λ = mid >= Scalar(0) ? mid + r : mid - r;
+        count(λ);
+        count((a / λ) * c - (b / λ) * b);
         ++k;
       } else {
         count(D[k]);
