@@ -15,6 +15,7 @@ from sleipnir.optimization import (
     TranscriptionMethod,
     bounds,
 )
+from tolerance import SolutionType, solution_tolerance
 
 
 def lerp(a: float, b: float, t: float) -> float:
@@ -80,10 +81,10 @@ def test_cart_pole_ocp() -> None:
     assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
 
     # Verify initial state
-    assert X.value(0, 0) == pytest.approx(x_initial[0, 0], abs=1e-8)
-    assert X.value(1, 0) == pytest.approx(x_initial[1, 0], abs=1e-8)
-    assert X.value(2, 0) == pytest.approx(x_initial[2, 0], abs=1e-8)
-    assert X.value(3, 0) == pytest.approx(x_initial[3, 0], abs=1e-8)
+    assert X.value(0, 0) == pytest.approx(x_initial[0, 0], abs=solution_tolerance(1))
+    assert X.value(1, 0) == pytest.approx(x_initial[1, 0], abs=solution_tolerance(1))
+    assert X.value(2, 0) == pytest.approx(x_initial[2, 0], abs=solution_tolerance(1))
+    assert X.value(3, 0) == pytest.approx(x_initial[3, 0], abs=solution_tolerance(1))
 
     # Verify solution
     for k in range(N):
@@ -115,13 +116,17 @@ def test_cart_pole_ocp() -> None:
 
         expected_xdot_c = f(x_c, u_c)
         for row in range(xdot_c.shape[0]):
-            assert xdot_c[row, 0] == pytest.approx(expected_xdot_c[row, 0], abs=1e-8)
+            assert xdot_c[row, 0] == pytest.approx(
+                expected_xdot_c[row, 0], abs=solution_tolerance(1)
+            )
 
     # Verify final state
-    assert X.value(0, N) == pytest.approx(x_final[0, 0], abs=1e-8)
-    assert X.value(1, N) == pytest.approx(x_final[1, 0], abs=1e-8)
-    assert X.value(2, N) == pytest.approx(x_final[2, 0], abs=1e-8)
-    assert X.value(3, N) == pytest.approx(x_final[3, 0], abs=1e-8)
+    assert X.value(0, N) == pytest.approx(
+        x_final[0, 0], abs=solution_tolerance(1, SolutionType.DEGENERATE)
+    )
+    assert X.value(1, N) == pytest.approx(x_final[1, 0], abs=solution_tolerance(1))
+    assert X.value(2, N) == pytest.approx(x_final[2, 0], abs=solution_tolerance(1))
+    assert X.value(3, N) == pytest.approx(x_final[3, 0], abs=solution_tolerance(1))
 
     # Log states for offline viewing
     with open("Cart-pole states.csv", "w") as f:

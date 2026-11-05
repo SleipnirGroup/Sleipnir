@@ -3,6 +3,7 @@
 import pytest
 from sleipnir.autodiff import ExpressionType, sqrt
 from sleipnir.optimization import ExitStatus, Problem
+from tolerance import solution_tolerance
 
 
 def test_callback_requested_stop() -> None:
@@ -73,20 +74,26 @@ def test_locally_infeasible_inequality_constraints() -> None:
     assert problem.solve(diagnostics=True) == ExitStatus.LOCALLY_INFEASIBLE
 
 
+# The solver bounds the unscaled constraint violation by its default tolerance of
+# √ε, so a constraint scaled by 1e-5 bounds x's error by √ε / 1e-5
+SMALL_CONSTRAINT_SCALE = 1e-5
+SMALL_CONSTRAINT_X_TOLERANCE = solution_tolerance(1) / SMALL_CONSTRAINT_SCALE
+
+
 def test_small_equality_constraint_scaling_is_feasible() -> None:
     problem = Problem()
 
     x = problem.decision_variable()
     x.set_value(5005)
 
-    problem.subject_to(1e-5 * (x - 5) == 0)
+    problem.subject_to(SMALL_CONSTRAINT_SCALE * (x - 5) == 0)
 
     assert problem.cost_function_type() == ExpressionType.NONE
     assert problem.equality_constraint_type() == ExpressionType.LINEAR
     assert problem.inequality_constraint_type() == ExpressionType.NONE
 
     assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
-    assert x.value() == pytest.approx(5, abs=1e-3)
+    assert x.value() == pytest.approx(5, abs=SMALL_CONSTRAINT_X_TOLERANCE)
 
 
 def test_small_inequality_constraint_scaling_is_feasible() -> None:
@@ -95,14 +102,14 @@ def test_small_inequality_constraint_scaling_is_feasible() -> None:
     x = problem.decision_variable()
     x.set_value(5005)
 
-    problem.subject_to(1e-5 * (5 - x) >= 0)
+    problem.subject_to(SMALL_CONSTRAINT_SCALE * (5 - x) >= 0)
 
     assert problem.cost_function_type() == ExpressionType.NONE
     assert problem.equality_constraint_type() == ExpressionType.NONE
     assert problem.inequality_constraint_type() == ExpressionType.LINEAR
 
     assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
-    assert x.value() <= 5 + 1e-3
+    assert x.value() <= 5 + SMALL_CONSTRAINT_X_TOLERANCE
 
 
 def test_nonfinite_cost() -> None:
@@ -157,14 +164,33 @@ def test_diverging_iterates() -> None:
     problem = Problem()
 
     x = problem.decision_variable()
+    x.set_value(1)
 
-    problem.minimize(x)
+    problem.minimize(-x * x)
 
-    assert problem.cost_function_type() == ExpressionType.LINEAR
+    assert problem.cost_function_type() == ExpressionType.QUADRATIC
     assert problem.equality_constraint_type() == ExpressionType.NONE
     assert problem.inequality_constraint_type() == ExpressionType.NONE
 
     assert problem.solve(diagnostics=True) == ExitStatus.DIVERGING_ITERATES
+
+
+def test_large_iterates_arent_diverging() -> None:
+    problem = Problem()
+
+    # Variables and slacks in the 1e5–1e6 range are common in unscaled problems
+    # with physical units, so they shouldn't trigger the divergence check
+    x = problem.decision_variable()
+    x.set_value(0)
+
+    problem.minimize((x - 1e6) * (x - 1e6))
+    problem.subject_to(x >= 0)
+
+    assert problem.cost_function_type() == ExpressionType.QUADRATIC
+    assert problem.equality_constraint_type() == ExpressionType.NONE
+    assert problem.inequality_constraint_type() == ExpressionType.LINEAR
+
+    assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
 
 
 def test_max_iterations_exceeded() -> None:

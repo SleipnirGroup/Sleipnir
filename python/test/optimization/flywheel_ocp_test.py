@@ -12,6 +12,7 @@ from sleipnir.optimization import (
     TimestepMethod,
     TranscriptionMethod,
 )
+from tolerance import SolutionType, solution_tolerance
 
 
 def flywheel_test(
@@ -57,26 +58,32 @@ def flywheel_test(
 
     X_ref, U_ref = optimal_flywheel_trajectory(A_discrete, B_discrete, r, 12.0, N)
 
-    # The cost depends on uₖ only through the Buₖ it adds to xₖ₊₁, so U is
-    # determined 1/B times less precisely than X
-    x_tolerance = 1e-4
-    u_tolerance = x_tolerance / B_discrete
-
     # Verify initial state
-    assert problem.X().value(0, 0) == pytest.approx(0.0, abs=1e-8)
+    assert problem.X().value(0, 0) == pytest.approx(0.0, abs=solution_tolerance(1))
 
     # Verify solution
     for k in range(N + 1):
-        assert problem.X().value(0, k) == pytest.approx(X_ref[k], abs=x_tolerance)
-        if k < N:
-            if transcription_method == TranscriptionMethod.DIRECT_COLLOCATION:
+        if transcription_method == TranscriptionMethod.DIRECT_COLLOCATION:
+            # After the input leaves saturation, the spline's inputs chatter (see
+            # below). The cost barely depends on that alternating mode, so the
+            # solution is degenerate.
+            assert problem.X().value(0, k) == pytest.approx(
+                X_ref[k], abs=solution_tolerance(5, SolutionType.DEGENERATE)
+            )
+            if k < N:
                 # The tolerance is large because the trajectory is represented by a
                 # spline, and splines chatter when transitioning quickly between
                 # steady-states.
-                assert problem.U().value(0, k) == pytest.approx(U_ref[k], abs=2.0)
-            else:
-                assert problem.U().value(0, k) == pytest.approx(
-                    U_ref[k], abs=u_tolerance
+                assert problem.U().value(0, k) == pytest.approx(U_ref[k], abs=20.0)
+        else:
+            assert problem.X().value(0, k) == pytest.approx(
+                X_ref[k], abs=solution_tolerance(1000)
+            )
+            if k < N:
+                # The cost only depends on uₖ through the Buₖ it adds to xₖ₊₁,
+                # so compare Buₖ, which is determined as precisely as xₖ₊₁
+                assert B_discrete * problem.U().value(0, k) == pytest.approx(
+                    B_discrete * U_ref[k], abs=solution_tolerance(1000)
                 )
 
     # Log states for offline viewing

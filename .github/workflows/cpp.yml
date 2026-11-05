@@ -8,7 +8,7 @@ concurrency:
 
 jobs:
   native:
-    timeout-minutes: 20
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -65,7 +65,7 @@ jobs:
           -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
           -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=Embedded
           -DSLEIPNIR_BUILD_EXAMPLES=ON
-          -DSLEIPNIR_TEST_SCALAR_TYPES="double;ExplicitDouble"
+          -DSLEIPNIR_TEST_SCALAR_TYPES="float;double;ExplicitDouble"
           ${{ matrix.cmake-args }}
         env:
           SCCACHE_CACHE_MULTIARCH: true
@@ -106,7 +106,7 @@ jobs:
           path: pkg
 
   coverage:
-    timeout-minutes: 20
+    timeout-minutes: 30
     name: "Coverage"
     runs-on: ubuntu-24.04
     steps:

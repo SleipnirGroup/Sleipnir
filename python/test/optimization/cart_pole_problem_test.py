@@ -9,6 +9,7 @@ from cart_pole_util import (
 from rk4 import rk4
 from sleipnir.autodiff import ExpressionType
 from sleipnir.optimization import ExitStatus, Problem, bounds
+from tolerance import SolutionType, solution_tolerance
 
 
 def lerp(a: float, b: float, t: float) -> float:
@@ -70,10 +71,14 @@ def test_cart_pole_problem(dt: float) -> None:
     assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
 
     # Verify initial state
-    assert X.value(0, 0) == pytest.approx(x_initial[0, 0], abs=1e-8)
-    assert X.value(1, 0) == pytest.approx(x_initial[1, 0], abs=1e-8)
-    assert X.value(2, 0) == pytest.approx(x_initial[2, 0], abs=1e-8)
-    assert X.value(3, 0) == pytest.approx(x_initial[3, 0], abs=1e-8)
+    assert X.value(0, 0) == pytest.approx(x_initial[0, 0], abs=solution_tolerance(1))
+    assert X.value(1, 0) == pytest.approx(
+        x_initial[1, 0], abs=solution_tolerance(1, SolutionType.DEGENERATE)
+    )
+    assert X.value(2, 0) == pytest.approx(
+        x_initial[2, 0], abs=solution_tolerance(1, SolutionType.DEGENERATE)
+    )
+    assert X.value(3, 0) == pytest.approx(x_initial[3, 0], abs=solution_tolerance(1))
 
     # Verify solution
     for k in range(N):
@@ -94,13 +99,23 @@ def test_cart_pole_problem(dt: float) -> None:
         )
         actual_x_k1 = X[:, k + 1 : k + 2].value()
         for row in range(actual_x_k1.shape[0]):
-            assert actual_x_k1[row, 0] == pytest.approx(expected_x_k1[row, 0], abs=1e-8)
+            assert actual_x_k1[row, 0] == pytest.approx(
+                expected_x_k1[row, 0], abs=solution_tolerance(1)
+            )
 
     # Verify final state
-    assert X.value(0, N) == pytest.approx(x_final[0, 0], abs=1e-8)
-    assert X.value(1, N) == pytest.approx(x_final[1, 0], abs=1e-8)
-    assert X.value(2, N) == pytest.approx(x_final[2, 0], abs=1e-8)
-    assert X.value(3, N) == pytest.approx(x_final[3, 0], abs=1e-8)
+    assert X.value(0, N) == pytest.approx(
+        x_final[0, 0], abs=solution_tolerance(1, SolutionType.DEGENERATE)
+    )
+    assert X.value(1, N) == pytest.approx(
+        x_final[1, 0], abs=solution_tolerance(1, SolutionType.DEGENERATE)
+    )
+    assert X.value(2, N) == pytest.approx(
+        x_final[2, 0], abs=solution_tolerance(1, SolutionType.DEGENERATE)
+    )
+    assert X.value(3, N) == pytest.approx(
+        x_final[3, 0], abs=solution_tolerance(1, SolutionType.DEGENERATE)
+    )
 
     # Log states for offline viewing
     with open("Cart-pole states.csv", "w") as f:

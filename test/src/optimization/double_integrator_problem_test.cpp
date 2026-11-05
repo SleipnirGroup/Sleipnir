@@ -23,6 +23,7 @@
 #include "catch_matchers.hpp"
 #include "catch_string_converters.hpp"
 #include "scalar_types.hpp"
+#include "tolerance.hpp"
 
 /// Discretizes the given continuous A and B matrices.
 ///
@@ -249,13 +250,13 @@ TEMPLATE_TEST_CASE("Problem - Double integrator", "[Problem]", SCALAR_TYPES) {
   // velocity is determined less precisely than position. uₖ affects only vₖ₊₁
   // through the dt uₖ it adds, so U is determined 1/dt times less precisely
   // than velocity.
-  const T p_tolerance = T(1e-4);
-  const T v_tolerance = T(1e-3);
+  const T p_tolerance = solution_tolerance<T>(200);
+  const T v_tolerance = solution_tolerance<T>(1000);
   const T u_tolerance = v_tolerance / dt.count();
 
   // Verify initial state
-  CHECK_THAT(X.value(0, 0), WithinAbs(T(0), T(1e-8)));
-  CHECK_THAT(X.value(1, 0), WithinAbs(T(0), T(1e-8)));
+  CHECK_THAT(X.value(0, 0), WithinAbs(T(0), solution_tolerance<T>(1)));
+  CHECK_THAT(X.value(1, 0), WithinAbs(T(0), solution_tolerance<T>(1)));
 
   // Verify solution
   Eigen::Vector2<T> x_ref{T(0), T(0)};
@@ -272,8 +273,8 @@ TEMPLATE_TEST_CASE("Problem - Double integrator", "[Problem]", SCALAR_TYPES) {
   }
 
   // Verify final state
-  CHECK_THAT(X.value(0, N), WithinAbs(r, T(1e-8)));
-  CHECK_THAT(X.value(1, N), WithinAbs(T(0), T(1e-8)));
+  CHECK_THAT(X.value(0, N), WithinAbs(r, solution_tolerance<T>(1)));
+  CHECK_THAT(X.value(1, N), WithinAbs(T(0), solution_tolerance<T>(1)));
 
   // Log states for offline viewing
   std::ofstream states{"Problem - Double integrator states.csv"};

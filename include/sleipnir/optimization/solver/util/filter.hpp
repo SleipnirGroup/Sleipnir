@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <limits>
 
 #include <Eigen/Core>
 #include <gch/small_vector.hpp>
@@ -140,6 +141,7 @@ class Filter {
                const FilterEntry<Scalar>& trial_entry, Scalar D_ϕ, Scalar α) {
     using std::isfinite;
     using std::pow;
+    using std::sqrt;
 
     // Reject steps with nonfinite cost or constraint violation above maximum
     if (!isfinite(trial_entry.cost) ||
@@ -153,7 +155,7 @@ class Filter {
         α * pow(-D_ϕ, s_ϕ) > pow(current_entry.constraint_violation, s_θ);
 
     // Armijo condition
-    constexpr Scalar η_ϕ(1e-8);
+    const Scalar η_ϕ = sqrt(std::numeric_limits<Scalar>::epsilon());
     bool armijo_condition =
         trial_entry.cost <= current_entry.cost + η_ϕ * α * D_ϕ;
 
@@ -261,7 +263,11 @@ class Filter {
   }
 
  private:
-  static constexpr Scalar γ_cost{1e-8};
+  static inline const Scalar γ_cost = [] {
+    using std::sqrt;
+    return sqrt(std::numeric_limits<Scalar>::epsilon());
+  }();
+
   static constexpr Scalar γ_constraint{1e-5};
 
   // Switching condition exponents

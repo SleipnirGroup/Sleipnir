@@ -11,6 +11,7 @@
 #include "catch_matchers.hpp"
 #include "catch_string_converters.hpp"
 #include "scalar_types.hpp"
+#include "tolerance.hpp"
 
 TEMPLATE_TEST_CASE("Problem - Unconstrained 1D", "[Problem]", SCALAR_TYPES) {
   using T = TestType;
@@ -28,7 +29,7 @@ TEMPLATE_TEST_CASE("Problem - Unconstrained 1D", "[Problem]", SCALAR_TYPES) {
 
   CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
-  CHECK_THAT(x.value(), WithinAbs(T(3), T(1e-6)));
+  CHECK_THAT(x.value(), WithinAbs(T(3), solution_tolerance<T>(1)));
 }
 
 TEMPLATE_TEST_CASE("Problem - Unconstrained 2D", "[Problem]", SCALAR_TYPES) {
@@ -50,8 +51,8 @@ TEMPLATE_TEST_CASE("Problem - Unconstrained 2D", "[Problem]", SCALAR_TYPES) {
 
     CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
-    CHECK_THAT(x.value(), WithinAbs(T(0), T(1e-6)));
-    CHECK_THAT(y.value(), WithinAbs(T(0), T(1e-6)));
+    CHECK_THAT(x.value(), WithinAbs(T(0), solution_tolerance<T>(1)));
+    CHECK_THAT(y.value(), WithinAbs(T(0), solution_tolerance<T>(1)));
   }
 
   {
@@ -69,8 +70,8 @@ TEMPLATE_TEST_CASE("Problem - Unconstrained 2D", "[Problem]", SCALAR_TYPES) {
 
     CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
-    CHECK_THAT(x.value(0), WithinAbs(T(0), T(1e-6)));
-    CHECK_THAT(x.value(1), WithinAbs(T(0), T(1e-6)));
+    CHECK_THAT(x.value(0), WithinAbs(T(0), solution_tolerance<T>(1)));
+    CHECK_THAT(x.value(1), WithinAbs(T(0), solution_tolerance<T>(1)));
   }
 }
 
@@ -133,8 +134,8 @@ TEMPLATE_TEST_CASE("Problem - Equality-constrained", "[Problem]",
 
     CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
-    CHECK_THAT(x.value(), WithinAbs(T(18), T(1e-5)));
-    CHECK_THAT(y.value(), WithinAbs(T(6), T(1e-5)));
+    CHECK_THAT(x.value(), WithinAbs(T(18), solution_tolerance<T>(1)));
+    CHECK_THAT(y.value(), WithinAbs(T(6), solution_tolerance<T>(1)));
   }
 
   {
@@ -154,8 +155,8 @@ TEMPLATE_TEST_CASE("Problem - Equality-constrained", "[Problem]",
 
     CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
-    CHECK_THAT(x.value(0), WithinAbs(T(3), T(1e-5)));
-    CHECK_THAT(x.value(1), WithinAbs(T(3), T(1e-5)));
+    CHECK_THAT(x.value(0), WithinAbs(T(3), solution_tolerance<T>(1)));
+    CHECK_THAT(x.value(1), WithinAbs(T(3), solution_tolerance<T>(1)));
   }
 }
 
@@ -179,6 +180,8 @@ TEMPLATE_TEST_CASE("Problem - Inequality-constrained 2D", "[Problem]",
 
   CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
-  CHECK_THAT(x.value(), WithinAbs(T(3) + T(1.0 / 3.0), T(1e-6)));
-  CHECK_THAT(y.value(), WithinAbs(T(1) + T(2.0 / 3.0), T(1e-6)));
+  CHECK_THAT(x.value(),
+             WithinAbs(T(3) + T(1.0 / 3.0), solution_tolerance<T>(1)));
+  CHECK_THAT(y.value(),
+             WithinAbs(T(1) + T(2.0 / 3.0), solution_tolerance<T>(1)));
 }

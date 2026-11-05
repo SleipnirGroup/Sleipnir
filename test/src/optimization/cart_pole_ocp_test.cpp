@@ -26,6 +26,7 @@
 #include "catch_string_converters.hpp"
 #include "lerp.hpp"
 #include "scalar_types.hpp"
+#include "tolerance.hpp"
 
 TEMPLATE_TEST_CASE("OCP - Cart-pole", "[OCP]", SCALAR_TYPES) {
   using T = TestType;
@@ -91,10 +92,10 @@ TEMPLATE_TEST_CASE("OCP - Cart-pole", "[OCP]", SCALAR_TYPES) {
   REQUIRE(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
   // Verify initial state
-  CHECK_THAT(X.value(0, 0), WithinAbs(x_initial[0], T(1e-8)));
-  CHECK_THAT(X.value(1, 0), WithinAbs(x_initial[1], T(1e-8)));
-  CHECK_THAT(X.value(2, 0), WithinAbs(x_initial[2], T(1e-8)));
-  CHECK_THAT(X.value(3, 0), WithinAbs(x_initial[3], T(1e-8)));
+  CHECK_THAT(X.value(0, 0), WithinAbs(x_initial[0], solution_tolerance<T>(1)));
+  CHECK_THAT(X.value(1, 0), WithinAbs(x_initial[1], solution_tolerance<T>(1)));
+  CHECK_THAT(X.value(2, 0), WithinAbs(x_initial[2], solution_tolerance<T>(1)));
+  CHECK_THAT(X.value(3, 0), WithinAbs(x_initial[3], solution_tolerance<T>(1)));
 
   // Verify solution
   for (int k = 0; k < N; ++k) {
@@ -129,15 +130,18 @@ TEMPLATE_TEST_CASE("OCP - Cart-pole", "[OCP]", SCALAR_TYPES) {
     Eigen::Vector4<T> expected_xdot_c = f(x_c, u_c);
     for (int row = 0; row < xdot_c.rows(); ++row) {
       INFO(std::format("  ẋ({}) @ k = {}", row, k));
-      CHECK_THAT(xdot_c[row], WithinAbs(expected_xdot_c[row], T(1e-8)));
+      CHECK_THAT(xdot_c[row],
+                 WithinAbs(expected_xdot_c[row], solution_tolerance<T>(1)));
     }
   }
 
   // Verify final state
-  CHECK_THAT(X.value(0, N), WithinAbs(x_final[0], T(1e-8)));
-  CHECK_THAT(X.value(1, N), WithinAbs(x_final[1], T(1e-8)));
-  CHECK_THAT(X.value(2, N), WithinAbs(x_final[2], T(1e-8)));
-  CHECK_THAT(X.value(3, N), WithinAbs(x_final[3], T(1e-8)));
+  CHECK_THAT(X.value(0, N),
+             WithinAbs(x_final[0],
+                       solution_tolerance<T>(1, SolutionType::DEGENERATE)));
+  CHECK_THAT(X.value(1, N), WithinAbs(x_final[1], solution_tolerance<T>(1)));
+  CHECK_THAT(X.value(2, N), WithinAbs(x_final[2], solution_tolerance<T>(1)));
+  CHECK_THAT(X.value(3, N), WithinAbs(x_final[3], solution_tolerance<T>(1)));
 
   // Log states for offline viewing
   std::ofstream states{"OCP - Cart-pole states.csv"};

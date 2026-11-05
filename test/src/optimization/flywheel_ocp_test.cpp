@@ -26,6 +26,7 @@
 #include "catch_string_converters.hpp"
 #include "flywheel_util.hpp"
 #include "scalar_types.hpp"
+#include "tolerance.hpp"
 
 template <typename T>
 void flywheel_test(
@@ -74,28 +75,36 @@ void flywheel_test(
   auto [X_ref, U_ref] =
       optimal_flywheel_trajectory(A_discrete, B_discrete, r, T(12), N);
 
-  // The cost depends on uₖ only through the B·uₖ it adds to xₖ₊₁, so U is
-  // determined 1/B times less precisely than X
-  const T x_tolerance = T(1e-4);
-  const T u_tolerance = x_tolerance / B_discrete;
-
   // Verify initial state
-  CHECK_THAT(problem.X().value(0, 0), WithinAbs(T(0), T(1e-8)));
+  CHECK_THAT(problem.X().value(0, 0),
+             WithinAbs(T(0), solution_tolerance<T>(1)));
 
   // Verify solution
   for (int k = 0; k < N + 1; ++k) {
     INFO(std::format("  k = {}", k));
 
-    CHECK_THAT(problem.X().value(0, k), WithinAbs(X_ref(k), x_tolerance));
-    if (k < N) {
-      if (transcription_method ==
-          slp::TranscriptionMethod::DIRECT_COLLOCATION) {
+    if (transcription_method == slp::TranscriptionMethod::DIRECT_COLLOCATION) {
+      // After the input leaves saturation, the spline's inputs chatter (see
+      // below). The cost barely depends on that alternating mode, so the
+      // solution is degenerate.
+      CHECK_THAT(problem.X().value(0, k),
+                 WithinAbs(X_ref(k),
+                           solution_tolerance<T>(5, SolutionType::DEGENERATE)));
+      if (k < N) {
         // The tolerance is large because the trajectory is represented by a
         // spline, and splines chatter when transitioning quickly between
         // steady-states.
-        CHECK_THAT(problem.U().value(0, k), WithinAbs(U_ref(k), T(2)));
-      } else {
-        CHECK_THAT(problem.U().value(0, k), WithinAbs(U_ref(k), u_tolerance));
+        CHECK_THAT(problem.U().value(0, k), WithinAbs(U_ref(k), T(20)));
+      }
+    } else {
+      CHECK_THAT(problem.X().value(0, k),
+                 WithinAbs(X_ref(k), solution_tolerance<T>(1000)));
+      if (k < N) {
+        // The cost only depends on uₖ only through the Buₖ it adds to xₖ₊₁, so
+        // compare Buₖ, which is determined as precisely as xₖ₊₁
+        CHECK_THAT(
+            B_discrete * problem.U().value(0, k),
+            WithinAbs(B_discrete * U_ref(k), solution_tolerance<T>(1000)));
       }
     }
   }

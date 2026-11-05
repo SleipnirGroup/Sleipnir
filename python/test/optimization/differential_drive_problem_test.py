@@ -7,6 +7,7 @@ from differential_drive_util import (
 from rk4 import rk4
 from sleipnir.autodiff import ExpressionType
 from sleipnir.optimization import ExitStatus, Problem, bounds
+from tolerance import solution_tolerance
 
 
 def lerp(a: float, b: float, t: float) -> float:
@@ -72,39 +73,39 @@ def test_differential_drive_problem() -> None:
     assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
 
     # Verify initial state
-    assert X.value(0, 0) == pytest.approx(x_initial[0, 0], abs=1e-8)
-    assert X.value(1, 0) == pytest.approx(x_initial[1, 0], abs=1e-8)
-    assert X.value(2, 0) == pytest.approx(x_initial[2, 0], abs=1e-8)
-    assert X.value(3, 0) == pytest.approx(x_initial[3, 0], abs=1e-8)
-    assert X.value(4, 0) == pytest.approx(x_initial[4, 0], abs=1e-8)
+    assert X.value(0, 0) == pytest.approx(x_initial[0, 0], abs=solution_tolerance(1))
+    assert X.value(1, 0) == pytest.approx(x_initial[1, 0], abs=solution_tolerance(1))
+    assert X.value(2, 0) == pytest.approx(x_initial[2, 0], abs=solution_tolerance(1))
+    assert X.value(3, 0) == pytest.approx(x_initial[3, 0], abs=solution_tolerance(1))
+    assert X.value(4, 0) == pytest.approx(x_initial[4, 0], abs=solution_tolerance(1))
 
     # Verify solution
-    x = np.zeros((5, 1))
     for k in range(N):
-        u = U[:, k : k + 1].value()
-
         # Input constraints
         assert U[0, k].value() >= -u_max
         assert U[0, k].value() <= u_max
         assert U[1, k].value() >= -u_max
         assert U[1, k].value() <= u_max
 
-        # Verify state
-        assert X.value(0, k) == pytest.approx(x[0, 0], abs=1e-8)
-        assert X.value(1, k) == pytest.approx(x[1, 0], abs=1e-8)
-        assert X.value(2, k) == pytest.approx(x[2, 0], abs=1e-8)
-        assert X.value(3, k) == pytest.approx(x[3, 0], abs=1e-8)
-        assert X.value(4, k) == pytest.approx(x[4, 0], abs=1e-8)
-
-        # Project state forward
-        x = rk4(differential_drive_dynamics_double, x, u, dt)
+        # Dynamics constraints
+        expected_x_k1 = rk4(
+            differential_drive_dynamics_double,
+            X[:, k : k + 1].value(),
+            U[:, k : k + 1].value(),
+            dt,
+        )
+        actual_x_k1 = X[:, k + 1 : k + 2].value()
+        for row in range(actual_x_k1.shape[0]):
+            assert actual_x_k1[row, 0] == pytest.approx(
+                expected_x_k1[row, 0], abs=solution_tolerance(1)
+            )
 
     # Verify final state
-    assert X.value(0, N) == pytest.approx(x_final[0, 0], abs=1e-8)
-    assert X.value(1, N) == pytest.approx(x_final[1, 0], abs=1e-8)
-    assert X.value(2, N) == pytest.approx(x_final[2, 0], abs=1e-8)
-    assert X.value(3, N) == pytest.approx(x_final[3, 0], abs=1e-8)
-    assert X.value(4, N) == pytest.approx(x_final[4, 0], abs=1e-8)
+    assert X.value(0, N) == pytest.approx(x_final[0, 0], abs=solution_tolerance(1))
+    assert X.value(1, N) == pytest.approx(x_final[1, 0], abs=solution_tolerance(1))
+    assert X.value(2, N) == pytest.approx(x_final[2, 0], abs=solution_tolerance(1))
+    assert X.value(3, N) == pytest.approx(x_final[3, 0], abs=solution_tolerance(1))
+    assert X.value(4, N) == pytest.approx(x_final[4, 0], abs=solution_tolerance(1))
 
     # Log states for offline viewing
     with open("Differential drive states.csv", "w") as f:

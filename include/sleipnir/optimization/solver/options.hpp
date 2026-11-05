@@ -3,6 +3,7 @@
 #pragma once
 
 #include <chrono>
+#include <cmath>
 #include <limits>
 
 namespace slp {
@@ -13,7 +14,12 @@ namespace slp {
 template <typename Scalar>
 struct Options {
   /// The solver will stop once the error is below this tolerance.
-  Scalar tolerance = Scalar(1e-8);  // NOLINT(google-readability-casting)
+  ///
+  /// Defaults to the square root of the scalar type's machine epsilon.
+  Scalar tolerance = [] {
+    using std::sqrt;
+    return sqrt(std::numeric_limits<Scalar>::epsilon());
+  }();
 
   /// The maximum number of solver iterations before returning a solution.
   int max_iterations = 5000;

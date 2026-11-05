@@ -1,6 +1,7 @@
 import pytest
 from sleipnir import autodiff
 from sleipnir.optimization import ExitStatus, Problem, multistart
+from tolerance import solution_tolerance
 
 
 class DecisionVariables:
@@ -39,5 +40,5 @@ def test_mishras_bird_function() -> None:
 
     assert status == ExitStatus.SUCCESS
 
-    assert variables.x == pytest.approx(-3.13024680, abs=1e-8)
-    assert variables.y == pytest.approx(-1.58214218, abs=1e-8)
+    assert variables.x == pytest.approx(-3.1302468034546564, abs=solution_tolerance(1))
+    assert variables.y == pytest.approx(-1.5821421769300335, abs=solution_tolerance(1))

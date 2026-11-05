@@ -151,6 +151,21 @@ The following runs the Python tests on a development build.
 uv run pytest
 ```
 
+### Choosing test tolerances
+
+Test tolerances follow the error model of the value being checked, so they scale correctly with the scalar type's precision. `test/include/tolerance.hpp` and `python/test/optimization/tolerance.py` provide a helper for each model, where ε is machine epsilon and tol = √ε is the default solver tolerance.
+
+| Error model | Helper                                            | Applies to                                                                                                       |
+|-------------|---------------------------------------------------|------------------------------------------------------------------------------------------------------------------|
+| C·ε         | `rounding_tolerance(C)`                           | Values computed without the solver (e.g., autodiff derivatives)                                                  |
+| C·tol       | `solution_tolerance(C)`                           | Equality constraint residuals (e.g., boundary conditions and dynamics defects) and regular solutions             |
+| C·√tol      | `solution_tolerance(C, SolutionType::DEGENERATE)` | Degenerate solutions (e.g., a weakly active constraint, no finite Lagrange multipliers, or a nearly flat cost)   |
+| C           | A fixed tolerance                                 | Errors that don't depend on precision (e.g., discretization error)                                               |
+
+Use `solution_tolerance()` for anything the solver produces, even if its error is usually rounding error. The solver only guarantees its termination tolerance, and how far below it the iterates land varies across platforms. Equality constraint residuals are part of the termination criterion, so they're at most tol; use a multiple of at least 1 for them. For regular solutions, the multiple is the value's sensitivity to the KKT error, so pick it as roughly 10x the largest error observed across the tested scalar types, in units of tol. An error that doesn't shrink with tighter precision often means the reference value is wrong, so check the reference before loosening the bound.
+
+The Python tests only test double, so take the error model and multiple from the C++ version of the test, which also tests float.
+
 ### Running Python examples
 
 The following runs an example on a development build.

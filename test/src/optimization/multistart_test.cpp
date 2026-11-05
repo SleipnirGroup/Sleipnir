@@ -13,6 +13,7 @@
 #include "catch_matchers.hpp"
 #include "catch_string_converters.hpp"
 #include "scalar_types.hpp"
+#include "tolerance.hpp"
 
 TEMPLATE_TEST_CASE("multistart - Mishra's Bird function", "[multistart]",
                    SCALAR_TYPES) {
@@ -49,6 +50,8 @@ TEMPLATE_TEST_CASE("multistart - Mishra's Bird function", "[multistart]",
 
   CHECK(status == slp::ExitStatus::SUCCESS);
 
-  CHECK_THAT(variables.x, WithinAbs(T(-3.13024680), T(1e-8)));
-  CHECK_THAT(variables.y, WithinAbs(T(-1.58214218), T(1e-8)));
+  CHECK_THAT(variables.x,
+             WithinAbs(T(-3.1302468034546564), solution_tolerance<T>(1)));
+  CHECK_THAT(variables.y,
+             WithinAbs(T(-1.5821421769300335), solution_tolerance<T>(1)));
 }

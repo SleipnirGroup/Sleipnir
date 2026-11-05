@@ -6,6 +6,7 @@ import pytest
 from scipy.signal import cont2discrete
 from sleipnir.autodiff import ExpressionType
 from sleipnir.optimization import ExitStatus, Problem, bounds
+from tolerance import solution_tolerance
 
 
 def optimal_double_integrator_inputs(
@@ -201,13 +202,13 @@ def test_double_integrator_problem() -> None:
     # velocity is determined less precisely than position. uₖ affects only vₖ₊₁
     # through the dt uₖ it adds, so U is determined 1/dt times less precisely
     # than velocity.
-    p_tolerance = 1e-4
-    v_tolerance = 1e-3
+    p_tolerance = solution_tolerance(200)
+    v_tolerance = solution_tolerance(1000)
     u_tolerance = v_tolerance / dt
 
     # Verify initial state
-    assert X.value(0, 0) == pytest.approx(0.0, abs=1e-8)
-    assert X.value(1, 0) == pytest.approx(0.0, abs=1e-8)
+    assert X.value(0, 0) == pytest.approx(0.0, abs=solution_tolerance(1))
+    assert X.value(1, 0) == pytest.approx(0.0, abs=solution_tolerance(1))
 
     # Verify solution
     x_ref = np.zeros((2, 1))
@@ -220,8 +221,8 @@ def test_double_integrator_problem() -> None:
             x_ref = A_d @ x_ref + B_d * U_ref[k]
 
     # Verify final state
-    assert X.value(0, N) == pytest.approx(r, abs=1e-8)
-    assert X.value(1, N) == pytest.approx(0.0, abs=1e-8)
+    assert X.value(0, N) == pytest.approx(r, abs=solution_tolerance(1))
+    assert X.value(1, N) == pytest.approx(0.0, abs=solution_tolerance(1))
 
     # Log states for offline viewing
     with open("Double integrator states.csv", "w") as f:
