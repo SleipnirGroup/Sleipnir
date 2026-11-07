@@ -251,6 +251,9 @@ int main() {
     // Final velocity
     problem.subject_to(v[_, N] == v_f);
 
+    // Final mass must be at least dry mass
+    problem.subject_to(Z[0, N] >= std::log(m_dry));
+
     // Position and velocity initial guesses
     for (int k = 0; k < N + 1; ++k) {
       for (int i = 0; i < 3; ++i) {
