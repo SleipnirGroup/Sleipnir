@@ -195,6 +195,9 @@ def main() -> None:
         # Final velocity
         problem.subject_to(v[:, -1] == v_f)
 
+        # Final mass must be at least dry mass
+        problem.subject_to(Z[0, -1] >= math.log(m_dry))
+
         # Position and velocity initial guesses
         for k in range(N + 1):
             for i in range(3):
