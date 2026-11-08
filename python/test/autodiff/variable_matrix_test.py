@@ -3,10 +3,24 @@ import sys
 
 import numpy as np
 from sleipnir import autodiff
-from sleipnir.autodiff import VariableMatrix
+from sleipnir.autodiff import ExpressionType, Variable, VariableMatrix
 
 # Machine epsilon for the binding's scalar type (double)
 ε = sys.float_info.epsilon
+
+
+def test_mixed_list_constructor() -> None:
+    x = Variable()
+    x.set_value(3.0)
+
+    # float and int elements are implicitly converted to constant Variables
+    mat = VariableMatrix([[x, 1.0], [2, x]])
+
+    assert mat.shape == (2, 2)
+    assert (mat.value() == np.array([[3.0, 1.0], [2.0, 3.0]])).all()
+    assert mat[0, 0].type() == ExpressionType.LINEAR
+    assert mat[0, 1].type() == ExpressionType.CONSTANT
+    assert mat[1, 0].type() == ExpressionType.CONSTANT
 
 
 def test_assignment_to_default() -> None:
@@ -523,13 +537,16 @@ def test_block_free_function() -> None:
 def check_solve(A: VariableMatrix, B: VariableMatrix) -> None:
     print(f"solve(A, B) {A.shape[0]}x{A.shape[1]}")
 
-    X = autodiff.solve(A, B)
+    for X in (
+        autodiff.solve(A, B),
+        autodiff.solve(A, B.value()),
+        autodiff.solve(A.value(), B),
+    ):
+        assert X.shape == (A.shape[1], B.shape[1])
 
-    assert X.shape == (A.shape[1], B.shape[1])
-
-    # Backward error bound of a stable solve
-    residual = np.linalg.norm(A.value() @ X.value() - B.value())
-    assert residual <= 8 * ε * np.linalg.norm(A.value()) * np.linalg.norm(X.value())
+        # Backward error bound of a stable solve
+        residual = np.linalg.norm(A.value() @ X.value() - B.value())
+        assert residual <= 8 * ε * np.linalg.norm(A.value()) * np.linalg.norm(X.value())
 
 
 def test_solve_free_function() -> None:

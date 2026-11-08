@@ -372,12 +372,11 @@ void bind_variable_matrix(nb::module_& autodiff,
   cls.def(-nb::self);
 
   // Matrix-scalar/scalar-matrix operations
-  for_each_type<double, int, Variable<double>>([&]<typename T> {
-    cls.def(nb::self * T(), "rhs"_a);
-    cls.def(T() * nb::self, "lhs"_a);
-    cls.def(nb::self / T(), "rhs"_a);
-    cls.def(nb::self /= T(), "rhs"_a, DOC(slp, VariableMatrix, operator, idiv));
-  });
+  cls.def(nb::self * Variable<double>(), "rhs"_a);
+  cls.def(Variable<double>() * nb::self, "lhs"_a);
+  cls.def(nb::self / Variable<double>(), "rhs"_a);
+  cls.def(nb::self /= Variable<double>(), "rhs"_a,
+          DOC(slp, VariableMatrix, operator, idiv));
   for_each_type<double, int, const Variable<double>&,
                 const VariableBlock<VariableMatrix<double>>,
                 nb::DRef<Eigen::MatrixXd>>([&]<typename T> {
@@ -529,6 +528,18 @@ void bind_variable_matrix(nb::module_& autodiff,
                nb::overload_cast<const VariableMatrix<double>&,
                                  const VariableMatrix<double>&>(&solve<double>),
                "A"_a, "B"_a, DOC(slp, solve));
+  autodiff.def(
+      "solve",
+      [](const VariableMatrix<double>& A, nb::DRef<Eigen::MatrixXd> B) {
+        return solve(A, VariableMatrix<double>(B));
+      },
+      "A"_a, "B"_a, DOC(slp, solve));
+  autodiff.def(
+      "solve",
+      [](nb::DRef<Eigen::MatrixXd> A, const VariableMatrix<double>& B) {
+        return solve(VariableMatrix<double>(A), B);
+      },
+      "A"_a, "B"_a, DOC(slp, solve));
 }
 
 }  // namespace slp

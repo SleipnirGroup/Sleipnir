@@ -52,9 +52,8 @@ int main() {
 
   // list of points in field space to reproject. Each one is a 4x1 vector of
   // (x,y,z,1)
-  std::vector field2points{
-      slp::VariableMatrix<double>{{2, 0 - 0.08255, 0.4, 1}}.T(),
-      slp::VariableMatrix<double>{{2, 0 + 0.08255, 0.4, 1}}.T()};
+  std::vector field2points{Eigen::Vector4d{2, 0 - 0.08255, 0.4, 1},
+                           Eigen::Vector4d{2, 0 + 0.08255, 0.4, 1}};
 
   // List of points we saw the target at. These are exactly what we expect for a
   // camera located at 0,0,0 (hand-calculated)

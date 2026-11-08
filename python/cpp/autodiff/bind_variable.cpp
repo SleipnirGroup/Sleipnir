@@ -98,7 +98,8 @@ void bind_variable(nb::module_& autodiff, nb::class_<Variable<double>>& cls) {
   using namespace nb::literals;
 
   cls.def(nb::init<>(), DOC(slp, Variable, Variable));
-  cls.def(nb::init<double>(), "value"_a, DOC(slp, Variable, Variable, 2));
+  cls.def(nb::init_implicit<double>(), "value"_a,
+          DOC(slp, Variable, Variable, 2));
   cls.def("set_value", nb::overload_cast<double>(&Variable<double>::set_value),
           "value"_a, DOC(slp, Variable, set_value));
   cls.def("value", &Variable<double>::value, DOC(slp, Variable, value));
