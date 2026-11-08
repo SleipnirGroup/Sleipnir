@@ -12,10 +12,10 @@
 
 #include <algorithm>
 #include <cmath>
+#include <compare>
 #include <concepts>
 #include <format>
 #include <numbers>
-#include <numeric>
 #include <print>
 #include <tuple>
 #include <type_traits>
@@ -66,29 +66,54 @@ auto line_search(std::invocable<int> auto f, int first, int last)
     -> std::tuple<int, std::invoke_result_t<decltype(f), int>> {
   // https://en.wikipedia.org/wiki/Golden-section_search
 
-  double ϕ_inv = (std::sqrt(5) - 1) / 2;
+  int x_3 = first;
+  int x_1 = last;
 
-  int b = std::round(std::lerp(first, last, ϕ_inv));
-  auto b_sol = f(b);
-  std::println("\tN ∈ [{}, {}] -> N = {}: {}", std::min(first, last),
-               std::max(first, last), b, b_sol);
+  auto evaluate = [&](int x) {
+    auto f_x = f(x);
+    std::println("\tN ∈ [{}, {}] -> N = {}: {}", std::min(x_1, x_3),
+                 std::max(x_1, x_3), x, f_x);
+    return f_x;
+  };
 
-  while (std::abs(last - first) > 1) {
-    auto a = std::round(std::lerp(first, b, ϕ_inv));
-    auto a_sol = f(a);
-    std::println("\tN ∈ [{}, {}] -> N = {}: {}", std::min(first, last),
-                 std::max(first, last), a, a_sol);
+  if (first + 1 == last) {
+    return std::ranges::min(
+        {std::tuple{first, evaluate(first)}, std::tuple{last, evaluate(last)}},
+        {}, [](const auto& p) { return std::get<1>(p); });
+  }
 
-    if (a_sol < b_sol) {
-      b_sol = a_sol;
-      last = b;
-      b = a;
+  const double ϕ_inv = (std::sqrt(5) - 1) / 2;
+
+  int x_2 = std::round(std::lerp(x_3, x_1, ϕ_inv));
+  auto f_2 = evaluate(x_2);
+
+  while (std::abs(x_3 - x_1) > 2) {
+    int x_4 = std::round(std::lerp(x_3, x_2, ϕ_inv));
+    if (auto f_4 = evaluate(x_4); f_4 < f_2) {
+      // Keep [x_2, x_3]
+      x_1 = x_2;
+      x_2 = x_4;
+      f_2 = f_4;
     } else {
-      first = last;
-      last = a;
+      // Keep [x_1, x_4]
+      x_3 = x_1;
+      x_1 = x_4;
     }
   }
-  return {b, b_sol};
+
+  // If x_1 or x_3 are first or last, they haven't been evaluated yet
+  if (x_1 == first || x_1 == last) {
+    if (auto f_1 = evaluate(x_1); f_1 < f_2) {
+      return {x_1, f_1};
+    }
+  }
+  if (x_3 == first || x_3 == last) {
+    if (auto f_3 = evaluate(x_3); f_3 < f_2) {
+      return {x_3, f_3};
+    }
+  }
+
+  return {x_2, f_2};
 }
 
 struct Solution {
@@ -100,12 +125,15 @@ struct Solution {
 
   double cost() const { return σ_value.sum(); }
 
-  bool operator<(const Solution& rhs) const {
-    if (status != rhs.status) {
-      return status == slp::ExitStatus::SUCCESS;
-    } else {
-      return cost() < rhs.cost();
-    }
+  std::partial_ordering operator<=>(const Solution& rhs) const {
+    return key() <=> rhs.key();
+  }
+
+  bool operator==(const Solution& rhs) const { return key() == rhs.key(); }
+
+ private:
+  std::tuple<bool, double> key() const {
+    return {status != slp::ExitStatus::SUCCESS, cost()};
   }
 };
 
