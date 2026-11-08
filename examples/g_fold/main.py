@@ -22,11 +22,158 @@ import numpy as np
 import numpy.typing as npt
 from numpy.linalg import norm
 from scipy.signal import cont2discrete
+from sleipnir.autodiff import cos, sin
 from sleipnir.optimization import ExitStatus, Problem, bounds
 
 
 def lerp(a: float, b: float, t: float) -> float:
     return a + t * (b - a)
+
+
+def time_horizon_upper_bound(
+    q_0: npt.NDArray[np.float64],
+    v_0: npt.NDArray[np.float64],
+    q_f: npt.NDArray[np.float64],
+    v_f: npt.NDArray[np.float64],
+    g: npt.NDArray[np.float64],
+    ω: npt.NDArray[np.float64],
+    Δv_max: float,
+) -> float:
+    """
+    Returns the time horizon upper bound t_max (s) for a flight from (q₀, v₀)
+    to (q_f, v_f) in a planet frame rotating at ω. Any longer flight would need
+    a larger velocity change than the thrust can provide.
+
+    See README.md for the derivation.
+
+    Args:
+        q_0: Initial position (m).
+        v_0: Initial velocity (m/s).
+        q_f: Final position (m).
+        v_f: Final velocity (m/s).
+        g: Gravitational acceleration (m/s²).
+        ω: Angular velocity of planet (rad/s). Must be nonzero.
+        Δv_max: Maximum velocity change the thrust can provide (m/s).
+
+    Returns:
+        The time horizon upper bound (s).
+    """
+    #        [ 0  −ω₃  ω₂]
+    # S(ω) = [ ω₃  0  −ω₁]
+    #        [−ω₂  ω₁  0 ]
+    #
+    # See equation (2) of [1].
+    ω_1 = ω[0, 0]
+    ω_2 = ω[1, 0]
+    ω_3 = ω[2, 0]
+    S = np.array([[0.0, -ω_3, ω_2], [ω_3, 0.0, -ω_1], [-ω_2, ω_1, 0.0]])
+
+    # Integrating the dynamics in an inertial frame removes the planet rotation
+    # terms and gives |Δv_u(t_f)| ≤ Δv_max where
+    #
+    #   Δv_u(t) = R(t)v_I,f − v_I,0 − R_int(t)g
+    #
+    # and v_I = v + ω×q is the inertial velocity in the planet frame.
+    #
+    # t_max is the largest t_f that satisfies the inequality, so we maximize t_f
+    # subject to it.
+    #
+    # See equation (11) of README.md.
+    problem = Problem()
+    t_f = problem.decision_variable()
+
+    # R(t) = I + k₁(t)S(ω) + k₂(t)S(ω)²
+    # R_int(t) = tI + k₂(t)S(ω) + k₃(t)S(ω)²
+    #
+    # See equations (8) and (9) of README.md.
+    ω_norm = norm(ω)
+    k_1 = sin(ω_norm * t_f) / ω_norm
+    k_2 = (1 - cos(ω_norm * t_f)) / ω_norm**2
+    k_3 = (t_f - k_1) / ω_norm**2
+
+    # See equation (5) of README.md.
+    v_I_0 = v_0 + S @ q_0
+    v_I_f = v_f + S @ q_f
+
+    # Δv_u(t_f) = R(t_f)v_I,f − v_I,0 − R_int(t_f)g
+    #           = v_I,f − v_I,0 − t_f g
+    #             + k₁(t_f)S(ω)v_I,f
+    #             + k₂(t_f)(S(ω)²v_I,f − S(ω)g)
+    #             − k₃(t_f)S(ω)²g
+    #
+    # See equation (10) of README.md.
+    Δv_u = (
+        v_I_f
+        - v_I_0
+        - t_f * g
+        + k_1 * (S @ v_I_f)
+        + k_2 * (S @ S @ v_I_f - S @ g)
+        - k_3 * (S @ S @ g)
+    )
+
+    problem.maximize(t_f)
+    problem.subject_to(Δv_u.T @ Δv_u <= Δv_max**2)
+    problem.solve()
+
+    return t_f.value()
+
+
+def time_horizon_lower_bound(
+    q_0: npt.NDArray[np.float64],
+    v_0: npt.NDArray[np.float64],
+    q_f: npt.NDArray[np.float64],
+    g: npt.NDArray[np.float64],
+    ω: npt.NDArray[np.float64],
+    v_max: float,
+    a_max: float,
+    θ: float,
+    t_max: float,
+) -> float:
+    """
+    Returns the time horizon lower bound t_min (s) for a flight from (q₀, v₀)
+    to q_f with zero final vertical velocity in a planet frame rotating at ω.
+    +X is up. Any shorter flight would need more vertical acceleration than
+    gravity and the thrust can provide.
+
+    See README.md for the derivation.
+
+    Args:
+        q_0: Initial position (m).
+        v_0: Initial velocity (m/s).
+        q_f: Final position (m).
+        g: Gravitational acceleration (m/s²). Must point down.
+        ω: Angular velocity of planet (rad/s).
+        v_max: Maximum velocity magnitude (m/s).
+        a_max: Maximum thrust acceleration (m/s²).
+        θ: Thrust pointing limit from vertical (rad).
+        t_max: Time horizon upper bound (s).
+
+    Returns:
+        The time horizon lower bound (s).
+    """
+    # The planet rotation terms add at most a_ω of vertical acceleration in
+    # either direction.
+    #
+    # See equations (24) and (25) of README.md.
+    q_bound = (norm(q_0) + norm(q_f) + v_max * t_max) / 2
+    a_ω = norm(np.cross([1.0, 0.0, 0.0], ω[:, 0])) * (2 * v_max + norm(ω) * q_bound)
+
+    # The thrust pointing limit keeps the vertical thrust acceleration within
+    # [min(0, cos(θ))a_max, a_max], so the vertical acceleration lies within
+    # [−a_fall, a_brake].
+    #
+    # See equations (22), (26), and (27) of README.md.
+    a_fall = -g[0, 0] - min(0.0, math.cos(θ)) * a_max + a_ω
+    a_brake = a_max + g[0, 0] + a_ω
+
+    # The fastest descent falls at a_fall up to a peak downward speed s_peak,
+    # then brakes at a_brake.
+    #
+    # See equations (28) and (29) of README.md.
+    Δh = q_0[0, 0] - q_f[0, 0]
+    s_0 = -v_0[0, 0]
+    s_peak = math.sqrt((2 * Δh + s_0**2 / a_fall) / (1 / a_fall + 1 / a_brake))
+    return (s_peak - s_0) / a_fall + s_peak / a_brake
 
 
 def line_search(f: Callable[[int], Any], first: int, last: int) -> tuple[int, Any]:
@@ -146,7 +293,7 @@ def main() -> None:
 
     # Thrust pointing limit (rad)
     θ = math.radians(90)
-    assert θ >= 0 and θ <= math.pi / 2
+    assert θ >= 0 and θ <= math.pi
 
     # Minimum glide slope
     γ_gs = math.radians(30)
@@ -163,8 +310,8 @@ def main() -> None:
 
     # See equation (2) of [1].
 
-    #     [0   -ω₃  ω₂]
-    # S = [ω₃   0  −ω₁]
+    #     [ 0  -ω₃  ω₂]
+    # S = [ ω₃  0  −ω₁]
     #     [−ω₂  ω₁  0 ]
     ω_1 = ω[0, 0]
     ω_2 = ω[1, 0]
@@ -321,7 +468,7 @@ def main() -> None:
 
                 # Integrate dynamics
                 #
-                # See equation (2) of [1].
+                # See equations (1), (2), and (33) of [1].
                 #
                 #   ẋ = Ax + B(g + u)
                 #   ż = −ασ
@@ -337,11 +484,16 @@ def main() -> None:
 
         return Solution(status, X.value(), Z.value(), U.value(), σ.value())
 
-    # Time horizon bounds (s)
+    # Time horizon upper bound (s)
     #
-    # See equation (55) of [2].
-    t_min = m_dry * norm(v_0) / ρ_2
-    t_max = m_fuel / (α * ρ_1)
+    # The fuel caps the thrust's total velocity change at Δv_max.
+    Δv_max = math.log(m_wet / m_dry) / α
+    t_max = time_horizon_upper_bound(q_0, v_0, q_f, v_f, g, ω, Δv_max)
+
+    # Time horizon lower bound (s)
+    #
+    # The thrust acceleration is at most ρ₂/m_dry.
+    t_min = time_horizon_lower_bound(q_0, v_0, q_f, g, ω, v_max, ρ_2 / m_dry, θ, t_max)
 
     # Number of control intervals
     #
