@@ -340,12 +340,11 @@ void bind_variable_block(
   cls.def(-nb::self);
 
   // Matrix-scalar/scalar-matrix operations
-  for_each_type<double, int, Variable<double>>([&]<typename T> {
-    cls.def(nb::self * T(), "rhs"_a);
-    cls.def(T() * nb::self, "lhs"_a);
-    cls.def(nb::self / T(), "rhs"_a);
-    cls.def(nb::self /= T(), "rhs"_a, DOC(slp, VariableBlock, operator, idiv));
-  });
+  cls.def(nb::self * Variable<double>(), "rhs"_a);
+  cls.def(Variable<double>() * nb::self, "lhs"_a);
+  cls.def(nb::self / Variable<double>(), "rhs"_a);
+  cls.def(nb::self /= Variable<double>(), "rhs"_a,
+          DOC(slp, VariableBlock, operator, idiv));
   for_each_type<double, int, const Variable<double>&,
                 nb::DRef<Eigen::MatrixXd>>([&]<typename T> {
     cls.def(

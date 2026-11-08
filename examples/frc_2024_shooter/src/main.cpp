@@ -10,6 +10,7 @@
 #include <sleipnir/autodiff/variable.hpp>
 #include <sleipnir/autodiff/variable_matrix.hpp>
 #include <sleipnir/optimization/problem.hpp>
+#include <sleipnir/util/concepts.hpp>
 
 // FRC 2024 shooter trajectory optimization.
 //
@@ -39,11 +40,11 @@ constexpr Vector6d target_wrt_field{
     {0.0}};
 constexpr Eigen::Vector3d g{{0.0}, {0.0}, {9.806}};  // m/s²
 
-slp::VariableMatrix<double> cross(const slp::VariableMatrix<double>& a,
-                                  const slp::VariableMatrix<double>& b) {
-  return slp::VariableMatrix<double>({{a[1, 0] * b[2, 0] - a[2, 0] * b[1, 0]},
-                                      {a[2, 0] * b[0, 0] - a[0, 0] * b[2, 0]},
-                                      {a[0, 0] * b[1, 0] - a[1, 0] * b[0, 0]}});
+slp::VariableMatrix<double> cross(const slp::MatrixLike auto& a,
+                                  const slp::MatrixLike auto& b) {
+  return {{a[1, 0] * b[2, 0] - a[2, 0] * b[1, 0]},
+          {a[2, 0] * b[0, 0] - a[0, 0] * b[2, 0]},
+          {a[0, 0] * b[1, 0] - a[1, 0] * b[0, 0]}};
 }
 
 slp::VariableMatrix<double> f(const slp::VariableMatrix<double>& x) {

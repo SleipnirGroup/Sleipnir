@@ -7,7 +7,7 @@ The robot pose is constrained to be on the floor (z = 0).
 """
 
 import numpy as np
-from sleipnir.autodiff import Variable, VariableMatrix, cos, sin, solve
+from sleipnir.autodiff import VariableMatrix, cos, sin, solve
 from sleipnir.optimization import Problem
 
 
@@ -23,21 +23,19 @@ def main() -> None:
     # robot pose
     robot_x = problem.decision_variable()
     robot_y = problem.decision_variable()
-    robot_z = Variable(0)
+    robot_z = 0.0
     robot_θ = problem.decision_variable()
 
     # cache autodiff variables
     sinθ = sin(robot_θ)
     cosθ = cos(robot_θ)
 
-    var0 = Variable(0)
-    var1 = Variable(1)
     field2robot = VariableMatrix(
         [
-            [cosθ, -sinθ, var0, robot_x],
-            [sinθ, cosθ, var0, robot_y],
-            [var0, var0, var1, robot_z],
-            [var0, var0, var0, var1],
+            [cosθ, -sinθ, 0, robot_x],
+            [sinθ, cosθ, 0, robot_y],
+            [0, 0, 1, robot_z],
+            [0, 0, 0, 1],
         ]
     )
 
@@ -49,8 +47,8 @@ def main() -> None:
     # list of points in field space to reproject. Each one is a 4x1 vector of
     # (x,y,z,1)
     field2points = [
-        VariableMatrix([[2, 0 - 0.08255, 0.4, 1]]).T,
-        VariableMatrix([[2, 0 + 0.08255, 0.4, 1]]).T,
+        np.array([[2], [0 - 0.08255], [0.4], [1]]),
+        np.array([[2], [0 + 0.08255], [0.4], [1]]),
     ]
 
     # List of points we saw the target at. These are exactly what we expect for
@@ -63,7 +61,7 @@ def main() -> None:
     robot_θ.set_value(0.2)
 
     # field2camera * field2camera⁻¹ = I
-    camera2field = solve(field2camera, VariableMatrix(np.identity(4)))
+    camera2field = solve(field2camera, np.identity(4))
 
     # Cost
     J = 0
