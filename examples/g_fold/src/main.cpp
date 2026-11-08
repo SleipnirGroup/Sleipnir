@@ -16,16 +16,140 @@
 #include <concepts>
 #include <format>
 #include <numbers>
+#include <numeric>
 #include <print>
 #include <tuple>
 #include <type_traits>
 
 #include <Eigen/Core>
+#include <Eigen/Geometry>
 #include <sleipnir/autodiff/slice.hpp>
 #include <sleipnir/autodiff/variable.hpp>
+#include <sleipnir/autodiff/variable_matrix.hpp>
 #include <sleipnir/optimization/problem.hpp>
 #include <sleipnir/optimization/solver/exit_status.hpp>
 #include <unsupported/Eigen/MatrixFunctions>
+
+/// Returns the time horizon upper bound t_max (s) for a flight from (q₀, v₀)
+/// to (q_f, v_f) in a planet frame rotating at ω. Any longer flight would need
+/// a larger velocity change than the thrust can provide.
+///
+/// See README.md for the derivation.
+///
+/// @param q_0 Initial position (m).
+/// @param v_0 Initial velocity (m/s).
+/// @param q_f Final position (m).
+/// @param v_f Final velocity (m/s).
+/// @param g Gravitational acceleration (m/s²).
+/// @param ω Angular velocity of planet (rad/s). Must be nonzero.
+/// @param Δv_max Maximum velocity change the thrust can provide (m/s).
+/// @return The time horizon upper bound (s).
+double time_horizon_upper_bound(const Eigen::Vector3d& q_0,
+                                const Eigen::Vector3d& v_0,
+                                const Eigen::Vector3d& q_f,
+                                const Eigen::Vector3d& v_f,
+                                const Eigen::Vector3d& g,
+                                const Eigen::Vector3d& ω, double Δv_max) {
+  //        [ 0  −ω₃  ω₂]
+  // S(ω) = [ ω₃  0  −ω₁]
+  //        [−ω₂  ω₁  0 ]
+  //
+  // See equation (2) of [1].
+  Eigen::Matrix3d S{{0.0, -ω[2], ω[1]}, {ω[2], 0.0, -ω[0]}, {-ω[1], ω[0], 0.0}};
+
+  // Integrating the dynamics in an inertial frame removes the planet rotation
+  // terms and gives |Δv_u(t_f)| ≤ Δv_max where
+  //
+  //   Δv_u(t) = R(t)v_I,f − v_I,0 − R_int(t)g
+  //
+  // and v_I = v + ω×q is the inertial velocity in the planet frame.
+  //
+  // t_max is the largest t_f that satisfies the inequality, so we maximize t_f
+  // subject to it.
+  //
+  // See equation (11) of README.md.
+  slp::Problem<double> problem;
+  auto t_f = problem.decision_variable();
+
+  // R(t) = I + k₁(t)S(ω) + k₂(t)S(ω)²
+  // R_int(t) = tI + k₂(t)S(ω) + k₃(t)S(ω)²
+  //
+  // See equations (8) and (9) of README.md.
+  double ω_norm = ω.norm();
+  auto k_1 = slp::sin(ω_norm * t_f) / ω_norm;
+  auto k_2 = (1 - slp::cos(ω_norm * t_f)) / (ω_norm * ω_norm);
+  auto k_3 = (t_f - k_1) / (ω_norm * ω_norm);
+
+  // See equation (5) of README.md.
+  Eigen::Vector3d v_I_0 = v_0 + ω.cross(q_0);
+  Eigen::Vector3d v_I_f = v_f + ω.cross(q_f);
+
+  // Δv_u(t_f) = R(t_f)v_I,f − v_I,0 − R_int(t_f)g
+  //           = v_I,f − v_I,0 − t_f g
+  //             + k₁(t_f)S(ω)v_I,f
+  //             + k₂(t_f)(S(ω)²v_I,f − S(ω)g)
+  //             − k₃(t_f)S(ω)²g
+  //
+  // See equation (10) of README.md.
+  auto Δv_u = v_I_f - v_I_0 - t_f * g + k_1 * (S * v_I_f) +
+              k_2 * (S * S * v_I_f - S * g) - k_3 * (S * S * g);
+
+  problem.maximize(t_f);
+  problem.subject_to(Δv_u.T() * Δv_u <= Δv_max * Δv_max);
+  problem.solve();
+
+  return t_f.value();
+}
+
+/// Returns the time horizon lower bound t_min (s) for a flight from (q₀, v₀)
+/// to q_f with zero final vertical velocity in a planet frame rotating at ω.
+/// +X is up. Any shorter flight would need more vertical acceleration than
+/// gravity and the thrust can provide.
+///
+/// See README.md for the derivation.
+///
+/// @param q_0 Initial position (m).
+/// @param v_0 Initial velocity (m/s).
+/// @param q_f Final position (m).
+/// @param g Gravitational acceleration (m/s²). Must point down.
+/// @param ω Angular velocity of planet (rad/s).
+/// @param v_max Maximum velocity magnitude (m/s).
+/// @param a_max Maximum thrust acceleration (m/s²).
+/// @param θ Thrust pointing limit from vertical (rad).
+/// @param t_max Time horizon upper bound (s).
+/// @return The time horizon lower bound (s).
+double time_horizon_lower_bound(const Eigen::Vector3d& q_0,
+                                const Eigen::Vector3d& v_0,
+                                const Eigen::Vector3d& q_f,
+                                const Eigen::Vector3d& g,
+                                const Eigen::Vector3d& ω, double v_max,
+                                double a_max, double θ, double t_max) {
+  // The planet rotation terms add at most a_ω of vertical acceleration in
+  // either direction.
+  //
+  // See equations (24) and (25) of README.md.
+  double q_bound = (q_0.norm() + q_f.norm() + v_max * t_max) / 2;
+  double a_ω = Eigen::Vector3d::UnitX().cross(ω).norm() *
+               (2 * v_max + ω.norm() * q_bound);
+
+  // The thrust pointing limit keeps the vertical thrust acceleration within
+  // [min(0, cos(θ))a_max, a_max], so the vertical acceleration lies within
+  // [−a_fall, a_brake].
+  //
+  // See equations (22), (26), and (27) of README.md.
+  double a_fall = -g[0] - std::min(0.0, std::cos(θ)) * a_max + a_ω;
+  double a_brake = a_max + g[0] + a_ω;
+
+  // The fastest descent falls at a_fall up to a peak downward speed s_peak,
+  // then brakes at a_brake.
+  //
+  // See equations (28) and (29) of README.md.
+  double Δh = q_0[0] - q_f[0];
+  double s_0 = -v_0[0];
+  double s_peak =
+      std::sqrt((2 * Δh + s_0 * s_0 / a_fall) / (1 / a_fall + 1 / a_brake));
+  return (s_peak - s_0) / a_fall + s_peak / a_brake;
+}
 
 /// Discretizes the given continuous A and B matrices.
 ///
@@ -207,7 +331,7 @@ int main() {
 
   // Thrust pointing limit (rad)
   constexpr double θ = 90.0 * std::numbers::pi / 180.0;
-  static_assert(θ >= 0.0 && θ <= std::numbers::pi / 2);
+  static_assert(θ >= 0.0 && θ <= std::numbers::pi);
 
   // Minimum glide slope
   constexpr double γ_gs = 30.0 * std::numbers::pi / 180.0;
@@ -224,9 +348,9 @@ int main() {
 
   // See equation (2) of [1].
 
-  //     [0   -ω₃  ω₂]
-  // S = [ω₃   0  −ω₁]
-  //     [−ω₂  ω₁  0 ]
+  //        [ 0  -ω₃  ω₂]
+  // S(ω) = [ ω₃  0  −ω₁]
+  //        [−ω₂  ω₁  0 ]
   constexpr double ω_1 = ω[0];
   constexpr double ω_2 = ω[1];
   constexpr double ω_3 = ω[2];
@@ -394,7 +518,7 @@ int main() {
 
         // Integrate dynamics
         //
-        // See equation (2) of [1].
+        // See equations (1), (2), and (33) of [1].
         //
         //   ẋ = Ax + B(g + u)
         //   ż = −ασ
@@ -413,11 +537,17 @@ int main() {
     return Solution{status, X.value(), Z.value(), U.value(), σ.value()};
   };
 
-  // Time horizon bounds (s)
+  // Time horizon upper bound (s)
   //
-  // See equation (55) of [2].
-  double t_min = m_dry * v_0.norm() / ρ_2;
-  constexpr double t_max = m_fuel / (α * ρ_1);
+  // The fuel caps the thrust's total velocity change at Δv_max.
+  double Δv_max = std::log(m_wet / m_dry) / α;
+  double t_max = time_horizon_upper_bound(q_0, v_0, q_f, v_f, g, ω, Δv_max);
+
+  // Time horizon lower bound (s)
+  //
+  // The thrust acceleration is at most ρ₂/m_dry.
+  double t_min = time_horizon_lower_bound(q_0, v_0, q_f, g, ω, v_max,
+                                          ρ_2 / m_dry, θ, t_max);
 
   // Number of control intervals
   //
