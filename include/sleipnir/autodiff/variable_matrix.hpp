@@ -9,6 +9,7 @@
 #include <initializer_list>
 #include <iterator>
 #include <span>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -570,24 +571,6 @@ class VariableMatrix : public SleipnirBase {
   ///
   /// @param lhs Operator left-hand side.
   /// @param rhs Operator right-hand side.
-  template <EigenMatrixLike LHS>
-  friend VariableMatrix<Scalar> operator*(const LHS& lhs,
-                                          const Variable<Scalar>& rhs) {
-    VariableMatrix<Scalar> result(detail::empty, lhs.rows(), lhs.cols());
-
-    for (int row = 0; row < result.rows(); ++row) {
-      for (int col = 0; col < result.cols(); ++col) {
-        result[row, col] = lhs[row, col] * rhs;
-      }
-    }
-
-    return result;
-  }
-
-  /// Matrix-scalar multiplication operator.
-  ///
-  /// @param lhs Operator left-hand side.
-  /// @param rhs Operator right-hand side.
   template <SleipnirMatrixLike<Scalar> LHS, ScalarLike RHS>
   friend VariableMatrix<Scalar> operator*(const LHS& lhs, const RHS& rhs) {
     VariableMatrix<Scalar> result(detail::empty, lhs.rows(), lhs.cols());
@@ -595,24 +578,6 @@ class VariableMatrix : public SleipnirBase {
     for (int row = 0; row < result.rows(); ++row) {
       for (int col = 0; col < result.cols(); ++col) {
         result[row, col] = lhs[row, col] * rhs;
-      }
-    }
-
-    return result;
-  }
-
-  /// Scalar-matrix multiplication operator.
-  ///
-  /// @param lhs Operator left-hand side.
-  /// @param rhs Operator right-hand side.
-  template <EigenMatrixLike RHS>
-  friend VariableMatrix<Scalar> operator*(const Variable<Scalar>& lhs,
-                                          const RHS& rhs) {
-    VariableMatrix<Scalar> result(detail::empty, rhs.rows(), rhs.cols());
-
-    for (int row = 0; row < result.rows(); ++row) {
-      for (int col = 0; col < result.cols(); ++col) {
-        result[row, col] = rhs[row, col] * lhs;
       }
     }
 
@@ -669,25 +634,6 @@ class VariableMatrix : public SleipnirBase {
     }
 
     return *this;
-  }
-
-  /// Binary division operator.
-  ///
-  /// @param lhs Operator left-hand side.
-  /// @param rhs Operator right-hand side.
-  /// @return Result of division.
-  template <EigenMatrixLike LHS>
-  friend VariableMatrix<Scalar> operator/(const LHS& lhs,
-                                          const Variable<Scalar>& rhs) {
-    VariableMatrix<Scalar> result(detail::empty, lhs.rows(), lhs.cols());
-
-    for (int row = 0; row < result.rows(); ++row) {
-      for (int col = 0; col < result.cols(); ++col) {
-        result[row, col] = lhs[row, col] / rhs;
-      }
-    }
-
-    return result;
   }
 
   /// Binary division operator.
@@ -1372,6 +1318,64 @@ VariableMatrix(const Eigen::MatrixBase<Derived>&)
 template <typename Derived>
 VariableMatrix(const Eigen::DiagonalBase<Derived>&)
     -> VariableMatrix<typename Derived::Scalar>;
+
+/// Matrix-scalar multiplication operator.
+///
+/// @tparam Scalar Scalar type.
+/// @param lhs Operator left-hand side.
+/// @param rhs Operator right-hand side.
+template <typename Scalar, EigenMatrixLike LHS>
+  requires std::same_as<typename std::decay_t<LHS>::Scalar, Scalar>
+VariableMatrix<Scalar> operator*(const LHS& lhs, const Variable<Scalar>& rhs) {
+  VariableMatrix<Scalar> result(detail::empty, lhs.rows(), lhs.cols());
+
+  for (int row = 0; row < result.rows(); ++row) {
+    for (int col = 0; col < result.cols(); ++col) {
+      result[row, col] = lhs[row, col] * rhs;
+    }
+  }
+
+  return result;
+}
+
+/// Scalar-matrix multiplication operator.
+///
+/// @tparam Scalar Scalar type.
+/// @param lhs Operator left-hand side.
+/// @param rhs Operator right-hand side.
+template <typename Scalar, EigenMatrixLike RHS>
+  requires std::same_as<typename std::decay_t<RHS>::Scalar, Scalar>
+VariableMatrix<Scalar> operator*(const Variable<Scalar>& lhs, const RHS& rhs) {
+  VariableMatrix<Scalar> result(detail::empty, rhs.rows(), rhs.cols());
+
+  for (int row = 0; row < result.rows(); ++row) {
+    for (int col = 0; col < result.cols(); ++col) {
+      result[row, col] = rhs[row, col] * lhs;
+    }
+  }
+
+  return result;
+}
+
+/// Binary division operator.
+///
+/// @tparam Scalar Scalar type.
+/// @param lhs Operator left-hand side.
+/// @param rhs Operator right-hand side.
+/// @return Result of division.
+template <typename Scalar, EigenMatrixLike LHS>
+  requires std::same_as<typename std::decay_t<LHS>::Scalar, Scalar>
+VariableMatrix<Scalar> operator/(const LHS& lhs, const Variable<Scalar>& rhs) {
+  VariableMatrix<Scalar> result(detail::empty, lhs.rows(), lhs.cols());
+
+  for (int row = 0; row < result.rows(); ++row) {
+    for (int col = 0; col < result.cols(); ++col) {
+      result[row, col] = lhs[row, col] / rhs;
+    }
+  }
+
+  return result;
+}
 
 /// Applies a coefficient-wise reduce operation to two matrices.
 ///
