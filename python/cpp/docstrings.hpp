@@ -2959,6 +2959,21 @@ Template Args:
 
 )doc";
 
+constexpr char mkd_doc_slp_operator_div[] =
+R"doc(Binary division operator.
+
+Args:
+    lhs: Operator left-hand side.
+    rhs: Operator right-hand side.
+
+Template Args:
+    Scalar: Scalar type.
+
+Returns:
+    Result of division.
+
+)doc";
+
 constexpr char mkd_doc_slp_operator_eq[] =
 R"doc(Equality operator that returns an equality constraint for two
 Variables.
@@ -3046,6 +3061,30 @@ for two Variables.
 Args:
     lhs: Left-hand side.
     rhs: Left-hand side.
+
+)doc";
+
+constexpr char mkd_doc_slp_operator_mul[] =
+R"doc(Matrix-scalar multiplication operator.
+
+Args:
+    lhs: Operator left-hand side.
+    rhs: Operator right-hand side.
+
+Template Args:
+    Scalar: Scalar type.
+
+)doc";
+
+constexpr char mkd_doc_slp_operator_mul_2[] =
+R"doc(Scalar-matrix multiplication operator.
+
+Args:
+    lhs: Operator left-hand side.
+    rhs: Operator right-hand side.
+
+Template Args:
+    Scalar: Scalar type.
 
 )doc";
 

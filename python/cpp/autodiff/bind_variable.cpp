@@ -3,8 +3,12 @@
 #include <nanobind/eigen/dense.h>
 #include <nanobind/nanobind.h>
 #include <nanobind/operators.h>
+#include <nanobind/stl/string.h>
 
+#include <algorithm>
+#include <array>
 #include <concepts>
+#include <string>
 #include <utility>
 
 #include <sleipnir/autodiff/variable.hpp>
@@ -13,6 +17,7 @@
 
 #include "docstrings.hpp"
 #include "for_each_type.hpp"
+#include "try_cast.hpp"
 
 namespace nb = nanobind;
 
@@ -115,6 +120,142 @@ void bind_variable(nb::module_& autodiff, nb::class_<Variable<double>>& cls) {
       cls.def(T() - nb::self, "lhs"_a);
     }
   });
+
+  // Scalar-matrix multiplication and division with NumPy arrays. These are also
+  // handled by __array_ufunc__ below, but type checkers only see these
+  // overloads.
+  cls.def(
+      "__mul__",
+      [](const Variable<double>& lhs, nb::DRef<Eigen::MatrixXd> rhs) {
+        return lhs * rhs;
+      },
+      nb::is_operator(), "rhs"_a);
+  cls.def(
+      "__imul__",
+      [](const Variable<double>& lhs, nb::DRef<Eigen::MatrixXd> rhs) {
+        return lhs * rhs;
+      },
+      nb::is_operator(), "rhs"_a);
+  cls.def(
+      "__rmul__",
+      [](const Variable<double>& rhs, nb::DRef<Eigen::MatrixXd> lhs) {
+        return lhs * rhs;
+      },
+      nb::is_operator(), "lhs"_a);
+  cls.def(
+      "__rtruediv__",
+      [](const Variable<double>& rhs, nb::DRef<Eigen::MatrixXd> lhs) {
+        return lhs / rhs;
+      },
+      nb::is_operator(), "lhs"_a);
+
+  // Map NumPy ufunc reprs to the equivalent function names in Python's
+  // operator module
+  static constexpr std::array scalar_operators{
+      std::pair{"<ufunc 'add'>", "add"},
+      std::pair{"<ufunc 'subtract'>", "sub"},
+      std::pair{"<ufunc 'multiply'>", "mul"},
+      std::pair{"<ufunc 'divide'>", "truediv"},
+      std::pair{"<ufunc 'equal'>", "eq"},
+      std::pair{"<ufunc 'less'>", "lt"},
+      std::pair{"<ufunc 'less_equal'>", "le"},
+      std::pair{"<ufunc 'greater'>", "gt"},
+      std::pair{"<ufunc 'greater_equal'>", "ge"}};
+
+  // https://numpy.org/doc/stable/user/basics.dispatch.html
+  cls.def(
+      "__array_ufunc__",
+      [](Variable<double>& self, nb::object ufunc, nb::str method,
+         nb::args inputs, const nb::kwargs&) -> nb::object {
+        std::string method_name = nb::cast<std::string>(method);
+        std::string ufunc_name =
+            nb::cast<std::string>(ufunc.attr("__repr__")());
+
+        // VariableMatrix only represents 2D arrays
+        auto is_2d_array = [](const nb::handle& obj) {
+          return nb::isinstance<nb::ndarray<>>(obj) &&
+                 nb::cast<nb::ndarray<>>(obj).ndim() == 2;
+        };
+
+        if (method_name == "__call__" && inputs.size() == 2) {
+          if (auto op = std::ranges::find(
+                  scalar_operators, ufunc_name,
+                  [](const auto& pair) { return pair.first; });
+              op != scalar_operators.end()) {
+            auto np = nb::module_::import_("numpy");
+
+            auto is_0d = [&](const nb::handle& obj) {
+              // np.ndim() returns 0 for any non-array object
+              return !nb::isinstance<Variable<double>>(obj) &&
+                     nb::cast<int>(np.attr("ndim")(obj)) == 0;
+            };
+
+            // Convert NumPy scalars and 0D arrays to the equivalent Python
+            // scalar (e.g., np.float64 to float) and return other objects
+            // unchanged
+            auto numpy_to_python_scalar =
+                [&](const nb::handle& obj) -> nb::object {
+              nb::object numpy_types =
+                  nb::make_tuple(np.attr("generic"), np.attr("ndarray"));
+              if (PyObject_IsInstance(obj.ptr(), numpy_types.ptr()) == 1) {
+                return obj.attr("item")();
+              } else {
+                return nb::borrow(obj);
+              }
+            };
+
+            // If an operand is 0D, apply the Python operator to its Python
+            // scalar and the other operand, which dispatches to Variable's
+            // scalar overloads
+            if (is_0d(inputs[0])) {
+              return nb::module_::import_("operator")
+                  .attr(op->second)(numpy_to_python_scalar(inputs[0]),
+                                    inputs[1]);
+            } else if (is_0d(inputs[1])) {
+              return nb::module_::import_("operator")
+                  .attr(op->second)(inputs[0],
+                                    numpy_to_python_scalar(inputs[1]));
+            }
+          }
+
+          if (ufunc_name == "<ufunc 'multiply'>") {
+            if (is_2d_array(inputs[0])) {
+              if (auto result = apply_eigen_op(
+                      [&](auto& lhs) {
+                        return lhs.template cast<double>() * self;
+                      },
+                      inputs[0])) {
+                return result.value();
+              }
+            } else if (is_2d_array(inputs[1])) {
+              if (auto result = apply_eigen_op(
+                      [&](auto& rhs) {
+                        return self * rhs.template cast<double>();
+                      },
+                      inputs[1])) {
+                return result.value();
+              }
+            }
+          } else if (ufunc_name == "<ufunc 'divide'>") {
+            if (is_2d_array(inputs[0])) {
+              if (auto result = apply_eigen_op(
+                      [&](auto& lhs) {
+                        return lhs.template cast<double>() / self;
+                      },
+                      inputs[0])) {
+                return result.value();
+              }
+            }
+          }
+        }
+
+        return nb::not_implemented();
+      },
+      // nanobind can't annotate nb::args or nb::kwargs, so the stub needs an
+      // explicit signature
+      nb::sig("def __array_ufunc__(self, ufunc: object, method: str, "
+              "*inputs: object, **kwargs: object) -> object"),
+      "ufunc"_a, "method"_a, "inputs"_a, "kwargs"_a);
 
   cls.def(
       "__pow__",

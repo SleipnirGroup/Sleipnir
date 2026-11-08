@@ -338,6 +338,26 @@ TEMPLATE_TEST_CASE("VariableMatrix - Compound assignment operators",
   CHECK(A2.value() == Eigen::Matrix2<T>{{T(1), T(2)}, {T(3), T(4)}});
 }
 
+TEMPLATE_TEST_CASE("VariableMatrix - Variable and Eigen matrix operators",
+                   "[VariableMatrix]", SCALAR_TYPES) {
+  using T = TestType;
+
+  const slp::Variable<T> x{T(2)};
+  const Eigen::Matrix2<T> A{{T(1), T(2)}, {T(3), T(4)}};
+
+  // Eigen matrices
+  CHECK((A * x).value() == Eigen::Matrix2<T>{{T(2), T(4)}, {T(6), T(8)}});
+  CHECK((x * A).value() == Eigen::Matrix2<T>{{T(2), T(4)}, {T(6), T(8)}});
+  CHECK((A / x).value() == Eigen::Matrix2<T>{{T(0.5), T(1)}, {T(1.5), T(2)}});
+
+  // Eigen expressions
+  CHECK(((A + A) * x).value() ==
+        Eigen::Matrix2<T>{{T(4), T(8)}, {T(12), T(16)}});
+  CHECK((x * (A * A)).value() ==
+        Eigen::Matrix2<T>{{T(14), T(20)}, {T(30), T(44)}});
+  CHECK(((A + A) / x).value() == Eigen::Matrix2<T>{{T(1), T(2)}, {T(3), T(4)}});
+}
+
 TEMPLATE_TEST_CASE("VariableMatrix - Iterators", "[VariableMatrix]",
                    SCALAR_TYPES) {
   using T = TestType;
