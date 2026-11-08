@@ -43,28 +43,44 @@ def line_search(f: Callable[[int], Any], first: int, last: int) -> tuple[int, An
     """
     # https://en.wikipedia.org/wiki/Golden-section_search
 
+    x_3 = first
+    x_1 = last
+
+    def evaluate(x: int) -> Any:
+        f_x = f(x)
+        print(f"\tN ∈ [{min(x_1, x_3)}, {max(x_1, x_3)}] -> N = {x}: {f_x}")
+        return f_x
+
+    if first + 1 == last:
+        return min((first, evaluate(first)), (last, evaluate(last)), key=lambda p: p[1])
+
     ϕ_inv = (math.sqrt(5) - 1) / 2
 
-    b = round(lerp(first, last, ϕ_inv))
-    b_sol = f(b)
-    print(f"\tN ∈ [{min(first, last)}, {max(first, last)}] -> N = {b}: {b_sol}")
+    x_2 = round(lerp(x_3, x_1, ϕ_inv))
+    f_2 = evaluate(x_2)
 
-    while abs(last - first) > 1:
-        a = round(lerp(first, b, ϕ_inv))
-        a_sol = f(a)
-        print(f"\tN ∈ [{min(first, last)}, {max(first, last)}] -> N = {a}: {a_sol}")
-
-        if a_sol < b_sol:
-            b_sol = a_sol
-            last = b
-            b = a
+    while abs(x_3 - x_1) > 2:
+        x_4 = round(lerp(x_3, x_2, ϕ_inv))
+        if (f_4 := evaluate(x_4)) < f_2:
+            # Keep [x_2, x_3]
+            x_1 = x_2
+            x_2 = x_4
+            f_2 = f_4
         else:
-            first = last
-            last = a
-    return b, b_sol
+            # Keep [x_1, x_4]
+            x_3 = x_1
+            x_1 = x_4
+
+    # If x_1 or x_3 are first or last, they haven't been evaluated yet
+    if x_1 in (first, last) and (f_1 := evaluate(x_1)) < f_2:
+        return x_1, f_1
+    if x_3 in (first, last) and (f_3 := evaluate(x_3)) < f_2:
+        return x_3, f_3
+
+    return x_2, f_2
 
 
-@dataclass
+@dataclass(eq=False)
 class Solution:
     status: ExitStatus
     X_value: npt.NDArray[np.float64]
@@ -76,10 +92,10 @@ class Solution:
         return self.σ_value.sum()
 
     def __lt__(self, other: "Solution") -> bool:
-        if self.status != other.status:
-            return self.status == ExitStatus.SUCCESS
-        else:
-            return self.cost() < other.cost()
+        return self._key() < other._key()
+
+    def _key(self) -> tuple[bool, float]:
+        return (self.status != ExitStatus.SUCCESS, self.cost())
 
     def __str__(self) -> str:
         if self.status == ExitStatus.SUCCESS:
