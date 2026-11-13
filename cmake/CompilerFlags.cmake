@@ -4,12 +4,8 @@ function(compiler_flags target)
 
         if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
             # Suppress the following warnings:
-            #   * -Warray-bounds= (false positives)
             #   * -Wpsabi (notes about a GCC 10.1 ABI change on aarch64)
-            target_compile_options(
-                ${target}
-                PRIVATE -Wno-array-bounds -Wno-psabi
-            )
+            target_compile_options(${target} PRIVATE -Wno-psabi)
         endif()
     else()
         # Suppress the following warnings:
