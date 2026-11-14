@@ -1,12 +1,13 @@
 // Copyright (c) Sleipnir contributors
 
+#ifndef RUNNING_TESTS
+
 #include <array>
 #include <cstddef>
 #include <print>
 
 #include "current_manager.hpp"
 
-#ifndef RUNNING_TESTS
 int main() {
   CurrentManager manager{std::array{1.0, 5.0, 10.0, 5.0}, 40.0};
 

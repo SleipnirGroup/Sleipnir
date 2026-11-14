@@ -5,6 +5,7 @@
 #include <span>
 #include <vector>
 
+#include <sleipnir/autodiff/variable_matrix.hpp>
 #include <sleipnir/optimization/problem.hpp>
 
 /// This class computes the optimal current allocation for a list of subsystems

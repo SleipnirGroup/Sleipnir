@@ -1,0 +1,4 @@
+# CI doesn't build the Python module (nanobind 3.1.0 doesn't compile against
+# libc++ 23), so clang-tidy only sees a partial parse of these files
+InheritParentConfig: true
+Checks: '-misc-include-cleaner'

@@ -2,6 +2,16 @@
 
 #include "sleipnir/optimization/solver/ipm.hpp"
 
+#include <functional>
+#include <span>
+
+#include <Eigen/Core>
+
+#include "sleipnir/optimization/solver/control_flow.hpp"
+#include "sleipnir/optimization/solver/exit_status.hpp"
+#include "sleipnir/optimization/solver/ipm_matrix_callbacks.hpp"
+#include "sleipnir/optimization/solver/iteration_info.hpp"
+#include "sleipnir/optimization/solver/options.hpp"
 #include "sleipnir/util/symbol_exports.hpp"
 
 template SLEIPNIR_DLLEXPORT slp::ExitStatus slp::ipm(

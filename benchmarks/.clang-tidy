@@ -1,0 +1,4 @@
+# CI doesn't install CasADi or Google Benchmark, so clang-tidy only sees a
+# partial parse of these files
+InheritParentConfig: true
+Checks: '-misc-include-cleaner'

@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include <cmath>
+#include <cmath>  // IWYU pragma: keep
 
 #include <Eigen/SparseCore>
 

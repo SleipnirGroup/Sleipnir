@@ -28,7 +28,7 @@
 #include <sleipnir/autodiff/variable_matrix.hpp>
 #include <sleipnir/optimization/problem.hpp>
 #include <sleipnir/optimization/solver/exit_status.hpp>
-#include <unsupported/Eigen/MatrixFunctions>
+#include <unsupported/Eigen/MatrixFunctions>  // IWYU pragma: keep
 
 /// Returns the time horizon upper bound t_max (s) for a flight from (q₀, v₀)
 /// to (q_f, v_f) in a planet frame rotating at ω. Any longer flight would need

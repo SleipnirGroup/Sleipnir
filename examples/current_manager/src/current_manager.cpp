@@ -3,8 +3,12 @@
 #include "current_manager.hpp"
 
 #include <algorithm>
+#include <cstddef>
+#include <span>
 #include <stdexcept>
 #include <vector>
+
+#include <sleipnir/autodiff/variable.hpp>
 
 CurrentManager::CurrentManager(std::span<const double> current_tolerances,
                                double max_current)

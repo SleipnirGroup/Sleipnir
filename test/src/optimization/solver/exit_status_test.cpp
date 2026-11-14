@@ -1,5 +1,6 @@
 // Copyright (c) Sleipnir contributors
 
+#include <chrono>  // IWYU pragma: keep
 #include <format>
 
 #include <catch2/catch_template_test_macros.hpp>
@@ -7,6 +8,7 @@
 #include <catch2/matchers/catch_matchers.hpp>
 #include <sleipnir/autodiff/expression_type.hpp>
 #include <sleipnir/optimization/problem.hpp>
+#include <sleipnir/optimization/solver/control_flow.hpp>
 #include <sleipnir/optimization/solver/exit_status.hpp>
 #include <sleipnir/optimization/solver/iteration_info.hpp>
 

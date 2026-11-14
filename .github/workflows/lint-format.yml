@@ -17,13 +17,13 @@ jobs:
         with:
           python-version: 3.14
 
-      - name: Install LLVM 22
+      - name: Install LLVM 23
         run: |
           wget https://apt.llvm.org/llvm.sh
           chmod +x llvm.sh
-          sudo ./llvm.sh 22 all
-          sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-22 200
-          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-22 200
+          sudo ./llvm.sh 23 all
+          sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-23 200
+          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-23 200
           echo "CC=clang" >> $GITHUB_ENV
           echo "CXX=clang++" >> $GITHUB_ENV
           echo "CXXFLAGS=-stdlib=libc++" >> $GITHUB_ENV
@@ -75,7 +75,7 @@ jobs:
         with:
           python-version: 3.14
 
-      - run: pip install wpiformat==2026.71
+      - run: pip install wpiformat==2026.76
 
       - run: wpiformat
 
@@ -118,21 +118,21 @@ jobs:
         with:
           python-version: 3.14
 
-      - name: Install LLVM 22
+      - name: Install LLVM 23
         run: |
           wget https://apt.llvm.org/llvm.sh
           chmod +x llvm.sh
-          sudo ./llvm.sh 22 all
-          sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-22 200
-          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-22 200
+          sudo ./llvm.sh 23 all
+          sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-23 200
+          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-23 200
           echo "CC=clang" >> $GITHUB_ENV
           echo "CXX=clang++" >> $GITHUB_ENV
           echo "CXXFLAGS=-stdlib=libc++" >> $GITHUB_ENV
 
-      - run: pip install wpiformat==2026.71
+      - run: pip install wpiformat==2026.76
 
       - name: Create compile_commands.json
-        run: cmake -B build -S . -DCMAKE_EXPORT_COMPILE_COMMANDS=YES
+        run: cmake -B build -S . -DCMAKE_EXPORT_COMPILE_COMMANDS=YES -DSLEIPNIR_BUILD_EXAMPLES=ON
 
       - name: List changed files
         run: wpiformat -list-changed-files

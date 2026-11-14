@@ -136,7 +136,11 @@ if(PROJECT_IS_TOP_LEVEL AND BUILD_TESTING)
         EXCLUDE_FROM_ALL
         SYSTEM
     )
+    # Keep Catch2's sources out of compile_commands.json so tools infer header
+    # compile commands from Sleipnir's own sources
+    set(CMAKE_EXPORT_COMPILE_COMMANDS OFF)
     FetchContent_MakeAvailable(Catch2)
+    set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
     # Enable StringMaker<std::string_view>
     target_compile_features(Catch2 PRIVATE cxx_std_23)
@@ -208,7 +212,11 @@ if(SLEIPNIR_BUILD_BENCHMARKS)
                 EXCLUDE_FROM_ALL
                 SYSTEM
             )
+            # Keep benchmark's sources out of compile_commands.json so tools
+            # infer header compile commands from Sleipnir's own sources
+            set(CMAKE_EXPORT_COMPILE_COMMANDS OFF)
             FetchContent_MakeAvailable(benchmark)
+            set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
         else()
             find_package(benchmark CONFIG REQUIRED)
         endif()

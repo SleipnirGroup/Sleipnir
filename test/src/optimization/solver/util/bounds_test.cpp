@@ -11,9 +11,7 @@
 #include <Eigen/Core>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
-#include <catch2/catch_tostring.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
-#include <catch2/matchers/catch_matchers_quantifiers.hpp>
 #include <catch2/matchers/catch_matchers_range_equals.hpp>
 #include <sleipnir/autodiff/jacobian.hpp>
 #include <sleipnir/autodiff/variable.hpp>
@@ -71,7 +69,7 @@ TEMPLATE_TEST_CASE("Bounds - Detection", "[Bounds]", SCALAR_TYPES) {
       correct_bound_constraint_mask{
           false, false, false, true,  true,  true,  false, true,  true,  true,
           true,  true,  true,  false, false, false, false, false, false, false,
-      };
+  };
   constexpr auto correct_conflicting_bounds =
       std::to_array<std::pair<Eigen::Index, Eigen::Index>>({
           {9, 11},
