@@ -13,6 +13,7 @@
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
 
+#include "sleipnir/optimization/solver/control_flow.hpp"
 #include "sleipnir/optimization/solver/exit_status.hpp"
 #include "sleipnir/optimization/solver/iteration_info.hpp"
 #include "sleipnir/optimization/solver/newton_matrix_callbacks.hpp"
@@ -52,7 +53,7 @@ namespace slp {
 template <typename Scalar>
 ExitStatus newton(
     const NewtonMatrixCallbacks<Scalar>& matrix_callbacks,
-    std::span<std::function<bool(const IterationInfo<Scalar>& info)>>
+    std::span<std::function<ControlFlow(const IterationInfo<Scalar>& info)>>
         iteration_callbacks,
     const Options<Scalar>& options, Eigen::VectorX<Scalar>& x) {
   using DenseVector = Eigen::VectorX<Scalar>;
@@ -143,7 +144,8 @@ ExitStatus newton(
 
     // Call iteration callbacks
     for (const auto& callback : iteration_callbacks) {
-      if (callback({iterations, x, {}, {}, {}, g, H, {}, {}})) {
+      if (callback({iterations, x, {}, {}, {}, g, H, {}, {}}) ==
+          ControlFlow::BREAK) {
         return ExitStatus::CALLBACK_REQUESTED_STOP;
       }
     }
@@ -290,7 +292,7 @@ ExitStatus newton(
 
 extern template SLEIPNIR_DLLEXPORT ExitStatus
 newton(const NewtonMatrixCallbacks<double>& matrix_callbacks,
-       std::span<std::function<bool(const IterationInfo<double>& info)>>
+       std::span<std::function<ControlFlow(const IterationInfo<double>& info)>>
            iteration_callbacks,
        const Options<double>& options, Eigen::VectorX<double>& x);
 

@@ -14,6 +14,7 @@
 #include <Eigen/SparseCore>
 #include <gch/small_vector.hpp>
 
+#include "sleipnir/optimization/solver/control_flow.hpp"
 #include "sleipnir/optimization/solver/exit_status.hpp"
 #include "sleipnir/optimization/solver/ipm_matrix_callbacks.hpp"
 #include "sleipnir/optimization/solver/iteration_info.hpp"
@@ -65,14 +66,15 @@ namespace slp {
 ///     variables.
 /// @return The exit status.
 template <typename Scalar>
-ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
-               std::span<std::function<bool(const IterationInfo<Scalar>& info)>>
-                   iteration_callbacks,
-               const Options<Scalar>& options,
+ExitStatus ipm(
+    const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
+    std::span<std::function<ControlFlow(const IterationInfo<Scalar>& info)>>
+        iteration_callbacks,
+    const Options<Scalar>& options,
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
-               const Eigen::ArrayX<bool>& bound_constraint_mask,
+    const Eigen::ArrayX<bool>& bound_constraint_mask,
 #endif
-               Eigen::VectorX<Scalar>& x) {
+    Eigen::VectorX<Scalar>& x) {
   using DenseVector = Eigen::VectorX<Scalar>;
 
   // If cᵢ(x) is sufficiently feasible, start the constraint with zero
@@ -127,16 +129,17 @@ ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
 /// @param[in,out] iterations The iteration counter.
 /// @return The exit status.
 template <typename Scalar>
-ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
-               std::span<std::function<bool(const IterationInfo<Scalar>& info)>>
-                   iteration_callbacks,
-               const Options<Scalar>& options, bool in_feasibility_restoration,
+ExitStatus ipm(
+    const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
+    std::span<std::function<ControlFlow(const IterationInfo<Scalar>& info)>>
+        iteration_callbacks,
+    const Options<Scalar>& options, bool in_feasibility_restoration,
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
-               const Eigen::ArrayX<bool>& bound_constraint_mask,
+    const Eigen::ArrayX<bool>& bound_constraint_mask,
 #endif
-               Eigen::VectorX<Scalar>& x, Eigen::VectorX<Scalar>& s,
-               Eigen::VectorX<Scalar>& y, Eigen::VectorX<Scalar>& z, Scalar& μ,
-               int& iterations) {
+    Eigen::VectorX<Scalar>& x, Eigen::VectorX<Scalar>& s,
+    Eigen::VectorX<Scalar>& y, Eigen::VectorX<Scalar>& z, Scalar& μ,
+    int& iterations) {
   using DenseVector = Eigen::VectorX<Scalar>;
   using SparseMatrix = Eigen::SparseMatrix<Scalar>;
   using SparseVector = Eigen::SparseVector<Scalar>;
@@ -397,7 +400,8 @@ ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
 
     // Call iteration callbacks
     for (const auto& callback : iteration_callbacks) {
-      if (callback({iterations, x, s, y, z, g, H, A_e, A_i})) {
+      if (callback({iterations, x, s, y, z, g, H, A_e, A_i}) ==
+          ControlFlow::BREAK) {
         return ExitStatus::CALLBACK_REQUESTED_STOP;
       }
     }
@@ -728,14 +732,15 @@ ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
           feasibility_restoration_cycle_detector.is_cycling();
 
       // Feasibility restoration phase
-      gch::small_vector<std::function<bool(const IterationInfo<Scalar>& info)>>
+      gch::small_vector<
+          std::function<ControlFlow(const IterationInfo<Scalar>& info)>>
           callbacks;
       for (auto& callback : iteration_callbacks) {
         callbacks.emplace_back(callback);
       }
       callbacks.emplace_back([&](const IterationInfo<Scalar>& info) {
         if (run_feasibility_restoration_to_convergence) {
-          return false;
+          return ControlFlow::CONTINUE;
         }
 
         DenseVector trial_x =
@@ -755,9 +760,13 @@ ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
         // is accepted by the normal filter, stop feasibility restoration
         FilterEntry trial_entry{matrices.f(trial_x), trial_s, trial_c_e,
                                 trial_c_i, μ};
-        return trial_entry.constraint_violation <
-                   Scalar(0.9) * initial_entry.constraint_violation &&
-               filter.is_acceptable(trial_entry);
+        if (trial_entry.constraint_violation <
+                Scalar(0.9) * initial_entry.constraint_violation &&
+            filter.is_acceptable(trial_entry)) {
+          return ControlFlow::BREAK;
+        } else {
+          return ControlFlow::CONTINUE;
+        }
       });
       auto status =
           feasibility_restoration<Scalar>(matrices, callbacks, options,
@@ -885,7 +894,7 @@ ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
 
 extern template SLEIPNIR_DLLEXPORT ExitStatus
 ipm(const IPMMatrixCallbacks<double>& matrix_callbacks,
-    std::span<std::function<bool(const IterationInfo<double>& info)>>
+    std::span<std::function<ControlFlow(const IterationInfo<double>& info)>>
         iteration_callbacks,
     const Options<double>& options,
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION

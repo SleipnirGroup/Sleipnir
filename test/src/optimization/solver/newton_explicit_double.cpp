@@ -6,6 +6,7 @@
 
 template slp::ExitStatus slp::newton(
     const NewtonMatrixCallbacks<ExplicitDouble>& matrix_callbacks,
-    std::span<std::function<bool(const IterationInfo<ExplicitDouble>& info)>>
+    std::span<
+        std::function<ControlFlow(const IterationInfo<ExplicitDouble>& info)>>
         iteration_callbacks,
     const Options<ExplicitDouble>& options, Eigen::VectorX<ExplicitDouble>& x);

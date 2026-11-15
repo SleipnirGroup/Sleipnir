@@ -4,7 +4,7 @@
 
 template slp::ExitStatus slp::sqp(
     const SQPMatrixCallbacks<float>& matrix_callbacks,
-    std::span<std::function<bool(const IterationInfo<float>& info)>>
+    std::span<std::function<ControlFlow(const IterationInfo<float>& info)>>
         iteration_callbacks,
     const slp::Options<float>& options,
     Eigen::Vector<float, Eigen::Dynamic>& x);

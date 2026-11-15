@@ -31,7 +31,7 @@ User-configured exit conditions:
   ↳ executed 5000 iterations
 ```
 
-The user-configurable exit conditions include the error tolerance, maximum iterations, and timeout passed to the `solve()` call; and iteration callbacks added to the `Problem` returning `true`.
+The user-configurable exit conditions include the error tolerance, maximum iterations, and timeout passed to the `solve()` call; and iteration callbacks added to the `Problem` returning `ControlFlow::BREAK` (C++) or raising `StopIteration` (Python).
 
 ### Problem size and structure
 

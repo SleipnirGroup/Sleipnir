@@ -127,11 +127,11 @@ void bind_problem(nb::class_<Problem<double>>& cls) {
         new (self) Problem<double>();
 
         // Make Python signals (e.g., SIGINT from Ctrl-C) abort the solve
-        self->add_persistent_callback([](const IterationInfo<double>&) -> bool {
+        self->add_persistent_callback([](const IterationInfo<double>&) {
           if (PyErr_CheckSignals() != 0) {
             throw nb::python_error();
           }
-          return false;
+          return ControlFlow::CONTINUE;
         });
       },
       DOC(slp, Problem, Problem));
@@ -206,10 +206,28 @@ void bind_problem(nb::class_<Problem<double>>& cls) {
   cls.def(
       "add_callback",
       [](Problem<double>& self,
-         std::function<bool(const IterationInfo<double>& info)> callback) {
-        self.add_callback(std::move(callback));
+         std::function<void(const IterationInfo<double>& info)> callback) {
+        self.add_callback([callback = std::move(callback)](
+                              const IterationInfo<double>& info) {
+          try {
+            callback(info);
+          } catch (nb::python_error& e) {
+            if (e.matches(PyExc_StopIteration)) {
+              return ControlFlow::BREAK;
+            }
+            throw;
+          }
+          return ControlFlow::CONTINUE;
+        });
       },
-      "callback"_a, DOC(slp, Problem, add_callback, 2));
+      "callback"_a,
+      R"doc(Adds a callback to be called at the beginning of each solver
+iteration.
+
+Args:
+    callback: The callback. Raising StopIteration from the callback stops
+              solving and returns the solution so far.
+)doc");
   cls.def("clear_callbacks", &Problem<double>::clear_callbacks,
           DOC(slp, Problem, clear_callbacks));
 }

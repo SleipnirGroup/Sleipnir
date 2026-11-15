@@ -24,6 +24,7 @@
 #include "sleipnir/autodiff/jacobian.hpp"
 #include "sleipnir/autodiff/variable.hpp"
 #include "sleipnir/autodiff/variable_matrix.hpp"
+#include "sleipnir/optimization/solver/control_flow.hpp"
 #include "sleipnir/optimization/solver/exit_status.hpp"
 #include "sleipnir/optimization/solver/ipm.hpp"
 #include "sleipnir/optimization/solver/ipm_matrix_callbacks.hpp"
@@ -352,19 +353,19 @@ class Problem {
         [=, callback =
                 std::forward<F>(callback)](const IterationInfo<Scalar>& info) {
           callback(info);
-          return false;
+          return ControlFlow::CONTINUE;
         });
   }
 
   /// Adds a callback to be called at the beginning of each solver iteration.
   ///
-  /// The callback for this overload should return bool.
+  /// The callback for this overload should return ControlFlow.
   ///
-  /// @param callback The callback. Returning true from the callback causes the
-  ///     solver to exit early with the solution it has so far.
+  /// @param callback The callback. Returning ControlFlow::BREAK from the
+  ///     callback stops solving and returns the solution so far.
   template <typename F>
     requires requires(F callback, const IterationInfo<Scalar>& info) {
-      { callback(info) } -> std::same_as<bool>;
+      { callback(info) } -> std::same_as<ControlFlow>;
     }
   void add_callback(F&& callback) {
     m_iteration_callbacks.emplace_back(std::forward<F>(callback));
@@ -379,11 +380,11 @@ class Problem {
   /// callbacks that shouldn't be removed by clear_callbacks(). Persistent
   /// callbacks run after non-persistent callbacks.
   ///
-  /// @param callback The callback. Returning true from the callback causes the
-  ///     solver to exit early with the solution it has so far.
+  /// @param callback The callback. Returning ControlFlow::BREAK from the
+  ///     callback stops solving and returns the solution so far.
   template <typename F>
     requires requires(F callback, const IterationInfo<Scalar>& info) {
-      { callback(info) } -> std::same_as<bool>;
+      { callback(info) } -> std::same_as<ControlFlow>;
     }
   void add_persistent_callback(F&& callback) {
     m_persistent_iteration_callbacks.emplace_back(std::forward<F>(callback));
@@ -406,9 +407,11 @@ class Problem {
   gch::small_vector<Variable<Scalar>> m_inequality_constraints;
 
   // The iteration callbacks
-  gch::small_vector<std::function<bool(const IterationInfo<Scalar>& info)>>
+  gch::small_vector<
+      std::function<ControlFlow(const IterationInfo<Scalar>& info)>>
       m_iteration_callbacks;
-  gch::small_vector<std::function<bool(const IterationInfo<Scalar>& info)>>
+  gch::small_vector<
+      std::function<ControlFlow(const IterationInfo<Scalar>& info)>>
       m_persistent_iteration_callbacks;
 
   ExitStatus solve_newton(const Options<Scalar>& options,
@@ -424,7 +427,8 @@ class Problem {
 
     int num_decision_variables = m_decision_variables.size();
 
-    gch::small_vector<std::function<bool(const IterationInfo<Scalar>& info)>>
+    gch::small_vector<
+        std::function<ControlFlow(const IterationInfo<Scalar>& info)>>
         iteration_callbacks;
     for (const auto& callback : m_iteration_callbacks) {
       iteration_callbacks.emplace_back(callback);
@@ -460,11 +464,10 @@ class Problem {
       H_spy = std::make_unique<Spy<Scalar>>(
           "H.spy", "Hessian", "Decision variables", "Decision variables",
           num_decision_variables, num_decision_variables);
-      iteration_callbacks.push_back(
-          [&](const IterationInfo<Scalar>& info) -> bool {
-            H_spy->add(info.H);
-            return false;
-          });
+      iteration_callbacks.push_back([&](const IterationInfo<Scalar>& info) {
+        H_spy->add(info.H);
+        return ControlFlow::CONTINUE;
+      });
     }
 #endif
 
@@ -507,7 +510,8 @@ class Problem {
     int num_decision_variables = m_decision_variables.size();
     int num_equality_constraints = m_equality_constraints.size();
 
-    gch::small_vector<std::function<bool(const IterationInfo<Scalar>& info)>>
+    gch::small_vector<
+        std::function<ControlFlow(const IterationInfo<Scalar>& info)>>
         iteration_callbacks;
     for (const auto& callback : m_iteration_callbacks) {
       iteration_callbacks.emplace_back(callback);
@@ -563,12 +567,11 @@ class Problem {
           "A_e.spy", "Equality constraint Jacobian", "Constraints",
           "Decision variables", num_equality_constraints,
           num_decision_variables);
-      iteration_callbacks.push_back(
-          [&](const IterationInfo<Scalar>& info) -> bool {
-            H_spy->add(info.H);
-            A_e_spy->add(info.A_e);
-            return false;
-          });
+      iteration_callbacks.push_back([&](const IterationInfo<Scalar>& info) {
+        H_spy->add(info.H);
+        A_e_spy->add(info.A_e);
+        return ControlFlow::CONTINUE;
+      });
     }
 #endif
 
@@ -628,7 +631,8 @@ class Problem {
     int num_equality_constraints = m_equality_constraints.size();
     int num_inequality_constraints = m_inequality_constraints.size();
 
-    gch::small_vector<std::function<bool(const IterationInfo<Scalar>& info)>>
+    gch::small_vector<
+        std::function<ControlFlow(const IterationInfo<Scalar>& info)>>
         iteration_callbacks;
     for (const auto& callback : m_iteration_callbacks) {
       iteration_callbacks.emplace_back(callback);
@@ -696,13 +700,12 @@ class Problem {
           "A_i.spy", "Inequality constraint Jacobian", "Constraints",
           "Decision variables", num_inequality_constraints,
           num_decision_variables);
-      iteration_callbacks.push_back(
-          [&](const IterationInfo<Scalar>& info) -> bool {
-            H_spy->add(info.H);
-            A_e_spy->add(info.A_e);
-            A_i_spy->add(info.A_i);
-            return false;
-          });
+      iteration_callbacks.push_back([&](const IterationInfo<Scalar>& info) {
+        H_spy->add(info.H);
+        A_e_spy->add(info.A_e);
+        A_i_spy->add(info.A_i);
+        return ControlFlow::CONTINUE;
+      });
     }
 #endif
 

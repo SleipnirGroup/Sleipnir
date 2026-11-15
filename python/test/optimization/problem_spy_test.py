@@ -57,10 +57,9 @@ def test_problem_spy() -> None:
     global iterations
     iterations = 0
 
-    def callback(info: IterationInfo) -> bool:
+    def callback(info: IterationInfo) -> None:
         global iterations
         iterations += 1
-        return False
 
     problem.add_callback(callback)
 

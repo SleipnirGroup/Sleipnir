@@ -6,7 +6,7 @@
 
 template SLEIPNIR_DLLEXPORT slp::ExitStatus slp::ipm(
     const IPMMatrixCallbacks<double>& matrix_callbacks,
-    std::span<std::function<bool(const IterationInfo<double>& info)>>
+    std::span<std::function<ControlFlow(const IterationInfo<double>& info)>>
         iteration_callbacks,
     const Options<double>& options,
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
