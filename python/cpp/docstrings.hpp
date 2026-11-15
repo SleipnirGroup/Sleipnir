@@ -798,12 +798,11 @@ constexpr char mkd_doc_slp_Problem_add_callback_2[] =
 R"doc(Adds a callback to be called at the beginning of each solver
 iteration.
 
-The callback for this overload should return bool.
+The callback for this overload should return ControlFlow.
 
 Args:
-    callback: The callback. Returning true from the callback causes
-              the solver to exit early with the solution it has so
-              far.
+    callback: The callback. Returning ControlFlow::BREAK from the
+              callback stops solving and returns the solution so far.
 
 )doc";
 
@@ -816,9 +815,8 @@ register callbacks that shouldn't be removed by clear_callbacks().
 Persistent callbacks run after non-persistent callbacks.
 
 Args:
-    callback: The callback. Returning true from the callback causes
-              the solver to exit early with the solution it has so
-              far.
+    callback: The callback. Returning ControlFlow::BREAK from the
+              callback stops solving and returns the solution so far.
 
 )doc";
 

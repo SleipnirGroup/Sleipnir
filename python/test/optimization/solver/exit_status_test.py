@@ -2,7 +2,7 @@
 
 import pytest
 from sleipnir.autodiff import ExpressionType, sqrt
-from sleipnir.optimization import ExitStatus, Problem
+from sleipnir.optimization import ExitStatus, IterationInfo, Problem
 from tolerance import solution_tolerance
 
 
@@ -11,16 +11,19 @@ def test_callback_requested_stop() -> None:
     x = problem.decision_variable()
     problem.minimize(x * x)
 
-    problem.add_callback(lambda info: False)
+    def stop(info: IterationInfo) -> None:
+        raise StopIteration
+
+    problem.add_callback(lambda info: None)
     x.set_value(1)
     assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
 
-    problem.add_callback(lambda info: True)
+    problem.add_callback(stop)
     x.set_value(1)
     assert problem.solve(diagnostics=True) == ExitStatus.CALLBACK_REQUESTED_STOP
 
     problem.clear_callbacks()
-    problem.add_callback(lambda info: False)
+    problem.add_callback(lambda info: None)
     x.set_value(1)
     assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
 

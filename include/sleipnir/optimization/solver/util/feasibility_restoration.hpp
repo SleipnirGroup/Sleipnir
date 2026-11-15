@@ -13,6 +13,7 @@
 #include <Eigen/SparseCore>
 #include <gch/small_vector.hpp>
 
+#include "sleipnir/optimization/solver/control_flow.hpp"
 #include "sleipnir/optimization/solver/exit_status.hpp"
 #include "sleipnir/optimization/solver/ipm_matrix_callbacks.hpp"
 #include "sleipnir/optimization/solver/iteration_info.hpp"
@@ -25,16 +26,17 @@
 namespace slp {
 
 template <typename Scalar>
-ExitStatus ipm(const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
-               std::span<std::function<bool(const IterationInfo<Scalar>& info)>>
-                   iteration_callbacks,
-               const Options<Scalar>& options, bool in_feasibility_restoration,
+ExitStatus ipm(
+    const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
+    std::span<std::function<ControlFlow(const IterationInfo<Scalar>& info)>>
+        iteration_callbacks,
+    const Options<Scalar>& options, bool in_feasibility_restoration,
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
-               const Eigen::ArrayX<bool>& bound_constraint_mask,
+    const Eigen::ArrayX<bool>& bound_constraint_mask,
 #endif
-               Eigen::VectorX<Scalar>& x, Eigen::VectorX<Scalar>& s,
-               Eigen::VectorX<Scalar>& y, Eigen::VectorX<Scalar>& z, Scalar& μ,
-               int& iterations);
+    Eigen::VectorX<Scalar>& x, Eigen::VectorX<Scalar>& s,
+    Eigen::VectorX<Scalar>& y, Eigen::VectorX<Scalar>& z, Scalar& μ,
+    int& iterations);
 
 /// Computes initial values for p and n in feasibility restoration.
 ///
@@ -113,7 +115,7 @@ std::tuple<Eigen::VectorX<Scalar>, Eigen::VectorX<Scalar>> compute_p_n(
 template <typename Scalar>
 ExitStatus feasibility_restoration(
     const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
-    std::span<std::function<bool(const IterationInfo<Scalar>& info)>>
+    std::span<std::function<ControlFlow(const IterationInfo<Scalar>& info)>>
         iteration_callbacks,
     const Options<Scalar>& options, Eigen::VectorX<Scalar>& x,
     Eigen::VectorX<Scalar>& y, int& iterations) {
@@ -371,7 +373,7 @@ ExitStatus feasibility_restoration(
 template <typename Scalar>
 ExitStatus feasibility_restoration(
     const IPMMatrixCallbacks<Scalar>& matrix_callbacks,
-    std::span<std::function<bool(const IterationInfo<Scalar>& info)>>
+    std::span<std::function<ControlFlow(const IterationInfo<Scalar>& info)>>
         iteration_callbacks,
     const Options<Scalar>& options,
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION

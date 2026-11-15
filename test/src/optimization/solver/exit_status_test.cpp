@@ -29,23 +29,26 @@ TEMPLATE_TEST_CASE("ExitStatus - Callback requested stop", "[ExitStatus]",
   x.set_value(T(1));
   CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
-  problem.add_callback([](const slp::IterationInfo<T>&) { return false; });
+  problem.add_callback(
+      [](const slp::IterationInfo<T>&) { return slp::ControlFlow::CONTINUE; });
   x.set_value(T(1));
   CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
-  problem.add_callback([](const slp::IterationInfo<T>&) { return true; });
+  problem.add_callback(
+      [](const slp::IterationInfo<T>&) { return slp::ControlFlow::BREAK; });
   x.set_value(T(1));
   CHECK(problem.solve({.diagnostics = true}) ==
         slp::ExitStatus::CALLBACK_REQUESTED_STOP);
 
   problem.clear_callbacks();
-  problem.add_callback([](const slp::IterationInfo<T>&) { return false; });
+  problem.add_callback(
+      [](const slp::IterationInfo<T>&) { return slp::ControlFlow::CONTINUE; });
   x.set_value(T(1));
   CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
 
   // Ensure persistent callbacks aren't removed by clear_callbacks()
   problem.add_persistent_callback(
-      [](const slp::IterationInfo<T>&) { return true; });
+      [](const slp::IterationInfo<T>&) { return slp::ControlFlow::BREAK; });
   problem.clear_callbacks();
   x.set_value(T(1));
   CHECK(problem.solve({.diagnostics = true}) ==

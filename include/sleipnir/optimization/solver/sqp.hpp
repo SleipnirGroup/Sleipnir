@@ -14,6 +14,7 @@
 #include <Eigen/SparseCore>
 #include <gch/small_vector.hpp>
 
+#include "sleipnir/optimization/solver/control_flow.hpp"
 #include "sleipnir/optimization/solver/exit_status.hpp"
 #include "sleipnir/optimization/solver/iteration_info.hpp"
 #include "sleipnir/optimization/solver/options.hpp"
@@ -58,10 +59,11 @@ namespace slp {
 ///     variables.
 /// @return The exit status.
 template <typename Scalar>
-ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
-               std::span<std::function<bool(const IterationInfo<Scalar>& info)>>
-                   iteration_callbacks,
-               const Options<Scalar>& options, Eigen::VectorX<Scalar>& x) {
+ExitStatus sqp(
+    const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
+    std::span<std::function<ControlFlow(const IterationInfo<Scalar>& info)>>
+        iteration_callbacks,
+    const Options<Scalar>& options, Eigen::VectorX<Scalar>& x) {
   using DenseVector = Eigen::VectorX<Scalar>;
 
   DenseVector y = DenseVector::Zero(matrix_callbacks.num_equality_constraints);
@@ -92,11 +94,12 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
 ///     constraint dual variables.
 /// @return The exit status.
 template <typename Scalar>
-ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
-               std::span<std::function<bool(const IterationInfo<Scalar>& info)>>
-                   iteration_callbacks,
-               const Options<Scalar>& options, Eigen::VectorX<Scalar>& x,
-               Eigen::VectorX<Scalar>& y) {
+ExitStatus sqp(
+    const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
+    std::span<std::function<ControlFlow(const IterationInfo<Scalar>& info)>>
+        iteration_callbacks,
+    const Options<Scalar>& options, Eigen::VectorX<Scalar>& x,
+    Eigen::VectorX<Scalar>& y) {
   using DenseVector = Eigen::VectorX<Scalar>;
   using SparseMatrix = Eigen::SparseMatrix<Scalar>;
   using SparseVector = Eigen::SparseVector<Scalar>;
@@ -268,7 +271,8 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
 
     // Call iteration callbacks
     for (const auto& callback : iteration_callbacks) {
-      if (callback({iterations, x, {}, y, {}, g, H, A_e, {}})) {
+      if (callback({iterations, x, {}, y, {}, g, H, A_e, {}}) ==
+          ControlFlow::BREAK) {
         return ExitStatus::CALLBACK_REQUESTED_STOP;
       }
     }
@@ -522,14 +526,15 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
           feasibility_restoration_cycle_detector.is_cycling();
 
       // Feasibility restoration phase
-      gch::small_vector<std::function<bool(const IterationInfo<Scalar>& info)>>
+      gch::small_vector<
+          std::function<ControlFlow(const IterationInfo<Scalar>& info)>>
           callbacks;
       for (auto& callback : iteration_callbacks) {
         callbacks.emplace_back(callback);
       }
       callbacks.emplace_back([&](const IterationInfo<Scalar>& info) {
         if (run_feasibility_restoration_to_convergence) {
-          return false;
+          return ControlFlow::CONTINUE;
         }
 
         DenseVector trial_x =
@@ -541,9 +546,13 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
 
         // If the current iterate sufficiently reduces constraint violation and
         // is accepted by the normal filter, stop feasibility restoration
-        return trial_entry.constraint_violation <
-                   Scalar(0.9) * initial_entry.constraint_violation &&
-               filter.is_acceptable(trial_entry);
+        if (trial_entry.constraint_violation <
+                Scalar(0.9) * initial_entry.constraint_violation &&
+            filter.is_acceptable(trial_entry)) {
+          return ControlFlow::BREAK;
+        } else {
+          return ControlFlow::CONTINUE;
+        }
       });
       auto status = feasibility_restoration<Scalar>(matrices, callbacks,
                                                     options, x, y, iterations);
@@ -624,7 +633,7 @@ ExitStatus sqp(const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
 
 extern template SLEIPNIR_DLLEXPORT ExitStatus
 sqp(const SQPMatrixCallbacks<double>& matrix_callbacks,
-    std::span<std::function<bool(const IterationInfo<double>& info)>>
+    std::span<std::function<ControlFlow(const IterationInfo<double>& info)>>
         iteration_callbacks,
     const Options<double>& options, Eigen::VectorX<double>& x);
 

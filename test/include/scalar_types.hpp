@@ -32,7 +32,7 @@ extern template class slp::OCP<float>;
 
 extern template slp::ExitStatus slp::ipm(
     const IPMMatrixCallbacks<float>& matrix_callbacks,
-    std::span<std::function<bool(const IterationInfo<float>& info)>>
+    std::span<std::function<ControlFlow(const IterationInfo<float>& info)>>
         iteration_callbacks,
     const Options<float>& options,
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
@@ -42,13 +42,13 @@ extern template slp::ExitStatus slp::ipm(
 
 extern template slp::ExitStatus slp::newton(
     const NewtonMatrixCallbacks<float>& matrix_callbacks,
-    std::span<std::function<bool(const IterationInfo<float>& info)>>
+    std::span<std::function<ControlFlow(const IterationInfo<float>& info)>>
         iteration_callbacks,
     const Options<float>& options, Eigen::Vector<float, Eigen::Dynamic>& x);
 
 extern template slp::ExitStatus slp::sqp(
     const SQPMatrixCallbacks<float>& matrix_callbacks,
-    std::span<std::function<bool(const IterationInfo<float>& info)>>
+    std::span<std::function<ControlFlow(const IterationInfo<float>& info)>>
         iteration_callbacks,
     const Options<float>& options, Eigen::Vector<float, Eigen::Dynamic>& x);
 
@@ -70,7 +70,8 @@ extern template class slp::OCP<ExplicitDouble>;
 
 extern template slp::ExitStatus slp::ipm(
     const IPMMatrixCallbacks<ExplicitDouble>& matrix_callbacks,
-    std::span<std::function<bool(const IterationInfo<ExplicitDouble>& info)>>
+    std::span<
+        std::function<ControlFlow(const IterationInfo<ExplicitDouble>& info)>>
         iteration_callbacks,
     const Options<ExplicitDouble>& options,
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
@@ -80,13 +81,15 @@ extern template slp::ExitStatus slp::ipm(
 
 extern template slp::ExitStatus slp::newton(
     const NewtonMatrixCallbacks<ExplicitDouble>& matrix_callbacks,
-    std::span<std::function<bool(const IterationInfo<ExplicitDouble>& info)>>
+    std::span<
+        std::function<ControlFlow(const IterationInfo<ExplicitDouble>& info)>>
         iteration_callbacks,
     const Options<ExplicitDouble>& options, Eigen::VectorX<ExplicitDouble>& x);
 
 extern template slp::ExitStatus slp::sqp(
     const SQPMatrixCallbacks<ExplicitDouble>& matrix_callbacks,
-    std::span<std::function<bool(const IterationInfo<ExplicitDouble>& info)>>
+    std::span<
+        std::function<ControlFlow(const IterationInfo<ExplicitDouble>& info)>>
         iteration_callbacks,
     const Options<ExplicitDouble>& options, Eigen::VectorX<ExplicitDouble>& x);
 
