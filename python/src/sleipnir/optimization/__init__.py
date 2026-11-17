@@ -32,4 +32,4 @@ def multistart[T](
         ]
 
     # Prioritize successful solve, otherwise prioritize solution with lower cost
-    return min(results, key=lambda x: (int(x[0] != ExitStatus.SUCCESS), x[1]))
+    return min(results, key=lambda result: (result[0] != ExitStatus.SUCCESS, result[1]))
