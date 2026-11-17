@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <future>
 #include <span>
+#include <utility>
 
 #include <gch/small_vector.hpp>
 
@@ -62,14 +63,9 @@ MultistartResult<Scalar, DecisionVariables> multistart(
     results.emplace_back(future.get());
   }
 
-  return *std::ranges::min_element(results, [](const auto& a, const auto& b) {
-    // Prioritize successful solve
-    if (a.status == ExitStatus::SUCCESS && b.status != ExitStatus::SUCCESS) {
-      return true;
-    }
-
-    // Otherwise prioritize solution with lower cost
-    return a.cost < b.cost;
+  // Prioritize successful solve, otherwise prioritize solution with lower cost
+  return *std::ranges::min_element(results, {}, [](const auto& result) {
+    return std::pair{result.status != ExitStatus::SUCCESS, result.cost};
   });
 }
 
