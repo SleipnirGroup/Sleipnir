@@ -77,6 +77,51 @@ ExpressionGraph<Scalar> topological_sort(const ExpressionPtr<Scalar>& root) {
   return list;
 }
 
+/// Returns true if the gradient of an expression graph is constant.
+///
+/// @tparam Scalar Scalar type.
+/// @param list Topological sort of graph from parent to child.
+/// @return True if the gradient of the expression graph is constant.
+template <typename Scalar>
+bool has_constant_gradient(const ExpressionGraph<Scalar>& list) {
+  using enum ExpressionType;
+
+  // The gradient of a constant or parameter expression is zero
+  if (list.empty() || list[0]->type() < LINEAR) {
+    return true;
+  }
+
+  // The gradient of a quadratic or nonlinear expression is never constant
+  if (list[0]->type() > LINEAR) {
+    return false;
+  }
+
+  for (const auto& node : list) {
+    // The gradient of a linear expression is composed of the partial
+    // derivatives of its linear operators, so only the ones that vary with
+    // their operator's arguments can change it. Operators on only constants
+    // and parameters (e.g., p₁ * p₂ in x + p₁ * p₂) are skipped because their
+    // partial derivatives are with respect to parameters, which aren't in the
+    // gradient.
+    if (node->type() == LINEAR && !node->has_constant_partials()) {
+      // A linear operator's partial derivatives can't depend on decision
+      // variables, or the operator wouldn't be linear, so they depend only on
+      // its constant and parameter arguments
+      bool has_parameter_arg = false;
+      node->visit_args([&](const auto& arg) {
+        has_parameter_arg |= arg->type() == PARAMETER;
+      });
+
+      // A parameter's value can change between solves
+      if (has_parameter_arg) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
 /// Updates the values of all nodes in this graph based on the values of
 /// their dependent nodes.
 ///

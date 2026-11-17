@@ -17,6 +17,8 @@ enum class ExpressionType : uint8_t {
   NONE,
   /// The expression is a constant.
   CONSTANT,
+  /// The expression is composed of parameters and constants.
+  PARAMETER,
   /// The expression is composed of linear and lower-order operators.
   LINEAR,
   /// The expression is composed of quadratic and lower-order operators.
@@ -53,6 +55,8 @@ struct std::formatter<slp::ExpressionType> {
         return m_underlying.format("none", ctx);
       case CONSTANT:
         return m_underlying.format("constant", ctx);
+      case PARAMETER:
+        return m_underlying.format("parameter", ctx);
       case LINEAR:
         return m_underlying.format("linear", ctx);
       case QUADRATIC:

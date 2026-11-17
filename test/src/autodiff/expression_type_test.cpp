@@ -8,6 +8,7 @@
 TEST_CASE("ExpressionType - Formatter", "[Formatter]") {
   CHECK(std::format("{}", slp::ExpressionType::NONE) == "none");
   CHECK(std::format("{}", slp::ExpressionType::CONSTANT) == "constant");
+  CHECK(std::format("{}", slp::ExpressionType::PARAMETER) == "parameter");
   CHECK(std::format("{}", slp::ExpressionType::LINEAR) == "linear");
   CHECK(std::format("{}", slp::ExpressionType::QUADRATIC) == "quadratic");
   CHECK(std::format("{}", slp::ExpressionType::NONLINEAR) == "nonlinear");

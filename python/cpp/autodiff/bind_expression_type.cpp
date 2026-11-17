@@ -14,6 +14,8 @@ void bind_expression_type(nb::enum_<ExpressionType>& e) {
   e.value("NONE", ExpressionType::NONE, DOC(slp, ExpressionType, NONE));
   e.value("CONSTANT", ExpressionType::CONSTANT,
           DOC(slp, ExpressionType, CONSTANT));
+  e.value("PARAMETER", ExpressionType::PARAMETER,
+          DOC(slp, ExpressionType, PARAMETER));
   e.value("LINEAR", ExpressionType::LINEAR, DOC(slp, ExpressionType, LINEAR));
   e.value("QUADRATIC", ExpressionType::QUADRATIC,
           DOC(slp, ExpressionType, QUADRATIC));
