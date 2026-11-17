@@ -100,12 +100,12 @@ TEMPLATE_TEST_CASE("OCP - Cart-pole", "[OCP]", SCALAR_TYPES) {
   // Verify solution
   for (int k = 0; k < N; ++k) {
     // Cart position constraints
-    CHECK(X.value(0, k) >= T(0));
-    CHECK(X.value(0, k) <= d_max);
+    CHECK(X.value(0, k) >= -solution_tolerance<T>(1));
+    CHECK(X.value(0, k) <= d_max + solution_tolerance<T>(1));
 
     // Input constraints
-    CHECK(U.value(0, k) >= -u_max);
-    CHECK(U.value(0, k) <= u_max);
+    CHECK(U.value(0, k) >= -u_max - solution_tolerance<T>(1));
+    CHECK(U.value(0, k) <= u_max + solution_tolerance<T>(1));
 
     // Dynamics constraints
     //

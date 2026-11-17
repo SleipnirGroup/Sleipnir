@@ -16,7 +16,7 @@ template <typename Scalar>
 Scalar min_hessian_regularization() {
   using std::sqrt;
 
-  // This value keeps regularized pivots well above the inertia's zero-pivot
+  // This value keeps regularized pivots well above the near-singular pivot
   // threshold
   return sqrt(std::numeric_limits<Scalar>::epsilon()) / Scalar(100);
 }
@@ -45,14 +45,13 @@ Scalar min_constraint_regularization() {
   return sqrt(std::numeric_limits<Scalar>::epsilon()) / Scalar(3000);
 }
 
-/// Returns the largest LDLT pivot magnitude the KKT matrix inertia counts as
-/// zero.
+/// Returns the largest LDLT pivot magnitude counted as near-singular. A 2x2
+/// pivot's magnitude is the smallest magnitude of its eigenvalues.
 ///
 /// @tparam Scalar Scalar type.
-/// @return The largest LDLT pivot magnitude the KKT matrix inertia counts as
-///     zero.
+/// @return The largest LDLT pivot magnitude counted as near-singular.
 template <typename Scalar>
-Scalar zero_pivot_threshold() {
+Scalar near_singular_pivot_threshold() {
   using std::min;
 
   // The threshold must be below the regularized pivots, or the regularization
@@ -73,21 +72,6 @@ Scalar max_constraint_regularization() {
   // Larger values than this distort the equality constraint Jacobian more than
   // they help a rank-deficient one
   return sqrt(std::numeric_limits<Scalar>::epsilon());
-}
-
-/// Returns the smallest LDLT pivot magnitude allowed without regularization.
-///
-/// @tparam Scalar Scalar type.
-/// @return The smallest LDLT pivot magnitude allowed without regularization.
-template <typename Scalar>
-Scalar min_unregularized_pivot() {
-  using std::pow;
-
-  // In a well-scaled matrix, a pivot D magnifies the factorization's rounding
-  // error by roughly 1/|D|. Pivots of at least ε^(1/4) keep that error within
-  // the KKT solver's iterative refinement tolerance of ε^(3/4), so the
-  // unregularized factorization is accurate enough without regularization.
-  return pow(std::numeric_limits<Scalar>::epsilon(), Scalar(0.25));
 }
 
 }  // namespace slp
