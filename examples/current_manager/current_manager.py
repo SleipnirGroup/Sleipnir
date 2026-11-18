@@ -1,4 +1,4 @@
-from sleipnir.autodiff import Variable, VariableMatrix
+from sleipnir.autodiff import Variable
 from sleipnir.optimization import Problem
 
 
@@ -19,17 +19,11 @@ class CurrentManager:
                 subsystem.
             max_current: The current budget to allocate between subsystems.
         """
-        self.__desired_currents = VariableMatrix(len(current_tolerances), 1)
         self.__problem = Problem()
+        self.__desired_currents = self.__problem.parameter(len(current_tolerances))
         self.__allocated_currents = self.__problem.decision_variable(
             len(current_tolerances)
         )
-
-        # Ensure desired_currents contains initialized Variables
-        for row in range(self.__desired_currents.rows()):
-            # Don't initialize to 0 or 1, because those will get folded by
-            # Sleipnir
-            self.__desired_currents[row] = Variable(float("inf"))
 
         J = 0.0
         current_sum = Variable(0.0)

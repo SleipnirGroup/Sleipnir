@@ -17,9 +17,10 @@ namespace slp::detail {
 /// Derived expression type for abs().
 ///
 /// @tparam Scalar Scalar type.
-template <typename Scalar>
+/// @tparam T Expression type.
+template <typename Scalar, ExpressionType T>
 struct AbsExpression final
-    : NonLeafExpression<AbsExpression<Scalar>, Scalar, 1> {
+    : NonLeafExpression<AbsExpression<Scalar, T>, Scalar, 1, T> {
   using AbsExpression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -53,15 +54,16 @@ struct AbsExpression final
 /// @param x The argument.
 template <typename Scalar>
 ExpressionPtr<Scalar> abs(const ExpressionPtr<Scalar>& x) {
-  return fold_or_make<AbsExpression<Scalar>>(x);
+  return fold_or_make<AbsExpression, Scalar>(x);
 }
 
 /// Derived expression type for acos().
 ///
 /// @tparam Scalar Scalar type.
-template <typename Scalar>
+/// @tparam T Expression type.
+template <typename Scalar, ExpressionType T>
 struct AcosExpression final
-    : NonLeafExpression<AcosExpression<Scalar>, Scalar, 1> {
+    : NonLeafExpression<AcosExpression<Scalar, T>, Scalar, 1, T> {
   using AcosExpression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -86,15 +88,16 @@ struct AcosExpression final
 /// @param x The argument.
 template <typename Scalar>
 ExpressionPtr<Scalar> acos(const ExpressionPtr<Scalar>& x) {
-  return fold_or_make<AcosExpression<Scalar>>(x);
+  return fold_or_make<AcosExpression, Scalar>(x);
 }
 
 /// Derived expression type for asin().
 ///
 /// @tparam Scalar Scalar type.
-template <typename Scalar>
+/// @tparam T Expression type.
+template <typename Scalar, ExpressionType T>
 struct AsinExpression final
-    : NonLeafExpression<AsinExpression<Scalar>, Scalar, 1> {
+    : NonLeafExpression<AsinExpression<Scalar, T>, Scalar, 1, T> {
   using AsinExpression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -119,15 +122,16 @@ struct AsinExpression final
 /// @param x The argument.
 template <typename Scalar>
 ExpressionPtr<Scalar> asin(const ExpressionPtr<Scalar>& x) {
-  return fold_or_make<AsinExpression<Scalar>>(x);
+  return fold_or_make<AsinExpression, Scalar>(x);
 }
 
 /// Derived expression type for atan().
 ///
 /// @tparam Scalar Scalar type.
-template <typename Scalar>
+/// @tparam T Expression type.
+template <typename Scalar, ExpressionType T>
 struct AtanExpression final
-    : NonLeafExpression<AtanExpression<Scalar>, Scalar, 1> {
+    : NonLeafExpression<AtanExpression<Scalar, T>, Scalar, 1, T> {
   using AtanExpression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -151,15 +155,16 @@ struct AtanExpression final
 /// @param x The argument.
 template <typename Scalar>
 ExpressionPtr<Scalar> atan(const ExpressionPtr<Scalar>& x) {
-  return fold_or_make<AtanExpression<Scalar>>(x);
+  return fold_or_make<AtanExpression, Scalar>(x);
 }
 
 /// Derived expression type for atan2().
 ///
 /// @tparam Scalar Scalar type.
-template <typename Scalar>
+/// @tparam T Expression type.
+template <typename Scalar, ExpressionType T>
 struct Atan2Expression final
-    : NonLeafExpression<Atan2Expression<Scalar>, Scalar, 2> {
+    : NonLeafExpression<Atan2Expression<Scalar, T>, Scalar, 2, T> {
   using Atan2Expression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -187,15 +192,16 @@ struct Atan2Expression final
 template <typename Scalar>
 ExpressionPtr<Scalar> atan2(const ExpressionPtr<Scalar>& y,
                             const ExpressionPtr<Scalar>& x) {
-  return fold_or_make<Atan2Expression<Scalar>>(y, x);
+  return fold_or_make<Atan2Expression, Scalar>(y, x);
 }
 
 /// Derived expression type for cbrt().
 ///
 /// @tparam Scalar Scalar type.
-template <typename Scalar>
+/// @tparam T Expression type.
+template <typename Scalar, ExpressionType T>
 struct CbrtExpression final
-    : NonLeafExpression<CbrtExpression<Scalar>, Scalar, 1> {
+    : NonLeafExpression<CbrtExpression<Scalar, T>, Scalar, 1, T> {
   using CbrtExpression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -219,15 +225,16 @@ struct CbrtExpression final
 /// @param x The argument.
 template <typename Scalar>
 ExpressionPtr<Scalar> cbrt(const ExpressionPtr<Scalar>& x) {
-  return fold_or_make<CbrtExpression<Scalar>>(x);
+  return fold_or_make<CbrtExpression, Scalar>(x);
 }
 
 /// Derived expression type for cos().
 ///
 /// @tparam Scalar Scalar type.
-template <typename Scalar>
+/// @tparam T Expression type.
+template <typename Scalar, ExpressionType T>
 struct CosExpression final
-    : NonLeafExpression<CosExpression<Scalar>, Scalar, 1> {
+    : NonLeafExpression<CosExpression<Scalar, T>, Scalar, 1, T> {
   using CosExpression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -252,15 +259,16 @@ struct CosExpression final
 /// @param x The argument.
 template <typename Scalar>
 ExpressionPtr<Scalar> cos(const ExpressionPtr<Scalar>& x) {
-  return fold_or_make<CosExpression<Scalar>>(x);
+  return fold_or_make<CosExpression, Scalar>(x);
 }
 
 /// Derived expression type for cosh().
 ///
 /// @tparam Scalar Scalar type.
-template <typename Scalar>
+/// @tparam T Expression type.
+template <typename Scalar, ExpressionType T>
 struct CoshExpression final
-    : NonLeafExpression<CoshExpression<Scalar>, Scalar, 1> {
+    : NonLeafExpression<CoshExpression<Scalar, T>, Scalar, 1, T> {
   using CoshExpression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -285,15 +293,16 @@ struct CoshExpression final
 /// @param x The argument.
 template <typename Scalar>
 ExpressionPtr<Scalar> cosh(const ExpressionPtr<Scalar>& x) {
-  return fold_or_make<CoshExpression<Scalar>>(x);
+  return fold_or_make<CoshExpression, Scalar>(x);
 }
 
 /// Derived expression type for erf().
 ///
 /// @tparam Scalar Scalar type.
-template <typename Scalar>
+/// @tparam T Expression type.
+template <typename Scalar, ExpressionType T>
 struct ErfExpression final
-    : NonLeafExpression<ErfExpression<Scalar>, Scalar, 1> {
+    : NonLeafExpression<ErfExpression<Scalar, T>, Scalar, 1, T> {
   using ErfExpression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -318,15 +327,16 @@ struct ErfExpression final
 /// @param x The argument.
 template <typename Scalar>
 ExpressionPtr<Scalar> erf(const ExpressionPtr<Scalar>& x) {
-  return fold_or_make<ErfExpression<Scalar>>(x);
+  return fold_or_make<ErfExpression, Scalar>(x);
 }
 
 /// Derived expression type for exp().
 ///
 /// @tparam Scalar Scalar type.
-template <typename Scalar>
+/// @tparam T Expression type.
+template <typename Scalar, ExpressionType T>
 struct ExpExpression final
-    : NonLeafExpression<ExpExpression<Scalar>, Scalar, 1> {
+    : NonLeafExpression<ExpExpression<Scalar, T>, Scalar, 1, T> {
   using ExpExpression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -350,7 +360,7 @@ struct ExpExpression final
 /// @param x The argument.
 template <typename Scalar>
 ExpressionPtr<Scalar> exp(const ExpressionPtr<Scalar>& x) {
-  return fold_or_make<ExpExpression<Scalar>>(x);
+  return fold_or_make<ExpExpression, Scalar>(x);
 }
 
 template <typename Scalar>
@@ -360,9 +370,10 @@ ExpressionPtr<Scalar> hypot(const ExpressionPtr<Scalar>& x,
 /// Derived expression type for hypot() with two arguments.
 ///
 /// @tparam Scalar Scalar type.
-template <typename Scalar>
+/// @tparam T Expression type.
+template <typename Scalar, ExpressionType T>
 struct Hypot2Expression final
-    : NonLeafExpression<Hypot2Expression<Scalar>, Scalar, 2> {
+    : NonLeafExpression<Hypot2Expression<Scalar, T>, Scalar, 2, T> {
   using Hypot2Expression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -396,7 +407,7 @@ ExpressionPtr<Scalar> hypot(const ExpressionPtr<Scalar>& x,
     return abs(x);
   }
 
-  return fold_or_make<Hypot2Expression<Scalar>>(x, y);
+  return fold_or_make<Hypot2Expression, Scalar>(x, y);
 }
 
 template <typename Scalar>
@@ -407,9 +418,10 @@ ExpressionPtr<Scalar> hypot(const ExpressionPtr<Scalar>& x,
 /// Derived expression type for hypot() with three arguments.
 ///
 /// @tparam Scalar Scalar type.
-template <typename Scalar>
+/// @tparam T Expression type.
+template <typename Scalar, ExpressionType T>
 struct Hypot3Expression final
-    : NonLeafExpression<Hypot3Expression<Scalar>, Scalar, 3> {
+    : NonLeafExpression<Hypot3Expression<Scalar, T>, Scalar, 3, T> {
   using Hypot3Expression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -448,7 +460,7 @@ ExpressionPtr<Scalar> hypot(const ExpressionPtr<Scalar>& x,
     return hypot(x, y);
   }
 
-  return fold_or_make<Hypot3Expression<Scalar>>(x, y, z);
+  return fold_or_make<Hypot3Expression, Scalar>(x, y, z);
 }
 
 /// Derived expression type for if_else().
@@ -456,9 +468,10 @@ ExpressionPtr<Scalar> hypot(const ExpressionPtr<Scalar>& x,
 /// Returns t if cond(a, b) is true, otherwise f.
 ///
 /// @tparam Scalar Scalar type.
-template <typename Scalar>
+/// @tparam T Expression type.
+template <typename Scalar, ExpressionType T>
 struct IfElseExpression final
-    : NonLeafExpression<IfElseExpression<Scalar>, Scalar, 4> {
+    : NonLeafExpression<IfElseExpression<Scalar, T>, Scalar, 4, T> {
   /// The expression's name.
   static constexpr std::string_view NAME = "if-else";
 
@@ -532,15 +545,23 @@ ExpressionPtr<Scalar> if_else(
     return cond(a->val, b->val) ? t : f;
   }
 
-  return make_expression_ptr<IfElseExpression<Scalar>>(cond, a, b, t, f);
+  if (a->type() <= PARAMETER && b->type() <= PARAMETER &&
+      t->type() <= PARAMETER && f->type() <= PARAMETER) {
+    return make_expression_ptr<IfElseExpression<Scalar, PARAMETER>>(cond, a, b,
+                                                                    t, f);
+  } else {
+    return make_expression_ptr<IfElseExpression<Scalar, NONLINEAR>>(cond, a, b,
+                                                                    t, f);
+  }
 }
 
 /// Derived expression type for log().
 ///
 /// @tparam Scalar Scalar type.
-template <typename Scalar>
+/// @tparam T Expression type.
+template <typename Scalar, ExpressionType T>
 struct LogExpression final
-    : NonLeafExpression<LogExpression<Scalar>, Scalar, 1> {
+    : NonLeafExpression<LogExpression<Scalar, T>, Scalar, 1, T> {
   using LogExpression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -564,15 +585,16 @@ struct LogExpression final
 /// @param x The argument.
 template <typename Scalar>
 ExpressionPtr<Scalar> log(const ExpressionPtr<Scalar>& x) {
-  return fold_or_make<LogExpression<Scalar>>(x);
+  return fold_or_make<LogExpression, Scalar>(x);
 }
 
 /// Derived expression type for log10().
 ///
 /// @tparam Scalar Scalar type.
-template <typename Scalar>
+/// @tparam T Expression type.
+template <typename Scalar, ExpressionType T>
 struct Log10Expression final
-    : NonLeafExpression<Log10Expression<Scalar>, Scalar, 1> {
+    : NonLeafExpression<Log10Expression<Scalar, T>, Scalar, 1, T> {
   using Log10Expression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -596,7 +618,7 @@ struct Log10Expression final
 /// @param x The argument.
 template <typename Scalar>
 ExpressionPtr<Scalar> log10(const ExpressionPtr<Scalar>& x) {
-  return fold_or_make<Log10Expression<Scalar>>(x);
+  return fold_or_make<Log10Expression, Scalar>(x);
 }
 
 /// Derived expression type for max().
@@ -604,9 +626,10 @@ ExpressionPtr<Scalar> log10(const ExpressionPtr<Scalar>& x) {
 /// Returns the greater of a and b. If the values are equivalent, returns a.
 ///
 /// @tparam Scalar Scalar type.
-template <typename Scalar>
+/// @tparam T Expression type.
+template <typename Scalar, ExpressionType T>
 struct MaxExpression final
-    : NonLeafExpression<MaxExpression<Scalar>, Scalar, 2> {
+    : NonLeafExpression<MaxExpression<Scalar, T>, Scalar, 2, T> {
   using MaxExpression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -642,7 +665,7 @@ struct MaxExpression final
 template <typename Scalar>
 ExpressionPtr<Scalar> max(const ExpressionPtr<Scalar>& a,
                           const ExpressionPtr<Scalar>& b) {
-  return fold_or_make<MaxExpression<Scalar>>(a, b);
+  return fold_or_make<MaxExpression, Scalar>(a, b);
 }
 
 /// Derived expression type for min().
@@ -650,9 +673,10 @@ ExpressionPtr<Scalar> max(const ExpressionPtr<Scalar>& a,
 /// Returns the lesser of a and b. If the values are equivalent, returns a.
 ///
 /// @tparam Scalar Scalar type.
-template <typename Scalar>
+/// @tparam T Expression type.
+template <typename Scalar, ExpressionType T>
 struct MinExpression final
-    : NonLeafExpression<MinExpression<Scalar>, Scalar, 2> {
+    : NonLeafExpression<MinExpression<Scalar, T>, Scalar, 2, T> {
   using MinExpression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -688,7 +712,7 @@ struct MinExpression final
 template <typename Scalar>
 ExpressionPtr<Scalar> min(const ExpressionPtr<Scalar>& a,
                           const ExpressionPtr<Scalar>& b) {
-  return fold_or_make<MinExpression<Scalar>>(a, b);
+  return fold_or_make<MinExpression, Scalar>(a, b);
 }
 
 template <typename Scalar>
@@ -758,21 +782,28 @@ ExpressionPtr<Scalar> pow(const ExpressionPtr<Scalar>& base,
   }
 
   if (power->is_constant(Scalar(2))) {
-    auto type = base->type() == LINEAR ? QUADRATIC : NONLINEAR;
+    auto type = base->type() == PARAMETER ? PARAMETER
+                : base->type() == LINEAR  ? QUADRATIC
+                                          : NONLINEAR;
     return make_typed_expression_ptr<MultExpression, Scalar>(type, base, base);
   } else if (power->is_constant(Scalar(0.5))) {
     return sqrt(base);
   }
 
-  return make_expression_ptr<PowExpression<Scalar, NONLINEAR>>(base, power);
+  if (base->type() <= PARAMETER && power->type() <= PARAMETER) {
+    return make_expression_ptr<PowExpression<Scalar, PARAMETER>>(base, power);
+  } else {
+    return make_expression_ptr<PowExpression<Scalar, NONLINEAR>>(base, power);
+  }
 }
 
 /// Derived expression type for sign().
 ///
 /// @tparam Scalar Scalar type.
-template <typename Scalar>
+/// @tparam T Expression type.
+template <typename Scalar, ExpressionType T>
 struct SignExpression final
-    : NonLeafExpression<SignExpression<Scalar>, Scalar, 1> {
+    : NonLeafExpression<SignExpression<Scalar, T>, Scalar, 1, T> {
   using SignExpression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -795,15 +826,16 @@ struct SignExpression final
 /// @param x The argument.
 template <typename Scalar>
 ExpressionPtr<Scalar> sign(const ExpressionPtr<Scalar>& x) {
-  return fold_or_make<SignExpression<Scalar>>(x);
+  return fold_or_make<SignExpression, Scalar>(x);
 }
 
 /// Derived expression type for sin().
 ///
 /// @tparam Scalar Scalar type.
-template <typename Scalar>
+/// @tparam T Expression type.
+template <typename Scalar, ExpressionType T>
 struct SinExpression final
-    : NonLeafExpression<SinExpression<Scalar>, Scalar, 1> {
+    : NonLeafExpression<SinExpression<Scalar, T>, Scalar, 1, T> {
   using SinExpression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -828,15 +860,16 @@ struct SinExpression final
 /// @param x The argument.
 template <typename Scalar>
 ExpressionPtr<Scalar> sin(const ExpressionPtr<Scalar>& x) {
-  return fold_or_make<SinExpression<Scalar>>(x);
+  return fold_or_make<SinExpression, Scalar>(x);
 }
 
 /// Derived expression type for sinh().
 ///
 /// @tparam Scalar Scalar type.
-template <typename Scalar>
+/// @tparam T Expression type.
+template <typename Scalar, ExpressionType T>
 struct SinhExpression final
-    : NonLeafExpression<SinhExpression<Scalar>, Scalar, 1> {
+    : NonLeafExpression<SinhExpression<Scalar, T>, Scalar, 1, T> {
   using SinhExpression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -861,15 +894,16 @@ struct SinhExpression final
 /// @param x The argument.
 template <typename Scalar>
 ExpressionPtr<Scalar> sinh(const ExpressionPtr<Scalar>& x) {
-  return fold_or_make<SinhExpression<Scalar>>(x);
+  return fold_or_make<SinhExpression, Scalar>(x);
 }
 
 /// Derived expression type for sqrt().
 ///
 /// @tparam Scalar Scalar type.
-template <typename Scalar>
+/// @tparam T Expression type.
+template <typename Scalar, ExpressionType T>
 struct SqrtExpression final
-    : NonLeafExpression<SqrtExpression<Scalar>, Scalar, 1> {
+    : NonLeafExpression<SqrtExpression<Scalar, T>, Scalar, 1, T> {
   using SqrtExpression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -893,15 +927,16 @@ struct SqrtExpression final
 /// @param x The argument.
 template <typename Scalar>
 ExpressionPtr<Scalar> sqrt(const ExpressionPtr<Scalar>& x) {
-  return fold_or_make<SqrtExpression<Scalar>>(x);
+  return fold_or_make<SqrtExpression, Scalar>(x);
 }
 
 /// Derived expression type for tan().
 ///
 /// @tparam Scalar Scalar type.
-template <typename Scalar>
+/// @tparam T Expression type.
+template <typename Scalar, ExpressionType T>
 struct TanExpression final
-    : NonLeafExpression<TanExpression<Scalar>, Scalar, 1> {
+    : NonLeafExpression<TanExpression<Scalar, T>, Scalar, 1, T> {
   using TanExpression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -928,15 +963,16 @@ struct TanExpression final
 /// @param x The argument.
 template <typename Scalar>
 ExpressionPtr<Scalar> tan(const ExpressionPtr<Scalar>& x) {
-  return fold_or_make<TanExpression<Scalar>>(x);
+  return fold_or_make<TanExpression, Scalar>(x);
 }
 
 /// Derived expression type for tanh().
 ///
 /// @tparam Scalar Scalar type.
-template <typename Scalar>
+/// @tparam T Expression type.
+template <typename Scalar, ExpressionType T>
 struct TanhExpression final
-    : NonLeafExpression<TanhExpression<Scalar>, Scalar, 1> {
+    : NonLeafExpression<TanhExpression<Scalar, T>, Scalar, 1, T> {
   using TanhExpression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -963,7 +999,7 @@ struct TanhExpression final
 /// @param x The argument.
 template <typename Scalar>
 ExpressionPtr<Scalar> tanh(const ExpressionPtr<Scalar>& x) {
-  return fold_or_make<TanhExpression<Scalar>>(x);
+  return fold_or_make<TanhExpression, Scalar>(x);
 }
 
 }  // namespace slp::detail

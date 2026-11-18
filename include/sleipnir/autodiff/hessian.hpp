@@ -25,7 +25,8 @@ namespace slp {
 /// variables.
 ///
 /// The gradient tree is cached so subsequent Hessian calculations are faster,
-/// and the Hessian is only recomputed if the variable expression is nonlinear.
+/// and the Hessian is only recomputed if the variable expression is nonlinear
+/// or its quadratic coefficients depend on parameters.
 ///
 /// @tparam Scalar Scalar type.
 /// @tparam UpLo Which part of the Hessian to compute (Lower or Lower | Upper).
@@ -81,15 +82,13 @@ class Hessian {
         continue;
       }
 
-      if (m_variables[row].type() == ExpressionType::LINEAR) {
-        // If the row is linear, compute its gradient once here and cache its
-        // triplets. Constant rows are ignored because their gradients have no
-        // nonzero triplets.
+      if (detail::has_constant_gradient(m_top_lists[row])) {
+        // If the row's gradient is constant, compute it once here and cache
+        // its triplets
         detail::append_triplets(m_top_lists[row], m_output_lists[row],
                                 m_cached_triplets, row);
-      } else if (m_variables[row].type() > ExpressionType::LINEAR) {
-        // If the row is quadratic or nonlinear, add it to the list of nonlinear
-        // rows to be recomputed in value().
+      } else {
+        // Otherwise, add it to the list of rows to be recomputed in value()
         m_nonlinear_rows.emplace_back(row);
       }
     }
@@ -173,8 +172,8 @@ class Hessian {
   // Cached triplets for gradients of linear rows
   gch::small_vector<Eigen::Triplet<Scalar>> m_cached_triplets;
 
-  // List of row indices for nonlinear rows whose graients will be computed in
-  // value()
+  // List of row indices for nonlinear rows and linear rows with parameters
+  // whose gradients will be computed in value()
   gch::small_vector<int> m_nonlinear_rows;
 };
 

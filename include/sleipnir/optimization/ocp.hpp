@@ -155,8 +155,10 @@ class OCP : public Problem<Scalar> {
       constrain_direct_collocation();
     } else if (transcription_method == TranscriptionMethod::SINGLE_SHOOTING) {
       // In single-shooting the states aren't decision variables, but instead
-      // depend on the input and previous states
-      m_X = VariableMatrix<Scalar>{num_states, m_num_steps + 1};
+      // depend on the input and previous states. The initial state is a
+      // parameter.
+      m_X = VariableMatrix<Scalar>{detail::empty, num_states, m_num_steps + 1};
+      m_X.col(0) = this->parameter(num_states);
       constrain_single_shooting();
     }
   }
@@ -180,8 +182,9 @@ class OCP : public Problem<Scalar> {
       x_0_value = VariableMatrix<Scalar>{initial_state};
     }
 
-    // In single-shooting, the initial state isn't a decision variable, so set
-    // its value instead if it's constant
+    // In single-shooting, the initial state is a parameter, so if the requested
+    // value is constant, set the parameter's value instead of adding a
+    // constraint
     if (m_transcription_method == TranscriptionMethod::SINGLE_SHOOTING &&
         std::ranges::all_of(x_0_value, [](const auto& elem) {
           return elem.type() == ExpressionType::CONSTANT;

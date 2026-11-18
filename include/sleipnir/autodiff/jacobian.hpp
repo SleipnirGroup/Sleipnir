@@ -24,7 +24,8 @@ namespace slp {
 /// a vector of variables.
 ///
 /// The Jacobian is only recomputed if the variable expression is quadratic or
-/// higher order.
+/// higher order, or if it's linear with coefficients that depend on
+/// parameters.
 ///
 /// @tparam Scalar Scalar type.
 template <typename Scalar>
@@ -86,15 +87,13 @@ class Jacobian {
         continue;
       }
 
-      if (m_variables[row].type() == ExpressionType::LINEAR) {
-        // If the row is linear, compute its gradient once here and cache its
-        // triplets. Constant rows are ignored because their gradients have no
-        // nonzero triplets.
+      if (detail::has_constant_gradient(m_top_lists[row])) {
+        // If the row's gradient is constant, compute it once here and cache
+        // its triplets
         detail::append_triplets(m_top_lists[row], m_output_lists[row],
                                 m_cached_triplets, row);
-      } else if (m_variables[row].type() > ExpressionType::LINEAR) {
-        // If the row is quadratic or nonlinear, add it to the list of nonlinear
-        // rows to be recomputed in value().
+      } else {
+        // Otherwise, add it to the list of rows to be recomputed in value()
         m_nonlinear_rows.emplace_back(row);
       }
     }
@@ -172,8 +171,8 @@ class Jacobian {
   /// Cached triplets for gradients of linear rows
   gch::small_vector<Eigen::Triplet<Scalar>> m_cached_triplets;
 
-  /// List of row indices for nonlinear rows whose graients will be computed in
-  /// value()
+  /// List of row indices for nonlinear rows and linear rows with parameters
+  /// whose gradients will be computed in value()
   gch::small_vector<int> m_nonlinear_rows;
 };
 

@@ -1,5 +1,8 @@
 import numpy as np
-from sleipnir.optimization import Problem
+import pytest
+from sleipnir.autodiff import ExpressionType
+from sleipnir.optimization import ExitStatus, Problem
+from tolerance import solution_tolerance
 
 
 def test_scalar_init_assign() -> None:
@@ -90,3 +93,68 @@ def test_symmetric_matrix() -> None:
     assert A.value(0, 1) == 2.0
     assert A.value(1, 0) == 2.0
     assert A.value(1, 1) == 3.0
+
+
+def test_parameter_init_assign() -> None:
+    problem = Problem()
+
+    p = problem.parameter()
+    assert p.type() == ExpressionType.PARAMETER
+    assert p.value() == 0.0
+    p.set_value(2.0)
+    assert p.value() == 2.0
+
+    P = problem.parameter(2, 3)
+    assert P.shape == (2, 3)
+    for elem in P:
+        assert elem.type() == ExpressionType.PARAMETER
+
+
+def test_parameter_not_folded() -> None:
+    problem = Problem()
+
+    # Parameters start at zero and one here, which constants would fold
+    p = problem.parameter()
+    q = problem.parameter()
+    q.set_value(1.0)
+    x = problem.decision_variable()
+
+    product = p * x
+    quotient = x / q
+
+    assert product.type() == ExpressionType.LINEAR
+    assert quotient.type() == ExpressionType.LINEAR
+
+    p.set_value(2.0)
+    q.set_value(4.0)
+    x.set_value(3.0)
+
+    assert product.value() == 6.0
+    assert quotient.value() == 0.75
+
+
+def test_parameter_resolve_with_new_values() -> None:
+    problem = Problem()
+
+    target = problem.parameter()
+    upper_bound = problem.parameter()
+    x = problem.decision_variable()
+
+    problem.minimize((x - target) * (x - target))
+    problem.subject_to(x <= upper_bound)
+
+    assert problem.cost_function_type() == ExpressionType.QUADRATIC
+    assert problem.equality_constraint_type() == ExpressionType.NONE
+    assert problem.inequality_constraint_type() == ExpressionType.LINEAR
+
+    # Unconstrained minimum is feasible
+    target.set_value(1.0)
+    upper_bound.set_value(5.0)
+    assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
+    assert x.value() == pytest.approx(1.0, abs=solution_tolerance(1))
+
+    # Unconstrained minimum is infeasible, so the bound is active
+    target.set_value(10.0)
+    upper_bound.set_value(3.0)
+    assert problem.solve(diagnostics=True) == ExitStatus.SUCCESS
+    assert x.value() == pytest.approx(3.0, abs=solution_tolerance(1))

@@ -92,7 +92,9 @@ SLEIPNIR_FORCE_INLINE ExpressionPtr<Scalar> make_typed_expression_ptr(
     ExpressionType type, const Args&... args) {
   using enum ExpressionType;
 
-  if (type == LINEAR) {
+  if (type == PARAMETER) {
+    return make_expression_ptr<T<Scalar, PARAMETER>>(args...);
+  } else if (type == LINEAR) {
     return make_expression_ptr<T<Scalar, LINEAR>>(args...);
   } else if (type == QUADRATIC) {
     return make_expression_ptr<T<Scalar, QUADRATIC>>(args...);
@@ -211,10 +213,10 @@ struct Expression {
       return constant_ptr(lhs->val * rhs->val);
     }
 
-    // Evaluate expression type. Scaling by a constant keeps the other
-    // operand's type.
+    // Evaluate expression type. Scaling by a constant or parameter keeps the
+    // other operand's type.
     auto type = NONLINEAR;
-    if (lhs->type() == CONSTANT || rhs->type() == CONSTANT) {
+    if (lhs->type() <= PARAMETER || rhs->type() <= PARAMETER) {
       type = std::max(lhs->type(), rhs->type());
     } else if (lhs->type() == LINEAR && rhs->type() == LINEAR) {
       type = QUADRATIC;
@@ -244,9 +246,10 @@ struct Expression {
       return constant_ptr(lhs->val / rhs->val);
     }
 
-    // Evaluate expression type. Dividing by a constant keeps the numerator's
-    // type.
-    auto type = rhs->type() == CONSTANT ? lhs->type() : NONLINEAR;
+    // Evaluate expression type. Dividing by a constant or parameter keeps the
+    // numerator's type.
+    auto type = rhs->type() <= PARAMETER ? std::max(lhs->type(), rhs->type())
+                                         : NONLINEAR;
     return make_typed_expression_ptr<DivExpression, Scalar>(type, lhs, rhs);
   }
 
@@ -372,6 +375,13 @@ struct Expression {
   /// @return The name of this expression.
   virtual std::string_view name() const = 0;
 
+  /// Returns true if the partial derivatives are the same at every argument
+  /// value.
+  ///
+  /// @return True if the partial derivatives are the same at every argument
+  ///     value.
+  virtual bool has_constant_partials() const { return true; }
+
   /// Accumulates the child adjoints as Scalars.
   virtual void accumulate_adjoints() const {}
 
@@ -453,6 +463,15 @@ struct NonLeafExpression : Expression<Scalar> {
   ///
   /// @return The name of this expression.
   std::string_view name() const final { return Derived::NAME; }
+
+  /// Returns true if the partial derivatives are the same at every argument
+  /// value.
+  ///
+  /// @return True if the partial derivatives are the same at every argument
+  ///     value.
+  bool has_constant_partials() const final {
+    return Derived::CONSTANT_PARTIALS;
+  }
 
   /// Accumulates the child adjoints as Scalars.
   void accumulate_adjoints() const final {
@@ -538,15 +557,17 @@ struct NonLeafExpression : Expression<Scalar> {
 /// A unary operator that maps its constant argument to itself (e.g., sin(0) =
 /// 0) returns the argument instead of allocating a new constant.
 ///
-/// @tparam T Derived expression type.
+/// @tparam T Derived expression type template.
+/// @tparam Scalar Scalar type.
 /// @tparam Args Argument types.
 /// @param args The arguments.
-template <typename T, typename... Args>
-ExpressionPtr<typename T::Scalar> fold_or_make(const Args&... args) {
-  using Scalar = typename T::Scalar;
+template <template <typename, ExpressionType> typename T, typename Scalar,
+          typename... Args>
+ExpressionPtr<Scalar> fold_or_make(const Args&... args) {
+  using enum ExpressionType;
 
-  if (((args->type() == ExpressionType::CONSTANT) && ...)) {
-    Scalar val = T::eval(args->val...);
+  if (((args->type() == CONSTANT) && ...)) {
+    Scalar val = T<Scalar, NONLINEAR>::eval(args->val...);
     if constexpr (sizeof...(Args) == 1) {
       const auto& x = std::get<0>(std::forward_as_tuple(args...));
       if (x->val == val) {
@@ -556,7 +577,11 @@ ExpressionPtr<typename T::Scalar> fold_or_make(const Args&... args) {
     return constant_ptr(val);
   }
 
-  return make_expression_ptr<T>(args...);
+  if (((args->type() <= PARAMETER) && ...)) {
+    return make_expression_ptr<T<Scalar, PARAMETER>>(args...);
+  } else {
+    return make_expression_ptr<T<Scalar, NONLINEAR>>(args...);
+  }
 }
 
 /// Derived expression type for binary minus operator.
@@ -783,6 +808,30 @@ struct DecisionVariableExpression final : Expression<Scalar> {
   ExpressionType type() const override { return ExpressionType::LINEAR; }
 
   std::string_view name() const override { return "decision variable"; }
+};
+
+/// Derived expression type for parameter.
+///
+/// A parameter is a constant whose value can be changed between solves with
+/// set_value().
+///
+/// @tparam Scalar Scalar type.
+template <typename Scalar>
+struct ParameterExpression final : Expression<Scalar> {
+  /// Constructs a parameter expression with a value of zero.
+  constexpr ParameterExpression() : Expression<Scalar>{Scalar(0)} {}
+
+  /// Constructs a nullary expression (an operator with no arguments).
+  ///
+  /// @param value The expression value.
+  explicit constexpr ParameterExpression(Scalar value)
+      : Expression<Scalar>{value} {}
+
+  Scalar value() const override { return this->val; }
+
+  ExpressionType type() const override { return ExpressionType::PARAMETER; }
+
+  std::string_view name() const override { return "parameter"; }
 };
 
 }  // namespace slp::detail

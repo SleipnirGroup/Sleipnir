@@ -199,6 +199,8 @@ constexpr char mkd_doc_slp_ExpressionType_NONE[] = R"doc(There is no expression.
 
 constexpr char mkd_doc_slp_ExpressionType_NONLINEAR[] = R"doc(The expression is composed of nonlinear and lower-order operators.)doc";
 
+constexpr char mkd_doc_slp_ExpressionType_PARAMETER[] = R"doc(The expression is composed of parameters and constants.)doc";
+
 constexpr char mkd_doc_slp_ExpressionType_QUADRATIC[] = R"doc(The expression is composed of quadratic and lower-order operators.)doc";
 
 constexpr char mkd_doc_slp_Gradient[] =
@@ -261,7 +263,7 @@ vector of variables.
 
 The gradient tree is cached so subsequent Hessian calculations are
 faster, and the Hessian is only recomputed if the variable expression
-is nonlinear.
+is nonlinear or its quadratic coefficients depend on parameters.
 
 Template Args:
     Scalar: Scalar type.
@@ -398,7 +400,8 @@ R"doc(This class calculates the Jacobian of a vector of variables with
 respect to a vector of variables.
 
 The Jacobian is only recomputed if the variable expression is
-quadratic or higher order.
+quadratic or higher order, or if it's linear with coefficients that
+depend on parameters.
 
 Template Args:
     Scalar: Scalar type.)doc";
@@ -452,8 +455,8 @@ constexpr char mkd_doc_slp_Jacobian_m_J[] = R"doc()doc";
 constexpr char mkd_doc_slp_Jacobian_m_cached_triplets[] = R"doc(Cached triplets for gradients of linear rows)doc";
 
 constexpr char mkd_doc_slp_Jacobian_m_nonlinear_rows[] =
-R"doc(List of row indices for nonlinear rows whose graients will be computed
-in value())doc";
+R"doc(List of row indices for nonlinear rows and linear rows with parameters
+whose gradients will be computed in value())doc";
 
 constexpr char mkd_doc_slp_Jacobian_m_output_lists[] = R"doc(List of output rows as column-node pairs)doc";
 
@@ -937,6 +940,38 @@ Args:
     cost: The cost function to minimize. A 1x1 VariableMatrix will
           implicitly convert to a Variable, and a non-1x1
           VariableMatrix will raise an assertion.
+
+)doc";
+
+constexpr char mkd_doc_slp_Problem_parameter[] =
+R"doc(Creates a parameter in the optimization problem.
+
+A parameter is a constant whose value can be changed between solves
+with set_value(). Unlike constants, parameters aren't folded into
+expressions.
+
+Parameters have an initial value of zero.
+
+Returns:
+    A parameter in the optimization problem.
+
+)doc";
+
+constexpr char mkd_doc_slp_Problem_parameter_2[] =
+R"doc(Creates a matrix of parameters in the optimization problem.
+
+A parameter is a constant whose value can be changed between solves
+with set_value(). Unlike constants, parameters aren't folded into
+expressions.
+
+Parameters have an initial value of zero.
+
+Args:
+    rows: Number of matrix rows.
+    cols: Number of matrix columns.
+
+Returns:
+    A matrix of parameters in the optimization problem.
 
 )doc";
 

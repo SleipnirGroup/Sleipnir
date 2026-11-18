@@ -18,6 +18,7 @@
 #include <Eigen/SparseCore>
 #include <gch/small_vector.hpp>
 
+#include "sleipnir/autodiff/expression.hpp"
 #include "sleipnir/autodiff/expression_type.hpp"
 #include "sleipnir/autodiff/gradient.hpp"
 #include "sleipnir/autodiff/hessian.hpp"
@@ -143,6 +144,41 @@ class Problem {
     }
 
     return vars;
+  }
+
+  /// Creates a parameter in the optimization problem.
+  ///
+  /// A parameter is a constant whose value can be changed between solves with
+  /// set_value(). Unlike constants, parameters aren't folded into expressions.
+  ///
+  /// Parameters have an initial value of zero.
+  ///
+  /// @return A parameter in the optimization problem.
+  [[nodiscard]]
+  Variable<Scalar> parameter() {
+    return Variable<Scalar>{
+        detail::make_expression_ptr<detail::ParameterExpression<Scalar>>()};
+  }
+
+  /// Creates a matrix of parameters in the optimization problem.
+  ///
+  /// A parameter is a constant whose value can be changed between solves with
+  /// set_value(). Unlike constants, parameters aren't folded into expressions.
+  ///
+  /// Parameters have an initial value of zero.
+  ///
+  /// @param rows Number of matrix rows.
+  /// @param cols Number of matrix columns.
+  /// @return A matrix of parameters in the optimization problem.
+  [[nodiscard]]
+  VariableMatrix<Scalar> parameter(int rows, int cols = 1) {
+    VariableMatrix<Scalar> params{detail::empty, rows, cols};
+
+    for (auto& param : params) {
+      param = parameter();
+    }
+
+    return params;
   }
 
   /// Tells the solver to minimize the output of the given cost function.
@@ -292,9 +328,9 @@ class Problem {
     }
 
     // If the problem is empty or constant, there's nothing to do
-    if (cost_function_type() <= ExpressionType::CONSTANT &&
-        equality_constraint_type() <= ExpressionType::CONSTANT &&
-        inequality_constraint_type() <= ExpressionType::CONSTANT) {
+    if (cost_function_type() <= ExpressionType::PARAMETER &&
+        equality_constraint_type() <= ExpressionType::PARAMETER &&
+        inequality_constraint_type() <= ExpressionType::PARAMETER) {
       if (options.diagnostics) {
         slp::println("\nInvoking no-op solver\n");
       }
@@ -799,8 +835,8 @@ class Problem {
   }
 
   void print_problem_analysis() {
-    constexpr std::array types{"no", "constant", "linear", "quadratic",
-                               "nonlinear"};
+    constexpr std::array types{"no",     "constant",  "parameter",
+                               "linear", "quadratic", "nonlinear"};
 
     // Print problem structure
     slp::println("\nProblem structure:");
@@ -819,13 +855,13 @@ class Problem {
 
     auto print_constraint_types =
         [](const gch::small_vector<Variable<Scalar>>& constraints) {
-          std::array<size_t, 5> counts{};
+          std::array<size_t, 6> counts{};
           for (const auto& constraint : constraints) {
             ++counts[std::to_underlying(constraint.type())];
           }
-          for (const auto& [count, name] :
-               std::views::zip(counts, std::array{"empty", "constant", "linear",
-                                                  "quadratic", "nonlinear"})) {
+          for (const auto& [count, name] : std::views::zip(
+                   counts, std::array{"empty", "constant", "parameter",
+                                      "linear", "quadratic", "nonlinear"})) {
             if (count > 0) {
               slp::println("  ↳ {} {}", count, name);
             }

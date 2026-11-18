@@ -23,6 +23,8 @@ struct StringMaker<slp::ExpressionType> {
         return "NONE";
       case CONSTANT:
         return "CONSTANT";
+      case PARAMETER:
+        return "PARAMETER";
       case LINEAR:
         return "LINEAR";
       case QUADRATIC:
