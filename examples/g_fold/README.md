@@ -120,7 +120,7 @@ Let v_I,0 = v₀ + ω×q₀ and v_I,f = v_f + ω×q_f be (5) at 0 and t_f. Subst
 
 ### Closed form rotation
 
-Evaluating R(t) and R_int(t) inside an optimization problem needs closed forms of them. R(t) = exp(S(ω)t) is the rotation by the angle |ω|t about the planet's rotation axis ω̂ = ω/|ω|, so Rodrigues's rotation formula gives
+Evaluating R(t) and R_int(t) inside an optimization problem needs closed forms of them. R(t) = exp(S(ω)t) is the rotation by the angle |ω|t about the planet's rotation axis ω̂ = ω/|ω|, so Rodrigues' rotation formula gives
 
 ```
   R(t) = I + sin(|ω|t)S(ω̂) + (1 − cos(|ω|t))S(ω̂)²

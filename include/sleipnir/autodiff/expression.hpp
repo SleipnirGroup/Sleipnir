@@ -445,7 +445,7 @@ struct NonLeafExpression : Expression<Scalar> {
     }(std::make_index_sequence<NumArgs>{});
   }
 
-  /// Returns the node's value computed from its arguments's values.
+  /// Returns the node's value computed from its arguments' values.
   ///
   /// @return The node's value.
   Scalar value() const final {
