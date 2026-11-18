@@ -33,14 +33,12 @@ inline constexpr bool USE_POOL_ALLOCATOR = true;
 template <typename Scalar>
 struct Expression;
 
-/// The maximum number of arguments an expression can have.
-inline constexpr size_t MAX_ARGS = 4;
-
 /// Array with one element per expression argument in visit_args() order.
 ///
 /// @tparam T Element type.
-template <typename T>
-using ArgArray = std::array<T, MAX_ARGS>;
+/// @tparam N The number of arguments.
+template <typename T, size_t N>
+using ArgArray = std::array<T, N>;
 
 /// Typedef for intrusive shared pointer to Expression.
 ///
@@ -413,12 +411,6 @@ struct Expression {
 template <typename Derived, typename Scalar, size_t NumArgs,
           ExpressionType Type = ExpressionType::NONLINEAR>
 struct NonLeafExpression : Expression<Scalar> {
-  /// The number of arguments.
-  static constexpr size_t NUM_ARGS = NumArgs;
-
-  // Ensure ArgArray is big enough to hold one element per argument
-  static_assert(NumArgs <= MAX_ARGS, "Increase MAX_ARGS");
-
   /// Whether the partial derivatives are the same at every argument value.
   static constexpr bool CONSTANT_PARTIALS = false;
 
@@ -477,7 +469,7 @@ struct NonLeafExpression : Expression<Scalar> {
   void accumulate_adjoints() const final {
     [&]<size_t... Is>(std::index_sequence<Is...>) {
       // Evaluate gradients
-      ArgArray<Scalar> g{};
+      ArgArray<Scalar, NumArgs> g{};
       grad(g, this->val, args[Is]->val...);
 
       // Accumulate adjoints
@@ -492,7 +484,7 @@ struct NonLeafExpression : Expression<Scalar> {
       // instead of building them as expressions
       if constexpr (Derived::CONSTANT_PARTIALS) {
         // Evaluate gradients
-        ArgArray<Scalar> g{};
+        ArgArray<Scalar, NumArgs> g{};
         grad(g, this->val, args[Is]->val...);
 
         // Accumulate adjoints
@@ -511,7 +503,7 @@ struct NonLeafExpression : Expression<Scalar> {
             ...);
       } else {
         // Evaluate gradients
-        ArgArray<ExpressionPtr<Scalar>> g;
+        ArgArray<ExpressionPtr<Scalar>, NumArgs> g;
         grad(g, ExpressionPtr<Scalar>{const_cast<NonLeafExpression*>(this)},
              args[Is]...);
 
@@ -542,7 +534,8 @@ struct NonLeafExpression : Expression<Scalar> {
   /// @param val The expression's value.
   /// @param x The argument values in visit_args() order.
   template <typename Value, typename... Args>
-  void grad(ArgArray<Value>& g, const Value& val, const Args&... x) const {
+  void grad(ArgArray<Value, NumArgs>& g, const Value& val,
+            const Args&... x) const {
     if constexpr (requires(const Derived& expr) {
                     expr.eval_grad(g, val, x...);
                   }) {
@@ -602,7 +595,8 @@ struct BinaryMinusExpression final
   static Scalar eval(Scalar lhs, Scalar rhs) { return lhs - rhs; }
 
   template <typename Value>
-  static void eval_grad(ArgArray<Value>& g, [[maybe_unused]] const Value& val,
+  static void eval_grad(ArgArray<Value, 2>& g,
+                        [[maybe_unused]] const Value& val,
                         [[maybe_unused]] const Value& lhs,
                         [[maybe_unused]] const Value& rhs) {
     g[0] = lit<Value>(Scalar(1));
@@ -628,7 +622,8 @@ struct BinaryPlusExpression final
   static Scalar eval(Scalar lhs, Scalar rhs) { return lhs + rhs; }
 
   template <typename Value>
-  static void eval_grad(ArgArray<Value>& g, [[maybe_unused]] const Value& val,
+  static void eval_grad(ArgArray<Value, 2>& g,
+                        [[maybe_unused]] const Value& val,
                         [[maybe_unused]] const Value& lhs,
                         [[maybe_unused]] const Value& rhs) {
     g[0] = lit<Value>(Scalar(1));
@@ -651,8 +646,9 @@ struct DivExpression final
   static Scalar eval(Scalar lhs, Scalar rhs) { return lhs / rhs; }
 
   template <typename Value>
-  static void eval_grad(ArgArray<Value>& g, [[maybe_unused]] const Value& val,
-                        const Value& lhs, const Value& rhs) {
+  static void eval_grad(ArgArray<Value, 2>& g,
+                        [[maybe_unused]] const Value& val, const Value& lhs,
+                        const Value& rhs) {
     g[0] = lit<Value>(Scalar(1)) / rhs;
     g[1] = -lhs / (rhs * rhs);
   }
@@ -673,8 +669,9 @@ struct MultExpression final
   static Scalar eval(Scalar lhs, Scalar rhs) { return lhs * rhs; }
 
   template <typename Value>
-  static void eval_grad(ArgArray<Value>& g, [[maybe_unused]] const Value& val,
-                        const Value& lhs, const Value& rhs) {
+  static void eval_grad(ArgArray<Value, 2>& g,
+                        [[maybe_unused]] const Value& val, const Value& lhs,
+                        const Value& rhs) {
     g[0] = rhs;
     g[1] = lhs;
   }
@@ -698,7 +695,8 @@ struct UnaryMinusExpression final
   static Scalar eval(Scalar lhs) { return -lhs; }
 
   template <typename Value>
-  static void eval_grad(ArgArray<Value>& g, [[maybe_unused]] const Value& val,
+  static void eval_grad(ArgArray<Value, 1>& g,
+                        [[maybe_unused]] const Value& val,
                         [[maybe_unused]] const Value& lhs) {
     g[0] = lit<Value>(Scalar(-1));
   }
