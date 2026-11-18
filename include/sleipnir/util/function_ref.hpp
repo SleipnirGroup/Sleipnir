@@ -31,7 +31,7 @@ class function_ref<R(Args...)> {
   /// @param f Callable to which to refer.
   template <typename F>
     requires(!std::is_same_v<std::decay_t<F>, function_ref> &&
-             std::is_invocable_r_v<R, F &&, Args...>)
+             std::is_invocable_r_v<R, F&&, Args...>)
   // NOLINTNEXTLINE (google-explicit-constructor)
   constexpr function_ref(F&& f) noexcept
       : obj_(const_cast<void*>(

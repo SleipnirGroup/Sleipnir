@@ -4,7 +4,7 @@
 
 #include <algorithm>
 #include <chrono>
-#include <cmath>
+#include <cmath>  // IWYU pragma: keep
 #include <functional>
 #include <limits>
 #include <optional>

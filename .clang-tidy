@@ -58,6 +58,7 @@ Checks:
   google-readability-casting,
   google-runtime-operator,
   misc-definitions-in-headers,
+  misc-include-cleaner,
   misc-misplaced-const,
   misc-new-delete-overloads,
   misc-non-copyable-objects,
@@ -73,4 +74,8 @@ Checks:
   modernize-use-using,
   readability-braces-around-statements'
 FormatStyle: file
+CheckOptions:
+  # libc++ declares <cmath> functions in std::__math and chrono literals in
+  # __chrono/duration.h, which include-cleaner can't map to public headers
+  misc-include-cleaner.IgnoreHeaders: '__math/.*;__chrono/.*'
 ExcludeHeaderFilterRegex: '/_deps/'

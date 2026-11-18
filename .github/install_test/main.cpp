@@ -1,6 +1,7 @@
 // Copyright (c) Sleipnir contributors
 
 #include <sleipnir/optimization/problem.hpp>
+#include <sleipnir/optimization/solver/exit_status.hpp>
 
 int main() {
   // Find the x, y pair with the largest product for which x + 3y = 36
