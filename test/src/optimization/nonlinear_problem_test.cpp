@@ -61,7 +61,7 @@ TEMPLATE_TEST_CASE("Problem - Rosenbrock with cubic and line constraint",
       x.set_value(x0);
       y.set_value(y0);
 
-      CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
+      CHECK(problem.solve() == slp::ExitStatus::SUCCESS);
 
       // Local minimum on the cubic constraint y = (x − 1)³ + 1. Substituting
       // the constraint into the cost gives a univariate polynomial whose
@@ -124,7 +124,7 @@ TEMPLATE_TEST_CASE("Problem - Rosenbrock with disk constraint", "[Problem]",
       x.set_value(x0);
       y.set_value(y0);
 
-      CHECK(problem.solve({.diagnostics = true}) == slp::ExitStatus::SUCCESS);
+      CHECK(problem.solve() == slp::ExitStatus::SUCCESS);
 
       // The disk constraint is weakly active at the minimum (its Lagrange
       // multiplier is zero), so the iterates only approach it to within the
