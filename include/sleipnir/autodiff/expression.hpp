@@ -33,13 +33,6 @@ inline constexpr bool USE_POOL_ALLOCATOR = true;
 template <typename Scalar>
 struct Expression;
 
-/// Array with one element per expression argument in visit_args() order.
-///
-/// @tparam T Element type.
-/// @tparam N The number of arguments.
-template <typename T, size_t N>
-using ArgArray = std::array<T, N>;
-
 /// Typedef for intrusive shared pointer to Expression.
 ///
 /// @tparam Scalar Scalar type.
@@ -468,7 +461,7 @@ struct NonLeafExpression : Expression<Scalar> {
   void accumulate_adjoints() const final {
     [&]<size_t... Is>(std::index_sequence<Is...>) {
       // Evaluate gradients
-      ArgArray<Scalar, NumArgs> g{};
+      std::array<Scalar, NumArgs> g{};
       grad(g, this->val, args[Is]->val...);
 
       // Accumulate adjoints
@@ -483,7 +476,7 @@ struct NonLeafExpression : Expression<Scalar> {
       // instead of building them as expressions
       if constexpr (Self::CONSTANT_PARTIALS) {
         // Evaluate gradients
-        ArgArray<Scalar, NumArgs> g{};
+        std::array<Scalar, NumArgs> g{};
         grad(g, this->val, args[Is]->val...);
 
         // Accumulate adjoints
@@ -502,7 +495,7 @@ struct NonLeafExpression : Expression<Scalar> {
             ...);
       } else {
         // Evaluate gradients
-        ArgArray<ExpressionPtr<Scalar>, NumArgs> g;
+        std::array<ExpressionPtr<Scalar>, NumArgs> g;
         grad(g, ExpressionPtr<Scalar>{const_cast<NonLeafExpression*>(this)},
              args[Is]...);
 
@@ -535,7 +528,7 @@ struct NonLeafExpression : Expression<Scalar> {
   /// @param val The expression's value.
   /// @param x The argument values in visit_args() order.
   template <typename Value, typename... Args>
-  void grad(ArgArray<Value, NumArgs>& g, const Value& val,
+  void grad(std::array<Value, NumArgs>& g, const Value& val,
             const Args&... x) const {
     if constexpr (requires(const Self& expr) {
                     expr.eval_grad(g, val, x...);
@@ -596,7 +589,7 @@ struct BinaryMinusExpression final
   static Scalar eval(Scalar lhs, Scalar rhs) { return lhs - rhs; }
 
   template <typename Value>
-  static void eval_grad(ArgArray<Value, 2>& g,
+  static void eval_grad(std::array<Value, 2>& g,
                         [[maybe_unused]] const Value& val,
                         [[maybe_unused]] const Value& lhs,
                         [[maybe_unused]] const Value& rhs) {
@@ -623,7 +616,7 @@ struct BinaryPlusExpression final
   static Scalar eval(Scalar lhs, Scalar rhs) { return lhs + rhs; }
 
   template <typename Value>
-  static void eval_grad(ArgArray<Value, 2>& g,
+  static void eval_grad(std::array<Value, 2>& g,
                         [[maybe_unused]] const Value& val,
                         [[maybe_unused]] const Value& lhs,
                         [[maybe_unused]] const Value& rhs) {
@@ -646,7 +639,7 @@ struct DivExpression final : NonLeafExpression<DivExpression, Scalar, Type, 2> {
   static Scalar eval(Scalar lhs, Scalar rhs) { return lhs / rhs; }
 
   template <typename Value>
-  static void eval_grad(ArgArray<Value, 2>& g,
+  static void eval_grad(std::array<Value, 2>& g,
                         [[maybe_unused]] const Value& val, const Value& lhs,
                         const Value& rhs) {
     g[0] = lit<Value>(Scalar(1)) / rhs;
@@ -669,7 +662,7 @@ struct MultExpression final
   static Scalar eval(Scalar lhs, Scalar rhs) { return lhs * rhs; }
 
   template <typename Value>
-  static void eval_grad(ArgArray<Value, 2>& g,
+  static void eval_grad(std::array<Value, 2>& g,
                         [[maybe_unused]] const Value& val, const Value& lhs,
                         const Value& rhs) {
     g[0] = rhs;
@@ -695,7 +688,7 @@ struct UnaryMinusExpression final
   static Scalar eval(Scalar lhs) { return -lhs; }
 
   template <typename Value>
-  static void eval_grad(ArgArray<Value, 1>& g,
+  static void eval_grad(std::array<Value, 1>& g,
                         [[maybe_unused]] const Value& val,
                         [[maybe_unused]] const Value& lhs) {
     g[0] = lit<Value>(Scalar(-1));
