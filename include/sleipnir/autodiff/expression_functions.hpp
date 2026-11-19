@@ -3,6 +3,7 @@
 #pragma once
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <concepts>
 #include <numbers>
@@ -31,7 +32,7 @@ struct AbsExpression final : NonLeafExpression<AbsExpression, Scalar, Type, 1> {
   }
 
   template <typename Value>
-  static void eval_grad(ArgArray<Value, 1>& g,
+  static void eval_grad(std::array<Value, 1>& g,
                         [[maybe_unused]] const Value& val, const Value& x) {
     if constexpr (std::same_as<Value, Scalar>) {
       if (x < Scalar(0)) {
@@ -74,7 +75,7 @@ struct AcosExpression final
   }
 
   template <typename Value>
-  static void eval_grad(ArgArray<Value, 1>& g,
+  static void eval_grad(std::array<Value, 1>& g,
                         [[maybe_unused]] const Value& val, const Value& x) {
     using std::sqrt;
     g[0] = lit<Value>(Scalar(-1)) / sqrt(lit<Value>(Scalar(1)) - x * x);
@@ -108,7 +109,7 @@ struct AsinExpression final
   }
 
   template <typename Value>
-  static void eval_grad(ArgArray<Value, 1>& g,
+  static void eval_grad(std::array<Value, 1>& g,
                         [[maybe_unused]] const Value& val, const Value& x) {
     using std::sqrt;
     g[0] = lit<Value>(Scalar(1)) / sqrt(lit<Value>(Scalar(1)) - x * x);
@@ -142,7 +143,7 @@ struct AtanExpression final
   }
 
   template <typename Value>
-  static void eval_grad(ArgArray<Value, 1>& g,
+  static void eval_grad(std::array<Value, 1>& g,
                         [[maybe_unused]] const Value& val, const Value& x) {
     g[0] = lit<Value>(Scalar(1)) / (lit<Value>(Scalar(1)) + x * x);
   }
@@ -175,7 +176,7 @@ struct Atan2Expression final
   }
 
   template <typename Value>
-  static void eval_grad(ArgArray<Value, 2>& g,
+  static void eval_grad(std::array<Value, 2>& g,
                         [[maybe_unused]] const Value& val, const Value& y,
                         const Value& x) {
     Value d = y * y + x * x;
@@ -213,7 +214,7 @@ struct CbrtExpression final
   }
 
   template <typename Value>
-  static void eval_grad(ArgArray<Value, 1>& g, const Value& val,
+  static void eval_grad(std::array<Value, 1>& g, const Value& val,
                         [[maybe_unused]] const Value& x) {
     g[0] = lit<Value>(Scalar(1)) / (lit<Value>(Scalar(3)) * val * val);
   }
@@ -245,7 +246,7 @@ struct CosExpression final : NonLeafExpression<CosExpression, Scalar, Type, 1> {
   }
 
   template <typename Value>
-  static void eval_grad(ArgArray<Value, 1>& g,
+  static void eval_grad(std::array<Value, 1>& g,
                         [[maybe_unused]] const Value& val, const Value& x) {
     using std::sin;
     g[0] = -sin(x);
@@ -279,7 +280,7 @@ struct CoshExpression final
   }
 
   template <typename Value>
-  static void eval_grad(ArgArray<Value, 1>& g,
+  static void eval_grad(std::array<Value, 1>& g,
                         [[maybe_unused]] const Value& val, const Value& x) {
     using std::sinh;
     g[0] = sinh(x);
@@ -312,7 +313,7 @@ struct ErfExpression final : NonLeafExpression<ErfExpression, Scalar, Type, 1> {
   }
 
   template <typename Value>
-  static void eval_grad(ArgArray<Value, 1>& g,
+  static void eval_grad(std::array<Value, 1>& g,
                         [[maybe_unused]] const Value& val, const Value& x) {
     using std::exp;
     g[0] = lit<Value>(Scalar(2.0 * std::numbers::inv_sqrtpi)) * exp(-x * x);
@@ -345,7 +346,7 @@ struct ExpExpression final : NonLeafExpression<ExpExpression, Scalar, Type, 1> {
   }
 
   template <typename Value>
-  static void eval_grad(ArgArray<Value, 1>& g, const Value& val,
+  static void eval_grad(std::array<Value, 1>& g, const Value& val,
                         [[maybe_unused]] const Value& x) {
     g[0] = val;
   }
@@ -382,8 +383,8 @@ struct Hypot2Expression final
   }
 
   template <typename Value>
-  static void eval_grad(ArgArray<Value, 2>& g, const Value& val, const Value& x,
-                        const Value& y) {
+  static void eval_grad(std::array<Value, 2>& g, const Value& val,
+                        const Value& x, const Value& y) {
     g[0] = x / val;
     g[1] = y / val;
   }
@@ -430,8 +431,8 @@ struct Hypot3Expression final
   }
 
   template <typename Value>
-  static void eval_grad(ArgArray<Value, 3>& g, const Value& val, const Value& x,
-                        const Value& y, const Value& z) {
+  static void eval_grad(std::array<Value, 3>& g, const Value& val,
+                        const Value& x, const Value& y, const Value& z) {
     g[0] = x / val;
     g[1] = y / val;
     g[2] = z / val;
@@ -494,7 +495,7 @@ struct IfElseExpression final
   }
 
   template <typename Value>
-  void eval_grad(ArgArray<Value, 4>& g, [[maybe_unused]] const Value& val,
+  void eval_grad(std::array<Value, 4>& g, [[maybe_unused]] const Value& val,
                  const Value& a, const Value& b,
                  [[maybe_unused]] const Value& t,
                  [[maybe_unused]] const Value& f) const {
@@ -569,7 +570,7 @@ struct LogExpression final : NonLeafExpression<LogExpression, Scalar, Type, 1> {
   }
 
   template <typename Value>
-  static void eval_grad(ArgArray<Value, 1>& g,
+  static void eval_grad(std::array<Value, 1>& g,
                         [[maybe_unused]] const Value& val, const Value& x) {
     g[0] = lit<Value>(Scalar(1)) / x;
   }
@@ -602,7 +603,7 @@ struct Log10Expression final
   }
 
   template <typename Value>
-  static void eval_grad(ArgArray<Value, 1>& g,
+  static void eval_grad(std::array<Value, 1>& g,
                         [[maybe_unused]] const Value& val, const Value& x) {
     g[0] = lit<Value>(Scalar(1)) / (lit<Value>(Scalar(std::numbers::ln10)) * x);
   }
@@ -636,7 +637,7 @@ struct MaxExpression final : NonLeafExpression<MaxExpression, Scalar, Type, 2> {
   }
 
   template <typename Value>
-  static void eval_grad(ArgArray<Value, 2>& g,
+  static void eval_grad(std::array<Value, 2>& g,
                         [[maybe_unused]] const Value& val, const Value& a,
                         const Value& b) {
     if constexpr (std::same_as<Value, Scalar>) {
@@ -683,7 +684,7 @@ struct MinExpression final : NonLeafExpression<MinExpression, Scalar, Type, 2> {
   }
 
   template <typename Value>
-  static void eval_grad(ArgArray<Value, 2>& g,
+  static void eval_grad(std::array<Value, 2>& g,
                         [[maybe_unused]] const Value& val, const Value& a,
                         const Value& b) {
     if constexpr (std::same_as<Value, Scalar>) {
@@ -735,7 +736,7 @@ struct PowExpression final : NonLeafExpression<PowExpression, Scalar, Type, 2> {
   }
 
   template <typename Value>
-  static void eval_grad(ArgArray<Value, 2>& g, const Value& val,
+  static void eval_grad(std::array<Value, 2>& g, const Value& val,
                         const Value& base, const Value& power) {
     using std::log;
     using std::pow;
@@ -841,7 +842,7 @@ struct SinExpression final : NonLeafExpression<SinExpression, Scalar, Type, 1> {
   }
 
   template <typename Value>
-  static void eval_grad(ArgArray<Value, 1>& g,
+  static void eval_grad(std::array<Value, 1>& g,
                         [[maybe_unused]] const Value& val, const Value& x) {
     using std::cos;
     g[0] = cos(x);
@@ -875,7 +876,7 @@ struct SinhExpression final
   }
 
   template <typename Value>
-  static void eval_grad(ArgArray<Value, 1>& g,
+  static void eval_grad(std::array<Value, 1>& g,
                         [[maybe_unused]] const Value& val, const Value& x) {
     using std::cosh;
     g[0] = cosh(x);
@@ -909,7 +910,7 @@ struct SqrtExpression final
   }
 
   template <typename Value>
-  static void eval_grad(ArgArray<Value, 1>& g, const Value& val,
+  static void eval_grad(std::array<Value, 1>& g, const Value& val,
                         [[maybe_unused]] const Value& x) {
     g[0] = lit<Value>(Scalar(1)) / (lit<Value>(Scalar(2)) * val);
   }
@@ -941,7 +942,7 @@ struct TanExpression final : NonLeafExpression<TanExpression, Scalar, Type, 1> {
   }
 
   template <typename Value>
-  static void eval_grad(ArgArray<Value, 1>& g,
+  static void eval_grad(std::array<Value, 1>& g,
                         [[maybe_unused]] const Value& val, const Value& x) {
     using std::cos;
 
@@ -977,7 +978,7 @@ struct TanhExpression final
   }
 
   template <typename Value>
-  static void eval_grad(ArgArray<Value, 1>& g,
+  static void eval_grad(std::array<Value, 1>& g,
                         [[maybe_unused]] const Value& val, const Value& x) {
     using std::cosh;
 
