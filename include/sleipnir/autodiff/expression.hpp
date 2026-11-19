@@ -49,55 +49,56 @@ using ExpressionPtr = IntrusiveSharedPtr<Expression<Scalar>>;
 /// Creates an intrusive shared pointer to an expression from the global pool
 /// allocator.
 ///
-/// @tparam T The derived expression type.
+/// @tparam Derived Derived expression type.
 /// @param args Constructor arguments for Expression.
-template <typename T, typename... Args>
-static ExpressionPtr<typename T::Scalar> make_expression_ptr(Args&&... args) {
+template <typename Derived, typename... Args>
+static ExpressionPtr<typename Derived::Scalar> make_expression_ptr(
+    Args&&... args) {
   if constexpr (USE_POOL_ALLOCATOR) {
-    return allocate_intrusive_shared<T>(global_pool_allocator<T>(),
-                                        std::forward<Args>(args)...);
+    return allocate_intrusive_shared<Derived>(global_pool_allocator<Derived>(),
+                                              std::forward<Args>(args)...);
   } else {
-    return make_intrusive_shared<T>(std::forward<Args>(args)...);
+    return make_intrusive_shared<Derived>(std::forward<Args>(args)...);
   }
 }
 
-template <typename Scalar, ExpressionType T>
+template <typename Scalar, ExpressionType Type>
 struct BinaryMinusExpression;
 
-template <typename Scalar, ExpressionType T>
+template <typename Scalar, ExpressionType Type>
 struct BinaryPlusExpression;
 
-template <typename Scalar, ExpressionType T>
+template <typename Scalar, ExpressionType Type>
 struct DivExpression;
 
-template <typename Scalar, ExpressionType T>
+template <typename Scalar, ExpressionType Type>
 struct MultExpression;
 
-template <typename Scalar, ExpressionType T>
+template <typename Scalar, ExpressionType Type>
 struct UnaryMinusExpression;
 
 /// Creates an intrusive shared pointer to a derived expression type templated
 /// on ExpressionType, instantiated with the given expression type.
 ///
-/// @tparam T Derived expression type template.
+/// @tparam Derived Derived expression type template.
 /// @tparam Scalar Scalar type.
 /// @tparam Args Argument types.
 /// @param type The expression's type.
 /// @param args The arguments.
-template <template <typename, ExpressionType> typename T, typename Scalar,
+template <template <typename, ExpressionType> typename Derived, typename Scalar,
           typename... Args>
 SLEIPNIR_FORCE_INLINE ExpressionPtr<Scalar> make_typed_expression_ptr(
     ExpressionType type, const Args&... args) {
   using enum ExpressionType;
 
   if (type == PARAMETER) {
-    return make_expression_ptr<T<Scalar, PARAMETER>>(args...);
+    return make_expression_ptr<Derived<Scalar, PARAMETER>>(args...);
   } else if (type == LINEAR) {
-    return make_expression_ptr<T<Scalar, LINEAR>>(args...);
+    return make_expression_ptr<Derived<Scalar, LINEAR>>(args...);
   } else if (type == QUADRATIC) {
-    return make_expression_ptr<T<Scalar, QUADRATIC>>(args...);
+    return make_expression_ptr<Derived<Scalar, QUADRATIC>>(args...);
   } else {
-    return make_expression_ptr<T<Scalar, NONLINEAR>>(args...);
+    return make_expression_ptr<Derived<Scalar, NONLINEAR>>(args...);
   }
 }
 
@@ -404,12 +405,12 @@ struct Expression {
 /// trees evaluate the partial derivatives as Scalars instead of building them
 /// as expressions.
 ///
-/// @tparam Derived Derived expression type.
+/// @tparam Derived Derived expression type template.
 /// @tparam Scalar Scalar type.
-/// @tparam NumArgs The number of arguments.
 /// @tparam Type The expression's type.
-template <typename Derived, typename Scalar, size_t NumArgs,
-          ExpressionType Type = ExpressionType::NONLINEAR>
+/// @tparam NumArgs The number of arguments.
+template <template <typename, ExpressionType> typename Derived, typename Scalar,
+          ExpressionType Type, size_t NumArgs>
 struct NonLeafExpression : Expression<Scalar> {
   /// Whether the partial derivatives are the same at every argument value.
   static constexpr bool CONSTANT_PARTIALS = false;
@@ -442,7 +443,7 @@ struct NonLeafExpression : Expression<Scalar> {
   /// @return The node's value.
   Scalar value() const final {
     return [&]<size_t... Is>(std::index_sequence<Is...>) {
-      return static_cast<const Derived&>(*this).eval(args[Is]->val...);
+      return static_cast<const Self&>(*this).eval(args[Is]->val...);
     }(std::make_index_sequence<NumArgs>{});
   }
 
@@ -454,16 +455,14 @@ struct NonLeafExpression : Expression<Scalar> {
   /// Returns the name of this expression.
   ///
   /// @return The name of this expression.
-  std::string_view name() const final { return Derived::NAME; }
+  std::string_view name() const final { return Self::NAME; }
 
   /// Returns true if the partial derivatives are the same at every argument
   /// value.
   ///
   /// @return True if the partial derivatives are the same at every argument
   ///     value.
-  bool has_constant_partials() const final {
-    return Derived::CONSTANT_PARTIALS;
-  }
+  bool has_constant_partials() const final { return Self::CONSTANT_PARTIALS; }
 
   /// Accumulates the child adjoints as Scalars.
   void accumulate_adjoints() const final {
@@ -482,7 +481,7 @@ struct NonLeafExpression : Expression<Scalar> {
     [&]<size_t... Is>(std::index_sequence<Is...>) {
       // If the partial derivatives are constant, evaluate them as Scalars
       // instead of building them as expressions
-      if constexpr (Derived::CONSTANT_PARTIALS) {
+      if constexpr (Self::CONSTANT_PARTIALS) {
         // Evaluate gradients
         ArgArray<Scalar, NumArgs> g{};
         grad(g, this->val, args[Is]->val...);
@@ -521,6 +520,8 @@ struct NonLeafExpression : Expression<Scalar> {
   }
 
  private:
+  using Self = Derived<Scalar, Type>;
+
   /// Computes the partial derivatives with the derived expression type's
   /// eval_grad(), or leaves them unwritten if it doesn't define one.
   ///
@@ -536,10 +537,10 @@ struct NonLeafExpression : Expression<Scalar> {
   template <typename Value, typename... Args>
   void grad(ArgArray<Value, NumArgs>& g, const Value& val,
             const Args&... x) const {
-    if constexpr (requires(const Derived& expr) {
+    if constexpr (requires(const Self& expr) {
                     expr.eval_grad(g, val, x...);
                   }) {
-      static_cast<const Derived&>(*this).eval_grad(g, val, x...);
+      static_cast<const Self&>(*this).eval_grad(g, val, x...);
     }
   }
 };
@@ -550,17 +551,17 @@ struct NonLeafExpression : Expression<Scalar> {
 /// A unary operator that maps its constant argument to itself (e.g., sin(0) =
 /// 0) returns the argument instead of allocating a new constant.
 ///
-/// @tparam T Derived expression type template.
+/// @tparam Derived Derived expression type template.
 /// @tparam Scalar Scalar type.
 /// @tparam Args Argument types.
 /// @param args The arguments.
-template <template <typename, ExpressionType> typename T, typename Scalar,
+template <template <typename, ExpressionType> typename Derived, typename Scalar,
           typename... Args>
 ExpressionPtr<Scalar> fold_or_make(const Args&... args) {
   using enum ExpressionType;
 
   if (((args->type() == CONSTANT) && ...)) {
-    Scalar val = T<Scalar, NONLINEAR>::eval(args->val...);
+    Scalar val = Derived<Scalar, NONLINEAR>::eval(args->val...);
     if constexpr (sizeof...(Args) == 1) {
       const auto& x = std::get<0>(std::forward_as_tuple(args...));
       if (x->val == val) {
@@ -571,19 +572,19 @@ ExpressionPtr<Scalar> fold_or_make(const Args&... args) {
   }
 
   if (((args->type() <= PARAMETER) && ...)) {
-    return make_expression_ptr<T<Scalar, PARAMETER>>(args...);
+    return make_expression_ptr<Derived<Scalar, PARAMETER>>(args...);
   } else {
-    return make_expression_ptr<T<Scalar, NONLINEAR>>(args...);
+    return make_expression_ptr<Derived<Scalar, NONLINEAR>>(args...);
   }
 }
 
 /// Derived expression type for binary minus operator.
 ///
 /// @tparam Scalar Scalar type.
-/// @tparam T Expression type.
-template <typename Scalar, ExpressionType T>
+/// @tparam Type Expression type.
+template <typename Scalar, ExpressionType Type>
 struct BinaryMinusExpression final
-    : NonLeafExpression<BinaryMinusExpression<Scalar, T>, Scalar, 2, T> {
+    : NonLeafExpression<BinaryMinusExpression, Scalar, Type, 2> {
   using BinaryMinusExpression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -607,10 +608,10 @@ struct BinaryMinusExpression final
 /// Derived expression type for binary plus operator.
 ///
 /// @tparam Scalar Scalar type.
-/// @tparam T Expression type.
-template <typename Scalar, ExpressionType T>
+/// @tparam Type Expression type.
+template <typename Scalar, ExpressionType Type>
 struct BinaryPlusExpression final
-    : NonLeafExpression<BinaryPlusExpression<Scalar, T>, Scalar, 2, T> {
+    : NonLeafExpression<BinaryPlusExpression, Scalar, Type, 2> {
   using BinaryPlusExpression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -634,10 +635,9 @@ struct BinaryPlusExpression final
 /// Derived expression type for binary division operator.
 ///
 /// @tparam Scalar Scalar type.
-/// @tparam T Expression type.
-template <typename Scalar, ExpressionType T>
-struct DivExpression final
-    : NonLeafExpression<DivExpression<Scalar, T>, Scalar, 2, T> {
+/// @tparam Type Expression type.
+template <typename Scalar, ExpressionType Type>
+struct DivExpression final : NonLeafExpression<DivExpression, Scalar, Type, 2> {
   using DivExpression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -657,10 +657,10 @@ struct DivExpression final
 /// Derived expression type for binary multiplication operator.
 ///
 /// @tparam Scalar Scalar type.
-/// @tparam T Expression type.
-template <typename Scalar, ExpressionType T>
+/// @tparam Type Expression type.
+template <typename Scalar, ExpressionType Type>
 struct MultExpression final
-    : NonLeafExpression<MultExpression<Scalar, T>, Scalar, 2, T> {
+    : NonLeafExpression<MultExpression, Scalar, Type, 2> {
   using MultExpression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -680,10 +680,10 @@ struct MultExpression final
 /// Derived expression type for unary minus operator.
 ///
 /// @tparam Scalar Scalar type.
-/// @tparam T Expression type.
-template <typename Scalar, ExpressionType T>
+/// @tparam Type Expression type.
+template <typename Scalar, ExpressionType Type>
 struct UnaryMinusExpression final
-    : NonLeafExpression<UnaryMinusExpression<Scalar, T>, Scalar, 1, T> {
+    : NonLeafExpression<UnaryMinusExpression, Scalar, Type, 1> {
   using UnaryMinusExpression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
