@@ -17,10 +17,9 @@ namespace slp::detail {
 /// Derived expression type for abs().
 ///
 /// @tparam Scalar Scalar type.
-/// @tparam T Expression type.
-template <typename Scalar, ExpressionType T>
-struct AbsExpression final
-    : NonLeafExpression<AbsExpression<Scalar, T>, Scalar, 1, T> {
+/// @tparam Type Expression type.
+template <typename Scalar, ExpressionType Type>
+struct AbsExpression final : NonLeafExpression<AbsExpression, Scalar, Type, 1> {
   using AbsExpression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -60,10 +59,10 @@ ExpressionPtr<Scalar> abs(const ExpressionPtr<Scalar>& x) {
 /// Derived expression type for acos().
 ///
 /// @tparam Scalar Scalar type.
-/// @tparam T Expression type.
-template <typename Scalar, ExpressionType T>
+/// @tparam Type Expression type.
+template <typename Scalar, ExpressionType Type>
 struct AcosExpression final
-    : NonLeafExpression<AcosExpression<Scalar, T>, Scalar, 1, T> {
+    : NonLeafExpression<AcosExpression, Scalar, Type, 1> {
   using AcosExpression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -94,10 +93,10 @@ ExpressionPtr<Scalar> acos(const ExpressionPtr<Scalar>& x) {
 /// Derived expression type for asin().
 ///
 /// @tparam Scalar Scalar type.
-/// @tparam T Expression type.
-template <typename Scalar, ExpressionType T>
+/// @tparam Type Expression type.
+template <typename Scalar, ExpressionType Type>
 struct AsinExpression final
-    : NonLeafExpression<AsinExpression<Scalar, T>, Scalar, 1, T> {
+    : NonLeafExpression<AsinExpression, Scalar, Type, 1> {
   using AsinExpression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -128,10 +127,10 @@ ExpressionPtr<Scalar> asin(const ExpressionPtr<Scalar>& x) {
 /// Derived expression type for atan().
 ///
 /// @tparam Scalar Scalar type.
-/// @tparam T Expression type.
-template <typename Scalar, ExpressionType T>
+/// @tparam Type Expression type.
+template <typename Scalar, ExpressionType Type>
 struct AtanExpression final
-    : NonLeafExpression<AtanExpression<Scalar, T>, Scalar, 1, T> {
+    : NonLeafExpression<AtanExpression, Scalar, Type, 1> {
   using AtanExpression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -161,10 +160,10 @@ ExpressionPtr<Scalar> atan(const ExpressionPtr<Scalar>& x) {
 /// Derived expression type for atan2().
 ///
 /// @tparam Scalar Scalar type.
-/// @tparam T Expression type.
-template <typename Scalar, ExpressionType T>
+/// @tparam Type Expression type.
+template <typename Scalar, ExpressionType Type>
 struct Atan2Expression final
-    : NonLeafExpression<Atan2Expression<Scalar, T>, Scalar, 2, T> {
+    : NonLeafExpression<Atan2Expression, Scalar, Type, 2> {
   using Atan2Expression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -199,10 +198,10 @@ ExpressionPtr<Scalar> atan2(const ExpressionPtr<Scalar>& y,
 /// Derived expression type for cbrt().
 ///
 /// @tparam Scalar Scalar type.
-/// @tparam T Expression type.
-template <typename Scalar, ExpressionType T>
+/// @tparam Type Expression type.
+template <typename Scalar, ExpressionType Type>
 struct CbrtExpression final
-    : NonLeafExpression<CbrtExpression<Scalar, T>, Scalar, 1, T> {
+    : NonLeafExpression<CbrtExpression, Scalar, Type, 1> {
   using CbrtExpression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -232,10 +231,9 @@ ExpressionPtr<Scalar> cbrt(const ExpressionPtr<Scalar>& x) {
 /// Derived expression type for cos().
 ///
 /// @tparam Scalar Scalar type.
-/// @tparam T Expression type.
-template <typename Scalar, ExpressionType T>
-struct CosExpression final
-    : NonLeafExpression<CosExpression<Scalar, T>, Scalar, 1, T> {
+/// @tparam Type Expression type.
+template <typename Scalar, ExpressionType Type>
+struct CosExpression final : NonLeafExpression<CosExpression, Scalar, Type, 1> {
   using CosExpression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -266,10 +264,10 @@ ExpressionPtr<Scalar> cos(const ExpressionPtr<Scalar>& x) {
 /// Derived expression type for cosh().
 ///
 /// @tparam Scalar Scalar type.
-/// @tparam T Expression type.
-template <typename Scalar, ExpressionType T>
+/// @tparam Type Expression type.
+template <typename Scalar, ExpressionType Type>
 struct CoshExpression final
-    : NonLeafExpression<CoshExpression<Scalar, T>, Scalar, 1, T> {
+    : NonLeafExpression<CoshExpression, Scalar, Type, 1> {
   using CoshExpression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -300,10 +298,9 @@ ExpressionPtr<Scalar> cosh(const ExpressionPtr<Scalar>& x) {
 /// Derived expression type for erf().
 ///
 /// @tparam Scalar Scalar type.
-/// @tparam T Expression type.
-template <typename Scalar, ExpressionType T>
-struct ErfExpression final
-    : NonLeafExpression<ErfExpression<Scalar, T>, Scalar, 1, T> {
+/// @tparam Type Expression type.
+template <typename Scalar, ExpressionType Type>
+struct ErfExpression final : NonLeafExpression<ErfExpression, Scalar, Type, 1> {
   using ErfExpression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -334,10 +331,9 @@ ExpressionPtr<Scalar> erf(const ExpressionPtr<Scalar>& x) {
 /// Derived expression type for exp().
 ///
 /// @tparam Scalar Scalar type.
-/// @tparam T Expression type.
-template <typename Scalar, ExpressionType T>
-struct ExpExpression final
-    : NonLeafExpression<ExpExpression<Scalar, T>, Scalar, 1, T> {
+/// @tparam Type Expression type.
+template <typename Scalar, ExpressionType Type>
+struct ExpExpression final : NonLeafExpression<ExpExpression, Scalar, Type, 1> {
   using ExpExpression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -371,10 +367,10 @@ ExpressionPtr<Scalar> hypot(const ExpressionPtr<Scalar>& x,
 /// Derived expression type for hypot() with two arguments.
 ///
 /// @tparam Scalar Scalar type.
-/// @tparam T Expression type.
-template <typename Scalar, ExpressionType T>
+/// @tparam Type Expression type.
+template <typename Scalar, ExpressionType Type>
 struct Hypot2Expression final
-    : NonLeafExpression<Hypot2Expression<Scalar, T>, Scalar, 2, T> {
+    : NonLeafExpression<Hypot2Expression, Scalar, Type, 2> {
   using Hypot2Expression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -419,10 +415,10 @@ ExpressionPtr<Scalar> hypot(const ExpressionPtr<Scalar>& x,
 /// Derived expression type for hypot() with three arguments.
 ///
 /// @tparam Scalar Scalar type.
-/// @tparam T Expression type.
-template <typename Scalar, ExpressionType T>
+/// @tparam Type Expression type.
+template <typename Scalar, ExpressionType Type>
 struct Hypot3Expression final
-    : NonLeafExpression<Hypot3Expression<Scalar, T>, Scalar, 3, T> {
+    : NonLeafExpression<Hypot3Expression, Scalar, Type, 3> {
   using Hypot3Expression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -469,10 +465,10 @@ ExpressionPtr<Scalar> hypot(const ExpressionPtr<Scalar>& x,
 /// Returns t if cond(a, b) is true, otherwise f.
 ///
 /// @tparam Scalar Scalar type.
-/// @tparam T Expression type.
-template <typename Scalar, ExpressionType T>
+/// @tparam Type Expression type.
+template <typename Scalar, ExpressionType Type>
 struct IfElseExpression final
-    : NonLeafExpression<IfElseExpression<Scalar, T>, Scalar, 4, T> {
+    : NonLeafExpression<IfElseExpression, Scalar, Type, 4> {
   /// The expression's name.
   static constexpr std::string_view NAME = "if-else";
 
@@ -559,10 +555,9 @@ ExpressionPtr<Scalar> if_else(
 /// Derived expression type for log().
 ///
 /// @tparam Scalar Scalar type.
-/// @tparam T Expression type.
-template <typename Scalar, ExpressionType T>
-struct LogExpression final
-    : NonLeafExpression<LogExpression<Scalar, T>, Scalar, 1, T> {
+/// @tparam Type Expression type.
+template <typename Scalar, ExpressionType Type>
+struct LogExpression final : NonLeafExpression<LogExpression, Scalar, Type, 1> {
   using LogExpression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -592,10 +587,10 @@ ExpressionPtr<Scalar> log(const ExpressionPtr<Scalar>& x) {
 /// Derived expression type for log10().
 ///
 /// @tparam Scalar Scalar type.
-/// @tparam T Expression type.
-template <typename Scalar, ExpressionType T>
+/// @tparam Type Expression type.
+template <typename Scalar, ExpressionType Type>
 struct Log10Expression final
-    : NonLeafExpression<Log10Expression<Scalar, T>, Scalar, 1, T> {
+    : NonLeafExpression<Log10Expression, Scalar, Type, 1> {
   using Log10Expression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -627,10 +622,9 @@ ExpressionPtr<Scalar> log10(const ExpressionPtr<Scalar>& x) {
 /// Returns the greater of a and b. If the values are equivalent, returns a.
 ///
 /// @tparam Scalar Scalar type.
-/// @tparam T Expression type.
-template <typename Scalar, ExpressionType T>
-struct MaxExpression final
-    : NonLeafExpression<MaxExpression<Scalar, T>, Scalar, 2, T> {
+/// @tparam Type Expression type.
+template <typename Scalar, ExpressionType Type>
+struct MaxExpression final : NonLeafExpression<MaxExpression, Scalar, Type, 2> {
   using MaxExpression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -675,10 +669,9 @@ ExpressionPtr<Scalar> max(const ExpressionPtr<Scalar>& a,
 /// Returns the lesser of a and b. If the values are equivalent, returns a.
 ///
 /// @tparam Scalar Scalar type.
-/// @tparam T Expression type.
-template <typename Scalar, ExpressionType T>
-struct MinExpression final
-    : NonLeafExpression<MinExpression<Scalar, T>, Scalar, 2, T> {
+/// @tparam Type Expression type.
+template <typename Scalar, ExpressionType Type>
+struct MinExpression final : NonLeafExpression<MinExpression, Scalar, Type, 2> {
   using MinExpression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -728,10 +721,9 @@ ExpressionPtr<Scalar> sqrt(const ExpressionPtr<Scalar>& x);
 /// Derived expression type for pow().
 ///
 /// @tparam Scalar Scalar type.
-/// @tparam T Expression type.
-template <typename Scalar, ExpressionType T>
-struct PowExpression final
-    : NonLeafExpression<PowExpression<Scalar, T>, Scalar, 2, T> {
+/// @tparam Type Expression type.
+template <typename Scalar, ExpressionType Type>
+struct PowExpression final : NonLeafExpression<PowExpression, Scalar, Type, 2> {
   using PowExpression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -803,10 +795,10 @@ ExpressionPtr<Scalar> pow(const ExpressionPtr<Scalar>& base,
 /// Derived expression type for sign().
 ///
 /// @tparam Scalar Scalar type.
-/// @tparam T Expression type.
-template <typename Scalar, ExpressionType T>
+/// @tparam Type Expression type.
+template <typename Scalar, ExpressionType Type>
 struct SignExpression final
-    : NonLeafExpression<SignExpression<Scalar, T>, Scalar, 1, T> {
+    : NonLeafExpression<SignExpression, Scalar, Type, 1> {
   using SignExpression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -835,10 +827,9 @@ ExpressionPtr<Scalar> sign(const ExpressionPtr<Scalar>& x) {
 /// Derived expression type for sin().
 ///
 /// @tparam Scalar Scalar type.
-/// @tparam T Expression type.
-template <typename Scalar, ExpressionType T>
-struct SinExpression final
-    : NonLeafExpression<SinExpression<Scalar, T>, Scalar, 1, T> {
+/// @tparam Type Expression type.
+template <typename Scalar, ExpressionType Type>
+struct SinExpression final : NonLeafExpression<SinExpression, Scalar, Type, 1> {
   using SinExpression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -869,10 +860,10 @@ ExpressionPtr<Scalar> sin(const ExpressionPtr<Scalar>& x) {
 /// Derived expression type for sinh().
 ///
 /// @tparam Scalar Scalar type.
-/// @tparam T Expression type.
-template <typename Scalar, ExpressionType T>
+/// @tparam Type Expression type.
+template <typename Scalar, ExpressionType Type>
 struct SinhExpression final
-    : NonLeafExpression<SinhExpression<Scalar, T>, Scalar, 1, T> {
+    : NonLeafExpression<SinhExpression, Scalar, Type, 1> {
   using SinhExpression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -903,10 +894,10 @@ ExpressionPtr<Scalar> sinh(const ExpressionPtr<Scalar>& x) {
 /// Derived expression type for sqrt().
 ///
 /// @tparam Scalar Scalar type.
-/// @tparam T Expression type.
-template <typename Scalar, ExpressionType T>
+/// @tparam Type Expression type.
+template <typename Scalar, ExpressionType Type>
 struct SqrtExpression final
-    : NonLeafExpression<SqrtExpression<Scalar, T>, Scalar, 1, T> {
+    : NonLeafExpression<SqrtExpression, Scalar, Type, 1> {
   using SqrtExpression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -936,10 +927,9 @@ ExpressionPtr<Scalar> sqrt(const ExpressionPtr<Scalar>& x) {
 /// Derived expression type for tan().
 ///
 /// @tparam Scalar Scalar type.
-/// @tparam T Expression type.
-template <typename Scalar, ExpressionType T>
-struct TanExpression final
-    : NonLeafExpression<TanExpression<Scalar, T>, Scalar, 1, T> {
+/// @tparam Type Expression type.
+template <typename Scalar, ExpressionType Type>
+struct TanExpression final : NonLeafExpression<TanExpression, Scalar, Type, 1> {
   using TanExpression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
@@ -972,10 +962,10 @@ ExpressionPtr<Scalar> tan(const ExpressionPtr<Scalar>& x) {
 /// Derived expression type for tanh().
 ///
 /// @tparam Scalar Scalar type.
-/// @tparam T Expression type.
-template <typename Scalar, ExpressionType T>
+/// @tparam Type Expression type.
+template <typename Scalar, ExpressionType Type>
 struct TanhExpression final
-    : NonLeafExpression<TanhExpression<Scalar, T>, Scalar, 1, T> {
+    : NonLeafExpression<TanhExpression, Scalar, Type, 1> {
   using TanhExpression::NonLeafExpression::NonLeafExpression;
 
   /// The expression's name.
