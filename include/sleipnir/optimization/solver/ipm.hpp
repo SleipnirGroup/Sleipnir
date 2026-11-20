@@ -422,13 +422,14 @@ ExitStatus ipm(
         matrices.num_decision_variables + matrices.num_equality_constraints);
     lhs.setFromSortedTriplets(triplets.begin(), triplets.end());
 
-    // rhs = −[∇f − Aₑᵀy − Aᵢᵀ(−Σcᵢ + μS⁻¹e + z)]
-    //        [               cₑ                ]
-    DenseVector rhs{x.rows() + y.rows()};
-    rhs.segment(0, x.rows()) =
+    // rhs = −[∇f − Aₑᵀy − Aᵢᵀ(μS⁻¹e − Σ(cᵢ − s))]
+    //        [                cₑ                ]
+    DenseVector rhs{g.rows() + y.rows()};
+    DenseVector c_i_minus_s = c_i - s;
+    rhs.segment(0, g.rows()) =
         -g + A_e.transpose() * y +
-        A_i.transpose() * (-Σ * c_i + μ * s.cwiseInverse() + z);
-    rhs.segment(x.rows(), y.rows()) = -c_e;
+        A_i.transpose() * (μ * s.cwiseInverse() - Σ * c_i_minus_s);
+    rhs.segment(g.rows(), y.rows()) = -c_e;
 
     phase_tracer.next(diagnostics[KKT_MATRIX_FACTOR]);
 
@@ -440,8 +441,8 @@ ExitStatus ipm(
 
     // Solve the Newton-KKT system
     //
-    // [H + AᵢᵀΣAᵢ  Aₑᵀ][ pˣ] = −[∇f − Aₑᵀy − Aᵢᵀ(−Σcᵢ + μS⁻¹e + z)]
-    // [    Aₑ       0 ][−pʸ]    [               cₑ                ]
+    // [H + AᵢᵀΣAᵢ  Aₑᵀ][ pˣ] = −[∇f − Aₑᵀy − Aᵢᵀ(μS⁻¹e − Σ(cᵢ − s))]
+    // [    Aₑ       0 ][−pʸ]    [                cₑ                ]
     if (solver.compute(lhs).info() != Eigen::Success) [[unlikely]] {
       return ExitStatus::FACTORIZATION_FAILED;
     }
@@ -460,7 +461,7 @@ ExitStatus ipm(
       step.p_s = c_i_minus_s + A_i * step.p_x;
       step.p_z = μ * s.cwiseInverse() - z - Σ * step.p_s;
     };
-    compute_step(step, c_i - s);
+    compute_step(step, c_i_minus_s);
 
     phase_tracer.next(diagnostics[LINE_SEARCH]);
 
@@ -581,7 +582,7 @@ ExitStatus ipm(
           // Rebuild Newton-KKT rhs with updated constraint values.
           //
           // rhs = −[∇f − Aₑᵀy − Aᵢᵀ(μS⁻¹e − Σ(cᵢ − s)ˢᵒᶜ)]
-          //        [               cₑˢᵒᶜ                 ]
+          //        [                cₑˢᵒᶜ                ]
           //
           // where
           //
@@ -590,10 +591,10 @@ ExitStatus ipm(
           //     αˢᵒᶜ(cᵢ(xₖ) − sₖ) + cᵢ(xₖ + αˢᵒᶜpˣˢᵒᶜ) − (sₖ + αˢᵒᶜpˢˢᵒᶜ)
           c_e_soc = α_soc * c_e_soc + trial_c_e;
           c_i_minus_s_soc = α_soc * c_i_minus_s_soc + trial_c_i - trial_s;
-          rhs.segment(0, x.rows()) =
+          rhs.segment(0, g.rows()) =
               -g + A_e.transpose() * y +
               A_i.transpose() * (μ * s.cwiseInverse() - Σ * c_i_minus_s_soc);
-          rhs.segment(x.rows(), y.rows()) = -c_e_soc;
+          rhs.segment(g.rows(), y.rows()) = -c_e_soc;
 
           // Solve the Newton-KKT system
           compute_step(soc_step, c_i_minus_s_soc);
