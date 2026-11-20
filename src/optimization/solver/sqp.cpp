@@ -19,3 +19,10 @@ template SLEIPNIR_DLLEXPORT slp::ExitStatus slp::sqp(
     std::span<std::function<ControlFlow(const IterationInfo<double>& info)>>
         iteration_callbacks,
     const slp::Options<double>& options, Eigen::VectorX<double>& x);
+
+template SLEIPNIR_DLLEXPORT slp::ExitStatus slp::sqp(
+    const SQPMatrixCallbacks<double>& matrix_callbacks,
+    std::span<std::function<ControlFlow(const IterationInfo<double>& info)>>
+        iteration_callbacks,
+    const Options<double>& options, Eigen::VectorX<double>& x,
+    Eigen::VectorX<double>& y);

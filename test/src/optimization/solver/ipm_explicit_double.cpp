@@ -23,3 +23,16 @@ template slp::ExitStatus slp::ipm(
     const Eigen::ArrayX<bool>& bound_constraint_mask,
 #endif
     Eigen::VectorX<ExplicitDouble>& x);
+
+template slp::ExitStatus slp::ipm(
+    const IPMMatrixCallbacks<ExplicitDouble>& matrix_callbacks,
+    std::span<
+        std::function<ControlFlow(const IterationInfo<ExplicitDouble>& info)>>
+        iteration_callbacks,
+    const Options<ExplicitDouble>& options, bool in_feasibility_restoration,
+#ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
+    const Eigen::ArrayX<bool>& bound_constraint_mask,
+#endif
+    Eigen::VectorX<ExplicitDouble>& x, Eigen::VectorX<ExplicitDouble>& s,
+    Eigen::VectorX<ExplicitDouble>& y, Eigen::VectorX<ExplicitDouble>& z,
+    ExplicitDouble& μ, int& iterations);

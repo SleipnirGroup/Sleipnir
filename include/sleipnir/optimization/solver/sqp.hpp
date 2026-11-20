@@ -547,4 +547,11 @@ sqp(const SQPMatrixCallbacks<double>& matrix_callbacks,
         iteration_callbacks,
     const Options<double>& options, Eigen::VectorX<double>& x);
 
+extern template SLEIPNIR_DLLEXPORT ExitStatus
+sqp(const SQPMatrixCallbacks<double>& matrix_callbacks,
+    std::span<std::function<ControlFlow(const IterationInfo<double>& info)>>
+        iteration_callbacks,
+    const Options<double>& options, Eigen::VectorX<double>& x,
+    Eigen::VectorX<double>& y);
+
 }  // namespace slp
