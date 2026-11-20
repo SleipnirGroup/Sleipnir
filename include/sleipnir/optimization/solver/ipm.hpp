@@ -4,7 +4,7 @@
 
 #include <algorithm>
 #include <chrono>
-#include <cmath>
+#include <cmath>  // IWYU pragma: keep
 #include <functional>
 #include <limits>
 #include <optional>
@@ -20,6 +20,7 @@
 #include "sleipnir/optimization/solver/iteration_info.hpp"
 #include "sleipnir/optimization/solver/options.hpp"
 #include "sleipnir/optimization/solver/util/all_finite.hpp"
+#include "sleipnir/optimization/solver/util/barrier_parameter.hpp"
 #include "sleipnir/optimization/solver/util/constraint_violation.hpp"
 #include "sleipnir/optimization/solver/util/feasibility_restoration.hpp"
 #include "sleipnir/optimization/solver/util/feasibility_restoration_cycle_detector.hpp"
@@ -249,20 +250,7 @@ ExitStatus ipm(
   // This should be run when the error is below a desired threshold for the
   // current barrier parameter
   auto update_barrier_parameter_and_reset_filter = [&] {
-    // Barrier parameter linear decrease power in "κ_μ μ". Range of (0, 1).
-    constexpr Scalar κ_μ(0.2);
-
-    // Barrier parameter superlinear decrease power in "μ^(θ_μ)". Range of (1,
-    // 2).
-    constexpr Scalar θ_μ(1.5);
-
-    // Update the barrier parameter.
-    //
-    //   μⱼ₊₁ = max(εₜₒₗ/10, min(κ_μ μⱼ, μⱼ^θ_μ))
-    //
-    // See equation (7) of [2].
-    using std::pow;
-    μ = std::max(μ_min, std::min(κ_μ * μ, pow(μ, θ_μ)));
+    μ = next_barrier_parameter(μ, μ_min);
 
     // Update the fraction-to-the-boundary rule scaling factor.
     //
@@ -710,14 +698,11 @@ ExitStatus ipm(
 
     // Update the barrier parameter if necessary
     if (E_0 > options.tolerance) {
-      // Barrier parameter scale factor for tolerance checks
-      constexpr Scalar κ_ε(10);
-
       // While the error is below the desired threshold for this barrier
       // parameter value, decrease the barrier parameter further
       Scalar E_μ = kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(
           g, A_e, c_e, A_i, c_i, s, y, z, μ, options.tolerance);
-      while (μ > μ_min && E_μ <= κ_ε * μ) {
+      while (μ > μ_min && E_μ <= barrier_subproblem_tolerance(μ)) {
         update_barrier_parameter_and_reset_filter();
         E_μ = kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(
             g, A_e, c_e, A_i, c_i, s, y, z, μ, options.tolerance);
