@@ -49,7 +49,7 @@ class KKTSolver {
 
   /// Computes the factorization of the KKT matrix.
   ///
-  /// In sparse mode, the matrix's symbolic decomposition is reused in
+  /// In sparse mode, the matrix's symbolic factorization is reused in
   /// subsequent calls, so subsequent calls must be given a matrix with the same
   /// sparsity pattern.
   ///

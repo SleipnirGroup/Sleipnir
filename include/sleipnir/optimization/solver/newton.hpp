@@ -150,7 +150,7 @@ ExitStatus newton(
       }
     }
 
-    phase_tracer.next(diagnostics[KKT_MATRIX_DECOMP]);
+    phase_tracer.next(diagnostics[KKT_MATRIX_FACTOR]);
 
     // Solve the Newton-KKT system
     //

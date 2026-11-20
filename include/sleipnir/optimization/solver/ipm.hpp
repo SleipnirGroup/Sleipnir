@@ -430,7 +430,7 @@ ExitStatus ipm(
         A_i.transpose() * (-Σ * c_i + μ * s.cwiseInverse() + z);
     rhs.segment(x.rows(), y.rows()) = -c_e;
 
-    phase_tracer.next(diagnostics[KKT_MATRIX_DECOMP]);
+    phase_tracer.next(diagnostics[KKT_MATRIX_FACTOR]);
 
     Step step;
     Scalar α_max(1);

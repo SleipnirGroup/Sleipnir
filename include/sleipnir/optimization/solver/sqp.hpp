@@ -297,7 +297,7 @@ ExitStatus sqp(
     rhs.segment(0, x.rows()) = -g + A_e.transpose() * y;
     rhs.segment(x.rows(), y.rows()) = -c_e;
 
-    phase_tracer.next(diagnostics[KKT_MATRIX_DECOMP]);
+    phase_tracer.next(diagnostics[KKT_MATRIX_FACTOR]);
 
     Step step;
     constexpr Scalar α_max(1);

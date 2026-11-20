@@ -45,7 +45,7 @@ class SparseKKTSolver {
 
   /// Computes the factorization of the KKT matrix.
   ///
-  /// The matrix's symbolic decomposition is reused in subsequent calls, so
+  /// The matrix's symbolic factorization is reused in subsequent calls, so
   /// subsequent calls must be given a matrix with the same sparsity pattern.
   ///
   /// @param lhs Left-hand side of the system.
@@ -134,7 +134,7 @@ class SparseKKTSolver {
           return *this;
         }
       } else {
-        // If the decomposition failed, increase δ and γ to drive all
+        // If the factorization failed, increase δ and γ to drive all
         // eigenvalues away from zero
         δ *= Scalar(10);
         γ = γ == Scalar(0) ? γ_initial : std::min(γ * Scalar(10), γ_max);
