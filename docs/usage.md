@@ -192,7 +192,7 @@ At the end of the solve, the solver prints a time trace of itself.
 │↳ iteration            38.18%▕███▍     ▏      0.021     0.007    3│
 │  ↳ callbacks           0.00%▕         ▏      0.000     0.000    3│
 │  ↳ KKT matrix build    3.64%▕▎        ▏      0.002     0.000    3│
-│  ↳ KKT matrix decomp   7.27%▕▋        ▏      0.004     0.001    3│
+│  ↳ KKT matrix factor   7.27%▕▋        ▏      0.004     0.001    3│
 │  ↳ KKT system solve    1.82%▕▏        ▏      0.001     0.000    3│
 │  ↳ line search        14.55%▕█▎       ▏      0.008     0.002    3│
 │    ↳ SOC               0.00%▕         ▏      0.000     0.000    0│

@@ -44,8 +44,8 @@ enum class SolveTimeTracerID : uint8_t {
   CALLBACKS,
   /// KKT matrix build.
   KKT_MATRIX_BUILD,
-  /// KKT matrix decomposition.
-  KKT_MATRIX_DECOMP,
+  /// KKT matrix factorization.
+  KKT_MATRIX_FACTOR,
   /// KKT system solve.
   KKT_SYSTEM_SOLVE,
   /// Line search.
@@ -106,7 +106,7 @@ inline constexpr std::array newton_time_trace{
     TimeTraceEntry{SolveTimeTracerID::SETUP, "setup", 1},
     TimeTraceEntry{SolveTimeTracerID::ITERATION, "iteration", 1},
     TimeTraceEntry{SolveTimeTracerID::CALLBACKS, "callbacks", 2},
-    TimeTraceEntry{SolveTimeTracerID::KKT_MATRIX_DECOMP, "KKT matrix decomp",
+    TimeTraceEntry{SolveTimeTracerID::KKT_MATRIX_FACTOR, "KKT matrix factor",
                    2},
     TimeTraceEntry{SolveTimeTracerID::KKT_SYSTEM_SOLVE, "KKT system solve", 2},
     TimeTraceEntry{SolveTimeTracerID::LINE_SEARCH, "line search", 2},
@@ -122,7 +122,7 @@ inline constexpr std::array sqp_time_trace{
     TimeTraceEntry{SolveTimeTracerID::ITERATION, "iteration", 1},
     TimeTraceEntry{SolveTimeTracerID::CALLBACKS, "callbacks", 2},
     TimeTraceEntry{SolveTimeTracerID::KKT_MATRIX_BUILD, "KKT matrix build", 2},
-    TimeTraceEntry{SolveTimeTracerID::KKT_MATRIX_DECOMP, "KKT matrix decomp",
+    TimeTraceEntry{SolveTimeTracerID::KKT_MATRIX_FACTOR, "KKT matrix factor",
                    2},
     TimeTraceEntry{SolveTimeTracerID::KKT_SYSTEM_SOLVE, "KKT system solve", 2},
     TimeTraceEntry{SolveTimeTracerID::LINE_SEARCH, "line search", 2},
@@ -144,7 +144,7 @@ inline constexpr std::array ipm_time_trace{
     TimeTraceEntry{SolveTimeTracerID::ITERATION, "iteration", 1},
     TimeTraceEntry{SolveTimeTracerID::CALLBACKS, "callbacks", 2},
     TimeTraceEntry{SolveTimeTracerID::KKT_MATRIX_BUILD, "KKT matrix build", 2},
-    TimeTraceEntry{SolveTimeTracerID::KKT_MATRIX_DECOMP, "KKT matrix decomp",
+    TimeTraceEntry{SolveTimeTracerID::KKT_MATRIX_FACTOR, "KKT matrix factor",
                    2},
     TimeTraceEntry{SolveTimeTracerID::KKT_SYSTEM_SOLVE, "KKT system solve", 2},
     TimeTraceEntry{SolveTimeTracerID::LINE_SEARCH, "line search", 2},

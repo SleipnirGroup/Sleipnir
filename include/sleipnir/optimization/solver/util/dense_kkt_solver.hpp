@@ -119,7 +119,7 @@ class DenseKKTSolver {
           return *this;
         }
       } else {
-        // If the decomposition failed, increase δ and γ to drive all
+        // If the factorization failed, increase δ and γ to drive all
         // eigenvalues away from zero
         δ *= Scalar(10);
         γ = γ == Scalar(0) ? γ_initial : std::min(γ * Scalar(10), γ_max);
