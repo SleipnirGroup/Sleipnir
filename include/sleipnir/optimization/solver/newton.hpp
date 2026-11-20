@@ -155,7 +155,9 @@ ExitStatus newton(
     // Solve the Newton-KKT system
     //
     // Hpˣ = −∇f
-    solver.compute(H);
+    if (solver.compute(H).info() != Eigen::Success) [[unlikely]] {
+      return ExitStatus::FACTORIZATION_FAILED;
+    }
 
     phase_tracer.next(diagnostics[KKT_SYSTEM_SOLVE]);
 
