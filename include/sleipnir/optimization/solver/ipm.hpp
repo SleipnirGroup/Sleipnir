@@ -20,14 +20,13 @@
 #include "sleipnir/optimization/solver/iteration_info.hpp"
 #include "sleipnir/optimization/solver/options.hpp"
 #include "sleipnir/optimization/solver/util/all_finite.hpp"
-#include "sleipnir/optimization/solver/util/append_as_triplets.hpp"
 #include "sleipnir/optimization/solver/util/constraint_violation.hpp"
 #include "sleipnir/optimization/solver/util/feasibility_restoration.hpp"
 #include "sleipnir/optimization/solver/util/feasibility_restoration_cycle_detector.hpp"
 #include "sleipnir/optimization/solver/util/filter.hpp"
 #include "sleipnir/optimization/solver/util/fraction_to_the_boundary_rule.hpp"
 #include "sleipnir/optimization/solver/util/kkt_error.hpp"
-#include "sleipnir/optimization/solver/util/kkt_solver.hpp"
+#include "sleipnir/optimization/solver/util/kkt_system.hpp"
 #include "sleipnir/optimization/solver/util/time_trace.hpp"
 #include "sleipnir/util/assert.hpp"
 #include "sleipnir/util/print_diagnostics.hpp"
@@ -142,65 +141,6 @@ ExitStatus ipm(
   using DenseVector = Eigen::VectorX<Scalar>;
   using SparseMatrix = Eigen::SparseMatrix<Scalar>;
   using SparseVector = Eigen::SparseVector<Scalar>;
-
-  /// Interior-point method step direction.
-  struct Step {
-    /// Decision variable primal step.
-    DenseVector p_x;
-    /// Inequality constraint slack variable primal step.
-    DenseVector p_s;
-    /// Equality constraint dual step.
-    DenseVector p_y;
-    /// Inequality constraint dual step.
-    DenseVector p_z;
-
-    /// Returns the infinity norm of the primal step.
-    ///
-    /// @return The infinity norm of the primal step.
-    Scalar primal_inf_norm() const {
-      return std::max(p_x.template lpNorm<Eigen::Infinity>(),
-                      p_s.template lpNorm<Eigen::Infinity>());
-    }
-
-    /// Returns the infinity norm of the dual step.
-    ///
-    /// @return The infinity norm of the dual step.
-    Scalar dual_inf_norm() const {
-      return std::max(p_y.template lpNorm<Eigen::Infinity>(),
-                      p_z.template lpNorm<Eigen::Infinity>());
-    }
-
-    /// Returns the step size below which the primal step is negligible
-    /// relative to the iterate.
-    ///
-    /// @param x The decision variables.
-    /// @param s The inequality constraint slack variables.
-    /// @return The step size below which the primal step is negligible
-    ///     relative to the iterate.
-    Scalar tiny_step_size(const DenseVector& x, const DenseVector& s) const {
-      using std::max;
-
-      // A primal step α[pˣ pˢ] is negligible if
-      //
-      //   max(‖αpˣ/(1 + |x|)‖_∞, ‖αpˢ/(1 + |s|)‖_∞) < 10ε
-      //
-      // where the absolute values and division are elementwise. Since α > 0,
-      // it factors out of the norms and max.
-      //
-      //   α max(‖pˣ/(1 + |x|)‖_∞, ‖pˢ/(1 + |s|)‖_∞) < 10ε
-      //
-      // Dividing both sides by the max gives
-      //
-      //   α < 10ε / max(‖pˣ/(1 + |x|)‖_∞, ‖pˢ/(1 + |s|)‖_∞)
-      return Scalar(10) * std::numeric_limits<Scalar>::epsilon() /
-             max((p_x.array().abs() / (Scalar(1) + x.array().abs()))
-                     .matrix()
-                     .template lpNorm<Eigen::Infinity>(),
-                 (p_s.array().abs() / (Scalar(1) + s.array().abs()))
-                     .matrix()
-                     .template lpNorm<Eigen::Infinity>());
-    }
-  };
 
   using std::isfinite;
 
@@ -336,21 +276,7 @@ ExitStatus ipm(
     fallback_kkt_error = std::numeric_limits<Scalar>::infinity();
   };
 
-  // Kept outside the loop so its storage can be reused
-  gch::small_vector<Eigen::Triplet<Scalar>> triplets;
-
-  const int lhs_rows =
-      matrices.num_decision_variables + matrices.num_equality_constraints;
-  KKTSolver<Scalar> solver{
-      // Use sparse solver if lower triangle fills < 25% of system
-      H.nonZeros() +
-              (A_i.transpose() * A_i)
-                  .template triangularView<Eigen::Lower>()
-                  .eval()
-                  .nonZeros() +
-              A_e.nonZeros() <
-          0.25 * lhs_rows * lhs_rows,
-      matrices.num_decision_variables, matrices.num_equality_constraints};
+  IPMKKTSystem<Scalar> kkt_system{H, A_e, A_i};
 
   // Step size reduction factor
   constexpr Scalar α_reduction_factor(0.5);
@@ -403,74 +329,28 @@ ExitStatus ipm(
 
     phase_tracer.next(diagnostics[KKT_MATRIX_BUILD]);
 
-    // S = diag(s)
-    // Z = diag(z)
-    // Σ = S⁻¹Z
-    const SparseMatrix Σ{s.cwiseInverse().asDiagonal() * z.asDiagonal()};
-
-    // lhs = [H + AᵢᵀΣAᵢ  Aₑᵀ]
-    //       [    Aₑ       0 ]
-    //
-    // Don't assign upper triangle because solver only uses lower triangle.
-    const SparseMatrix top_left =
-        H + (A_i.transpose() * Σ * A_i).template triangularView<Eigen::Lower>();
-    triplets.clear();
-    triplets.reserve(top_left.nonZeros() + A_e.nonZeros());
-    append_as_triplets(triplets, 0, 0, {top_left, A_e});
-    SparseMatrix lhs(
-        matrices.num_decision_variables + matrices.num_equality_constraints,
-        matrices.num_decision_variables + matrices.num_equality_constraints);
-    lhs.setFromSortedTriplets(triplets.begin(), triplets.end());
-
-    // rhs = −[∇f − Aₑᵀy − Aᵢᵀ(μS⁻¹e − Σ(cᵢ − s))]
-    //        [                cₑ                ]
-    DenseVector rhs{g.rows() + y.rows()};
-    DenseVector c_i_minus_s = c_i - s;
-    rhs.segment(0, g.rows()) =
-        -g + A_e.transpose() * y +
-        A_i.transpose() * (μ * s.cwiseInverse() - Σ * c_i_minus_s);
-    rhs.segment(g.rows(), y.rows()) = -c_e;
+    kkt_system.build(H, A_e, A_i, s, z);
 
     phase_tracer.next(diagnostics[KKT_MATRIX_FACTOR]);
 
-    Step step;
-    Scalar α_max(1);
-    Scalar α(1);
-    Scalar α_z(1);
-    bool call_feasibility_restoration = false;
-
-    // Solve the Newton-KKT system
-    //
-    // [H + AᵢᵀΣAᵢ  Aₑᵀ][ pˣ] = −[∇f − Aₑᵀy − Aᵢᵀ(μS⁻¹e − Σ(cᵢ − s))]
-    // [    Aₑ       0 ][−pʸ]    [                cₑ                ]
-    if (solver.compute(lhs).info() != Eigen::Success) [[unlikely]] {
+    if (!kkt_system.factorize()) [[unlikely]] {
       return ExitStatus::FACTORIZATION_FAILED;
     }
 
     phase_tracer.next(diagnostics[KKT_SYSTEM_SOLVE]);
 
-    auto compute_step = [&](Step& step, const DenseVector& c_i_minus_s) {
-      // p = [ pˣ]
-      //     [−pʸ]
-      DenseVector p = solver.solve(rhs);
-      step.p_x = p.segment(0, x.rows());
-      step.p_y = -p.segment(x.rows(), y.rows());
-
-      // pˢ = cᵢ − s + Aᵢpˣ
-      // pᶻ = μS⁻¹e − z − Σpˢ
-      step.p_s = c_i_minus_s + A_i * step.p_x;
-      step.p_z = μ * s.cwiseInverse() - z - Σ * step.p_s;
-    };
-    compute_step(step, c_i_minus_s);
+    auto step = kkt_system.solve(g, A_e, A_i, y, s, z, μ, c_e, c_i - s);
 
     phase_tracer.next(diagnostics[LINE_SEARCH]);
 
+    bool call_feasibility_restoration = false;
+
     // αᵐᵃˣ = max(α ∈ (0, 1] : sₖ + αpₖˢ ≥ (1−τⱼ)sₖ)
-    α_max = fraction_to_the_boundary_rule<Scalar>(s, step.p_s, τ);
-    α = α_max;
+    Scalar α_max = fraction_to_the_boundary_rule<Scalar>(s, step.p_s, τ);
+    Scalar α = α_max;
 
     // αₖᶻ = max(α ∈ (0, 1] : zₖ + αpₖᶻ ≥ (1−τⱼ)zₖ)
-    α_z = fraction_to_the_boundary_rule<Scalar>(z, step.p_z, τ);
+    Scalar α_z = fraction_to_the_boundary_rule<Scalar>(z, step.p_z, τ);
 
     const FilterEntry<Scalar> current_entry{f, s, c_e, c_i, μ};
 
@@ -572,32 +452,22 @@ ExitStatus ipm(
                       matrices.scaling, g, A_e, trial_c_e, A_i, trial_c_i,
                       trial_s, trial_y, trial_z, Scalar(0), options.tolerance),
                   trial_f, constraint_violation(trial_c_e, trial_c_i, trial_s),
-                  trial_s.dot(trial_z), μ, solver.hessian_regularization(),
-                  solver.constraint_jacobian_regularization(),
+                  trial_s.dot(trial_z), μ, kkt_system.hessian_regularization(),
+                  kkt_system.constraint_jacobian_regularization(),
                   soc_step.primal_inf_norm(), soc_step.dual_inf_norm(), α_soc,
                   Scalar(1), α_reduction_factor, α_z_soc);
             }
           }};
 
-          // Rebuild Newton-KKT rhs with updated constraint values.
-          //
-          // rhs = −[∇f − Aₑᵀy − Aᵢᵀ(μS⁻¹e − Σ(cᵢ − s)ˢᵒᶜ)]
-          //        [                cₑˢᵒᶜ                ]
-          //
-          // where
+          // Solve the Newton-KKT system with corrected constraint values
           //
           //   cₑˢᵒᶜ = αˢᵒᶜcₑ(xₖ) + cₑ(xₖ + αˢᵒᶜpˣˢᵒᶜ)
           //   (cᵢ − s)ˢᵒᶜ =
           //     αˢᵒᶜ(cᵢ(xₖ) − sₖ) + cᵢ(xₖ + αˢᵒᶜpˣˢᵒᶜ) − (sₖ + αˢᵒᶜpˢˢᵒᶜ)
           c_e_soc = α_soc * c_e_soc + trial_c_e;
           c_i_minus_s_soc = α_soc * c_i_minus_s_soc + trial_c_i - trial_s;
-          rhs.segment(0, g.rows()) =
-              -g + A_e.transpose() * y +
-              A_i.transpose() * (μ * s.cwiseInverse() - Σ * c_i_minus_s_soc);
-          rhs.segment(g.rows(), y.rows()) = -c_e_soc;
-
-          // Solve the Newton-KKT system
-          compute_step(soc_step, c_i_minus_s_soc);
+          soc_step = kkt_system.solve(g, A_e, A_i, y, s, z, μ, c_e_soc,
+                                      c_i_minus_s_soc);
 
           // αˢᵒᶜ = max(α ∈ (0, 1] : sₖ + αpₖˢ ≥ (1−τⱼ)sₖ)
           // αₖᶻˢᵒᶜ = max(α ∈ (0, 1] : zₖ + αpₖᶻ ≥ (1−τⱼ)zₖ)
@@ -857,15 +727,16 @@ ExitStatus ipm(
     inner_iter_tracer.stop();
 
     if (options.diagnostics) {
-      print_iterate_diagnostics(
-          iterations,
-          in_feasibility_restoration ? IterationType::FEASIBILITY_RESTORATION
-                                     : IterationType::NORMAL,
-          inner_iter_tracer.current_duration(), E_0, f,
-          constraint_violation(c_e, c_i, s), s.dot(z), μ,
-          solver.hessian_regularization(),
-          solver.constraint_jacobian_regularization(), step.primal_inf_norm(),
-          step.dual_inf_norm(), α, α_max, α_reduction_factor, α_z);
+      print_iterate_diagnostics(iterations,
+                                in_feasibility_restoration
+                                    ? IterationType::FEASIBILITY_RESTORATION
+                                    : IterationType::NORMAL,
+                                inner_iter_tracer.current_duration(), E_0, f,
+                                constraint_violation(c_e, c_i, s), s.dot(z), μ,
+                                kkt_system.hessian_regularization(),
+                                kkt_system.constraint_jacobian_regularization(),
+                                step.primal_inf_norm(), step.dual_inf_norm(), α,
+                                α_max, α_reduction_factor, α_z);
     }
 
     ++iterations;

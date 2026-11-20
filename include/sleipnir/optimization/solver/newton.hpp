@@ -21,7 +21,7 @@
 #include "sleipnir/optimization/solver/util/all_finite.hpp"
 #include "sleipnir/optimization/solver/util/filter.hpp"
 #include "sleipnir/optimization/solver/util/kkt_error.hpp"
-#include "sleipnir/optimization/solver/util/kkt_solver.hpp"
+#include "sleipnir/optimization/solver/util/kkt_system.hpp"
 #include "sleipnir/optimization/solver/util/time_trace.hpp"
 #include "sleipnir/util/assert.hpp"
 #include "sleipnir/util/print_diagnostics.hpp"
@@ -109,9 +109,7 @@ ExitStatus newton(
 
   Filter<Scalar> filter;
 
-  KKTSolver<Scalar> solver{
-      // Use sparse solver if lower triangle fills < 25% of system
-      H.nonZeros() < 0.25 * H.size(), matrices.num_decision_variables, 0};
+  NewtonKKTSystem<Scalar> kkt_system{H};
 
   // Step size reduction factor
   constexpr Scalar α_reduction_factor(0.5);
@@ -152,50 +150,33 @@ ExitStatus newton(
 
     phase_tracer.next(diagnostics[KKT_MATRIX_FACTOR]);
 
-    // Solve the Newton-KKT system
-    //
-    // Hpˣ = −∇f
-    if (solver.compute(H).info() != Eigen::Success) [[unlikely]] {
+    if (!kkt_system.factorize(H)) [[unlikely]] {
       return ExitStatus::FACTORIZATION_FAILED;
     }
 
     phase_tracer.next(diagnostics[KKT_SYSTEM_SOLVE]);
 
-    DenseVector p_x = solver.solve(-g);
+    const auto step = kkt_system.solve(g);
 
     phase_tracer.next(diagnostics[LINE_SEARCH]);
 
     constexpr Scalar α_max(1);
     Scalar α = α_max;
+
     const FilterEntry<Scalar> current_entry{f};
-    const Scalar D_ϕ = g.transpose() * p_x;
+
+    const Scalar D_ϕ = g.transpose() * step.p_x;
 
     const Scalar α_min = filter.min_step_size(current_entry, D_ϕ);
 
     // α_min is zero when the search direction is a descent direction, so also
     // end the line search when the step becomes negligible relative to the
     // iterate. This bounds the number of step size reductions.
-    //
-    // A step αpˣ is negligible if
-    //
-    //   ‖αpˣ/(1 + |x|)‖_∞ < 10ε
-    //
-    // where the absolute value and division are elementwise. Since α > 0, it
-    // factors out of the norm.
-    //
-    //   α‖pˣ/(1 + |x|)‖_∞ < 10ε
-    //
-    // Dividing both sides by the norm gives
-    //
-    //   α < 10ε / ‖pˣ/(1 + |x|)‖_∞
-    const Scalar α_tiny = Scalar(10) * std::numeric_limits<Scalar>::epsilon() /
-                          (p_x.array().abs() / (Scalar(1) + x.array().abs()))
-                              .matrix()
-                              .template lpNorm<Eigen::Infinity>();
+    const Scalar α_tiny = step.tiny_step_size(x);
 
     // Loop until a step is accepted
     while (1) {
-      trial_x = x + α * p_x;
+      trial_x = x + α * step.p_x;
 
       trial_f = matrices.f(trial_x);
 
@@ -224,7 +205,7 @@ ExitStatus newton(
       if (α < α_min || α < α_tiny) {
         Scalar current_kkt_error = kkt_error<Scalar, KKTErrorType::ONE_NORM>(g);
 
-        trial_x = x + α_max * p_x;
+        trial_x = x + α_max * step.p_x;
 
         trial_f = matrices.f(trial_x);
 
@@ -263,13 +244,13 @@ ExitStatus newton(
     inner_iter_tracer.stop();
 
     if (options.diagnostics) {
-      print_iterate_diagnostics(
-          iterations, IterationType::NORMAL,
-          inner_iter_tracer.current_duration(), E_0, f, Scalar(0), Scalar(0),
-          Scalar(0), solver.hessian_regularization(),
-          solver.constraint_jacobian_regularization(),
-          p_x.template lpNorm<Eigen::Infinity>(), Scalar(1), α, α_max,
-          α_reduction_factor, Scalar(1));
+      print_iterate_diagnostics(iterations, IterationType::NORMAL,
+                                inner_iter_tracer.current_duration(), E_0, f,
+                                Scalar(0), Scalar(0), Scalar(0),
+                                kkt_system.hessian_regularization(),
+                                kkt_system.constraint_jacobian_regularization(),
+                                step.primal_inf_norm(), Scalar(1), α, α_max,
+                                α_reduction_factor, Scalar(1));
     }
 
     ++iterations;
