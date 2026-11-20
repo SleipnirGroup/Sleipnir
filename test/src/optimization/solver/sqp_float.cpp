@@ -17,3 +17,10 @@ template slp::ExitStatus slp::sqp(
         iteration_callbacks,
     const slp::Options<float>& options,
     Eigen::Vector<float, Eigen::Dynamic>& x);
+
+template slp::ExitStatus slp::sqp(
+    const SQPMatrixCallbacks<float>& matrix_callbacks,
+    std::span<std::function<ControlFlow(const IterationInfo<float>& info)>>
+        iteration_callbacks,
+    const Options<float>& options, Eigen::VectorX<float>& x,
+    Eigen::VectorX<float>& y);

@@ -769,4 +769,16 @@ ipm(const IPMMatrixCallbacks<double>& matrix_callbacks,
 #endif
     Eigen::VectorX<double>& x);
 
+extern template SLEIPNIR_DLLEXPORT ExitStatus
+ipm(const IPMMatrixCallbacks<double>& matrix_callbacks,
+    std::span<std::function<ControlFlow(const IterationInfo<double>& info)>>
+        iteration_callbacks,
+    const Options<double>& options, bool in_feasibility_restoration,
+#ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
+    const Eigen::ArrayX<bool>& bound_constraint_mask,
+#endif
+    Eigen::VectorX<double>& x, Eigen::VectorX<double>& s,
+    Eigen::VectorX<double>& y, Eigen::VectorX<double>& z, double& μ,
+    int& iterations);
+
 }  // namespace slp
