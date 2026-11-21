@@ -7,183 +7,45 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-wheel-linux-x86_64:
-    env: &build-wheel-env
-      ARCHFLAGS: -arch arm64 -arch x86_64
-      MACOSX_DEPLOYMENT_TARGET: 14.0
-    timeout-minutes: 10
-    strategy:
-      matrix:
-        include:
-          - name: Linux x86_64
-            os: ubuntu-24.04
+  wheel-windows-x86_64:
+    name: Windows x86_64
+    uses: ./.github/workflows/python-wheel.yml
+    with:
+      name: Windows x86_64
+      os: windows-2025
 
-    name: Build ${{ matrix.name }}
-    runs-on: ${{ matrix.os }}
-    steps: &build-wheel-steps
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-      # https://github.com/actions/checkout/issues/882
-      - run: git fetch --tags --force origin
+  wheel-windows-aarch64:
+    name: Windows aarch64
+    uses: ./.github/workflows/python-wheel.yml
+    with:
+      name: Windows aarch64
+      os: windows-11-arm
 
-      - name: Make GCC 14 the default toolchain (Linux)
-        if: runner.os == 'Linux'
-        run: |
-          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 200
-          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14 200
+  wheel-linux-x86_64:
+    name: Linux x86_64
+    uses: ./.github/workflows/python-wheel.yml
+    with:
+      name: Linux x86_64
+      os: ubuntu-24.04
 
-      - uses: TheMrMilchmann/setup-msvc-dev@v4
-        if: runner.os == 'Windows'
-        with:
-          arch: ${{ runner.arch }}
+  wheel-linux-aarch64:
+    name: Linux aarch64
+    uses: ./.github/workflows/python-wheel.yml
+    with:
+      name: Linux aarch64
+      os: ubuntu-24.04-arm
 
-      - name: Set up sccache
-        uses: mozilla-actions/sccache-action@v0.0.11
-
-      - uses: actions/setup-python@v7
-        with:
-          # Minimum supported Python version
-          python-version: 3.12
-
-      - run: python ./tools/update_version.py
-        if: ${{ !(github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')) }}
-      - run: python ./tools/update_version.py --release
-        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
-
-      - name: Build wheel
-        run: |
-          pip install build
-          python .github/workflows/print_constraints.py > constraints.txt
-          python -m build --wheel --dependency-constraints-txt constraints.txt
-        env:
-          CMAKE_C_COMPILER_LAUNCHER: sccache
-          CMAKE_CXX_COMPILER_LAUNCHER: sccache
-          CMAKE_GENERATOR: Ninja
-          SCCACHE_CACHE_MULTIARCH: true
-          SCCACHE_GHA_ENABLED: true
-
-      - name: Repair wheel (Windows)
-        run: |
-          pip install delvewheel
-          python -m delvewheel repair -v dist/*.whl
-        if: runner.os == 'Windows'
-
-      - name: Repair wheel (Linux)
-        run: |
-          pip install auditwheel
-          python -m auditwheel repair dist/*.whl
-        if: runner.os == 'Linux'
-
-      - name: Repair wheel (macOS)
-        run: |
-          pip install delocate
-          delocate-wheel -w wheelhouse -v dist/*.whl
-        if: runner.os == 'macOS'
-
-      - uses: actions/upload-artifact@v7
-        with:
-          name: ${{ matrix.name }} wheel
-          path: wheelhouse
-
-  build-wheel:
-    env: *build-wheel-env
-    timeout-minutes: 10
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - name: Windows x86_64
-            os: windows-2025
-          - name: Windows aarch64
-            os: windows-11-arm
-          - name: Linux aarch64
-            os: ubuntu-24.04-arm
-          - name: macOS universal
-            os: macos-15
-
-    name: Build ${{ matrix.name }}
-    runs-on: ${{ matrix.os }}
-    steps: *build-wheel-steps
-
-  test-wheel:
-    timeout-minutes: 5
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - name: Windows x86_64
-            os: windows-2025
-            version: "3.12"
-          - name: Windows aarch64
-            os: windows-11-arm
-            version: "3.12"
-          - name: Linux x86_64
-            os: ubuntu-24.04
-            version: "3.12"
-          - name: Linux aarch64
-            os: ubuntu-24.04-arm
-            version: "3.12"
-          - name: macOS universal
-            os: macos-15
-            version: "3.12"
-
-          - name: Windows x86_64
-            os: windows-2025
-            version: "3.13"
-          - name: Windows aarch64
-            os: windows-11-arm
-            version: "3.13"
-          - name: Linux x86_64
-            os: ubuntu-24.04
-            version: "3.13"
-          - name: Linux aarch64
-            os: ubuntu-24.04-arm
-            version: "3.13"
-          - name: macOS universal
-            os: macos-15
-            version: "3.13"
-
-          - name: Windows x86_64
-            os: windows-2025
-            version: "3.14"
-          - name: Windows aarch64
-            os: windows-11-arm
-            version: "3.14"
-          - name: Linux x86_64
-            os: ubuntu-24.04
-            version: "3.14"
-          - name: Linux aarch64
-            os: ubuntu-24.04-arm
-            version: "3.14"
-          - name: macOS universal
-            os: macos-15
-            version: "3.14"
-
-    name: Test ${{ matrix.name }} (${{ matrix.version }})
-    runs-on: ${{ matrix.os }}
-    needs: [build-wheel, build-wheel-linux-x86_64]
-    steps:
-      - uses: actions/checkout@v7
-
-      - uses: actions/setup-python@v7
-        with:
-          python-version: ${{ matrix.version }}
-
-      - uses: actions/download-artifact@v8
-        with:
-          path: dist
-          pattern: '${{ matrix.name }} wheel'
-
-      - run: pip install pytest dist/sleipnirgroup_jormungandr-*.whl
-        shell: bash
-      - run: pytest
-        shell: bash
+  wheel-macos-universal:
+    name: macOS universal
+    uses: ./.github/workflows/python-wheel.yml
+    with:
+      name: macOS universal
+      os: macos-15
 
   mypy:
     name: mypy
     runs-on: ubuntu-24.04
-    needs: [build-wheel-linux-x86_64]
+    needs: [wheel-linux-x86_64]
     steps:
       - uses: actions/checkout@v7
 
@@ -248,7 +110,13 @@ jobs:
   pypi-publish:
     name: Upload release to PyPI
     runs-on: ubuntu-24.04
-    needs: [test-wheel, build-sdist]
+    needs:
+      - wheel-windows-x86_64
+      - wheel-windows-aarch64
+      - wheel-linux-x86_64
+      - wheel-linux-aarch64
+      - wheel-macos-universal
+      - build-sdist
     if: github.repository_owner == 'SleipnirGroup' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
     environment:
       name: pypi
