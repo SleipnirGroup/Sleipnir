@@ -7,29 +7,20 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-wheel:
-    env:
+  build-wheel-linux-x86_64:
+    env: &build-wheel-env
       ARCHFLAGS: -arch arm64 -arch x86_64
       MACOSX_DEPLOYMENT_TARGET: 14.0
     timeout-minutes: 10
     strategy:
-      fail-fast: false
       matrix:
         include:
-          - name: Windows x86_64
-            os: windows-2025
-          - name: Windows aarch64
-            os: windows-11-arm
           - name: Linux x86_64
             os: ubuntu-24.04
-          - name: Linux aarch64
-            os: ubuntu-24.04-arm
-          - name: macOS universal
-            os: macos-15
 
     name: Build ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
-    steps:
+    steps: &build-wheel-steps
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
@@ -95,6 +86,26 @@ jobs:
           name: ${{ matrix.name }} wheel
           path: wheelhouse
 
+  build-wheel:
+    env: *build-wheel-env
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows x86_64
+            os: windows-2025
+          - name: Windows aarch64
+            os: windows-11-arm
+          - name: Linux aarch64
+            os: ubuntu-24.04-arm
+          - name: macOS universal
+            os: macos-15
+
+    name: Build ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    steps: *build-wheel-steps
+
   test-wheel:
     timeout-minutes: 5
     strategy:
@@ -151,7 +162,7 @@ jobs:
 
     name: Test ${{ matrix.name }} (${{ matrix.version }})
     runs-on: ${{ matrix.os }}
-    needs: [build-wheel]
+    needs: [build-wheel, build-wheel-linux-x86_64]
     steps:
       - uses: actions/checkout@v7
 
@@ -172,7 +183,7 @@ jobs:
   mypy:
     name: mypy
     runs-on: ubuntu-24.04
-    needs: [build-wheel]
+    needs: [build-wheel-linux-x86_64]
     steps:
       - uses: actions/checkout@v7
 
