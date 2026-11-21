@@ -1,0 +1,113 @@
+name: Python wheel
+
+on:
+  workflow_call:
+    inputs:
+      name:
+        description: Platform name used in job and artifact names
+        required: true
+        type: string
+      os:
+        description: Runner image
+        required: true
+        type: string
+
+jobs:
+  build:
+    name: Build
+    runs-on: ${{ inputs.os }}
+    timeout-minutes: 10
+    env:
+      ARCHFLAGS: -arch arm64 -arch x86_64
+      MACOSX_DEPLOYMENT_TARGET: 14.0
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      # https://github.com/actions/checkout/issues/882
+      - run: git fetch --tags --force origin
+
+      - name: Make GCC 14 the default toolchain (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 200
+          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14 200
+
+      - uses: TheMrMilchmann/setup-msvc-dev@v4
+        if: runner.os == 'Windows'
+        with:
+          arch: ${{ runner.arch }}
+
+      - name: Set up sccache
+        uses: mozilla-actions/sccache-action@v0.0.11
+
+      - uses: actions/setup-python@v7
+        with:
+          # Minimum supported Python version
+          python-version: 3.12
+
+      - run: python ./tools/update_version.py
+        if: ${{ !(github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')) }}
+      - run: python ./tools/update_version.py --release
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+
+      - name: Build wheel
+        run: |
+          pip install build
+          python .github/workflows/print_constraints.py > constraints.txt
+          python -m build --wheel --dependency-constraints-txt constraints.txt
+        env:
+          CMAKE_C_COMPILER_LAUNCHER: sccache
+          CMAKE_CXX_COMPILER_LAUNCHER: sccache
+          CMAKE_GENERATOR: Ninja
+          SCCACHE_CACHE_MULTIARCH: true
+          SCCACHE_GHA_ENABLED: true
+
+      - name: Repair wheel (Windows)
+        run: |
+          pip install delvewheel
+          python -m delvewheel repair -v dist/*.whl
+        if: runner.os == 'Windows'
+
+      - name: Repair wheel (Linux)
+        run: |
+          pip install auditwheel
+          python -m auditwheel repair dist/*.whl
+        if: runner.os == 'Linux'
+
+      - name: Repair wheel (macOS)
+        run: |
+          pip install delocate
+          delocate-wheel -w wheelhouse -v dist/*.whl
+        if: runner.os == 'macOS'
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ${{ inputs.name }} wheel
+          path: wheelhouse
+
+  test:
+    name: Test (${{ matrix.version }})
+    runs-on: ${{ inputs.os }}
+    timeout-minutes: 5
+    needs: [build]
+    strategy:
+      fail-fast: false
+      matrix:
+        version: ["3.12", "3.13", "3.14"]
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.version }}
+
+      - uses: actions/download-artifact@v8
+        with:
+          path: dist
+          pattern: '${{ inputs.name }} wheel'
+
+      - run: pip install pytest dist/sleipnirgroup_jormungandr-*.whl
+        shell: bash
+      - run: pytest
+        shell: bash
