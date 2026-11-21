@@ -192,8 +192,8 @@ ExitStatus sqp(
       feasibility_restoration_cycle_detector;
 
   // Error
-  Scalar E_0 = unscaled_kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(
-      matrices.scaling, g, A_e, c_e, y, options.tolerance);
+  Scalar E_0 = unscaled_kkt_error_inf_norm<Scalar>(matrices.scaling, g, A_e,
+                                                   c_e, y, options.tolerance);
 
   setup_tracer.stop();
 
@@ -310,8 +310,8 @@ ExitStatus sqp(
               print_iterate_diagnostics(
                   iterations, IterationType::SECOND_ORDER_CORRECTION,
                   soc_tracer.current_duration(),
-                  kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(
-                      g, A_e, trial_c_e, trial_y, options.tolerance),
+                  kkt_error_inf_norm<Scalar>(g, A_e, trial_c_e, trial_y,
+                                             options.tolerance),
                   trial_f, constraint_violation(trial_c_e), Scalar(0),
                   Scalar(0), kkt_system.hessian_regularization(),
                   kkt_system.constraint_jacobian_regularization(),
@@ -379,8 +379,7 @@ ExitStatus sqp(
       // If step size hit a minimum or the step became negligible, check if the
       // KKT error was reduced. If it wasn't, invoke feasibility restoration.
       if (α < α_min || α < α_tiny) {
-        Scalar current_kkt_error = kkt_error<Scalar, KKTErrorType::ONE_NORM>(
-            g, A_e, c_e, y, options.tolerance);
+        Scalar current_kkt_error = kkt_error_one_norm<Scalar>(g, A_e, c_e, y);
 
         trial_x = x + α_max * step.p_x;
         trial_y = y + α_max * step.p_y;
@@ -388,9 +387,8 @@ ExitStatus sqp(
         trial_f = matrices.f(trial_x);
         trial_c_e = matrices.c_e(trial_x);
 
-        Scalar next_kkt_error = kkt_error<Scalar, KKTErrorType::ONE_NORM>(
-            matrices.g(trial_x), matrices.A_e(trial_x), trial_c_e, trial_y,
-            options.tolerance);
+        Scalar next_kkt_error = kkt_error_one_norm<Scalar>(
+            matrices.g(trial_x), matrices.A_e(trial_x), trial_c_e, trial_y);
 
         // If the step using αᵐᵃˣ reduced the KKT error below the current
         // iterate's and every previous fallback step's, accept it anyway
@@ -506,8 +504,8 @@ ExitStatus sqp(
     H = matrices.H(x, y);
 
     // Update the error
-    E_0 = unscaled_kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(
-        matrices.scaling, g, A_e, c_e, y, options.tolerance);
+    E_0 = unscaled_kkt_error_inf_norm<Scalar>(matrices.scaling, g, A_e, c_e, y,
+                                              options.tolerance);
 
     inner_iter_tracer.stop();
 

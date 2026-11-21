@@ -120,8 +120,7 @@ ExitStatus newton(
   Scalar fallback_kkt_error = std::numeric_limits<Scalar>::infinity();
 
   // Error
-  Scalar E_0 = unscaled_kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(
-      matrices.scaling, g);
+  Scalar E_0 = unscaled_kkt_error_inf_norm<Scalar>(matrices.scaling, g);
 
   setup_tracer.stop();
 
@@ -203,14 +202,13 @@ ExitStatus newton(
       // If step size hit a minimum or the step became negligible, check if the
       // KKT error was reduced. If it wasn't, report line search failure.
       if (α < α_min || α < α_tiny) {
-        Scalar current_kkt_error = kkt_error<Scalar, KKTErrorType::ONE_NORM>(g);
+        Scalar current_kkt_error = kkt_error_one_norm<Scalar>(g);
 
         trial_x = x + α_max * step.p_x;
 
         trial_f = matrices.f(trial_x);
 
-        Scalar next_kkt_error =
-            kkt_error<Scalar, KKTErrorType::ONE_NORM>(matrices.g(trial_x));
+        Scalar next_kkt_error = kkt_error_one_norm<Scalar>(matrices.g(trial_x));
 
         // If the step using αᵐᵃˣ reduced the KKT error below the current
         // iterate's and every previous fallback step's, accept it anyway
@@ -238,8 +236,7 @@ ExitStatus newton(
     H = matrices.H(x);
 
     // Update the error
-    E_0 = unscaled_kkt_error<Scalar, KKTErrorType::INF_NORM_SCALED>(
-        matrices.scaling, g);
+    E_0 = unscaled_kkt_error_inf_norm<Scalar>(matrices.scaling, g);
 
     inner_iter_tracer.stop();
 
