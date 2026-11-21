@@ -56,10 +56,11 @@ struct ProblemScaling {
   /// See section 3.8 of [2].
   ///
   /// @param g Cost gradient ∇f, evaluated at the starting point.
-  explicit ProblemScaling(const DenseVector& g) {
+  explicit ProblemScaling(const SparseVector& g) {
     constexpr Scalar g_max(100);
 
-    f = std::min(Scalar(1), g_max / g.template lpNorm<Eigen::Infinity>());
+    f = std::min(Scalar(1),
+                 g_max / g.coeffs().template lpNorm<Eigen::Infinity>());
   }
 
   /// Computes SQP problem scaling.
@@ -75,10 +76,11 @@ struct ProblemScaling {
   /// @param g Cost gradient ∇f, evaluated at the starting point.
   /// @param A_e Equality constraint Jacobian Aₑ, evaluated at the starting
   ///     point.
-  ProblemScaling(const DenseVector& g, const SparseMatrix& A_e) {
+  ProblemScaling(const SparseVector& g, const SparseMatrix& A_e) {
     constexpr Scalar g_max(100);
 
-    f = std::min(Scalar(1), g_max / g.template lpNorm<Eigen::Infinity>());
+    f = std::min(Scalar(1),
+                 g_max / g.coeffs().template lpNorm<Eigen::Infinity>());
     c_e = (g_max / sparse_inf_norms(A_e).array()).min(Scalar(1)).matrix();
   }
 
@@ -97,11 +99,12 @@ struct ProblemScaling {
   ///     point.
   /// @param A_i Inequality constraint Jacobian Aᵢ, evaluated at the starting
   ///     point.
-  ProblemScaling(const DenseVector& g, const SparseMatrix& A_e,
+  ProblemScaling(const SparseVector& g, const SparseMatrix& A_e,
                  const SparseMatrix& A_i) {
     constexpr Scalar g_max(100);
 
-    f = std::min(Scalar(1), g_max / g.template lpNorm<Eigen::Infinity>());
+    f = std::min(Scalar(1),
+                 g_max / g.coeffs().template lpNorm<Eigen::Infinity>());
     c_e = (g_max / sparse_inf_norms(A_e).array()).min(Scalar(1)).matrix();
     c_i = (g_max / sparse_inf_norms(A_i).array()).min(Scalar(1)).matrix();
   }

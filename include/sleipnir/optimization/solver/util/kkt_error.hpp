@@ -20,11 +20,11 @@ namespace slp {
 /// @tparam Scalar Scalar type.
 /// @param g Cost function gradient ∇f.
 template <typename Scalar>
-Scalar kkt_error_inf_norm(const Eigen::VectorX<Scalar>& g) {
+Scalar kkt_error_inf_norm(const Eigen::SparseVector<Scalar>& g) {
   // The KKT conditions from docs/algorithms.md:
   //
   //   ∇f = 0
-  return g.template lpNorm<Eigen::Infinity>();
+  return g.coeffs().template lpNorm<Eigen::Infinity>();
 }
 
 /// Returns the 1-norm of the KKT condition errors for Newton's method.
@@ -32,11 +32,11 @@ Scalar kkt_error_inf_norm(const Eigen::VectorX<Scalar>& g) {
 /// @tparam Scalar Scalar type.
 /// @param g Cost function gradient ∇f.
 template <typename Scalar>
-Scalar kkt_error_one_norm(const Eigen::VectorX<Scalar>& g) {
+Scalar kkt_error_one_norm(const Eigen::SparseVector<Scalar>& g) {
   // The KKT conditions from docs/algorithms.md:
   //
   //   ∇f = 0
-  return g.template lpNorm<1>();
+  return g.coeffs().template lpNorm<1>();
 }
 
 /// Returns the ∞-norm of the scaled KKT condition errors for Sequential
@@ -49,7 +49,7 @@ Scalar kkt_error_one_norm(const Eigen::VectorX<Scalar>& g) {
 /// @param y Equality constraint dual variables.
 /// @param tolerance Solver tolerance.
 template <typename Scalar>
-Scalar kkt_error_inf_norm(const Eigen::VectorX<Scalar>& g,
+Scalar kkt_error_inf_norm(const Eigen::SparseVector<Scalar>& g,
                           const Eigen::SparseMatrix<Scalar>& A_e,
                           const Eigen::VectorX<Scalar>& c_e,
                           const Eigen::VectorX<Scalar>& y, Scalar tolerance) {
@@ -79,6 +79,7 @@ Scalar kkt_error_inf_norm(const Eigen::VectorX<Scalar>& g,
 
   // ω = ‖|∇f| + |Aₑ|ᵀ|y|‖_∞
   const Scalar ω = (g.cwiseAbs() + A_e.cwiseAbs().transpose() * y.cwiseAbs())
+                       .toDense()
                        .template lpNorm<Eigen::Infinity>();
 
   Scalar s_d = std::max(Scalar(1), pow(ε, Scalar(0.625)) * ω / tolerance);
@@ -86,7 +87,8 @@ Scalar kkt_error_inf_norm(const Eigen::VectorX<Scalar>& g,
   // ‖∇f − Aₑᵀy‖_∞ / s_d
   // ‖cₑ‖_∞
   return std::max(
-      {(g - A_e.transpose() * y).template lpNorm<Eigen::Infinity>() / s_d,
+      {(g - A_e.transpose() * y).toDense().template lpNorm<Eigen::Infinity>() /
+           s_d,
        c_e.template lpNorm<Eigen::Infinity>()});
 }
 
@@ -99,7 +101,7 @@ Scalar kkt_error_inf_norm(const Eigen::VectorX<Scalar>& g,
 /// @param c_e Equality constraints cₑ(x).
 /// @param y Equality constraint dual variables.
 template <typename Scalar>
-Scalar kkt_error_one_norm(const Eigen::VectorX<Scalar>& g,
+Scalar kkt_error_one_norm(const Eigen::SparseVector<Scalar>& g,
                           const Eigen::SparseMatrix<Scalar>& A_e,
                           const Eigen::VectorX<Scalar>& c_e,
                           const Eigen::VectorX<Scalar>& y) {
@@ -107,7 +109,7 @@ Scalar kkt_error_one_norm(const Eigen::VectorX<Scalar>& g,
   //
   //   ∇f − Aₑᵀy = 0
   //   cₑ = 0
-  return (g - A_e.transpose() * y).template lpNorm<1>() +
+  return (g - A_e.transpose() * y).toDense().template lpNorm<1>() +
          c_e.template lpNorm<1>();
 }
 
@@ -127,11 +129,11 @@ Scalar kkt_error_one_norm(const Eigen::VectorX<Scalar>& g,
 /// @param tolerance Solver tolerance.
 template <typename Scalar>
 Scalar kkt_error_inf_norm(
-    const Eigen::VectorX<Scalar>& g, const Eigen::SparseMatrix<Scalar>& A_e,
-    const Eigen::VectorX<Scalar>& c_e, const Eigen::SparseMatrix<Scalar>& A_i,
-    const Eigen::VectorX<Scalar>& c_i, const Eigen::VectorX<Scalar>& s,
-    const Eigen::VectorX<Scalar>& y, const Eigen::VectorX<Scalar>& z, Scalar μ,
-    Scalar tolerance) {
+    const Eigen::SparseVector<Scalar>& g,
+    const Eigen::SparseMatrix<Scalar>& A_e, const Eigen::VectorX<Scalar>& c_e,
+    const Eigen::SparseMatrix<Scalar>& A_i, const Eigen::VectorX<Scalar>& c_i,
+    const Eigen::VectorX<Scalar>& s, const Eigen::VectorX<Scalar>& y,
+    const Eigen::VectorX<Scalar>& z, Scalar μ, Scalar tolerance) {
   using std::pow;
 
   // The KKT conditions from docs/algorithms.md:
@@ -161,6 +163,7 @@ Scalar kkt_error_inf_norm(
   // ω = ‖|∇f| + |Aₑ|ᵀ|y| + |Aᵢ|ᵀ|z|‖_∞
   const Scalar ω = (g.cwiseAbs() + A_e.cwiseAbs().transpose() * y.cwiseAbs() +
                     A_i.cwiseAbs().transpose() * z.cwiseAbs())
+                       .toDense()
                        .template lpNorm<Eigen::Infinity>();
 
   Scalar s_d = std::max(Scalar(1), pow(ε, Scalar(0.625)) * ω / tolerance);
@@ -181,6 +184,7 @@ Scalar kkt_error_inf_norm(
   // ‖cₑ‖_∞
   // ‖cᵢ − s‖_∞
   return std::max({(g - A_e.transpose() * y - A_i.transpose() * z)
+                           .toDense()
                            .template lpNorm<Eigen::Infinity>() /
                        s_d,
                    (S * z - μe).template lpNorm<Eigen::Infinity>() / s_c,
@@ -202,7 +206,7 @@ Scalar kkt_error_inf_norm(
 /// @param z Inequality constraint dual variables.
 /// @param μ Barrier parameter.
 template <typename Scalar>
-Scalar kkt_error_one_norm(const Eigen::VectorX<Scalar>& g,
+Scalar kkt_error_one_norm(const Eigen::SparseVector<Scalar>& g,
                           const Eigen::SparseMatrix<Scalar>& A_e,
                           const Eigen::VectorX<Scalar>& c_e,
                           const Eigen::SparseMatrix<Scalar>& A_i,
@@ -221,7 +225,9 @@ Scalar kkt_error_one_norm(const Eigen::VectorX<Scalar>& g,
   const Eigen::VectorX<Scalar> μe =
       Eigen::VectorX<Scalar>::Constant(s.rows(), μ);
 
-  return (g - A_e.transpose() * y - A_i.transpose() * z).template lpNorm<1>() +
+  return (g - A_e.transpose() * y - A_i.transpose() * z)
+             .toDense()
+             .template lpNorm<1>() +
          (S * z - μe).template lpNorm<1>() + c_e.template lpNorm<1>() +
          (c_i - s).template lpNorm<1>();
 }
@@ -233,14 +239,14 @@ Scalar kkt_error_one_norm(const Eigen::VectorX<Scalar>& g,
 /// @param g Scaled cost function gradient d_f·∇f.
 template <typename Scalar>
 Scalar unscaled_kkt_error_inf_norm(const ProblemScaling<Scalar>& scaling,
-                                   const Eigen::VectorX<Scalar>& g) {
-  using DenseVector = Eigen::VectorX<Scalar>;
+                                   const Eigen::SparseVector<Scalar>& g) {
+  using SparseVector = Eigen::SparseVector<Scalar>;
 
   if (scaling.is_identity()) {
     return kkt_error_inf_norm<Scalar>(g);
   }
 
-  const DenseVector g_unscaled = (Scalar(1) / scaling.f) * g;
+  const SparseVector g_unscaled = (Scalar(1) / scaling.f) * g;
 
   return kkt_error_inf_norm<Scalar>(g_unscaled);
 }
@@ -257,13 +263,14 @@ Scalar unscaled_kkt_error_inf_norm(const ProblemScaling<Scalar>& scaling,
 /// @param tolerance Solver tolerance.
 template <typename Scalar>
 Scalar unscaled_kkt_error_inf_norm(const ProblemScaling<Scalar>& scaling,
-                                   const Eigen::VectorX<Scalar>& g,
+                                   const Eigen::SparseVector<Scalar>& g,
                                    const Eigen::SparseMatrix<Scalar>& A_e,
                                    const Eigen::VectorX<Scalar>& c_e,
                                    const Eigen::VectorX<Scalar>& y,
                                    Scalar tolerance) {
   using DenseVector = Eigen::VectorX<Scalar>;
   using SparseMatrix = Eigen::SparseMatrix<Scalar>;
+  using SparseVector = Eigen::SparseVector<Scalar>;
 
   if (scaling.is_identity()) {
     return kkt_error_inf_norm<Scalar>(g, A_e, c_e, y, tolerance);
@@ -272,7 +279,7 @@ Scalar unscaled_kkt_error_inf_norm(const ProblemScaling<Scalar>& scaling,
   const Scalar inv_d_f = Scalar(1) / scaling.f;
   const DenseVector inv_d_c_e = scaling.c_e.cwiseInverse();
 
-  const DenseVector g_unscaled = inv_d_f * g;
+  const SparseVector g_unscaled = inv_d_f * g;
   const SparseMatrix A_e_unscaled = inv_d_c_e.asDiagonal() * A_e;
   const DenseVector c_e_unscaled = inv_d_c_e.cwiseProduct(c_e);
   const DenseVector y_unscaled = scaling.c_e.cwiseProduct(y) * inv_d_f;
@@ -298,13 +305,14 @@ Scalar unscaled_kkt_error_inf_norm(const ProblemScaling<Scalar>& scaling,
 /// @param tolerance Solver tolerance.
 template <typename Scalar>
 Scalar unscaled_kkt_error_inf_norm(
-    const ProblemScaling<Scalar>& scaling, const Eigen::VectorX<Scalar>& g,
+    const ProblemScaling<Scalar>& scaling, const Eigen::SparseVector<Scalar>& g,
     const Eigen::SparseMatrix<Scalar>& A_e, const Eigen::VectorX<Scalar>& c_e,
     const Eigen::SparseMatrix<Scalar>& A_i, const Eigen::VectorX<Scalar>& c_i,
     const Eigen::VectorX<Scalar>& s, const Eigen::VectorX<Scalar>& y,
     const Eigen::VectorX<Scalar>& z, Scalar μ, Scalar tolerance) {
   using DenseVector = Eigen::VectorX<Scalar>;
   using SparseMatrix = Eigen::SparseMatrix<Scalar>;
+  using SparseVector = Eigen::SparseVector<Scalar>;
 
   if (scaling.is_identity()) {
     return kkt_error_inf_norm<Scalar>(g, A_e, c_e, A_i, c_i, s, y, z, μ,
@@ -315,7 +323,7 @@ Scalar unscaled_kkt_error_inf_norm(
   const DenseVector inv_d_c_e = scaling.c_e.cwiseInverse();
   const DenseVector inv_d_c_i = scaling.c_i.cwiseInverse();
 
-  const DenseVector g_unscaled = inv_d_f * g;
+  const SparseVector g_unscaled = inv_d_f * g;
   const SparseMatrix A_e_unscaled = inv_d_c_e.asDiagonal() * A_e;
   const DenseVector c_e_unscaled = inv_d_c_e.cwiseProduct(c_e);
   const SparseMatrix A_i_unscaled = inv_d_c_i.asDiagonal() * A_i;
