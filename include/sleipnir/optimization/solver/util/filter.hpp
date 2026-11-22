@@ -139,7 +139,9 @@ class Filter {
   /// @return True if the given entry is acceptable to the filter.
   bool try_add(const FilterEntry<Scalar>& current_entry,
                const FilterEntry<Scalar>& trial_entry, Scalar D_ϕ, Scalar α) {
+    using std::abs;
     using std::isfinite;
+    using std::max;
     using std::pow;
     using std::sqrt;
 
@@ -166,16 +168,22 @@ class Filter {
         trial_entry.constraint_violation <=
             (Scalar(1) - γ_constraint) * current_entry.constraint_violation;
 
-    // If constraint violation is below threshold and switching condition is
-    // true, check Armijo condition for step rejection. Otherwise, check
-    // sufficient decrease condition.
+    // Excessive cost increase condition
+    bool excessive_cost_increase =
+        trial_entry.cost - current_entry.cost >
+        Scalar(1e5) * max(Scalar(1), abs(current_entry.cost));
+
+    // Near feasibility, a step that satisfies the switching condition is a
+    // cost-reducing step and must satisfy the Armijo condition. Otherwise, the
+    // step must sufficiently decrease the cost or the constraint violation
+    // without increasing the cost by orders of magnitude.
     if (current_entry.constraint_violation <= min_constraint_violation &&
         switching_condition) {
       if (!armijo_condition) {
         m_last_rejection_due_to_filter = false;
         return false;
       }
-    } else if (!sufficient_decrease) {
+    } else if (!sufficient_decrease || excessive_cost_increase) {
       m_last_rejection_due_to_filter = false;
       return false;
     }
