@@ -10,6 +10,7 @@
 #include <sleipnir/optimization/solver/options.hpp>
 #include <sleipnir/optimization/solver/sqp.hpp>  // IWYU pragma: keep
 #include <sleipnir/optimization/solver/sqp_matrix_callbacks.hpp>
+#include <sleipnir/optimization/solver/util/iterates.hpp>
 
 template slp::ExitStatus slp::sqp(
     const SQPMatrixCallbacks<float>& matrix_callbacks,
@@ -22,5 +23,4 @@ template slp::ExitStatus slp::sqp(
     const SQPMatrixCallbacks<float>& matrix_callbacks,
     std::span<std::function<ControlFlow(const IterationInfo<float>& info)>>
         iteration_callbacks,
-    const Options<float>& options, Eigen::VectorX<float>& x,
-    Eigen::VectorX<float>& y);
+    const Options<float>& options, SQPIterates<float>& iterates);

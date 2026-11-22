@@ -226,9 +226,8 @@ ExitStatus newton(
 
     phase_tracer.stop();
 
-    // Update iterates
+    // Update iterates and function values
     x = trial_x;
-
     f = trial_f;
 
     // Update autodiff for Hessian

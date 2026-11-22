@@ -9,6 +9,7 @@
 #include <limits>
 #include <optional>
 #include <span>
+#include <utility>
 
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
@@ -24,6 +25,9 @@
 #include "sleipnir/optimization/solver/util/feasibility_restoration.hpp"
 #include "sleipnir/optimization/solver/util/feasibility_restoration_cycle_detector.hpp"
 #include "sleipnir/optimization/solver/util/filter.hpp"
+#include "sleipnir/optimization/solver/util/first_derivatives.hpp"
+#include "sleipnir/optimization/solver/util/function_values.hpp"
+#include "sleipnir/optimization/solver/util/iterates.hpp"
 #include "sleipnir/optimization/solver/util/kkt_error.hpp"
 #include "sleipnir/optimization/solver/util/kkt_system.hpp"
 #include "sleipnir/optimization/solver/util/time_trace.hpp"
@@ -65,9 +69,16 @@ ExitStatus sqp(
     const Options<Scalar>& options, Eigen::VectorX<Scalar>& x) {
   using DenseVector = Eigen::VectorX<Scalar>;
 
-  DenseVector y = DenseVector::Zero(matrix_callbacks.num_equality_constraints);
+  SQPIterates<Scalar> iterates{
+      .x = std::move(x),
+      .y = DenseVector::Zero(matrix_callbacks.num_equality_constraints)};
 
-  return sqp(matrix_callbacks, iteration_callbacks, options, x, y);
+  const auto status =
+      sqp(matrix_callbacks, iteration_callbacks, options, iterates);
+
+  x = std::move(iterates.x);
+
+  return status;
 }
 
 /// Finds the optimal solution to a nonlinear program using Sequential Quadratic
@@ -87,23 +98,21 @@ ExitStatus sqp(
 /// @param[in] iteration_callbacks The list of callbacks to call at the
 ///     beginning of each iteration.
 /// @param[in] options Solver options.
-/// @param[in,out] x The initial guess and output location for the decision
-///     variables.
-/// @param[in,out] y The initial guess and output location for the equality
-///     constraint dual variables.
+/// @param[in,out] iterates The initial guess and output location for the
+///     iterates.
 /// @return The exit status.
 template <typename Scalar>
 ExitStatus sqp(
     const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
     std::span<std::function<ControlFlow(const IterationInfo<Scalar>& info)>>
         iteration_callbacks,
-    const Options<Scalar>& options, Eigen::VectorX<Scalar>& x,
-    Eigen::VectorX<Scalar>& y) {
+    const Options<Scalar>& options, SQPIterates<Scalar>& iterates) {
   using DenseVector = Eigen::VectorX<Scalar>;
   using SparseMatrix = Eigen::SparseMatrix<Scalar>;
-  using SparseVector = Eigen::SparseVector<Scalar>;
 
   using std::isfinite;
+
+  auto& [x, y] = iterates;
 
   const auto solve_start_time = std::chrono::steady_clock::now();
 
@@ -137,11 +146,13 @@ ExitStatus sqp(
 
   ScopedTimeTracer setup_tracer{diagnostics[SETUP]};
 
-  Scalar f = matrices.f(x);
-  SparseVector g = matrices.g(x);
+  SQPFunctionValues<Scalar> function_values{.f = matrices.f(x),
+                                            .c_e = matrices.c_e(x)};
+  SQPFirstDerivatives<Scalar> first_derivatives{.g = matrices.g(x),
+                                                .A_e = matrices.A_e(x)};
+  auto& [f, c_e] = function_values;
+  auto& [g, A_e] = first_derivatives;
   SparseMatrix H = matrices.H(x, y);
-  DenseVector c_e = matrices.c_e(x);
-  SparseMatrix A_e = matrices.A_e(x);
 
   // Ensure matrix callback dimensions are consistent
   slp_assert(g.rows() == matrices.num_decision_variables);
@@ -151,11 +162,11 @@ ExitStatus sqp(
   slp_assert(A_e.rows() == matrices.num_equality_constraints);
   slp_assert(A_e.cols() == matrices.num_decision_variables);
 
-  DenseVector trial_x;
-  DenseVector trial_y;
+  SQPIterates<Scalar> trial_iterates;
+  auto& [trial_x, trial_y] = trial_iterates;
 
-  Scalar trial_f;
-  DenseVector trial_c_e;
+  SQPFunctionValues<Scalar> trial_function_values;
+  auto& [trial_f, trial_c_e] = trial_function_values;
 
   // Check for overconstrained problem
   if (matrices.num_equality_constraints > matrices.num_decision_variables) {
@@ -167,8 +178,8 @@ ExitStatus sqp(
   }
 
   // Check whether initial guess has finite cost, constraints, and derivatives
-  if (!isfinite(f) || !all_finite(g) || !all_finite(H) || !c_e.allFinite() ||
-      !all_finite(A_e)) {
+  if (!function_values.all_finite() || !first_derivatives.all_finite() ||
+      !all_finite(H)) {
     return ExitStatus::NONFINITE_INITIAL_GUESS;
   }
 
@@ -192,8 +203,9 @@ ExitStatus sqp(
       feasibility_restoration_cycle_detector;
 
   // Error
-  Scalar E_0 = unscaled_kkt_error_inf_norm<Scalar>(matrices.scaling, g, A_e,
-                                                   c_e, y, options.tolerance);
+  Scalar E_0 = unscaled_kkt_error_inf_norm<Scalar>(
+      matrices.scaling, iterates, function_values, first_derivatives,
+      options.tolerance);
 
   setup_tracer.stop();
 
@@ -242,7 +254,7 @@ ExitStatus sqp(
     constexpr Scalar α_max(1);
     Scalar α = α_max;
 
-    const FilterEntry<Scalar> current_entry{f, c_e};
+    const FilterEntry<Scalar> current_entry{function_values};
 
     const Scalar D_ϕ = g.transpose() * step.p_x;
 
@@ -263,7 +275,7 @@ ExitStatus sqp(
 
       // If f(xₖ + αpₖˣ) or cₑ(xₖ + αpₖˣ) aren't finite, reduce step size
       // immediately
-      if (!isfinite(trial_f) || !trial_c_e.allFinite()) {
+      if (!trial_function_values.all_finite()) {
         // Reduce step size
         α *= α_reduction_factor;
 
@@ -275,7 +287,7 @@ ExitStatus sqp(
       }
 
       // Check whether filter accepts trial iterate
-      FilterEntry trial_entry{trial_f, trial_c_e};
+      FilterEntry trial_entry{trial_function_values};
       if (filter.try_add(current_entry, trial_entry, D_ϕ, α)) {
         // Accept step
         break;
@@ -310,8 +322,9 @@ ExitStatus sqp(
               print_iterate_diagnostics(
                   iterations, IterationType::SECOND_ORDER_CORRECTION,
                   soc_tracer.current_duration(),
-                  kkt_error_inf_norm<Scalar>(g, A_e, trial_c_e, trial_y,
-                                             options.tolerance),
+                  kkt_error_inf_norm<Scalar>(
+                      trial_iterates, trial_function_values, first_derivatives,
+                      options.tolerance),
                   trial_f, constraint_violation(trial_c_e), Scalar(0),
                   Scalar(0), kkt_system.hessian_regularization(),
                   kkt_system.constraint_jacobian_regularization(),
@@ -333,7 +346,7 @@ ExitStatus sqp(
           trial_c_e = matrices.c_e(trial_x);
 
           // Check whether the filter accepts trial iterate
-          FilterEntry trial_entry{trial_f, trial_c_e};
+          FilterEntry trial_entry{trial_function_values};
           if (filter.try_add(current_entry, trial_entry, D_ϕ, α)) {
             step = soc_step;
             α = α_soc;
@@ -379,7 +392,8 @@ ExitStatus sqp(
       // If step size hit a minimum or the step became negligible, check if the
       // KKT error was reduced. If it wasn't, invoke feasibility restoration.
       if (α < α_min || α < α_tiny) {
-        Scalar current_kkt_error = kkt_error_one_norm<Scalar>(g, A_e, c_e, y);
+        Scalar current_kkt_error = kkt_error_one_norm<Scalar>(
+            iterates, function_values, first_derivatives);
 
         trial_x = x + α_max * step.p_x;
         trial_y = y + α_max * step.p_y;
@@ -388,7 +402,9 @@ ExitStatus sqp(
         trial_c_e = matrices.c_e(trial_x);
 
         Scalar next_kkt_error = kkt_error_one_norm<Scalar>(
-            matrices.g(trial_x), matrices.A_e(trial_x), trial_c_e, trial_y);
+            trial_iterates, trial_function_values,
+            SQPFirstDerivatives<Scalar>{matrices.g(trial_x),
+                                        matrices.A_e(trial_x)});
 
         // If the step using αᵐᵃˣ reduced the KKT error below the current
         // iterate's and every previous fallback step's, accept it anyway
@@ -411,7 +427,7 @@ ExitStatus sqp(
 
     // If solver stalled, invoke feasibility restoration
     if (!call_feasibility_restoration) {
-      FilterEntry trial_entry{trial_f, trial_c_e};
+      FilterEntry trial_entry{trial_function_values};
       if (stall_detector.update(current_entry, trial_entry, α,
                                 filter.min_constraint_violation)) {
         call_feasibility_restoration = true;
@@ -422,7 +438,7 @@ ExitStatus sqp(
       ScopedTimeTracer feasibility_restoration_tracer{
           diagnostics[FEASIBILITY_RESTORATION]};
 
-      FilterEntry initial_entry{matrices.f(x), c_e};
+      FilterEntry initial_entry{function_values};
 
       // Augment the filter with the current iterate so the normal phase can't
       // return to it
@@ -448,9 +464,8 @@ ExitStatus sqp(
         DenseVector trial_x =
             info.x.segment(0, matrices.num_decision_variables);
 
-        DenseVector trial_c_e = matrices.c_e(trial_x);
-
-        FilterEntry trial_entry{matrices.f(trial_x), trial_c_e};
+        FilterEntry trial_entry{SQPFunctionValues<Scalar>{
+            matrices.f(trial_x), matrices.c_e(trial_x)}};
 
         // If the current iterate sufficiently reduces constraint violation and
         // is accepted by the normal filter, stop feasibility restoration
@@ -462,16 +477,15 @@ ExitStatus sqp(
           return ControlFlow::CONTINUE;
         }
       });
-      auto status = feasibility_restoration<Scalar>(matrices, callbacks,
-                                                    options, x, y, iterations);
+      auto status = feasibility_restoration<Scalar>(
+          matrices, callbacks, options, iterates, iterations);
 
       if (status != ExitStatus::SUCCESS) {
         // Report failure
         return status;
       }
 
-      f = matrices.f(x);
-      c_e = matrices.c_e(x);
+      function_values = {matrices.f(x), matrices.c_e(x)};
 
       // Resuming from an iterate the filter rejects would break the filter's
       // convergence guarantee, and continuing feasibility restoration from its
@@ -481,7 +495,7 @@ ExitStatus sqp(
       // stops at its own convergence tolerance instead of driving constraint
       // violation to zero, so the filter can still hold entries with lower cost
       // and constraint violation.
-      if (!filter.is_acceptable(FilterEntry{f, c_e})) {
+      if (!filter.is_acceptable(FilterEntry{function_values})) {
         return ExitStatus::FEASIBILITY_RESTORATION_FAILED;
       }
     } else {
@@ -490,12 +504,9 @@ ExitStatus sqp(
         full_step_rejected_counter = 0;
       }
 
-      // Update iterates
-      x = trial_x;
-      y = trial_y;
-
-      f = trial_f;
-      c_e = trial_c_e;
+      // Update iterates and function values
+      iterates = trial_iterates;
+      function_values = trial_function_values;
     }
 
     // Update autodiff for Jacobians and Hessian
@@ -504,8 +515,9 @@ ExitStatus sqp(
     H = matrices.H(x, y);
 
     // Update the error
-    E_0 = unscaled_kkt_error_inf_norm<Scalar>(matrices.scaling, g, A_e, c_e, y,
-                                              options.tolerance);
+    E_0 = unscaled_kkt_error_inf_norm<Scalar>(
+        matrices.scaling, iterates, function_values, first_derivatives,
+        options.tolerance);
 
     inner_iter_tracer.stop();
 
@@ -549,7 +561,6 @@ extern template SLEIPNIR_DLLEXPORT ExitStatus
 sqp(const SQPMatrixCallbacks<double>& matrix_callbacks,
     std::span<std::function<ControlFlow(const IterationInfo<double>& info)>>
         iteration_callbacks,
-    const Options<double>& options, Eigen::VectorX<double>& x,
-    Eigen::VectorX<double>& y);
+    const Options<double>& options, SQPIterates<double>& iterates);
 
 }  // namespace slp

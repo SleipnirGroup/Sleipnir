@@ -10,6 +10,7 @@
 #include <sleipnir/optimization/solver/ipm_matrix_callbacks.hpp>
 #include <sleipnir/optimization/solver/iteration_info.hpp>
 #include <sleipnir/optimization/solver/options.hpp>
+#include <sleipnir/optimization/solver/util/iterates.hpp>
 
 template slp::ExitStatus slp::ipm(
     const IPMMatrixCallbacks<float>& matrix_callbacks,
@@ -29,6 +30,4 @@ template slp::ExitStatus slp::ipm(
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
     const Eigen::ArrayX<bool>& bound_constraint_mask,
 #endif
-    Eigen::VectorX<float>& x, Eigen::VectorX<float>& s,
-    Eigen::VectorX<float>& y, Eigen::VectorX<float>& z, float& μ,
-    int& iterations);
+    IPMIterates<float>& iterates, float& μ, int& iterations);

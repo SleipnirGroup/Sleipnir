@@ -24,6 +24,7 @@
 #include <sleipnir/optimization/solver/options.hpp>
 #include <sleipnir/optimization/solver/sqp.hpp>  // IWYU pragma: keep
 #include <sleipnir/optimization/solver/sqp_matrix_callbacks.hpp>
+#include <sleipnir/optimization/solver/util/iterates.hpp>
 
 #include "explicit_double.hpp"
 
@@ -60,9 +61,7 @@ extern template slp::ExitStatus slp::ipm(
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
     const Eigen::ArrayX<bool>& bound_constraint_mask,
 #endif
-    Eigen::VectorX<float>& x, Eigen::VectorX<float>& s,
-    Eigen::VectorX<float>& y, Eigen::VectorX<float>& z, float& μ,
-    int& iterations);
+    IPMIterates<float>& iterates, float& μ, int& iterations);
 
 extern template slp::ExitStatus slp::newton(
     const NewtonMatrixCallbacks<float>& matrix_callbacks,
@@ -80,8 +79,7 @@ extern template slp::ExitStatus slp::sqp(
     const SQPMatrixCallbacks<float>& matrix_callbacks,
     std::span<std::function<ControlFlow(const IterationInfo<float>& info)>>
         iteration_callbacks,
-    const Options<float>& options, Eigen::VectorX<float>& x,
-    Eigen::VectorX<float>& y);
+    const Options<float>& options, SQPIterates<float>& iterates);
 
 extern template class slp::Problem<float>;
 
@@ -119,9 +117,7 @@ extern template slp::ExitStatus slp::ipm(
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
     const Eigen::ArrayX<bool>& bound_constraint_mask,
 #endif
-    Eigen::VectorX<ExplicitDouble>& x, Eigen::VectorX<ExplicitDouble>& s,
-    Eigen::VectorX<ExplicitDouble>& y, Eigen::VectorX<ExplicitDouble>& z,
-    ExplicitDouble& μ, int& iterations);
+    IPMIterates<ExplicitDouble>& iterates, ExplicitDouble& μ, int& iterations);
 
 extern template slp::ExitStatus slp::newton(
     const NewtonMatrixCallbacks<ExplicitDouble>& matrix_callbacks,
@@ -142,7 +138,7 @@ extern template slp::ExitStatus slp::sqp(
     std::span<
         std::function<ControlFlow(const IterationInfo<ExplicitDouble>& info)>>
         iteration_callbacks,
-    const Options<ExplicitDouble>& options, Eigen::VectorX<ExplicitDouble>& x,
-    Eigen::VectorX<ExplicitDouble>& y);
+    const Options<ExplicitDouble>& options,
+    SQPIterates<ExplicitDouble>& iterates);
 
 extern template class slp::Problem<ExplicitDouble>;
