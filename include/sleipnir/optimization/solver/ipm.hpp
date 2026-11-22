@@ -238,6 +238,8 @@ ExitStatus ipm(
   // Fraction-to-the-boundary rule scale factor τ
   Scalar τ = τ_min;
 
+  IPMKKTSystem<Scalar> kkt_system{H, A_e, A_i};
+
   Filter<Scalar> filter{constraint_violation(c_e, c_i, s)};
 
   // The smallest KKT error of a step accepted by the KKT error reduction
@@ -262,8 +264,6 @@ ExitStatus ipm(
     filter.reset();
     fallback_kkt_error = std::numeric_limits<Scalar>::infinity();
   };
-
-  IPMKKTSystem<Scalar> kkt_system{H, A_e, A_i};
 
   // Step size reduction factor
   constexpr Scalar α_reduction_factor(0.5);

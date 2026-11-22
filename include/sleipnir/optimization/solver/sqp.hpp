@@ -183,9 +183,9 @@ ExitStatus sqp(
     return ExitStatus::NONFINITE_INITIAL_GUESS;
   }
 
-  Filter<Scalar> filter{constraint_violation(c_e)};
-
   SQPKKTSystem<Scalar> kkt_system{H, A_e};
+
+  Filter<Scalar> filter{constraint_violation(c_e)};
 
   // Step size reduction factor
   constexpr Scalar α_reduction_factor(0.5);
