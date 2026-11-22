@@ -10,6 +10,7 @@
 #include <sleipnir/optimization/solver/ipm_matrix_callbacks.hpp>
 #include <sleipnir/optimization/solver/iteration_info.hpp>
 #include <sleipnir/optimization/solver/options.hpp>
+#include <sleipnir/optimization/solver/util/iterates.hpp>
 
 #include "explicit_double.hpp"
 
@@ -33,6 +34,4 @@ template slp::ExitStatus slp::ipm(
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
     const Eigen::ArrayX<bool>& bound_constraint_mask,
 #endif
-    Eigen::VectorX<ExplicitDouble>& x, Eigen::VectorX<ExplicitDouble>& s,
-    Eigen::VectorX<ExplicitDouble>& y, Eigen::VectorX<ExplicitDouble>& z,
-    ExplicitDouble& μ, int& iterations);
+    IPMIterates<ExplicitDouble>& iterates, ExplicitDouble& μ, int& iterations);

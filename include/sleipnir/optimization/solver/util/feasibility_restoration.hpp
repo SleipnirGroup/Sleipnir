@@ -20,6 +20,7 @@
 #include "sleipnir/optimization/solver/options.hpp"
 #include "sleipnir/optimization/solver/sqp_matrix_callbacks.hpp"
 #include "sleipnir/optimization/solver/util/append_as_triplets.hpp"
+#include "sleipnir/optimization/solver/util/iterates.hpp"
 #include "sleipnir/optimization/solver/util/problem_scaling.hpp"
 #include "sleipnir/util/print_diagnostics.hpp"
 
@@ -34,9 +35,7 @@ ExitStatus ipm(
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
     const Eigen::ArrayX<bool>& bound_constraint_mask,
 #endif
-    Eigen::VectorX<Scalar>& x, Eigen::VectorX<Scalar>& s,
-    Eigen::VectorX<Scalar>& y, Eigen::VectorX<Scalar>& z, Scalar& μ,
-    int& iterations);
+    IPMIterates<Scalar>& iterates, Scalar& μ, int& iterations);
 
 /// Computes initial values for p and n in feasibility restoration.
 ///
@@ -107,9 +106,7 @@ std::tuple<Eigen::VectorX<Scalar>, Eigen::VectorX<Scalar>> compute_p_n(
 /// @param[in] iteration_callbacks The list of callbacks to call at the
 ///     beginning of each iteration.
 /// @param[in] options Solver options.
-/// @param[in,out] x The decision variables from the normal solve.
-/// @param[in,out] y The equality constraint dual variables from the normal
-///     solve.
+/// @param[in,out] iterates The iterates from the normal solve.
 /// @param[in,out] iterations The iteration counter.
 /// @return The exit status.
 template <typename Scalar>
@@ -117,8 +114,8 @@ ExitStatus feasibility_restoration(
     const SQPMatrixCallbacks<Scalar>& matrix_callbacks,
     std::span<std::function<ControlFlow(const IterationInfo<Scalar>& info)>>
         iteration_callbacks,
-    const Options<Scalar>& options, Eigen::VectorX<Scalar>& x,
-    Eigen::VectorX<Scalar>& y, int& iterations) {
+    const Options<Scalar>& options, SQPIterates<Scalar>& iterates,
+    int& iterations) {
   // Feasibility restoration
   //
   //        min  ρ Σ (pₑ + nₑ) + ζ/2 (x - xᵣ)ᵀDᵣ(x - xᵣ)
@@ -141,6 +138,8 @@ ExitStatus feasibility_restoration(
   using SparseVector = Eigen::SparseVector<Scalar>;
 
   using std::sqrt;
+
+  auto& [x, y] = iterates;
 
   const auto& matrices = matrix_callbacks;
   const auto& num_vars = matrices.num_decision_variables;
@@ -301,14 +300,17 @@ ExitStatus feasibility_restoration(
       },
       fr_scaling};
 
+  IPMIterates<Scalar> fr_iterates{std::move(fr_x), std::move(fr_s),
+                                  std::move(fr_y), std::move(fr_z)};
+
   auto status =
       ipm<Scalar>(fr_matrix_callbacks, iteration_callbacks, options, true,
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
                   Eigen::ArrayX<bool>::Constant(2 * num_eq, true),
 #endif
-                  fr_x, fr_s, fr_y, fr_z, fr_μ, iterations);
+                  fr_iterates, fr_μ, iterations);
 
-  x = fr_x.segment(0, x.rows());
+  x = fr_iterates.x.segment(0, x.rows());
 
   // If feasibility restoration converged, check the constraint violation in
   // the original problem's scaling
@@ -360,13 +362,7 @@ ExitStatus feasibility_restoration(
 /// @param[in] iteration_callbacks The list of callbacks to call at the
 ///     beginning of each iteration.
 /// @param[in] options Solver options.
-/// @param[in,out] x The current decision variables from the normal solve.
-/// @param[in,out] s The current inequality constraint slack variables from the
-///     normal solve.
-/// @param[in,out] y The current equality constraint duals from the normal
-///     solve.
-/// @param[in,out] z The current inequality constraint duals from the normal
-///     solve.
+/// @param[in,out] iterates The current iterates from the normal solve.
 /// @param[in] μ Barrier parameter.
 /// @param[in,out] iterations The iteration counter.
 /// @return The exit status.
@@ -379,9 +375,7 @@ ExitStatus feasibility_restoration(
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
     const Eigen::ArrayX<bool>& bound_constraint_mask,
 #endif
-    Eigen::VectorX<Scalar>& x, Eigen::VectorX<Scalar>& s,
-    Eigen::VectorX<Scalar>& y, Eigen::VectorX<Scalar>& z, Scalar μ,
-    int& iterations) {
+    IPMIterates<Scalar>& iterates, Scalar μ, int& iterations) {
   // Feasibility restoration
   //
   //        min  ρ Σ (pₑ + nₑ + pᵢ + nᵢ) + ζ/2 (x - xᵣ)ᵀDᵣ(x - xᵣ)
@@ -408,6 +402,8 @@ ExitStatus feasibility_restoration(
   using SparseVector = Eigen::SparseVector<Scalar>;
 
   using std::sqrt;
+
+  auto& [x, s, y, z] = iterates;
 
   const auto& matrices = matrix_callbacks;
   const auto& num_vars = matrices.num_decision_variables;
@@ -630,14 +626,17 @@ ExitStatus feasibility_restoration(
   fr_bound_constraint_mask.segment(num_ineq, 2 * num_eq + 2 * num_ineq) = true;
 #endif
 
+  IPMIterates<Scalar> fr_iterates{std::move(fr_x), std::move(fr_s),
+                                  std::move(fr_y), std::move(fr_z)};
+
   auto status =
       ipm<Scalar>(fr_matrix_callbacks, iteration_callbacks, options, true,
 #ifdef SLEIPNIR_ENABLE_BOUND_PROJECTION
                   fr_bound_constraint_mask,
 #endif
-                  fr_x, fr_s, fr_y, fr_z, fr_μ, iterations);
+                  fr_iterates, fr_μ, iterations);
 
-  x = fr_x.segment(0, x.rows());
+  x = fr_iterates.x.segment(0, x.rows());
 
   // If feasibility restoration converged, check the constraint violation in the
   // original problem's scaling
@@ -685,7 +684,8 @@ ExitStatus feasibility_restoration(
     // The normal phase's early-exit callback computes the slacks the same way,
     // so the returned iterate is the one the filter accepted.
     const DenseVector c_i = matrices.c_i(x);
-    s = (c_i.array() >= Scalar(1e-2)).select(c_i, fr_s.segment(0, s.rows()));
+    s = (c_i.array() >= Scalar(1e-2))
+            .select(c_i, fr_iterates.s.segment(0, s.rows()));
 
     // Reset the equality constraint duals since feasibility restoration didn't
     // account for the cost function
@@ -715,7 +715,7 @@ ExitStatus feasibility_restoration(
     // point-in-time test can reject iterates the solver would otherwise
     // escape). See section 3.3, p. 14 of [2].
 
-    s = fr_s.segment(0, s.rows());
+    s = fr_iterates.s.segment(0, s.rows());
 
     if (options.diagnostics) {
       if (c_e_violated) {
@@ -728,7 +728,7 @@ ExitStatus feasibility_restoration(
 
     return ExitStatus::LOCALLY_INFEASIBLE;
   } else {
-    s = fr_s.segment(0, s.rows());
+    s = fr_iterates.s.segment(0, s.rows());
     return ExitStatus::FEASIBILITY_RESTORATION_FAILED;
   }
 }

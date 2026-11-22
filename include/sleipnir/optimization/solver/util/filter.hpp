@@ -10,6 +10,7 @@
 #include <gch/small_vector.hpp>
 
 #include "sleipnir/optimization/solver/util/constraint_violation.hpp"
+#include "sleipnir/optimization/solver/util/function_values.hpp"
 
 // See docs/algorithms.md#Works_cited for citation definitions.
 
@@ -41,22 +42,21 @@ struct FilterEntry {
 
   /// Constructs a Sequential Quadratic Programming filter entry.
   ///
-  /// @param f The cost function value.
-  /// @param c_e The equality constraint values (nonzero means violation).
-  FilterEntry(Scalar f, const DenseVector& c_e)
-      : FilterEntry{f, slp::constraint_violation(c_e)} {}
+  /// @param function_values The cost function and equality constraint values.
+  explicit FilterEntry(const SQPFunctionValues<Scalar>& function_values)
+      : FilterEntry{function_values.f,
+                    slp::constraint_violation(function_values.c_e)} {}
 
   /// Constructs an interior-point method filter entry.
   ///
-  /// @param f The cost function value.
   /// @param s The inequality constraint slack variables.
-  /// @param c_e The equality constraint values (nonzero means violation).
-  /// @param c_i The inequality constraint values (negative means violation).
+  /// @param function_values The cost function and constraint values.
   /// @param μ The barrier parameter.
-  FilterEntry(Scalar f, DenseVector& s, const DenseVector& c_e,
-              const DenseVector& c_i, Scalar μ)
-      : FilterEntry{f - μ * s.array().log().sum(),
-                    slp::constraint_violation(c_e, c_i, s)} {}
+  FilterEntry(const DenseVector& s,
+              const IPMFunctionValues<Scalar>& function_values, Scalar μ)
+      : FilterEntry{function_values.f - μ * s.array().log().sum(),
+                    slp::constraint_violation(function_values.c_e,
+                                              function_values.c_i, s)} {}
 
   /// Returns true if this filter entry is dominated by another.
   ///

@@ -9,6 +9,9 @@
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
 
+#include "sleipnir/optimization/solver/util/first_derivatives.hpp"
+#include "sleipnir/optimization/solver/util/function_values.hpp"
+#include "sleipnir/optimization/solver/util/iterates.hpp"
 #include "sleipnir/optimization/solver/util/problem_scaling.hpp"
 
 // See docs/algorithms.md#Works_cited for citation definitions
@@ -43,17 +46,21 @@ Scalar kkt_error_one_norm(const Eigen::SparseVector<Scalar>& g) {
 /// Quadratic Programming.
 ///
 /// @tparam Scalar Scalar type.
-/// @param g Cost function gradient ∇f.
-/// @param A_e Equality constraint Jacobian Aₑ(x).
-/// @param c_e Equality constraints cₑ(x).
-/// @param y Equality constraint dual variables.
+/// @param iterates The iterates.
+/// @param function_values Cost function and equality constraint values.
+/// @param first_derivatives Cost function gradient and equality constraint
+///     Jacobian.
 /// @param tolerance Solver tolerance.
 template <typename Scalar>
-Scalar kkt_error_inf_norm(const Eigen::SparseVector<Scalar>& g,
-                          const Eigen::SparseMatrix<Scalar>& A_e,
-                          const Eigen::VectorX<Scalar>& c_e,
-                          const Eigen::VectorX<Scalar>& y, Scalar tolerance) {
+Scalar kkt_error_inf_norm(const SQPIterates<Scalar>& iterates,
+                          const SQPFunctionValues<Scalar>& function_values,
+                          const SQPFirstDerivatives<Scalar>& first_derivatives,
+                          Scalar tolerance) {
   using std::pow;
+
+  const auto& y = iterates.y;
+  const auto& c_e = function_values.c_e;
+  const auto& [g, A_e] = first_derivatives;
 
   // The KKT conditions from docs/algorithms.md:
   //
@@ -96,15 +103,19 @@ Scalar kkt_error_inf_norm(const Eigen::SparseVector<Scalar>& g,
 /// Programming.
 ///
 /// @tparam Scalar Scalar type.
-/// @param g Cost function gradient ∇f.
-/// @param A_e Equality constraint Jacobian Aₑ(x).
-/// @param c_e Equality constraints cₑ(x).
-/// @param y Equality constraint dual variables.
+/// @param iterates The iterates.
+/// @param function_values Cost function and equality constraint values.
+/// @param first_derivatives Cost function gradient and equality constraint
+///     Jacobian.
 template <typename Scalar>
-Scalar kkt_error_one_norm(const Eigen::SparseVector<Scalar>& g,
-                          const Eigen::SparseMatrix<Scalar>& A_e,
-                          const Eigen::VectorX<Scalar>& c_e,
-                          const Eigen::VectorX<Scalar>& y) {
+Scalar kkt_error_one_norm(
+    const SQPIterates<Scalar>& iterates,
+    const SQPFunctionValues<Scalar>& function_values,
+    const SQPFirstDerivatives<Scalar>& first_derivatives) {
+  const auto& y = iterates.y;
+  const auto& c_e = function_values.c_e;
+  const auto& [g, A_e] = first_derivatives;
+
   // The KKT conditions from docs/algorithms.md:
   //
   //   ∇f − Aₑᵀy = 0
@@ -117,24 +128,21 @@ Scalar kkt_error_one_norm(const Eigen::SparseVector<Scalar>& g,
 /// method.
 ///
 /// @tparam Scalar Scalar type.
-/// @param g Cost function gradient ∇f.
-/// @param A_e Equality constraint Jacobian Aₑ(x).
-/// @param c_e Equality constraints cₑ(x).
-/// @param A_i Inequality constraint Jacobian Aᵢ(x).
-/// @param c_i Inequality constraints cᵢ(x).
-/// @param s Inequality constraint slack variables.
-/// @param y Equality constraint dual variables.
-/// @param z Inequality constraint dual variables.
+/// @param iterates The iterates.
+/// @param function_values Cost function and constraint values.
+/// @param first_derivatives Cost function gradient and constraint Jacobians.
 /// @param μ Barrier parameter.
 /// @param tolerance Solver tolerance.
 template <typename Scalar>
-Scalar kkt_error_inf_norm(
-    const Eigen::SparseVector<Scalar>& g,
-    const Eigen::SparseMatrix<Scalar>& A_e, const Eigen::VectorX<Scalar>& c_e,
-    const Eigen::SparseMatrix<Scalar>& A_i, const Eigen::VectorX<Scalar>& c_i,
-    const Eigen::VectorX<Scalar>& s, const Eigen::VectorX<Scalar>& y,
-    const Eigen::VectorX<Scalar>& z, Scalar μ, Scalar tolerance) {
+Scalar kkt_error_inf_norm(const IPMIterates<Scalar>& iterates,
+                          const IPMFunctionValues<Scalar>& function_values,
+                          const IPMFirstDerivatives<Scalar>& first_derivatives,
+                          Scalar μ, Scalar tolerance) {
   using std::pow;
+
+  const auto& [x, s, y, z] = iterates;
+  const auto& [f, c_e, c_i] = function_values;
+  const auto& [g, A_e, A_i] = first_derivatives;
 
   // The KKT conditions from docs/algorithms.md:
   //
@@ -196,24 +204,19 @@ Scalar kkt_error_inf_norm(
 /// method.
 ///
 /// @tparam Scalar Scalar type.
-/// @param g Cost function gradient ∇f.
-/// @param A_e Equality constraint Jacobian Aₑ(x).
-/// @param c_e Equality constraints cₑ(x).
-/// @param A_i Inequality constraint Jacobian Aᵢ(x).
-/// @param c_i Inequality constraints cᵢ(x).
-/// @param s Inequality constraint slack variables.
-/// @param y Equality constraint dual variables.
-/// @param z Inequality constraint dual variables.
+/// @param iterates The iterates.
+/// @param function_values Cost function and constraint values.
+/// @param first_derivatives Cost function gradient and constraint Jacobians.
 /// @param μ Barrier parameter.
 template <typename Scalar>
-Scalar kkt_error_one_norm(const Eigen::SparseVector<Scalar>& g,
-                          const Eigen::SparseMatrix<Scalar>& A_e,
-                          const Eigen::VectorX<Scalar>& c_e,
-                          const Eigen::SparseMatrix<Scalar>& A_i,
-                          const Eigen::VectorX<Scalar>& c_i,
-                          const Eigen::VectorX<Scalar>& s,
-                          const Eigen::VectorX<Scalar>& y,
-                          const Eigen::VectorX<Scalar>& z, Scalar μ) {
+Scalar kkt_error_one_norm(const IPMIterates<Scalar>& iterates,
+                          const IPMFunctionValues<Scalar>& function_values,
+                          const IPMFirstDerivatives<Scalar>& first_derivatives,
+                          Scalar μ) {
+  const auto& [x, s, y, z] = iterates;
+  const auto& [f, c_e, c_i] = function_values;
+  const auto& [g, A_e, A_i] = first_derivatives;
+
   // The KKT conditions from docs/algorithms.md:
   //
   //   ∇f − Aₑᵀy − Aᵢᵀz = 0
@@ -256,36 +259,36 @@ Scalar unscaled_kkt_error_inf_norm(const ProblemScaling<Scalar>& scaling,
 ///
 /// @tparam Scalar Scalar type.
 /// @param scaling Problem scaling.
-/// @param g Scaled cost function gradient d_f·∇f.
-/// @param A_e Scaled equality constraint Jacobian D_cₑ·Aₑ(x).
-/// @param c_e Scaled equality constraints D_cₑ·cₑ(x).
-/// @param y Scaled equality constraint dual variables.
+/// @param iterates Scaled iterates.
+/// @param function_values Scaled cost function and equality constraint values.
+/// @param first_derivatives Scaled cost function gradient and equality
+///     constraint Jacobian.
 /// @param tolerance Solver tolerance.
 template <typename Scalar>
-Scalar unscaled_kkt_error_inf_norm(const ProblemScaling<Scalar>& scaling,
-                                   const Eigen::SparseVector<Scalar>& g,
-                                   const Eigen::SparseMatrix<Scalar>& A_e,
-                                   const Eigen::VectorX<Scalar>& c_e,
-                                   const Eigen::VectorX<Scalar>& y,
-                                   Scalar tolerance) {
+Scalar unscaled_kkt_error_inf_norm(
+    const ProblemScaling<Scalar>& scaling, const SQPIterates<Scalar>& iterates,
+    const SQPFunctionValues<Scalar>& function_values,
+    const SQPFirstDerivatives<Scalar>& first_derivatives, Scalar tolerance) {
   using DenseVector = Eigen::VectorX<Scalar>;
-  using SparseMatrix = Eigen::SparseMatrix<Scalar>;
-  using SparseVector = Eigen::SparseVector<Scalar>;
 
   if (scaling.is_identity()) {
-    return kkt_error_inf_norm<Scalar>(g, A_e, c_e, y, tolerance);
+    return kkt_error_inf_norm<Scalar>(iterates, function_values,
+                                      first_derivatives, tolerance);
   }
 
   const Scalar inv_d_f = Scalar(1) / scaling.f;
   const DenseVector inv_d_c_e = scaling.c_e.cwiseInverse();
 
-  const SparseVector g_unscaled = inv_d_f * g;
-  const SparseMatrix A_e_unscaled = inv_d_c_e.asDiagonal() * A_e;
-  const DenseVector c_e_unscaled = inv_d_c_e.cwiseProduct(c_e);
-  const DenseVector y_unscaled = scaling.c_e.cwiseProduct(y) * inv_d_f;
+  const SQPFunctionValues<Scalar> function_values_unscaled{
+      inv_d_f * function_values.f, inv_d_c_e.cwiseProduct(function_values.c_e)};
+  const SQPFirstDerivatives<Scalar> first_derivatives_unscaled{
+      inv_d_f * first_derivatives.g,
+      inv_d_c_e.asDiagonal() * first_derivatives.A_e};
+  const SQPIterates<Scalar> iterates_unscaled{
+      iterates.x, scaling.c_e.cwiseProduct(iterates.y) * inv_d_f};
 
-  return kkt_error_inf_norm<Scalar>(g_unscaled, A_e_unscaled, c_e_unscaled,
-                                    y_unscaled, tolerance);
+  return kkt_error_inf_norm<Scalar>(iterates_unscaled, function_values_unscaled,
+                                    first_derivatives_unscaled, tolerance);
 }
 
 /// Returns the ∞-norm of the unscaled KKT condition errors for the
@@ -293,49 +296,45 @@ Scalar unscaled_kkt_error_inf_norm(const ProblemScaling<Scalar>& scaling,
 ///
 /// @tparam Scalar Scalar type.
 /// @param scaling Problem scaling.
-/// @param g Scaled cost function gradient d_f·∇f.
-/// @param A_e Scaled equality constraint Jacobian D_cₑ·Aₑ(x).
-/// @param c_e Scaled equality constraints D_cₑ·cₑ(x).
-/// @param A_i Scaled inequality constraint Jacobian D_cᵢ·Aᵢ(x).
-/// @param c_i Scaled inequality constraints D_cᵢ·cᵢ(x).
-/// @param s Scaled inequality constraint slack variables.
-/// @param y Scaled equality constraint dual variables.
-/// @param z Scaled inequality constraint dual variables.
+/// @param iterates Scaled iterates.
+/// @param function_values Scaled cost function and constraint values.
+/// @param first_derivatives Scaled cost function gradient and constraint
+///     Jacobians.
 /// @param μ Scaled barrier parameter.
 /// @param tolerance Solver tolerance.
 template <typename Scalar>
 Scalar unscaled_kkt_error_inf_norm(
-    const ProblemScaling<Scalar>& scaling, const Eigen::SparseVector<Scalar>& g,
-    const Eigen::SparseMatrix<Scalar>& A_e, const Eigen::VectorX<Scalar>& c_e,
-    const Eigen::SparseMatrix<Scalar>& A_i, const Eigen::VectorX<Scalar>& c_i,
-    const Eigen::VectorX<Scalar>& s, const Eigen::VectorX<Scalar>& y,
-    const Eigen::VectorX<Scalar>& z, Scalar μ, Scalar tolerance) {
+    const ProblemScaling<Scalar>& scaling, const IPMIterates<Scalar>& iterates,
+    const IPMFunctionValues<Scalar>& function_values,
+    const IPMFirstDerivatives<Scalar>& first_derivatives, Scalar μ,
+    Scalar tolerance) {
   using DenseVector = Eigen::VectorX<Scalar>;
-  using SparseMatrix = Eigen::SparseMatrix<Scalar>;
-  using SparseVector = Eigen::SparseVector<Scalar>;
 
   if (scaling.is_identity()) {
-    return kkt_error_inf_norm<Scalar>(g, A_e, c_e, A_i, c_i, s, y, z, μ,
-                                      tolerance);
+    return kkt_error_inf_norm<Scalar>(iterates, function_values,
+                                      first_derivatives, μ, tolerance);
   }
 
   const Scalar inv_d_f = Scalar(1) / scaling.f;
   const DenseVector inv_d_c_e = scaling.c_e.cwiseInverse();
   const DenseVector inv_d_c_i = scaling.c_i.cwiseInverse();
 
-  const SparseVector g_unscaled = inv_d_f * g;
-  const SparseMatrix A_e_unscaled = inv_d_c_e.asDiagonal() * A_e;
-  const DenseVector c_e_unscaled = inv_d_c_e.cwiseProduct(c_e);
-  const SparseMatrix A_i_unscaled = inv_d_c_i.asDiagonal() * A_i;
-  const DenseVector c_i_unscaled = inv_d_c_i.cwiseProduct(c_i);
-  const DenseVector s_unscaled = inv_d_c_i.cwiseProduct(s);
-  const DenseVector y_unscaled = scaling.c_e.cwiseProduct(y) * inv_d_f;
-  const DenseVector z_unscaled = scaling.c_i.cwiseProduct(z) * inv_d_f;
+  const IPMFunctionValues<Scalar> function_values_unscaled{
+      inv_d_f * function_values.f, inv_d_c_e.cwiseProduct(function_values.c_e),
+      inv_d_c_i.cwiseProduct(function_values.c_i)};
+  const IPMFirstDerivatives<Scalar> first_derivatives_unscaled{
+      inv_d_f * first_derivatives.g,
+      inv_d_c_e.asDiagonal() * first_derivatives.A_e,
+      inv_d_c_i.asDiagonal() * first_derivatives.A_i};
+  const IPMIterates<Scalar> iterates_unscaled{
+      iterates.x, inv_d_c_i.cwiseProduct(iterates.s),
+      scaling.c_e.cwiseProduct(iterates.y) * inv_d_f,
+      scaling.c_i.cwiseProduct(iterates.z) * inv_d_f};
   const Scalar μ_unscaled = inv_d_f * μ;
 
-  return kkt_error_inf_norm<Scalar>(
-      g_unscaled, A_e_unscaled, c_e_unscaled, A_i_unscaled, c_i_unscaled,
-      s_unscaled, y_unscaled, z_unscaled, μ_unscaled, tolerance);
+  return kkt_error_inf_norm<Scalar>(iterates_unscaled, function_values_unscaled,
+                                    first_derivatives_unscaled, μ_unscaled,
+                                    tolerance);
 }
 
 }  // namespace slp

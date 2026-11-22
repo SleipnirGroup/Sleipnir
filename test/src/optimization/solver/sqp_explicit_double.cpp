@@ -10,6 +10,7 @@
 #include <sleipnir/optimization/solver/options.hpp>
 #include <sleipnir/optimization/solver/sqp.hpp>  // IWYU pragma: keep
 #include <sleipnir/optimization/solver/sqp_matrix_callbacks.hpp>
+#include <sleipnir/optimization/solver/util/iterates.hpp>
 
 #include "explicit_double.hpp"
 
@@ -26,5 +27,5 @@ template slp::ExitStatus slp::sqp(
     std::span<
         std::function<ControlFlow(const IterationInfo<ExplicitDouble>& info)>>
         iteration_callbacks,
-    const Options<ExplicitDouble>& options, Eigen::VectorX<ExplicitDouble>& x,
-    Eigen::VectorX<ExplicitDouble>& y);
+    const Options<ExplicitDouble>& options,
+    SQPIterates<ExplicitDouble>& iterates);
