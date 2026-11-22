@@ -107,9 +107,9 @@ ExitStatus newton(
     return ExitStatus::NONFINITE_INITIAL_GUESS;
   }
 
-  Filter<Scalar> filter;
-
   NewtonKKTSystem<Scalar> kkt_system{H};
+
+  Filter<Scalar> filter;
 
   // Step size reduction factor
   constexpr Scalar α_reduction_factor(0.5);
