@@ -129,13 +129,14 @@ jobs:
           echo "CXX=clang++" >> $GITHUB_ENV
           echo "CXXFLAGS=-stdlib=libc++" >> $GITHUB_ENV
 
-      - run: pip install wpiformat==2026.76
+      - run: pip install --group docstrings wpiformat==2026.76
 
       - name: Create compile_commands.json
-        run: cmake -B build -S . -DCMAKE_EXPORT_COMPILE_COMMANDS=YES -DSLEIPNIR_BUILD_EXAMPLES=ON
+        run: cmake -B build -S . -DCMAKE_EXPORT_COMPILE_COMMANDS=YES -DSLEIPNIR_BUILD_EXAMPLES=ON -DSLEIPNIR_BUILD_PYTHON=ON
 
       - name: List changed files
         run: wpiformat -list-changed-files
 
+      # FIXME: Remove includecstdio after the next nanobind release
       - name: Run clang-tidy
-        run: wpiformat -no-format -tidy-all -compile-commands=build -tidy-extra-args std=c++23
+        run: wpiformat -no-format -tidy-all -compile-commands=build -tidy-extra-args std=c++23,includecstdio
