@@ -213,9 +213,7 @@ TEMPLATE_TEST_CASE("Problem parameter - Expression types", "[Problem]",
   CHECK(slp::atan2(p, slp::Variable<T>{T(1)}).type() == PARAMETER);
   CHECK(slp::hypot(p, p, p).type() == PARAMETER);
   CHECK(slp::max(p, slp::Variable<T>{T(1)}).type() == PARAMETER);
-  CHECK(slp::if_else([](T a, T b) { return a < b; }, p, slp::Variable<T>{T(1)},
-                     p, slp::Variable<T>{T(2)})
-            .type() == PARAMETER);
+  CHECK(slp::if_else(p < T(1), p, T(2)).type() == PARAMETER);
   CHECK((p * x).type() == LINEAR);
   CHECK((x / p).type() == LINEAR);
   CHECK((slp::sin(p) * x).type() == LINEAR);
@@ -224,9 +222,7 @@ TEMPLATE_TEST_CASE("Problem parameter - Expression types", "[Problem]",
   CHECK(slp::sin(x).type() == NONLINEAR);
   CHECK(slp::pow(p, x).type() == NONLINEAR);
   CHECK(slp::max(p, x).type() == NONLINEAR);
-  CHECK(slp::if_else([](T a, T b) { return a < b; }, p, slp::Variable<T>{T(1)},
-                     x, slp::Variable<T>{T(2)})
-            .type() == NONLINEAR);
+  CHECK(slp::if_else(p < T(1), x, T(2)).type() == NONLINEAR);
 }
 
 TEMPLATE_TEST_CASE("Problem parameter - Not folded", "[Problem]",

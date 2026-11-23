@@ -620,8 +620,7 @@ TEMPLATE_TEST_CASE("Hessian - if_else()", "[Hessian]", SCALAR_TYPES) {
   // The condition's arguments are decision variables, but they don't
   // contribute to the Hessian.
   slp::VariableMatrix<T> x{2};
-  auto f = slp::if_else([](T a, T b) { return a < b; }, x[0], x[1],
-                        x[0] * x[0] * x[1], x[1] * x[1] * x[1]);
+  auto f = slp::if_else(x[0] < x[1], x[0] * x[0] * x[1], x[1] * x[1] * x[1]);
   slp::Hessian hessian{f, x};
   auto symbolic_H = hessian.get();
 

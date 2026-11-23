@@ -681,8 +681,7 @@ TEMPLATE_TEST_CASE("Gradient - if_else()", "[Gradient]", SCALAR_TYPES) {
   slp::Variable<T> x3 = x * x * x;
 
   // f(x) = x² if x < 0, otherwise x³
-  auto f = slp::if_else([](T a, T b) { return a < b; }, x,
-                        slp::Variable<T>{T(0)}, x2, x3);
+  auto f = slp::if_else(x < T(0), x2, x3);
   auto g = slp::Gradient(f, x);
 
   // True branch
@@ -696,6 +695,17 @@ TEMPLATE_TEST_CASE("Gradient - if_else()", "[Gradient]", SCALAR_TYPES) {
   CHECK(f.value() == x3.value());
   CHECK(g.get().value().coeff(0) == slp::Gradient(x3, x).value().coeff(0));
   CHECK(g.value().coeff(0) == slp::Gradient(x3, x).value().coeff(0));
+
+  // Non-strict comparisons include equality
+  CHECK(slp::if_else(x <= T(0), x2, T(1)).value() == x2.value());
+  CHECK(slp::if_else(x >= T(0), x2, T(1)).value() == x2.value());
+  CHECK(slp::if_else(x > T(0), x2, T(1)).value() == T(1));
+
+  // Equality condition
+  auto h = slp::if_else(x == T(0), T(1), x3);
+  CHECK(h.value() == T(1));
+  x.set_value(T(2));
+  CHECK(h.value() == x3.value());
 }
 
 TEMPLATE_TEST_CASE("Gradient - max()", "[Gradient]", SCALAR_TYPES) {

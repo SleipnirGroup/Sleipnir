@@ -6,6 +6,7 @@
 #include <concepts>
 #include <cstddef>
 #include <initializer_list>
+#include <ranges>
 #include <source_location>
 #include <type_traits>
 #include <utility>
@@ -32,6 +33,12 @@ namespace slp {
 
 template <typename Scalar>
 class VariableMatrix;
+
+template <typename Scalar>
+struct EqualityConstraints;
+
+template <typename Scalar>
+struct InequalityConstraints;
 
 namespace detail {
 
@@ -315,9 +322,14 @@ class Variable : public SleipnirBase {
                                 const Variable<Scalar>& y);
   template <typename Scalar>
   friend Variable<Scalar> if_else(
-      std::type_identity_t<bool (*)(Scalar a, Scalar b)> cond,
-      const Variable<Scalar>& a, const Variable<Scalar>& b,
-      const Variable<Scalar>& t, const Variable<Scalar>& f);
+      const EqualityConstraints<Scalar>& cond,
+      const std::type_identity_t<Variable<Scalar>>& t,
+      const std::type_identity_t<Variable<Scalar>>& f);
+  template <typename Scalar>
+  friend Variable<Scalar> if_else(
+      const InequalityConstraints<Scalar>& cond,
+      const std::type_identity_t<Variable<Scalar>>& t,
+      const std::type_identity_t<Variable<Scalar>>& f);
   template <typename Scalar>
   friend Variable<Scalar> log(const Variable<Scalar>& x);
   template <typename Scalar>
@@ -526,26 +538,6 @@ Variable<Scalar> hypot(const Variable<Scalar>& x, const ScalarLike auto& y) {
 template <typename Scalar>
 Variable<Scalar> hypot(const Variable<Scalar>& x, const Variable<Scalar>& y) {
   return Variable{detail::hypot(x.expr, y.expr)};
-}
-
-/// if_else() for Variables.
-///
-/// Returns t if cond(a, b) is true, otherwise f. The condition is evaluated on
-/// the values of a and b each time the result is evaluated, and the gradient
-/// only flows through the selected branch.
-///
-/// @tparam Scalar Scalar type.
-/// @param cond Condition evaluated on a and b.
-/// @param a The condition's first argument.
-/// @param b The condition's second argument.
-/// @param t Value selected when cond(a, b) is true.
-/// @param f Value selected when cond(a, b) is false.
-template <typename Scalar>
-Variable<Scalar> if_else(
-    std::type_identity_t<bool (*)(Scalar a, Scalar b)> cond,
-    const Variable<Scalar>& a, const Variable<Scalar>& b,
-    const Variable<Scalar>& t, const Variable<Scalar>& f) {
-  return Variable{detail::if_else(cond, a.expr, b.expr, t.expr, f.expr)};
 }
 
 /// log() for Variables.
@@ -866,6 +858,13 @@ struct InequalityConstraints {
   /// A vector of scalar inequality constraints.
   gch::small_vector<Variable<Scalar>> constraints;
 
+  /// Whether each scalar inequality constraint came from a strict comparison
+  /// (< or >).
+  ///
+  /// The solver treats strict and non-strict inequality constraints the same.
+  /// if_else() and the conversion to bool distinguish them.
+  gch::small_vector<bool> strict;
+
   /// Concatenates multiple inequality constraints.
   ///
   /// @param inequality_constraints The list of InequalityConstraints to
@@ -875,6 +874,7 @@ struct InequalityConstraints {
     for (const auto& elem : inequality_constraints) {
       constraints.insert(constraints.end(), elem.constraints.begin(),
                          elem.constraints.end());
+      strict.insert(strict.end(), elem.strict.begin(), elem.strict.end());
     }
   }
 
@@ -889,6 +889,7 @@ struct InequalityConstraints {
     for (const auto& elem : inequality_constraints) {
       constraints.insert(constraints.end(), elem.constraints.begin(),
                          elem.constraints.end());
+      strict.insert(strict.end(), elem.strict.begin(), elem.strict.end());
     }
   }
 
@@ -900,19 +901,24 @@ struct InequalityConstraints {
   ///
   /// @param lhs Left-hand side.
   /// @param rhs Right-hand side.
+  /// @param strict Whether the comparison is strict (lhs > rhs).
   template <typename LHS, typename RHS>
     requires(ScalarLike<LHS> || MatrixLike<LHS>) &&
-            (ScalarLike<RHS> || MatrixLike<RHS>) &&
-            (SleipnirType<LHS> || SleipnirType<RHS>)
-  InequalityConstraints(LHS&& lhs, RHS&& rhs)
-      : constraints{make_constraints<Scalar>(lhs, rhs)} {}
+                (ScalarLike<RHS> || MatrixLike<RHS>) &&
+                (SleipnirType<LHS> || SleipnirType<RHS>)
+  InequalityConstraints(LHS&& lhs, RHS&& rhs, bool strict = false)
+      : constraints{make_constraints<Scalar>(lhs, rhs)},
+        strict(constraints.size(), strict) {}
 
   /// Implicit conversion operator to bool.
   // NOLINTNEXTLINE (google-explicit-constructor)
   operator bool() {
-    return std::ranges::all_of(constraints, [](auto& constraint) {
-      return constraint.value() >= Scalar(0);
-    });
+    return std::ranges::all_of(
+        std::views::zip(constraints, strict), [](auto&& elem) {
+          auto& [constraint, is_strict] = elem;
+          return is_strict ? constraint.value() > Scalar(0)
+                           : constraint.value() >= Scalar(0);
+        });
   }
 };
 
@@ -959,7 +965,7 @@ template <typename LHS, typename RHS>
           (ScalarLike<RHS> || MatrixLike<RHS>) &&
           (SleipnirType<LHS> || SleipnirType<RHS>)
 auto operator<(LHS&& lhs, RHS&& rhs) {
-  return rhs >= lhs;
+  return decltype(rhs >= lhs){rhs, lhs, true};
 }
 
 /// Less-than-or-equal-to comparison operator that returns an inequality
@@ -985,7 +991,7 @@ template <typename LHS, typename RHS>
           (ScalarLike<RHS> || MatrixLike<RHS>) &&
           (SleipnirType<LHS> || SleipnirType<RHS>)
 auto operator>(LHS&& lhs, RHS&& rhs) {
-  return lhs >= rhs;
+  return decltype(lhs >= rhs){lhs, rhs, true};
 }
 
 /// Greater-than-or-equal-to comparison operator that returns an inequality
@@ -1022,6 +1028,54 @@ template <typename LHS, typename RHS>
           (ScalarLike<RHS> || MatrixLike<RHS>) && SleipnirType<RHS>
 auto operator>=(LHS&& lhs, RHS&& rhs) {
   return InequalityConstraints<typename std::decay_t<LHS>::Scalar>{lhs, rhs};
+}
+
+/// Returns t if the equality constraint cond is satisfied, otherwise f.
+///
+/// For example, if_else(x == y, t, f) returns t if x = y, otherwise f.
+///
+/// The condition is evaluated on the current values of its operands each time
+/// the result is evaluated, and the gradient only flows through the selected
+/// branch. Both branches are evaluated regardless of which one is selected.
+///
+/// @tparam Scalar Scalar type.
+/// @param cond A scalar equality constraint.
+/// @param t Value selected when cond is satisfied.
+/// @param f Value selected when cond is violated.
+template <typename Scalar>
+Variable<Scalar> if_else(const EqualityConstraints<Scalar>& cond,
+                         const std::type_identity_t<Variable<Scalar>>& t,
+                         const std::type_identity_t<Variable<Scalar>>& f) {
+  slp_assert(cond.constraints.size() == 1);
+
+  return Variable{detail::if_else(detail::IfElseCondition::ZERO,
+                                  cond.constraints[0].expr, t.expr, f.expr)};
+}
+
+/// Returns t if the inequality constraint cond is satisfied, otherwise f.
+///
+/// For example, if_else(x < y, t, f) returns t if x < y, otherwise f. Strict
+/// comparisons (< and >) exclude equality and non-strict comparisons (≤ and ≥)
+/// include it.
+///
+/// The condition is evaluated on the current values of its operands each time
+/// the result is evaluated, and the gradient only flows through the selected
+/// branch. Both branches are evaluated regardless of which one is selected.
+///
+/// @tparam Scalar Scalar type.
+/// @param cond A scalar inequality constraint.
+/// @param t Value selected when cond is satisfied.
+/// @param f Value selected when cond is violated.
+template <typename Scalar>
+Variable<Scalar> if_else(const InequalityConstraints<Scalar>& cond,
+                         const std::type_identity_t<Variable<Scalar>>& t,
+                         const std::type_identity_t<Variable<Scalar>>& f) {
+  slp_assert(cond.constraints.size() == 1);
+
+  return Variable{detail::if_else(cond.strict[0]
+                                      ? detail::IfElseCondition::POSITIVE
+                                      : detail::IfElseCondition::NONNEGATIVE,
+                                  cond.constraints[0].expr, t.expr, f.expr)};
 }
 
 /// Helper function for creating bound constraints.

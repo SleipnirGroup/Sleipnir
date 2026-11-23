@@ -2,13 +2,14 @@
 
 #pragma once
 
+#include <stdint.h>
+
 #include <algorithm>
 #include <array>
 #include <cmath>
 #include <concepts>
 #include <numbers>
 #include <string_view>
-#include <type_traits>
 #include <utility>
 
 #include "sleipnir/autodiff/expression.hpp"
@@ -461,71 +462,97 @@ ExpressionPtr<Scalar> hypot(const ExpressionPtr<Scalar>& x,
   return fold_or_make<Hypot3Expression, Scalar>(x, y, z);
 }
 
+/// The condition if_else() checks on its argument c.
+enum class IfElseCondition : uint8_t {
+  /// c = 0.
+  ZERO,
+  /// c ≥ 0.
+  NONNEGATIVE,
+  /// c > 0.
+  POSITIVE
+};
+
 /// Derived expression type for if_else().
 ///
-/// Returns t if cond(a, b) is true, otherwise f.
+/// Returns t if c satisfies the condition, otherwise f.
 ///
 /// @tparam Scalar Scalar type.
 /// @tparam Type Expression type.
 template <typename Scalar, ExpressionType Type>
 struct IfElseExpression final
-    : NonLeafExpression<IfElseExpression, Scalar, Type, 4> {
+    : NonLeafExpression<IfElseExpression, Scalar, Type, 3> {
   /// The expression's name.
   static constexpr std::string_view NAME = "if-else";
 
-  /// Condition evaluated on a and b.
-  bool (*cond)(Scalar a, Scalar b);
+  /// The condition checked on c.
+  IfElseCondition cond;
 
   /// Constructs an if-else expression.
   ///
-  /// @param cond Condition evaluated on a and b.
-  /// @param a The condition's first argument.
-  /// @param b The condition's second argument.
-  /// @param t Value selected when cond(a, b) is true.
-  /// @param f Value selected when cond(a, b) is false.
-  constexpr IfElseExpression(bool (*cond)(Scalar a, Scalar b),
-                             ExpressionPtr<Scalar> a, ExpressionPtr<Scalar> b,
+  /// @param cond The condition checked on c.
+  /// @param c The condition's argument.
+  /// @param t Value selected when c satisfies the condition.
+  /// @param f Value selected when c violates the condition.
+  constexpr IfElseExpression(IfElseCondition cond, ExpressionPtr<Scalar> c,
                              ExpressionPtr<Scalar> t, ExpressionPtr<Scalar> f)
-      : IfElseExpression::NonLeafExpression{std::move(a), std::move(b),
-                                            std::move(t), std::move(f)},
+      : IfElseExpression::NonLeafExpression{std::move(c), std::move(t),
+                                            std::move(f)},
         cond{cond} {}
 
-  Scalar eval(Scalar a, Scalar b, Scalar t, Scalar f) const {
-    return cond(a, b) ? t : f;
+  /// Returns true if c satisfies the condition.
+  ///
+  /// @param cond The condition checked on c.
+  /// @param c The condition's argument.
+  /// @return True if c satisfies the condition.
+  static bool satisfied(IfElseCondition cond, Scalar c) {
+    using enum IfElseCondition;
+
+    switch (cond) {
+      case ZERO:
+        return c == Scalar(0);
+      case NONNEGATIVE:
+        return c >= Scalar(0);
+      case POSITIVE:
+        return c > Scalar(0);
+      default:
+        std::unreachable();
+    }
+  }
+
+  Scalar eval(Scalar c, Scalar t, Scalar f) const {
+    return satisfied(cond, c) ? t : f;
   }
 
   template <typename Value>
-  void eval_grad(std::array<Value, 4>& g, [[maybe_unused]] const Value& val,
-                 const Value& a, const Value& b,
-                 [[maybe_unused]] const Value& t,
+  void eval_grad(std::array<Value, 3>& g, [[maybe_unused]] const Value& val,
+                 const Value& c, [[maybe_unused]] const Value& t,
                  [[maybe_unused]] const Value& f) const {
-    // a and b have zero gradient
+    // c has zero gradient
     if constexpr (std::same_as<Value, Scalar>) {
-      bool c = cond(a, b);
-      g[2] = c ? Scalar(1) : Scalar(0);
-      g[3] = c ? Scalar(0) : Scalar(1);
+      bool s = satisfied(cond, c);
+      g[1] = s ? Scalar(1) : Scalar(0);
+      g[2] = s ? Scalar(0) : Scalar(1);
     } else {
       auto zero = constant_ptr(Scalar(0));
       auto one = constant_ptr(Scalar(1));
-      g[2] = if_else(cond, a, b, one, zero);
-      g[3] = if_else(cond, a, b, zero, one);
+      g[1] = if_else(cond, c, one, zero);
+      g[2] = if_else(cond, c, zero, one);
     }
   }
 };
 
-/// Returns t if cond(a, b) is true, otherwise f.
+/// Returns t if c satisfies the condition, otherwise f.
 ///
 /// @tparam Scalar Scalar type.
-/// @param cond Condition evaluated on a and b.
-/// @param a The condition's first argument.
-/// @param b The condition's second argument.
-/// @param t Value selected when cond(a, b) is true.
-/// @param f Value selected when cond(a, b) is false.
+/// @param cond The condition checked on c.
+/// @param c The condition's argument.
+/// @param t Value selected when c satisfies the condition.
+/// @param f Value selected when c violates the condition.
 template <typename Scalar>
-ExpressionPtr<Scalar> if_else(
-    std::type_identity_t<bool (*)(Scalar a, Scalar b)> cond,
-    const ExpressionPtr<Scalar>& a, const ExpressionPtr<Scalar>& b,
-    const ExpressionPtr<Scalar>& t, const ExpressionPtr<Scalar>& f) {
+ExpressionPtr<Scalar> if_else(IfElseCondition cond,
+                              const ExpressionPtr<Scalar>& c,
+                              const ExpressionPtr<Scalar>& t,
+                              const ExpressionPtr<Scalar>& f) {
   using enum ExpressionType;
 
   // Prune expression
@@ -539,17 +566,17 @@ ExpressionPtr<Scalar> if_else(
   }
 
   // Evaluate constant condition
-  if (a->type() == CONSTANT && b->type() == CONSTANT) {
-    return cond(a->val, b->val) ? t : f;
+  if (c->type() == CONSTANT) {
+    return IfElseExpression<Scalar, NONLINEAR>::satisfied(cond, c->val) ? t : f;
   }
 
-  if (a->type() <= PARAMETER && b->type() <= PARAMETER &&
-      t->type() <= PARAMETER && f->type() <= PARAMETER) {
-    return make_expression_ptr<IfElseExpression<Scalar, PARAMETER>>(cond, a, b,
-                                                                    t, f);
+  if (c->type() <= PARAMETER && t->type() <= PARAMETER &&
+      f->type() <= PARAMETER) {
+    return make_expression_ptr<IfElseExpression<Scalar, PARAMETER>>(cond, c, t,
+                                                                    f);
   } else {
-    return make_expression_ptr<IfElseExpression<Scalar, NONLINEAR>>(cond, a, b,
-                                                                    t, f);
+    return make_expression_ptr<IfElseExpression<Scalar, NONLINEAR>>(cond, c, t,
+                                                                    f);
   }
 }
 
@@ -647,9 +674,9 @@ struct MaxExpression final : NonLeafExpression<MaxExpression, Scalar, Type, 2> {
     } else {
       auto zero = constant_ptr(Scalar(0));
       auto one = constant_ptr(Scalar(1));
-      auto cond = [](Scalar a, Scalar b) { return a >= b; };
-      g[0] = if_else(cond, a, b, one, zero);
-      g[1] = if_else(cond, a, b, zero, one);
+      auto c = a - b;
+      g[0] = if_else(IfElseCondition::NONNEGATIVE, c, one, zero);
+      g[1] = if_else(IfElseCondition::NONNEGATIVE, c, zero, one);
     }
   }
 };
@@ -694,9 +721,9 @@ struct MinExpression final : NonLeafExpression<MinExpression, Scalar, Type, 2> {
     } else {
       auto zero = constant_ptr(Scalar(0));
       auto one = constant_ptr(Scalar(1));
-      auto cond = [](Scalar a, Scalar b) { return a <= b; };
-      g[0] = if_else(cond, a, b, one, zero);
-      g[1] = if_else(cond, a, b, zero, one);
+      auto c = b - a;
+      g[0] = if_else(IfElseCondition::NONNEGATIVE, c, one, zero);
+      g[1] = if_else(IfElseCondition::NONNEGATIVE, c, zero, one);
     }
   }
 };

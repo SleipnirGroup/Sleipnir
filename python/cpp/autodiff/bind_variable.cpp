@@ -301,6 +301,18 @@ void bind_variable(nb::module_& autodiff, nb::class_<Variable<double>>& cls) {
       autodiff, "hypot",
       nb::overload_cast<const V&, const V&, const V&>(&hypot<double>), "x"_a,
       "y"_a, "z"_a, DOC(slp, hypot, 2));
+  autodiff.def(
+      "if_else",
+      [](const EqualityConstraints<double>& cond, const V& t, const V& f) {
+        return if_else(cond, t, f);
+      },
+      "cond"_a, "t"_a, "f"_a, DOC(slp, if_else));
+  autodiff.def(
+      "if_else",
+      [](const InequalityConstraints<double>& cond, const V& t, const V& f) {
+        return if_else(cond, t, f);
+      },
+      "cond"_a, "t"_a, "f"_a, DOC(slp, if_else, 2));
   def_unary_math(autodiff, "log", &log<double>, "x"_a, DOC(slp, log));
   def_unary_math(autodiff, "log10", &log10<double>, "x"_a, DOC(slp, log10));
   def_binary_math(autodiff, "max",

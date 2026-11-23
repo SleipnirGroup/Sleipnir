@@ -723,3 +723,35 @@ def test_non_scalar() -> None:
     g_value = g.get().value()
     assert g_value.shape == (3, 1)
     assert (g_value == expected_g).all()
+
+
+def test_if_else() -> None:
+    x = Variable()
+
+    # f(x) = x² if x < 0, otherwise x³
+    f = autodiff.if_else(x < 0.0, x * x, x * x * x)
+    g = Gradient(f, x)
+
+    # True branch
+    x.set_value(-3.0)
+    assert f.value() == 9.0
+    assert g.get().value()[0, 0] == -6.0
+    assert g.value()[0, 0] == -6.0
+
+    # False branch
+    x.set_value(0.0)
+    assert f.value() == 0.0
+    assert g.value()[0, 0] == 0.0
+
+    x.set_value(2.0)
+    assert f.value() == 8.0
+    assert g.get().value()[0, 0] == 12.0
+    assert g.value()[0, 0] == 12.0
+
+    # Non-strict comparison includes equality
+    x.set_value(0.0)
+    assert autodiff.if_else(x <= 0.0, 1.0, 2.0).value() == 1.0
+    assert autodiff.if_else(x > 0.0, 1.0, 2.0).value() == 2.0
+
+    # Equality condition
+    assert autodiff.if_else(x == 0.0, 1.0, 2.0).value() == 1.0
