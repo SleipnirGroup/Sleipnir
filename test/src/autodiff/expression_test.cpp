@@ -297,22 +297,27 @@ TEMPLATE_TEST_CASE("Expression - Prune if_else()", "[Expression]",
   auto one = constant_ptr(T(1));
   auto x = make_expression_ptr<DecisionVariableExpression<T>>(T(1));
   auto y = make_expression_ptr<DecisionVariableExpression<T>>(T(2));
-  auto lt = +[](T a, T b) { return a < b; };
+  auto neg_one = constant_ptr(T(-1));
+
+  using enum slp::detail::IfElseCondition;
 
   // Identical branches
-  CHECK(slp::detail::if_else(lt, x, y, x, x) == x);
+  CHECK(slp::detail::if_else(POSITIVE, x, y, y) == y);
 
   // Equal constant branches
   auto other_one = constant_ptr(T(1));
-  CHECK(slp::detail::if_else(lt, x, y, one, other_one) == one);
+  CHECK(slp::detail::if_else(POSITIVE, x, one, other_one) == one);
 
   // Constant condition
-  CHECK(slp::detail::if_else(lt, zero, one, x, y) == x);
-  CHECK(slp::detail::if_else(lt, one, zero, x, y) == y);
+  CHECK(slp::detail::if_else(ZERO, zero, x, y) == x);
+  CHECK(slp::detail::if_else(ZERO, one, x, y) == y);
+  CHECK(slp::detail::if_else(NONNEGATIVE, zero, x, y) == x);
+  CHECK(slp::detail::if_else(NONNEGATIVE, neg_one, x, y) == y);
+  CHECK(slp::detail::if_else(POSITIVE, one, x, y) == x);
+  CHECK(slp::detail::if_else(POSITIVE, zero, x, y) == y);
 
   // Non-constant condition
-  CHECK(slp::detail::if_else(lt, x, one, x, y)->name() == "if-else");
-  CHECK(slp::detail::if_else(lt, zero, y, x, y)->name() == "if-else");
+  CHECK(slp::detail::if_else(POSITIVE, x, one, y)->name() == "if-else");
 }
 
 TEMPLATE_TEST_CASE("Expression - Prune log()", "[Expression]", SCALAR_TYPES) {

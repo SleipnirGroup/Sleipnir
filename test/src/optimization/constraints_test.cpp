@@ -99,8 +99,8 @@ TEMPLATE_TEST_CASE("constraints - Equality constraint boolean comparison",
   }
 }
 
-// For the purposes of optimization, a < constraint is treated the same as a <=
-// constraint
+// The solver treats a < constraint the same as a <= constraint, but the
+// boolean conversion distinguishes them
 TEMPLATE_TEST_CASE("constraints - Inequality constraint boolean comparisons",
                    "[constraints]", SCALAR_TYPES) {
   using T = TestType;
@@ -110,64 +110,64 @@ TEMPLATE_TEST_CASE("constraints - Inequality constraint boolean comparisons",
 
   // T-Variable
   for (const auto& [lhs, rhs] : args) {
-    CHECK(bool{T{lhs} < slp::Variable<T>{rhs}} == (lhs <= rhs));
+    CHECK(bool{T{lhs} < slp::Variable<T>{rhs}} == (lhs < rhs));
     CHECK(bool{T{lhs} <= slp::Variable<T>{rhs}} == (lhs <= rhs));
-    CHECK(bool{T{lhs} > slp::Variable<T>{rhs}} == (lhs >= rhs));
+    CHECK(bool{T{lhs} > slp::Variable<T>{rhs}} == (lhs > rhs));
     CHECK(bool{T{lhs} >= slp::Variable<T>{rhs}} == (lhs >= rhs));
   }
 
   // T-VariableMatrix
   for (const auto& [lhs, rhs] : args) {
-    CHECK(bool{T{lhs} < slp::VariableMatrix<T>{{rhs}}} == (lhs <= rhs));
+    CHECK(bool{T{lhs} < slp::VariableMatrix<T>{{rhs}}} == (lhs < rhs));
     CHECK(bool{T{lhs} <= slp::VariableMatrix<T>{{rhs}}} == (lhs <= rhs));
-    CHECK(bool{T{lhs} > slp::VariableMatrix<T>{{rhs}}} == (lhs >= rhs));
+    CHECK(bool{T{lhs} > slp::VariableMatrix<T>{{rhs}}} == (lhs > rhs));
     CHECK(bool{T{lhs} >= slp::VariableMatrix<T>{{rhs}}} == (lhs >= rhs));
   }
 
   // Variable-T
   for (const auto& [lhs, rhs] : args) {
-    CHECK(bool{slp::Variable<T>{lhs} < T{rhs}} == (lhs <= rhs));
+    CHECK(bool{slp::Variable<T>{lhs} < T{rhs}} == (lhs < rhs));
     CHECK(bool{slp::Variable<T>{lhs} <= T{rhs}} == (lhs <= rhs));
-    CHECK(bool{slp::Variable<T>{lhs} > T{rhs}} == (lhs >= rhs));
+    CHECK(bool{slp::Variable<T>{lhs} > T{rhs}} == (lhs > rhs));
     CHECK(bool{slp::Variable<T>{lhs} >= T{rhs}} == (lhs >= rhs));
   }
 
   // Variable-Variable
   for (const auto& [lhs, rhs] : args) {
-    CHECK(bool{slp::Variable<T>{lhs} < slp::Variable<T>{rhs}} == (lhs <= rhs));
+    CHECK(bool{slp::Variable<T>{lhs} < slp::Variable<T>{rhs}} == (lhs < rhs));
     CHECK(bool{slp::Variable<T>{lhs} <= slp::Variable<T>{rhs}} == (lhs <= rhs));
-    CHECK(bool{slp::Variable<T>{lhs} > slp::Variable<T>{rhs}} == (lhs >= rhs));
+    CHECK(bool{slp::Variable<T>{lhs} > slp::Variable<T>{rhs}} == (lhs > rhs));
     CHECK(bool{slp::Variable<T>{lhs} >= slp::Variable<T>{rhs}} == (lhs >= rhs));
   }
 
   // Variable-VariableMatrix
   for (const auto& [lhs, rhs] : args) {
     CHECK(bool{slp::Variable<T>{lhs} < slp::VariableMatrix<T>{{rhs}}} ==
-          (lhs <= rhs));
+          (lhs < rhs));
     CHECK(bool{slp::Variable<T>{lhs} <= slp::VariableMatrix<T>{{rhs}}} ==
           (lhs <= rhs));
     CHECK(bool{slp::Variable<T>{lhs} > slp::VariableMatrix<T>{{rhs}}} ==
-          (lhs >= rhs));
+          (lhs > rhs));
     CHECK(bool{slp::Variable<T>{lhs} >= slp::VariableMatrix<T>{{rhs}}} ==
           (lhs >= rhs));
   }
 
   // VariableMatrix-T
   for (const auto& [lhs, rhs] : args) {
-    CHECK(bool{slp::VariableMatrix<T>{{lhs}} < T{rhs}} == (lhs <= rhs));
+    CHECK(bool{slp::VariableMatrix<T>{{lhs}} < T{rhs}} == (lhs < rhs));
     CHECK(bool{slp::VariableMatrix<T>{{lhs}} <= T{rhs}} == (lhs <= rhs));
-    CHECK(bool{slp::VariableMatrix<T>{{lhs}} > T{rhs}} == (lhs >= rhs));
+    CHECK(bool{slp::VariableMatrix<T>{{lhs}} > T{rhs}} == (lhs > rhs));
     CHECK(bool{slp::VariableMatrix<T>{{lhs}} >= T{rhs}} == (lhs >= rhs));
   }
 
   // VariableMatrix-Variable
   for (const auto& [lhs, rhs] : args) {
     CHECK(bool{slp::VariableMatrix<T>{{lhs}} < slp::Variable<T>{rhs}} ==
-          (lhs <= rhs));
+          (lhs < rhs));
     CHECK(bool{slp::VariableMatrix<T>{{lhs}} <= slp::Variable<T>{rhs}} ==
           (lhs <= rhs));
     CHECK(bool{slp::VariableMatrix<T>{{lhs}} > slp::Variable<T>{rhs}} ==
-          (lhs >= rhs));
+          (lhs > rhs));
     CHECK(bool{slp::VariableMatrix<T>{{lhs}} >= slp::Variable<T>{rhs}} ==
           (lhs >= rhs));
   }
@@ -175,11 +175,11 @@ TEMPLATE_TEST_CASE("constraints - Inequality constraint boolean comparisons",
   // VariableMatrix-VariableMatrix
   for (const auto& [lhs, rhs] : args) {
     CHECK(bool{slp::VariableMatrix<T>{{lhs}} < slp::VariableMatrix<T>{{rhs}}} ==
-          (lhs <= rhs));
+          (lhs < rhs));
     CHECK(bool{slp::VariableMatrix<T>{{lhs}} <=
                slp::VariableMatrix<T>{{rhs}}} == (lhs <= rhs));
     CHECK(bool{slp::VariableMatrix<T>{{lhs}} > slp::VariableMatrix<T>{{rhs}}} ==
-          (lhs >= rhs));
+          (lhs > rhs));
     CHECK(bool{slp::VariableMatrix<T>{{lhs}} >=
                slp::VariableMatrix<T>{{rhs}}} == (lhs >= rhs));
   }
@@ -187,11 +187,11 @@ TEMPLATE_TEST_CASE("constraints - Inequality constraint boolean comparisons",
   // Eigen::MatrixX<T>-Variable
   for (const auto& [lhs, rhs] : args) {
     CHECK(bool{Eigen::MatrixX<T>{{lhs}} < slp::Variable<T>{rhs}} ==
-          (lhs <= rhs));
+          (lhs < rhs));
     CHECK(bool{Eigen::MatrixX<T>{{lhs}} <= slp::Variable<T>{rhs}} ==
           (lhs <= rhs));
     CHECK(bool{Eigen::MatrixX<T>{{lhs}} > slp::Variable<T>{rhs}} ==
-          (lhs >= rhs));
+          (lhs > rhs));
     CHECK(bool{Eigen::MatrixX<T>{{lhs}} >= slp::Variable<T>{rhs}} ==
           (lhs >= rhs));
   }
@@ -199,23 +199,23 @@ TEMPLATE_TEST_CASE("constraints - Inequality constraint boolean comparisons",
   // Eigen::MatrixX<T>-VariableMatrix
   for (const auto& [lhs, rhs] : args) {
     CHECK(bool{Eigen::MatrixX<T>{{lhs}} < slp::VariableMatrix<T>{{rhs}}} ==
-          (lhs <= rhs));
+          (lhs < rhs));
     CHECK(bool{Eigen::MatrixX<T>{{lhs}} <= slp::VariableMatrix<T>{{rhs}}} ==
           (lhs <= rhs));
     CHECK(bool{Eigen::MatrixX<T>{{lhs}} > slp::VariableMatrix<T>{{rhs}}} ==
-          (lhs >= rhs));
+          (lhs > rhs));
     CHECK(bool{Eigen::MatrixX<T>{{lhs}} >= slp::VariableMatrix<T>{{rhs}}} ==
           (lhs >= rhs));
   }
 
   // Eigen::MatrixX<T>-VariableBlock
   for (const auto& [lhs, rhs] : args) {
-    CHECK(bool{Eigen::MatrixX<T>{{lhs}} < slp::VariableMatrix<T>{{rhs}}.block(
-                                              0, 0, 1, 1)} == (lhs <= rhs));
+    CHECK(bool{Eigen::MatrixX<T>{{lhs}} <
+               slp::VariableMatrix<T>{{rhs}}.block(0, 0, 1, 1)} == (lhs < rhs));
     CHECK(bool{Eigen::MatrixX<T>{{lhs}} <= slp::VariableMatrix<T>{{rhs}}.block(
                                                0, 0, 1, 1)} == (lhs <= rhs));
-    CHECK(bool{Eigen::MatrixX<T>{{lhs}} > slp::VariableMatrix<T>{{rhs}}.block(
-                                              0, 0, 1, 1)} == (lhs >= rhs));
+    CHECK(bool{Eigen::MatrixX<T>{{lhs}} >
+               slp::VariableMatrix<T>{{rhs}}.block(0, 0, 1, 1)} == (lhs > rhs));
     CHECK(bool{Eigen::MatrixX<T>{{lhs}} >= slp::VariableMatrix<T>{{rhs}}.block(
                                                0, 0, 1, 1)} == (lhs >= rhs));
   }
@@ -223,11 +223,11 @@ TEMPLATE_TEST_CASE("constraints - Inequality constraint boolean comparisons",
   // Variable-Eigen::MatrixX<T>
   for (const auto& [lhs, rhs] : args) {
     CHECK(bool{slp::Variable<T>{lhs} < Eigen::MatrixX<T>{{rhs}}} ==
-          (lhs <= rhs));
+          (lhs < rhs));
     CHECK(bool{slp::Variable<T>{lhs} <= Eigen::MatrixX<T>{{rhs}}} ==
           (lhs <= rhs));
     CHECK(bool{slp::Variable<T>{lhs} > Eigen::MatrixX<T>{{rhs}}} ==
-          (lhs >= rhs));
+          (lhs > rhs));
     CHECK(bool{slp::Variable<T>{lhs} >= Eigen::MatrixX<T>{{rhs}}} ==
           (lhs >= rhs));
   }
@@ -235,11 +235,11 @@ TEMPLATE_TEST_CASE("constraints - Inequality constraint boolean comparisons",
   // VariableMatrix-Eigen::MatrixX<T>
   for (const auto& [lhs, rhs] : args) {
     CHECK(bool{slp::VariableMatrix<T>{{lhs}} < Eigen::MatrixX<T>{{rhs}}} ==
-          (lhs <= rhs));
+          (lhs < rhs));
     CHECK(bool{slp::VariableMatrix<T>{{lhs}} <= Eigen::MatrixX<T>{{rhs}}} ==
           (lhs <= rhs));
     CHECK(bool{slp::VariableMatrix<T>{{lhs}} > Eigen::MatrixX<T>{{rhs}}} ==
-          (lhs >= rhs));
+          (lhs > rhs));
     CHECK(bool{slp::VariableMatrix<T>{{lhs}} >= Eigen::MatrixX<T>{{rhs}}} ==
           (lhs >= rhs));
   }
@@ -247,11 +247,11 @@ TEMPLATE_TEST_CASE("constraints - Inequality constraint boolean comparisons",
   // VariableBlock-Eigen::MatrixX<T>
   for (const auto& [lhs, rhs] : args) {
     CHECK(bool{slp::VariableMatrix<T>{{lhs}}.block(0, 0, 1, 1) <
-               Eigen::MatrixX<T>{{rhs}}} == (lhs <= rhs));
+               Eigen::MatrixX<T>{{rhs}}} == (lhs < rhs));
     CHECK(bool{slp::VariableMatrix<T>{{lhs}}.block(0, 0, 1, 1) <=
                Eigen::MatrixX<T>{{rhs}}} == (lhs <= rhs));
     CHECK(bool{slp::VariableMatrix<T>{{lhs}}.block(0, 0, 1, 1) >
-               Eigen::MatrixX<T>{{rhs}}} == (lhs >= rhs));
+               Eigen::MatrixX<T>{{rhs}}} == (lhs > rhs));
     CHECK(bool{slp::VariableMatrix<T>{{lhs}}.block(0, 0, 1, 1) >=
                Eigen::MatrixX<T>{{rhs}}} == (lhs >= rhs));
   }
@@ -295,4 +295,13 @@ TEMPLATE_TEST_CASE("constraints - Inequality constraint concatenation",
   CHECK_FALSE(bool{ineq1});
   CHECK(bool{ineq2});
   CHECK_FALSE(bool{ineqs});
+
+  // Each constraint keeps its own strictness
+  slp::InequalityConstraints strict = slp::Variable<T>{1} < slp::Variable<T>{1};
+  slp::InequalityConstraints non_strict =
+      slp::Variable<T>{1} <= slp::Variable<T>{1};
+  CHECK_FALSE(bool{slp::InequalityConstraints{strict, non_strict}});
+  CHECK_FALSE(bool{slp::InequalityConstraints{non_strict, strict}});
+  CHECK(bool{slp::InequalityConstraints{non_strict, non_strict}});
+  CHECK(bool{slp::InequalityConstraints{ineq2, non_strict}});
 }

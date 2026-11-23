@@ -105,6 +105,12 @@ R"doc(A vector of equality constraints of the form cₑ(x) = 0.
 Template Args:
     Scalar: Scalar type.)doc";
 
+constexpr char mkd_doc_slp_EqualityConstraints_2[] =
+R"doc(A vector of equality constraints of the form cₑ(x) = 0.
+
+Template Args:
+    Scalar: Scalar type.)doc";
+
 constexpr char mkd_doc_slp_EqualityConstraints_EqualityConstraints[] =
 R"doc(Concatenates multiple equality constraints.
 
@@ -334,6 +340,12 @@ R"doc(A vector of inequality constraints of the form cᵢ(x) ≥ 0.
 Template Args:
     Scalar: Scalar type.)doc";
 
+constexpr char mkd_doc_slp_InequalityConstraints_2[] =
+R"doc(A vector of inequality constraints of the form cᵢ(x) ≥ 0.
+
+Template Args:
+    Scalar: Scalar type.)doc";
+
 constexpr char mkd_doc_slp_InequalityConstraints_InequalityConstraints[] =
 R"doc(Concatenates multiple inequality constraints.
 
@@ -364,12 +376,20 @@ lhs - rhs ≥ 0.
 Args:
     lhs: Left-hand side.
     rhs: Right-hand side.
+    strict: Whether the comparison is strict (lhs > rhs).
 
 )doc";
 
 constexpr char mkd_doc_slp_InequalityConstraints_constraints[] = R"doc(A vector of scalar inequality constraints.)doc";
 
 constexpr char mkd_doc_slp_InequalityConstraints_operator_bool[] = R"doc(Implicit conversion operator to bool.)doc";
+
+constexpr char mkd_doc_slp_InequalityConstraints_strict[] =
+R"doc(Whether each scalar inequality constraint came from a strict
+comparison (< or >).
+
+The solver treats strict and non-strict inequality constraints the
+same. if_else() and the conversion to bool distinguish them.)doc";
 
 constexpr char mkd_doc_slp_IterationInfo[] =
 R"doc(Solver iteration information exposed to an iteration callback.
@@ -2854,18 +2874,41 @@ Template Args:
 )doc";
 
 constexpr char mkd_doc_slp_if_else[] =
-R"doc(if_else() for Variables.
+R"doc(Returns t if the equality constraint cond is satisfied, otherwise f.
 
-Returns t if cond(a, b) is true, otherwise f. The condition is
-evaluated on the values of a and b each time the result is evaluated,
-and the gradient only flows through the selected branch.
+For example, if_else(x == y, t, f) returns t if x = y, otherwise f.
+
+The condition is evaluated on the current values of its operands each
+time the result is evaluated, and the gradient only flows through the
+selected branch. Both branches are evaluated regardless of which one
+is selected.
 
 Args:
-    cond: Condition evaluated on a and b.
-    a: The condition's first argument.
-    b: The condition's second argument.
-    t: Value selected when cond(a, b) is true.
-    f: Value selected when cond(a, b) is false.
+    cond: A scalar equality constraint.
+    t: Value selected when cond is satisfied.
+    f: Value selected when cond is violated.
+
+Template Args:
+    Scalar: Scalar type.
+
+)doc";
+
+constexpr char mkd_doc_slp_if_else_2[] =
+R"doc(Returns t if the inequality constraint cond is satisfied, otherwise f.
+
+For example, if_else(x < y, t, f) returns t if x < y, otherwise f.
+Strict comparisons (< and >) exclude equality and non-strict
+comparisons (≤ and ≥) include it.
+
+The condition is evaluated on the current values of its operands each
+time the result is evaluated, and the gradient only flows through the
+selected branch. Both branches are evaluated regardless of which one
+is selected.
+
+Args:
+    cond: A scalar inequality constraint.
+    t: Value selected when cond is satisfied.
+    f: Value selected when cond is violated.
 
 Template Args:
     Scalar: Scalar type.
