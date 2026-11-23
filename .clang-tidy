@@ -78,4 +78,4 @@ CheckOptions:
   # libc++ declares <cmath> functions in std::__math and chrono literals in
   # __chrono/duration.h, which include-cleaner can't map to public headers
   misc-include-cleaner.IgnoreHeaders: '__math/.*;__chrono/.*'
-ExcludeHeaderFilterRegex: '/_deps/'
+ExcludeHeaderFilterRegex: '/_deps/|/python3\.[0-9]+/'
