@@ -15,7 +15,6 @@ license-files = ["LICENSE.txt"]
 requires = [
   "nanobind~=3.1.0",
   "py-build-cmake~=0.5.1",
-  "pybind11-mkdoc~=3.0.0",
 ]
 build-backend = "py_build_cmake.build"
 
@@ -37,6 +36,7 @@ install_args = []
   [tool.py-build-cmake.cmake.options]
   BUILD_TESTING = "OFF"
   SLEIPNIR_BUILD_PYTHON = "ON"
+  SLEIPNIR_GENERATE_DOCSTRINGS = "OFF"
 
 [tool.py-build-cmake.module]
 name = "sleipnir"
