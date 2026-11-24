@@ -9,6 +9,8 @@ stubgen can't express some things the bindings support at runtime:
    RealMatrix, and float converts to Real. Every RealMatrix parameter also accepts a
    Submatrix, and every Real parameter also accepts a float. Return types and
    callback arguments are left alone since those are always RealMatrix or Real.
+   Sparse matrix parameters annotated as scipy.sparse.csc_matrix also accept
+   scipy.sparse.csr_matrix.
 2. Sparse matrices are annotated as scipy.sparse.csc_matrix[float], but
    scipy-stubs expects a NumPy numeric scalar type argument.
 """
@@ -52,6 +54,22 @@ REAL = re.compile(
 )
 
 
+# A CSC sparse matrix parameter. The bindings also accept CSR sparse matrices,
+# which nanobind converts. The lookahead prevents already-widened annotations
+# from matching again.
+#
+#   x: scipy.sparse.csc_matrix[float]
+#   -> x: scipy.sparse.csc_matrix[float] | scipy.sparse.csr_matrix[float]
+SPARSE = re.compile(
+    r"""
+    (?<![\w.])                             # Not part of another name
+    scipy\.sparse\.csc_matrix\[(\w+)\]       # Type name and scalar type
+    (?!\ \|\ scipy\.sparse\.csr_matrix\b)    # Not already widened
+    """,
+    re.VERBOSE,
+)
+
+
 @dataclass(frozen=True)
 class Widening:
     """A type that also accepts another type via implicit conversion."""
@@ -68,6 +86,11 @@ class Widening:
 
 # \1 is "sleipnir._sleipnir.autodiff." prefix or empty
 WIDENINGS = [
+    Widening(
+        SPARSE,
+        r"scipy.sparse.csr_matrix[\1]",
+        r"scipy.sparse.csc_matrix[\1] | scipy.sparse.csr_matrix[\1]",
+    ),
     Widening(MATRIX, r"\1Submatrix", r"\1RealMatrix | \1Submatrix"),
     Widening(REAL, "float", r"\1Real | float"),
 ]
@@ -195,12 +218,15 @@ def widen_signatures(stub: str) -> str:
 
 def fix_sparse_matrices(stub: str) -> str:
     """
-    Replaces scipy.sparse.csc_matrix[float] with
-    scipy.sparse.csc_matrix[numpy.float64], since scipy-stubs requires a NumPy
+    Replaces scipy.sparse.csc_matrix[float] and scipy.sparse.csr_matrix[float]
+    with scipy.sparse.csc_matrix[numpy.float64] and
+    scipy.sparse.csr_matrix[numpy.float64], since scipy-stubs requires a NumPy
     numeric scalar type argument.
     """
-    return stub.replace(
-        "scipy.sparse.csc_matrix[float]", "scipy.sparse.csc_matrix[numpy.float64]"
+    return re.sub(
+        r"scipy\.sparse\.(cs[cr]_matrix)\[float\]",
+        r"scipy.sparse.\1[numpy.float64]",
+        stub,
     )
 
 

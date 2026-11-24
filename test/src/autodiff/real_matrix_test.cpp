@@ -8,6 +8,7 @@
 #include <ranges>
 
 #include <Eigen/Core>
+#include <Eigen/SparseCore>
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
@@ -287,6 +288,58 @@ TEMPLATE_TEST_CASE("RealMatrix - Subslicing", "[RealMatrix]", SCALAR_TYPES) {
                                  {T(2), T(0), T(1), T(0), T(0)},
                                  {T(0), T(0), T(0), T(0), T(0)}});
   }
+}
+
+TEMPLATE_TEST_CASE("RealMatrix - Dense matrix multiplication", "[RealMatrix]",
+                   SCALAR_TYPES) {
+  using T = TestType;
+
+  Eigen::Matrix<T, 3, 3> A_dense{
+      {T(1), T(0), T(2)}, {T(0), T(3), T(0)}, {T(-1), T(0), T(4)}};
+  slp::RealMatrix<T> A{A_dense};
+
+  Eigen::Matrix<T, 3, 2> B_dense{{T(1), T(2)}, {T(3), T(4)}, {T(5), T(6)}};
+  slp::RealMatrix<T> B{B_dense};
+
+  // RealMatrix-RealMatrix
+  CHECK((A * B).value() == A_dense * B_dense);
+  CHECK((B.T() * A).value() == B_dense.transpose() * A_dense);
+  CHECK((A * B.col(0)).value() == A_dense * B_dense.col(0));
+
+  // Eigen-RealMatrix
+  CHECK((A_dense * B).value() == A_dense * B_dense);
+  CHECK((A_dense.transpose() * B).value() == A_dense.transpose() * B_dense);
+  CHECK((A_dense * B.col(0)).value() == A_dense * B_dense.col(0));
+
+  // RealMatrix-Eigen
+  CHECK((A * B_dense).value() == A_dense * B_dense);
+  CHECK((B.T() * A_dense).value() == B_dense.transpose() * A_dense);
+  CHECK((A * B_dense.col(0)).value() == A_dense * B_dense.col(0));
+
+  // RealMatrix-scalar
+  CHECK((B * T(2)).value() == B_dense * T(2));
+  CHECK((T(2) * B).value() == T(2) * B_dense);
+  CHECK((B.col(0) * T(2)).value() == B_dense.col(0) * T(2));
+}
+
+TEMPLATE_TEST_CASE("RealMatrix - Sparse matrix multiplication", "[RealMatrix]",
+                   SCALAR_TYPES) {
+  using T = TestType;
+
+  Eigen::Matrix<T, 3, 3> A_dense{
+      {T(1), T(0), T(2)}, {T(0), T(3), T(0)}, {T(-1), T(0), T(4)}};
+  Eigen::SparseMatrix<T> A = A_dense.sparseView();
+
+  Eigen::Matrix<T, 3, 2> B_dense{{T(1), T(2)}, {T(3), T(4)}, {T(5), T(6)}};
+  slp::RealMatrix<T> B{B_dense};
+
+  CHECK((A * B).value() == A_dense * B_dense);
+  CHECK((B.T() * A).value() == B_dense.transpose() * A_dense);
+  CHECK((A.transpose() * B).value() == A_dense.transpose() * B_dense);
+  CHECK((A * B.col(0)).value() == A_dense * B_dense.col(0));
+
+  Eigen::SparseMatrix<T, Eigen::RowMajor> A_row_major = A;
+  CHECK((A_row_major * B).value() == A_dense * B_dense);
 }
 
 TEMPLATE_TEST_CASE("RealMatrix - Compound assignment operators", "[RealMatrix]",

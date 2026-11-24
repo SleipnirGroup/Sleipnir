@@ -16,6 +16,7 @@
 #include <Eigen/Core>
 #include <Eigen/LU>  // IWYU pragma: keep
 #include <Eigen/QR>  // IWYU pragma: keep
+#include <Eigen/SparseCore>
 #include <gch/small_vector.hpp>
 
 #include "sleipnir/autodiff/expression_graph.hpp"
@@ -556,6 +557,66 @@ class RealMatrix : public SleipnirBase {
           sum += lhs[i, k] * rhs[k, j];
         }
         result[i, j] = sum;
+      }
+    }
+
+    return result;
+  }
+
+  /// Sparse matrix multiplication operator.
+  ///
+  /// @param lhs Operator left-hand side.
+  /// @param rhs Operator right-hand side.
+  template <EigenSparseMatrixLike LHS, SleipnirMatrixLike<Scalar> RHS>
+    requires std::same_as<typename std::decay_t<LHS>::Scalar, Scalar>
+  friend RealMatrix<Scalar> operator*(const LHS& lhs, const RHS& rhs) {
+    slp_assert(lhs.cols() == rhs.rows());
+
+    RealMatrix<Scalar> result(detail::empty, lhs.rows(), rhs.cols());
+    for (auto& elem : result) {
+      elem = Real{Scalar(0)};
+    }
+
+    // Binds without a copy if lhs is already a column-major SparseMatrix
+    const Eigen::SparseMatrix<Scalar>& A = lhs;
+    for (int outer = 0; outer < A.outerSize(); ++outer) {
+      for (typename Eigen::SparseMatrix<Scalar>::InnerIterator it{A, outer}; it;
+           ++it) {
+        int i = static_cast<int>(it.row());
+        int k = static_cast<int>(it.col());
+        for (int j = 0; j < rhs.cols(); ++j) {
+          result[i, j] += it.value() * rhs[k, j];
+        }
+      }
+    }
+
+    return result;
+  }
+
+  /// Sparse matrix multiplication operator.
+  ///
+  /// @param lhs Operator left-hand side.
+  /// @param rhs Operator right-hand side.
+  template <SleipnirMatrixLike<Scalar> LHS, EigenSparseMatrixLike RHS>
+    requires std::same_as<typename std::decay_t<RHS>::Scalar, Scalar>
+  friend RealMatrix<Scalar> operator*(const LHS& lhs, const RHS& rhs) {
+    slp_assert(lhs.cols() == rhs.rows());
+
+    RealMatrix<Scalar> result(detail::empty, lhs.rows(), rhs.cols());
+    for (auto& elem : result) {
+      elem = Real{Scalar(0)};
+    }
+
+    // Binds without a copy if rhs is already a column-major SparseMatrix
+    const Eigen::SparseMatrix<Scalar>& B = rhs;
+    for (int outer = 0; outer < B.outerSize(); ++outer) {
+      for (typename Eigen::SparseMatrix<Scalar>::InnerIterator it{B, outer}; it;
+           ++it) {
+        int k = static_cast<int>(it.row());
+        int j = static_cast<int>(it.col());
+        for (int i = 0; i < lhs.rows(); ++i) {
+          result[i, j] += lhs[i, k] * it.value();
+        }
       }
     }
 

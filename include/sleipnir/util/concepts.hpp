@@ -29,6 +29,12 @@ concept EigenMatrixLike =
     std::derived_from<std::decay_t<T>, Eigen::MatrixBase<std::decay_t<T>>> &&
     MatrixLike<T>;
 
+template <typename T>
+concept EigenSparseMatrixLike =
+    std::derived_from<std::decay_t<T>,
+                      Eigen::SparseMatrixBase<std::decay_t<T>>> &&
+    MatrixLike<T>;
+
 template <typename T, typename Scalar>
 concept SleipnirMatrixLike =
     SleipnirType<T> && MatrixLike<T> &&
