@@ -561,6 +561,21 @@ class Submatrix : public SleipnirBase {
     return result;
   }
 
+  /// Returns the trace of the variable matrix, the sum of its diagonal.
+  ///
+  /// @return The trace of the variable matrix.
+  Real<Scalar> trace() const {
+    slp_assert(rows() == cols());
+
+    Real<Scalar> result{Scalar(0)};
+
+    for (int row = 0; row < rows(); ++row) {
+      result += (*this)[row, row];
+    }
+
+    return result;
+  }
+
   /// Returns the number of rows in the matrix.
   ///
   /// @return The number of rows in the matrix.

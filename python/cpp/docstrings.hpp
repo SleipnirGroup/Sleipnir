@@ -1742,6 +1742,14 @@ Returns:
 
 )doc";
 
+constexpr char mkd_doc_slp_RealMatrix_trace[] =
+R"doc(Returns the trace of the variable matrix, the sum of its diagonal.
+
+Returns:
+    The trace of the variable matrix.
+
+)doc";
+
 constexpr char mkd_doc_slp_RealMatrix_value[] =
 R"doc(Returns an element of the variable matrix.
 
@@ -2532,6 +2540,14 @@ R"doc(Returns number of elements in matrix.
 
 Returns:
     Number of elements in matrix.
+
+)doc";
+
+constexpr char mkd_doc_slp_Submatrix_trace[] =
+R"doc(Returns the trace of the variable matrix, the sum of its diagonal.
+
+Returns:
+    The trace of the variable matrix.
 
 )doc";
 

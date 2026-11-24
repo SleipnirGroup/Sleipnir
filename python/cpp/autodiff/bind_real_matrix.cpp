@@ -425,6 +425,7 @@ void bind_real_matrix(nb::module_& autodiff,
       },
       nb::is_operator(), "power"_a);
   cls.def_prop_ro("T", &RealMatrix<double>::T, DOC(slp, RealMatrix, T));
+  cls.def("trace", &RealMatrix<double>::trace, DOC(slp, RealMatrix, trace));
   cls.def("rows", &RealMatrix<double>::rows, DOC(slp, RealMatrix, rows));
   cls.def("cols", &RealMatrix<double>::cols, DOC(slp, RealMatrix, cols));
   cls.def_prop_ro("shape", [](const RealMatrix<double>& self) {
