@@ -18,7 +18,7 @@ void bind_gradient(nb::class_<Gradient<double>>& cls) {
 
   cls.def(nb::init<Real<double>, Real<double>>(), "expression"_a, "wrt"_a,
           DOC(slp, Gradient, Gradient));
-  cls.def(nb::init<Real<double>, Matrix<double>>(), "expression"_a, "wrt"_a,
+  cls.def(nb::init<Real<double>, RealMatrix<double>>(), "expression"_a, "wrt"_a,
           DOC(slp, Gradient, Gradient, 2));
   cls.def("get", &Gradient<double>::get, DOC(slp, Gradient, get));
   cls.def(

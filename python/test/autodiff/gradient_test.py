@@ -4,7 +4,7 @@ import sys
 import numpy as np
 import pytest
 from sleipnir import autodiff
-from sleipnir.autodiff import Gradient, Matrix, Real
+from sleipnir.autodiff import Gradient, Real, RealMatrix
 
 # Machine epsilon for the binding's scalar type (double)
 ε = sys.float_info.epsilon
@@ -703,7 +703,7 @@ def test_sign() -> None:
 
 
 def test_non_scalar() -> None:
-    x = Matrix(3)
+    x = RealMatrix(3)
     x[0].set_value(1)
     x[1].set_value(2)
     x[2].set_value(3)

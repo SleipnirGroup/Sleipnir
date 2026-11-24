@@ -11,8 +11,8 @@
 
 #include "sleipnir/autodiff/expression.hpp"
 #include "sleipnir/autodiff/expression_graph.hpp"
-#include "sleipnir/autodiff/matrix.hpp"
 #include "sleipnir/autodiff/real.hpp"
+#include "sleipnir/autodiff/real_matrix.hpp"
 #include "sleipnir/util/assert.hpp"
 #include "sleipnir/util/concepts.hpp"
 #include "sleipnir/util/empty.hpp"
@@ -39,7 +39,7 @@ class Hessian {
   /// @param expression Expression of which to compute the Hessian.
   /// @param wrt Variable with respect to which to compute the Hessian.
   Hessian(Real<Scalar> expression, Real<Scalar> wrt)
-      : Hessian{std::move(expression), Matrix<Scalar>{std::move(wrt)}} {}
+      : Hessian{std::move(expression), RealMatrix<Scalar>{std::move(wrt)}} {}
 
   /// Constructs a Hessian object.
   ///
@@ -100,14 +100,15 @@ class Hessian {
     }
   }
 
-  /// Returns the Hessian as a Matrix.
+  /// Returns the Hessian as a RealMatrix.
   ///
   /// This is useful when constructing optimization problems with derivatives in
   /// them.
   ///
-  /// @return The Hessian as a Matrix.
-  Matrix<Scalar> get() const {
-    Matrix<Scalar> result{detail::empty, m_expressions.rows(), m_wrt.rows()};
+  /// @return The Hessian as a RealMatrix.
+  RealMatrix<Scalar> get() const {
+    RealMatrix<Scalar> result{detail::empty, m_expressions.rows(),
+                              m_wrt.rows()};
 
     for (int row = 0; row < m_expressions.rows(); ++row) {
       auto grad = detail::gradient_tree(m_top_lists[row], m_wrt);
@@ -154,8 +155,8 @@ class Hessian {
   }
 
  private:
-  Matrix<Scalar> m_expressions;
-  Matrix<Scalar> m_wrt;
+  RealMatrix<Scalar> m_expressions;
+  RealMatrix<Scalar> m_wrt;
 
   /// List of topologically sorted graphs from parent to child, one for each row
   gch::small_vector<detail::ExpressionGraph<Scalar>> m_top_lists;

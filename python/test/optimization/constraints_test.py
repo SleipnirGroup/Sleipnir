@@ -1,5 +1,5 @@
 import numpy as np
-from sleipnir.autodiff import Matrix, Real
+from sleipnir.autodiff import Real, RealMatrix
 from sleipnir.optimization import EqualityConstraints, InequalityConstraints
 
 
@@ -10,9 +10,9 @@ def test_equality_constraint_boolean_comparisons() -> None:
     for lhs, rhs in args:
         assert bool(float(lhs) == Real(rhs)) == (lhs == rhs)
 
-    # double-Matrix
+    # double-RealMatrix
     for lhs, rhs in args:
-        assert bool(float(lhs) == Matrix([[rhs]])) == (lhs == rhs)
+        assert bool(float(lhs) == RealMatrix([[rhs]])) == (lhs == rhs)
 
     # Real-double
     for lhs, rhs in args:
@@ -22,37 +22,37 @@ def test_equality_constraint_boolean_comparisons() -> None:
     for lhs, rhs in args:
         assert bool(Real(lhs) == Real(rhs)) == (lhs == rhs)
 
-    # Real-Matrix
+    # Real-RealMatrix
     for lhs, rhs in args:
-        assert bool(Real(lhs) == Matrix([[rhs]])) == (lhs == rhs)
+        assert bool(Real(lhs) == RealMatrix([[rhs]])) == (lhs == rhs)
 
-    # Matrix-double
+    # RealMatrix-double
     for lhs, rhs in args:
-        assert bool(Matrix([[lhs]]) == float(rhs)) == (lhs == rhs)
+        assert bool(RealMatrix([[lhs]]) == float(rhs)) == (lhs == rhs)
 
-    # Matrix-Real
+    # RealMatrix-Real
     for lhs, rhs in args:
-        assert bool(Matrix([[lhs]]) == Real(rhs)) == (lhs == rhs)
+        assert bool(RealMatrix([[lhs]]) == Real(rhs)) == (lhs == rhs)
 
-    # Matrix-Matrix
+    # RealMatrix-RealMatrix
     for lhs, rhs in args:
-        assert bool(Matrix([[lhs]]) == Matrix([[rhs]])) == (lhs == rhs)
+        assert bool(RealMatrix([[lhs]]) == RealMatrix([[rhs]])) == (lhs == rhs)
 
-    # np.array-Matrix
+    # np.array-RealMatrix
     for lhs, rhs in args:
-        assert bool(np.array([[lhs]]) == Matrix([[rhs]])) == (lhs == rhs)
+        assert bool(np.array([[lhs]]) == RealMatrix([[rhs]])) == (lhs == rhs)
 
     # np.array-Submatrix
     for lhs, rhs in args:
-        assert bool(np.array([[lhs]]) == Matrix([[rhs]])[:, :]) == (lhs == rhs)
+        assert bool(np.array([[lhs]]) == RealMatrix([[rhs]])[:, :]) == (lhs == rhs)
 
-    # Matrix-np.array
+    # RealMatrix-np.array
     for lhs, rhs in args:
-        assert bool(Matrix([[lhs]]) == np.array([[rhs]])) == (lhs == rhs)
+        assert bool(RealMatrix([[lhs]]) == np.array([[rhs]])) == (lhs == rhs)
 
     # Submatrix-np.array
     for lhs, rhs in args:
-        assert bool(Matrix([[lhs]])[:, :] == np.array([[rhs]])) == (lhs == rhs)
+        assert bool(RealMatrix([[lhs]])[:, :] == np.array([[rhs]])) == (lhs == rhs)
 
 
 # The solver treats a < constraint the same as a <= constraint, but the
@@ -67,12 +67,12 @@ def test_inequality_constraint_boolean_comparisons() -> None:
         assert bool(float(lhs) > Real(rhs)) == (lhs > rhs)
         assert bool(float(lhs) >= Real(rhs)) == (lhs >= rhs)
 
-    # double-Matrix
+    # double-RealMatrix
     for lhs, rhs in args:
-        assert bool(float(lhs) < Matrix([[rhs]])) == (lhs < rhs)
-        assert bool(float(lhs) <= Matrix([[rhs]])) == (lhs <= rhs)
-        assert bool(float(lhs) > Matrix([[rhs]])) == (lhs > rhs)
-        assert bool(float(lhs) >= Matrix([[rhs]])) == (lhs >= rhs)
+        assert bool(float(lhs) < RealMatrix([[rhs]])) == (lhs < rhs)
+        assert bool(float(lhs) <= RealMatrix([[rhs]])) == (lhs <= rhs)
+        assert bool(float(lhs) > RealMatrix([[rhs]])) == (lhs > rhs)
+        assert bool(float(lhs) >= RealMatrix([[rhs]])) == (lhs >= rhs)
 
     # Real-Real
     for lhs, rhs in args:
@@ -81,61 +81,61 @@ def test_inequality_constraint_boolean_comparisons() -> None:
         assert bool(Real(lhs) > Real(rhs)) == (lhs > rhs)
         assert bool(Real(lhs) >= Real(rhs)) == (lhs >= rhs)
 
-    # Real-Matrix
+    # Real-RealMatrix
     for lhs, rhs in args:
-        assert bool(Real(lhs) < Matrix([[rhs]])) == (lhs < rhs)
-        assert bool(Real(lhs) <= Matrix([[rhs]])) == (lhs <= rhs)
-        assert bool(Real(lhs) > Matrix([[rhs]])) == (lhs > rhs)
-        assert bool(Real(lhs) >= Matrix([[rhs]])) == (lhs >= rhs)
+        assert bool(Real(lhs) < RealMatrix([[rhs]])) == (lhs < rhs)
+        assert bool(Real(lhs) <= RealMatrix([[rhs]])) == (lhs <= rhs)
+        assert bool(Real(lhs) > RealMatrix([[rhs]])) == (lhs > rhs)
+        assert bool(Real(lhs) >= RealMatrix([[rhs]])) == (lhs >= rhs)
 
-    # Matrix-double
+    # RealMatrix-double
     for lhs, rhs in args:
-        assert bool(Matrix([[lhs]]) < float(rhs)) == (lhs < rhs)
-        assert bool(Matrix([[lhs]]) <= float(rhs)) == (lhs <= rhs)
-        assert bool(Matrix([[lhs]]) > float(rhs)) == (lhs > rhs)
-        assert bool(Matrix([[lhs]]) >= float(rhs)) == (lhs >= rhs)
+        assert bool(RealMatrix([[lhs]]) < float(rhs)) == (lhs < rhs)
+        assert bool(RealMatrix([[lhs]]) <= float(rhs)) == (lhs <= rhs)
+        assert bool(RealMatrix([[lhs]]) > float(rhs)) == (lhs > rhs)
+        assert bool(RealMatrix([[lhs]]) >= float(rhs)) == (lhs >= rhs)
 
-    # Matrix-Real
+    # RealMatrix-Real
     for lhs, rhs in args:
-        assert bool(Matrix([[lhs]]) < Real(rhs)) == (lhs < rhs)
-        assert bool(Matrix([[lhs]]) <= Real(rhs)) == (lhs <= rhs)
-        assert bool(Matrix([[lhs]]) > Real(rhs)) == (lhs > rhs)
-        assert bool(Matrix([[lhs]]) >= Real(rhs)) == (lhs >= rhs)
+        assert bool(RealMatrix([[lhs]]) < Real(rhs)) == (lhs < rhs)
+        assert bool(RealMatrix([[lhs]]) <= Real(rhs)) == (lhs <= rhs)
+        assert bool(RealMatrix([[lhs]]) > Real(rhs)) == (lhs > rhs)
+        assert bool(RealMatrix([[lhs]]) >= Real(rhs)) == (lhs >= rhs)
 
-    # Matrix-Matrix
+    # RealMatrix-RealMatrix
     for lhs, rhs in args:
-        assert bool(Matrix([[lhs]]) < Matrix([[rhs]])) == (lhs < rhs)
-        assert bool(Matrix([[lhs]]) <= Matrix([[rhs]])) == (lhs <= rhs)
-        assert bool(Matrix([[lhs]]) > Matrix([[rhs]])) == (lhs > rhs)
-        assert bool(Matrix([[lhs]]) >= Matrix([[rhs]])) == (lhs >= rhs)
+        assert bool(RealMatrix([[lhs]]) < RealMatrix([[rhs]])) == (lhs < rhs)
+        assert bool(RealMatrix([[lhs]]) <= RealMatrix([[rhs]])) == (lhs <= rhs)
+        assert bool(RealMatrix([[lhs]]) > RealMatrix([[rhs]])) == (lhs > rhs)
+        assert bool(RealMatrix([[lhs]]) >= RealMatrix([[rhs]])) == (lhs >= rhs)
 
-    # np.array-Matrix
+    # np.array-RealMatrix
     for lhs, rhs in args:
-        assert bool(np.array([[lhs]]) < Matrix([[rhs]])) == (lhs < rhs)
-        assert bool(np.array([[lhs]]) <= Matrix([[rhs]])) == (lhs <= rhs)
-        assert bool(np.array([[lhs]]) > Matrix([[rhs]])) == (lhs > rhs)
-        assert bool(np.array([[lhs]]) >= Matrix([[rhs]])) == (lhs >= rhs)
+        assert bool(np.array([[lhs]]) < RealMatrix([[rhs]])) == (lhs < rhs)
+        assert bool(np.array([[lhs]]) <= RealMatrix([[rhs]])) == (lhs <= rhs)
+        assert bool(np.array([[lhs]]) > RealMatrix([[rhs]])) == (lhs > rhs)
+        assert bool(np.array([[lhs]]) >= RealMatrix([[rhs]])) == (lhs >= rhs)
 
     # np.array-Submatrix
     for lhs, rhs in args:
-        assert bool(np.array([[lhs]]) < Matrix([[rhs]])[:, :]) == (lhs < rhs)
-        assert bool(np.array([[lhs]]) <= Matrix([[rhs]])[:, :]) == (lhs <= rhs)
-        assert bool(np.array([[lhs]]) > Matrix([[rhs]])[:, :]) == (lhs > rhs)
-        assert bool(np.array([[lhs]]) >= Matrix([[rhs]])[:, :]) == (lhs >= rhs)
+        assert bool(np.array([[lhs]]) < RealMatrix([[rhs]])[:, :]) == (lhs < rhs)
+        assert bool(np.array([[lhs]]) <= RealMatrix([[rhs]])[:, :]) == (lhs <= rhs)
+        assert bool(np.array([[lhs]]) > RealMatrix([[rhs]])[:, :]) == (lhs > rhs)
+        assert bool(np.array([[lhs]]) >= RealMatrix([[rhs]])[:, :]) == (lhs >= rhs)
 
-    # Matrix-np.array
+    # RealMatrix-np.array
     for lhs, rhs in args:
-        assert bool(Matrix([[lhs]]) < np.array([[rhs]])) == (lhs < rhs)
-        assert bool(Matrix([[lhs]]) <= np.array([[rhs]])) == (lhs <= rhs)
-        assert bool(Matrix([[lhs]]) > np.array([[rhs]])) == (lhs > rhs)
-        assert bool(Matrix([[lhs]]) >= np.array([[rhs]])) == (lhs >= rhs)
+        assert bool(RealMatrix([[lhs]]) < np.array([[rhs]])) == (lhs < rhs)
+        assert bool(RealMatrix([[lhs]]) <= np.array([[rhs]])) == (lhs <= rhs)
+        assert bool(RealMatrix([[lhs]]) > np.array([[rhs]])) == (lhs > rhs)
+        assert bool(RealMatrix([[lhs]]) >= np.array([[rhs]])) == (lhs >= rhs)
 
     # Submatrix-np.array
     for lhs, rhs in args:
-        assert bool(Matrix([[lhs]])[:, :] < np.array([[rhs]])) == (lhs < rhs)
-        assert bool(Matrix([[lhs]])[:, :] <= np.array([[rhs]])) == (lhs <= rhs)
-        assert bool(Matrix([[lhs]])[:, :] > np.array([[rhs]])) == (lhs > rhs)
-        assert bool(Matrix([[lhs]])[:, :] >= np.array([[rhs]])) == (lhs >= rhs)
+        assert bool(RealMatrix([[lhs]])[:, :] < np.array([[rhs]])) == (lhs < rhs)
+        assert bool(RealMatrix([[lhs]])[:, :] <= np.array([[rhs]])) == (lhs <= rhs)
+        assert bool(RealMatrix([[lhs]])[:, :] > np.array([[rhs]])) == (lhs > rhs)
+        assert bool(RealMatrix([[lhs]])[:, :] >= np.array([[rhs]])) == (lhs >= rhs)
 
 
 def test_equality_constraint_concatenation() -> None:

@@ -9,7 +9,7 @@ from tolerance import SolutionType, solution_tolerance
 def test_quartic() -> None:
     problem = Problem()
 
-    x = problem.decision_variable()
+    x = problem.real_decision_variable()
     x.set_value(20.0)
 
     problem.minimize(autodiff.pow(x, 4))
@@ -28,7 +28,7 @@ def test_quartic() -> None:
 def test_rosenbrock_with_cubic_and_line_constraint() -> None:
     problem = Problem()
 
-    x, y = problem.decision_variable(2)
+    x, y = problem.real_decision_variable(2)
 
     problem.minimize(
         100 * autodiff.pow(y - autodiff.pow(x, 2), 2) + autodiff.pow(1 - x, 2)
@@ -87,7 +87,7 @@ def test_rosenbrock_with_disk_constraint() -> None:
 
     problem = Problem()
 
-    x, y = problem.decision_variable(2)
+    x, y = problem.real_decision_variable(2)
 
     problem.minimize(
         100 * autodiff.pow(y - autodiff.pow(x, 2), 2) + autodiff.pow(1 - x, 2)
@@ -118,7 +118,7 @@ def test_rosenbrock_with_disk_constraint() -> None:
 def test_minimum_2d_distance_with_linear_constraint() -> None:
     problem = Problem()
 
-    x, y = problem.decision_variable(2)
+    x, y = problem.real_decision_variable(2)
     x.set_value(20.0)
     y.set_value(50.0)
 
@@ -139,7 +139,7 @@ def test_minimum_2d_distance_with_linear_constraint() -> None:
 def test_conflicting_bounds() -> None:
     problem = Problem()
 
-    x, y = problem.decision_variable(2)
+    x, y = problem.real_decision_variable(2)
 
     problem.minimize(autodiff.hypot(x, y))
 
@@ -163,7 +163,7 @@ def test_wachter_and_biegler_line_search_failure() -> None:
 
     problem = Problem()
 
-    x, s1, s2 = problem.decision_variable(3)
+    x, s1, s2 = problem.real_decision_variable(3)
     x.set_value(-2)
     s1.set_value(3)
     s2.set_value(1)
@@ -206,7 +206,7 @@ def test_hock_schittkowski_13() -> None:
 
     problem = Problem()
 
-    x, y = problem.decision_variable(2)
+    x, y = problem.real_decision_variable(2)
     x.set_value(-2)
     y.set_value(-2)
 

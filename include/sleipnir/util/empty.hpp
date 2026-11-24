@@ -4,10 +4,10 @@
 
 namespace slp::detail {
 
-/// Type tag used to designate an uninitialized Matrix.
+/// Type tag used to designate an uninitialized RealMatrix.
 struct empty_t {};
 
-/// Designates an uninitialized Matrix.
+/// Designates an uninitialized RealMatrix.
 static constexpr empty_t empty{};
 
 }  // namespace slp::detail

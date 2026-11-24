@@ -5,8 +5,8 @@
 #include <print>
 
 #include <Eigen/Core>
-#include <sleipnir/autodiff/matrix.hpp>
 #include <sleipnir/autodiff/real.hpp>
+#include <sleipnir/autodiff/real_matrix.hpp>
 #include <sleipnir/autodiff/slice.hpp>
 #include <sleipnir/optimization/problem.hpp>
 #include <sleipnir/util/concepts.hpp>
@@ -32,14 +32,14 @@ constexpr double target_radius = 0.61;               // m
 constexpr double cone_angle = std::numbers::pi / 4;  // rad
 constexpr Eigen::Vector3d g{{0.0}, {0.0}, {9.806}};  // m/s²
 
-slp::Matrix<double> cross(const slp::MatrixLike auto& a,
-                          const slp::MatrixLike auto& b) {
+slp::RealMatrix<double> cross(const slp::MatrixLike auto& a,
+                              const slp::MatrixLike auto& b) {
   return {{a[1, 0] * b[2, 0] - a[2, 0] * b[1, 0]},
           {a[2, 0] * b[0, 0] - a[0, 0] * b[2, 0]},
           {a[0, 0] * b[1, 0] - a[1, 0] * b[0, 0]}};
 }
 
-slp::Matrix<double> f(const slp::Matrix<double>& x) {
+slp::RealMatrix<double> f(const slp::RealMatrix<double>& x) {
   using namespace slp::slicing;
 
   // x' = x'
@@ -100,7 +100,7 @@ int main() {
 
   // Set up duration decision variables
   constexpr int N = 50;
-  auto T = problem.decision_variable();
+  auto T = problem.real_decision_variable();
   problem.subject_to(T >= 0);
   T.set_value(1);
   auto dt = T / N;
@@ -113,7 +113,7 @@ int main() {
   // x = [x velocity]
   //     [y velocity]
   //     [z velocity]
-  auto X = problem.decision_variable(6, N);
+  auto X = problem.real_decision_variable(6, N);
 
   auto p = X.block(0, 0, 3, N);
   auto p_x = X.row(0);

@@ -44,11 +44,11 @@ TEMPLATE_TEST_CASE("Problem - Arm on elevator", "[Problem]", SCALAR_TYPES) {
 
   slp::Problem<T> problem;
 
-  auto elevator = problem.decision_variable(2, N + 1);
-  auto elevator_accel = problem.decision_variable(1, N);
+  auto elevator = problem.real_decision_variable(2, N + 1);
+  auto elevator_accel = problem.real_decision_variable(1, N);
 
-  auto arm = problem.decision_variable(2, N + 1);
-  auto arm_accel = problem.decision_variable(1, N);
+  auto arm = problem.real_decision_variable(2, N + 1);
+  auto arm_accel = problem.real_decision_variable(1, N);
 
   for (int k = 0; k < N; ++k) {
     // Elevator dynamics constraints

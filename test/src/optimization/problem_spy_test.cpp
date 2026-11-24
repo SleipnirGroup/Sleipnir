@@ -62,8 +62,8 @@ TEMPLATE_TEST_CASE("Problem - Spy", "[Problem]", SCALAR_TYPES) {
 
   slp::Problem<T> problem;
 
-  auto x = problem.decision_variable();
-  auto y = problem.decision_variable();
+  auto x = problem.real_decision_variable();
+  auto y = problem.real_decision_variable();
   x.set_value(T(20));
   y.set_value(T(20));
 

@@ -8,7 +8,7 @@ from tolerance import solution_tolerance
 
 def test_callback_requested_stop() -> None:
     problem = Problem()
-    x = problem.decision_variable()
+    x = problem.real_decision_variable()
     problem.minimize(x * x)
 
     def stop(info: IterationInfo) -> None:
@@ -31,7 +31,7 @@ def test_callback_requested_stop() -> None:
 def test_too_few_dofs() -> None:
     problem = Problem()
 
-    x, y, z = problem.decision_variable(3)
+    x, y, z = problem.real_decision_variable(3)
 
     problem.subject_to(x == 1)
     problem.subject_to(x == 2)
@@ -48,7 +48,7 @@ def test_too_few_dofs() -> None:
 def test_locally_infeasible_equality_constraints() -> None:
     problem = Problem()
 
-    x, y, z = problem.decision_variable(3)
+    x, y, z = problem.real_decision_variable(3)
 
     problem.subject_to(x == y + 1)
     problem.subject_to(y == z + 1)
@@ -64,7 +64,7 @@ def test_locally_infeasible_equality_constraints() -> None:
 def test_locally_infeasible_inequality_constraints() -> None:
     problem = Problem()
 
-    x, y, z = problem.decision_variable(3)
+    x, y, z = problem.real_decision_variable(3)
 
     problem.subject_to(x >= y + 1)
     problem.subject_to(y >= z + 1)
@@ -86,7 +86,7 @@ SMALL_CONSTRAINT_X_TOLERANCE = solution_tolerance(1) / SMALL_CONSTRAINT_SCALE
 def test_small_equality_constraint_scaling_is_feasible() -> None:
     problem = Problem()
 
-    x = problem.decision_variable()
+    x = problem.real_decision_variable()
     x.set_value(5005)
 
     problem.subject_to(SMALL_CONSTRAINT_SCALE * (x - 5) == 0)
@@ -102,7 +102,7 @@ def test_small_equality_constraint_scaling_is_feasible() -> None:
 def test_small_inequality_constraint_scaling_is_feasible() -> None:
     problem = Problem()
 
-    x = problem.decision_variable()
+    x = problem.real_decision_variable()
     x.set_value(5005)
 
     problem.subject_to(SMALL_CONSTRAINT_SCALE * (5 - x) >= 0)
@@ -117,7 +117,7 @@ def test_small_inequality_constraint_scaling_is_feasible() -> None:
 
 def test_nonfinite_cost() -> None:
     problem = Problem()
-    x = problem.decision_variable()
+    x = problem.real_decision_variable()
     problem.minimize(1 / x)
 
     assert problem.solve() == ExitStatus.NONFINITE_INITIAL_GUESS
@@ -125,7 +125,7 @@ def test_nonfinite_cost() -> None:
 
 def test_nonfinite_gradient() -> None:
     problem = Problem()
-    x = problem.decision_variable()
+    x = problem.real_decision_variable()
     problem.minimize(sqrt(x))
 
     assert problem.solve() == ExitStatus.NONFINITE_INITIAL_GUESS
@@ -133,7 +133,7 @@ def test_nonfinite_gradient() -> None:
 
 def test_nonfinite_equality_constraint() -> None:
     problem = Problem()
-    x = problem.decision_variable()
+    x = problem.real_decision_variable()
     problem.subject_to(1 / x == 1)
 
     assert problem.solve() == ExitStatus.NONFINITE_INITIAL_GUESS
@@ -141,7 +141,7 @@ def test_nonfinite_equality_constraint() -> None:
 
 def test_nonfinite_equality_constraint_jacobian() -> None:
     problem = Problem()
-    x = problem.decision_variable()
+    x = problem.real_decision_variable()
     problem.subject_to(sqrt(x) == 1)
 
     assert problem.solve() == ExitStatus.NONFINITE_INITIAL_GUESS
@@ -149,7 +149,7 @@ def test_nonfinite_equality_constraint_jacobian() -> None:
 
 def test_nonfinite_inequality_constraint() -> None:
     problem = Problem()
-    x = problem.decision_variable()
+    x = problem.real_decision_variable()
     problem.subject_to(1 / x > 1)
 
     assert problem.solve() == ExitStatus.NONFINITE_INITIAL_GUESS
@@ -157,7 +157,7 @@ def test_nonfinite_inequality_constraint() -> None:
 
 def test_nonfinite_inequality_constraint_jacobian() -> None:
     problem = Problem()
-    x = problem.decision_variable()
+    x = problem.real_decision_variable()
     problem.subject_to(sqrt(x) > 1)
 
     assert problem.solve() == ExitStatus.NONFINITE_INITIAL_GUESS
@@ -166,7 +166,7 @@ def test_nonfinite_inequality_constraint_jacobian() -> None:
 def test_diverging_iterates() -> None:
     problem = Problem()
 
-    x = problem.decision_variable()
+    x = problem.real_decision_variable()
     x.set_value(1)
 
     problem.minimize(-x * x)
@@ -183,7 +183,7 @@ def test_large_iterates_arent_diverging() -> None:
 
     # Variables and slacks in the 1e5–1e6 range are common in unscaled problems
     # with physical units, so they shouldn't trigger the divergence check
-    x = problem.decision_variable()
+    x = problem.real_decision_variable()
     x.set_value(0)
 
     problem.minimize((x - 1e6) * (x - 1e6))
@@ -199,7 +199,7 @@ def test_large_iterates_arent_diverging() -> None:
 def test_max_iterations_exceeded() -> None:
     problem = Problem()
 
-    x = problem.decision_variable()
+    x = problem.real_decision_variable()
     x.set_value(1)
 
     problem.minimize(x * x)
@@ -217,7 +217,7 @@ def test_max_iterations_exceeded() -> None:
 def test_timeout() -> None:
     problem = Problem()
 
-    x = problem.decision_variable()
+    x = problem.real_decision_variable()
     x.set_value(1)
 
     problem.minimize(x * x)

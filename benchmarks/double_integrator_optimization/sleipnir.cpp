@@ -43,8 +43,8 @@ slp::Problem<double> double_integrator_sleipnir(
       {0.5 * T * T, 0.0}, {0.0, 0.5 * T * T}, {T, 0.0}, {0.0, T}};
 
   slp::Problem<double> problem;
-  auto X = problem.decision_variable(4, N + 1);
-  auto U = problem.decision_variable(2, N);
+  auto X = problem.real_decision_variable(4, N + 1);
+  auto U = problem.real_decision_variable(2, N);
 
   // Dynamics constraint
   for (int k = 0; k < N; ++k) {

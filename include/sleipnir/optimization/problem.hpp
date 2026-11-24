@@ -23,8 +23,8 @@
 #include "sleipnir/autodiff/gradient.hpp"
 #include "sleipnir/autodiff/hessian.hpp"
 #include "sleipnir/autodiff/jacobian.hpp"
-#include "sleipnir/autodiff/matrix.hpp"
 #include "sleipnir/autodiff/real.hpp"
+#include "sleipnir/autodiff/real_matrix.hpp"
 #include "sleipnir/optimization/solver/control_flow.hpp"
 #include "sleipnir/optimization/solver/exit_status.hpp"
 #include "sleipnir/optimization/solver/ipm.hpp"
@@ -82,7 +82,7 @@ class Problem {
   ///
   /// @return A decision variable in the optimization problem.
   [[nodiscard]]
-  Real<Scalar> decision_variable() {
+  Real<Scalar> real_decision_variable() {
     m_decision_variables.emplace_back();
     return m_decision_variables.back();
   }
@@ -95,10 +95,10 @@ class Problem {
   /// @param cols Number of matrix columns.
   /// @return A matrix of decision variables in the optimization problem.
   [[nodiscard]]
-  Matrix<Scalar> decision_variable(int rows, int cols = 1) {
+  RealMatrix<Scalar> real_decision_variable(int rows, int cols = 1) {
     m_decision_variables.reserve(m_decision_variables.size() + rows * cols);
 
-    Matrix<Scalar> vars{detail::empty, rows, cols};
+    RealMatrix<Scalar> vars{detail::empty, rows, cols};
 
     for (int row = 0; row < rows; ++row) {
       for (int col = 0; col < cols; ++col) {
@@ -135,8 +135,8 @@ class Problem {
   /// @param cols Number of matrix columns.
   /// @return A matrix of parameters in the optimization problem.
   [[nodiscard]]
-  Matrix<Scalar> parameter(int rows, int cols = 1) {
-    Matrix<Scalar> params{detail::empty, rows, cols};
+  RealMatrix<Scalar> parameter(int rows, int cols = 1) {
+    RealMatrix<Scalar> params{detail::empty, rows, cols};
 
     for (auto& param : params) {
       param = parameter();
@@ -151,8 +151,8 @@ class Problem {
   /// will find the closest solution to the initial conditions that's in the
   /// feasible set.
   ///
-  /// @param cost The cost function to minimize. A 1x1 Matrix will
-  ///     implicitly convert to a Real, and a non-1x1 Matrix will
+  /// @param cost The cost function to minimize. A 1x1 RealMatrix will
+  ///     implicitly convert to a Real, and a non-1x1 RealMatrix will
   ///     raise an assertion.
   void minimize(const Real<Scalar>& cost) { m_f = cost; }
 
@@ -162,8 +162,8 @@ class Problem {
   /// will find the closest solution to the initial conditions that's in the
   /// feasible set.
   ///
-  /// @param cost The cost function to minimize. A 1x1 Matrix will
-  ///     implicitly convert to a Real, and a non-1x1 Matrix will
+  /// @param cost The cost function to minimize. A 1x1 RealMatrix will
+  ///     implicitly convert to a Real, and a non-1x1 RealMatrix will
   ///     raise an assertion.
   void minimize(Real<Scalar>&& cost) { m_f = std::move(cost); }
 
@@ -173,8 +173,8 @@ class Problem {
   /// will find the closest solution to the initial conditions that's in the
   /// feasible set.
   ///
-  /// @param objective The objective function to maximize. A 1x1 Matrix
-  ///     will implicitly convert to a Real, and a non-1x1 Matrix
+  /// @param objective The objective function to maximize. A 1x1 RealMatrix
+  ///     will implicitly convert to a Real, and a non-1x1 RealMatrix
   ///     will raise an assertion.
   void maximize(const Real<Scalar>& objective) {
     // Maximizing a cost function is the same as minimizing its negative
@@ -187,8 +187,8 @@ class Problem {
   /// will find the closest solution to the initial conditions that's in the
   /// feasible set.
   ///
-  /// @param objective The objective function to maximize. A 1x1 Matrix
-  ///     will implicitly convert to a Real, and a non-1x1 Matrix
+  /// @param objective The objective function to maximize. A 1x1 RealMatrix
+  ///     will implicitly convert to a Real, and a non-1x1 RealMatrix
   ///     will raise an assertion.
   void maximize(Real<Scalar>&& objective) {
     // Maximizing a cost function is the same as minimizing its negative
@@ -332,7 +332,7 @@ class Problem {
     }
 
     // Assign the solution to the original Real instances
-    Matrix<Scalar>{m_decision_variables}.set_value(x);
+    RealMatrix<Scalar>{m_decision_variables}.set_value(x);
 
     return status;
   }
@@ -418,7 +418,7 @@ class Problem {
     using SparseVector = Eigen::SparseVector<Scalar>;
     using enum SetupTimeTracerID;
 
-    Matrix<Scalar> x_ad{m_decision_variables};
+    RealMatrix<Scalar> x_ad{m_decision_variables};
 
     // Set up cost function
     Real f = m_f.value_or(Scalar(0));
@@ -500,7 +500,7 @@ class Problem {
     using SparseVector = Eigen::SparseVector<Scalar>;
     using enum SetupTimeTracerID;
 
-    Matrix<Scalar> x_ad{m_decision_variables};
+    RealMatrix<Scalar> x_ad{m_decision_variables};
 
     // Set up cost function
     Real f = m_f.value_or(Scalar(0));
@@ -518,8 +518,8 @@ class Problem {
       iteration_callbacks.emplace_back(callback);
     }
 
-    Matrix<Scalar> c_e_ad{m_equality_constraints};
-    Matrix<Scalar> y_ad(num_equality_constraints);
+    RealMatrix<Scalar> c_e_ad{m_equality_constraints};
+    RealMatrix<Scalar> y_ad(num_equality_constraints);
 
     TimeTracerTree<SetupTimeTracer, sqp_setup_time_trace> ad_setup_tracers{
         options.diagnostics};
@@ -620,7 +620,7 @@ class Problem {
     using SparseVector = Eigen::SparseVector<Scalar>;
     using enum SetupTimeTracerID;
 
-    Matrix<Scalar> x_ad{m_decision_variables};
+    RealMatrix<Scalar> x_ad{m_decision_variables};
 
     // Set up cost function
     Real f = m_f.value_or(Scalar(0));
@@ -639,10 +639,10 @@ class Problem {
       iteration_callbacks.emplace_back(callback);
     }
 
-    Matrix<Scalar> c_e_ad{m_equality_constraints};
-    Matrix<Scalar> c_i_ad{m_inequality_constraints};
-    Matrix<Scalar> y_ad(num_equality_constraints);
-    Matrix<Scalar> z_ad(num_inequality_constraints);
+    RealMatrix<Scalar> c_e_ad{m_equality_constraints};
+    RealMatrix<Scalar> c_i_ad{m_inequality_constraints};
+    RealMatrix<Scalar> y_ad(num_equality_constraints);
+    RealMatrix<Scalar> z_ad(num_inequality_constraints);
 
     TimeTracerTree<SetupTimeTracer, ipm_setup_time_trace> ad_setup_tracers{
         options.diagnostics};

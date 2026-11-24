@@ -43,7 +43,7 @@ namespace slp {
 /// where f(x) is the cost function.
 ///
 /// @tparam Scalar Scalar type.
-/// @param[in] matrix_callbacks Matrix callbacks.
+/// @param[in] matrix_callbacks RealMatrix callbacks.
 /// @param[in] iteration_callbacks The list of callbacks to call at the
 ///     beginning of each iteration.
 /// @param[in] options Solver options.

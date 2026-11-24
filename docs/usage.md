@@ -13,7 +13,7 @@ from sleipnir.optimization import Problem
 
 problem = Problem()
 
-x, y = problem.decision_variable(2)
+x, y = problem.real_decision_variable(2)
 
 problem.maximize(x * y)
 problem.subject_to(x + 3 * y == 36)
@@ -423,10 +423,10 @@ T_max = 5.0
 
 problem = slp.optimization.Problem()
 
-x = problem.decision_variable(N + 1)
-v = problem.decision_variable(N)
+x = problem.real_decision_variable(N + 1)
+v = problem.real_decision_variable(N)
 
-dt = problem.decision_variable()
+dt = problem.real_decision_variable()
 dt.set_value(T_max / N)
 problem.subject_to(dt > 0)
 problem.subject_to(dt < T_max / N)
@@ -450,10 +450,10 @@ T_max = 5.0
 
 problem = slp.optimization.Problem()
 
-x = problem.decision_variable(N + 1)
-v = problem.decision_variable(N)
+x = problem.real_decision_variable(N + 1)
+v = problem.real_decision_variable(N)
 
-dt = problem.decision_variable(N)
+dt = problem.real_decision_variable(N)
 problem.subject_to(dt > 0)
 problem.subject_to(dt < T_max / N)
 for k in range(N - 1):

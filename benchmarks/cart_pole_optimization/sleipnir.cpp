@@ -8,8 +8,8 @@
 #include <span>
 
 #include <Eigen/Core>
-#include <sleipnir/autodiff/matrix.hpp>
 #include <sleipnir/autodiff/real.hpp>
+#include <sleipnir/autodiff/real_matrix.hpp>
 #include <sleipnir/optimization/problem.hpp>
 #include <sleipnir/optimization/solver/exit_status.hpp>
 
@@ -22,8 +22,8 @@ namespace {
 ///
 /// @param x The state [x, θ, ẋ, θ̇]ᵀ.
 /// @param u The input [f_x].
-slp::Matrix<double> cart_pole_dynamics(const slp::Matrix<double>& x,
-                                       const slp::Matrix<double>& u) {
+slp::RealMatrix<double> cart_pole_dynamics(const slp::RealMatrix<double>& x,
+                                           const slp::RealMatrix<double>& u) {
   // https://underactuated.mit.edu/acrobot.html#cart_pole
   //
   // θ is CCW+ measured from negative y-axis.
@@ -62,23 +62,23 @@ slp::Matrix<double> cart_pole_dynamics(const slp::Matrix<double>& x,
 
   //        [ m_c + m_p  m_p l cosθ]
   // M(q) = [m_p l cosθ    m_p l²  ]
-  slp::Matrix<double> M{{m_c + m_p, m_p * l * c},
-                        {m_p * l * c, m_p * std::pow(l, 2)}};
+  slp::RealMatrix<double> M{{m_c + m_p, m_p * l * c},
+                            {m_p * l * c, m_p * std::pow(l, 2)}};
 
   //           [0  −m_p lθ̇ sinθ]
   // C(q, q̇) = [0       0      ]
-  slp::Matrix<double> C{{0, -m_p * l * thetadot * s}, {0, 0}};
+  slp::RealMatrix<double> C{{0, -m_p * l * thetadot * s}, {0, 0}};
 
   //          [     0      ]
   // τ_g(q) = [-m_p gl sinθ]
-  slp::Matrix<double> tau_g{{0}, {-m_p * g * l * s}};
+  slp::RealMatrix<double> tau_g{{0}, {-m_p * g * l * s}};
 
   //     [1]
   // B = [0]
   Eigen::Matrix<double, 2, 1> B{{1}, {0}};
 
   // q̈ = M⁻¹(q)(τ_g(q) − C(q, q̇)q̇ + Bu)
-  slp::Matrix<double> qddot{4, 1};
+  slp::RealMatrix<double> qddot{4, 1};
   qddot.segment(0, 2) = qdot;
   qddot.segment(2, 2) = solve(M, tau_g - C * qdot + B * u);
   return qddot;
@@ -99,7 +99,7 @@ slp::Problem<double> cart_pole_sleipnir(std::chrono::duration<double> dt,
   slp::Problem<double> problem;
 
   // x = [q, q̇]ᵀ = [x, θ, ẋ, θ̇]ᵀ
-  auto X = problem.decision_variable(4, N + 1);
+  auto X = problem.real_decision_variable(4, N + 1);
 
   // Initial guess
   for (int k = 0; k < N + 1; ++k) {
@@ -110,7 +110,7 @@ slp::Problem<double> cart_pole_sleipnir(std::chrono::duration<double> dt,
   }
 
   // u = f_x
-  auto U = problem.decision_variable(1, N);
+  auto U = problem.real_decision_variable(1, N);
 
   // Initial conditions
   problem.subject_to(X.col(0) == x_initial);
@@ -126,10 +126,10 @@ slp::Problem<double> cart_pole_sleipnir(std::chrono::duration<double> dt,
 
   // Dynamics constraints - RK4 integration
   for (int k = 0; k < N; ++k) {
-    problem.subject_to(
-        X.col(k + 1) ==
-        rk4<decltype(cart_pole_dynamics), slp::Matrix<double>,
-            slp::Matrix<double>>(cart_pole_dynamics, X.col(k), U.col(k), dt));
+    problem.subject_to(X.col(k + 1) ==
+                       rk4<decltype(cart_pole_dynamics),
+                           slp::RealMatrix<double>, slp::RealMatrix<double>>(
+                           cart_pole_dynamics, X.col(k), U.col(k), dt));
   }
 
   // Minimize sum squared inputs

@@ -10,8 +10,8 @@
 
 #include "sleipnir/autodiff/expression.hpp"
 #include "sleipnir/autodiff/expression_graph.hpp"
-#include "sleipnir/autodiff/matrix.hpp"
 #include "sleipnir/autodiff/real.hpp"
+#include "sleipnir/autodiff/real_matrix.hpp"
 #include "sleipnir/util/assert.hpp"
 #include "sleipnir/util/concepts.hpp"
 #include "sleipnir/util/empty.hpp"
@@ -34,8 +34,8 @@ class Jacobian {
   /// @param expression Expression of which to compute the Jacobian.
   /// @param wrt Variable with respect to which to compute the Jacobian.
   Jacobian(Real<Scalar> expression, Real<Scalar> wrt)
-      : Jacobian{Matrix<Scalar>{std::move(expression)},
-                 Matrix<Scalar>{std::move(wrt)}} {}
+      : Jacobian{RealMatrix<Scalar>{std::move(expression)},
+                 RealMatrix<Scalar>{std::move(wrt)}} {}
 
   /// Constructs a Jacobian object.
   ///
@@ -43,14 +43,14 @@ class Jacobian {
   /// @param wrt Vector of variables with respect to which to compute the
   ///     Jacobian.
   Jacobian(Real<Scalar> expression, SleipnirMatrixLike<Scalar> auto wrt)
-      : Jacobian{Matrix<Scalar>{std::move(expression)}, std::move(wrt)} {}
+      : Jacobian{RealMatrix<Scalar>{std::move(expression)}, std::move(wrt)} {}
 
   /// Constructs a Jacobian object.
   ///
   /// @param expressions Vector of expressions of which to compute the Jacobian.
   /// @param wrt Vector of variables with respect to which to compute the
   ///     Jacobian.
-  Jacobian(Matrix<Scalar> expressions, SleipnirMatrixLike<Scalar> auto wrt)
+  Jacobian(RealMatrix<Scalar> expressions, SleipnirMatrixLike<Scalar> auto wrt)
       : m_expressions{std::move(expressions)}, m_wrt{std::move(wrt)} {
     slp_assert(m_expressions.cols() == 1);
     slp_assert(m_wrt.cols() == 1);
@@ -100,14 +100,15 @@ class Jacobian {
     }
   }
 
-  /// Returns the Jacobian as a Matrix.
+  /// Returns the Jacobian as a RealMatrix.
   ///
   /// This is useful when constructing optimization problems with derivatives in
   /// them.
   ///
-  /// @return The Jacobian as a Matrix.
-  Matrix<Scalar> get() const {
-    Matrix<Scalar> result{detail::empty, m_expressions.rows(), m_wrt.rows()};
+  /// @return The Jacobian as a RealMatrix.
+  RealMatrix<Scalar> get() const {
+    RealMatrix<Scalar> result{detail::empty, m_expressions.rows(),
+                              m_wrt.rows()};
 
     for (int row = 0; row < m_expressions.rows(); ++row) {
       auto grad = detail::gradient_tree(m_top_lists[row], m_wrt);
@@ -151,8 +152,8 @@ class Jacobian {
   }
 
  private:
-  Matrix<Scalar> m_expressions;
-  Matrix<Scalar> m_wrt;
+  RealMatrix<Scalar> m_expressions;
+  RealMatrix<Scalar> m_wrt;
 
   /// List of topologically sorted graphs from parent to child, one for each row
   gch::small_vector<detail::ExpressionGraph<Scalar>> m_top_lists;

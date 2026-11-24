@@ -7,7 +7,7 @@
 
 #include <Eigen/Core>
 #include <benchmark/benchmark.h>
-#include <sleipnir/autodiff/matrix.hpp>
+#include <sleipnir/autodiff/real_matrix.hpp>
 
 /// Evaluates a Sleipnir autodiff object.
 ///
@@ -19,7 +19,7 @@ class SleipnirAutodiffEvaluator {
   ///
   /// @param x The autodiff object's input.
   /// @param derivative The autodiff object.
-  SleipnirAutodiffEvaluator(slp::Matrix<double> x, Derivative derivative)
+  SleipnirAutodiffEvaluator(slp::RealMatrix<double> x, Derivative derivative)
       : m_x{std::move(x)}, m_derivative{std::move(derivative)} {}
 
   /// Evaluates the autodiff object at the given input.
@@ -33,6 +33,6 @@ class SleipnirAutodiffEvaluator {
   }
 
  private:
-  slp::Matrix<double> m_x;
+  slp::RealMatrix<double> m_x;
   Derivative m_derivative;
 };

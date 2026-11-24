@@ -49,7 +49,7 @@ TEMPLATE_TEST_CASE("Problem - Cart-pole", "[Problem]", SCALAR_TYPES) {
   slp::Problem<T> problem;
 
   // x = [q, q̇]ᵀ = [x, θ, ẋ, θ̇]ᵀ
-  auto X = problem.decision_variable(4, N + 1);
+  auto X = problem.real_decision_variable(4, N + 1);
 
   // Initial guess
   for (int k = 0; k < N + 1; ++k) {
@@ -58,7 +58,7 @@ TEMPLATE_TEST_CASE("Problem - Cart-pole", "[Problem]", SCALAR_TYPES) {
   }
 
   // u = f_x
-  auto U = problem.decision_variable(1, N);
+  auto U = problem.real_decision_variable(1, N);
 
   // Initial conditions
   problem.subject_to(X.col(0) == x_initial);
@@ -76,9 +76,9 @@ TEMPLATE_TEST_CASE("Problem - Cart-pole", "[Problem]", SCALAR_TYPES) {
   for (int k = 0; k < N; ++k) {
     problem.subject_to(
         X.col(k + 1) ==
-        rk4<T, decltype(&CartPoleUtil<T>::dynamics_variable), slp::Matrix<T>,
-            slp::Matrix<T>>(&CartPoleUtil<T>::dynamics_variable, X.col(k),
-                            U.col(k), dt));
+        rk4<T, decltype(&CartPoleUtil<T>::dynamics_variable),
+            slp::RealMatrix<T>, slp::RealMatrix<T>>(
+            &CartPoleUtil<T>::dynamics_variable, X.col(k), U.col(k), dt));
   }
 
   // Minimize sum squared inputs

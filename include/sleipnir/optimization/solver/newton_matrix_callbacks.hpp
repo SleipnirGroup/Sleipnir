@@ -11,7 +11,7 @@
 
 namespace slp {
 
-/// Matrix callbacks for the Newton's method solver.
+/// RealMatrix callbacks for the Newton's method solver.
 ///
 /// @tparam Scalar Scalar type.
 template <typename Scalar>

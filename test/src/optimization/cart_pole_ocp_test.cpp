@@ -11,8 +11,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <sleipnir/autodiff/expression_type.hpp>
-#include <sleipnir/autodiff/matrix.hpp>
 #include <sleipnir/autodiff/real.hpp>
+#include <sleipnir/autodiff/real_matrix.hpp>
 #include <sleipnir/optimization/ocp.hpp>
 #include <sleipnir/optimization/ocp/dynamics_type.hpp>
 #include <sleipnir/optimization/ocp/timestep_method.hpp>
@@ -65,8 +65,9 @@ TEMPLATE_TEST_CASE("OCP - Cart-pole", "[OCP]", SCALAR_TYPES) {
   problem.constrain_final_state(x_final);
 
   // Cart position constraints
-  problem.for_each_step([&](const slp::Matrix<T>& x, [[maybe_unused]]
-                                                     const slp::Matrix<T>& u) {
+  problem.for_each_step([&](const slp::RealMatrix<T>& x,
+                            [[maybe_unused]]
+                            const slp::RealMatrix<T>& u) {
     problem.subject_to(slp::bounds(T(0), x[0], d_max));
   });
 

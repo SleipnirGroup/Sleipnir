@@ -4,7 +4,7 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <sleipnir/autodiff/jacobian.hpp>
-#include <sleipnir/autodiff/matrix.hpp>
+#include <sleipnir/autodiff/real_matrix.hpp>
 #include <sleipnir/util/pool.hpp>
 #include <sleipnir/util/scope_exit.hpp>
 
@@ -16,7 +16,7 @@ TEMPLATE_TEST_CASE("Jacobian - y = x", "[Jacobian]", SCALAR_TYPES) {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  slp::Matrix<T> x{3};
+  slp::RealMatrix<T> x{3};
   for (int i = 0; i < 3; ++i) {
     x[i].set_value(T(i + 1));
   }
@@ -41,7 +41,7 @@ TEMPLATE_TEST_CASE("Jacobian - y = 3x", "[Jacobian]", SCALAR_TYPES) {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  slp::Matrix<T> x{3};
+  slp::RealMatrix<T> x{3};
   for (int i = 0; i < 3; ++i) {
     x[i].set_value(T(i + 1));
   }
@@ -66,7 +66,7 @@ TEMPLATE_TEST_CASE("Jacobian - Products", "[Jacobian]", SCALAR_TYPES) {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  slp::Matrix<T> x{3};
+  slp::RealMatrix<T> x{3};
   for (int i = 0; i < 3; ++i) {
     x[i].set_value(T(i + 1));
   }
@@ -82,7 +82,7 @@ TEMPLATE_TEST_CASE("Jacobian - Products", "[Jacobian]", SCALAR_TYPES) {
   //         [2  1  0]
   // dy/dx = [0  3  2]
   //         [3  0  1]
-  slp::Matrix<T> y{3};
+  slp::RealMatrix<T> y{3};
   y[0] = x[0] * x[1];
   y[1] = x[1] * x[2];
   y[2] = x[0] * x[2];
@@ -100,14 +100,14 @@ TEMPLATE_TEST_CASE("Jacobian - Nested products", "[Jacobian]", SCALAR_TYPES) {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  slp::Matrix<T> x{1};
+  slp::RealMatrix<T> x{1};
   x[0].set_value(T(3));
   CHECK(x.value(0) == T(3));
 
   //     [ 5x]   [15]
   // y = [ 7x] = [21]
   //     [11x]   [33]
-  slp::Matrix<T> y{3};
+  slp::RealMatrix<T> y{3};
   y[0] = T(5) * x[0];
   y[1] = T(7) * x[0];
   y[2] = T(11) * x[0];
@@ -118,7 +118,7 @@ TEMPLATE_TEST_CASE("Jacobian - Nested products", "[Jacobian]", SCALAR_TYPES) {
   //     [y₁y₂]   [15⋅21]   [315]
   // z = [y₂y₃] = [21⋅33] = [693]
   //     [y₁y₃]   [15⋅33]   [495]
-  slp::Matrix<T> z{3};
+  slp::RealMatrix<T> z{3};
   z[0] = y[0] * y[1];
   z[1] = y[1] * y[2];
   z[2] = y[0] * y[2];
@@ -179,7 +179,7 @@ TEMPLATE_TEST_CASE("Jacobian - Non-square", "[Jacobian]", SCALAR_TYPES) {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  slp::Matrix<T> x{3};
+  slp::RealMatrix<T> x{3};
   for (int i = 0; i < 3; ++i) {
     x[i].set_value(T(i + 1));
   }
@@ -187,7 +187,7 @@ TEMPLATE_TEST_CASE("Jacobian - Non-square", "[Jacobian]", SCALAR_TYPES) {
   // y = [x₁ + 3x₂ − 5x₃]
   //
   // dy/dx = [1  3  −5]
-  slp::Matrix<T> y{1};
+  slp::RealMatrix<T> y{1};
   y[0] = x[0] + T(3) * x[1] - T(5) * x[2];
   auto J = slp::Jacobian(y, x);
 
@@ -210,13 +210,13 @@ TEMPLATE_TEST_CASE("Jacobian - Real reuse", "[Jacobian]", SCALAR_TYPES) {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  slp::Matrix<T> x{2};
+  slp::RealMatrix<T> x{2};
   for (int i = 0; i < 2; ++i) {
     x[i].set_value(T(i + 1));
   }
 
   // y = [x₁x₂]
-  slp::Matrix<T> y{1};
+  slp::RealMatrix<T> y{1};
   y[0] = x[0] * x[1];
 
   slp::Jacobian jacobian{y, x};

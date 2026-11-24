@@ -32,7 +32,7 @@ namespace slp {
 // Forward declarations for friend declarations in Real
 
 template <typename Scalar>
-class Matrix;
+class RealMatrix;
 
 template <typename Scalar>
 struct EqualityConstraints;
@@ -43,8 +43,9 @@ struct InequalityConstraints;
 namespace detail {
 
 template <typename Scalar>
-Matrix<Scalar> gradient_tree(const detail::ExpressionGraph<Scalar>& top_list,
-                             const Matrix<Scalar>& wrt);
+RealMatrix<Scalar> gradient_tree(
+    const detail::ExpressionGraph<Scalar>& top_list,
+    const RealMatrix<Scalar>& wrt);
 
 }  // namespace detail
 
@@ -362,9 +363,9 @@ class Real : public SleipnirBase {
                             const Real<Scalar>& z);
 
   template <typename Scalar>
-  friend Matrix<Scalar> detail::gradient_tree(
+  friend RealMatrix<Scalar> detail::gradient_tree(
       const detail::ExpressionGraph<Scalar>& top_list,
-      const Matrix<Scalar>& wrt);
+      const RealMatrix<Scalar>& wrt);
   template <typename Scalar, int UpLo>
     requires(UpLo == Eigen::Lower) || (UpLo == (Eigen::Lower | Eigen::Upper))
   friend class Hessian;

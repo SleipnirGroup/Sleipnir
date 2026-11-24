@@ -6,8 +6,8 @@
 #include <utility>
 
 #include <sleipnir/autodiff/jacobian.hpp>
-#include <sleipnir/autodiff/matrix.hpp>
 #include <sleipnir/autodiff/real.hpp>
+#include <sleipnir/autodiff/real_matrix.hpp>
 
 #include "benchmark_util.hpp"
 #include "sleipnir_autodiff_evaluator.hpp"
@@ -17,7 +17,7 @@ namespace {
 /// Returns the test constraint function.
 ///
 /// @param x The input.
-slp::Matrix<double> constraints(const slp::Matrix<double>& x) {
+slp::RealMatrix<double> constraints(const slp::RealMatrix<double>& x) {
   // Jacobian sparsity pattern (x entry represents nonzero):
   //
   //        x₀    x₁    x₂    x₃  ⋯ xₙ₋₃  xₙ₋₂  xₙ₋₁
@@ -27,7 +27,7 @@ slp::Matrix<double> constraints(const slp::Matrix<double>& x) {
   //  ⋮   [                       ⋱                 ]
   // cₙ₋₃ [                          x     x        ]
   // cₙ₋₂ [                                x     x  ]
-  slp::Matrix<double> c{x.rows() - 1};
+  slp::RealMatrix<double> c{x.rows() - 1};
   for (int i = 0; i < x.rows() - 1; ++i) {
     c[i] = slp::sin(x[i]) * slp::exp(x[i + 1]) - x[i] * x[i + 1];
   }
@@ -38,7 +38,7 @@ slp::Matrix<double> constraints(const slp::Matrix<double>& x) {
 
 void register_sleipnir_benchmarks(std::span<const int> nums_variables) {
   register_autodiff_benchmarks("Sleipnir", nums_variables, [](int N) {
-    slp::Matrix<double> x{N};
+    slp::RealMatrix<double> x{N};
     slp::Jacobian J{constraints(x), x};
     return SleipnirAutodiffEvaluator{std::move(x), std::move(J)};
   });

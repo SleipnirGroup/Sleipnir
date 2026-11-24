@@ -27,11 +27,11 @@ def test_arm_on_elevator_problem() -> None:
 
     problem = Problem()
 
-    elevator = problem.decision_variable(2, N + 1)
-    elevator_accel = problem.decision_variable(1, N)
+    elevator = problem.real_decision_variable(2, N + 1)
+    elevator_accel = problem.real_decision_variable(1, N)
 
-    arm = problem.decision_variable(2, N + 1)
-    arm_accel = problem.decision_variable(1, N)
+    arm = problem.real_decision_variable(2, N + 1)
+    arm_accel = problem.real_decision_variable(1, N)
 
     for k in range(N):
         # Elevator dynamics constraints

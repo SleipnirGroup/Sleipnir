@@ -23,8 +23,8 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
-#include <sleipnir/autodiff/matrix.hpp>
 #include <sleipnir/autodiff/real.hpp>
+#include <sleipnir/autodiff/real_matrix.hpp>
 #include <sleipnir/autodiff/slice.hpp>
 #include <sleipnir/optimization/problem.hpp>
 #include <sleipnir/optimization/solver/exit_status.hpp>
@@ -69,7 +69,7 @@ double time_horizon_upper_bound(const Eigen::Vector3d& q_0,
   //
   // See equation (11) of README.md.
   slp::Problem<double> problem;
-  auto t_f = problem.decision_variable();
+  auto t_f = problem.real_decision_variable();
 
   // R(t) = I + k₁(t)S(ω) + k₂(t)S(ω)²
   // R_int(t) = tI + k₂(t)S(ω) + k₃(t)S(ω)²
@@ -377,13 +377,13 @@ int main() {
     slp::Problem<double> problem;
 
     // x = [position, velocity]ᵀ
-    auto X = problem.decision_variable(6, N + 1);
+    auto X = problem.real_decision_variable(6, N + 1);
     // z = ln(m)
-    auto Z = problem.decision_variable(1, N + 1);
+    auto Z = problem.real_decision_variable(1, N + 1);
     // u = T_c/m
-    auto U = problem.decision_variable(3, N);
+    auto U = problem.real_decision_variable(3, N);
     // σ = Γ/m
-    auto σ = problem.decision_variable(1, N);
+    auto σ = problem.real_decision_variable(1, N);
 
     auto q = X[slp::Slice{_, 3}, _];
     auto v = X[slp::Slice{3, 6}, _];

@@ -3,7 +3,7 @@ import math
 import numpy as np
 import numpy.typing as npt
 from sleipnir import autodiff
-from sleipnir.autodiff import Matrix, Submatrix
+from sleipnir.autodiff import RealMatrix, Submatrix
 
 # x = [x, y, heading, left velocity, right velocity]ᵀ
 # u = [left voltage, right voltage]ᵀ
@@ -36,9 +36,9 @@ def differential_drive_dynamics_double(
 
 
 def differential_drive_dynamics_variable(
-    x: Matrix | Submatrix, u: Matrix | Submatrix
-) -> Matrix:
-    xdot = Matrix(5, 1)
+    x: RealMatrix | Submatrix, u: RealMatrix | Submatrix
+) -> RealMatrix:
+    xdot = RealMatrix(5, 1)
 
     v = (x[3, 0] + x[4, 0]) / 2.0
     xdot[0, :] = v * autodiff.cos(x[2, 0])

@@ -10,8 +10,8 @@
 #include <vector>
 
 #include <Eigen/Core>
-#include <sleipnir/autodiff/matrix.hpp>
 #include <sleipnir/autodiff/real.hpp>
+#include <sleipnir/autodiff/real_matrix.hpp>
 #include <sleipnir/optimization/problem.hpp>
 
 int main() {
@@ -24,16 +24,16 @@ int main() {
   constexpr double cy = 150;
 
   // robot pose
-  auto robot_x = problem.decision_variable();
-  auto robot_y = problem.decision_variable();
+  auto robot_x = problem.real_decision_variable();
+  auto robot_y = problem.real_decision_variable();
   constexpr double robot_z = 0.0;
-  auto robot_θ = problem.decision_variable();
+  auto robot_θ = problem.real_decision_variable();
 
   // cache autodiff expressions
   auto sinθ = sin(robot_θ);
   auto cosθ = cos(robot_θ);
 
-  slp::Matrix<double> field2robot{
+  slp::RealMatrix<double> field2robot{
       {cosθ, -sinθ, 0, robot_x},
       {sinθ, cosθ, 0, robot_y},
       {0, 0, 1, robot_z},

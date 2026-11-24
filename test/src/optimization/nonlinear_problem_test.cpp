@@ -22,7 +22,7 @@ TEMPLATE_TEST_CASE("Problem - Quartic", "[Problem]", SCALAR_TYPES) {
 
   slp::Problem<T> problem;
 
-  auto x = problem.decision_variable();
+  auto x = problem.real_decision_variable();
   x.set_value(T(20));
 
   problem.minimize(pow(x, T(4)));
@@ -44,8 +44,8 @@ TEMPLATE_TEST_CASE("Problem - Rosenbrock with cubic and line constraint",
 
   slp::Problem<T> problem;
 
-  auto x = problem.decision_variable();
-  auto y = problem.decision_variable();
+  auto x = problem.real_decision_variable();
+  auto y = problem.real_decision_variable();
 
   problem.minimize(100 * pow(y - pow(x, 2), 2) + pow(1 - x, 2));
 
@@ -108,8 +108,8 @@ TEMPLATE_TEST_CASE("Problem - Rosenbrock with disk constraint", "[Problem]",
 
   slp::Problem<T> problem;
 
-  auto x = problem.decision_variable();
-  auto y = problem.decision_variable();
+  auto x = problem.real_decision_variable();
+  auto y = problem.real_decision_variable();
 
   problem.minimize(pow(T(1) - x, T(2)) + T(100) * pow(y - pow(x, T(2)), T(2)));
 
@@ -144,8 +144,8 @@ TEMPLATE_TEST_CASE("Problem - Minimum 2D distance with linear constraint",
 
   slp::Problem<T> problem;
 
-  auto x = problem.decision_variable();
-  auto y = problem.decision_variable();
+  auto x = problem.real_decision_variable();
+  auto y = problem.real_decision_variable();
   x.set_value(T(20));
   y.set_value(T(50));
 
@@ -168,8 +168,8 @@ TEMPLATE_TEST_CASE("Problem - Conflicting bounds", "[Problem]", SCALAR_TYPES) {
 
   slp::Problem<T> problem;
 
-  auto x = problem.decision_variable();
-  auto y = problem.decision_variable();
+  auto x = problem.real_decision_variable();
+  auto y = problem.real_decision_variable();
 
   problem.minimize(hypot(x, y));
 
@@ -197,9 +197,9 @@ TEMPLATE_TEST_CASE("Problem - Wachter and Biegler line search failure",
 
   slp::Problem<T> problem;
 
-  auto x = problem.decision_variable();
-  auto s1 = problem.decision_variable();
-  auto s2 = problem.decision_variable();
+  auto x = problem.real_decision_variable();
+  auto s1 = problem.real_decision_variable();
+  auto s2 = problem.real_decision_variable();
   x.set_value(T(-2));
   s1.set_value(T(3));
   s2.set_value(T(1));
@@ -248,8 +248,8 @@ TEMPLATE_TEST_CASE("Problem - Hock-Schittkowski 13", "[Problem]",
 
   slp::Problem<T> problem;
 
-  auto x = problem.decision_variable();
-  auto y = problem.decision_variable();
+  auto x = problem.real_decision_variable();
+  auto y = problem.real_decision_variable();
   x.set_value(T(-2));
   y.set_value(T(-2));
 

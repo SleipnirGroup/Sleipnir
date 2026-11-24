@@ -1,9 +1,9 @@
 import numpy as np
-from sleipnir.autodiff import Jacobian, Matrix
+from sleipnir.autodiff import Jacobian, RealMatrix
 
 
 def test_y_eq_x() -> None:
-    x = Matrix(3)
+    x = RealMatrix(3)
     for i in range(3):
         x[i].set_value(i + 1)
 
@@ -21,7 +21,7 @@ def test_y_eq_x() -> None:
 
 
 def test_y_eq_3x() -> None:
-    x = Matrix(3)
+    x = RealMatrix(3)
     for i in range(3):
         x[i].set_value(i + 1)
 
@@ -39,7 +39,7 @@ def test_y_eq_3x() -> None:
 
 
 def test_products() -> None:
-    x = Matrix(3)
+    x = RealMatrix(3)
     for i in range(3):
         x[i].set_value(i + 1)
 
@@ -54,7 +54,7 @@ def test_products() -> None:
     #         [2  1  0]
     # dy/dx = [0  3  2]
     #         [3  0  1]
-    y = Matrix(3)
+    y = RealMatrix(3)
     y[0] = x[0] * x[1]
     y[1] = x[1] * x[2]
     y[2] = x[0] * x[2]
@@ -66,14 +66,14 @@ def test_products() -> None:
 
 
 def test_nested_products() -> None:
-    x = Matrix(1)
+    x = RealMatrix(1)
     x[0].set_value(3)
     assert x.value(0) == 3.0
 
     #     [ 5x]   [15]
     # y = [ 7x] = [21]
     #     [11x]   [33]
-    y = Matrix(3)
+    y = RealMatrix(3)
     y[0] = 5 * x[0]
     y[1] = 7 * x[0]
     y[2] = 11 * x[0]
@@ -84,7 +84,7 @@ def test_nested_products() -> None:
     #     [y₁y₂]   [15⋅21]   [315]
     # z = [y₂y₃] = [21⋅33] = [693]
     #     [y₁y₃]   [15⋅33]   [495]
-    z = Matrix(3)
+    z = RealMatrix(3)
     z[0] = y[0] * y[1]
     z[1] = y[1] * y[2]
     z[2] = y[0] * y[2]
@@ -133,14 +133,14 @@ def test_nested_products() -> None:
 
 
 def test_non_square() -> None:
-    x = Matrix(3)
+    x = RealMatrix(3)
     for i in range(3):
         x[i].set_value(i + 1)
 
     # y = [x₁ + 3x₂ − 5x₃]
     #
     # dy/dx = [1  3  −5]
-    y = Matrix(1)
+    y = RealMatrix(1)
     y[0] = x[0] + 3 * x[1] - 5 * x[2]
     J = Jacobian(y, x)
 
@@ -156,12 +156,12 @@ def test_non_square() -> None:
 
 
 def test_variable_reuse() -> None:
-    x = Matrix(2)
+    x = RealMatrix(2)
     for i in range(2):
         x[i].set_value(i + 1)
 
     # y = [x₁x₂]
-    y = Matrix(1)
+    y = RealMatrix(1)
     y[0] = x[0] * x[1]
 
     jacobian = Jacobian(y, x)

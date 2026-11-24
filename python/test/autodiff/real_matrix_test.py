@@ -3,7 +3,7 @@ import sys
 
 import numpy as np
 from sleipnir import autodiff
-from sleipnir.autodiff import ExpressionType, Matrix, Real
+from sleipnir.autodiff import ExpressionType, Real, RealMatrix
 
 # Machine epsilon for the binding's scalar type (double)
 ε = sys.float_info.epsilon
@@ -14,7 +14,7 @@ def test_mixed_list_constructor() -> None:
     x.set_value(3.0)
 
     # float and int elements are implicitly converted to constant Reals
-    mat = Matrix([[x, 1.0], [2, x]])
+    mat = RealMatrix([[x, 1.0], [2, x]])
 
     assert mat.shape == (2, 2)
     assert (mat.value() == np.array([[3.0, 1.0], [2.0, 3.0]])).all()
@@ -24,13 +24,13 @@ def test_mixed_list_constructor() -> None:
 
 
 def test_assignment_to_default() -> None:
-    mat = Matrix()
+    mat = RealMatrix()
 
     assert mat.rows() == 0
     assert mat.cols() == 0
     assert mat.shape == (0, 0)
 
-    mat = Matrix(2, 2)
+    mat = RealMatrix(2, 2)
 
     assert mat.rows() == 2
     assert mat.cols() == 2
@@ -52,8 +52,8 @@ def test_assignment_to_default() -> None:
 
 
 def test_assignment_aliasing() -> None:
-    A = Matrix([[1.0, 2.0], [3.0, 4.0]])
-    B = Matrix([[5.0, 6.0], [7.0, 8.0]])
+    A = RealMatrix([[1.0, 2.0], [3.0, 4.0]])
+    B = RealMatrix([[5.0, 6.0], [7.0, 8.0]])
 
     # A and B initially contain different values
     expected_A = np.array([[1.0, 2.0], [3.0, 4.0]])
@@ -74,7 +74,7 @@ def test_assignment_aliasing() -> None:
 
 
 def test_slicing() -> None:
-    mat = Matrix([[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]])
+    mat = RealMatrix([[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]])
     assert mat.shape == (4, 4)
 
     # Single-arg index operator on full matrix
@@ -159,7 +159,7 @@ def test_slicing() -> None:
 
 def test_subslicing() -> None:
     # Block-of-block assignment (row skip forward)
-    mat = Matrix(5, 5)
+    mat = RealMatrix(5, 5)
     assert mat[::2, ::1][1:3, 1:4].shape == (2, 3)
     mat[::2, ::1][1:3, 1:4] = np.array([[1, 2, 3], [4, 5, 6]])
 
@@ -177,7 +177,7 @@ def test_subslicing() -> None:
     ).all()
 
     # Block-of-block assignment (row skip backward)
-    mat = Matrix(5, 5)
+    mat = RealMatrix(5, 5)
     assert mat[::-2, ::-1][1:3, 1:4].shape == (2, 3)
     mat[::-2, ::-1][1:3, 1:4] = np.array([[1, 2, 3], [4, 5, 6]])
 
@@ -195,7 +195,7 @@ def test_subslicing() -> None:
     ).all()
 
     # Block-of-block assignment (column skip forward)
-    mat = Matrix(5, 5)
+    mat = RealMatrix(5, 5)
     assert mat[::1, ::2][1:4, 1:3].shape == (3, 2)
     mat[::1, ::2][1:4, 1:3] = np.array([[1, 2], [3, 4], [5, 6]])
 
@@ -213,7 +213,7 @@ def test_subslicing() -> None:
     ).all()
 
     # Block-of-block assignment (column skip backward)
-    mat = Matrix(5, 5)
+    mat = RealMatrix(5, 5)
     assert mat[::-1, ::-2][1:4, 1:3].shape == (3, 2)
     mat[::-1, ::-2][1:4, 1:3] = np.array([[1, 2], [3, 4], [5, 6]])
 
@@ -232,12 +232,12 @@ def test_subslicing() -> None:
 
 
 def test_compound_assignment_operators() -> None:
-    A1 = Matrix([[1]])
-    A2 = Matrix([[1, 2], [3, 4]])
-    B = Matrix([[1, 2], [3, 4]])
+    A1 = RealMatrix([[1]])
+    A2 = RealMatrix([[1, 2], [3, 4]])
+    B = RealMatrix([[1, 2], [3, 4]])
     b = 2
 
-    # Matrix matrix-matrix operators
+    # RealMatrix matrix-matrix operators
     A2 += B
     assert (A2.value() == np.array([[2, 4], [6, 8]])).all()
     A2 -= B
@@ -255,7 +255,7 @@ def test_compound_assignment_operators() -> None:
     assert (A2.value() == np.array([[7, 10], [15, 22]])).all()
     A2.set_value(np.array([[1, 2], [3, 4]]))
 
-    # Matrix matrix-scalar operators
+    # RealMatrix matrix-scalar operators
     A1 += b
     assert A1.value() == 3
     A1 -= b
@@ -277,7 +277,7 @@ def test_compound_assignment_operators() -> None:
 
 
 def test_iterators() -> None:
-    A = Matrix([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]])
+    A = RealMatrix([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]])
     sub_A = A[2:3, 1:3]
 
     assert sum(1 for _ in A) == 9
@@ -295,7 +295,7 @@ def test_iterators() -> None:
 
 
 def test_value() -> None:
-    A = Matrix([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]])
+    A = RealMatrix([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]])
     expected = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]])
 
     # Full matrix
@@ -315,8 +315,8 @@ def test_value() -> None:
 
 
 def test_pow() -> None:
-    # Matrix coefficient-wise power
-    A = Matrix([[-2.0, -3.0, -4.0], [-5.0, -6.0, -7.0]])
+    # RealMatrix coefficient-wise power
+    A = RealMatrix([[-2.0, -3.0, -4.0], [-5.0, -6.0, -7.0]])
     assert A**2 == np.array([[4.0, 9.0, 16.0], [25.0, 36.0, 49.0]])
     assert A**3 == np.array([[-8.0, -27.0, -64.0], [-125.0, -216.0, -343.0]])
 
@@ -327,8 +327,8 @@ def test_pow() -> None:
 
 
 def test_cwise_map() -> None:
-    # Matrix cwise_map
-    A = Matrix([[-2.0, -3.0, -4.0], [-5.0, -6.0, -7.0]])
+    # RealMatrix cwise_map
+    A = RealMatrix([[-2.0, -3.0, -4.0], [-5.0, -6.0, -7.0]])
 
     result1 = A.cwise_map(autodiff.abs)
     expected1 = np.array([[2.0, 3.0, 4.0], [5.0, 6.0, 7.0]])
@@ -352,8 +352,8 @@ def test_cwise_map() -> None:
 
 
 def test_unary_broadcast() -> None:
-    # Matrix broadcast
-    A = Matrix([[-2.0, -3.0, -4.0], [-5.0, -6.0, -7.0]])
+    # RealMatrix broadcast
+    A = RealMatrix([[-2.0, -3.0, -4.0], [-5.0, -6.0, -7.0]])
 
     result1 = autodiff.abs(A)
     expected1 = np.array([[2.0, 3.0, 4.0], [5.0, 6.0, 7.0]])
@@ -377,7 +377,7 @@ def test_unary_broadcast() -> None:
 
 
 def test_identity_static_function() -> None:
-    A = Matrix.identity(3)
+    A = RealMatrix.identity(3)
 
     assert A.shape == (3, 3)
 
@@ -385,7 +385,7 @@ def test_identity_static_function() -> None:
 
 
 def test_zero_static_function() -> None:
-    A = Matrix.zero(2, 3)
+    A = RealMatrix.zero(2, 3)
 
     assert A.shape == (2, 3)
 
@@ -395,7 +395,7 @@ def test_zero_static_function() -> None:
 
 
 def test_one_static_function() -> None:
-    A = Matrix.one(2, 3)
+    A = RealMatrix.one(2, 3)
 
     assert A.shape == (2, 3)
 
@@ -405,7 +405,7 @@ def test_one_static_function() -> None:
 
 
 def test_constant_static_function() -> None:
-    A = Matrix.constant(2, 3, 2.0)
+    A = RealMatrix.constant(2, 3, 2.0)
 
     assert A.shape == (2, 3)
 
@@ -415,8 +415,8 @@ def test_constant_static_function() -> None:
 
 
 def test_cwise_reduce() -> None:
-    A = Matrix([[2.0, 3.0, 4.0], [5.0, 6.0, 7.0]])
-    B = Matrix([[8.0, 9.0, 10.0], [11.0, 12.0, 13.0]])
+    A = RealMatrix([[2.0, 3.0, 4.0], [5.0, 6.0, 7.0]])
+    B = RealMatrix([[8.0, 9.0, 10.0], [11.0, 12.0, 13.0]])
     result = autodiff.cwise_reduce(A, B, lambda a, b: a * b)
 
     assert (result.value() == np.array([[16.0, 27.0, 40.0], [55.0, 72.0, 91.0]])).all()
@@ -424,7 +424,7 @@ def test_cwise_reduce() -> None:
 
 def test_exp() -> None:
     # Scalar
-    A1 = Matrix([[4.0]])
+    A1 = RealMatrix([[4.0]])
     np.testing.assert_allclose(
         A1.exp().value(), np.array([[math.exp(4.0)]]), rtol=16 * ε, atol=0
     )
@@ -434,12 +434,12 @@ def test_exp() -> None:
 
     # exp(A) exp(−A) = I cancels terms as large as ‖exp(A)‖‖exp(−A)‖, so the
     # rounding error scales with that product instead of with I
-    def exp_product_margin(A: Matrix) -> float:
+    def exp_product_margin(A: RealMatrix) -> float:
         return float(
             8 * ε * np.linalg.norm(A.exp().value()) * np.linalg.norm((-A).exp().value())
         )
 
-    A2 = Matrix([[0.0, 1.0], [0.0, -0.5]])
+    A2 = RealMatrix([[0.0, 1.0], [0.0, -0.5]])
     np.testing.assert_allclose(
         A2.exp().value() @ (-A2).exp().value(),
         np.identity(2),
@@ -451,7 +451,7 @@ def test_exp() -> None:
         atol=exp_product_margin(A2),
     )
 
-    A3 = Matrix([[0.0, 1.0], [0.0, 10.0]])
+    A3 = RealMatrix([[0.0, 1.0], [0.0, 10.0]])
     np.testing.assert_allclose(
         A3.exp().value() @ (-A3).exp().value(),
         np.identity(2),
@@ -462,7 +462,7 @@ def test_exp() -> None:
         np.identity(2),
         atol=exp_product_margin(A3),
     )
-    A4 = Matrix([[1.0, 10.0], [0.0, 0.0]])
+    A4 = RealMatrix([[1.0, 10.0], [0.0, 0.0]])
     np.testing.assert_allclose(
         A4.exp().value() @ (-A4).exp().value(),
         np.identity(2),
@@ -474,7 +474,7 @@ def test_exp() -> None:
         atol=exp_product_margin(A4),
     )
 
-    A5 = Matrix([[2.0, 3.0], [4.0, 5.0]])
+    A5 = RealMatrix([[2.0, 3.0], [4.0, 5.0]])
     np.testing.assert_allclose(
         A5.exp().value() @ (-A5).exp().value(),
         np.identity(2),
@@ -495,7 +495,7 @@ def test_exp() -> None:
     #    ([0  0  0  4  0  0  0])   [1  4   6   4   1  0  0]
     #    ([0  0  0  0  5  0  0])   [1  5  10  10   5  1  0]
     #    ([0  0  0  0  0  6  0])   [1  6  15  20  15  6  1]
-    pascal = Matrix.zero(7, 7)
+    pascal = RealMatrix.zero(7, 7)
     for col in range(6):
         pascal[col + 1, col] = col + 1
     expected_pascal = np.zeros((7, 7))
@@ -514,15 +514,15 @@ def test_exp() -> None:
 
 
 def test_block_free_function() -> None:
-    A = Matrix([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
-    B = Matrix([[7.0], [8.0]])
+    A = RealMatrix([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
+    B = RealMatrix([[7.0], [8.0]])
 
     mat1 = autodiff.block([[A, B]])
     expected1 = np.array([[1.0, 2.0, 3.0, 7.0], [4.0, 5.0, 6.0, 8.0]])
     assert mat1.shape == (2, 4)
     assert (mat1.value() == expected1).all()
 
-    C = Matrix([[9.0, 10.0, 11.0, 12.0]])
+    C = RealMatrix([[9.0, 10.0, 11.0, 12.0]])
 
     mat2 = autodiff.block([[A, B], [C]])
     expected2 = np.array(
@@ -532,7 +532,7 @@ def test_block_free_function() -> None:
     assert (mat2.value() == expected2).all()
 
 
-def check_solve(A: Matrix, B: Matrix) -> None:
+def check_solve(A: RealMatrix, B: RealMatrix) -> None:
     print(f"solve(A, B) {A.shape[0]}x{A.shape[1]}")
 
     for X in (
@@ -549,20 +549,20 @@ def check_solve(A: Matrix, B: Matrix) -> None:
 
 def test_solve_free_function() -> None:
     # 1x1 special case
-    check_solve(Matrix([[2.0]]), Matrix([[5.0]]))
+    check_solve(RealMatrix([[2.0]]), RealMatrix([[5.0]]))
 
     # 2x2 special case
-    check_solve(Matrix([[1.0, 2.0], [3.0, 4.0]]), Matrix([[5.0], [6.0]]))
+    check_solve(RealMatrix([[1.0, 2.0], [3.0, 4.0]]), RealMatrix([[5.0], [6.0]]))
 
     # 3x3 special case
     check_solve(
-        Matrix([[1.0, 2.0, 3.0], [-4.0, -5.0, 6.0], [7.0, 8.0, 9.0]]),
-        Matrix([[10.0], [11.0], [12.0]]),
+        RealMatrix([[1.0, 2.0, 3.0], [-4.0, -5.0, 6.0], [7.0, 8.0, 9.0]]),
+        RealMatrix([[10.0], [11.0], [12.0]]),
     )
 
     # 4x4 special case
     check_solve(
-        Matrix(
+        RealMatrix(
             [
                 [1.0, 2.0, 3.0, -4.0],
                 [-5.0, 6.0, 7.0, 8.0],
@@ -570,12 +570,12 @@ def test_solve_free_function() -> None:
                 [13.0, 14.0, 15.0, 16.0],
             ]
         ),
-        Matrix([[17.0], [18.0], [19.0], [20.0]]),
+        RealMatrix([[17.0], [18.0], [19.0], [20.0]]),
     )
 
     # 5x5 general case
     check_solve(
-        Matrix(
+        RealMatrix(
             [
                 [1.0, 2.0, 3.0, -4.0, 5.0],
                 [-5.0, 6.0, 7.0, 8.0, 9.0],
@@ -584,5 +584,5 @@ def test_solve_free_function() -> None:
                 [17.0, 18.0, 19.0, 20.0, 21.0],
             ]
         ),
-        Matrix([[21.0], [22.0], [23.0], [24.0], [25.0]]),
+        RealMatrix([[21.0], [22.0], [23.0], [24.0], [25.0]]),
     )

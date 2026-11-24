@@ -28,8 +28,8 @@ TEMPLATE_TEST_CASE("multistart - Mishra's Bird function", "[multistart]",
       -> slp::MultistartResult<T, DecisionVariables> {
     slp::Problem<T> problem;
 
-    auto x = problem.decision_variable();
-    auto y = problem.decision_variable();
+    auto x = problem.real_decision_variable();
+    auto y = problem.real_decision_variable();
     x.set_value(input.x);
     y.set_value(input.y);
 

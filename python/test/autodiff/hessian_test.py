@@ -7,7 +7,7 @@ from functools import reduce
 import numpy as np
 import pytest
 from sleipnir import autodiff
-from sleipnir.autodiff import Gradient, Hessian, Jacobian, Matrix, Real
+from sleipnir.autodiff import Gradient, Hessian, Jacobian, Real, RealMatrix
 
 # Machine epsilon for the binding's scalar type (double)
 ε = sys.float_info.epsilon
@@ -19,7 +19,7 @@ def prod[T](iterable: Iterable[T]) -> T:
 
 def test_linear() -> None:
     # y = x
-    x = Matrix(1)
+    x = RealMatrix(1)
     x[0].set_value(3)
     y = x[0]
 
@@ -35,7 +35,7 @@ def test_linear() -> None:
 
 def test_quadratic() -> None:
     # y = x²
-    x = Matrix(1)
+    x = RealMatrix(1)
     x[0].set_value(3)
     y = x[0] * x[0]
 
@@ -51,7 +51,7 @@ def test_quadratic() -> None:
 
 def test_cubic() -> None:
     # y = x³
-    x = Matrix(1)
+    x = RealMatrix(1)
     x[0].set_value(3)
     y = x[0] * x[0] * x[0]
 
@@ -67,7 +67,7 @@ def test_cubic() -> None:
 
 def test_quartic() -> None:
     # y = x⁴
-    x = Matrix(1)
+    x = RealMatrix(1)
     x[0].set_value(3)
     y = x[0] * x[0] * x[0] * x[0]
 
@@ -83,7 +83,7 @@ def test_quartic() -> None:
 
 def test_sum() -> None:
     y = Real()
-    x = Matrix(5)
+    x = RealMatrix(5)
     for i in range(5):
         x[i].set_value(i + 1)
 
@@ -100,7 +100,7 @@ def test_sum() -> None:
 
 
 def test_sum_of_products() -> None:
-    x = Matrix(5)
+    x = RealMatrix(5)
     for i in range(5):
         x[i].set_value(i + 1)
 
@@ -120,7 +120,7 @@ def test_sum_of_products() -> None:
 
 
 def test_product_of_sines() -> None:
-    x = Matrix(5)
+    x = RealMatrix(5)
     for i in range(5):
         x[i].set_value(i + 1)
 
@@ -155,7 +155,7 @@ def test_product_of_sines() -> None:
 
 
 def test_sum_of_squared_residuals() -> None:
-    x = Matrix(5)
+    x = RealMatrix(5)
     for i in range(5):
         x[i].set_value(1)
 
@@ -186,10 +186,10 @@ def test_sum_of_squared_residuals() -> None:
 
 
 def test_sum_of_squares() -> None:
-    r = Matrix(4)
+    r = RealMatrix(4)
     r.set_value(np.array([[25.0], [10.0], [5.0], [0.0]]))
 
-    x = Matrix(4)
+    x = RealMatrix(4)
     for i in range(4):
         x[i].set_value(0.0)
 
@@ -226,7 +226,7 @@ def check_unary_hessian(
     # ∂²y/∂x₀² = f″(u) x₁²
     # ∂²y/∂x₀∂x₁ = f″(u) x₀x₁ + f′(u)
     # ∂²y/∂x₁² = f″(u) x₀²
-    x = Matrix(2)
+    x = RealMatrix(2)
     x[0].set_value(0.6)
     x[1].set_value(0.7)
     hessian = Hessian(f(x[0] * x[1]), x)
@@ -258,7 +258,7 @@ def test_division() -> None:
     # ∂²y/∂x₀² = 0
     # ∂²y/∂x₀∂x₁ = −1/x₁²
     # ∂²y/∂x₁² = 2x₀/x₁³
-    x = Matrix(2)
+    x = RealMatrix(2)
     hessian = Hessian(x[0] / x[1], x)
     symbolic_H = hessian.get()
 
@@ -312,7 +312,7 @@ def test_atan2() -> None:
     # ∂²z/∂y² = −2xy/(x² + y²)²
     # ∂²z/∂y∂x = (y² − x²)/(x² + y²)²
     # ∂²z/∂x² = 2xy/(x² + y²)²
-    input = Matrix(2)
+    input = RealMatrix(2)
     hessian = Hessian(autodiff.atan2(input[0], input[1]), input)
     symbolic_H = hessian.get()
 
@@ -368,7 +368,7 @@ def hypot_expected_H(v: np.ndarray) -> np.ndarray:
 
 
 def test_hypot_two_arguments() -> None:
-    x = Matrix(2)
+    x = RealMatrix(2)
     hessian = Hessian(autodiff.hypot(x[0], x[1]), x)
     symbolic_H = hessian.get()
 
@@ -384,7 +384,7 @@ def test_hypot_two_arguments() -> None:
 
 
 def test_hypot_three_arguments() -> None:
-    x = Matrix(3)
+    x = RealMatrix(3)
     hessian = Hessian(autodiff.hypot(x[0], x[1], x[2]), x)
     symbolic_H = hessian.get()
 
@@ -406,7 +406,7 @@ def test_hypot_repeated_argument() -> None:
     # ∂²y/∂a² = (2y² − 4a²)/y³
     # ∂²y/∂a∂b = −2ab/y³
     # ∂²y/∂b² = (y² − b²)/y³
-    x = Matrix(2)
+    x = RealMatrix(2)
     hessian = Hessian(autodiff.hypot(x[0], x[1], x[0]), x)
     symbolic_H = hessian.get()
 
@@ -439,7 +439,7 @@ def test_log10() -> None:
 
 
 def test_max_and_min() -> None:
-    input = Matrix(2)
+    input = RealMatrix(2)
     expected_y = np.array([[0.0, 0.0], [0.0, 2.0]])
     expected_x = np.array([[2.0, 0.0], [0.0, 0.0]])
 
@@ -469,7 +469,7 @@ def test_max_and_min() -> None:
 
 
 def test_pow() -> None:
-    input = Matrix(2)
+    input = RealMatrix(2)
     f = autodiff.pow(input[0] + 1.0, input[1])
     hessian = Hessian(f, input)
 
@@ -540,7 +540,7 @@ def test_rosenbrock() -> None:
     # ∂²z/∂xy = −400x
     # ∂²z/∂y² = 200
 
-    input = Matrix(2)
+    input = RealMatrix(2)
     x = input[0]
     y = input[1]
     hessian = Hessian((1 - x) ** 2 + 100 * (y - x**2) ** 2, input)
@@ -569,7 +569,7 @@ def test_edge_pushing_wang_example_1() -> None:
     #     efficient Hessian computation via automatic differentiation", 2016.
     #     https://sci-hub.st/10.1007/s12532-016-0100-3
 
-    x = Matrix(2)
+    x = RealMatrix(2)
     x[0].set_value(3)
     x[1].set_value(4)
 
@@ -608,7 +608,7 @@ def test_edge_pushing_petro_figure_1() -> None:
 
     # y = p₁ log(x₁x₂)
     p_1 = Real(2.0)
-    x = Matrix(2)
+    x = RealMatrix(2)
     x[0].set_value(2)
     x[1].set_value(3)
     y = p_1 * autodiff.log(x[0] * x[1])
@@ -635,7 +635,7 @@ def test_edge_pushing_petro_figure_1() -> None:
 
 def test_variable_reuse() -> None:
     y = Real()
-    x = Matrix(1)
+    x = RealMatrix(1)
 
     # y = x³
     x[0].set_value(1)

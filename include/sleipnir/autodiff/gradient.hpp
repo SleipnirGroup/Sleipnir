@@ -8,8 +8,8 @@
 #include <Eigen/SparseCore>
 
 #include "sleipnir/autodiff/jacobian.hpp"
-#include "sleipnir/autodiff/matrix.hpp"
 #include "sleipnir/autodiff/real.hpp"
+#include "sleipnir/autodiff/real_matrix.hpp"
 #include "sleipnir/util/concepts.hpp"
 #include "sleipnir/util/symbol_exports.hpp"
 
@@ -38,15 +38,15 @@ class Gradient {
   /// @param wrt Vector of variables with respect to which to compute the
   ///     gradient.
   Gradient(Real<Scalar> expression, SleipnirMatrixLike<Scalar> auto wrt)
-      : m_jacobian{Matrix{std::move(expression)}, std::move(wrt)} {}
+      : m_jacobian{RealMatrix{std::move(expression)}, std::move(wrt)} {}
 
-  /// Returns the gradient as a Matrix.
+  /// Returns the gradient as a RealMatrix.
   ///
   /// This is useful when constructing optimization problems with derivatives in
   /// them.
   ///
-  /// @return The gradient as a Matrix.
-  Matrix<Scalar> get() const { return m_jacobian.get().T(); }
+  /// @return The gradient as a RealMatrix.
+  RealMatrix<Scalar> get() const { return m_jacobian.get().T(); }
 
   /// Evaluates the gradient at wrt's value.
   ///

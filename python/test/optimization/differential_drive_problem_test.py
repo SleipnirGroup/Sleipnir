@@ -27,7 +27,7 @@ def test_differential_drive_problem() -> None:
     problem = Problem()
 
     # x = [x, y, heading, left velocity, right velocity]ᵀ
-    X = problem.decision_variable(5, N + 1)
+    X = problem.real_decision_variable(5, N + 1)
 
     # Initial guess
     for k in range(N + 1):
@@ -35,7 +35,7 @@ def test_differential_drive_problem() -> None:
         X[1, k].set_value(lerp(x_initial[1, 0], x_final[1, 0], k / N))
 
     # u = [left voltage, right voltage]ᵀ
-    U = problem.decision_variable(2, N)
+    U = problem.real_decision_variable(2, N)
 
     # Initial conditions
     problem.subject_to(X[:, :1] == x_initial)

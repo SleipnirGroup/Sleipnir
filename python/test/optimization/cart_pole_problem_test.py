@@ -32,7 +32,7 @@ def test_cart_pole_problem(dt: float) -> None:
     problem = Problem()
 
     # x = [q, q̇]ᵀ = [x, θ, ẋ, θ̇]ᵀ
-    X = problem.decision_variable(4, N + 1)
+    X = problem.real_decision_variable(4, N + 1)
 
     # Initial guess
     for k in range(N + 1):
@@ -40,7 +40,7 @@ def test_cart_pole_problem(dt: float) -> None:
         X[1, k].set_value(lerp(x_initial[1, 0], x_final[1, 0], k / N))
 
     # u = f_x
-    U = problem.decision_variable(1, N)
+    U = problem.real_decision_variable(1, N)
 
     # Initial conditions
     problem.subject_to(X[:, :1] == x_initial)

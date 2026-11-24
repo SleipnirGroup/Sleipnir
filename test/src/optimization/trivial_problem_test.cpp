@@ -29,7 +29,7 @@ TEMPLATE_TEST_CASE("Problem - No cost unconstrained", "[Problem]",
   {
     slp::Problem<T> problem;
 
-    auto X = problem.decision_variable(2, 3);
+    auto X = problem.real_decision_variable(2, 3);
 
     CHECK(problem.cost_function_type() == slp::ExpressionType::NONE);
     CHECK(problem.equality_constraint_type() == slp::ExpressionType::NONE);
@@ -47,7 +47,7 @@ TEMPLATE_TEST_CASE("Problem - No cost unconstrained", "[Problem]",
   {
     slp::Problem<T> problem;
 
-    auto X = problem.decision_variable(2, 3);
+    auto X = problem.real_decision_variable(2, 3);
     X.set_value(Eigen::Matrix<T, 2, 3>::Ones());
 
     CHECK(problem.cost_function_type() == slp::ExpressionType::NONE);

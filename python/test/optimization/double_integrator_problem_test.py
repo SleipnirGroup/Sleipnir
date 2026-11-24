@@ -153,10 +153,10 @@ def test_double_integrator_problem() -> None:
     problem = Problem()
 
     # 2x1 state vector with N + 1 timesteps (includes last state)
-    X = problem.decision_variable(2, N + 1)
+    X = problem.real_decision_variable(2, N + 1)
 
     # 1x1 input vector with N timesteps (input at last state doesn't matter)
-    U = problem.decision_variable(1, N)
+    U = problem.real_decision_variable(1, N)
 
     # Kinematics constraint assuming constant acceleration between timesteps
     for k in range(N):

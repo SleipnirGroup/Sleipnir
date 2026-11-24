@@ -7,8 +7,8 @@ int main() {
   // Find the x, y pair with the largest product for which x + 3y = 36
   slp::Problem<double> problem;
 
-  auto x = problem.decision_variable();
-  auto y = problem.decision_variable();
+  auto x = problem.real_decision_variable();
+  auto y = problem.real_decision_variable();
 
   problem.maximize(x * y);
   problem.subject_to(x + 3 * y == 36);

@@ -12,44 +12,45 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
-#include <sleipnir/autodiff/matrix.hpp>
 #include <sleipnir/autodiff/real.hpp>
+#include <sleipnir/autodiff/real_matrix.hpp>
 #include <sleipnir/autodiff/slice.hpp>
 
 #include "catch_matchers.hpp"
 #include "scalar_types.hpp"
 
-TEMPLATE_TEST_CASE("Matrix - Construct from Eigen::MatrixBase", "[Matrix]",
-                   SCALAR_TYPES) {
+TEMPLATE_TEST_CASE("RealMatrix - Construct from Eigen::MatrixBase",
+                   "[RealMatrix]", SCALAR_TYPES) {
   using T = TestType;
 
-  slp::Matrix mat{
+  slp::RealMatrix mat{
       Eigen::Matrix<T, 2, 3>{{T(1), T(2), T(3)}, {T(4), T(5), T(6)}}};
 
   Eigen::Matrix<T, 2, 3> expected{{T(1), T(2), T(3)}, {T(4), T(5), T(6)}};
   CHECK(mat.value() == expected);
 }
 
-TEMPLATE_TEST_CASE("Matrix - Construct from Eigen::DiagonalBase", "[Matrix]",
-                   SCALAR_TYPES) {
+TEMPLATE_TEST_CASE("RealMatrix - Construct from Eigen::DiagonalBase",
+                   "[RealMatrix]", SCALAR_TYPES) {
   using T = TestType;
 
-  slp::Matrix mat{Eigen::Vector3<T>{{T(1), T(2), T(3)}}.asDiagonal()};
+  slp::RealMatrix mat{Eigen::Vector3<T>{{T(1), T(2), T(3)}}.asDiagonal()};
 
   Eigen::Matrix3<T> expected{
       {T(1), T(0), T(0)}, {T(0), T(2), T(0)}, {T(0), T(0), T(3)}};
   CHECK(mat.value() == expected);
 }
 
-TEMPLATE_TEST_CASE("Matrix - Assignment to default", "[Matrix]", SCALAR_TYPES) {
+TEMPLATE_TEST_CASE("RealMatrix - Assignment to default", "[RealMatrix]",
+                   SCALAR_TYPES) {
   using T = TestType;
 
-  slp::Matrix<T> mat;
+  slp::RealMatrix<T> mat;
 
   CHECK(mat.rows() == 0);
   CHECK(mat.cols() == 0);
 
-  mat = slp::Matrix<T>{2, 2};
+  mat = slp::RealMatrix<T>{2, 2};
 
   CHECK(mat.rows() == 2);
   CHECK(mat.cols() == 2);
@@ -69,11 +70,12 @@ TEMPLATE_TEST_CASE("Matrix - Assignment to default", "[Matrix]", SCALAR_TYPES) {
   CHECK(mat[1, 1].value() == T(4));
 }
 
-TEMPLATE_TEST_CASE("Matrix - Assignment aliasing", "[Matrix]", SCALAR_TYPES) {
+TEMPLATE_TEST_CASE("RealMatrix - Assignment aliasing", "[RealMatrix]",
+                   SCALAR_TYPES) {
   using T = TestType;
 
-  slp::Matrix<T> A{{1, 2}, {3, 4}};
-  slp::Matrix<T> B{{5, 6}, {7, 8}};
+  slp::RealMatrix<T> A{{1, 2}, {3, 4}};
+  slp::RealMatrix<T> B{{5, 6}, {7, 8}};
 
   // A and B initially contain different values
   Eigen::Matrix2<T> expected_A{{T(1), T(2)}, {T(3), T(4)}};
@@ -93,11 +95,12 @@ TEMPLATE_TEST_CASE("Matrix - Assignment aliasing", "[Matrix]", SCALAR_TYPES) {
   CHECK(B.value() == expected_B);
 }
 
-TEMPLATE_TEST_CASE("Matrix - block() member function", "[Matrix]",
+TEMPLATE_TEST_CASE("RealMatrix - block() member function", "[RealMatrix]",
                    SCALAR_TYPES) {
   using T = TestType;
 
-  slp::Matrix<T> A{{T(1), T(2), T(3)}, {T(4), T(5), T(6)}, {T(7), T(8), T(9)}};
+  slp::RealMatrix<T> A{
+      {T(1), T(2), T(3)}, {T(4), T(5), T(6)}, {T(7), T(8), T(9)}};
 
   // Block assignment
   A.block(1, 1, 2, 2) = Eigen::Matrix2<T>{{T(10), T(11)}, {T(12), T(13)}};
@@ -114,14 +117,14 @@ TEMPLATE_TEST_CASE("Matrix - block() member function", "[Matrix]",
   CHECK(A.value() == expected2);
 }
 
-TEMPLATE_TEST_CASE("Matrix - Slicing", "[Matrix]", SCALAR_TYPES) {
+TEMPLATE_TEST_CASE("RealMatrix - Slicing", "[RealMatrix]", SCALAR_TYPES) {
   using T = TestType;
   using namespace slp::slicing;
 
-  slp::Matrix<T> mat{{T(1), T(2), T(3), T(4)},
-                     {T(5), T(6), T(7), T(8)},
-                     {T(9), T(10), T(11), T(12)},
-                     {T(13), T(14), T(15), T(16)}};
+  slp::RealMatrix<T> mat{{T(1), T(2), T(3), T(4)},
+                         {T(5), T(6), T(7), T(8)},
+                         {T(9), T(10), T(11), T(12)},
+                         {T(13), T(14), T(15), T(16)}};
   CHECK(mat.rows() == 4);
   CHECK(mat.cols() == 4);
 
@@ -213,13 +216,13 @@ TEMPLATE_TEST_CASE("Matrix - Slicing", "[Matrix]", SCALAR_TYPES) {
   }
 }
 
-TEMPLATE_TEST_CASE("Matrix - Subslicing", "[Matrix]", SCALAR_TYPES) {
+TEMPLATE_TEST_CASE("RealMatrix - Subslicing", "[RealMatrix]", SCALAR_TYPES) {
   using T = TestType;
   using namespace slp::slicing;
 
   // Block-of-block assignment (row skip forward)
   {
-    slp::Matrix<T> mat{5, 5};
+    slp::RealMatrix<T> mat{5, 5};
     auto s = mat[slp::Slice{_, _, 2}, slp::Slice{_, _, 1}]
                 [slp::Slice{1, 3}, slp::Slice{1, 4}];
     CHECK(s.rows() == 2);
@@ -236,7 +239,7 @@ TEMPLATE_TEST_CASE("Matrix - Subslicing", "[Matrix]", SCALAR_TYPES) {
 
   // Block-of-block assignment (row skip backward)
   {
-    slp::Matrix<T> mat{5, 5};
+    slp::RealMatrix<T> mat{5, 5};
     auto s = mat[slp::Slice{_, _, -2}, slp::Slice{_, _, -1}]
                 [slp::Slice{1, 3}, slp::Slice{1, 4}];
     CHECK(s.rows() == 2);
@@ -253,7 +256,7 @@ TEMPLATE_TEST_CASE("Matrix - Subslicing", "[Matrix]", SCALAR_TYPES) {
 
   // Block-of-block assignment (column skip forward)
   {
-    slp::Matrix<T> mat{5, 5};
+    slp::RealMatrix<T> mat{5, 5};
     auto s = mat[slp::Slice{_, _, 1}, slp::Slice{_, _, 2}]
                 [slp::Slice{1, 4}, slp::Slice{1, 3}];
     CHECK(s.rows() == 3);
@@ -270,7 +273,7 @@ TEMPLATE_TEST_CASE("Matrix - Subslicing", "[Matrix]", SCALAR_TYPES) {
 
   // Block-of-block assignment (column skip backward)
   {
-    slp::Matrix<T> mat{5, 5};
+    slp::RealMatrix<T> mat{5, 5};
     auto s = mat[slp::Slice{_, _, -1}, slp::Slice{_, _, -2}]
                 [slp::Slice{1, 4}, slp::Slice{1, 3}];
     CHECK(s.rows() == 3);
@@ -286,16 +289,16 @@ TEMPLATE_TEST_CASE("Matrix - Subslicing", "[Matrix]", SCALAR_TYPES) {
   }
 }
 
-TEMPLATE_TEST_CASE("Matrix - Compound assignment operators", "[Matrix]",
+TEMPLATE_TEST_CASE("RealMatrix - Compound assignment operators", "[RealMatrix]",
                    SCALAR_TYPES) {
   using T = TestType;
 
-  slp::Matrix<T> A1{{T(1)}};
-  slp::Matrix<T> A2{{T(1), T(2)}, {T(3), T(4)}};
-  const slp::Matrix<T> B{{T(1), T(2)}, {T(3), T(4)}};
+  slp::RealMatrix<T> A1{{T(1)}};
+  slp::RealMatrix<T> A2{{T(1), T(2)}, {T(3), T(4)}};
+  const slp::RealMatrix<T> B{{T(1), T(2)}, {T(3), T(4)}};
   const T b{2};
 
-  // Matrix matrix-matrix operators
+  // RealMatrix matrix-matrix operators
   A2 += B;
   CHECK(A2.value() == Eigen::Matrix2<T>{{T(2), T(4)}, {T(6), T(8)}});
   A2 -= B;
@@ -313,7 +316,7 @@ TEMPLATE_TEST_CASE("Matrix - Compound assignment operators", "[Matrix]",
   CHECK(A2.value() == Eigen::Matrix2<T>{{T(7), T(10)}, {T(15), T(22)}});
   A2.set_value(Eigen::Matrix2<T>{{T(1), T(2)}, {T(3), T(4)}});
 
-  // Matrix matrix-scalar operators
+  // RealMatrix matrix-scalar operators
   A1 += b;
   CHECK(A1.value() == Eigen::Matrix<T, 1, 1>{{T(3)}});
   A1 -= b;
@@ -334,8 +337,8 @@ TEMPLATE_TEST_CASE("Matrix - Compound assignment operators", "[Matrix]",
   CHECK(A2.value() == Eigen::Matrix2<T>{{T(1), T(2)}, {T(3), T(4)}});
 }
 
-TEMPLATE_TEST_CASE("Matrix - Real and Eigen matrix operators", "[Matrix]",
-                   SCALAR_TYPES) {
+TEMPLATE_TEST_CASE("RealMatrix - Real and Eigen matrix operators",
+                   "[RealMatrix]", SCALAR_TYPES) {
   using T = TestType;
 
   const slp::Real<T> x{T(2)};
@@ -354,10 +357,11 @@ TEMPLATE_TEST_CASE("Matrix - Real and Eigen matrix operators", "[Matrix]",
   CHECK(((A + A) / x).value() == Eigen::Matrix2<T>{{T(1), T(2)}, {T(3), T(4)}});
 }
 
-TEMPLATE_TEST_CASE("Matrix - Iterators", "[Matrix]", SCALAR_TYPES) {
+TEMPLATE_TEST_CASE("RealMatrix - Iterators", "[RealMatrix]", SCALAR_TYPES) {
   using T = TestType;
 
-  slp::Matrix<T> A{{T(1), T(2), T(3)}, {T(4), T(5), T(6)}, {T(7), T(8), T(9)}};
+  slp::RealMatrix<T> A{
+      {T(1), T(2), T(3)}, {T(4), T(5), T(6)}, {T(7), T(8), T(9)}};
   auto sub_A = A.block(2, 1, 1, 2);
 
   CHECK(std::distance(A.begin(), A.end()) == 9);
@@ -394,11 +398,12 @@ TEMPLATE_TEST_CASE("Matrix - Iterators", "[Matrix]", SCALAR_TYPES) {
   }
 }
 
-TEMPLATE_TEST_CASE("Matrix - Value", "[Matrix]", SCALAR_TYPES) {
+TEMPLATE_TEST_CASE("RealMatrix - Value", "[RealMatrix]", SCALAR_TYPES) {
   using T = TestType;
   using namespace slp::slicing;
 
-  slp::Matrix<T> A{{T(1), T(2), T(3)}, {T(4), T(5), T(6)}, {T(7), T(8), T(9)}};
+  slp::RealMatrix<T> A{
+      {T(1), T(2), T(3)}, {T(4), T(5), T(6)}, {T(7), T(8), T(9)}};
   Eigen::Matrix3<T> expected{
       {T(1), T(2), T(3)}, {T(4), T(5), T(6)}, {T(7), T(8), T(9)}};
 
@@ -433,10 +438,10 @@ TEMPLATE_TEST_CASE("Matrix - Value", "[Matrix]", SCALAR_TYPES) {
             1) == T(9));
 }
 
-TEMPLATE_TEST_CASE("Matrix - to_eigen()", "[Matrix]", SCALAR_TYPES) {
+TEMPLATE_TEST_CASE("RealMatrix - to_eigen()", "[RealMatrix]", SCALAR_TYPES) {
   using T = TestType;
 
-  slp::Matrix<T> A{{T(1), T(2), T(3)}, {T(4), T(5), T(6)}};
+  slp::RealMatrix<T> A{{T(1), T(2), T(3)}, {T(4), T(5), T(6)}};
   auto eigen_A = A.to_eigen();
 
   CHECK(A.rows() == eigen_A.rows());
@@ -449,13 +454,14 @@ TEMPLATE_TEST_CASE("Matrix - to_eigen()", "[Matrix]", SCALAR_TYPES) {
   }
 }
 
-TEMPLATE_TEST_CASE("Matrix - cwise_transform()", "[Matrix]", SCALAR_TYPES) {
+TEMPLATE_TEST_CASE("RealMatrix - cwise_transform()", "[RealMatrix]",
+                   SCALAR_TYPES) {
   using T = TestType;
 
-  // Matrix cwise_transform
-  slp::Matrix<T> A{{T(-2), T(-3), T(-4)}, {T(-5), T(-6), T(-7)}};
+  // RealMatrix cwise_transform
+  slp::RealMatrix<T> A{{T(-2), T(-3), T(-4)}, {T(-5), T(-6), T(-7)}};
 
-  slp::Matrix result1 = A.cwise_transform(slp::abs<T>);
+  slp::RealMatrix result1 = A.cwise_transform(slp::abs<T>);
   Eigen::Matrix<T, 2, 3> expected1{{T(2), T(3), T(4)}, {T(5), T(6), T(7)}};
 
   // Don't modify original matrix
@@ -466,7 +472,7 @@ TEMPLATE_TEST_CASE("Matrix - cwise_transform()", "[Matrix]", SCALAR_TYPES) {
   // Submatrix cwise_transform
   auto sub_A = A.block(0, 0, 2, 2);
 
-  slp::Matrix result2 = sub_A.cwise_transform(slp::abs<T>);
+  slp::RealMatrix result2 = sub_A.cwise_transform(slp::abs<T>);
   Eigen::Matrix2<T> expected2{{T(2), T(3)}, {T(5), T(6)}};
 
   // Don't modify original matrix
@@ -476,11 +482,11 @@ TEMPLATE_TEST_CASE("Matrix - cwise_transform()", "[Matrix]", SCALAR_TYPES) {
   CHECK(result2.value() == expected2);
 }
 
-TEMPLATE_TEST_CASE("Matrix - identity() static function", "[Matrix]",
+TEMPLATE_TEST_CASE("RealMatrix - identity() static function", "[RealMatrix]",
                    SCALAR_TYPES) {
   using T = TestType;
 
-  auto A = slp::Matrix<T>::identity(3);
+  auto A = slp::RealMatrix<T>::identity(3);
 
   CHECK(A.rows() == 3);
   CHECK(A.cols() == 3);
@@ -488,11 +494,11 @@ TEMPLATE_TEST_CASE("Matrix - identity() static function", "[Matrix]",
   CHECK(A.value() == Eigen::Matrix3<T>::Identity());
 }
 
-TEMPLATE_TEST_CASE("Matrix - zero() static function", "[Matrix]",
+TEMPLATE_TEST_CASE("RealMatrix - zero() static function", "[RealMatrix]",
                    SCALAR_TYPES) {
   using T = TestType;
 
-  auto A = slp::Matrix<T>::zero(2, 3);
+  auto A = slp::RealMatrix<T>::zero(2, 3);
 
   CHECK(A.rows() == 2);
   CHECK(A.cols() == 3);
@@ -502,10 +508,11 @@ TEMPLATE_TEST_CASE("Matrix - zero() static function", "[Matrix]",
   }
 }
 
-TEMPLATE_TEST_CASE("Matrix - one() static function", "[Matrix]", SCALAR_TYPES) {
+TEMPLATE_TEST_CASE("RealMatrix - one() static function", "[RealMatrix]",
+                   SCALAR_TYPES) {
   using T = TestType;
 
-  auto A = slp::Matrix<T>::one(2, 3);
+  auto A = slp::RealMatrix<T>::one(2, 3);
 
   CHECK(A.rows() == 2);
   CHECK(A.cols() == 3);
@@ -515,11 +522,11 @@ TEMPLATE_TEST_CASE("Matrix - one() static function", "[Matrix]", SCALAR_TYPES) {
   }
 }
 
-TEMPLATE_TEST_CASE("Matrix - constant() static function", "[Matrix]",
+TEMPLATE_TEST_CASE("RealMatrix - constant() static function", "[RealMatrix]",
                    SCALAR_TYPES) {
   using T = TestType;
 
-  auto A = slp::Matrix<T>::constant(2, 3, T(2));
+  auto A = slp::RealMatrix<T>::constant(2, 3, T(2));
 
   CHECK(A.rows() == 2);
   CHECK(A.cols() == 3);
@@ -529,18 +536,19 @@ TEMPLATE_TEST_CASE("Matrix - constant() static function", "[Matrix]",
   }
 }
 
-TEMPLATE_TEST_CASE("Matrix - cwise_reduce()", "[Matrix]", SCALAR_TYPES) {
+TEMPLATE_TEST_CASE("RealMatrix - cwise_reduce()", "[RealMatrix]",
+                   SCALAR_TYPES) {
   using T = TestType;
 
-  slp::Matrix<T> A{{T(2), T(3), T(4)}, {T(5), T(6), T(7)}};
-  slp::Matrix<T> B{{T(8), T(9), T(10)}, {T(11), T(12), T(13)}};
-  slp::Matrix result = slp::cwise_reduce<T>(A, B, std::multiplies<>{});
+  slp::RealMatrix<T> A{{T(2), T(3), T(4)}, {T(5), T(6), T(7)}};
+  slp::RealMatrix<T> B{{T(8), T(9), T(10)}, {T(11), T(12), T(13)}};
+  slp::RealMatrix result = slp::cwise_reduce<T>(A, B, std::multiplies<>{});
 
   Eigen::Matrix<T, 2, 3> expected{{T(16), T(27), T(40)}, {T(55), T(72), T(91)}};
   CHECK(result.value() == expected);
 }
 
-TEMPLATE_TEST_CASE("Matrix - exp()", "[Matrix]", SCALAR_TYPES) {
+TEMPLATE_TEST_CASE("RealMatrix - exp()", "[RealMatrix]", SCALAR_TYPES) {
   using T = TestType;
   using namespace slp::slicing;
   using std::exp;
@@ -548,7 +556,7 @@ TEMPLATE_TEST_CASE("Matrix - exp()", "[Matrix]", SCALAR_TYPES) {
   constexpr T ε = std::numeric_limits<T>::epsilon();
 
   // Scalar
-  auto A1 = slp::Matrix<T>{{T(4)}};
+  auto A1 = slp::RealMatrix<T>{{T(4)}};
   CHECK_THAT(A1.exp().value(),
              WithinRel(Eigen::Matrix<T, 1, 1>{exp(T(4))}, T(16) * ε));
   CHECK_THAT((A1[_, _].exp().value()),
@@ -556,29 +564,29 @@ TEMPLATE_TEST_CASE("Matrix - exp()", "[Matrix]", SCALAR_TYPES) {
 
   // exp(A) exp(−A) = I cancels terms as large as ‖exp(A)‖‖exp(−A)‖, so the
   // rounding error scales with that product instead of with I
-  auto exp_product_margin = [&](const slp::Matrix<T>& A) {
+  auto exp_product_margin = [&](const slp::RealMatrix<T>& A) {
     return T(8) * ε * A.exp().value().norm() * (-A).exp().value().norm();
   };
 
-  auto A2 = slp::Matrix<T>{{T(0), T(1)}, {T(0), T(-0.5)}};
+  auto A2 = slp::RealMatrix<T>{{T(0), T(1)}, {T(0), T(-0.5)}};
   CHECK_THAT(A2.exp().value() * (-A2).exp().value(),
              WithinAbs(Eigen::Matrix2<T>::Identity(), exp_product_margin(A2)));
   CHECK_THAT((A2[_, _].exp().value() * (-A2[_, _]).exp().value()),
              WithinAbs(Eigen::Matrix2<T>::Identity(), exp_product_margin(A2)));
 
-  auto A3 = slp::Matrix<T>{{T(0), T(1)}, {T(0), T(10)}};
+  auto A3 = slp::RealMatrix<T>{{T(0), T(1)}, {T(0), T(10)}};
   CHECK_THAT(A3.exp().value() * (-A3).exp().value(),
              WithinAbs(Eigen::Matrix2<T>::Identity(), exp_product_margin(A3)));
   CHECK_THAT((A3[_, _].exp().value() * (-A3[_, _]).exp().value()),
              WithinAbs(Eigen::Matrix2<T>::Identity(), exp_product_margin(A3)));
 
-  auto A4 = slp::Matrix<T>{{T(1), T(10)}, {T(0), T(0)}};
+  auto A4 = slp::RealMatrix<T>{{T(1), T(10)}, {T(0), T(0)}};
   CHECK_THAT(A4.exp().value() * (-A4).exp().value(),
              WithinAbs(Eigen::Matrix2<T>::Identity(), exp_product_margin(A4)));
   CHECK_THAT((A4[_, _].exp().value() * (-A4[_, _]).exp().value()),
              WithinAbs(Eigen::Matrix2<T>::Identity(), exp_product_margin(A4)));
 
-  auto A5 = slp::Matrix<T>{{T(2), T(3)}, {T(4), T(5)}};
+  auto A5 = slp::RealMatrix<T>{{T(2), T(3)}, {T(4), T(5)}};
   CHECK_THAT(A5.exp().value() * (-A5).exp().value(),
              WithinAbs(Eigen::Matrix2<T>::Identity(), exp_product_margin(A5)));
   CHECK_THAT((A5[_, _].exp().value() * (-A5[_, _]).exp().value()),
@@ -593,7 +601,7 @@ TEMPLATE_TEST_CASE("Matrix - exp()", "[Matrix]", SCALAR_TYPES) {
   //    ([0  0  0  4  0  0  0])   [1  4   6   4   1  0  0]
   //    ([0  0  0  0  5  0  0])   [1  5  10  10   5  1  0]
   //    ([0  0  0  0  0  6  0])   [1  6  15  20  15  6  1]
-  auto pascal = slp::Matrix<T>::zero(7, 7);
+  auto pascal = slp::RealMatrix<T>::zero(7, 7);
   for (int col = 0; col < 6; ++col) {
     pascal[col + 1, col] = T(col + 1);
   }
@@ -610,22 +618,23 @@ TEMPLATE_TEST_CASE("Matrix - exp()", "[Matrix]", SCALAR_TYPES) {
              WithinRel(expected_pascal, T(32) * ε));
 }
 
-TEMPLATE_TEST_CASE("Matrix - block() free function", "[Matrix]", SCALAR_TYPES) {
+TEMPLATE_TEST_CASE("RealMatrix - block() free function", "[RealMatrix]",
+                   SCALAR_TYPES) {
   using T = TestType;
 
-  slp::Matrix<T> A{{T(1), T(2), T(3)}, {T(4), T(5), T(6)}};
-  slp::Matrix<T> B{{T(7)}, {T(8)}};
+  slp::RealMatrix<T> A{{T(1), T(2), T(3)}, {T(4), T(5), T(6)}};
+  slp::RealMatrix<T> B{{T(7)}, {T(8)}};
 
-  slp::Matrix mat1 = slp::block({{A, B}});
+  slp::RealMatrix mat1 = slp::block({{A, B}});
   Eigen::Matrix<T, 2, 4> expected1{{T(1), T(2), T(3), T(7)},
                                    {T(4), T(5), T(6), T(8)}};
   CHECK(mat1.rows() == 2);
   CHECK(mat1.cols() == 4);
   CHECK(mat1.value() == expected1);
 
-  slp::Matrix<T> C{{T(9), T(10), T(11), T(12)}};
+  slp::RealMatrix<T> C{{T(9), T(10), T(11), T(12)}};
 
-  slp::Matrix mat2 = slp::block({{A, B}, {C}});
+  slp::RealMatrix mat2 = slp::block({{A, B}, {C}});
   Eigen::Matrix<T, 3, 4> expected2{{T(1), T(2), T(3), T(7)},
                                    {T(4), T(5), T(6), T(8)},
                                    {T(9), T(10), T(11), T(12)}};
@@ -635,7 +644,7 @@ TEMPLATE_TEST_CASE("Matrix - block() free function", "[Matrix]", SCALAR_TYPES) {
 }
 
 template <typename T>
-void check_solve(slp::Matrix<T> A, slp::Matrix<T> B) {
+void check_solve(slp::RealMatrix<T> A, slp::RealMatrix<T> B) {
   constexpr T ε = std::numeric_limits<T>::epsilon();
 
   INFO(std::format("solve(A, B) {}x{}", A.rows(), A.cols()));
@@ -650,34 +659,35 @@ void check_solve(slp::Matrix<T> A, slp::Matrix<T> B) {
   CHECK(residual <= T(8) * ε * A.value().norm() * X.value().norm());
 }
 
-TEMPLATE_TEST_CASE("Matrix - solve() free function", "[Matrix]", SCALAR_TYPES) {
+TEMPLATE_TEST_CASE("RealMatrix - solve() free function", "[RealMatrix]",
+                   SCALAR_TYPES) {
   using T = TestType;
 
   // 1x1 special case
-  check_solve(slp::Matrix<T>{{T(2)}}, slp::Matrix<T>{{T(5)}});
+  check_solve(slp::RealMatrix<T>{{T(2)}}, slp::RealMatrix<T>{{T(5)}});
 
   // 2x2 special case
-  check_solve(slp::Matrix<T>{{T(1), T(2)}, {T(3), T(4)}},
-              slp::Matrix<T>{{T(5)}, {T(6)}});
+  check_solve(slp::RealMatrix<T>{{T(1), T(2)}, {T(3), T(4)}},
+              slp::RealMatrix<T>{{T(5)}, {T(6)}});
 
   // 3x3 special case
   check_solve(
-      slp::Matrix<T>{
+      slp::RealMatrix<T>{
           {T(1), T(2), T(3)}, {T(-4), T(-5), T(6)}, {T(7), T(8), T(9)}},
-      slp::Matrix<T>{{T(10)}, {T(11)}, {T(12)}});
+      slp::RealMatrix<T>{{T(10)}, {T(11)}, {T(12)}});
 
   // 4x4 special case
-  check_solve(slp::Matrix<T>{{T(1), T(2), T(3), T(-4)},
-                             {T(-5), T(6), T(7), T(8)},
-                             {T(9), T(10), T(11), T(12)},
-                             {T(13), T(14), T(15), T(16)}},
-              slp::Matrix<T>{{T(17)}, {T(18)}, {T(19)}, {T(20)}});
+  check_solve(slp::RealMatrix<T>{{T(1), T(2), T(3), T(-4)},
+                                 {T(-5), T(6), T(7), T(8)},
+                                 {T(9), T(10), T(11), T(12)},
+                                 {T(13), T(14), T(15), T(16)}},
+              slp::RealMatrix<T>{{T(17)}, {T(18)}, {T(19)}, {T(20)}});
 
   // 5x5 general case
-  check_solve(slp::Matrix<T>{{T(1), T(2), T(3), T(-4), T(5)},
-                             {T(-5), T(6), T(7), T(8), T(9)},
-                             {T(9), T(10), T(11), T(12), T(13)},
-                             {T(13), T(14), T(15), T(16), T(17)},
-                             {T(17), T(18), T(19), T(20), T(21)}},
-              slp::Matrix<T>{{T(21)}, {T(22)}, {T(23)}, {T(24)}, {T(25)}});
+  check_solve(slp::RealMatrix<T>{{T(1), T(2), T(3), T(-4), T(5)},
+                                 {T(-5), T(6), T(7), T(8), T(9)},
+                                 {T(9), T(10), T(11), T(12), T(13)},
+                                 {T(13), T(14), T(15), T(16), T(17)},
+                                 {T(17), T(18), T(19), T(20), T(21)}},
+              slp::RealMatrix<T>{{T(21)}, {T(22)}, {T(23)}, {T(24)}, {T(25)}});
 }
