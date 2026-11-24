@@ -8,9 +8,9 @@
 #include <sleipnir/autodiff/gradient.hpp>
 #include <sleipnir/autodiff/hessian.hpp>
 #include <sleipnir/autodiff/jacobian.hpp>
-#include <sleipnir/autodiff/variable.hpp>
-#include <sleipnir/autodiff/variable_block.hpp>
-#include <sleipnir/autodiff/variable_matrix.hpp>
+#include <sleipnir/autodiff/matrix.hpp>
+#include <sleipnir/autodiff/real.hpp>
+#include <sleipnir/autodiff/submatrix.hpp>
 #include <sleipnir/optimization/ocp.hpp>
 #include <sleipnir/optimization/ocp/dynamics_type.hpp>
 #include <sleipnir/optimization/ocp/timestep_method.hpp>
@@ -25,11 +25,9 @@ namespace slp {
 
 void bind_expression_type(nb::enum_<ExpressionType>& e);
 
-void bind_variable(nb::module_& autodiff, nb::class_<Variable<double>>& cls);
-void bind_variable_matrix(nb::module_& autodiff,
-                          nb::class_<VariableMatrix<double>>& cls);
-void bind_variable_block(
-    nb::class_<VariableBlock<VariableMatrix<double>>>& cls);
+void bind_real(nb::module_& autodiff, nb::class_<Real<double>>& cls);
+void bind_matrix(nb::module_& autodiff, nb::class_<Matrix<double>>& cls);
+void bind_submatrix(nb::class_<Submatrix<Matrix<double>>>& cls);
 
 void bind_gradient(nb::class_<Gradient<double>>& cls);
 void bind_hessian(nb::class_<Hessian<double>>& cls);

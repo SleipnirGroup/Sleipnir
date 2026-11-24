@@ -10,8 +10,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <sleipnir/autodiff/expression_type.hpp>
-#include <sleipnir/autodiff/variable.hpp>
-#include <sleipnir/autodiff/variable_matrix.hpp>
+#include <sleipnir/autodiff/matrix.hpp>
+#include <sleipnir/autodiff/real.hpp>
 #include <sleipnir/optimization/problem.hpp>
 #include <sleipnir/optimization/solver/exit_status.hpp>
 #include <sleipnir/util/pool.hpp>
@@ -68,13 +68,13 @@ TEMPLATE_TEST_CASE("Problem - Differential drive", "[Problem]", SCALAR_TYPES) {
     problem.subject_to(
         X.col(k + 1) ==
         rk4<T, decltype(DifferentialDriveUtil<T>::dynamics_variable),
-            slp::VariableMatrix<T>, slp::VariableMatrix<T>>(
+            slp::Matrix<T>, slp::Matrix<T>>(
             DifferentialDriveUtil<T>::dynamics_variable, X.col(k), U.col(k),
             dt));
   }
 
   // Minimize sum squared states and inputs
-  slp::Variable J = T(0);
+  slp::Real J = T(0);
   for (int k = 0; k < N; ++k) {
     J += X.col(k).T() * X.col(k) + U.col(k).T() * U.col(k);
   }

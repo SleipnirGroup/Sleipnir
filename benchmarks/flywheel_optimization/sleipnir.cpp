@@ -7,7 +7,7 @@
 #include <span>
 
 #include <Eigen/Core>
-#include <sleipnir/autodiff/variable.hpp>
+#include <sleipnir/autodiff/real.hpp>
 #include <sleipnir/optimization/problem.hpp>
 #include <sleipnir/optimization/solver/exit_status.hpp>
 
@@ -42,7 +42,7 @@ slp::Problem<double> flywheel_sleipnir(std::chrono::duration<double> dt,
 
   // Cost function - minimize error
   Eigen::Matrix<double, 1, 1> r{10.0};
-  slp::Variable J = 0.0;
+  slp::Real J = 0.0;
   for (int k = 0; k < N + 1; ++k) {
     J += ((r - X.col(k)).T() * (r - X.col(k)));
   }

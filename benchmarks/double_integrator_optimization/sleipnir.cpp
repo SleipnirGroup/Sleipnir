@@ -6,7 +6,7 @@
 #include <span>
 
 #include <Eigen/Core>
-#include <sleipnir/autodiff/variable.hpp>
+#include <sleipnir/autodiff/real.hpp>
 #include <sleipnir/optimization/problem.hpp>
 #include <sleipnir/optimization/solver/exit_status.hpp>
 
@@ -61,7 +61,7 @@ slp::Problem<double> double_integrator_sleipnir(
   }
 
   // Cost function - minimize smoothed fuel use
-  slp::Variable J = 0.0;
+  slp::Real J = 0.0;
   for (int k = 0; k < N; ++k) {
     J += slp::sqrt(U[0, k] * U[0, k] + U[1, k] * U[1, k] + ε * ε);
   }

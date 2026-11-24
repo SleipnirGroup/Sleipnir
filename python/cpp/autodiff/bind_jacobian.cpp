@@ -4,8 +4,8 @@
 #include <nanobind/nanobind.h>
 
 #include <sleipnir/autodiff/jacobian.hpp>
-#include <sleipnir/autodiff/variable.hpp>
-#include <sleipnir/autodiff/variable_matrix.hpp>
+#include <sleipnir/autodiff/matrix.hpp>
+#include <sleipnir/autodiff/real.hpp>
 
 #include "docstrings.hpp"
 
@@ -16,12 +16,12 @@ namespace slp {
 void bind_jacobian(nb::class_<Jacobian<double>>& cls) {
   using namespace nb::literals;
 
-  cls.def(nb::init<Variable<double>, Variable<double>>(), "variable"_a, "wrt"_a,
+  cls.def(nb::init<Real<double>, Real<double>>(), "expression"_a, "wrt"_a,
           DOC(slp, Jacobian, Jacobian));
-  cls.def(nb::init<Variable<double>, VariableMatrix<double>>(), "variable"_a,
-          "wrt"_a, DOC(slp, Jacobian, Jacobian));
-  cls.def(nb::init<VariableMatrix<double>, VariableMatrix<double>>(),
-          "variables"_a, "wrt"_a, DOC(slp, Jacobian, Jacobian));
+  cls.def(nb::init<Real<double>, Matrix<double>>(), "expression"_a, "wrt"_a,
+          DOC(slp, Jacobian, Jacobian));
+  cls.def(nb::init<Matrix<double>, Matrix<double>>(), "expressions"_a, "wrt"_a,
+          DOC(slp, Jacobian, Jacobian));
   cls.def("get", &Jacobian<double>::get, DOC(slp, Jacobian, get));
   cls.def("value", &Jacobian<double>::value, DOC(slp, Jacobian, value));
 }

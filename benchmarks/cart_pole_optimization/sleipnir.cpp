@@ -8,8 +8,8 @@
 #include <span>
 
 #include <Eigen/Core>
-#include <sleipnir/autodiff/variable.hpp>
-#include <sleipnir/autodiff/variable_matrix.hpp>
+#include <sleipnir/autodiff/matrix.hpp>
+#include <sleipnir/autodiff/real.hpp>
 #include <sleipnir/optimization/problem.hpp>
 #include <sleipnir/optimization/solver/exit_status.hpp>
 
@@ -22,9 +22,8 @@ namespace {
 ///
 /// @param x The state [x, θ, ẋ, θ̇]ᵀ.
 /// @param u The input [f_x].
-slp::VariableMatrix<double> cart_pole_dynamics(
-    const slp::VariableMatrix<double>& x,
-    const slp::VariableMatrix<double>& u) {
+slp::Matrix<double> cart_pole_dynamics(const slp::Matrix<double>& x,
+                                       const slp::Matrix<double>& u) {
   // https://underactuated.mit.edu/acrobot.html#cart_pole
   //
   // θ is CCW+ measured from negative y-axis.
@@ -63,23 +62,23 @@ slp::VariableMatrix<double> cart_pole_dynamics(
 
   //        [ m_c + m_p  m_p l cosθ]
   // M(q) = [m_p l cosθ    m_p l²  ]
-  slp::VariableMatrix<double> M{{m_c + m_p, m_p * l * c},
-                                {m_p * l * c, m_p * std::pow(l, 2)}};
+  slp::Matrix<double> M{{m_c + m_p, m_p * l * c},
+                        {m_p * l * c, m_p * std::pow(l, 2)}};
 
   //           [0  −m_p lθ̇ sinθ]
   // C(q, q̇) = [0       0      ]
-  slp::VariableMatrix<double> C{{0, -m_p * l * thetadot * s}, {0, 0}};
+  slp::Matrix<double> C{{0, -m_p * l * thetadot * s}, {0, 0}};
 
   //          [     0      ]
   // τ_g(q) = [-m_p gl sinθ]
-  slp::VariableMatrix<double> tau_g{{0}, {-m_p * g * l * s}};
+  slp::Matrix<double> tau_g{{0}, {-m_p * g * l * s}};
 
   //     [1]
   // B = [0]
   Eigen::Matrix<double, 2, 1> B{{1}, {0}};
 
   // q̈ = M⁻¹(q)(τ_g(q) − C(q, q̇)q̇ + Bu)
-  slp::VariableMatrix<double> qddot{4, 1};
+  slp::Matrix<double> qddot{4, 1};
   qddot.segment(0, 2) = qdot;
   qddot.segment(2, 2) = solve(M, tau_g - C * qdot + B * u);
   return qddot;
@@ -129,13 +128,12 @@ slp::Problem<double> cart_pole_sleipnir(std::chrono::duration<double> dt,
   for (int k = 0; k < N; ++k) {
     problem.subject_to(
         X.col(k + 1) ==
-        rk4<decltype(cart_pole_dynamics), slp::VariableMatrix<double>,
-            slp::VariableMatrix<double>>(cart_pole_dynamics, X.col(k), U.col(k),
-                                         dt));
+        rk4<decltype(cart_pole_dynamics), slp::Matrix<double>,
+            slp::Matrix<double>>(cart_pole_dynamics, X.col(k), U.col(k), dt));
   }
 
   // Minimize sum squared inputs
-  slp::Variable J = 0.0;
+  slp::Real J = 0.0;
   for (int k = 0; k < N; ++k) {
     J += U.col(k).T() * U.col(k);
   }

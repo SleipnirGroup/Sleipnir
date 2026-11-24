@@ -5,7 +5,7 @@
 #include <print>
 
 #include <Eigen/Core>
-#include <sleipnir/autodiff/variable_matrix.hpp>
+#include <sleipnir/autodiff/matrix.hpp>
 #include <sleipnir/optimization/ocp.hpp>
 #include <sleipnir/optimization/ocp/dynamics_type.hpp>
 #include <sleipnir/optimization/ocp/timestep_method.hpp>
@@ -28,8 +28,7 @@ int main() {
   Eigen::Matrix<double, 1, 1> A_discrete{std::exp(A(0) * dt.count())};
   Eigen::Matrix<double, 1, 1> B_discrete{(1.0 - A_discrete(0)) * B(0)};
 
-  auto f_discrete = [=](slp::VariableMatrix<double> x,
-                        slp::VariableMatrix<double> u) {
+  auto f_discrete = [=](slp::Matrix<double> x, slp::Matrix<double> u) {
     return A_discrete * x + B_discrete * u;
   };
 

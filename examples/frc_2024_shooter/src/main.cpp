@@ -6,9 +6,9 @@
 
 #include <Eigen/Core>
 #include <sleipnir/autodiff/gradient.hpp>
+#include <sleipnir/autodiff/matrix.hpp>
+#include <sleipnir/autodiff/real.hpp>
 #include <sleipnir/autodiff/slice.hpp>
-#include <sleipnir/autodiff/variable.hpp>
-#include <sleipnir/autodiff/variable_matrix.hpp>
 #include <sleipnir/optimization/problem.hpp>
 #include <sleipnir/util/concepts.hpp>
 
@@ -40,14 +40,14 @@ constexpr Vector6d target_wrt_field{
     {0.0}};
 constexpr Eigen::Vector3d g{{0.0}, {0.0}, {9.806}};  // m/s²
 
-slp::VariableMatrix<double> cross(const slp::MatrixLike auto& a,
-                                  const slp::MatrixLike auto& b) {
+slp::Matrix<double> cross(const slp::MatrixLike auto& a,
+                          const slp::MatrixLike auto& b) {
   return {{a[1, 0] * b[2, 0] - a[2, 0] * b[1, 0]},
           {a[2, 0] * b[0, 0] - a[0, 0] * b[2, 0]},
           {a[0, 0] * b[1, 0] - a[1, 0] * b[0, 0]}};
 }
 
-slp::VariableMatrix<double> f(const slp::VariableMatrix<double>& x) {
+slp::Matrix<double> f(const slp::Matrix<double>& x) {
   using namespace slp::slicing;
 
   // x' = x'
@@ -65,7 +65,7 @@ slp::VariableMatrix<double> f(const slp::VariableMatrix<double>& x) {
   // m is the object mass in kg
   constexpr double ρ = 1.204;  // kg/m³
   auto v = x[slp::Slice{3, 6}, _];
-  slp::Variable v2 = v.T() * v;
+  slp::Real v2 = v.T() * v;
   auto v_norm = sqrt(v2);
   auto v_hat = v / v_norm;
   constexpr Eigen::Vector3d ω{{0.0}, {0.0}, {2.0}};  // rad/s

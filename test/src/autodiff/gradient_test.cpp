@@ -9,8 +9,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <sleipnir/autodiff/gradient.hpp>
-#include <sleipnir/autodiff/variable.hpp>
-#include <sleipnir/autodiff/variable_matrix.hpp>
+#include <sleipnir/autodiff/matrix.hpp>
+#include <sleipnir/autodiff/real.hpp>
 #include <sleipnir/util/pool.hpp>
 #include <sleipnir/util/scope_exit.hpp>
 
@@ -23,11 +23,11 @@ TEMPLATE_TEST_CASE("Gradient - Trivial case", "[Gradient]", SCALAR_TYPES) {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  slp::Variable<T> a;
+  slp::Real<T> a;
   a.set_value(T(10));
-  slp::Variable<T> b;
+  slp::Real<T> b;
   b.set_value(T(20));
-  slp::Variable c = a;
+  slp::Real c = a;
 
   CHECK(slp::Gradient(a, a).value().coeff(0) == T(1));
   CHECK(slp::Gradient(a, b).value().coeff(0) == T(0));
@@ -41,9 +41,9 @@ TEMPLATE_TEST_CASE("Gradient - Unary plus", "[Gradient]", SCALAR_TYPES) {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  slp::Variable<T> a;
+  slp::Real<T> a;
   a.set_value(T(10));
-  slp::Variable c = +a;
+  slp::Real c = +a;
 
   CHECK(c.value() == a.value());
   CHECK(slp::Gradient(c, a).value().coeff(0) == T(1));
@@ -55,9 +55,9 @@ TEMPLATE_TEST_CASE("Gradient - Unary minus", "[Gradient]", SCALAR_TYPES) {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  slp::Variable<T> a;
+  slp::Real<T> a;
   a.set_value(T(10));
-  slp::Variable c = -a;
+  slp::Real c = -a;
 
   CHECK(c.value() == -a.value());
   CHECK(slp::Gradient(c, a).value().coeff(0) == T(-1));
@@ -70,10 +70,10 @@ TEMPLATE_TEST_CASE("Gradient - Identical variables", "[Gradient]",
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  slp::Variable<T> a;
+  slp::Real<T> a;
   a.set_value(T(10));
-  slp::Variable x = a;
-  slp::Variable c = a * a + x;
+  slp::Real x = a;
+  slp::Real c = a * a + x;
 
   CHECK(c.value() == a.value() * a.value() + x.value());
   CHECK(slp::Gradient(c, a).value().coeff(0) ==
@@ -88,9 +88,9 @@ TEMPLATE_TEST_CASE("Gradient - Elementary", "[Gradient]", SCALAR_TYPES) {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  slp::Variable<T> a;
+  slp::Real<T> a;
   a.set_value(T(1));
-  slp::Variable<T> b;
+  slp::Real<T> b;
   b.set_value(T(2));
 
   auto c = -2 * a;
@@ -124,11 +124,11 @@ TEMPLATE_TEST_CASE("Gradient - Comparison", "[Gradient]", SCALAR_TYPES) {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  slp::Variable<T> x;
+  slp::Real<T> x;
   x.set_value(T(10));
-  slp::Variable<T> a;
+  slp::Real<T> a;
   a.set_value(T(10));
-  slp::Variable<T> b;
+  slp::Real<T> b;
   b.set_value(T(200));
 
   CHECK(a.value() == a.value());
@@ -197,7 +197,7 @@ TEMPLATE_TEST_CASE("Gradient - Trigonometry", "[Gradient]", SCALAR_TYPES) {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  slp::Variable<T> x;
+  slp::Real<T> x;
   x.set_value(T(0.5));
 
   // sin(x)
@@ -252,7 +252,7 @@ TEMPLATE_TEST_CASE("Gradient - Hyperbolic", "[Gradient]", SCALAR_TYPES) {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  slp::Variable<T> x;
+  slp::Real<T> x;
   x.set_value(T(1));
 
   // sinh(x)
@@ -286,7 +286,7 @@ TEMPLATE_TEST_CASE("Gradient - Exponential", "[Gradient]", SCALAR_TYPES) {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  slp::Variable<T> x;
+  slp::Real<T> x;
   x.set_value(T(1));
 
   // log(x)
@@ -321,11 +321,11 @@ TEMPLATE_TEST_CASE("Gradient - Power", "[Gradient]", SCALAR_TYPES) {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  slp::Variable<T> x;
+  slp::Real<T> x;
   x.set_value(T(1));
-  slp::Variable<T> a;
+  slp::Real<T> a;
   a.set_value(T(2));
-  slp::Variable y = 2 * a;
+  slp::Real y = 2 * a;
 
   // sqrt(x)
   CHECK(slp::sqrt(x).value() == sqrt(x.value()));
@@ -426,7 +426,7 @@ TEMPLATE_TEST_CASE("Gradient - abs()", "[Gradient]", SCALAR_TYPES) {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  slp::Variable<T> x;
+  slp::Real<T> x;
   auto g = slp::Gradient(slp::abs(x), x);
 
   x.set_value(T(1));
@@ -470,8 +470,8 @@ TEMPLATE_TEST_CASE("Gradient - atan2()", "[Gradient]", SCALAR_TYPES) {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  slp::Variable<T> x;
-  slp::Variable<T> y;
+  slp::Real<T> x;
+  slp::Real<T> y;
 
   // Testing atan2 function on (T, var)
   x.set_value(T(1));
@@ -576,8 +576,8 @@ TEMPLATE_TEST_CASE("Gradient - hypot()", "[Gradient]", SCALAR_TYPES) {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  slp::Variable<T> x;
-  slp::Variable<T> y;
+  slp::Real<T> x;
+  slp::Real<T> y;
 
   // Testing hypot function on (var, T)
   x.set_value(T(1.8));
@@ -643,7 +643,7 @@ TEMPLATE_TEST_CASE("Gradient - hypot()", "[Gradient]", SCALAR_TYPES) {
         T(9) * y.value() / hypot(T(2) * x.value(), T(3) * y.value()));
 
   // Testing hypot function on (var, var, var)
-  slp::Variable<T> z;
+  slp::Real<T> z;
   x.set_value(T(1.3));
   y.set_value(T(2.3));
   z.set_value(T(3.3));
@@ -674,11 +674,11 @@ TEMPLATE_TEST_CASE("Gradient - if_else()", "[Gradient]", SCALAR_TYPES) {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  slp::Variable<T> x;
+  slp::Real<T> x;
   x.set_value(T(2));
 
-  slp::Variable<T> x2 = x * x;
-  slp::Variable<T> x3 = x * x * x;
+  slp::Real<T> x2 = x * x;
+  slp::Real<T> x3 = x * x * x;
 
   // f(x) = x² if x < 0, otherwise x³
   auto f = slp::if_else(x < T(0), x2, x3);
@@ -714,11 +714,11 @@ TEMPLATE_TEST_CASE("Gradient - max()", "[Gradient]", SCALAR_TYPES) {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  slp::Variable<T> x;
+  slp::Real<T> x;
   x.set_value(T(2));
 
-  slp::Variable<T> x2 = x * x;
-  slp::Variable<T> x3 = x * x * x;
+  slp::Real<T> x2 = x * x;
+  slp::Real<T> x3 = x * x * x;
 
   // Testing lhs < rhs
   auto g = slp::Gradient(slp::max(x2, x3), x);
@@ -745,11 +745,11 @@ TEMPLATE_TEST_CASE("Gradient - min()", "[Gradient]", SCALAR_TYPES) {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  slp::Variable<T> x;
+  slp::Real<T> x;
   x.set_value(T(2));
 
-  slp::Variable<T> x2 = x * x;
-  slp::Variable<T> x3 = x * x * x;
+  slp::Real<T> x2 = x * x;
+  slp::Real<T> x3 = x * x * x;
 
   // Testing lhs < rhs
   auto g = slp::Gradient(slp::min(x2, x3), x);
@@ -779,7 +779,7 @@ TEMPLATE_TEST_CASE("Gradient - Miscellaneous", "[Gradient]", SCALAR_TYPES) {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  slp::Variable<T> x;
+  slp::Real<T> x;
 
   // dx/dx
   x.set_value(T(3));
@@ -800,19 +800,19 @@ TEMPLATE_TEST_CASE("Gradient - Miscellaneous", "[Gradient]", SCALAR_TYPES) {
         T(2) * T(std::numbers::inv_sqrtpi) * exp(-x.value() * x.value()));
 }
 
-TEMPLATE_TEST_CASE("Gradient - Variable reuse", "[Gradient]", SCALAR_TYPES) {
+TEMPLATE_TEST_CASE("Gradient - Real reuse", "[Gradient]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  slp::Variable<T> a;
+  slp::Real<T> a;
   a.set_value(T(10));
 
-  slp::Variable<T> b;
+  slp::Real<T> b;
   b.set_value(T(20));
 
-  slp::Variable x = a * b;
+  slp::Real x = a * b;
 
   auto g = slp::Gradient(x, a);
 
@@ -840,7 +840,7 @@ TEMPLATE_TEST_CASE("Gradient - sign()", "[Gradient]", SCALAR_TYPES) {
     }
   };
 
-  slp::Variable<T> x;
+  slp::Real<T> x;
 
   // sign(1)
   x.set_value(T(1));
@@ -873,7 +873,7 @@ TEMPLATE_TEST_CASE("Gradient - Non-scalar", "[Gradient]", SCALAR_TYPES) {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  slp::VariableMatrix<T> x{3};
+  slp::Matrix<T> x{3};
   x[0].set_value(T(1));
   x[1].set_value(T(2));
   x[2].set_value(T(3));

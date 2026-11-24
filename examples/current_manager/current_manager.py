@@ -1,4 +1,4 @@
-from sleipnir.autodiff import Variable
+from sleipnir.autodiff import Real
 from sleipnir.optimization import Problem
 
 
@@ -26,7 +26,7 @@ class CurrentManager:
         )
 
         J = 0.0
-        current_sum = Variable(0.0)
+        current_sum = Real(0.0)
         for i in range(len(current_tolerances)):
             # The weight is 1/tolᵢ² where tolᵢ is the tolerance between the
             # desired and allocated current for subsystem i

@@ -68,8 +68,7 @@ jobs:
             # Comparison operators deliberately return constraints instead of
             # bool
             --disable-error-code override
-            # Indexing returns a Variable for int indices and a VariableBlock
-            # otherwise
+            # Indexing returns a Real for int indices and a Submatrix otherwise
             --disable-error-code overload-overlap
             # The bindings have int overloads alongside float ones so ints
             # dispatch without a conversion pass, but type checkers promote int

@@ -12,7 +12,7 @@
 #include <catch2/generators/catch_generators.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <sleipnir/autodiff/expression_type.hpp>
-#include <sleipnir/autodiff/variable.hpp>
+#include <sleipnir/autodiff/real.hpp>
 #include <sleipnir/optimization/problem.hpp>
 #include <sleipnir/optimization/solver/exit_status.hpp>
 #include <sleipnir/util/pool.hpp>
@@ -76,13 +76,13 @@ TEMPLATE_TEST_CASE("Problem - Cart-pole", "[Problem]", SCALAR_TYPES) {
   for (int k = 0; k < N; ++k) {
     problem.subject_to(
         X.col(k + 1) ==
-        rk4<T, decltype(&CartPoleUtil<T>::dynamics_variable),
-            slp::VariableMatrix<T>, slp::VariableMatrix<T>>(
-            &CartPoleUtil<T>::dynamics_variable, X.col(k), U.col(k), dt));
+        rk4<T, decltype(&CartPoleUtil<T>::dynamics_variable), slp::Matrix<T>,
+            slp::Matrix<T>>(&CartPoleUtil<T>::dynamics_variable, X.col(k),
+                            U.col(k), dt));
   }
 
   // Minimize sum squared inputs
-  slp::Variable J = T(0);
+  slp::Real J = T(0);
   for (int k = 0; k < N; ++k) {
     J += U.col(k).T() * U.col(k);
   }

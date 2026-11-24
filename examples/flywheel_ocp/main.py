@@ -3,7 +3,7 @@
 import math
 
 import numpy as np
-from sleipnir.autodiff import VariableMatrix
+from sleipnir.autodiff import Matrix
 from sleipnir.optimization import (
     OCP,
     DynamicsType,
@@ -26,7 +26,7 @@ def main() -> None:
     A_discrete = math.exp(A * dt)
     B_discrete = (1.0 - A_discrete) * B
 
-    def f_discrete(x: VariableMatrix, u: VariableMatrix) -> VariableMatrix:
+    def f_discrete(x: Matrix, u: Matrix) -> Matrix:
         return A_discrete * x + B_discrete * u
 
     r = 10.0

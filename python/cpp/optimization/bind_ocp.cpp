@@ -9,8 +9,8 @@
 #include <functional>
 
 #include <Eigen/Core>
-#include <sleipnir/autodiff/variable.hpp>
-#include <sleipnir/autodiff/variable_matrix.hpp>
+#include <sleipnir/autodiff/matrix.hpp>
+#include <sleipnir/autodiff/real.hpp>
 #include <sleipnir/optimization/ocp.hpp>
 #include <sleipnir/optimization/ocp/dynamics_type.hpp>
 #include <sleipnir/optimization/ocp/timestep_method.hpp>
@@ -44,9 +44,8 @@ void bind_ocp(nb::class_<OCP<double>, Problem<double>>& cls) {
   using namespace nb::literals;
 
   cls.def(nb::init<int, int, std::chrono::duration<double>, int,
-                   const std::function<VariableMatrix<double>(
-                       const VariableMatrix<double>& x,
-                       const VariableMatrix<double>& u)>&,
+                   const std::function<Matrix<double>(
+                       const Matrix<double>& x, const Matrix<double>& u)>&,
                    DynamicsType, TimestepMethod, TranscriptionMethod>(),
           "num_states"_a, "num_inputs"_a, "dt"_a, "num_steps"_a, "dynamics"_a,
           "dynamics_type"_a = DynamicsType::EXPLICIT_ODE,
@@ -60,7 +59,7 @@ void bind_ocp(nb::class_<OCP<double>, Problem<double>>& cls) {
   cls.def("constrain_initial_state", &OCP<double>::constrain_initial_state<int>,
           "initial_state"_a, DOC(slp, OCP, constrain_initial_state));
   cls.def("constrain_initial_state",
-          &OCP<double>::constrain_initial_state<Variable<double>>,
+          &OCP<double>::constrain_initial_state<Real<double>>,
           "initial_state"_a, DOC(slp, OCP, constrain_initial_state));
   cls.def(
       "constrain_initial_state",
@@ -69,7 +68,7 @@ void bind_ocp(nb::class_<OCP<double>, Problem<double>>& cls) {
       },
       "initial_state"_a, DOC(slp, OCP, constrain_initial_state));
   cls.def("constrain_initial_state",
-          &OCP<double>::constrain_initial_state<VariableMatrix<double>>,
+          &OCP<double>::constrain_initial_state<Matrix<double>>,
           "initial_state"_a, DOC(slp, OCP, constrain_initial_state));
 
   cls.def("constrain_final_state", &OCP<double>::constrain_final_state<double>,
@@ -77,8 +76,8 @@ void bind_ocp(nb::class_<OCP<double>, Problem<double>>& cls) {
   cls.def("constrain_final_state", &OCP<double>::constrain_final_state<int>,
           "final_state"_a, DOC(slp, OCP, constrain_final_state));
   cls.def("constrain_final_state",
-          &OCP<double>::constrain_final_state<Variable<double>>,
-          "final_state"_a, DOC(slp, OCP, constrain_final_state));
+          &OCP<double>::constrain_final_state<Real<double>>, "final_state"_a,
+          DOC(slp, OCP, constrain_final_state));
   cls.def(
       "constrain_final_state",
       [](OCP<double>& self, nb::DRef<Eigen::MatrixXd> final_state) {
@@ -86,14 +85,14 @@ void bind_ocp(nb::class_<OCP<double>, Problem<double>>& cls) {
       },
       "final_state"_a, DOC(slp, OCP, constrain_final_state));
   cls.def("constrain_final_state",
-          &OCP<double>::constrain_final_state<VariableMatrix<double>>,
-          "final_state"_a, DOC(slp, OCP, constrain_final_state));
+          &OCP<double>::constrain_final_state<Matrix<double>>, "final_state"_a,
+          DOC(slp, OCP, constrain_final_state));
 
   cls.def(
       "for_each_step",
       [](OCP<double>& self,
-         const std::function<void(const VariableMatrix<double>& x,
-                                  const VariableMatrix<double>& u)>& callback) {
+         const std::function<void(const Matrix<double>& x,
+                                  const Matrix<double>& u)>& callback) {
         self.for_each_step(callback);
       },
       "callback"_a, DOC(slp, OCP, for_each_step));
@@ -103,8 +102,8 @@ void bind_ocp(nb::class_<OCP<double>, Problem<double>>& cls) {
   cls.def("set_lower_input_bound", &OCP<double>::set_lower_input_bound<int>,
           "lower_bound"_a, DOC(slp, OCP, set_lower_input_bound));
   cls.def("set_lower_input_bound",
-          &OCP<double>::set_lower_input_bound<Variable<double>>,
-          "lower_bound"_a, DOC(slp, OCP, set_lower_input_bound));
+          &OCP<double>::set_lower_input_bound<Real<double>>, "lower_bound"_a,
+          DOC(slp, OCP, set_lower_input_bound));
   cls.def(
       "set_lower_input_bound",
       [](OCP<double>& self, nb::DRef<Eigen::MatrixXd> lower_bound) {
@@ -112,16 +111,16 @@ void bind_ocp(nb::class_<OCP<double>, Problem<double>>& cls) {
       },
       "lower_bound"_a, DOC(slp, OCP, set_lower_input_bound));
   cls.def("set_lower_input_bound",
-          &OCP<double>::set_lower_input_bound<VariableMatrix<double>>,
-          "lower_bound"_a, DOC(slp, OCP, set_lower_input_bound));
+          &OCP<double>::set_lower_input_bound<Matrix<double>>, "lower_bound"_a,
+          DOC(slp, OCP, set_lower_input_bound));
 
   cls.def("set_upper_input_bound", &OCP<double>::set_upper_input_bound<double>,
           "upper_bound"_a, DOC(slp, OCP, set_upper_input_bound));
   cls.def("set_upper_input_bound", &OCP<double>::set_upper_input_bound<int>,
           "upper_bound"_a, DOC(slp, OCP, set_upper_input_bound));
   cls.def("set_upper_input_bound",
-          &OCP<double>::set_upper_input_bound<Variable<double>>,
-          "upper_bound"_a, DOC(slp, OCP, set_upper_input_bound));
+          &OCP<double>::set_upper_input_bound<Real<double>>, "upper_bound"_a,
+          DOC(slp, OCP, set_upper_input_bound));
   cls.def(
       "set_upper_input_bound",
       [](OCP<double>& self, nb::DRef<Eigen::MatrixXd> upper_bound) {
@@ -129,8 +128,8 @@ void bind_ocp(nb::class_<OCP<double>, Problem<double>>& cls) {
       },
       "upper_bound"_a, DOC(slp, OCP, set_upper_input_bound));
   cls.def("set_upper_input_bound",
-          &OCP<double>::set_upper_input_bound<VariableMatrix<double>>,
-          "upper_bound"_a, DOC(slp, OCP, set_upper_input_bound));
+          &OCP<double>::set_upper_input_bound<Matrix<double>>, "upper_bound"_a,
+          DOC(slp, OCP, set_upper_input_bound));
 
   cls.def("set_min_timestep", &OCP<double>::set_min_timestep, "min_timestep"_a,
           DOC(slp, OCP, set_min_timestep));

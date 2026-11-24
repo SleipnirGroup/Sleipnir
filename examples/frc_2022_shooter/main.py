@@ -20,7 +20,7 @@ import numpy.typing as npt
 from mpl_toolkits.mplot3d import Axes3D
 from numpy.linalg import norm
 from sleipnir import autodiff
-from sleipnir.autodiff import VariableBlock, VariableMatrix, block, sqrt
+from sleipnir.autodiff import Matrix, Submatrix, block, sqrt
 from sleipnir.optimization import Problem
 
 field_width = 8.2296  # 27 ft -> m
@@ -37,10 +37,8 @@ def lerp(a: float, b: float, t: float) -> float:
     return a + t * (b - a)
 
 
-def cross(
-    a: VariableMatrix | VariableBlock, b: npt.NDArray[np.float64]
-) -> VariableMatrix:
-    return VariableMatrix(
+def cross(a: Matrix | Submatrix, b: npt.NDArray[np.float64]) -> Matrix:
+    return Matrix(
         [
             [a[1, 0] * b[2, 0] - a[2, 0] * b[1, 0]],
             [a[2, 0] * b[0, 0] - a[0, 0] * b[2, 0]],
@@ -49,7 +47,7 @@ def cross(
     )
 
 
-def f(x: VariableMatrix | VariableBlock) -> VariableMatrix:
+def f(x: Matrix | Submatrix) -> Matrix:
     # x' = x'
     # y' = y'
     # z' = z'

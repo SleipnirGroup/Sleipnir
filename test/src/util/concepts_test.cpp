@@ -1,17 +1,17 @@
 // Copyright (c) Sleipnir contributors
 
 #include <Eigen/Core>
-#include <sleipnir/autodiff/variable.hpp>
-#include <sleipnir/autodiff/variable_block.hpp>
-#include <sleipnir/autodiff/variable_matrix.hpp>
+#include <sleipnir/autodiff/matrix.hpp>
+#include <sleipnir/autodiff/real.hpp>
+#include <sleipnir/autodiff/submatrix.hpp>
 #include <sleipnir/util/concepts.hpp>
 
 using EigBlk = Eigen::Block<Eigen::MatrixXd>;
 using EigMat = Eigen::MatrixXd;
 
-using SlpBlk = slp::VariableBlock<slp::VariableMatrix<double>>;
-using SlpMat = slp::VariableMatrix<double>;
-using SlpVar = slp::Variable<double>;
+using SlpBlk = slp::Submatrix<slp::Matrix<double>>;
+using SlpMat = slp::Matrix<double>;
+using SlpVar = slp::Real<double>;
 
 // SleipnirType
 static_assert(!slp::SleipnirType<EigBlk>);

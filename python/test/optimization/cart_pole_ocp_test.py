@@ -6,7 +6,7 @@ from cart_pole_util import (
     cart_pole_dynamics_double,
     cart_pole_dynamics_variable,
 )
-from sleipnir.autodiff import ExpressionType, VariableMatrix
+from sleipnir.autodiff import ExpressionType, Matrix
 from sleipnir.optimization import (
     OCP,
     DynamicsType,
@@ -59,7 +59,7 @@ def test_cart_pole_ocp() -> None:
     problem.constrain_final_state(x_final)
 
     # Cart position constraints
-    def each(x: VariableMatrix, u: VariableMatrix) -> None:
+    def each(x: Matrix, u: Matrix) -> None:
         problem.subject_to(bounds(0.0, x[0], d_max))
 
     problem.for_each_step(each)

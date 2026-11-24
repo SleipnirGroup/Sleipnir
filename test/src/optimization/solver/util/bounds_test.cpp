@@ -14,8 +14,8 @@
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_range_equals.hpp>
 #include <sleipnir/autodiff/jacobian.hpp>
-#include <sleipnir/autodiff/variable.hpp>
-#include <sleipnir/autodiff/variable_matrix.hpp>
+#include <sleipnir/autodiff/matrix.hpp>
+#include <sleipnir/autodiff/real.hpp>
 #include <sleipnir/optimization/solver/util/bounds.hpp>
 
 #include "scalar_types.hpp"
@@ -26,12 +26,12 @@ TEMPLATE_TEST_CASE("Bounds - Detection", "[Bounds]", SCALAR_TYPES) {
   constexpr auto inf = std::numeric_limits<T>::infinity();
   constexpr auto nan = std::numeric_limits<T>::quiet_NaN();
 
-  slp::Variable<T> x, y, z, w, v, u;
+  slp::Real<T> x, y, z, w, v, u;
   std::array decision_variables{x, y, z, w, v};
 
-  slp::Variable a = -z - T(1e-12);
+  slp::Real a = -z - T(1e-12);
   // We assume these imply constraints in the form c(x) ≥ 0
-  auto inequality_constraint_variables = std::to_array<slp::Variable<T>>({
+  auto inequality_constraint_variables = std::to_array<slp::Real<T>>({
       x + y - T(3),
       x * y,
       T(3),
@@ -76,8 +76,8 @@ TEMPLATE_TEST_CASE("Bounds - Detection", "[Bounds]", SCALAR_TYPES) {
           {9, 12},
       });
 
-  slp::VariableMatrix<T> x_ad{decision_variables};
-  slp::VariableMatrix<T> c_i_ad{inequality_constraint_variables};
+  slp::Matrix<T> x_ad{decision_variables};
+  slp::Matrix<T> c_i_ad{inequality_constraint_variables};
   slp::Jacobian A_i{c_i_ad, x_ad};
   const auto [bound_constraint_mask, decision_var_indices_to_bounds,
               conflicting_bounds] =

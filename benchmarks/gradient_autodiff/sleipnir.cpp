@@ -6,8 +6,8 @@
 #include <utility>
 
 #include <sleipnir/autodiff/gradient.hpp>
-#include <sleipnir/autodiff/variable.hpp>
-#include <sleipnir/autodiff/variable_matrix.hpp>
+#include <sleipnir/autodiff/matrix.hpp>
+#include <sleipnir/autodiff/real.hpp>
 
 #include "benchmark_util.hpp"
 #include "sleipnir_autodiff_evaluator.hpp"
@@ -17,11 +17,11 @@ namespace {
 /// Returns the extended Rosenbrock function.
 ///
 /// @param x The input.
-slp::Variable<double> rosenbrock(const slp::VariableMatrix<double>& x) {
-  slp::Variable f = 0.0;
+slp::Real<double> rosenbrock(const slp::Matrix<double>& x) {
+  slp::Real f = 0.0;
   for (int i = 0; i < x.rows() - 1; ++i) {
-    slp::Variable a = x[i + 1] - x[i] * x[i];
-    slp::Variable b = 1.0 - x[i];
+    slp::Real a = x[i + 1] - x[i] * x[i];
+    slp::Real b = 1.0 - x[i];
     f += 100.0 * a * a + b * b;
   }
   return f;
@@ -31,7 +31,7 @@ slp::Variable<double> rosenbrock(const slp::VariableMatrix<double>& x) {
 
 void register_sleipnir_benchmarks(std::span<const int> nums_variables) {
   register_autodiff_benchmarks("Sleipnir", nums_variables, [](int N) {
-    slp::VariableMatrix<double> x{N};
+    slp::Matrix<double> x{N};
     slp::Gradient g{rosenbrock(x), x};
     return SleipnirAutodiffEvaluator{std::move(x), std::move(g)};
   });

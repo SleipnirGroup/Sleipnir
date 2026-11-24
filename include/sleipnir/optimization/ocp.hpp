@@ -9,8 +9,8 @@
 #include <utility>
 
 #include "sleipnir/autodiff/expression_type.hpp"
-#include "sleipnir/autodiff/variable.hpp"
-#include "sleipnir/autodiff/variable_matrix.hpp"
+#include "sleipnir/autodiff/matrix.hpp"
+#include "sleipnir/autodiff/real.hpp"
 #include "sleipnir/optimization/ocp/dynamics_type.hpp"
 #include "sleipnir/optimization/ocp/timestep_method.hpp"
 #include "sleipnir/optimization/ocp/transcription_method.hpp"
@@ -71,8 +71,8 @@ class OCP : public Problem<Scalar> {
   /// @param transcription_method The transcription method.
   OCP(int num_states, int num_inputs, std::chrono::duration<Scalar> dt,
       int num_steps,
-      function_ref<VariableMatrix<Scalar>(const VariableMatrix<Scalar>& x,
-                                          const VariableMatrix<Scalar>& u)>
+      function_ref<Matrix<Scalar>(const Matrix<Scalar>& x,
+                                  const Matrix<Scalar>& u)>
           dynamics,
       DynamicsType dynamics_type = DynamicsType::EXPLICIT_ODE,
       TimestepMethod timestep_method = TimestepMethod::FIXED,
@@ -82,11 +82,11 @@ class OCP : public Problem<Scalar> {
             num_inputs,
             dt,
             num_steps,
-            [=]([[maybe_unused]] const VariableMatrix<Scalar>& t,
-                const VariableMatrix<Scalar>& x,
-                const VariableMatrix<Scalar>& u,
-                [[maybe_unused]] const VariableMatrix<Scalar>& dt)
-                -> VariableMatrix<Scalar> { return dynamics(x, u); },
+            [=]([[maybe_unused]] const Matrix<Scalar>& t,
+                const Matrix<Scalar>& x, const Matrix<Scalar>& u,
+                [[maybe_unused]] const Matrix<Scalar>& dt) -> Matrix<Scalar> {
+              return dynamics(x, u);
+            },
             dynamics_type,
             timestep_method,
             transcription_method} {}
@@ -110,9 +110,9 @@ class OCP : public Problem<Scalar> {
   /// @param transcription_method The transcription method.
   OCP(int num_states, int num_inputs, std::chrono::duration<Scalar> dt,
       int num_steps,
-      function_ref<VariableMatrix<Scalar>(
-          const Variable<Scalar>& t, const VariableMatrix<Scalar>& x,
-          const VariableMatrix<Scalar>& u, const Variable<Scalar>& dt)>
+      function_ref<
+          Matrix<Scalar>(const Real<Scalar>& t, const Matrix<Scalar>& x,
+                         const Matrix<Scalar>& u, const Real<Scalar>& dt)>
           dynamics,
       DynamicsType dynamics_type = DynamicsType::EXPLICIT_ODE,
       TimestepMethod timestep_method = TimestepMethod::FIXED,
@@ -126,16 +126,16 @@ class OCP : public Problem<Scalar> {
     m_U = this->decision_variable(num_inputs, m_num_steps + 1);
 
     if (timestep_method == TimestepMethod::FIXED) {
-      m_DT = VariableMatrix<Scalar>{1, m_num_steps + 1};
+      m_DT = Matrix<Scalar>{1, m_num_steps + 1};
       for (int i = 0; i < num_steps + 1; ++i) {
         m_DT[0, i] = dt.count();
       }
     } else if (timestep_method == TimestepMethod::VARIABLE_SINGLE) {
-      Variable single_dt = this->decision_variable();
+      Real single_dt = this->decision_variable();
       single_dt.set_value(dt.count());
 
       // Set the member variable matrix to track the decision variable
-      m_DT = VariableMatrix<Scalar>{1, m_num_steps + 1};
+      m_DT = Matrix<Scalar>{1, m_num_steps + 1};
       for (int i = 0; i < num_steps + 1; ++i) {
         m_DT[0, i] = single_dt;
       }
@@ -157,7 +157,7 @@ class OCP : public Problem<Scalar> {
       // In single-shooting the states aren't decision variables, but instead
       // depend on the input and previous states. The initial state is a
       // parameter.
-      m_X = VariableMatrix<Scalar>{detail::empty, num_states, m_num_steps + 1};
+      m_X = Matrix<Scalar>{detail::empty, num_states, m_num_steps + 1};
       m_X.col(0) = this->parameter(num_states);
       constrain_single_shooting();
     }
@@ -172,14 +172,14 @@ class OCP : public Problem<Scalar> {
     auto x_0 = this->initial_state();
 
     // Broadcast scalars to the initial state's shape
-    VariableMatrix<Scalar> x_0_value;
+    Matrix<Scalar> x_0_value;
     if constexpr (ScalarLike<T>) {
-      x_0_value = VariableMatrix<Scalar>{detail::empty, x_0.rows(), x_0.cols()};
+      x_0_value = Matrix<Scalar>{detail::empty, x_0.rows(), x_0.cols()};
       for (auto& elem : x_0_value) {
         elem = initial_state;
       }
     } else {
-      x_0_value = VariableMatrix<Scalar>{initial_state};
+      x_0_value = Matrix<Scalar>{initial_state};
     }
 
     // In single-shooting, the initial state is a parameter, so if the requested
@@ -206,13 +206,13 @@ class OCP : public Problem<Scalar> {
 
   /// Sets the constraint evaluation function. This function is called
   /// `num_steps+1` times, with the corresponding state and input
-  /// VariableMatrices.
+  /// Matrices.
   ///
   /// @param callback The callback f(x, u) where x is the state and u is the
   ///     input vector.
-  void for_each_step(const function_ref<void(const VariableMatrix<Scalar>& x,
-                                             const VariableMatrix<Scalar>& u)>
-                         callback) {
+  void for_each_step(
+      const function_ref<void(const Matrix<Scalar>& x, const Matrix<Scalar>& u)>
+          callback) {
     for (int i = 0; i < m_num_steps + 1; ++i) {
       auto x = X().col(i);
       auto u = U().col(i);
@@ -222,16 +222,15 @@ class OCP : public Problem<Scalar> {
 
   /// Sets the constraint evaluation function. This function is called
   /// `num_steps+1` times, with the corresponding state and input
-  /// VariableMatrices.
+  /// Matrices.
   ///
   /// @param callback The callback f(t, x, u, dt) where t is time, x is the
   ///     state vector, u is the input vector, and dt is the timestep duration.
   void for_each_step(
-      const function_ref<
-          void(const Variable<Scalar>& t, const VariableMatrix<Scalar>& x,
-               const VariableMatrix<Scalar>& u, const Variable<Scalar>& dt)>
+      const function_ref<void(const Real<Scalar>& t, const Matrix<Scalar>& x,
+                              const Matrix<Scalar>& u, const Real<Scalar>& dt)>
           callback) {
-    Variable<Scalar> time{0};
+    Real<Scalar> time{0};
 
     for (int i = 0; i < m_num_steps + 1; ++i) {
       auto x = X().col(i);
@@ -287,7 +286,7 @@ class OCP : public Problem<Scalar> {
   /// Shaped (num_states)x(num_steps+1).
   ///
   /// @return The state variable matrix.
-  VariableMatrix<Scalar>& X() { return m_X; }
+  Matrix<Scalar>& X() { return m_X; }
 
   /// Gets the input variables. After the problem is solved, this will contain
   /// the inputs corresponding to the optimized trajectory.
@@ -296,7 +295,7 @@ class OCP : public Problem<Scalar> {
   /// in the trajectory.
   ///
   /// @return The input variable matrix.
-  VariableMatrix<Scalar>& U() { return m_U; }
+  Matrix<Scalar>& U() { return m_U; }
 
   /// Gets the timestep variables. After the problem is solved, this will
   /// contain the timesteps corresponding to the optimized trajectory.
@@ -305,31 +304,30 @@ class OCP : public Problem<Scalar> {
   /// trajectory.
   ///
   /// @return The timestep variable matrix.
-  VariableMatrix<Scalar>& dt() { return m_DT; }
+  Matrix<Scalar>& dt() { return m_DT; }
 
   /// Gets the initial state in the trajectory.
   ///
   /// @return The initial state of the trajectory.
-  VariableMatrix<Scalar> initial_state() { return m_X.col(0); }
+  Matrix<Scalar> initial_state() { return m_X.col(0); }
 
   /// Gets the final state in the trajectory.
   ///
   /// @return The final state of the trajectory.
-  VariableMatrix<Scalar> final_state() { return m_X.col(m_num_steps); }
+  Matrix<Scalar> final_state() { return m_X.col(m_num_steps); }
 
  private:
   int m_num_steps;
 
-  function_ref<VariableMatrix<Scalar>(
-      const Variable<Scalar>& t, const VariableMatrix<Scalar>& x,
-      const VariableMatrix<Scalar>& u, const Variable<Scalar>& dt)>
+  function_ref<Matrix<Scalar>(const Real<Scalar>& t, const Matrix<Scalar>& x,
+                              const Matrix<Scalar>& u, const Real<Scalar>& dt)>
       m_dynamics;
   DynamicsType m_dynamics_type;
   TranscriptionMethod m_transcription_method;
 
-  VariableMatrix<Scalar> m_X;
-  VariableMatrix<Scalar> m_U;
-  VariableMatrix<Scalar> m_DT;
+  Matrix<Scalar> m_X;
+  Matrix<Scalar> m_U;
+  Matrix<Scalar> m_DT;
 
   /// Performs 4th order Runge-Kutta integration of dx/dt = f(t, x, u) for dt.
   ///
@@ -353,11 +351,11 @@ class OCP : public Problem<Scalar> {
   void constrain_direct_collocation() {
     slp_assert(m_dynamics_type == DynamicsType::EXPLICIT_ODE);
 
-    Variable<Scalar> time{0};
+    Real<Scalar> time{0};
 
     // Derivation at https://mec560sbu.github.io/2016/09/30/direct_collocation/
     for (int i = 0; i < m_num_steps; ++i) {
-      Variable h = dt()[0, i];
+      Real h = dt()[0, i];
 
       auto& f = m_dynamics;
 
@@ -388,19 +386,19 @@ class OCP : public Problem<Scalar> {
 
   /// Applies direct transcription dynamics constraints.
   void constrain_direct_transcription() {
-    Variable<Scalar> time{0};
+    Real<Scalar> time{0};
 
     for (int i = 0; i < m_num_steps; ++i) {
       auto x_begin = X().col(i);
       auto x_end = X().col(i + 1);
       auto u = U().col(i);
-      Variable dt = this->dt()[0, i];
+      Real dt = this->dt()[0, i];
 
       if (m_dynamics_type == DynamicsType::EXPLICIT_ODE) {
         this->subject_to(
-            x_end == rk4<const decltype(m_dynamics)&, VariableMatrix<Scalar>,
-                         VariableMatrix<Scalar>, Variable<Scalar>>(
-                         m_dynamics, x_begin, u, time, dt));
+            x_end ==
+            rk4<const decltype(m_dynamics)&, Matrix<Scalar>, Matrix<Scalar>,
+                Real<Scalar>>(m_dynamics, x_begin, u, time, dt));
       } else if (m_dynamics_type == DynamicsType::DISCRETE) {
         this->subject_to(x_end == m_dynamics(time, x_begin, u, dt));
       }
@@ -411,18 +409,17 @@ class OCP : public Problem<Scalar> {
 
   /// Applies single shooting dynamics constraints.
   void constrain_single_shooting() {
-    Variable<Scalar> time{0};
+    Real<Scalar> time{0};
 
     for (int i = 0; i < m_num_steps; ++i) {
       auto x_begin = X().col(i);
       auto x_end = X().col(i + 1);
       auto u = U().col(i);
-      Variable dt = this->dt()[0, i];
+      Real dt = this->dt()[0, i];
 
       if (m_dynamics_type == DynamicsType::EXPLICIT_ODE) {
-        x_end = rk4<const decltype(m_dynamics)&, VariableMatrix<Scalar>,
-                    VariableMatrix<Scalar>, Variable<Scalar>>(
-            m_dynamics, x_begin, u, time, dt);
+        x_end = rk4<const decltype(m_dynamics)&, Matrix<Scalar>, Matrix<Scalar>,
+                    Real<Scalar>>(m_dynamics, x_begin, u, time, dt);
       } else if (m_dynamics_type == DynamicsType::DISCRETE) {
         x_end = m_dynamics(time, x_begin, u, dt);
       }

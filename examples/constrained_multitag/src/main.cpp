@@ -10,8 +10,8 @@
 #include <vector>
 
 #include <Eigen/Core>
-#include <sleipnir/autodiff/variable.hpp>
-#include <sleipnir/autodiff/variable_matrix.hpp>
+#include <sleipnir/autodiff/matrix.hpp>
+#include <sleipnir/autodiff/real.hpp>
 #include <sleipnir/optimization/problem.hpp>
 
 int main() {
@@ -29,11 +29,11 @@ int main() {
   constexpr double robot_z = 0.0;
   auto robot_θ = problem.decision_variable();
 
-  // cache autodiff variables
+  // cache autodiff expressions
   auto sinθ = sin(robot_θ);
   auto cosθ = cos(robot_θ);
 
-  slp::VariableMatrix<double> field2robot{
+  slp::Matrix<double> field2robot{
       {cosθ, -sinθ, 0, robot_x},
       {sinθ, cosθ, 0, robot_y},
       {0, 0, 1, robot_z},
@@ -68,7 +68,7 @@ int main() {
   auto camera2field = solve<double>(field2camera, Eigen::Matrix4d::Identity());
 
   // Cost
-  slp::Variable J = 0.0;
+  slp::Real J = 0.0;
   for (const auto& [field2point, observation] :
        std::views::zip(field2points, point_observations)) {
     // camera2point = field2camera⁻¹ * field2point
