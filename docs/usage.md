@@ -388,7 +388,7 @@ A problem is a quadratic program (QP) if:
 
 All other problems are nonlinear programs (NLPs).
 
-### Suppressing constant pruning
+### Constant pruning and parameters
 
 Sleipnir aggressively simplifies constant expressions in the expression graph. This includes:
 
@@ -397,16 +397,10 @@ Sleipnir aggressively simplifies constant expressions in the expression graph. T
 * addition or subtraction by 0
 * math functions evaluating constants
 
-If the user intends to reuse the problem formulation with different constants, the expression pruning can be suppressed in two ways.
-
-1. Make an empty (linear) `Real`, then set its value. This can negatively impact autodiff caching.
+Use a parameter for constants that need to change between solves.
 ```python
-a = Real()
-a.set_value(0)
-```
-2. Create a constant `Real` with a value that won't be pruned (expression-dependent).
-```python
-a = Real(2)
+problem = Problem()
+a = problem.parameter()
 ```
 
 ### Avoiding numerical issues
