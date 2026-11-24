@@ -144,31 +144,6 @@ TEMPLATE_TEST_CASE("Problem decision variable - Dynamic matrix init assign",
         Eigen::MatrixX<T>{{T(2), T(8)}, {T(2), T(10)}, {T(11), T(12)}});
 }
 
-TEMPLATE_TEST_CASE("Problem decision variable - Symmetric matrix", "[Problem]",
-                   SCALAR_TYPES) {
-  using T = TestType;
-
-  slp::Problem<T> problem;
-
-  // Matrix zero init
-  auto A = problem.symmetric_decision_variable(2);
-  CHECK(A.value(0, 0) == T(0));
-  CHECK(A.value(0, 1) == T(0));
-  CHECK(A.value(1, 0) == T(0));
-  CHECK(A.value(1, 1) == T(0));
-
-  // Assign to lower triangle
-  A[0, 0].set_value(T(1));
-  A[1, 0].set_value(T(2));
-  A[1, 1].set_value(T(3));
-
-  // Confirm whole matrix changed
-  CHECK(A.value(0, 0) == T(1));
-  CHECK(A.value(0, 1) == T(2));
-  CHECK(A.value(1, 0) == T(2));
-  CHECK(A.value(1, 1) == T(3));
-}
-
 TEMPLATE_TEST_CASE("Problem parameter - Init assign", "[Problem]",
                    SCALAR_TYPES) {
   using T = TestType;

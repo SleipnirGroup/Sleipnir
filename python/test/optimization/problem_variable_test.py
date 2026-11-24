@@ -73,28 +73,6 @@ def test_matrix_init_assign() -> None:
     assert (z.value() == np.array([[2.0, 8.0], [2.0, 10.0], [11.0, 12.0]])).all()
 
 
-def test_symmetric_matrix() -> None:
-    problem = Problem()
-
-    # Matrix zero init
-    A = problem.symmetric_decision_variable(2)
-    assert A.value(0, 0) == 0.0
-    assert A.value(0, 1) == 0.0
-    assert A.value(1, 0) == 0.0
-    assert A.value(1, 1) == 0.0
-
-    # Assign to lower triangle
-    A[0, 0].set_value(1.0)
-    A[1, 0].set_value(2.0)
-    A[1, 1].set_value(3.0)
-
-    # Confirm whole matrix changed
-    assert A.value(0, 0) == 1.0
-    assert A.value(0, 1) == 2.0
-    assert A.value(1, 0) == 2.0
-    assert A.value(1, 1) == 3.0
-
-
 def test_parameter_init_assign() -> None:
     problem = Problem()
 

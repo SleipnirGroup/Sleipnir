@@ -1056,24 +1056,6 @@ Args:
 
 )doc";
 
-constexpr char mkd_doc_slp_Problem_symmetric_decision_variable[] =
-R"doc(Creates a symmetric matrix of decision variables in the optimization
-problem.
-
-Variable instances are reused across the diagonal, which helps reduce
-problem dimensionality.
-
-Decision variables have an initial value of zero.
-
-Args:
-    rows: Number of matrix rows.
-
-Returns:
-    A symmetric matrix of decision variables in the optimization
-    problem.
-
-)doc";
-
 constexpr char mkd_doc_slp_TimestepMethod[] = R"doc(Enum describing the type of system timestep.)doc";
 
 constexpr char mkd_doc_slp_TimestepMethod_FIXED[] = R"doc(The timestep is a fixed constant.)doc";
