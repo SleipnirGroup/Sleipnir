@@ -7,7 +7,7 @@ The robot pose is constrained to be on the floor (z = 0).
 """
 
 import numpy as np
-from sleipnir.autodiff import VariableMatrix, cos, sin, solve
+from sleipnir.autodiff import Matrix, cos, sin, solve
 from sleipnir.optimization import Problem
 
 
@@ -26,11 +26,11 @@ def main() -> None:
     robot_z = 0.0
     robot_θ = problem.decision_variable()
 
-    # cache autodiff variables
+    # cache autodiff expressions
     sinθ = sin(robot_θ)
     cosθ = cos(robot_θ)
 
-    field2robot = VariableMatrix(
+    field2robot = Matrix(
         [
             [cosθ, -sinθ, 0, robot_x],
             [sinθ, cosθ, 0, robot_y],

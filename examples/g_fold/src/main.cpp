@@ -23,9 +23,9 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <sleipnir/autodiff/matrix.hpp>
+#include <sleipnir/autodiff/real.hpp>
 #include <sleipnir/autodiff/slice.hpp>
-#include <sleipnir/autodiff/variable.hpp>
-#include <sleipnir/autodiff/variable_matrix.hpp>
 #include <sleipnir/optimization/problem.hpp>
 #include <sleipnir/optimization/solver/exit_status.hpp>
 #include <unsupported/Eigen/MatrixFunctions>  // IWYU pragma: keep
@@ -531,7 +531,7 @@ int main() {
     }
 
     // Problem 4 from [1]: Minimum fuel
-    problem.minimize(std::accumulate(σ.begin(), σ.end(), slp::Variable{0.0}));
+    problem.minimize(std::accumulate(σ.begin(), σ.end(), slp::Real{0.0}));
     auto status = problem.solve();
 
     return Solution{status, X.value(), Z.value(), U.value(), σ.value()};

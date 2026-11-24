@@ -1,58 +1,58 @@
 import numpy as np
-from sleipnir.autodiff import Variable, VariableMatrix
+from sleipnir.autodiff import Matrix, Real
 from sleipnir.optimization import EqualityConstraints, InequalityConstraints
 
 
 def test_equality_constraint_boolean_comparisons() -> None:
     args = [(1.0, 1.0), (1.0, 2.0), (2.0, 1.0)]
 
-    # double-Variable
+    # double-Real
     for lhs, rhs in args:
-        assert bool(float(lhs) == Variable(rhs)) == (lhs == rhs)
+        assert bool(float(lhs) == Real(rhs)) == (lhs == rhs)
 
-    # double-VariableMatrix
+    # double-Matrix
     for lhs, rhs in args:
-        assert bool(float(lhs) == VariableMatrix([[rhs]])) == (lhs == rhs)
+        assert bool(float(lhs) == Matrix([[rhs]])) == (lhs == rhs)
 
-    # Variable-double
+    # Real-double
     for lhs, rhs in args:
-        assert bool(Variable(lhs) == float(rhs)) == (lhs == rhs)
+        assert bool(Real(lhs) == float(rhs)) == (lhs == rhs)
 
-    # Variable-Variable
+    # Real-Real
     for lhs, rhs in args:
-        assert bool(Variable(lhs) == Variable(rhs)) == (lhs == rhs)
+        assert bool(Real(lhs) == Real(rhs)) == (lhs == rhs)
 
-    # Variable-VariableMatrix
+    # Real-Matrix
     for lhs, rhs in args:
-        assert bool(Variable(lhs) == VariableMatrix([[rhs]])) == (lhs == rhs)
+        assert bool(Real(lhs) == Matrix([[rhs]])) == (lhs == rhs)
 
-    # VariableMatrix-double
+    # Matrix-double
     for lhs, rhs in args:
-        assert bool(VariableMatrix([[lhs]]) == float(rhs)) == (lhs == rhs)
+        assert bool(Matrix([[lhs]]) == float(rhs)) == (lhs == rhs)
 
-    # VariableMatrix-Variable
+    # Matrix-Real
     for lhs, rhs in args:
-        assert bool(VariableMatrix([[lhs]]) == Variable(rhs)) == (lhs == rhs)
+        assert bool(Matrix([[lhs]]) == Real(rhs)) == (lhs == rhs)
 
-    # VariableMatrix-VariableMatrix
+    # Matrix-Matrix
     for lhs, rhs in args:
-        assert bool(VariableMatrix([[lhs]]) == VariableMatrix([[rhs]])) == (lhs == rhs)
+        assert bool(Matrix([[lhs]]) == Matrix([[rhs]])) == (lhs == rhs)
 
-    # np.array-VariableMatrix
+    # np.array-Matrix
     for lhs, rhs in args:
-        assert bool(np.array([[lhs]]) == VariableMatrix([[rhs]])) == (lhs == rhs)
+        assert bool(np.array([[lhs]]) == Matrix([[rhs]])) == (lhs == rhs)
 
-    # np.array-VariableBlock
+    # np.array-Submatrix
     for lhs, rhs in args:
-        assert bool(np.array([[lhs]]) == VariableMatrix([[rhs]])[:, :]) == (lhs == rhs)
+        assert bool(np.array([[lhs]]) == Matrix([[rhs]])[:, :]) == (lhs == rhs)
 
-    # VariableMatrix-np.array
+    # Matrix-np.array
     for lhs, rhs in args:
-        assert bool(VariableMatrix([[lhs]]) == np.array([[rhs]])) == (lhs == rhs)
+        assert bool(Matrix([[lhs]]) == np.array([[rhs]])) == (lhs == rhs)
 
-    # VariableBlock-np.array
+    # Submatrix-np.array
     for lhs, rhs in args:
-        assert bool(VariableMatrix([[lhs]])[:, :] == np.array([[rhs]])) == (lhs == rhs)
+        assert bool(Matrix([[lhs]])[:, :] == np.array([[rhs]])) == (lhs == rhs)
 
 
 # The solver treats a < constraint the same as a <= constraint, but the
@@ -60,87 +60,87 @@ def test_equality_constraint_boolean_comparisons() -> None:
 def test_inequality_constraint_boolean_comparisons() -> None:
     args = [(1.0, 1.0), (1.0, 2.0), (2.0, 1.0)]
 
-    # double-Variable
+    # double-Real
     for lhs, rhs in args:
-        assert bool(float(lhs) < Variable(rhs)) == (lhs < rhs)
-        assert bool(float(lhs) <= Variable(rhs)) == (lhs <= rhs)
-        assert bool(float(lhs) > Variable(rhs)) == (lhs > rhs)
-        assert bool(float(lhs) >= Variable(rhs)) == (lhs >= rhs)
+        assert bool(float(lhs) < Real(rhs)) == (lhs < rhs)
+        assert bool(float(lhs) <= Real(rhs)) == (lhs <= rhs)
+        assert bool(float(lhs) > Real(rhs)) == (lhs > rhs)
+        assert bool(float(lhs) >= Real(rhs)) == (lhs >= rhs)
 
-    # double-VariableMatrix
+    # double-Matrix
     for lhs, rhs in args:
-        assert bool(float(lhs) < VariableMatrix([[rhs]])) == (lhs < rhs)
-        assert bool(float(lhs) <= VariableMatrix([[rhs]])) == (lhs <= rhs)
-        assert bool(float(lhs) > VariableMatrix([[rhs]])) == (lhs > rhs)
-        assert bool(float(lhs) >= VariableMatrix([[rhs]])) == (lhs >= rhs)
+        assert bool(float(lhs) < Matrix([[rhs]])) == (lhs < rhs)
+        assert bool(float(lhs) <= Matrix([[rhs]])) == (lhs <= rhs)
+        assert bool(float(lhs) > Matrix([[rhs]])) == (lhs > rhs)
+        assert bool(float(lhs) >= Matrix([[rhs]])) == (lhs >= rhs)
 
-    # Variable-Variable
+    # Real-Real
     for lhs, rhs in args:
-        assert bool(Variable(lhs) < Variable(rhs)) == (lhs < rhs)
-        assert bool(Variable(lhs) <= Variable(rhs)) == (lhs <= rhs)
-        assert bool(Variable(lhs) > Variable(rhs)) == (lhs > rhs)
-        assert bool(Variable(lhs) >= Variable(rhs)) == (lhs >= rhs)
+        assert bool(Real(lhs) < Real(rhs)) == (lhs < rhs)
+        assert bool(Real(lhs) <= Real(rhs)) == (lhs <= rhs)
+        assert bool(Real(lhs) > Real(rhs)) == (lhs > rhs)
+        assert bool(Real(lhs) >= Real(rhs)) == (lhs >= rhs)
 
-    # Variable-VariableMatrix
+    # Real-Matrix
     for lhs, rhs in args:
-        assert bool(Variable(lhs) < VariableMatrix([[rhs]])) == (lhs < rhs)
-        assert bool(Variable(lhs) <= VariableMatrix([[rhs]])) == (lhs <= rhs)
-        assert bool(Variable(lhs) > VariableMatrix([[rhs]])) == (lhs > rhs)
-        assert bool(Variable(lhs) >= VariableMatrix([[rhs]])) == (lhs >= rhs)
+        assert bool(Real(lhs) < Matrix([[rhs]])) == (lhs < rhs)
+        assert bool(Real(lhs) <= Matrix([[rhs]])) == (lhs <= rhs)
+        assert bool(Real(lhs) > Matrix([[rhs]])) == (lhs > rhs)
+        assert bool(Real(lhs) >= Matrix([[rhs]])) == (lhs >= rhs)
 
-    # VariableMatrix-double
+    # Matrix-double
     for lhs, rhs in args:
-        assert bool(VariableMatrix([[lhs]]) < float(rhs)) == (lhs < rhs)
-        assert bool(VariableMatrix([[lhs]]) <= float(rhs)) == (lhs <= rhs)
-        assert bool(VariableMatrix([[lhs]]) > float(rhs)) == (lhs > rhs)
-        assert bool(VariableMatrix([[lhs]]) >= float(rhs)) == (lhs >= rhs)
+        assert bool(Matrix([[lhs]]) < float(rhs)) == (lhs < rhs)
+        assert bool(Matrix([[lhs]]) <= float(rhs)) == (lhs <= rhs)
+        assert bool(Matrix([[lhs]]) > float(rhs)) == (lhs > rhs)
+        assert bool(Matrix([[lhs]]) >= float(rhs)) == (lhs >= rhs)
 
-    # VariableMatrix-Variable
+    # Matrix-Real
     for lhs, rhs in args:
-        assert bool(VariableMatrix([[lhs]]) < Variable(rhs)) == (lhs < rhs)
-        assert bool(VariableMatrix([[lhs]]) <= Variable(rhs)) == (lhs <= rhs)
-        assert bool(VariableMatrix([[lhs]]) > Variable(rhs)) == (lhs > rhs)
-        assert bool(VariableMatrix([[lhs]]) >= Variable(rhs)) == (lhs >= rhs)
+        assert bool(Matrix([[lhs]]) < Real(rhs)) == (lhs < rhs)
+        assert bool(Matrix([[lhs]]) <= Real(rhs)) == (lhs <= rhs)
+        assert bool(Matrix([[lhs]]) > Real(rhs)) == (lhs > rhs)
+        assert bool(Matrix([[lhs]]) >= Real(rhs)) == (lhs >= rhs)
 
-    # VariableMatrix-VariableMatrix
+    # Matrix-Matrix
     for lhs, rhs in args:
-        assert bool(VariableMatrix([[lhs]]) < VariableMatrix([[rhs]])) == (lhs < rhs)
-        assert bool(VariableMatrix([[lhs]]) <= VariableMatrix([[rhs]])) == (lhs <= rhs)
-        assert bool(VariableMatrix([[lhs]]) > VariableMatrix([[rhs]])) == (lhs > rhs)
-        assert bool(VariableMatrix([[lhs]]) >= VariableMatrix([[rhs]])) == (lhs >= rhs)
+        assert bool(Matrix([[lhs]]) < Matrix([[rhs]])) == (lhs < rhs)
+        assert bool(Matrix([[lhs]]) <= Matrix([[rhs]])) == (lhs <= rhs)
+        assert bool(Matrix([[lhs]]) > Matrix([[rhs]])) == (lhs > rhs)
+        assert bool(Matrix([[lhs]]) >= Matrix([[rhs]])) == (lhs >= rhs)
 
-    # np.array-VariableMatrix
+    # np.array-Matrix
     for lhs, rhs in args:
-        assert bool(np.array([[lhs]]) < VariableMatrix([[rhs]])) == (lhs < rhs)
-        assert bool(np.array([[lhs]]) <= VariableMatrix([[rhs]])) == (lhs <= rhs)
-        assert bool(np.array([[lhs]]) > VariableMatrix([[rhs]])) == (lhs > rhs)
-        assert bool(np.array([[lhs]]) >= VariableMatrix([[rhs]])) == (lhs >= rhs)
+        assert bool(np.array([[lhs]]) < Matrix([[rhs]])) == (lhs < rhs)
+        assert bool(np.array([[lhs]]) <= Matrix([[rhs]])) == (lhs <= rhs)
+        assert bool(np.array([[lhs]]) > Matrix([[rhs]])) == (lhs > rhs)
+        assert bool(np.array([[lhs]]) >= Matrix([[rhs]])) == (lhs >= rhs)
 
-    # np.array-VariableBlock
+    # np.array-Submatrix
     for lhs, rhs in args:
-        assert bool(np.array([[lhs]]) < VariableMatrix([[rhs]])[:, :]) == (lhs < rhs)
-        assert bool(np.array([[lhs]]) <= VariableMatrix([[rhs]])[:, :]) == (lhs <= rhs)
-        assert bool(np.array([[lhs]]) > VariableMatrix([[rhs]])[:, :]) == (lhs > rhs)
-        assert bool(np.array([[lhs]]) >= VariableMatrix([[rhs]])[:, :]) == (lhs >= rhs)
+        assert bool(np.array([[lhs]]) < Matrix([[rhs]])[:, :]) == (lhs < rhs)
+        assert bool(np.array([[lhs]]) <= Matrix([[rhs]])[:, :]) == (lhs <= rhs)
+        assert bool(np.array([[lhs]]) > Matrix([[rhs]])[:, :]) == (lhs > rhs)
+        assert bool(np.array([[lhs]]) >= Matrix([[rhs]])[:, :]) == (lhs >= rhs)
 
-    # VariableMatrix-np.array
+    # Matrix-np.array
     for lhs, rhs in args:
-        assert bool(VariableMatrix([[lhs]]) < np.array([[rhs]])) == (lhs < rhs)
-        assert bool(VariableMatrix([[lhs]]) <= np.array([[rhs]])) == (lhs <= rhs)
-        assert bool(VariableMatrix([[lhs]]) > np.array([[rhs]])) == (lhs > rhs)
-        assert bool(VariableMatrix([[lhs]]) >= np.array([[rhs]])) == (lhs >= rhs)
+        assert bool(Matrix([[lhs]]) < np.array([[rhs]])) == (lhs < rhs)
+        assert bool(Matrix([[lhs]]) <= np.array([[rhs]])) == (lhs <= rhs)
+        assert bool(Matrix([[lhs]]) > np.array([[rhs]])) == (lhs > rhs)
+        assert bool(Matrix([[lhs]]) >= np.array([[rhs]])) == (lhs >= rhs)
 
-    # VariableBlock-np.array
+    # Submatrix-np.array
     for lhs, rhs in args:
-        assert bool(VariableMatrix([[lhs]])[:, :] < np.array([[rhs]])) == (lhs < rhs)
-        assert bool(VariableMatrix([[lhs]])[:, :] <= np.array([[rhs]])) == (lhs <= rhs)
-        assert bool(VariableMatrix([[lhs]])[:, :] > np.array([[rhs]])) == (lhs > rhs)
-        assert bool(VariableMatrix([[lhs]])[:, :] >= np.array([[rhs]])) == (lhs >= rhs)
+        assert bool(Matrix([[lhs]])[:, :] < np.array([[rhs]])) == (lhs < rhs)
+        assert bool(Matrix([[lhs]])[:, :] <= np.array([[rhs]])) == (lhs <= rhs)
+        assert bool(Matrix([[lhs]])[:, :] > np.array([[rhs]])) == (lhs > rhs)
+        assert bool(Matrix([[lhs]])[:, :] >= np.array([[rhs]])) == (lhs >= rhs)
 
 
 def test_equality_constraint_concatenation() -> None:
-    eq1 = Variable(1.0) == Variable(1.0)
-    eq2 = Variable(1.0) == Variable(2.0)
+    eq1 = Real(1.0) == Real(1.0)
+    eq2 = Real(1.0) == Real(2.0)
     eqs = EqualityConstraints([eq1, eq2])
 
     assert bool(eq1)
@@ -149,8 +149,8 @@ def test_equality_constraint_concatenation() -> None:
 
 
 def test_inequality_constraint_concatenation() -> None:
-    ineq1 = Variable(2.0) < Variable(1.0)
-    ineq2 = Variable(1.0) < Variable(2.0)
+    ineq1 = Real(2.0) < Real(1.0)
+    ineq2 = Real(1.0) < Real(2.0)
     ineqs = InequalityConstraints([ineq1, ineq2])
 
     assert not bool(ineq1)
@@ -158,8 +158,8 @@ def test_inequality_constraint_concatenation() -> None:
     assert not bool(ineqs)
 
     # Each constraint keeps its own strictness
-    strict = Variable(1.0) < Variable(1.0)
-    non_strict = Variable(1.0) <= Variable(1.0)
+    strict = Real(1.0) < Real(1.0)
+    non_strict = Real(1.0) <= Real(1.0)
     assert not bool(InequalityConstraints([strict, non_strict]))
     assert not bool(InequalityConstraints([non_strict, strict]))
     assert bool(InequalityConstraints([non_strict, non_strict]))

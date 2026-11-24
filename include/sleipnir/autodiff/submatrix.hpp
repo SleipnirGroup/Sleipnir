@@ -10,9 +10,9 @@
 
 #include <Eigen/Core>
 
+#include "sleipnir/autodiff/real.hpp"
 #include "sleipnir/autodiff/sleipnir_base.hpp"
 #include "sleipnir/autodiff/slice.hpp"
-#include "sleipnir/autodiff/variable.hpp"
 #include "sleipnir/util/assert.hpp"
 #include "sleipnir/util/concepts.hpp"
 #include "sleipnir/util/empty.hpp"
@@ -20,23 +20,23 @@
 
 namespace slp {
 
-/// A submatrix of autodiff variables with reference semantics.
+/// A submatrix of autodiff expressions with reference semantics.
 ///
 /// @tparam Mat The type of the matrix whose storage this class points to.
 template <typename Mat>
-class VariableBlock : public SleipnirBase {
+class Submatrix : public SleipnirBase {
  public:
   /// Scalar type alias.
   using Scalar = typename Mat::Scalar;
 
   /// Copy constructor.
-  VariableBlock(const VariableBlock<Mat>&) = default;
+  Submatrix(const Submatrix<Mat>&) = default;
 
-  /// Assigns a VariableBlock to the block.
+  /// Assigns a Submatrix to the block.
   ///
-  /// @param values VariableBlock of values.
-  /// @return This VariableBlock.
-  VariableBlock<Mat>& operator=(const VariableBlock<Mat>& values) {
+  /// @param values Submatrix of values.
+  /// @return This Submatrix.
+  Submatrix<Mat>& operator=(const Submatrix<Mat>& values) {
     if (this == &values) {
       return *this;
     }
@@ -61,13 +61,13 @@ class VariableBlock : public SleipnirBase {
   }
 
   /// Move constructor.
-  VariableBlock(VariableBlock<Mat>&&) = default;
+  Submatrix(Submatrix<Mat>&&) = default;
 
-  /// Assigns a VariableBlock to the block.
+  /// Assigns a Submatrix to the block.
   ///
-  /// @param values VariableBlock of values.
-  /// @return This VariableBlock.
-  VariableBlock<Mat>& operator=(VariableBlock<Mat>&& values) {
+  /// @param values Submatrix of values.
+  /// @return This Submatrix.
+  Submatrix<Mat>& operator=(Submatrix<Mat>&& values) {
     if (this == &values) {
       return *this;
     }
@@ -91,28 +91,28 @@ class VariableBlock : public SleipnirBase {
     return *this;
   }
 
-  /// Constructs a Variable block pointing to all of the given matrix.
+  /// Constructs a Submatrix pointing to all of the given matrix.
   ///
   /// @param mat The matrix to which to point.
   // NOLINTNEXTLINE (google-explicit-constructor)
-  VariableBlock(Mat& mat) : VariableBlock{mat, 0, 0, mat.rows(), mat.cols()} {}
+  Submatrix(Mat& mat) : Submatrix{mat, 0, 0, mat.rows(), mat.cols()} {}
 
-  /// Constructs a Variable block pointing to a subset of the given matrix.
+  /// Constructs a Submatrix pointing to a subset of the given matrix.
   ///
   /// @param mat The matrix to which to point.
   /// @param row_offset The block's row offset.
   /// @param col_offset The block's column offset.
   /// @param block_rows The number of rows in the block.
   /// @param block_cols The number of columns in the block.
-  VariableBlock(Mat& mat, int row_offset, int col_offset, int block_rows,
-                int block_cols)
+  Submatrix(Mat& mat, int row_offset, int col_offset, int block_rows,
+            int block_cols)
       : m_mat{&mat},
         m_row_slice{row_offset, row_offset + block_rows, 1},
         m_row_slice_length{m_row_slice.adjust(mat.rows())},
         m_col_slice{col_offset, col_offset + block_cols, 1},
         m_col_slice_length{m_col_slice.adjust(mat.cols())} {}
 
-  /// Constructs a Variable block pointing to a subset of the given matrix.
+  /// Constructs a Submatrix pointing to a subset of the given matrix.
   ///
   /// Note that the slices are taken as is rather than adjusted.
   ///
@@ -121,8 +121,8 @@ class VariableBlock : public SleipnirBase {
   /// @param row_slice_length The block's row length.
   /// @param col_slice The block's column slice.
   /// @param col_slice_length The block's column length.
-  VariableBlock(Mat& mat, Slice row_slice, int row_slice_length,
-                Slice col_slice, int col_slice_length)
+  Submatrix(Mat& mat, Slice row_slice, int row_slice_length, Slice col_slice,
+            int col_slice_length)
       : m_mat{&mat},
         m_row_slice{std::move(row_slice)},
         m_row_slice_length{row_slice_length},
@@ -134,8 +134,8 @@ class VariableBlock : public SleipnirBase {
   /// This only works for blocks with one row and one column.
   ///
   /// @param value Value to assign.
-  /// @return This VariableBlock.
-  VariableBlock<Mat>& operator=(ScalarLike auto value) {
+  /// @return This Submatrix.
+  Submatrix<Mat>& operator=(ScalarLike auto value) {
     slp_assert(rows() == 1 && cols() == 1);
 
     (*this)[0, 0] = value;
@@ -157,9 +157,9 @@ class VariableBlock : public SleipnirBase {
   /// Assigns an Eigen matrix to the block.
   ///
   /// @param values Eigen matrix of values to assign.
-  /// @return This VariableBlock.
+  /// @return This Submatrix.
   template <typename Derived>
-  VariableBlock<Mat>& operator=(const Eigen::MatrixBase<Derived>& values) {
+  Submatrix<Mat>& operator=(const Eigen::MatrixBase<Derived>& values) {
     slp_assert(rows() == values.rows() && cols() == values.cols());
 
     for (int row = 0; row < rows(); ++row) {
@@ -186,11 +186,11 @@ class VariableBlock : public SleipnirBase {
     }
   }
 
-  /// Assigns a VariableMatrix to the block.
+  /// Assigns a Matrix to the block.
   ///
-  /// @param values VariableMatrix of values.
-  /// @return This VariableBlock.
-  VariableBlock<Mat>& operator=(const Mat& values) {
+  /// @param values Matrix of values.
+  /// @return This Submatrix.
+  Submatrix<Mat>& operator=(const Mat& values) {
     slp_assert(rows() == values.rows() && cols() == values.cols());
 
     for (int row = 0; row < rows(); ++row) {
@@ -201,11 +201,11 @@ class VariableBlock : public SleipnirBase {
     return *this;
   }
 
-  /// Assigns a VariableMatrix to the block.
+  /// Assigns a Matrix to the block.
   ///
-  /// @param values VariableMatrix of values.
-  /// @return This VariableBlock.
-  VariableBlock<Mat>& operator=(Mat&& values) {
+  /// @param values Matrix of values.
+  /// @return This Submatrix.
+  Submatrix<Mat>& operator=(Mat&& values) {
     slp_assert(rows() == values.rows() && cols() == values.cols());
 
     for (int row = 0; row < rows(); ++row) {
@@ -221,7 +221,7 @@ class VariableBlock : public SleipnirBase {
   /// @param row The scalar subblock's row.
   /// @param col The scalar subblock's column.
   /// @return A scalar subblock at the given row and column.
-  Variable<Scalar>& operator[](int row, int col)
+  Real<Scalar>& operator[](int row, int col)
     requires(!std::is_const_v<Mat>)
   {
     slp_assert(row >= 0 && row < rows());
@@ -235,7 +235,7 @@ class VariableBlock : public SleipnirBase {
   /// @param row The scalar subblock's row.
   /// @param col The scalar subblock's column.
   /// @return A scalar subblock at the given row and column.
-  const Variable<Scalar>& operator[](int row, int col) const {
+  const Real<Scalar>& operator[](int row, int col) const {
     slp_assert(row >= 0 && row < rows());
     slp_assert(col >= 0 && col < cols());
     return (*m_mat)[m_row_slice.start + row * m_row_slice.step,
@@ -246,7 +246,7 @@ class VariableBlock : public SleipnirBase {
   ///
   /// @param index The scalar subblock's index.
   /// @return A scalar subblock at the given index.
-  Variable<Scalar>& operator[](int index)
+  Real<Scalar>& operator[](int index)
     requires(!std::is_const_v<Mat>)
   {
     slp_assert(index >= 0 && index < rows() * cols());
@@ -257,7 +257,7 @@ class VariableBlock : public SleipnirBase {
   ///
   /// @param index The scalar subblock's index.
   /// @return A scalar subblock at the given index.
-  const Variable<Scalar>& operator[](int index) const {
+  const Real<Scalar>& operator[](int index) const {
     slp_assert(index >= 0 && index < rows() * cols());
     return (*this)[index / cols(), index % cols()];
   }
@@ -269,8 +269,8 @@ class VariableBlock : public SleipnirBase {
   /// @param block_rows The number of rows in the block selection.
   /// @param block_cols The number of columns in the block selection.
   /// @return A block of the variable matrix.
-  VariableBlock<Mat> block(int row_offset, int col_offset, int block_rows,
-                           int block_cols) {
+  Submatrix<Mat> block(int row_offset, int col_offset, int block_rows,
+                       int block_cols) {
     slp_assert(row_offset >= 0 && row_offset <= rows());
     slp_assert(col_offset >= 0 && col_offset <= cols());
     slp_assert(block_rows >= 0 && block_rows <= rows() - row_offset);
@@ -286,8 +286,8 @@ class VariableBlock : public SleipnirBase {
   /// @param block_rows The number of rows in the block selection.
   /// @param block_cols The number of columns in the block selection.
   /// @return A block slice of the variable matrix.
-  const VariableBlock<const Mat> block(int row_offset, int col_offset,
-                                       int block_rows, int block_cols) const {
+  const Submatrix<const Mat> block(int row_offset, int col_offset,
+                                   int block_rows, int block_cols) const {
     slp_assert(row_offset >= 0 && row_offset <= rows());
     slp_assert(col_offset >= 0 && col_offset <= cols());
     slp_assert(block_rows >= 0 && block_rows <= rows() - row_offset);
@@ -301,7 +301,7 @@ class VariableBlock : public SleipnirBase {
   /// @param row_slice The row slice.
   /// @param col_slice The column slice.
   /// @return A slice of the variable matrix.
-  VariableBlock<Mat> operator[](Slice row_slice, Slice col_slice) {
+  Submatrix<Mat> operator[](Slice row_slice, Slice col_slice) {
     int row_slice_length = row_slice.adjust(m_row_slice_length);
     int col_slice_length = col_slice.adjust(m_col_slice_length);
     return (*this)[row_slice, row_slice_length, col_slice, col_slice_length];
@@ -312,8 +312,8 @@ class VariableBlock : public SleipnirBase {
   /// @param row_slice The row slice.
   /// @param col_slice The column slice.
   /// @return A slice of the variable matrix.
-  const VariableBlock<const Mat> operator[](Slice row_slice,
-                                            Slice col_slice) const {
+  const Submatrix<const Mat> operator[](Slice row_slice,
+                                        Slice col_slice) const {
     int row_slice_length = row_slice.adjust(m_row_slice_length);
     int col_slice_length = col_slice.adjust(m_col_slice_length);
     return (*this)[row_slice, row_slice_length, col_slice, col_slice_length];
@@ -329,18 +329,17 @@ class VariableBlock : public SleipnirBase {
   /// @param col_slice The column slice.
   /// @param col_slice_length The column slice length.
   /// @return A slice of the variable matrix.
-  VariableBlock<Mat> operator[](Slice row_slice, int row_slice_length,
-                                Slice col_slice, int col_slice_length) {
-    return VariableBlock{
-        *m_mat,
-        {m_row_slice.start + row_slice.start * m_row_slice.step,
-         m_row_slice.start + row_slice.stop * m_row_slice.step,
-         row_slice.step * m_row_slice.step},
-        row_slice_length,
-        {m_col_slice.start + col_slice.start * m_col_slice.step,
-         m_col_slice.start + col_slice.stop * m_col_slice.step,
-         col_slice.step * m_col_slice.step},
-        col_slice_length};
+  Submatrix<Mat> operator[](Slice row_slice, int row_slice_length,
+                            Slice col_slice, int col_slice_length) {
+    return Submatrix{*m_mat,
+                     {m_row_slice.start + row_slice.start * m_row_slice.step,
+                      m_row_slice.start + row_slice.stop * m_row_slice.step,
+                      row_slice.step * m_row_slice.step},
+                     row_slice_length,
+                     {m_col_slice.start + col_slice.start * m_col_slice.step,
+                      m_col_slice.start + col_slice.stop * m_col_slice.step,
+                      col_slice.step * m_col_slice.step},
+                     col_slice_length};
   }
 
   /// Returns a slice of the variable matrix.
@@ -353,20 +352,18 @@ class VariableBlock : public SleipnirBase {
   /// @param col_slice The column slice.
   /// @param col_slice_length The column slice length.
   /// @return A slice of the variable matrix.
-  const VariableBlock<const Mat> operator[](Slice row_slice,
-                                            int row_slice_length,
-                                            Slice col_slice,
-                                            int col_slice_length) const {
-    return VariableBlock{
-        *m_mat,
-        {m_row_slice.start + row_slice.start * m_row_slice.step,
-         m_row_slice.start + row_slice.stop * m_row_slice.step,
-         row_slice.step * m_row_slice.step},
-        row_slice_length,
-        {m_col_slice.start + col_slice.start * m_col_slice.step,
-         m_col_slice.start + col_slice.stop * m_col_slice.step,
-         col_slice.step * m_col_slice.step},
-        col_slice_length};
+  const Submatrix<const Mat> operator[](Slice row_slice, int row_slice_length,
+                                        Slice col_slice,
+                                        int col_slice_length) const {
+    return Submatrix{*m_mat,
+                     {m_row_slice.start + row_slice.start * m_row_slice.step,
+                      m_row_slice.start + row_slice.stop * m_row_slice.step,
+                      row_slice.step * m_row_slice.step},
+                     row_slice_length,
+                     {m_col_slice.start + col_slice.start * m_col_slice.step,
+                      m_col_slice.start + col_slice.stop * m_col_slice.step,
+                      col_slice.step * m_col_slice.step},
+                     col_slice_length};
   }
 
   /// Returns a segment of the variable vector.
@@ -374,7 +371,7 @@ class VariableBlock : public SleipnirBase {
   /// @param offset The offset of the segment.
   /// @param length The length of the segment.
   /// @return A segment of the variable vector.
-  VariableBlock<Mat> segment(int offset, int length) {
+  Submatrix<Mat> segment(int offset, int length) {
     slp_assert(cols() == 1);
     slp_assert(offset >= 0 && offset < rows());
     slp_assert(length >= 0 && length <= rows() - offset);
@@ -386,7 +383,7 @@ class VariableBlock : public SleipnirBase {
   /// @param offset The offset of the segment.
   /// @param length The length of the segment.
   /// @return A segment of the variable vector.
-  const VariableBlock<Mat> segment(int offset, int length) const {
+  const Submatrix<Mat> segment(int offset, int length) const {
     slp_assert(cols() == 1);
     slp_assert(offset >= 0 && offset < rows());
     slp_assert(length >= 0 && length <= rows() - offset);
@@ -397,7 +394,7 @@ class VariableBlock : public SleipnirBase {
   ///
   /// @param row The row to slice.
   /// @return A row slice of the variable matrix.
-  VariableBlock<Mat> row(int row) {
+  Submatrix<Mat> row(int row) {
     slp_assert(row >= 0 && row < rows());
     return block(row, 0, 1, cols());
   }
@@ -406,7 +403,7 @@ class VariableBlock : public SleipnirBase {
   ///
   /// @param row The row to slice.
   /// @return A row slice of the variable matrix.
-  VariableBlock<const Mat> row(int row) const {
+  Submatrix<const Mat> row(int row) const {
     slp_assert(row >= 0 && row < rows());
     return block(row, 0, 1, cols());
   }
@@ -415,7 +412,7 @@ class VariableBlock : public SleipnirBase {
   ///
   /// @param col The column to slice.
   /// @return A column slice of the variable matrix.
-  VariableBlock<Mat> col(int col) {
+  Submatrix<Mat> col(int col) {
     slp_assert(col >= 0 && col < cols());
     return block(0, col, rows(), 1);
   }
@@ -424,22 +421,22 @@ class VariableBlock : public SleipnirBase {
   ///
   /// @param col The column to slice.
   /// @return A column slice of the variable matrix.
-  VariableBlock<const Mat> col(int col) const {
+  Submatrix<const Mat> col(int col) const {
     slp_assert(col >= 0 && col < cols());
     return block(0, col, rows(), 1);
   }
 
   /// Compound matrix multiplication-assignment operator.
   ///
-  /// @param rhs Variable to multiply.
+  /// @param rhs Real to multiply.
   /// @return Result of multiplication.
-  VariableBlock<Mat>& operator*=(const MatrixLike auto& rhs) {
+  Submatrix<Mat>& operator*=(const MatrixLike auto& rhs) {
     slp_assert(cols() == rhs.rows() && cols() == rhs.cols());
 
     for (int i = 0; i < rows(); ++i) {
       Mat lhs_old_row = row(i);
       for (int j = 0; j < rhs.cols(); ++j) {
-        Variable sum{Scalar(0)};
+        Real sum{Scalar(0)};
         for (int k = 0; k < cols(); ++k) {
           sum += lhs_old_row[k] * rhs[k, j];
         }
@@ -452,9 +449,9 @@ class VariableBlock : public SleipnirBase {
 
   /// Compound matrix multiplication-assignment operator.
   ///
-  /// @param rhs Variable to multiply.
+  /// @param rhs Real to multiply.
   /// @return Result of multiplication.
-  VariableBlock<Mat>& operator*=(const ScalarLike auto& rhs) {
+  Submatrix<Mat>& operator*=(const ScalarLike auto& rhs) {
     for (int row = 0; row < rows(); ++row) {
       for (int col = 0; col < cols(); ++col) {
         (*this)[row, col] *= rhs;
@@ -466,9 +463,9 @@ class VariableBlock : public SleipnirBase {
 
   /// Compound matrix division-assignment operator.
   ///
-  /// @param rhs Variable to divide.
+  /// @param rhs Real to divide.
   /// @return Result of division.
-  VariableBlock<Mat>& operator/=(const ScalarLike auto& rhs) {
+  Submatrix<Mat>& operator/=(const ScalarLike auto& rhs) {
     for (int row = 0; row < rows(); ++row) {
       for (int col = 0; col < cols(); ++col) {
         (*this)[row, col] /= rhs;
@@ -480,9 +477,9 @@ class VariableBlock : public SleipnirBase {
 
   /// Compound addition-assignment operator.
   ///
-  /// @param rhs Variable to add.
+  /// @param rhs Real to add.
   /// @return Result of addition.
-  VariableBlock<Mat>& operator+=(const MatrixLike auto& rhs) {
+  Submatrix<Mat>& operator+=(const MatrixLike auto& rhs) {
     slp_assert(rows() == rhs.rows() && cols() == rhs.cols());
 
     for (int row = 0; row < rows(); ++row) {
@@ -496,9 +493,9 @@ class VariableBlock : public SleipnirBase {
 
   /// Compound addition-assignment operator.
   ///
-  /// @param rhs Variable to add.
+  /// @param rhs Real to add.
   /// @return Result of addition.
-  VariableBlock<Mat>& operator+=(const ScalarLike auto& rhs) {
+  Submatrix<Mat>& operator+=(const ScalarLike auto& rhs) {
     slp_assert(rows() == 1 && cols() == 1);
 
     for (int row = 0; row < rows(); ++row) {
@@ -512,9 +509,9 @@ class VariableBlock : public SleipnirBase {
 
   /// Compound subtraction-assignment operator.
   ///
-  /// @param rhs Variable to subtract.
+  /// @param rhs Real to subtract.
   /// @return Result of subtraction.
-  VariableBlock<Mat>& operator-=(const MatrixLike auto& rhs) {
+  Submatrix<Mat>& operator-=(const MatrixLike auto& rhs) {
     slp_assert(rows() == rhs.rows() && cols() == rhs.cols());
 
     for (int row = 0; row < rows(); ++row) {
@@ -528,9 +525,9 @@ class VariableBlock : public SleipnirBase {
 
   /// Compound subtraction-assignment operator.
   ///
-  /// @param rhs Variable to subtract.
+  /// @param rhs Real to subtract.
   /// @return Result of subtraction.
-  VariableBlock<Mat>& operator-=(const ScalarLike auto& rhs) {
+  Submatrix<Mat>& operator-=(const ScalarLike auto& rhs) {
     slp_assert(rows() == 1 && cols() == 1);
 
     for (int row = 0; row < rows(); ++row) {
@@ -542,9 +539,9 @@ class VariableBlock : public SleipnirBase {
     return *this;
   }
 
-  /// Implicit conversion operator from 1x1 VariableBlock to Variable.
+  /// Implicit conversion operator from 1x1 Submatrix to Real.
   // NOLINTNEXTLINE (google-explicit-constructor)
-  operator Variable<Scalar>() const {
+  operator Real<Scalar>() const {
     slp_assert(rows() == 1 && cols() == 1);
     return (*this)[0, 0];
   }
@@ -610,8 +607,7 @@ class VariableBlock : public SleipnirBase {
   /// @param unary_op The unary operator to use for the transform operation.
   /// @return Result of the unary operator.
   std::remove_cv_t<Mat> cwise_transform(
-      function_ref<Variable<Scalar>(const Variable<Scalar>& x)> unary_op)
-      const {
+      function_ref<Real<Scalar>(const Real<Scalar>& x)> unary_op) const {
     std::remove_cv_t<Mat> result{detail::empty, rows(), cols()};
 
     for (int row = 0; row < rows(); ++row) {
@@ -635,14 +631,14 @@ class VariableBlock : public SleipnirBase {
   class iterator {
    public:
     using iterator_category = std::bidirectional_iterator_tag;
-    using value_type = Variable<Scalar>;
+    using value_type = Real<Scalar>;
     using difference_type = std::ptrdiff_t;
-    using pointer = Variable<Scalar>*;
-    using reference = Variable<Scalar>&;
+    using pointer = Real<Scalar>*;
+    using reference = Real<Scalar>&;
 
     constexpr iterator() noexcept = default;
 
-    constexpr iterator(VariableBlock<Mat>* mat, int index) noexcept
+    constexpr iterator(Submatrix<Mat>* mat, int index) noexcept
         : m_mat{mat}, m_index{index} {}
 
     constexpr iterator& operator++() noexcept {
@@ -672,21 +668,21 @@ class VariableBlock : public SleipnirBase {
     constexpr reference operator*() const noexcept { return (*m_mat)[m_index]; }
 
    private:
-    VariableBlock<Mat>* m_mat = nullptr;
+    Submatrix<Mat>* m_mat = nullptr;
     int m_index = 0;
   };
 
   class const_iterator {
    public:
     using iterator_category = std::bidirectional_iterator_tag;
-    using value_type = Variable<Scalar>;
+    using value_type = Real<Scalar>;
     using difference_type = std::ptrdiff_t;
-    using pointer = Variable<Scalar>*;
-    using const_reference = const Variable<Scalar>&;
+    using pointer = Real<Scalar>*;
+    using const_reference = const Real<Scalar>&;
 
     constexpr const_iterator() noexcept = default;
 
-    constexpr const_iterator(const VariableBlock<Mat>* mat, int index) noexcept
+    constexpr const_iterator(const Submatrix<Mat>* mat, int index) noexcept
         : m_mat{mat}, m_index{index} {}
 
     constexpr const_iterator& operator++() noexcept {
@@ -718,7 +714,7 @@ class VariableBlock : public SleipnirBase {
     }
 
    private:
-    const VariableBlock<Mat>* m_mat = nullptr;
+    const Submatrix<Mat>* m_mat = nullptr;
     int m_index = 0;
   };
 

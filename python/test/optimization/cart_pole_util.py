@@ -3,7 +3,7 @@ import math
 import numpy as np
 import numpy.typing as npt
 from sleipnir import autodiff
-from sleipnir.autodiff import Variable, VariableBlock, VariableMatrix
+from sleipnir.autodiff import Matrix, Real, Submatrix
 
 # https://underactuated.mit.edu/acrobot.html#cart_pole
 #
@@ -71,9 +71,7 @@ def cart_pole_dynamics_double(
     return qddot
 
 
-def cart_pole_dynamics_variable(
-    x: VariableMatrix | VariableBlock, u: VariableMatrix | VariableBlock
-) -> VariableMatrix:
+def cart_pole_dynamics_variable(x: Matrix | Submatrix, u: Matrix | Submatrix) -> Matrix:
     q = x[:2, :]
     qdot = x[2:, :]
     theta = q[1, 0]
@@ -84,32 +82,32 @@ def cart_pole_dynamics_variable(
 
     #        [ m_c + m_p  m_p l cosθ]
     # M(q) = [m_p l cosθ    m_p l²  ]
-    M = VariableMatrix(
+    M = Matrix(
         [
-            [Variable(m_c + m_p), m_p * l * c],
-            [m_p * l * c, Variable(m_p * l**2)],
+            [Real(m_c + m_p), m_p * l * c],
+            [m_p * l * c, Real(m_p * l**2)],
         ]
     )
 
     #           [0  −m_p lθ̇ sinθ]
     # C(q, q̇) = [0       0      ]
-    C = VariableMatrix(
+    C = Matrix(
         [
-            [Variable(0.0), -m_p * l * thetadot * s],
-            [Variable(0.0), Variable(0.0)],
+            [Real(0.0), -m_p * l * thetadot * s],
+            [Real(0.0), Real(0.0)],
         ]
     )
 
     #          [     0      ]
     # τ_g(q) = [-m_p gl sinθ]
-    tau_g = VariableMatrix([[Variable(0.0)], [-m_p * g * l * s]])
+    tau_g = Matrix([[Real(0.0)], [-m_p * g * l * s]])
 
     #     [1]
     # B = [0]
     B = np.array([[1], [0]])
 
     # q̈ = M⁻¹(q)(τ_g(q) − C(q, q̇)q̇ + Bu)
-    qddot = VariableMatrix(4, 1)
+    qddot = Matrix(4, 1)
     qddot[:2, :] = qdot
     qddot[2:, :] = autodiff.solve(M, tau_g - C @ qdot + B @ u)
     return qddot

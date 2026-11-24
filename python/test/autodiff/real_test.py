@@ -1,28 +1,28 @@
 import numpy as np
 import pytest
-from sleipnir.autodiff import ExpressionType, Variable, VariableMatrix
+from sleipnir.autodiff import ExpressionType, Matrix, Real
 
 
 def test_default_constructor() -> None:
-    a = Variable()
+    a = Real()
     assert a.value() == 0.0
     assert a.type() == ExpressionType.LINEAR
 
 
 def test_constant_constructor() -> None:
     # float
-    a = Variable(1.0)
+    a = Real(1.0)
     assert a.value() == 1.0
     assert a.type() == ExpressionType.CONSTANT
 
     # int
-    b = Variable(2)
+    b = Real(2)
     assert b.value() == 2
     assert b.type() == ExpressionType.CONSTANT
 
 
 def test_set_value() -> None:
-    a = Variable()
+    a = Real()
 
     # float
     a.set_value(1.0)
@@ -34,7 +34,7 @@ def test_set_value() -> None:
 
 
 def test_numpy_array_operators() -> None:
-    x = Variable(2.0)
+    x = Real(2.0)
     A = np.array([[1.0, 2.0], [3.0, 4.0]])
 
     # float arrays
@@ -43,7 +43,7 @@ def test_numpy_array_operators() -> None:
         (A * x, [[2.0, 4.0], [6.0, 8.0]]),
         (A / x, [[0.5, 1.0], [1.5, 2.0]]),
     ]:
-        assert isinstance(result, VariableMatrix)
+        assert isinstance(result, Matrix)
         assert np.array_equal(result.value(), expected)
 
     # int arrays
@@ -53,7 +53,7 @@ def test_numpy_array_operators() -> None:
         (B * x, [[2.0, 4.0], [6.0, 8.0]]),
         (B / x, [[0.5, 1.0], [1.5, 2.0]]),
     ]:
-        assert isinstance(result, VariableMatrix)
+        assert isinstance(result, Matrix)
         assert np.array_equal(result.value(), expected)
 
     # NumPy scalars
@@ -68,13 +68,13 @@ def test_numpy_array_operators() -> None:
         (a / x, 1.5),
         (x / a, 2.0 / 3.0),
     ]:
-        assert isinstance(result, Variable)
+        assert isinstance(result, Real)
         assert result.value() == pytest.approx(expected)
     # mypy rejects this because NumPy's stubs don't let np.integer defer to
-    # Variable.__rmul__, but at runtime NumPy calls Variable.__array_ufunc__
-    assert isinstance(np.int64(3) * x, Variable)  # type: ignore[operator]
-    assert isinstance(a <= x, type(Variable() <= 0.0))
-    assert isinstance(x <= a, type(Variable() <= 0.0))
+    # Real.__rmul__, but at runtime NumPy calls Real.__array_ufunc__
+    assert isinstance(np.int64(3) * x, Real)  # type: ignore[operator]
+    assert isinstance(a <= x, type(Real() <= 0.0))
+    assert isinstance(x <= a, type(Real() <= 0.0))
 
     # Other operations with NumPy arrays raise TypeError
     with pytest.raises(TypeError):

@@ -10,8 +10,8 @@
 
 #include "sleipnir/autodiff/expression.hpp"
 #include "sleipnir/autodiff/expression_graph.hpp"
-#include "sleipnir/autodiff/variable.hpp"
-#include "sleipnir/autodiff/variable_matrix.hpp"
+#include "sleipnir/autodiff/matrix.hpp"
+#include "sleipnir/autodiff/real.hpp"
 #include "sleipnir/util/assert.hpp"
 #include "sleipnir/util/concepts.hpp"
 #include "sleipnir/util/empty.hpp"
@@ -19,12 +19,11 @@
 
 namespace slp {
 
-/// This class calculates the Jacobian of a vector of variables with respect to
-/// a vector of variables.
+/// This class calculates the Jacobian of a vector of expressions with respect
+/// to a vector of variables.
 ///
-/// The Jacobian is only recomputed if the variable expression is quadratic or
-/// higher order, or if it's linear with coefficients that depend on
-/// parameters.
+/// The Jacobian is only recomputed if the expression is quadratic or higher
+/// order, or if it's linear with coefficients that depend on parameters.
 ///
 /// @tparam Scalar Scalar type.
 template <typename Scalar>
@@ -32,33 +31,32 @@ class Jacobian {
  public:
   /// Constructs a Jacobian object.
   ///
-  /// @param variable Variable of which to compute the Jacobian.
+  /// @param expression Expression of which to compute the Jacobian.
   /// @param wrt Variable with respect to which to compute the Jacobian.
-  Jacobian(Variable<Scalar> variable, Variable<Scalar> wrt)
-      : Jacobian{VariableMatrix<Scalar>{std::move(variable)},
-                 VariableMatrix<Scalar>{std::move(wrt)}} {}
+  Jacobian(Real<Scalar> expression, Real<Scalar> wrt)
+      : Jacobian{Matrix<Scalar>{std::move(expression)},
+                 Matrix<Scalar>{std::move(wrt)}} {}
 
   /// Constructs a Jacobian object.
   ///
-  /// @param variable Variable of which to compute the Jacobian.
+  /// @param expression Expression of which to compute the Jacobian.
   /// @param wrt Vector of variables with respect to which to compute the
   ///     Jacobian.
-  Jacobian(Variable<Scalar> variable, SleipnirMatrixLike<Scalar> auto wrt)
-      : Jacobian{VariableMatrix<Scalar>{std::move(variable)}, std::move(wrt)} {}
+  Jacobian(Real<Scalar> expression, SleipnirMatrixLike<Scalar> auto wrt)
+      : Jacobian{Matrix<Scalar>{std::move(expression)}, std::move(wrt)} {}
 
   /// Constructs a Jacobian object.
   ///
-  /// @param variables Vector of variables of which to compute the Jacobian.
+  /// @param expressions Vector of expressions of which to compute the Jacobian.
   /// @param wrt Vector of variables with respect to which to compute the
   ///     Jacobian.
-  Jacobian(VariableMatrix<Scalar> variables,
-           SleipnirMatrixLike<Scalar> auto wrt)
-      : m_variables{std::move(variables)}, m_wrt{std::move(wrt)} {
-    slp_assert(m_variables.cols() == 1);
+  Jacobian(Matrix<Scalar> expressions, SleipnirMatrixLike<Scalar> auto wrt)
+      : m_expressions{std::move(expressions)}, m_wrt{std::move(wrt)} {
+    slp_assert(m_expressions.cols() == 1);
     slp_assert(m_wrt.cols() == 1);
 
-    for (auto& variable : m_variables) {
-      m_top_lists.emplace_back(detail::topological_sort(variable.expr));
+    for (auto& expression : m_expressions) {
+      m_top_lists.emplace_back(detail::topological_sort(expression.expr));
     }
 
     // Initialize column each expression's adjoint occupies in the Jacobian
@@ -81,8 +79,8 @@ class Jacobian {
       node.expr->scratch = -1;
     }
 
-    for (int row = 0; row < m_variables.rows(); ++row) {
-      if (m_variables[row].expr == nullptr) {
+    for (int row = 0; row < m_expressions.rows(); ++row) {
+      if (m_expressions[row].expr == nullptr) {
         continue;
       }
 
@@ -102,23 +100,22 @@ class Jacobian {
     }
   }
 
-  /// Returns the Jacobian as a VariableMatrix.
+  /// Returns the Jacobian as a Matrix.
   ///
   /// This is useful when constructing optimization problems with derivatives in
   /// them.
   ///
-  /// @return The Jacobian as a VariableMatrix.
-  VariableMatrix<Scalar> get() const {
-    VariableMatrix<Scalar> result{detail::empty, m_variables.rows(),
-                                  m_wrt.rows()};
+  /// @return The Jacobian as a Matrix.
+  Matrix<Scalar> get() const {
+    Matrix<Scalar> result{detail::empty, m_expressions.rows(), m_wrt.rows()};
 
-    for (int row = 0; row < m_variables.rows(); ++row) {
+    for (int row = 0; row < m_expressions.rows(); ++row) {
       auto grad = detail::gradient_tree(m_top_lists[row], m_wrt);
       for (int col = 0; col < m_wrt.rows(); ++col) {
         if (grad[col].expr != nullptr) {
           result[row, col] = std::move(grad[col]);
         } else {
-          result[row, col] = Variable{Scalar(0)};
+          result[row, col] = Real{Scalar(0)};
         }
       }
     }
@@ -154,8 +151,8 @@ class Jacobian {
   }
 
  private:
-  VariableMatrix<Scalar> m_variables;
-  VariableMatrix<Scalar> m_wrt;
+  Matrix<Scalar> m_expressions;
+  Matrix<Scalar> m_wrt;
 
   /// List of topologically sorted graphs from parent to child, one for each row
   gch::small_vector<detail::ExpressionGraph<Scalar>> m_top_lists;
@@ -165,7 +162,7 @@ class Jacobian {
       gch::small_vector<std::pair<int, detail::Expression<Scalar>*>>>
       m_output_lists;
 
-  Eigen::SparseMatrix<Scalar> m_J{m_variables.rows(), m_wrt.rows()};
+  Eigen::SparseMatrix<Scalar> m_J{m_expressions.rows(), m_wrt.rows()};
 
   /// Cached triplets for gradients of linear rows
   gch::small_vector<Eigen::Triplet<Scalar>> m_cached_triplets;

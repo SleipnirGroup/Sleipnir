@@ -5,7 +5,7 @@
 #include <span>
 #include <vector>
 
-#include <sleipnir/autodiff/variable_matrix.hpp>
+#include <sleipnir/autodiff/matrix.hpp>
 #include <sleipnir/optimization/problem.hpp>
 
 /// This class computes the optimal current allocation for a list of subsystems
@@ -34,6 +34,6 @@ class CurrentManager {
 
  private:
   slp::Problem<double> m_problem;
-  slp::VariableMatrix<double> m_desired_currents;
-  slp::VariableMatrix<double> m_allocated_currents;
+  slp::Matrix<double> m_desired_currents;
+  slp::Matrix<double> m_allocated_currents;
 };

@@ -14,8 +14,8 @@
 #include <string_view>
 #include <utility>
 
-#include <sleipnir/autodiff/variable.hpp>
-#include <sleipnir/autodiff/variable_matrix.hpp>
+#include <sleipnir/autodiff/matrix.hpp>
+#include <sleipnir/autodiff/real.hpp>
 #include <sleipnir/optimization/problem.hpp>
 #include <sleipnir/optimization/solver/iteration_info.hpp>
 #include <sleipnir/optimization/solver/options.hpp>
@@ -145,7 +145,7 @@ void bind_problem(nb::class_<Problem<double>>& cls) {
           DOC(slp, Problem, parameter));
   cls.def("parameter", nb::overload_cast<int, int>(&Problem<double>::parameter),
           "rows"_a, "cols"_a = 1, DOC(slp, Problem, parameter, 2));
-  for_each_type<double, const Variable<double>&, const VariableMatrix<double>&>(
+  for_each_type<double, const Real<double>&, const Matrix<double>&>(
       [&]<typename T> {
         cls.def(
             "minimize",

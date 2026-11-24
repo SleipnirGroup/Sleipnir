@@ -11,8 +11,8 @@
 
 #include "sleipnir/autodiff/expression.hpp"
 #include "sleipnir/autodiff/expression_graph.hpp"
-#include "sleipnir/autodiff/variable.hpp"
-#include "sleipnir/autodiff/variable_matrix.hpp"
+#include "sleipnir/autodiff/matrix.hpp"
+#include "sleipnir/autodiff/real.hpp"
 #include "sleipnir/util/assert.hpp"
 #include "sleipnir/util/concepts.hpp"
 #include "sleipnir/util/empty.hpp"
@@ -20,12 +20,12 @@
 
 namespace slp {
 
-/// This class calculates the Hessian of a variable with respect to a vector of
-/// variables.
+/// This class calculates the Hessian of an expression with respect to a vector
+/// of variables.
 ///
 /// The gradient tree is cached so subsequent Hessian calculations are faster,
-/// and the Hessian is only recomputed if the variable expression is nonlinear
-/// or its quadratic coefficients depend on parameters.
+/// and the Hessian is only recomputed if the expression is nonlinear or its
+/// quadratic coefficients depend on parameters.
 ///
 /// @tparam Scalar Scalar type.
 /// @tparam UpLo Which part of the Hessian to compute (Lower or Lower | Upper).
@@ -36,24 +36,24 @@ class Hessian {
  public:
   /// Constructs a Hessian object.
   ///
-  /// @param variable Variable of which to compute the Hessian.
+  /// @param expression Expression of which to compute the Hessian.
   /// @param wrt Variable with respect to which to compute the Hessian.
-  Hessian(Variable<Scalar> variable, Variable<Scalar> wrt)
-      : Hessian{std::move(variable), VariableMatrix<Scalar>{std::move(wrt)}} {}
+  Hessian(Real<Scalar> expression, Real<Scalar> wrt)
+      : Hessian{std::move(expression), Matrix<Scalar>{std::move(wrt)}} {}
 
   /// Constructs a Hessian object.
   ///
-  /// @param variable Variable of which to compute the Hessian.
+  /// @param expression Expression of which to compute the Hessian.
   /// @param wrt Vector of variables with respect to which to compute the
   ///     Hessian.
-  Hessian(Variable<Scalar> variable, SleipnirMatrixLike<Scalar> auto wrt)
-      : m_variables{detail::gradient_tree(
-            detail::topological_sort(variable.expr), wrt)},
+  Hessian(Real<Scalar> expression, SleipnirMatrixLike<Scalar> auto wrt)
+      : m_expressions{detail::gradient_tree(
+            detail::topological_sort(expression.expr), wrt)},
         m_wrt{std::move(wrt)} {
     slp_assert(m_wrt.cols() == 1);
 
-    for (auto& variable : m_variables) {
-      m_top_lists.emplace_back(detail::topological_sort(variable.expr));
+    for (auto& expression : m_expressions) {
+      m_top_lists.emplace_back(detail::topological_sort(expression.expr));
     }
 
     // Initialize column each expression's adjoint occupies in the Jacobian
@@ -76,8 +76,8 @@ class Hessian {
       node.expr->scratch = -1;
     }
 
-    for (int row = 0; row < m_variables.rows(); ++row) {
-      if (m_variables[row].expr == nullptr) {
+    for (int row = 0; row < m_expressions.rows(); ++row) {
+      if (m_expressions[row].expr == nullptr) {
         continue;
       }
 
@@ -100,23 +100,22 @@ class Hessian {
     }
   }
 
-  /// Returns the Hessian as a VariableMatrix.
+  /// Returns the Hessian as a Matrix.
   ///
   /// This is useful when constructing optimization problems with derivatives in
   /// them.
   ///
-  /// @return The Hessian as a VariableMatrix.
-  VariableMatrix<Scalar> get() const {
-    VariableMatrix<Scalar> result{detail::empty, m_variables.rows(),
-                                  m_wrt.rows()};
+  /// @return The Hessian as a Matrix.
+  Matrix<Scalar> get() const {
+    Matrix<Scalar> result{detail::empty, m_expressions.rows(), m_wrt.rows()};
 
-    for (int row = 0; row < m_variables.rows(); ++row) {
+    for (int row = 0; row < m_expressions.rows(); ++row) {
       auto grad = detail::gradient_tree(m_top_lists[row], m_wrt);
       for (int col = 0; col < m_wrt.rows(); ++col) {
         if (grad[col].expr != nullptr) {
           result[row, col] = std::move(grad[col]);
         } else {
-          result[row, col] = Variable{Scalar(0)};
+          result[row, col] = Real{Scalar(0)};
         }
       }
     }
@@ -155,8 +154,8 @@ class Hessian {
   }
 
  private:
-  VariableMatrix<Scalar> m_variables;
-  VariableMatrix<Scalar> m_wrt;
+  Matrix<Scalar> m_expressions;
+  Matrix<Scalar> m_wrt;
 
   /// List of topologically sorted graphs from parent to child, one for each row
   gch::small_vector<detail::ExpressionGraph<Scalar>> m_top_lists;
@@ -166,7 +165,7 @@ class Hessian {
       gch::small_vector<std::pair<int, detail::Expression<Scalar>*>>>
       m_output_lists;
 
-  Eigen::SparseMatrix<Scalar> m_H{m_variables.rows(), m_wrt.rows()};
+  Eigen::SparseMatrix<Scalar> m_H{m_expressions.rows(), m_wrt.rows()};
 
   // Cached triplets for gradients of linear rows
   gch::small_vector<Eigen::Triplet<Scalar>> m_cached_triplets;

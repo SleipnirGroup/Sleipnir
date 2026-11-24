@@ -93,7 +93,7 @@ Next, we'll create a cost function for minimizing position error.
 
 ```cpp
 // Cost function - minimize position error
-slp::Variable J = 0.0;
+slp::Real J = 0.0;
 for (int k = 0; k < N + 1; ++k) {
   J += slp::pow(r - X(0, k), 2);
 }

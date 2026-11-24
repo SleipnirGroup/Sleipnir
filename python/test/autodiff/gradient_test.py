@@ -4,16 +4,16 @@ import sys
 import numpy as np
 import pytest
 from sleipnir import autodiff
-from sleipnir.autodiff import Gradient, Variable, VariableMatrix
+from sleipnir.autodiff import Gradient, Matrix, Real
 
 # Machine epsilon for the binding's scalar type (double)
 ε = sys.float_info.epsilon
 
 
 def test_trivial_case() -> None:
-    a = Variable()
+    a = Real()
     a.set_value(10)
-    b = Variable()
+    b = Real()
     b.set_value(20)
     c = a
 
@@ -24,7 +24,7 @@ def test_trivial_case() -> None:
 
 
 def test_unary_plus() -> None:
-    a = Variable()
+    a = Real()
     a.set_value(10)
     c = +a
 
@@ -33,7 +33,7 @@ def test_unary_plus() -> None:
 
 
 def test_unary_minus() -> None:
-    a = Variable()
+    a = Real()
     a.set_value(10)
     c = -a
 
@@ -42,7 +42,7 @@ def test_unary_minus() -> None:
 
 
 def test_identical_variables() -> None:
-    a = Variable()
+    a = Real()
     a.set_value(10)
     x = a
     c = a * a + x
@@ -55,9 +55,9 @@ def test_identical_variables() -> None:
 
 
 def test_elementary() -> None:
-    a = Variable()
+    a = Real()
     a.set_value(1.0)
-    b = Variable()
+    b = Real()
     b.set_value(2.0)
 
     c = -2 * a
@@ -86,11 +86,11 @@ def test_elementary() -> None:
 
 
 def test_comparison() -> None:
-    x = Variable()
+    x = Real()
     x.set_value(10.0)
-    a = Variable()
+    a = Real()
     a.set_value(10.0)
-    b = Variable()
+    b = Real()
     b.set_value(200.0)
 
     assert a.value() == a.value()
@@ -147,7 +147,7 @@ def test_comparison() -> None:
 
 
 def test_trigonometry() -> None:
-    x = Variable()
+    x = Real()
     x.set_value(0.5)
 
     # sin(x)
@@ -194,7 +194,7 @@ def test_trigonometry() -> None:
 
 
 def test_hyperbolic() -> None:
-    x = Variable()
+    x = Real()
     x.set_value(1.0)
 
     # sinh(x)
@@ -220,7 +220,7 @@ def test_hyperbolic() -> None:
 
 
 def test_exponential() -> None:
-    x = Variable()
+    x = Real()
     x.set_value(1.0)
 
     # log(x)
@@ -246,9 +246,9 @@ def test_exponential() -> None:
 
 
 def test_power() -> None:
-    x = Variable()
+    x = Real()
     x.set_value(1.0)
-    a = Variable()
+    a = Real()
     a.set_value(2.0)
     y = 2 * a
 
@@ -349,7 +349,7 @@ def test_power() -> None:
 
 
 def test_abs() -> None:
-    x = Variable()
+    x = Real()
     g = Gradient(autodiff.abs(x), x)
 
     x.set_value(1.0)
@@ -383,8 +383,8 @@ def test_abs() -> None:
 
 
 def test_atan2() -> None:
-    x = Variable()
-    y = Variable()
+    x = Real()
+    y = Real()
 
     # Testing atan2 function on (double, var)
     x.set_value(1.0)
@@ -488,8 +488,8 @@ def test_atan2() -> None:
 
 
 def test_hypot() -> None:
-    x = Variable()
-    y = Variable()
+    x = Real()
+    y = Real()
 
     # Testing hypot function on (var, double)
     x.set_value(1.8)
@@ -544,7 +544,7 @@ def test_hypot() -> None:
     )
 
     # Testing hypot function on (var, var, var)
-    z = Variable()
+    z = Real()
     x.set_value(1.3)
     y.set_value(2.3)
     z.set_value(3.3)
@@ -572,7 +572,7 @@ def test_hypot() -> None:
 
 
 def test_max() -> None:
-    x = Variable()
+    x = Real()
     x.set_value(2)
 
     x2 = x * x
@@ -598,7 +598,7 @@ def test_max() -> None:
 
 
 def test_min() -> None:
-    x = Variable()
+    x = Real()
     x.set_value(2)
 
     x2 = x * x
@@ -624,7 +624,7 @@ def test_min() -> None:
 
 
 def test_miscellaneous() -> None:
-    x = Variable()
+    x = Real()
 
     # dx/dx
     x.set_value(3.0)
@@ -648,10 +648,10 @@ def test_miscellaneous() -> None:
 
 
 def test_reuse() -> None:
-    a = Variable()
+    a = Real()
     a.set_value(10)
 
-    b = Variable()
+    b = Real()
     b.set_value(20)
 
     x = a * b
@@ -675,7 +675,7 @@ def test_sign() -> None:
         else:
             return 1.0
 
-    x = Variable()
+    x = Real()
 
     # sign(1.0)
     x.set_value(1.0)
@@ -703,7 +703,7 @@ def test_sign() -> None:
 
 
 def test_non_scalar() -> None:
-    x = VariableMatrix(3)
+    x = Matrix(3)
     x[0].set_value(1)
     x[1].set_value(2)
     x[2].set_value(3)
@@ -726,7 +726,7 @@ def test_non_scalar() -> None:
 
 
 def test_if_else() -> None:
-    x = Variable()
+    x = Real()
 
     # f(x) = x² if x < 0, otherwise x³
     f = autodiff.if_else(x < 0.0, x * x, x * x * x)

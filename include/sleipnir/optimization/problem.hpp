@@ -23,8 +23,8 @@
 #include "sleipnir/autodiff/gradient.hpp"
 #include "sleipnir/autodiff/hessian.hpp"
 #include "sleipnir/autodiff/jacobian.hpp"
-#include "sleipnir/autodiff/variable.hpp"
-#include "sleipnir/autodiff/variable_matrix.hpp"
+#include "sleipnir/autodiff/matrix.hpp"
+#include "sleipnir/autodiff/real.hpp"
 #include "sleipnir/optimization/solver/control_flow.hpp"
 #include "sleipnir/optimization/solver/exit_status.hpp"
 #include "sleipnir/optimization/solver/ipm.hpp"
@@ -82,7 +82,7 @@ class Problem {
   ///
   /// @return A decision variable in the optimization problem.
   [[nodiscard]]
-  Variable<Scalar> decision_variable() {
+  Real<Scalar> decision_variable() {
     m_decision_variables.emplace_back();
     return m_decision_variables.back();
   }
@@ -95,10 +95,10 @@ class Problem {
   /// @param cols Number of matrix columns.
   /// @return A matrix of decision variables in the optimization problem.
   [[nodiscard]]
-  VariableMatrix<Scalar> decision_variable(int rows, int cols = 1) {
+  Matrix<Scalar> decision_variable(int rows, int cols = 1) {
     m_decision_variables.reserve(m_decision_variables.size() + rows * cols);
 
-    VariableMatrix<Scalar> vars{detail::empty, rows, cols};
+    Matrix<Scalar> vars{detail::empty, rows, cols};
 
     for (int row = 0; row < rows; ++row) {
       for (int col = 0; col < cols; ++col) {
@@ -119,8 +119,8 @@ class Problem {
   ///
   /// @return A parameter in the optimization problem.
   [[nodiscard]]
-  Variable<Scalar> parameter() {
-    return Variable<Scalar>{
+  Real<Scalar> parameter() {
+    return Real<Scalar>{
         detail::make_expression_ptr<detail::ParameterExpression<Scalar>>()};
   }
 
@@ -135,8 +135,8 @@ class Problem {
   /// @param cols Number of matrix columns.
   /// @return A matrix of parameters in the optimization problem.
   [[nodiscard]]
-  VariableMatrix<Scalar> parameter(int rows, int cols = 1) {
-    VariableMatrix<Scalar> params{detail::empty, rows, cols};
+  Matrix<Scalar> parameter(int rows, int cols = 1) {
+    Matrix<Scalar> params{detail::empty, rows, cols};
 
     for (auto& param : params) {
       param = parameter();
@@ -151,10 +151,10 @@ class Problem {
   /// will find the closest solution to the initial conditions that's in the
   /// feasible set.
   ///
-  /// @param cost The cost function to minimize. A 1x1 VariableMatrix will
-  ///     implicitly convert to a Variable, and a non-1x1 VariableMatrix will
+  /// @param cost The cost function to minimize. A 1x1 Matrix will
+  ///     implicitly convert to a Real, and a non-1x1 Matrix will
   ///     raise an assertion.
-  void minimize(const Variable<Scalar>& cost) { m_f = cost; }
+  void minimize(const Real<Scalar>& cost) { m_f = cost; }
 
   /// Tells the solver to minimize the output of the given cost function.
   ///
@@ -162,10 +162,10 @@ class Problem {
   /// will find the closest solution to the initial conditions that's in the
   /// feasible set.
   ///
-  /// @param cost The cost function to minimize. A 1x1 VariableMatrix will
-  ///     implicitly convert to a Variable, and a non-1x1 VariableMatrix will
+  /// @param cost The cost function to minimize. A 1x1 Matrix will
+  ///     implicitly convert to a Real, and a non-1x1 Matrix will
   ///     raise an assertion.
-  void minimize(Variable<Scalar>&& cost) { m_f = std::move(cost); }
+  void minimize(Real<Scalar>&& cost) { m_f = std::move(cost); }
 
   /// Tells the solver to maximize the output of the given objective function.
   ///
@@ -173,10 +173,10 @@ class Problem {
   /// will find the closest solution to the initial conditions that's in the
   /// feasible set.
   ///
-  /// @param objective The objective function to maximize. A 1x1 VariableMatrix
-  ///     will implicitly convert to a Variable, and a non-1x1 VariableMatrix
+  /// @param objective The objective function to maximize. A 1x1 Matrix
+  ///     will implicitly convert to a Real, and a non-1x1 Matrix
   ///     will raise an assertion.
-  void maximize(const Variable<Scalar>& objective) {
+  void maximize(const Real<Scalar>& objective) {
     // Maximizing a cost function is the same as minimizing its negative
     m_f = -objective;
   }
@@ -187,10 +187,10 @@ class Problem {
   /// will find the closest solution to the initial conditions that's in the
   /// feasible set.
   ///
-  /// @param objective The objective function to maximize. A 1x1 VariableMatrix
-  ///     will implicitly convert to a Variable, and a non-1x1 VariableMatrix
+  /// @param objective The objective function to maximize. A 1x1 Matrix
+  ///     will implicitly convert to a Real, and a non-1x1 Matrix
   ///     will raise an assertion.
-  void maximize(Variable<Scalar>&& objective) {
+  void maximize(Real<Scalar>&& objective) {
     // Maximizing a cost function is the same as minimizing its negative
     m_f = -std::move(objective);
   }
@@ -255,8 +255,7 @@ class Problem {
   /// @return The type of the highest order equality constraint.
   ExpressionType equality_constraint_type() const {
     if (!m_equality_constraints.empty()) {
-      return std::ranges::max(m_equality_constraints, {},
-                              &Variable<Scalar>::type)
+      return std::ranges::max(m_equality_constraints, {}, &Real<Scalar>::type)
           .type();
     } else {
       return ExpressionType::NONE;
@@ -268,8 +267,7 @@ class Problem {
   /// @return The type of the highest order inequality constraint.
   ExpressionType inequality_constraint_type() const {
     if (!m_inequality_constraints.empty()) {
-      return std::ranges::max(m_inequality_constraints, {},
-                              &Variable<Scalar>::type)
+      return std::ranges::max(m_inequality_constraints, {}, &Real<Scalar>::type)
           .type();
     } else {
       return ExpressionType::NONE;
@@ -333,8 +331,8 @@ class Problem {
       slp::println("\nExit: {}", status);
     }
 
-    // Assign the solution to the original Variable instances
-    VariableMatrix<Scalar>{m_decision_variables}.set_value(x);
+    // Assign the solution to the original Real instances
+    Matrix<Scalar>{m_decision_variables}.set_value(x);
 
     return status;
   }
@@ -395,16 +393,16 @@ class Problem {
 
   // The list of decision variables, which are the root of the problem's
   // expression tree
-  gch::small_vector<Variable<Scalar>> m_decision_variables;
+  gch::small_vector<Real<Scalar>> m_decision_variables;
 
   // The cost function: f(x)
-  std::optional<Variable<Scalar>> m_f;
+  std::optional<Real<Scalar>> m_f;
 
   // The list of equality constraints: cₑ(x) = 0
-  gch::small_vector<Variable<Scalar>> m_equality_constraints;
+  gch::small_vector<Real<Scalar>> m_equality_constraints;
 
   // The list of inequality constraints: cᵢ(x) ≥ 0
-  gch::small_vector<Variable<Scalar>> m_inequality_constraints;
+  gch::small_vector<Real<Scalar>> m_inequality_constraints;
 
   // The iteration callbacks
   gch::small_vector<
@@ -420,10 +418,10 @@ class Problem {
     using SparseVector = Eigen::SparseVector<Scalar>;
     using enum SetupTimeTracerID;
 
-    VariableMatrix<Scalar> x_ad{m_decision_variables};
+    Matrix<Scalar> x_ad{m_decision_variables};
 
     // Set up cost function
-    Variable f = m_f.value_or(Scalar(0));
+    Real f = m_f.value_or(Scalar(0));
 
     int num_decision_variables = m_decision_variables.size();
 
@@ -502,10 +500,10 @@ class Problem {
     using SparseVector = Eigen::SparseVector<Scalar>;
     using enum SetupTimeTracerID;
 
-    VariableMatrix<Scalar> x_ad{m_decision_variables};
+    Matrix<Scalar> x_ad{m_decision_variables};
 
     // Set up cost function
-    Variable f = m_f.value_or(Scalar(0));
+    Real f = m_f.value_or(Scalar(0));
 
     int num_decision_variables = m_decision_variables.size();
     int num_equality_constraints = m_equality_constraints.size();
@@ -520,8 +518,8 @@ class Problem {
       iteration_callbacks.emplace_back(callback);
     }
 
-    VariableMatrix<Scalar> c_e_ad{m_equality_constraints};
-    VariableMatrix<Scalar> y_ad(num_equality_constraints);
+    Matrix<Scalar> c_e_ad{m_equality_constraints};
+    Matrix<Scalar> y_ad(num_equality_constraints);
 
     TimeTracerTree<SetupTimeTracer, sqp_setup_time_trace> ad_setup_tracers{
         options.diagnostics};
@@ -622,10 +620,10 @@ class Problem {
     using SparseVector = Eigen::SparseVector<Scalar>;
     using enum SetupTimeTracerID;
 
-    VariableMatrix<Scalar> x_ad{m_decision_variables};
+    Matrix<Scalar> x_ad{m_decision_variables};
 
     // Set up cost function
-    Variable f = m_f.value_or(Scalar(0));
+    Real f = m_f.value_or(Scalar(0));
 
     int num_decision_variables = m_decision_variables.size();
     int num_equality_constraints = m_equality_constraints.size();
@@ -641,10 +639,10 @@ class Problem {
       iteration_callbacks.emplace_back(callback);
     }
 
-    VariableMatrix<Scalar> c_e_ad{m_equality_constraints};
-    VariableMatrix<Scalar> c_i_ad{m_inequality_constraints};
-    VariableMatrix<Scalar> y_ad(num_equality_constraints);
-    VariableMatrix<Scalar> z_ad(num_inequality_constraints);
+    Matrix<Scalar> c_e_ad{m_equality_constraints};
+    Matrix<Scalar> c_i_ad{m_inequality_constraints};
+    Matrix<Scalar> y_ad(num_equality_constraints);
+    Matrix<Scalar> z_ad(num_inequality_constraints);
 
     TimeTracerTree<SetupTimeTracer, ipm_setup_time_trace> ad_setup_tracers{
         options.diagnostics};
@@ -818,7 +816,7 @@ class Problem {
     }
 
     auto print_constraint_types =
-        [](const gch::small_vector<Variable<Scalar>>& constraints) {
+        [](const gch::small_vector<Real<Scalar>>& constraints) {
           std::array<size_t, 6> counts{};
           for (const auto& constraint : constraints) {
             ++counts[std::to_underlying(constraint.type())];

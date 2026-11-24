@@ -11,7 +11,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <sleipnir/autodiff/expression_type.hpp>
-#include <sleipnir/autodiff/variable.hpp>
+#include <sleipnir/autodiff/real.hpp>
 #include <sleipnir/optimization/problem.hpp>
 #include <sleipnir/optimization/solver/exit_status.hpp>
 #include <sleipnir/util/pool.hpp>
@@ -55,7 +55,7 @@ TEMPLATE_TEST_CASE("Problem - Flywheel", "[Problem]", SCALAR_TYPES) {
 
   // Cost function - minimize error
   constexpr Eigen::Matrix<T, 1, 1> r{{T(10)}};
-  slp::Variable J = T(0);
+  slp::Real J = T(0);
   for (int k = 0; k < N + 1; ++k) {
     J += (r - X.col(k)).T() * (r - X.col(k));
   }

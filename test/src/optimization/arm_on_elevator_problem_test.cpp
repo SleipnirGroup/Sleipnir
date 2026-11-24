@@ -7,7 +7,7 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <sleipnir/autodiff/expression_type.hpp>
-#include <sleipnir/autodiff/variable.hpp>
+#include <sleipnir/autodiff/real.hpp>
 #include <sleipnir/optimization/problem.hpp>
 #include <sleipnir/optimization/solver/exit_status.hpp>
 #include <sleipnir/util/pool.hpp>
@@ -99,7 +99,7 @@ TEMPLATE_TEST_CASE("Problem - Arm on elevator", "[Problem]", SCALAR_TYPES) {
   problem.subject_to(heights <= END_EFFECTOR_MAX_HEIGHT);
 
   // Cost function
-  slp::Variable J = T(0);
+  slp::Real J = T(0);
   for (int k = 0; k < N + 1; ++k) {
     J += pow(ELEVATOR_END_HEIGHT - elevator[0, k], T(2)) +
          pow(ARM_END_ANGLE - arm[0, k], T(2));

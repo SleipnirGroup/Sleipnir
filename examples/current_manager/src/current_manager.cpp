@@ -8,15 +8,15 @@
 #include <stdexcept>
 #include <vector>
 
-#include <sleipnir/autodiff/variable.hpp>
+#include <sleipnir/autodiff/real.hpp>
 
 CurrentManager::CurrentManager(std::span<const double> current_tolerances,
                                double max_current)
     : m_desired_currents{m_problem.parameter(current_tolerances.size())},
       m_allocated_currents{
           m_problem.decision_variable(current_tolerances.size())} {
-  slp::Variable J = 0.0;
-  slp::Variable current_sum = 0.0;
+  slp::Real J = 0.0;
+  slp::Real current_sum = 0.0;
   for (size_t i = 0; i < current_tolerances.size(); ++i) {
     // The weight is 1/tolᵢ² where tolᵢ is the tolerance between the desired
     // and allocated current for subsystem i

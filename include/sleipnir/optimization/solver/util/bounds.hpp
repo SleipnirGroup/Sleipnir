@@ -13,7 +13,7 @@
 #include <gch/small_vector.hpp>
 
 #include "sleipnir/autodiff/expression_type.hpp"
-#include "sleipnir/autodiff/variable.hpp"
+#include "sleipnir/autodiff/real.hpp"
 #include "sleipnir/util/assert.hpp"
 
 // See docs/algorithms.md#Works_cited for citation definitions
@@ -51,8 +51,8 @@ struct Bounds {
 /// @param A_i The Jacobian of inequality_constraints wrt decision_variables,
 ///     evaluated anywhere.
 template <typename Scalar>
-Bounds<Scalar> get_bounds(std::span<Variable<Scalar>> decision_variables,
-                          std::span<Variable<Scalar>> inequality_constraints,
+Bounds<Scalar> get_bounds(std::span<Real<Scalar>> decision_variables,
+                          std::span<Real<Scalar>> inequality_constraints,
                           const Eigen::SparseMatrix<Scalar>& A_i) {
   // NB: Casting to long is unspecified if the size of decision_variable.size()
   // is greater than the max long value, but then we wouldn't be able to fill

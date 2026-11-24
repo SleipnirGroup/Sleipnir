@@ -9,7 +9,7 @@
 #include <sleipnir/autodiff/expression_type.hpp>
 #include <sleipnir/autodiff/hessian.hpp>
 #include <sleipnir/autodiff/jacobian.hpp>
-#include <sleipnir/autodiff/variable.hpp>
+#include <sleipnir/autodiff/real.hpp>
 #include <sleipnir/optimization/problem.hpp>
 #include <sleipnir/optimization/solver/exit_status.hpp>
 
@@ -185,9 +185,9 @@ TEMPLATE_TEST_CASE("Problem parameter - Expression types", "[Problem]",
   CHECK(slp::pow(p, p).type() == PARAMETER);
   CHECK(slp::sin(p).type() == PARAMETER);
   CHECK(slp::sqrt(p).type() == PARAMETER);
-  CHECK(slp::atan2(p, slp::Variable<T>{T(1)}).type() == PARAMETER);
+  CHECK(slp::atan2(p, slp::Real<T>{T(1)}).type() == PARAMETER);
   CHECK(slp::hypot(p, p, p).type() == PARAMETER);
-  CHECK(slp::max(p, slp::Variable<T>{T(1)}).type() == PARAMETER);
+  CHECK(slp::max(p, slp::Real<T>{T(1)}).type() == PARAMETER);
   CHECK(slp::if_else(p < T(1), p, T(2)).type() == PARAMETER);
   CHECK((p * x).type() == LINEAR);
   CHECK((x / p).type() == LINEAR);
@@ -268,7 +268,7 @@ TEMPLATE_TEST_CASE("Problem parameter - Jacobian updates", "[Problem]",
   auto x = problem.decision_variable(2);
 
   // Both rows are linear, but the first row's coefficients depend on p
-  slp::VariableMatrix<T> y{{p * x[0] + x[1]}, {T(3) * x[1]}};
+  slp::Matrix<T> y{{p * x[0] + x[1]}, {T(3) * x[1]}};
   slp::Jacobian J{y, x};
 
   p.set_value(T(2));

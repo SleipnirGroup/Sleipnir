@@ -6,9 +6,9 @@
 #include <Eigen/Core>
 #include <sleipnir/autodiff/expression_type.hpp>
 #include <sleipnir/autodiff/gradient.hpp>
-#include <sleipnir/autodiff/variable.hpp>
-#include <sleipnir/autodiff/variable_block.hpp>
-#include <sleipnir/autodiff/variable_matrix.hpp>
+#include <sleipnir/autodiff/matrix.hpp>
+#include <sleipnir/autodiff/real.hpp>
+#include <sleipnir/autodiff/submatrix.hpp>
 #include <sleipnir/optimization/ocp.hpp>
 #include <sleipnir/optimization/ocp/dynamics_type.hpp>
 #include <sleipnir/optimization/ocp/timestep_method.hpp>
@@ -38,12 +38,10 @@ NB_MODULE(_sleipnir, m) {
   nb::enum_<ExpressionType> expression_type{autodiff, "ExpressionType",
                                             DOC(slp, ExpressionType)};
 
-  nb::class_<Variable<double>> variable{autodiff, "Variable",
-                                        DOC(slp, Variable)};
-  nb::class_<VariableMatrix<double>> variable_matrix{autodiff, "VariableMatrix",
-                                                     DOC(slp, VariableMatrix)};
-  nb::class_<VariableBlock<VariableMatrix<double>>> variable_block{
-      autodiff, "VariableBlock", DOC(slp, VariableBlock)};
+  nb::class_<Real<double>> real{autodiff, "Real", DOC(slp, Real)};
+  nb::class_<Matrix<double>> matrix{autodiff, "Matrix", DOC(slp, Matrix)};
+  nb::class_<Submatrix<Matrix<double>>> submatrix{autodiff, "Submatrix",
+                                                  DOC(slp, Submatrix)};
 
   nb::class_<Gradient<double>> gradient{autodiff, "Gradient",
                                         DOC(slp, Gradient)};
@@ -57,21 +55,18 @@ NB_MODULE(_sleipnir, m) {
       optimization, "InequalityConstraints", DOC(slp_InequalityConstraints)};
 
   // Bounds function
-  for_each_type<
-      double, int, const Variable<double>&, const VariableMatrix<double>&,
-      const VariableBlock<VariableMatrix<double>>&, nb::DRef<Eigen::MatrixXd>>(
+  for_each_type<double, int, const Real<double>&, const Matrix<double>&,
+                const Submatrix<Matrix<double>>&, nb::DRef<Eigen::MatrixXd>>(
       [&]<typename L> {
-        for_each_type<const Variable<double>&, const VariableMatrix<double>&,
-                      const VariableBlock<VariableMatrix<double>>&>(
-            [&]<typename X> {
-              for_each_type<double, int, const Variable<double>&,
-                            const VariableMatrix<double>&,
-                            const VariableBlock<VariableMatrix<double>>&,
-                            nb::DRef<Eigen::MatrixXd>>([&]<typename U> {
-                optimization.def("bounds", &bounds<L&&, X&&, U&&>, "l"_a, "x"_a,
-                                 "u"_a, DOC(slp, bounds));
-              });
-            });
+        for_each_type<const Real<double>&, const Matrix<double>&,
+                      const Submatrix<Matrix<double>>&>([&]<typename X> {
+          for_each_type<double, int, const Real<double>&, const Matrix<double>&,
+                        const Submatrix<Matrix<double>>&,
+                        nb::DRef<Eigen::MatrixXd>>([&]<typename U> {
+            optimization.def("bounds", &bounds<L&&, X&&, U&&>, "l"_a, "x"_a,
+                             "u"_a, DOC(slp, bounds));
+          });
+        });
       });
 
   nb::enum_<ExitStatus> exit_status{optimization, "ExitStatus",
@@ -94,13 +89,12 @@ NB_MODULE(_sleipnir, m) {
 
   bind_expression_type(expression_type);
 
-  bind_variable(autodiff, variable);
-  bind_variable_matrix(autodiff, variable_matrix);
-  bind_variable_block(variable_block);
+  bind_real(autodiff, real);
+  bind_matrix(autodiff, matrix);
+  bind_submatrix(submatrix);
 
   // Implicit conversions
-  variable_matrix.def(
-      nb::init_implicit<VariableBlock<VariableMatrix<double>>>());
+  matrix.def(nb::init_implicit<Submatrix<Matrix<double>>>());
 
   bind_gradient(gradient);
   bind_hessian(hessian);

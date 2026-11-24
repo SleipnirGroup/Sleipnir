@@ -14,8 +14,8 @@
 #include <sleipnir/autodiff/gradient.hpp>
 #include <sleipnir/autodiff/hessian.hpp>
 #include <sleipnir/autodiff/jacobian.hpp>
-#include <sleipnir/autodiff/variable.hpp>
-#include <sleipnir/autodiff/variable_matrix.hpp>
+#include <sleipnir/autodiff/matrix.hpp>
+#include <sleipnir/autodiff/real.hpp>
 #include <sleipnir/util/pool.hpp>
 #include <sleipnir/util/scope_exit.hpp>
 
@@ -30,9 +30,9 @@ TEMPLATE_TEST_CASE("Hessian - Linear", "[Hessian]", SCALAR_TYPES) {
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
   // y = x
-  slp::VariableMatrix<T> x{1};
+  slp::Matrix<T> x{1};
   x[0].set_value(T(3));
-  slp::Variable y = x[0];
+  slp::Real y = x[0];
 
   // dy/dx = 1
   T g = slp::Gradient(y, x[0]).value().coeff(0);
@@ -51,9 +51,9 @@ TEMPLATE_TEST_CASE("Hessian - Quadratic", "[Hessian]", SCALAR_TYPES) {
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
   // y = x²
-  slp::VariableMatrix<T> x{1};
+  slp::Matrix<T> x{1};
   x[0].set_value(T(3));
-  slp::Variable y = x[0] * x[0];
+  slp::Real y = x[0] * x[0];
 
   // dy/dx = 2x = 6
   T g = slp::Gradient(y, x[0]).value().coeff(0);
@@ -72,9 +72,9 @@ TEMPLATE_TEST_CASE("Hessian - Cubic", "[Hessian]", SCALAR_TYPES) {
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
   // y = x³
-  slp::VariableMatrix<T> x{1};
+  slp::Matrix<T> x{1};
   x[0].set_value(T(3));
-  slp::Variable y = x[0] * x[0] * x[0];
+  slp::Real y = x[0] * x[0] * x[0];
 
   // dy/dx = 3x² = 27
   T g = slp::Gradient(y, x[0]).value().coeff(0);
@@ -93,9 +93,9 @@ TEMPLATE_TEST_CASE("Hessian - Quartic", "[Hessian]", SCALAR_TYPES) {
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
   // y = x⁴
-  slp::VariableMatrix<T> x{1};
+  slp::Matrix<T> x{1};
   x[0].set_value(T(3));
-  slp::Variable y = x[0] * x[0] * x[0] * x[0];
+  slp::Real y = x[0] * x[0] * x[0] * x[0];
 
   // dy/dx = 4x³ = 108
   T g = slp::Gradient(y, x[0]).value().coeff(0);
@@ -113,7 +113,7 @@ TEMPLATE_TEST_CASE("Hessian - Sum", "[Hessian]", SCALAR_TYPES) {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  slp::VariableMatrix<T> x{5};
+  slp::Matrix<T> x{5};
   x[0].set_value(T(1));
   x[1].set_value(T(2));
   x[2].set_value(T(3));
@@ -121,7 +121,7 @@ TEMPLATE_TEST_CASE("Hessian - Sum", "[Hessian]", SCALAR_TYPES) {
   x[4].set_value(T(5));
 
   // y = sum(x)
-  auto y = std::accumulate(x.begin(), x.end(), slp::Variable{T(0)});
+  auto y = std::accumulate(x.begin(), x.end(), slp::Real{T(0)});
   CHECK(y.value() == T(15));
 
   auto g = slp::Gradient(y, x);
@@ -139,13 +139,13 @@ TEMPLATE_TEST_CASE("Hessian - Sum of products", "[Hessian]", SCALAR_TYPES) {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  slp::VariableMatrix<T> x{5};
+  slp::Matrix<T> x{5};
   for (int i = 0; i < 5; ++i) {
     x[i].set_value(T(i + 1));
   }
 
   // y = ||x||²
-  slp::Variable y = x.T() * x;
+  slp::Real y = x.T() * x;
   CHECK(y.value() == T(1 * 1 + 2 * 2 + 3 * 3 + 4 * 4 + 5 * 5));
 
   auto g = slp::Gradient(y, x);
@@ -170,14 +170,14 @@ TEMPLATE_TEST_CASE("Hessian - Product of sines", "[Hessian]", SCALAR_TYPES) {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  slp::VariableMatrix<T> x{5};
+  slp::Matrix<T> x{5};
   for (int i = 0; i < 5; ++i) {
     x[i].set_value(T(i + 1));
   }
 
   // y = prod(sin(x))
   auto temp = x.cwise_transform(slp::sin<T>);
-  auto y = std::accumulate(temp.begin(), temp.end(), slp::Variable{T(1)},
+  auto y = std::accumulate(temp.begin(), temp.end(), slp::Real{T(1)},
                            std::multiplies{});
   CHECK_THAT(y.value(), WithinRel(sin(T(1)) * sin(T(2)) * sin(T(3)) *
                                       sin(T(4)) * sin(T(5)),
@@ -214,17 +214,16 @@ TEMPLATE_TEST_CASE("Hessian - Sum of squared residuals", "[Hessian]",
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  slp::VariableMatrix<T> x{5};
+  slp::Matrix<T> x{5};
   for (int i = 0; i < 5; ++i) {
     x[i].set_value(T(1));
   }
 
   // y = sum(diff(x).^2)
   auto temp = (x.block(0, 0, 4, 1) - x.block(1, 0, 4, 1))
-                  .cwise_transform([](const slp::Variable<T>& x) {
-                    return slp::pow(x, T(2));
-                  });
-  auto y = std::accumulate(temp.begin(), temp.end(), slp::Variable{T(0)});
+                  .cwise_transform(
+                      [](const slp::Real<T>& x) { return slp::pow(x, T(2)); });
+  auto y = std::accumulate(temp.begin(), temp.end(), slp::Real{T(0)});
   auto g = slp::Gradient(y, x).value().toDense();
 
   CHECK(y.value() == T(0));
@@ -254,15 +253,15 @@ TEMPLATE_TEST_CASE("Hessian - Sum of squares", "[Hessian]", SCALAR_TYPES) {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  slp::VariableMatrix<T> r{4};
+  slp::Matrix<T> r{4};
   r.set_value(Eigen::Vector4<T>{{T(25), T(10), T(5), T(0)}});
 
-  slp::VariableMatrix<T> x{4};
+  slp::Matrix<T> x{4};
   for (int i = 0; i < 4; ++i) {
     x[i].set_value(T(0));
   }
 
-  slp::Variable J = T(0);
+  slp::Real J = T(0);
   for (int i = 0; i < 4; ++i) {
     J += (r[i] - x[i]) * (r[i] - x[i]);
   }
@@ -284,7 +283,7 @@ TEMPLATE_TEST_CASE("Hessian - Nested powers", "[Hessian]", SCALAR_TYPES) {
 
   constexpr T x0(3);
 
-  slp::Variable<T> x;
+  slp::Real<T> x;
   x.set_value(x0);
 
   auto y = slp::pow(slp::pow(x, T(2)), T(2));
@@ -302,14 +301,13 @@ TEMPLATE_TEST_CASE("Hessian - Nested powers", "[Hessian]", SCALAR_TYPES) {
 // ∂²y/∂x₀∂x₁ = f″(u) x₀x₁ + f′(u)
 // ∂²y/∂x₁² = f″(u) x₀²
 template <typename T>
-void check_unary_hessian(
-    std::function<slp::Variable<T>(const slp::Variable<T>&)> f,
-    std::function<T(T)> df, std::function<T(T)> d2f) {
+void check_unary_hessian(std::function<slp::Real<T>(const slp::Real<T>&)> f,
+                         std::function<T(T)> df, std::function<T(T)> d2f) {
   using std::abs;
 
   constexpr T ε = std::numeric_limits<T>::epsilon();
 
-  slp::VariableMatrix<T> x{2};
+  slp::Matrix<T> x{2};
   x[0].set_value(T(0.6));
   x[1].set_value(T(0.7));
   slp::Hessian hessian{f(x[0] * x[1]), x};
@@ -352,7 +350,7 @@ TEMPLATE_TEST_CASE("Hessian - Division", "[Hessian]", SCALAR_TYPES) {
   // ∂²y/∂x₀² = 0
   // ∂²y/∂x₀∂x₁ = −1/x₁²
   // ∂²y/∂x₁² = 2x₀/x₁³
-  slp::VariableMatrix<T> x{2};
+  slp::Matrix<T> x{2};
   slp::Hessian hessian{x[0] / x[1], x};
   auto symbolic_H = hessian.get();
 
@@ -443,7 +441,7 @@ TEMPLATE_TEST_CASE("Hessian - atan2()", "[Hessian]", SCALAR_TYPES) {
   // ∂²z/∂y² = −2xy/(x² + y²)²
   // ∂²z/∂y∂x = (y² − x²)/(x² + y²)²
   // ∂²z/∂x² = 2xy/(x² + y²)²
-  slp::VariableMatrix<T> input{2};
+  slp::Matrix<T> input{2};
   slp::Hessian hessian{slp::atan2(input[0], input[1]), input};
   auto symbolic_H = hessian.get();
 
@@ -550,7 +548,7 @@ TEMPLATE_TEST_CASE("Hessian - hypot()", "[Hessian]", SCALAR_TYPES) {
   };
 
   SECTION("Two arguments") {
-    slp::VariableMatrix<T> x{2};
+    slp::Matrix<T> x{2};
     slp::Hessian hessian{slp::hypot(x[0], x[1]), x};
     auto symbolic_H = hessian.get();
 
@@ -567,7 +565,7 @@ TEMPLATE_TEST_CASE("Hessian - hypot()", "[Hessian]", SCALAR_TYPES) {
   }
 
   SECTION("Three arguments") {
-    slp::VariableMatrix<T> x{3};
+    slp::Matrix<T> x{3};
     slp::Hessian hessian{slp::hypot(x[0], x[1], x[2]), x};
     auto symbolic_H = hessian.get();
 
@@ -589,7 +587,7 @@ TEMPLATE_TEST_CASE("Hessian - hypot()", "[Hessian]", SCALAR_TYPES) {
     // ∂²y/∂a² = (2y² − 4a²)/y³
     // ∂²y/∂a∂b = −2ab/y³
     // ∂²y/∂b² = (y² − b²)/y³
-    slp::VariableMatrix<T> x{2};
+    slp::Matrix<T> x{2};
     slp::Hessian hessian{slp::hypot(x[0], x[1], x[0]), x};
     auto symbolic_H = hessian.get();
 
@@ -619,7 +617,7 @@ TEMPLATE_TEST_CASE("Hessian - if_else()", "[Hessian]", SCALAR_TYPES) {
   //
   // The condition's arguments are decision variables, but they don't
   // contribute to the Hessian.
-  slp::VariableMatrix<T> x{2};
+  slp::Matrix<T> x{2};
   auto f = slp::if_else(x[0] < x[1], x[0] * x[0] * x[1], x[1] * x[1] * x[1]);
   slp::Hessian hessian{f, x};
   auto symbolic_H = hessian.get();
@@ -676,11 +674,11 @@ TEMPLATE_TEST_CASE("Hessian - max() and min()", "[Hessian]", SCALAR_TYPES) {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  slp::VariableMatrix<T> input{2};
+  slp::Matrix<T> input{2};
   Eigen::Matrix2<T> expected_y{{T(0), T(0)}, {T(0), T(2)}};
   Eigen::Matrix2<T> expected_x{{T(2), T(0)}, {T(0), T(0)}};
 
-  auto check = [&](slp::Variable<T> f, T x0, T y0, T x1, T y1) {
+  auto check = [&](slp::Real<T> f, T x0, T y0, T x1, T y1) {
     slp::Hessian hessian{f, input};
     auto symbolic_H = hessian.get();
 
@@ -716,7 +714,7 @@ TEMPLATE_TEST_CASE("Hessian - pow()", "[Hessian]", SCALAR_TYPES) {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  slp::VariableMatrix<T> input{2};
+  slp::Matrix<T> input{2};
   auto f = slp::pow(input[0] + T(1), input[1]);
   slp::Hessian hessian{f, input};
 
@@ -836,7 +834,7 @@ TEMPLATE_TEST_CASE("Hessian - Rosenbrock", "[Hessian]", SCALAR_TYPES) {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  slp::VariableMatrix<T> input{2};
+  slp::Matrix<T> input{2};
   auto& x = input[0];
   auto& y = input[1];
   auto hessian = slp::Hessian(
@@ -876,7 +874,7 @@ TEMPLATE_TEST_CASE("Hessian - Edge pushing (Wang) example 1", "[Hessian]",
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  slp::VariableMatrix<T> x{2};
+  slp::Matrix<T> x{2};
   x[0].set_value(T(3));
   x[1].set_value(T(4));
 
@@ -916,11 +914,11 @@ TEMPLATE_TEST_CASE("Hessian - Edge pushing (Petro) figure 1", "[Hessian]",
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
   // y = p₁ log(x₁x₂)
-  slp::Variable<T> p_1 = 2.0;
-  slp::VariableMatrix<T> x{2};
+  slp::Real<T> p_1 = 2.0;
+  slp::Matrix<T> x{2};
   x[0].set_value(T(2));
   x[1].set_value(T(3));
-  slp::Variable<T> y = p_1 * slp::log(x[0] * x[1]);
+  slp::Real<T> y = p_1 * slp::log(x[0] * x[1]);
 
   // d²y/dx² = [−p₁/x₁²     0   ]
   //           [   0     −p₁/x₂²]
@@ -946,14 +944,14 @@ TEMPLATE_TEST_CASE("Hessian - Edge pushing (Petro) figure 1", "[Hessian]",
   }
 }
 
-TEMPLATE_TEST_CASE("Hessian - Variable reuse", "[Hessian]", SCALAR_TYPES) {
+TEMPLATE_TEST_CASE("Hessian - Real reuse", "[Hessian]", SCALAR_TYPES) {
   using T = TestType;
 
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  slp::Variable<T> y;
-  slp::VariableMatrix<T> x{1};
+  slp::Real<T> y;
+  slp::Matrix<T> x{1};
 
   // y = x³
   x[0].set_value(T(1));

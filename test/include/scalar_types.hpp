@@ -11,7 +11,7 @@
 #include <sleipnir/autodiff/gradient.hpp>
 #include <sleipnir/autodiff/hessian.hpp>
 #include <sleipnir/autodiff/jacobian.hpp>
-#include <sleipnir/autodiff/variable_matrix.hpp>
+#include <sleipnir/autodiff/matrix.hpp>
 #include <sleipnir/optimization/ocp.hpp>
 #include <sleipnir/optimization/problem.hpp>
 #include <sleipnir/optimization/solver/control_flow.hpp>
@@ -36,10 +36,10 @@ extern template class slp::Hessian<float, Eigen::Lower | Eigen::Upper>;
 
 extern template class slp::Jacobian<float>;
 
-extern template class slp::VariableMatrix<float>;
+extern template class slp::Matrix<float>;
 
-extern template slp::VariableMatrix<float> slp::solve(
-    const slp::VariableMatrix<float>& A, const slp::VariableMatrix<float>& B);
+extern template slp::Matrix<float> slp::solve(const slp::Matrix<float>& A,
+                                              const slp::Matrix<float>& B);
 
 extern template class slp::OCP<float>;
 
@@ -89,11 +89,10 @@ extern template class slp::Hessian<ExplicitDouble, Eigen::Lower | Eigen::Upper>;
 
 extern template class slp::Jacobian<ExplicitDouble>;
 
-extern template class slp::VariableMatrix<ExplicitDouble>;
+extern template class slp::Matrix<ExplicitDouble>;
 
-extern template slp::VariableMatrix<ExplicitDouble> slp::solve(
-    const slp::VariableMatrix<ExplicitDouble>& A,
-    const slp::VariableMatrix<ExplicitDouble>& B);
+extern template slp::Matrix<ExplicitDouble> slp::solve(
+    const slp::Matrix<ExplicitDouble>& A, const slp::Matrix<ExplicitDouble>& B);
 
 extern template class slp::OCP<ExplicitDouble>;
 

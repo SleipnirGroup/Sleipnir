@@ -13,8 +13,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <sleipnir/autodiff/expression_type.hpp>
-#include <sleipnir/autodiff/variable.hpp>
-#include <sleipnir/autodiff/variable_matrix.hpp>
+#include <sleipnir/autodiff/matrix.hpp>
+#include <sleipnir/autodiff/real.hpp>
 #include <sleipnir/optimization/problem.hpp>
 #include <sleipnir/optimization/solver/exit_status.hpp>
 #include <sleipnir/util/pool.hpp>
@@ -48,7 +48,7 @@ discretize_ab(const Eigen::Matrix<T, States, States>& A_c,
   // ϕ = eᴹᵀ = [A_d  B_d]
   //           [ 0    I ]
   Eigen::Matrix<T, States + Inputs, States + Inputs> ϕ =
-      slp::VariableMatrix<T>{M * dt}.exp().value();
+      slp::Matrix<T>{M * dt}.exp().value();
 
   return {ϕ.template block<States, States>(0, 0),
           ϕ.template block<States, Inputs>(0, States)};
@@ -228,7 +228,7 @@ TEMPLATE_TEST_CASE("Problem - Double integrator", "[Problem]", SCALAR_TYPES) {
   problem.subject_to(slp::bounds(T(-1), U, T(1)));
 
   // Cost function - minimize position error
-  slp::Variable J = T(0);
+  slp::Real J = T(0);
   for (int k = 0; k < N + 1; ++k) {
     J += pow(r - X[0, k], 2);
   }

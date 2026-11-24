@@ -6,7 +6,7 @@
 
 #include <vector>
 
-#include <sleipnir/autodiff/variable.hpp>
+#include <sleipnir/autodiff/real.hpp>
 
 #include "docstrings.hpp"
 

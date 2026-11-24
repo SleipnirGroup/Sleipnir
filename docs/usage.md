@@ -399,14 +399,14 @@ Sleipnir aggressively simplifies constant expressions in the expression graph. T
 
 If the user intends to reuse the problem formulation with different constants, the expression pruning can be suppressed in two ways.
 
-1. Make an empty (linear) `Variable`, then set its value. This can negatively impact autodiff caching.
+1. Make an empty (linear) `Real`, then set its value. This can negatively impact autodiff caching.
 ```python
-a = Variable()
+a = Real()
 a.set_value(0)
 ```
-2. Create a constant `Variable` with a value that won't be pruned (expression-dependent).
+2. Create a constant `Real` with a value that won't be pruned (expression-dependent).
 ```python
-a = Variable(2)
+a = Real(2)
 ```
 
 ### Avoiding numerical issues

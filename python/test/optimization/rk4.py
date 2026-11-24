@@ -3,25 +3,28 @@ from typing import Any, overload
 
 import numpy as np
 import numpy.typing as npt
-from sleipnir.autodiff import VariableBlock, VariableMatrix
+from sleipnir.autodiff import Matrix, Submatrix
 
-type Matrix = npt.NDArray[np.float64]
-type SymbolicMatrix = VariableMatrix | VariableBlock
-
-
-@overload
-def rk4(
-    f: Callable[[Matrix, Matrix], Matrix], x: Matrix, u: Matrix, dt: float
-) -> Matrix: ...
+type NumericMatrix = npt.NDArray[np.float64]
+type SymbolicMatrix = Matrix | Submatrix
 
 
 @overload
 def rk4(
-    f: Callable[[SymbolicMatrix, SymbolicMatrix], VariableMatrix],
+    f: Callable[[NumericMatrix, NumericMatrix], NumericMatrix],
+    x: NumericMatrix,
+    u: NumericMatrix,
+    dt: float,
+) -> NumericMatrix: ...
+
+
+@overload
+def rk4(
+    f: Callable[[SymbolicMatrix, SymbolicMatrix], Matrix],
     x: SymbolicMatrix,
     u: SymbolicMatrix,
     dt: float,
-) -> VariableMatrix: ...
+) -> Matrix: ...
 
 
 def rk4(f: Callable[[Any, Any], Any], x: Any, u: Any, dt: float) -> Any:

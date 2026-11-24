@@ -5,7 +5,7 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
-#include <sleipnir/autodiff/variable.hpp>
+#include <sleipnir/autodiff/real.hpp>
 #include <sleipnir/optimization/multistart.hpp>
 #include <sleipnir/optimization/problem.hpp>
 #include <sleipnir/optimization/solver/exit_status.hpp>
@@ -34,8 +34,8 @@ TEMPLATE_TEST_CASE("multistart - Mishra's Bird function", "[multistart]",
     y.set_value(input.y);
 
     // https://en.wikipedia.org/wiki/Test_functions_for_optimization#Test_functions_for_constrained_optimization
-    slp::Variable J = sin(y) * exp(pow(T(1) - cos(x), T(2))) +
-                      cos(x) * exp(pow(T(1) - sin(y), T(2))) + pow(x - y, T(2));
+    slp::Real J = sin(y) * exp(pow(T(1) - cos(x), T(2))) +
+                  cos(x) * exp(pow(T(1) - sin(y), T(2))) + pow(x - y, T(2));
     problem.minimize(J);
 
     problem.subject_to(pow(x + T(5), T(2)) + pow(y + T(5), T(2)) < T(25));

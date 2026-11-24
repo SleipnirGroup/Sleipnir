@@ -19,7 +19,7 @@ import numpy as np
 import numpy.typing as npt
 from mpl_toolkits.mplot3d import Axes3D
 from numpy.linalg import norm
-from sleipnir.autodiff import Gradient, VariableBlock, VariableMatrix, block, sqrt
+from sleipnir.autodiff import Gradient, Matrix, Submatrix, block, sqrt
 from sleipnir.optimization import Problem
 
 field_width = 8.2296  # 27 ft -> m
@@ -41,10 +41,8 @@ target_wrt_field = np.array(
 g = np.array([[0], [0], [9.806]])  # m/s²
 
 
-def cross_variable(
-    a: VariableMatrix | VariableBlock, b: npt.NDArray[np.float64]
-) -> VariableMatrix:
-    return VariableMatrix(
+def cross_variable(a: Matrix | Submatrix, b: npt.NDArray[np.float64]) -> Matrix:
+    return Matrix(
         [
             [a[1, 0] * b[2, 0] - a[2, 0] * b[1, 0]],
             [a[2, 0] * b[0, 0] - a[0, 0] * b[2, 0]],
@@ -53,7 +51,7 @@ def cross_variable(
     )
 
 
-def f_variable(x: VariableMatrix | VariableBlock) -> VariableMatrix:
+def f_variable(x: Matrix | Submatrix) -> Matrix:
     # x' = x'
     # y' = y'
     # z' = z'

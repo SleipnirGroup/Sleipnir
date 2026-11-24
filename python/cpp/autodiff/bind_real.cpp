@@ -11,9 +11,9 @@
 #include <string>
 #include <utility>
 
-#include <sleipnir/autodiff/variable.hpp>
-#include <sleipnir/autodiff/variable_block.hpp>
-#include <sleipnir/autodiff/variable_matrix.hpp>
+#include <sleipnir/autodiff/matrix.hpp>
+#include <sleipnir/autodiff/real.hpp>
+#include <sleipnir/autodiff/submatrix.hpp>
 
 #include "docstrings.hpp"
 #include "for_each_type.hpp"
@@ -37,21 +37,18 @@ void def_unary_math(nb::module_& autodiff, const char* name, F&& f,
   autodiff.def(
       name, [=](double x) { return f(x); }, std::forward<Args>(args)...);
 
-  // Variable overload
+  // Real overload
   autodiff.def(name, f, std::forward<Args>(args)...);
 
-  // VariableMatrix overload
+  // Matrix overload
   autodiff.def(
-      name,
-      [=](const VariableMatrix<double>& x) { return x.cwise_transform(f); },
+      name, [=](const Matrix<double>& x) { return x.cwise_transform(f); },
       std::forward<Args>(args)...);
 
-  // VariableBlock overload
+  // Submatrix overload
   autodiff.def(
       name,
-      [=](const VariableBlock<VariableMatrix<double>>& x) {
-        return x.cwise_transform(f);
-      },
+      [=](const Submatrix<Matrix<double>>& x) { return x.cwise_transform(f); },
       std::forward<Args>(args)...);
 }
 
@@ -59,7 +56,7 @@ void def_unary_math(nb::module_& autodiff, const char* name, F&& f,
 template <typename F, typename... Args>
 void def_binary_math(nb::module_& autodiff, const char* name, F&& f,
                      Args&&... args) {
-  using V = Variable<double>;
+  using V = Real<double>;
   for_each_type<double, const V&>([&]<typename L> {
     for_each_type<double, const V&>([&]<typename R> {
       if constexpr (std::same_as<L, const V&> && std::same_as<R, const V&>) {
@@ -77,7 +74,7 @@ void def_binary_math(nb::module_& autodiff, const char* name, F&& f,
 template <typename F, typename... Args>
 void def_ternary_math(nb::module_& autodiff, const char* name, F&& f,
                       Args&&... args) {
-  using V = Variable<double>;
+  using V = Real<double>;
   for_each_type<double, const V&>([&]<typename L> {
     for_each_type<double, const V&>([&]<typename M> {
       for_each_type<double, const V&>([&]<typename R> {
@@ -94,26 +91,25 @@ void def_ternary_math(nb::module_& autodiff, const char* name, F&& f,
   });
 }
 
-void bind_variable(nb::module_& autodiff, nb::class_<Variable<double>>& cls) {
+void bind_real(nb::module_& autodiff, nb::class_<Real<double>>& cls) {
   using namespace nb::literals;
 
-  cls.def(nb::init<>(), DOC(slp, Variable, Variable));
-  cls.def(nb::init_implicit<double>(), "value"_a,
-          DOC(slp, Variable, Variable, 2));
-  cls.def("set_value", nb::overload_cast<double>(&Variable<double>::set_value),
-          "value"_a, DOC(slp, Variable, set_value));
-  cls.def("value", &Variable<double>::value, DOC(slp, Variable, value));
-  cls.def("type", &Variable<double>::type, DOC(slp, Variable, type));
+  cls.def(nb::init<>(), DOC(slp, Real, Real));
+  cls.def(nb::init_implicit<double>(), "value"_a, DOC(slp, Real, Real, 2));
+  cls.def("set_value", nb::overload_cast<double>(&Real<double>::set_value),
+          "value"_a, DOC(slp, Real, set_value));
+  cls.def("value", &Real<double>::value, DOC(slp, Real, value));
+  cls.def("type", &Real<double>::type, DOC(slp, Real, type));
 
   for_each_type<nb::detail::self_t, double, int>([&]<typename T> {
     cls.def(nb::self * T(), "rhs"_a);
-    cls.def(nb::self *= T(), "rhs"_a, DOC(slp, Variable, operator, imul));
+    cls.def(nb::self *= T(), "rhs"_a, DOC(slp, Real, operator, imul));
     cls.def(nb::self / T(), "rhs"_a);
-    cls.def(nb::self /= T(), "rhs"_a, DOC(slp, Variable, operator, idiv));
+    cls.def(nb::self /= T(), "rhs"_a, DOC(slp, Real, operator, idiv));
     cls.def(nb::self + T(), "rhs"_a);
-    cls.def(nb::self += T(), "rhs"_a, DOC(slp, Variable, operator, iadd));
+    cls.def(nb::self += T(), "rhs"_a, DOC(slp, Real, operator, iadd));
     cls.def(nb::self - T(), "rhs"_a);
-    cls.def(nb::self -= T(), "rhs"_a, DOC(slp, Variable, operator, isub));
+    cls.def(nb::self -= T(), "rhs"_a, DOC(slp, Real, operator, isub));
     if constexpr (!std::same_as<T, nb::detail::self_t>) {
       cls.def(T() * nb::self, "lhs"_a);
       cls.def(T() / nb::self, "lhs"_a);
@@ -127,25 +123,25 @@ void bind_variable(nb::module_& autodiff, nb::class_<Variable<double>>& cls) {
   // overloads.
   cls.def(
       "__mul__",
-      [](const Variable<double>& lhs, nb::DRef<Eigen::MatrixXd> rhs) {
+      [](const Real<double>& lhs, nb::DRef<Eigen::MatrixXd> rhs) {
         return lhs * rhs;
       },
       nb::is_operator(), "rhs"_a);
   cls.def(
       "__imul__",
-      [](const Variable<double>& lhs, nb::DRef<Eigen::MatrixXd> rhs) {
+      [](const Real<double>& lhs, nb::DRef<Eigen::MatrixXd> rhs) {
         return lhs * rhs;
       },
       nb::is_operator(), "rhs"_a);
   cls.def(
       "__rmul__",
-      [](const Variable<double>& rhs, nb::DRef<Eigen::MatrixXd> lhs) {
+      [](const Real<double>& rhs, nb::DRef<Eigen::MatrixXd> lhs) {
         return lhs * rhs;
       },
       nb::is_operator(), "lhs"_a);
   cls.def(
       "__rtruediv__",
-      [](const Variable<double>& rhs, nb::DRef<Eigen::MatrixXd> lhs) {
+      [](const Real<double>& rhs, nb::DRef<Eigen::MatrixXd> lhs) {
         return lhs / rhs;
       },
       nb::is_operator(), "lhs"_a);
@@ -166,13 +162,13 @@ void bind_variable(nb::module_& autodiff, nb::class_<Variable<double>>& cls) {
   // https://numpy.org/doc/stable/user/basics.dispatch.html
   cls.def(
       "__array_ufunc__",
-      [](Variable<double>& self, nb::object ufunc, nb::str method,
-         nb::args inputs, const nb::kwargs&) -> nb::object {
+      [](Real<double>& self, nb::object ufunc, nb::str method, nb::args inputs,
+         const nb::kwargs&) -> nb::object {
         std::string method_name = nb::cast<std::string>(method);
         std::string ufunc_name =
             nb::cast<std::string>(ufunc.attr("__repr__")());
 
-        // VariableMatrix only represents 2D arrays
+        // Matrix only represents 2D arrays
         auto is_2d_array = [](const nb::handle& obj) {
           return nb::isinstance<nb::ndarray<>>(obj) &&
                  nb::cast<nb::ndarray<>>(obj).ndim() == 2;
@@ -187,7 +183,7 @@ void bind_variable(nb::module_& autodiff, nb::class_<Variable<double>>& cls) {
 
             auto is_0d = [&](const nb::handle& obj) {
               // np.ndim() returns 0 for any non-array object
-              return !nb::isinstance<Variable<double>>(obj) &&
+              return !nb::isinstance<Real<double>>(obj) &&
                      nb::cast<int>(np.attr("ndim")(obj)) == 0;
             };
 
@@ -206,7 +202,7 @@ void bind_variable(nb::module_& autodiff, nb::class_<Variable<double>>& cls) {
             };
 
             // If an operand is 0D, apply the Python operator to its Python
-            // scalar and the other operand, which dispatches to Variable's
+            // scalar and the other operand, which dispatches to Real's
             // scalar overloads
             if (is_0d(inputs[0])) {
               return nb::module_::import_("operator")
@@ -260,7 +256,7 @@ void bind_variable(nb::module_& autodiff, nb::class_<Variable<double>>& cls) {
 
   cls.def(
       "__pow__",
-      [](const Variable<double>& self, int power) { return pow(self, power); },
+      [](const Real<double>& self, int power) { return pow(self, power); },
       nb::is_operator(), "power"_a);
   cls.def(-nb::self);
   cls.def(+nb::self);
@@ -282,7 +278,7 @@ void bind_variable(nb::module_& autodiff, nb::class_<Variable<double>>& cls) {
   });
 
   // Math functions
-  using V = Variable<double>;
+  using V = Real<double>;
   def_unary_math(autodiff, "abs", &abs<double>, "x"_a, DOC(slp, abs));
   def_unary_math(autodiff, "acos", &acos<double>, "x"_a, DOC(slp, acos));
   def_unary_math(autodiff, "asin", &asin<double>, "x"_a, DOC(slp, asin));

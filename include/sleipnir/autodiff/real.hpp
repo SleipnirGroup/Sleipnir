@@ -29,10 +29,10 @@
 
 namespace slp {
 
-// Forward declarations for friend declarations in Variable
+// Forward declarations for friend declarations in Real
 
 template <typename Scalar>
-class VariableMatrix;
+class Matrix;
 
 template <typename Scalar>
 struct EqualityConstraints;
@@ -43,9 +43,8 @@ struct InequalityConstraints;
 namespace detail {
 
 template <typename Scalar>
-VariableMatrix<Scalar> gradient_tree(
-    const detail::ExpressionGraph<Scalar>& top_list,
-    const VariableMatrix<Scalar>& wrt);
+Matrix<Scalar> gradient_tree(const detail::ExpressionGraph<Scalar>& top_list,
+                             const Matrix<Scalar>& wrt);
 
 }  // namespace detail
 
@@ -56,70 +55,70 @@ class Hessian;
 template <typename Scalar>
 class Jacobian;
 
-/// An autodiff variable pointing to an expression node.
+/// A real-valued autodiff expression.
 ///
 /// @tparam Scalar_ Scalar type.
 template <typename Scalar_>
-class Variable : public SleipnirBase {
+class Real : public SleipnirBase {
  public:
   /// Scalar type alias.
   using Scalar = Scalar_;
 
-  /// Constructs a linear Variable with a value of zero.
-  Variable() = default;
+  /// Constructs a linear Real with a value of zero.
+  Real() = default;
 
-  /// Constructs an empty Variable.
-  explicit constexpr Variable(std::nullptr_t) : expr{nullptr} {}
+  /// Constructs an empty Real.
+  explicit constexpr Real(std::nullptr_t) : expr{nullptr} {}
 
-  /// Constructs a Variable from a scalar type.
+  /// Constructs a Real from a scalar type.
   ///
-  /// @param value The value of the Variable.
+  /// @param value The value of the Real.
   // NOLINTNEXTLINE (google-explicit-constructor)
-  Variable(Scalar value)
+  Real(Scalar value)
     requires(!MatrixLike<Scalar>)
       : expr{detail::make_expression_ptr<detail::ConstantExpression<Scalar>>(
             value)} {}
 
-  /// Constructs a Variable from a scalar type.
+  /// Constructs a Real from a scalar type.
   ///
-  /// @param value The value of the Variable.
+  /// @param value The value of the Real.
   // NOLINTNEXTLINE (google-explicit-constructor)
-  Variable(SleipnirMatrixLike<Scalar> auto value) : expr{value[0, 0].expr} {
+  Real(SleipnirMatrixLike<Scalar> auto value) : expr{value[0, 0].expr} {
     slp_assert(value.rows() == 1 && value.cols() == 1);
   }
 
-  /// Constructs a Variable from a floating-point type.
+  /// Constructs a Real from a floating-point type.
   ///
-  /// @param value The value of the Variable.
+  /// @param value The value of the Real.
   // NOLINTNEXTLINE (google-explicit-constructor)
-  Variable(std::floating_point auto value)
+  Real(std::floating_point auto value)
       : expr{detail::make_expression_ptr<detail::ConstantExpression<Scalar>>(
             Scalar(value))} {}
 
-  /// Constructs a Variable from an integral type.
+  /// Constructs a Real from an integral type.
   ///
-  /// @param value The value of the Variable.
+  /// @param value The value of the Real.
   // NOLINTNEXTLINE (google-explicit-constructor)
-  Variable(std::integral auto value)
+  Real(std::integral auto value)
       : expr{detail::make_expression_ptr<detail::ConstantExpression<Scalar>>(
             Scalar(value))} {}
 
-  /// Constructs a Variable pointing to the specified expression.
+  /// Constructs a Real pointing to the specified expression.
   ///
   /// @param expr The autodiff variable.
-  explicit Variable(const detail::ExpressionPtr<Scalar>& expr) : expr{expr} {}
+  explicit Real(const detail::ExpressionPtr<Scalar>& expr) : expr{expr} {}
 
-  /// Constructs a Variable pointing to the specified expression.
+  /// Constructs a Real pointing to the specified expression.
   ///
   /// @param expr The autodiff variable.
-  explicit constexpr Variable(detail::ExpressionPtr<Scalar>&& expr)
+  explicit constexpr Real(detail::ExpressionPtr<Scalar>&& expr)
       : expr{std::move(expr)} {}
 
   /// Assignment operator for scalar.
   ///
-  /// @param value The value of the Variable.
+  /// @param value The value of the Real.
   /// @return This variable.
-  Variable<Scalar>& operator=(ScalarLike auto value) {
+  Real<Scalar>& operator=(ScalarLike auto value) {
     expr =
         detail::make_expression_ptr<detail::ConstantExpression<Scalar>>(value);
     m_graph_initialized = false;
@@ -127,9 +126,9 @@ class Variable : public SleipnirBase {
     return *this;
   }
 
-  /// Sets Variable's internal value.
+  /// Sets Real's internal value.
   ///
-  /// @param value The value of the Variable.
+  /// @param value The value of the Real.
   void set_value(Scalar value) {
 #ifndef SLEIPNIR_DISABLE_DIAGNOSTICS
     if (!expr->is_leaf) {
@@ -162,98 +161,98 @@ class Variable : public SleipnirBase {
   /// @return The type of this expression.
   ExpressionType type() const { return expr->type(); }
 
-  /// Variable-scalar multiplication operator.
+  /// Real-scalar multiplication operator.
   ///
   /// @param lhs Operator left-hand side.
   /// @param rhs Operator right-hand side.
   /// @return Result of multiplication.
   template <ScalarLike LHS, SleipnirScalarLike<Scalar> RHS>
-  friend Variable<Scalar> operator*(const LHS& lhs, const RHS& rhs) {
-    return Variable{Variable<Scalar>{lhs}.expr * rhs.expr};
+  friend Real<Scalar> operator*(const LHS& lhs, const RHS& rhs) {
+    return Real{Real<Scalar>{lhs}.expr * rhs.expr};
   }
 
-  /// Variable-scalar multiplication operator.
+  /// Real-scalar multiplication operator.
   ///
   /// @param lhs Operator left-hand side.
   /// @param rhs Operator right-hand side.
   /// @return Result of multiplication.
   template <SleipnirScalarLike<Scalar> LHS, ScalarLike RHS>
-  friend Variable<Scalar> operator*(const LHS& lhs, const RHS& rhs) {
-    return Variable{lhs.expr * Variable<Scalar>{rhs}.expr};
+  friend Real<Scalar> operator*(const LHS& lhs, const RHS& rhs) {
+    return Real{lhs.expr * Real<Scalar>{rhs}.expr};
   }
 
-  /// Variable-scalar multiplication operator.
+  /// Real-scalar multiplication operator.
   ///
   /// @param lhs Operator left-hand side.
   /// @param rhs Operator right-hand side.
   /// @return Result of multiplication.
-  friend Variable<Scalar> operator*(const Variable<Scalar>& lhs,
-                                    const Variable<Scalar>& rhs) {
-    return Variable{lhs.expr * rhs.expr};
+  friend Real<Scalar> operator*(const Real<Scalar>& lhs,
+                                const Real<Scalar>& rhs) {
+    return Real{lhs.expr * rhs.expr};
   }
 
-  /// Variable-Variable compound multiplication operator.
+  /// Real-Real compound multiplication operator.
   ///
   /// @param rhs Operator right-hand side.
   /// @return Result of multiplication.
-  Variable<Scalar>& operator*=(const Variable<Scalar>& rhs) {
+  Real<Scalar>& operator*=(const Real<Scalar>& rhs) {
     *this = *this * rhs;
     return *this;
   }
 
-  /// Variable-Variable division operator.
+  /// Real-Real division operator.
   ///
   /// @param lhs Operator left-hand side.
   /// @param rhs Operator right-hand side.
   /// @return Result of division.
-  friend Variable<Scalar> operator/(const Variable<Scalar>& lhs,
-                                    const Variable<Scalar>& rhs) {
-    return Variable{lhs.expr / rhs.expr};
+  friend Real<Scalar> operator/(const Real<Scalar>& lhs,
+                                const Real<Scalar>& rhs) {
+    return Real{lhs.expr / rhs.expr};
   }
 
-  /// Variable-Variable compound division operator.
+  /// Real-Real compound division operator.
   ///
   /// @param rhs Operator right-hand side.
   /// @return Result of division.
-  Variable<Scalar>& operator/=(const Variable<Scalar>& rhs) {
+  Real<Scalar>& operator/=(const Real<Scalar>& rhs) {
     *this = *this / rhs;
     return *this;
   }
 
-  /// Variable-Variable addition operator.
+  /// Real-Real addition operator.
   ///
   /// @param lhs Operator left-hand side.
   /// @param rhs Operator right-hand side.
   /// @return Result of addition.
-  friend Variable<Scalar> operator+(const Variable<Scalar>& lhs,
-                                    const Variable<Scalar>& rhs) {
-    return Variable{lhs.expr + rhs.expr};
+  friend Real<Scalar> operator+(const Real<Scalar>& lhs,
+                                const Real<Scalar>& rhs) {
+    return Real{lhs.expr + rhs.expr};
   }
 
-  /// Variable-Variable compound addition operator.
+  /// Real-Real compound addition operator.
   ///
   /// @param rhs Operator right-hand side.
   /// @return Result of addition.
-  Variable<Scalar>& operator+=(const Variable<Scalar>& rhs) {
+  Real<Scalar>& operator+=(const Real<Scalar>& rhs) {
     *this = *this + rhs;
     return *this;
   }
 
-  /// Variable-Variable subtraction operator.
+  /// Real-Real subtraction operator.
   ///
   /// @param lhs Operator left-hand side.
   /// @param rhs Operator right-hand side.
   /// @return Result of subtraction.
-  friend Variable<Scalar> operator-(const Variable<Scalar>& lhs,
-                                    const Variable<Scalar>& rhs) {
-    return Variable{lhs.expr - rhs.expr};
+  friend Real<Scalar> operator-(const Real<Scalar>& lhs,
+                                const Real<Scalar>& rhs) {
+    return Real{lhs.expr - rhs.expr};
   }
 
-  /// Variable-Variable compound subtraction operator.
+  /// Real-Real compound subtraction operator.
   ///
   /// @param rhs Operator right-hand side.
   /// @return Result of subtraction.
-  Variable<Scalar>& operator-=(const Variable<Scalar>& rhs) {
+  Real<Scalar>& operator-=(const Real<Scalar>& rhs) {
     *this = *this - rhs;
     return *this;
   }
@@ -261,15 +260,15 @@ class Variable : public SleipnirBase {
   /// Unary minus operator.
   ///
   /// @param lhs Operand for unary minus.
-  friend Variable<Scalar> operator-(const Variable<Scalar>& lhs) {
-    return Variable{-lhs.expr};
+  friend Real<Scalar> operator-(const Real<Scalar>& lhs) {
+    return Real{-lhs.expr};
   }
 
   /// Unary plus operator.
   ///
   /// @param lhs Operand for unary plus.
-  friend Variable<Scalar> operator+(const Variable<Scalar>& lhs) {
-    return Variable{+lhs.expr};
+  friend Real<Scalar> operator+(const Real<Scalar>& lhs) {
+    return Real{+lhs.expr};
   }
 
  private:
@@ -285,103 +284,87 @@ class Variable : public SleipnirBase {
   bool m_graph_initialized = false;
 
   template <typename Scalar>
-  friend Variable<Scalar> abs(const Variable<Scalar>& x);
+  friend Real<Scalar> abs(const Real<Scalar>& x);
   template <typename Scalar>
-  friend Variable<Scalar> acos(const Variable<Scalar>& x);
+  friend Real<Scalar> acos(const Real<Scalar>& x);
   template <typename Scalar>
-  friend Variable<Scalar> asin(const Variable<Scalar>& x);
+  friend Real<Scalar> asin(const Real<Scalar>& x);
   template <typename Scalar>
-  friend Variable<Scalar> atan(const Variable<Scalar>& x);
+  friend Real<Scalar> atan(const Real<Scalar>& x);
   template <typename Scalar>
-  friend Variable<Scalar> atan2(const ScalarLike auto& y,
-                                const Variable<Scalar>& x);
+  friend Real<Scalar> atan2(const ScalarLike auto& y, const Real<Scalar>& x);
   template <typename Scalar>
-  friend Variable<Scalar> atan2(const Variable<Scalar>& y,
-                                const ScalarLike auto& x);
+  friend Real<Scalar> atan2(const Real<Scalar>& y, const ScalarLike auto& x);
   template <typename Scalar>
-  friend Variable<Scalar> atan2(const Variable<Scalar>& y,
-                                const Variable<Scalar>& x);
+  friend Real<Scalar> atan2(const Real<Scalar>& y, const Real<Scalar>& x);
   template <typename Scalar>
-  friend Variable<Scalar> cbrt(const Variable<Scalar>& x);
+  friend Real<Scalar> cbrt(const Real<Scalar>& x);
   template <typename Scalar>
-  friend Variable<Scalar> cos(const Variable<Scalar>& x);
+  friend Real<Scalar> cos(const Real<Scalar>& x);
   template <typename Scalar>
-  friend Variable<Scalar> cosh(const Variable<Scalar>& x);
+  friend Real<Scalar> cosh(const Real<Scalar>& x);
   template <typename Scalar>
-  friend Variable<Scalar> erf(const Variable<Scalar>& x);
+  friend Real<Scalar> erf(const Real<Scalar>& x);
   template <typename Scalar>
-  friend Variable<Scalar> exp(const Variable<Scalar>& x);
+  friend Real<Scalar> exp(const Real<Scalar>& x);
   template <typename Scalar>
-  friend Variable<Scalar> hypot(const ScalarLike auto& x,
-                                const Variable<Scalar>& y);
+  friend Real<Scalar> hypot(const ScalarLike auto& x, const Real<Scalar>& y);
   template <typename Scalar>
-  friend Variable<Scalar> hypot(const Variable<Scalar>& x,
-                                const ScalarLike auto& y);
+  friend Real<Scalar> hypot(const Real<Scalar>& x, const ScalarLike auto& y);
   template <typename Scalar>
-  friend Variable<Scalar> hypot(const Variable<Scalar>& x,
-                                const Variable<Scalar>& y);
+  friend Real<Scalar> hypot(const Real<Scalar>& x, const Real<Scalar>& y);
   template <typename Scalar>
-  friend Variable<Scalar> if_else(
-      const EqualityConstraints<Scalar>& cond,
-      const std::type_identity_t<Variable<Scalar>>& t,
-      const std::type_identity_t<Variable<Scalar>>& f);
+  friend Real<Scalar> if_else(const EqualityConstraints<Scalar>& cond,
+                              const std::type_identity_t<Real<Scalar>>& t,
+                              const std::type_identity_t<Real<Scalar>>& f);
   template <typename Scalar>
-  friend Variable<Scalar> if_else(
-      const InequalityConstraints<Scalar>& cond,
-      const std::type_identity_t<Variable<Scalar>>& t,
-      const std::type_identity_t<Variable<Scalar>>& f);
+  friend Real<Scalar> if_else(const InequalityConstraints<Scalar>& cond,
+                              const std::type_identity_t<Real<Scalar>>& t,
+                              const std::type_identity_t<Real<Scalar>>& f);
   template <typename Scalar>
-  friend Variable<Scalar> log(const Variable<Scalar>& x);
+  friend Real<Scalar> log(const Real<Scalar>& x);
   template <typename Scalar>
-  friend Variable<Scalar> log10(const Variable<Scalar>& x);
+  friend Real<Scalar> log10(const Real<Scalar>& x);
   template <typename Scalar>
-  friend Variable<Scalar> max(const ScalarLike auto& a,
-                              const Variable<Scalar>& b);
+  friend Real<Scalar> max(const ScalarLike auto& a, const Real<Scalar>& b);
   template <typename Scalar>
-  friend Variable<Scalar> max(const Variable<Scalar>& a,
-                              const ScalarLike auto& b);
+  friend Real<Scalar> max(const Real<Scalar>& a, const ScalarLike auto& b);
   template <typename Scalar>
-  friend Variable<Scalar> max(const Variable<Scalar>& a,
-                              const Variable<Scalar>& b);
+  friend Real<Scalar> max(const Real<Scalar>& a, const Real<Scalar>& b);
   template <typename Scalar>
-  friend Variable<Scalar> min(const ScalarLike auto& a,
-                              const Variable<Scalar>& b);
+  friend Real<Scalar> min(const ScalarLike auto& a, const Real<Scalar>& b);
   template <typename Scalar>
-  friend Variable<Scalar> min(const Variable<Scalar>& a,
-                              const ScalarLike auto& b);
+  friend Real<Scalar> min(const Real<Scalar>& a, const ScalarLike auto& b);
   template <typename Scalar>
-  friend Variable<Scalar> min(const Variable<Scalar>& a,
-                              const Variable<Scalar>& b);
+  friend Real<Scalar> min(const Real<Scalar>& a, const Real<Scalar>& b);
   template <typename Scalar>
-  friend Variable<Scalar> pow(const ScalarLike auto& base,
-                              const Variable<Scalar>& power);
+  friend Real<Scalar> pow(const ScalarLike auto& base,
+                          const Real<Scalar>& power);
   template <typename Scalar>
-  friend Variable<Scalar> pow(const Variable<Scalar>& base,
-                              const ScalarLike auto& power);
+  friend Real<Scalar> pow(const Real<Scalar>& base,
+                          const ScalarLike auto& power);
   template <typename Scalar>
-  friend Variable<Scalar> pow(const Variable<Scalar>& base,
-                              const Variable<Scalar>& power);
+  friend Real<Scalar> pow(const Real<Scalar>& base, const Real<Scalar>& power);
   template <typename Scalar>
-  friend Variable<Scalar> sign(const Variable<Scalar>& x);
+  friend Real<Scalar> sign(const Real<Scalar>& x);
   template <typename Scalar>
-  friend Variable<Scalar> sin(const Variable<Scalar>& x);
+  friend Real<Scalar> sin(const Real<Scalar>& x);
   template <typename Scalar>
-  friend Variable<Scalar> sinh(const Variable<Scalar>& x);
+  friend Real<Scalar> sinh(const Real<Scalar>& x);
   template <typename Scalar>
-  friend Variable<Scalar> sqrt(const Variable<Scalar>& x);
+  friend Real<Scalar> sqrt(const Real<Scalar>& x);
   template <typename Scalar>
-  friend Variable<Scalar> tan(const Variable<Scalar>& x);
+  friend Real<Scalar> tan(const Real<Scalar>& x);
   template <typename Scalar>
-  friend Variable<Scalar> tanh(const Variable<Scalar>& x);
+  friend Real<Scalar> tanh(const Real<Scalar>& x);
   template <typename Scalar>
-  friend Variable<Scalar> hypot(const Variable<Scalar>& x,
-                                const Variable<Scalar>& y,
-                                const Variable<Scalar>& z);
+  friend Real<Scalar> hypot(const Real<Scalar>& x, const Real<Scalar>& y,
+                            const Real<Scalar>& z);
 
   template <typename Scalar>
-  friend VariableMatrix<Scalar> detail::gradient_tree(
+  friend Matrix<Scalar> detail::gradient_tree(
       const detail::ExpressionGraph<Scalar>& top_list,
-      const VariableMatrix<Scalar>& wrt);
+      const Matrix<Scalar>& wrt);
   template <typename Scalar, int UpLo>
     requires(UpLo == Eigen::Lower) || (UpLo == (Eigen::Lower | Eigen::Upper))
   friend class Hessian;
@@ -391,174 +374,174 @@ class Variable : public SleipnirBase {
 
 template <template <typename> typename T, typename Scalar>
   requires SleipnirMatrixLike<T<Scalar>, Scalar>
-Variable(T<Scalar>) -> Variable<Scalar>;
+Real(T<Scalar>) -> Real<Scalar>;
 
 template <std::floating_point T>
-Variable(T) -> Variable<T>;
+Real(T) -> Real<T>;
 
 template <std::integral T>
-Variable(T) -> Variable<T>;
+Real(T) -> Real<T>;
 
-/// abs() for Variables.
+/// abs() for Reals.
 ///
 /// @tparam Scalar Scalar type.
 /// @param x The argument.
 template <typename Scalar>
-Variable<Scalar> abs(const Variable<Scalar>& x) {
-  return Variable{detail::abs(x.expr)};
+Real<Scalar> abs(const Real<Scalar>& x) {
+  return Real{detail::abs(x.expr)};
 }
 
-/// acos() for Variables.
+/// acos() for Reals.
 ///
 /// @tparam Scalar Scalar type.
 /// @param x The argument.
 template <typename Scalar>
-Variable<Scalar> acos(const Variable<Scalar>& x) {
-  return Variable{detail::acos(x.expr)};
+Real<Scalar> acos(const Real<Scalar>& x) {
+  return Real{detail::acos(x.expr)};
 }
 
-/// asin() for Variables.
+/// asin() for Reals.
 ///
 /// @tparam Scalar Scalar type.
 /// @param x The argument.
 template <typename Scalar>
-Variable<Scalar> asin(const Variable<Scalar>& x) {
-  return Variable{detail::asin(x.expr)};
+Real<Scalar> asin(const Real<Scalar>& x) {
+  return Real{detail::asin(x.expr)};
 }
 
-/// atan() for Variables.
+/// atan() for Reals.
 ///
 /// @tparam Scalar Scalar type.
 /// @param x The argument.
 template <typename Scalar>
-Variable<Scalar> atan(const Variable<Scalar>& x) {
-  return Variable{detail::atan(x.expr)};
+Real<Scalar> atan(const Real<Scalar>& x) {
+  return Real{detail::atan(x.expr)};
 }
 
-/// atan2() for Variables.
+/// atan2() for Reals.
 ///
 /// @tparam Scalar Scalar type.
 /// @param y The y argument.
 /// @param x The x argument.
 template <typename Scalar>
-Variable<Scalar> atan2(const ScalarLike auto& y, const Variable<Scalar>& x) {
-  return Variable{detail::atan2(Variable<Scalar>(y).expr, x.expr)};
+Real<Scalar> atan2(const ScalarLike auto& y, const Real<Scalar>& x) {
+  return Real{detail::atan2(Real<Scalar>(y).expr, x.expr)};
 }
 
-/// atan2() for Variables.
+/// atan2() for Reals.
 ///
 /// @tparam Scalar Scalar type.
 /// @param y The y argument.
 /// @param x The x argument.
 template <typename Scalar>
-Variable<Scalar> atan2(const Variable<Scalar>& y, const ScalarLike auto& x) {
-  return Variable{detail::atan2(y.expr, Variable<Scalar>(x).expr)};
+Real<Scalar> atan2(const Real<Scalar>& y, const ScalarLike auto& x) {
+  return Real{detail::atan2(y.expr, Real<Scalar>(x).expr)};
 }
 
-/// atan2() for Variables.
+/// atan2() for Reals.
 ///
 /// @tparam Scalar Scalar type.
 /// @param y The y argument.
 /// @param x The x argument.
 template <typename Scalar>
-Variable<Scalar> atan2(const Variable<Scalar>& y, const Variable<Scalar>& x) {
-  return Variable{detail::atan2(y.expr, x.expr)};
+Real<Scalar> atan2(const Real<Scalar>& y, const Real<Scalar>& x) {
+  return Real{detail::atan2(y.expr, x.expr)};
 }
 
-/// cbrt() for Variables.
+/// cbrt() for Reals.
 ///
 /// @tparam Scalar Scalar type.
 /// @param x The argument.
 template <typename Scalar>
-Variable<Scalar> cbrt(const Variable<Scalar>& x) {
-  return Variable{detail::cbrt(x.expr)};
+Real<Scalar> cbrt(const Real<Scalar>& x) {
+  return Real{detail::cbrt(x.expr)};
 }
 
-/// cos() for Variables.
+/// cos() for Reals.
 ///
 /// @tparam Scalar Scalar type.
 /// @param x The argument.
 template <typename Scalar>
-Variable<Scalar> cos(const Variable<Scalar>& x) {
-  return Variable{detail::cos(x.expr)};
+Real<Scalar> cos(const Real<Scalar>& x) {
+  return Real{detail::cos(x.expr)};
 }
 
-/// cosh() for Variables.
+/// cosh() for Reals.
 ///
 /// @tparam Scalar Scalar type.
 /// @param x The argument.
 template <typename Scalar>
-Variable<Scalar> cosh(const Variable<Scalar>& x) {
-  return Variable{detail::cosh(x.expr)};
+Real<Scalar> cosh(const Real<Scalar>& x) {
+  return Real{detail::cosh(x.expr)};
 }
 
-/// erf() for Variables.
+/// erf() for Reals.
 ///
 /// @tparam Scalar Scalar type.
 /// @param x The argument.
 template <typename Scalar>
-Variable<Scalar> erf(const Variable<Scalar>& x) {
-  return Variable{detail::erf(x.expr)};
+Real<Scalar> erf(const Real<Scalar>& x) {
+  return Real{detail::erf(x.expr)};
 }
 
-/// exp() for Variables.
+/// exp() for Reals.
 ///
 /// @tparam Scalar Scalar type.
 /// @param x The argument.
 template <typename Scalar>
-Variable<Scalar> exp(const Variable<Scalar>& x) {
-  return Variable{detail::exp(x.expr)};
+Real<Scalar> exp(const Real<Scalar>& x) {
+  return Real{detail::exp(x.expr)};
 }
 
-/// hypot() for Variables.
+/// hypot() for Reals.
 ///
 /// @tparam Scalar Scalar type.
 /// @param x The x argument.
 /// @param y The y argument.
 template <typename Scalar>
-Variable<Scalar> hypot(const ScalarLike auto& x, const Variable<Scalar>& y) {
-  return Variable{detail::hypot(Variable<Scalar>(x).expr, y.expr)};
+Real<Scalar> hypot(const ScalarLike auto& x, const Real<Scalar>& y) {
+  return Real{detail::hypot(Real<Scalar>(x).expr, y.expr)};
 }
 
-/// hypot() for Variables.
+/// hypot() for Reals.
 ///
 /// @tparam Scalar Scalar type.
 /// @param x The x argument.
 /// @param y The y argument.
 template <typename Scalar>
-Variable<Scalar> hypot(const Variable<Scalar>& x, const ScalarLike auto& y) {
-  return Variable{detail::hypot(x.expr, Variable<Scalar>(y).expr)};
+Real<Scalar> hypot(const Real<Scalar>& x, const ScalarLike auto& y) {
+  return Real{detail::hypot(x.expr, Real<Scalar>(y).expr)};
 }
 
-/// hypot() for Variables.
+/// hypot() for Reals.
 ///
 /// @tparam Scalar Scalar type.
 /// @param x The x argument.
 /// @param y The y argument.
 template <typename Scalar>
-Variable<Scalar> hypot(const Variable<Scalar>& x, const Variable<Scalar>& y) {
-  return Variable{detail::hypot(x.expr, y.expr)};
+Real<Scalar> hypot(const Real<Scalar>& x, const Real<Scalar>& y) {
+  return Real{detail::hypot(x.expr, y.expr)};
 }
 
-/// log() for Variables.
+/// log() for Reals.
 ///
 /// @tparam Scalar Scalar type.
 /// @param x The argument.
 template <typename Scalar>
-Variable<Scalar> log(const Variable<Scalar>& x) {
-  return Variable{detail::log(x.expr)};
+Real<Scalar> log(const Real<Scalar>& x) {
+  return Real{detail::log(x.expr)};
 }
 
-/// log10() for Variables.
+/// log10() for Reals.
 ///
 /// @tparam Scalar Scalar type.
 /// @param x The argument.
 template <typename Scalar>
-Variable<Scalar> log10(const Variable<Scalar>& x) {
-  return Variable{detail::log10(x.expr)};
+Real<Scalar> log10(const Real<Scalar>& x) {
+  return Real{detail::log10(x.expr)};
 }
 
-/// max() for Variables.
+/// max() for Reals.
 ///
 /// Returns the greater of a and b. If the values are equivalent, returns a.
 ///
@@ -566,11 +549,11 @@ Variable<Scalar> log10(const Variable<Scalar>& x) {
 /// @param a The a argument.
 /// @param b The b argument.
 template <typename Scalar>
-Variable<Scalar> max(const ScalarLike auto& a, const Variable<Scalar>& b) {
-  return Variable{detail::max(Variable<Scalar>(a).expr, b.expr)};
+Real<Scalar> max(const ScalarLike auto& a, const Real<Scalar>& b) {
+  return Real{detail::max(Real<Scalar>(a).expr, b.expr)};
 }
 
-/// max() for Variables.
+/// max() for Reals.
 ///
 /// Returns the greater of a and b. If the values are equivalent, returns a.
 ///
@@ -578,11 +561,11 @@ Variable<Scalar> max(const ScalarLike auto& a, const Variable<Scalar>& b) {
 /// @param a The a argument.
 /// @param b The b argument.
 template <typename Scalar>
-Variable<Scalar> max(const Variable<Scalar>& a, const ScalarLike auto& b) {
-  return Variable{detail::max(a.expr, Variable<Scalar>(b).expr)};
+Real<Scalar> max(const Real<Scalar>& a, const ScalarLike auto& b) {
+  return Real{detail::max(a.expr, Real<Scalar>(b).expr)};
 }
 
-/// max() for Variables.
+/// max() for Reals.
 ///
 /// Returns the greater of a and b. If the values are equivalent, returns a.
 ///
@@ -590,11 +573,11 @@ Variable<Scalar> max(const Variable<Scalar>& a, const ScalarLike auto& b) {
 /// @param a The a argument.
 /// @param b The b argument.
 template <typename Scalar>
-Variable<Scalar> max(const Variable<Scalar>& a, const Variable<Scalar>& b) {
-  return Variable{detail::max(a.expr, b.expr)};
+Real<Scalar> max(const Real<Scalar>& a, const Real<Scalar>& b) {
+  return Real{detail::max(a.expr, b.expr)};
 }
 
-/// min() for Variables.
+/// min() for Reals.
 ///
 /// Returns the lesser of a and b. If the values are equivalent, returns a.
 ///
@@ -602,11 +585,11 @@ Variable<Scalar> max(const Variable<Scalar>& a, const Variable<Scalar>& b) {
 /// @param a The a argument.
 /// @param b The b argument.
 template <typename Scalar>
-Variable<Scalar> min(const ScalarLike auto& a, const Variable<Scalar>& b) {
-  return Variable{detail::min(Variable<Scalar>(a).expr, b.expr)};
+Real<Scalar> min(const ScalarLike auto& a, const Real<Scalar>& b) {
+  return Real{detail::min(Real<Scalar>(a).expr, b.expr)};
 }
 
-/// min() for Variables.
+/// min() for Reals.
 ///
 /// Returns the lesser of a and b. If the values are equivalent, returns a.
 ///
@@ -614,11 +597,11 @@ Variable<Scalar> min(const ScalarLike auto& a, const Variable<Scalar>& b) {
 /// @param a The a argument.
 /// @param b The b argument.
 template <typename Scalar>
-Variable<Scalar> min(const Variable<Scalar>& a, const ScalarLike auto& b) {
-  return Variable{detail::min(a.expr, Variable<Scalar>(b).expr)};
+Real<Scalar> min(const Real<Scalar>& a, const ScalarLike auto& b) {
+  return Real{detail::min(a.expr, Real<Scalar>(b).expr)};
 }
 
-/// min() for Variables.
+/// min() for Reals.
 ///
 /// Returns the lesser of a and b. If the values are equivalent, returns a.
 ///
@@ -626,107 +609,104 @@ Variable<Scalar> min(const Variable<Scalar>& a, const ScalarLike auto& b) {
 /// @param a The a argument.
 /// @param b The b argument.
 template <typename Scalar>
-Variable<Scalar> min(const Variable<Scalar>& a, const Variable<Scalar>& b) {
-  return Variable{detail::min(a.expr, b.expr)};
+Real<Scalar> min(const Real<Scalar>& a, const Real<Scalar>& b) {
+  return Real{detail::min(a.expr, b.expr)};
 }
 
-/// pow() for Variables.
+/// pow() for Reals.
 ///
 /// @tparam Scalar Scalar type.
 /// @param base The base.
 /// @param power The power.
 template <typename Scalar>
-Variable<Scalar> pow(const ScalarLike auto& base,
-                     const Variable<Scalar>& power) {
-  return Variable{detail::pow(Variable<Scalar>(base).expr, power.expr)};
+Real<Scalar> pow(const ScalarLike auto& base, const Real<Scalar>& power) {
+  return Real{detail::pow(Real<Scalar>(base).expr, power.expr)};
 }
 
-/// pow() for Variables.
+/// pow() for Reals.
 ///
 /// @tparam Scalar Scalar type.
 /// @param base The base.
 /// @param power The power.
 template <typename Scalar>
-Variable<Scalar> pow(const Variable<Scalar>& base,
-                     const ScalarLike auto& power) {
-  return Variable{detail::pow(base.expr, Variable<Scalar>(power).expr)};
+Real<Scalar> pow(const Real<Scalar>& base, const ScalarLike auto& power) {
+  return Real{detail::pow(base.expr, Real<Scalar>(power).expr)};
 }
 
-/// pow() for Variables.
+/// pow() for Reals.
 ///
 /// @tparam Scalar Scalar type.
 /// @param base The base.
 /// @param power The power.
 template <typename Scalar>
-Variable<Scalar> pow(const Variable<Scalar>& base,
-                     const Variable<Scalar>& power) {
-  return Variable{detail::pow(base.expr, power.expr)};
+Real<Scalar> pow(const Real<Scalar>& base, const Real<Scalar>& power) {
+  return Real{detail::pow(base.expr, power.expr)};
 }
 
-/// sign() for Variables.
+/// sign() for Reals.
 ///
 /// @tparam Scalar Scalar type.
 /// @param x The argument.
 template <typename Scalar>
-Variable<Scalar> sign(const Variable<Scalar>& x) {
-  return Variable{detail::sign(x.expr)};
+Real<Scalar> sign(const Real<Scalar>& x) {
+  return Real{detail::sign(x.expr)};
 }
 
-/// sin() for Variables.
+/// sin() for Reals.
 ///
 /// @tparam Scalar Scalar type.
 /// @param x The argument.
 template <typename Scalar>
-Variable<Scalar> sin(const Variable<Scalar>& x) {
-  return Variable{detail::sin(x.expr)};
+Real<Scalar> sin(const Real<Scalar>& x) {
+  return Real{detail::sin(x.expr)};
 }
 
-/// sinh() for Variables.
+/// sinh() for Reals.
 ///
 /// @tparam Scalar Scalar type.
 /// @param x The argument.
 template <typename Scalar>
-Variable<Scalar> sinh(const Variable<Scalar>& x) {
-  return Variable{detail::sinh(x.expr)};
+Real<Scalar> sinh(const Real<Scalar>& x) {
+  return Real{detail::sinh(x.expr)};
 }
 
-/// sqrt() for Variables.
+/// sqrt() for Reals.
 ///
 /// @tparam Scalar Scalar type.
 /// @param x The argument.
 template <typename Scalar>
-Variable<Scalar> sqrt(const Variable<Scalar>& x) {
-  return Variable{detail::sqrt(x.expr)};
+Real<Scalar> sqrt(const Real<Scalar>& x) {
+  return Real{detail::sqrt(x.expr)};
 }
 
-/// tan() for Variables.
+/// tan() for Reals.
 ///
 /// @tparam Scalar Scalar type.
 /// @param x The argument.
 template <typename Scalar>
-Variable<Scalar> tan(const Variable<Scalar>& x) {
-  return Variable{detail::tan(x.expr)};
+Real<Scalar> tan(const Real<Scalar>& x) {
+  return Real{detail::tan(x.expr)};
 }
 
-/// tanh() for Variables.
+/// tanh() for Reals.
 ///
 /// @tparam Scalar Scalar type.
 /// @param x The argument.
 template <typename Scalar>
-Variable<Scalar> tanh(const Variable<Scalar>& x) {
-  return Variable{detail::tanh(x.expr)};
+Real<Scalar> tanh(const Real<Scalar>& x) {
+  return Real{detail::tanh(x.expr)};
 }
 
-/// hypot() for Variables.
+/// hypot() for Reals.
 ///
 /// @tparam Scalar Scalar type.
 /// @param x The x argument.
 /// @param y The y argument.
 /// @param z The z argument.
 template <typename Scalar>
-Variable<Scalar> hypot(const Variable<Scalar>& x, const Variable<Scalar>& y,
-                       const Variable<Scalar>& z) {
-  return Variable{detail::hypot(x.expr, y.expr, z.expr)};
+Real<Scalar> hypot(const Real<Scalar>& x, const Real<Scalar>& y,
+                   const Real<Scalar>& z) {
+  return Real{detail::hypot(x.expr, y.expr, z.expr)};
 }
 
 // The standard form for equality constraints is c(x) = 0, and the standard form
@@ -737,7 +717,7 @@ Variable<Scalar> hypot(const Variable<Scalar>& x, const Variable<Scalar>& y,
 template <typename Scalar, ScalarLike LHS, ScalarLike RHS>
   requires SleipnirScalarLike<LHS, Scalar> || SleipnirScalarLike<RHS, Scalar>
 auto make_constraints(LHS&& lhs, RHS&& rhs) {
-  gch::small_vector<Variable<Scalar>> constraints;
+  gch::small_vector<Real<Scalar>> constraints;
   constraints.emplace_back(lhs - rhs);
 
   return constraints;
@@ -746,7 +726,7 @@ auto make_constraints(LHS&& lhs, RHS&& rhs) {
 template <typename Scalar, ScalarLike LHS, MatrixLike RHS>
   requires SleipnirScalarLike<LHS, Scalar> || SleipnirMatrixLike<RHS, Scalar>
 auto make_constraints(LHS&& lhs, RHS&& rhs) {
-  gch::small_vector<Variable<Scalar>> constraints;
+  gch::small_vector<Real<Scalar>> constraints;
   constraints.reserve(rhs.rows() * rhs.cols());
 
   for (int row = 0; row < rhs.rows(); ++row) {
@@ -762,7 +742,7 @@ auto make_constraints(LHS&& lhs, RHS&& rhs) {
 template <typename Scalar, MatrixLike LHS, ScalarLike RHS>
   requires SleipnirMatrixLike<LHS, Scalar> || SleipnirScalarLike<RHS, Scalar>
 auto make_constraints(LHS&& lhs, RHS&& rhs) {
-  gch::small_vector<Variable<Scalar>> constraints;
+  gch::small_vector<Real<Scalar>> constraints;
   constraints.reserve(lhs.rows() * lhs.cols());
 
   for (int row = 0; row < lhs.rows(); ++row) {
@@ -780,7 +760,7 @@ template <typename Scalar, MatrixLike LHS, MatrixLike RHS>
 auto make_constraints(LHS&& lhs, RHS&& rhs) {
   slp_assert(lhs.rows() == rhs.rows() && lhs.cols() == rhs.cols());
 
-  gch::small_vector<Variable<Scalar>> constraints;
+  gch::small_vector<Real<Scalar>> constraints;
   constraints.reserve(lhs.rows() * lhs.cols());
 
   for (int row = 0; row < lhs.rows(); ++row) {
@@ -799,7 +779,7 @@ auto make_constraints(LHS&& lhs, RHS&& rhs) {
 template <typename Scalar>
 struct EqualityConstraints {
   /// A vector of scalar equality constraints.
-  gch::small_vector<Variable<Scalar>> constraints;
+  gch::small_vector<Real<Scalar>> constraints;
 
   /// Concatenates multiple equality constraints.
   ///
@@ -856,7 +836,7 @@ struct EqualityConstraints {
 template <typename Scalar>
 struct InequalityConstraints {
   /// A vector of scalar inequality constraints.
-  gch::small_vector<Variable<Scalar>> constraints;
+  gch::small_vector<Real<Scalar>> constraints;
 
   /// Whether each scalar inequality constraint came from a strict comparison
   /// (< or >).
@@ -922,7 +902,7 @@ struct InequalityConstraints {
   }
 };
 
-/// Equality operator that returns an equality constraint for two Variables.
+/// Equality operator that returns an equality constraint for two Reals.
 ///
 /// @param lhs Left-hand side.
 /// @param rhs Left-hand side.
@@ -933,7 +913,7 @@ auto operator==(LHS&& lhs, RHS&& rhs) {
   return EqualityConstraints<typename std::decay_t<LHS>::Scalar>{lhs, rhs};
 }
 
-/// Equality operator that returns an equality constraint for two Variables.
+/// Equality operator that returns an equality constraint for two Reals.
 ///
 /// @param lhs Left-hand side.
 /// @param rhs Left-hand side.
@@ -944,7 +924,7 @@ auto operator==(LHS&& lhs, RHS&& rhs) {
   return EqualityConstraints<typename std::decay_t<RHS>::Scalar>{lhs, rhs};
 }
 
-/// Equality operator that returns an equality constraint for two Variables.
+/// Equality operator that returns an equality constraint for two Reals.
 ///
 /// @param lhs Left-hand side.
 /// @param rhs Left-hand side.
@@ -956,7 +936,7 @@ auto operator==(LHS&& lhs, RHS&& rhs) {
 }
 
 /// Less-than comparison operator that returns an inequality constraint for two
-/// Variables.
+/// Reals.
 ///
 /// @param lhs Left-hand side.
 /// @param rhs Left-hand side.
@@ -969,7 +949,7 @@ auto operator<(LHS&& lhs, RHS&& rhs) {
 }
 
 /// Less-than-or-equal-to comparison operator that returns an inequality
-/// constraint for two Variables.
+/// constraint for two Reals.
 ///
 /// @param lhs Left-hand side.
 /// @param rhs Left-hand side.
@@ -982,7 +962,7 @@ auto operator<=(LHS&& lhs, RHS&& rhs) {
 }
 
 /// Greater-than comparison operator that returns an inequality constraint for
-/// two Variables.
+/// two Reals.
 ///
 /// @param lhs Left-hand side.
 /// @param rhs Left-hand side.
@@ -995,7 +975,7 @@ auto operator>(LHS&& lhs, RHS&& rhs) {
 }
 
 /// Greater-than-or-equal-to comparison operator that returns an inequality
-/// constraint for two Variables.
+/// constraint for two Reals.
 ///
 /// @param lhs Left-hand side.
 /// @param rhs Left-hand side.
@@ -1007,7 +987,7 @@ auto operator>=(LHS&& lhs, RHS&& rhs) {
 }
 
 /// Greater-than-or-equal-to comparison operator that returns an inequality
-/// constraint for two Variables.
+/// constraint for two Reals.
 ///
 /// @param lhs Left-hand side.
 /// @param rhs Left-hand side.
@@ -1019,7 +999,7 @@ auto operator>=(LHS&& lhs, RHS&& rhs) {
 }
 
 /// Greater-than-or-equal-to comparison operator that returns an inequality
-/// constraint for two Variables.
+/// constraint for two Reals.
 ///
 /// @param lhs Left-hand side.
 /// @param rhs Left-hand side.
@@ -1043,13 +1023,13 @@ auto operator>=(LHS&& lhs, RHS&& rhs) {
 /// @param t Value selected when cond is satisfied.
 /// @param f Value selected when cond is violated.
 template <typename Scalar>
-Variable<Scalar> if_else(const EqualityConstraints<Scalar>& cond,
-                         const std::type_identity_t<Variable<Scalar>>& t,
-                         const std::type_identity_t<Variable<Scalar>>& f) {
+Real<Scalar> if_else(const EqualityConstraints<Scalar>& cond,
+                     const std::type_identity_t<Real<Scalar>>& t,
+                     const std::type_identity_t<Real<Scalar>>& f) {
   slp_assert(cond.constraints.size() == 1);
 
-  return Variable{detail::if_else(detail::IfElseCondition::ZERO,
-                                  cond.constraints[0].expr, t.expr, f.expr)};
+  return Real{detail::if_else(detail::IfElseCondition::ZERO,
+                              cond.constraints[0].expr, t.expr, f.expr)};
 }
 
 /// Returns t if the inequality constraint cond is satisfied, otherwise f.
@@ -1067,21 +1047,21 @@ Variable<Scalar> if_else(const EqualityConstraints<Scalar>& cond,
 /// @param t Value selected when cond is satisfied.
 /// @param f Value selected when cond is violated.
 template <typename Scalar>
-Variable<Scalar> if_else(const InequalityConstraints<Scalar>& cond,
-                         const std::type_identity_t<Variable<Scalar>>& t,
-                         const std::type_identity_t<Variable<Scalar>>& f) {
+Real<Scalar> if_else(const InequalityConstraints<Scalar>& cond,
+                     const std::type_identity_t<Real<Scalar>>& t,
+                     const std::type_identity_t<Real<Scalar>>& f) {
   slp_assert(cond.constraints.size() == 1);
 
-  return Variable{detail::if_else(cond.strict[0]
-                                      ? detail::IfElseCondition::POSITIVE
-                                      : detail::IfElseCondition::NONNEGATIVE,
-                                  cond.constraints[0].expr, t.expr, f.expr)};
+  return Real{detail::if_else(cond.strict[0]
+                                  ? detail::IfElseCondition::POSITIVE
+                                  : detail::IfElseCondition::NONNEGATIVE,
+                              cond.constraints[0].expr, t.expr, f.expr)};
 }
 
 /// Helper function for creating bound constraints.
 ///
 /// @param l Lower bound.
-/// @param x Variable to bound.
+/// @param x Real to bound.
 /// @param u Upper bound.
 template <typename L, typename X, typename U>
   requires(ScalarLike<L> || MatrixLike<L>) && SleipnirType<X> &&
@@ -1095,19 +1075,19 @@ auto bounds(L&& l, X&& x, U&& u) {
 namespace Eigen {
 
 /// NumTraits specialization that allows instantiating Eigen types with
-/// Variable.
+/// Real.
 ///
 /// @tparam Scalar Scalar type.
 template <typename Scalar>
-struct NumTraits<slp::Variable<Scalar>> : NumTraits<Scalar> {
+struct NumTraits<slp::Real<Scalar>> : NumTraits<Scalar> {
   /// Real type.
-  using Real = slp::Variable<Scalar>;
+  using Real = slp::Real<Scalar>;
   /// Non-integer type.
-  using NonInteger = slp::Variable<Scalar>;
+  using NonInteger = slp::Real<Scalar>;
   /// Nested type.
-  using Nested = slp::Variable<Scalar>;
+  using Nested = slp::Real<Scalar>;
   /// Literal type.
-  using Literal = slp::Variable<Scalar>;
+  using Literal = slp::Real<Scalar>;
 
   /// Is complex.
   static constexpr int IsComplex = 0;

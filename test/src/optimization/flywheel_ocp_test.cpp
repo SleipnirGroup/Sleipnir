@@ -12,7 +12,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <sleipnir/autodiff/expression_type.hpp>
-#include <sleipnir/autodiff/variable_matrix.hpp>
+#include <sleipnir/autodiff/matrix.hpp>
 #include <sleipnir/optimization/ocp.hpp>
 #include <sleipnir/optimization/ocp/dynamics_type.hpp>
 #include <sleipnir/optimization/ocp/timestep_method.hpp>
@@ -29,12 +29,11 @@
 #include "tolerance.hpp"
 
 template <typename T>
-void flywheel_test(
-    std::string test_name, T A, T B,
-    const slp::function_ref<slp::VariableMatrix<T>(
-        const slp::VariableMatrix<T>& x, const slp::VariableMatrix<T>& u)>& f,
-    slp::DynamicsType dynamics_type,
-    slp::TranscriptionMethod transcription_method) {
+void flywheel_test(std::string test_name, T A, T B,
+                   const slp::function_ref<slp::Matrix<T>(
+                       const slp::Matrix<T>& x, const slp::Matrix<T>& u)>& f,
+                   slp::DynamicsType dynamics_type,
+                   slp::TranscriptionMethod transcription_method) {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
@@ -142,7 +141,7 @@ TEMPLATE_TEST_CASE("OCP - Flywheel (explicit)", "[OCP]", SCALAR_TYPES) {
   constexpr T A(-1);
   constexpr T B(1);
 
-  auto f_ode = [=](slp::VariableMatrix<T> x, slp::VariableMatrix<T> u) {
+  auto f_ode = [=](slp::Matrix<T> x, slp::Matrix<T> u) {
     return A * x + B * u;
   };
 
@@ -168,7 +167,7 @@ TEMPLATE_TEST_CASE("OCP - Flywheel (discrete)", "[OCP]", SCALAR_TYPES) {
   T A_discrete = exp(A * T(dt.count()));
   T B_discrete = (T(1) - A_discrete) * B;
 
-  auto f_discrete = [=](slp::VariableMatrix<T> x, slp::VariableMatrix<T> u) {
+  auto f_discrete = [=](slp::Matrix<T> x, slp::Matrix<T> u) {
     return A_discrete * x + B_discrete * u;
   };
 

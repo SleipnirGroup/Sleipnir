@@ -5,7 +5,7 @@
 #include <cmath>
 
 #include <Eigen/Core>
-#include <sleipnir/autodiff/variable_matrix.hpp>
+#include <sleipnir/autodiff/matrix.hpp>
 
 template <typename Scalar>
 class DifferentialDriveUtil {
@@ -46,10 +46,9 @@ class DifferentialDriveUtil {
     return xdot;
   }
 
-  static slp::VariableMatrix<Scalar> dynamics_variable(
-      const slp::VariableMatrix<Scalar>& x,
-      const slp::VariableMatrix<Scalar>& u) {
-    slp::VariableMatrix<Scalar> xdot{5};
+  static slp::Matrix<Scalar> dynamics_variable(const slp::Matrix<Scalar>& x,
+                                               const slp::Matrix<Scalar>& u) {
+    slp::Matrix<Scalar> xdot{5};
 
     auto v = (x[3] + x[4]) / Scalar(2);
     xdot[0] = v * cos(x[2]);
