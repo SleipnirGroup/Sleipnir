@@ -110,42 +110,6 @@ class Problem {
     return vars;
   }
 
-  /// Creates a symmetric matrix of decision variables in the optimization
-  /// problem.
-  ///
-  /// Variable instances are reused across the diagonal, which helps reduce
-  /// problem dimensionality.
-  ///
-  /// Decision variables have an initial value of zero.
-  ///
-  /// @param rows Number of matrix rows.
-  /// @return A symmetric matrix of decision variables in the optimization
-  ///     problem.
-  [[nodiscard]]
-  VariableMatrix<Scalar> symmetric_decision_variable(int rows) {
-    // We only need to store the lower triangle of an n x n symmetric matrix;
-    // the other elements are duplicates. The lower triangle has (n² + n)/2
-    // elements.
-    //
-    //   n
-    //   Σ k = (n² + n)/2
-    //  k=1
-    m_decision_variables.reserve(m_decision_variables.size() +
-                                 (rows * rows + rows) / 2);
-
-    VariableMatrix<Scalar> vars{detail::empty, rows, rows};
-
-    for (int row = 0; row < rows; ++row) {
-      for (int col = 0; col <= row; ++col) {
-        m_decision_variables.emplace_back();
-        vars[row, col] = m_decision_variables.back();
-        vars[col, row] = m_decision_variables.back();
-      }
-    }
-
-    return vars;
-  }
-
   /// Creates a parameter in the optimization problem.
   ///
   /// A parameter is a constant whose value can be changed between solves with

@@ -141,9 +141,6 @@ void bind_problem(nb::class_<Problem<double>>& cls) {
   cls.def("decision_variable",
           nb::overload_cast<int, int>(&Problem<double>::decision_variable),
           "rows"_a, "cols"_a = 1, DOC(slp, Problem, decision_variable, 2));
-  cls.def("symmetric_decision_variable",
-          &Problem<double>::symmetric_decision_variable, "rows"_a,
-          DOC(slp, Problem, symmetric_decision_variable));
   cls.def("parameter", nb::overload_cast<>(&Problem<double>::parameter),
           DOC(slp, Problem, parameter));
   cls.def("parameter", nb::overload_cast<int, int>(&Problem<double>::parameter),
