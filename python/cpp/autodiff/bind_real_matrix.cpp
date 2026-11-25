@@ -98,40 +98,8 @@ void bind_real_matrix(nb::module_& autodiff,
               std::format("Expected 2 slices, got {}.", slices.size()).c_str());
         }
 
-        Slice row_slice;
-        int row_slice_length;
-        Slice col_slice;
-        int col_slice_length;
-
-        // Row slice
-        const auto& row_elem = slices[0];
-        if (auto py_row_slice = try_cast<nb::slice>(row_elem)) {
-          auto t = py_row_slice.value().compute(self.rows());
-          row_slice = Slice{t.get<0>(), t.get<1>(), t.get<2>()};
-          row_slice_length = t.get<3>();
-        } else {
-          int start = nb::cast<int>(row_elem);
-          if (start < 0) {
-            start += self.rows();
-          }
-          row_slice = Slice{start, start + 1};
-          row_slice_length = 1;
-        }
-
-        // Column slice
-        const auto& col_elem = slices[1];
-        if (auto py_col_slice = try_cast<nb::slice>(col_elem)) {
-          auto t = py_col_slice.value().compute(self.cols());
-          col_slice = Slice{t.get<0>(), t.get<1>(), t.get<2>()};
-          col_slice_length = t.get<3>();
-        } else {
-          int start = nb::cast<int>(col_elem);
-          if (start < 0) {
-            start += self.cols();
-          }
-          col_slice = Slice{start, start + 1};
-          col_slice_length = 1;
-        }
+        auto [row_slice, row_slice_length] = to_slice(slices[0], self.rows());
+        auto [col_slice, col_slice_length] = to_slice(slices[1], self.cols());
 
         auto lhs =
             self[row_slice, row_slice_length, col_slice, col_slice_length];
@@ -199,37 +167,8 @@ void bind_real_matrix(nb::module_& autodiff,
               std::format("Expected 2 slices, got {}.", slices.size()).c_str());
         }
 
-        Slice row_slice;
-        int row_slice_length;
-        Slice col_slice;
-        int col_slice_length;
-
-        // Row slice
-        const auto& row_elem = slices[0];
-        if (auto py_row_slice = try_cast<nb::slice>(row_elem)) {
-          auto t = py_row_slice.value().compute(self.rows());
-          row_slice = Slice{t.get<0>(), t.get<1>(), t.get<2>()};
-          row_slice_length = t.get<3>();
-        } else {
-          int start = nb::cast<int>(row_elem);
-          row_slice = Slice{start, start + 1};
-          row_slice_length = 1;
-        }
-
-        // Column slice
-        const auto& col_elem = slices[1];
-        if (auto py_col_slice = try_cast<nb::slice>(col_elem)) {
-          auto t = py_col_slice.value().compute(self.cols());
-          col_slice = Slice{t.get<0>(), t.get<1>(), t.get<2>()};
-          col_slice_length = t.get<3>();
-        } else {
-          int start = nb::cast<int>(col_elem);
-          if (start < 0) {
-            start += self.cols();
-          }
-          col_slice = Slice{start, start + 1};
-          col_slice_length = 1;
-        }
+        auto [row_slice, row_slice_length] = to_slice(slices[0], self.rows());
+        auto [col_slice, col_slice_length] = to_slice(slices[1], self.cols());
 
         return self[row_slice, row_slice_length, col_slice, col_slice_length];
       },
