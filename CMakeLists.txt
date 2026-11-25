@@ -45,6 +45,11 @@ option(SLEIPNIR_BUILD_BENCHMARKS "Build CasADi and Sleipnir benchmarks" OFF)
 option(SLEIPNIR_BUILD_EXAMPLES "Build examples" OFF)
 option(SLEIPNIR_BUILD_PYTHON "Build Python module" OFF)
 option(
+    SLEIPNIR_GENERATE_DOCSTRINGS
+    "Regenerate the Python module's docstrings from the C++ headers with pybind11_mkdoc"
+    ON
+)
+option(
     SLEIPNIR_DISABLE_DIAGNOSTICS
     "Disable diagnostics support at compile-time"
     OFF
@@ -572,7 +577,9 @@ if(SLEIPNIR_BUILD_PYTHON)
     )
 
     # Generate docs for the Python module
-    include(Pybind11Mkdoc)
-    pybind11_mkdoc(_sleipnir "${sleipnir_headers}")
-    add_dependencies(_sleipnir _sleipnir_docstrings)
+    if(SLEIPNIR_GENERATE_DOCSTRINGS)
+        include(Pybind11Mkdoc)
+        pybind11_mkdoc(_sleipnir "${sleipnir_headers}")
+        add_dependencies(_sleipnir _sleipnir_docstrings)
+    endif()
 endif()

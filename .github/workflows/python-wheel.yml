@@ -54,8 +54,7 @@ jobs:
       - name: Build wheel
         run: |
           pip install build
-          python .github/workflows/print_constraints.py > constraints.txt
-          python -m build --wheel --dependency-constraints-txt constraints.txt
+          python -m build --wheel
         env:
           CMAKE_C_COMPILER_LAUNCHER: sccache
           CMAKE_CXX_COMPILER_LAUNCHER: sccache
