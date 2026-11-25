@@ -337,67 +337,6 @@ TEMPLATE_TEST_CASE("RealMatrix - Compound assignment operators", "[RealMatrix]",
   CHECK(A2.value() == Eigen::Matrix2<T>{{T(1), T(2)}, {T(3), T(4)}});
 }
 
-TEMPLATE_TEST_CASE("RealMatrix - Real and Eigen matrix operators",
-                   "[RealMatrix]", SCALAR_TYPES) {
-  using T = TestType;
-
-  const slp::Real<T> x{T(2)};
-  const Eigen::Matrix2<T> A{{T(1), T(2)}, {T(3), T(4)}};
-
-  // Eigen matrices
-  CHECK((A * x).value() == Eigen::Matrix2<T>{{T(2), T(4)}, {T(6), T(8)}});
-  CHECK((x * A).value() == Eigen::Matrix2<T>{{T(2), T(4)}, {T(6), T(8)}});
-  CHECK((A / x).value() == Eigen::Matrix2<T>{{T(0.5), T(1)}, {T(1.5), T(2)}});
-
-  // Eigen expressions
-  CHECK(((A + A) * x).value() ==
-        Eigen::Matrix2<T>{{T(4), T(8)}, {T(12), T(16)}});
-  CHECK((x * (A * A)).value() ==
-        Eigen::Matrix2<T>{{T(14), T(20)}, {T(30), T(44)}});
-  CHECK(((A + A) / x).value() == Eigen::Matrix2<T>{{T(1), T(2)}, {T(3), T(4)}});
-}
-
-TEMPLATE_TEST_CASE("RealMatrix - Iterators", "[RealMatrix]", SCALAR_TYPES) {
-  using T = TestType;
-
-  slp::RealMatrix<T> A{
-      {T(1), T(2), T(3)}, {T(4), T(5), T(6)}, {T(7), T(8), T(9)}};
-  auto sub_A = A.block(2, 1, 1, 2);
-
-  CHECK(std::distance(A.begin(), A.end()) == 9);
-  CHECK(std::distance(A.cbegin(), A.cend()) == 9);
-  CHECK(std::distance(A.rbegin(), A.rend()) == 9);
-  CHECK(std::distance(A.crbegin(), A.crend()) == 9);
-  CHECK(std::distance(sub_A.begin(), sub_A.end()) == 2);
-  CHECK(std::distance(sub_A.cbegin(), sub_A.cend()) == 2);
-  CHECK(std::distance(sub_A.rbegin(), sub_A.rend()) == 2);
-  CHECK(std::distance(sub_A.crbegin(), sub_A.crend()) == 2);
-
-  int i = 1;
-  for (auto& elem : A) {
-    CHECK(elem.value() == T(i));
-    ++i;
-  }
-
-  i = 9;
-  for (auto& elem : A | std::views::reverse) {
-    CHECK(elem.value() == T(i));
-    --i;
-  }
-
-  i = 8;
-  for (auto& elem : sub_A) {
-    CHECK(elem.value() == T(i));
-    ++i;
-  }
-
-  i = 9;
-  for (auto& elem : sub_A | std::views::reverse) {
-    CHECK(elem.value() == T(i));
-    --i;
-  }
-}
-
 TEMPLATE_TEST_CASE("RealMatrix - Value", "[RealMatrix]", SCALAR_TYPES) {
   using T = TestType;
   using namespace slp::slicing;
@@ -482,72 +421,6 @@ TEMPLATE_TEST_CASE("RealMatrix - cwise_transform()", "[RealMatrix]",
   CHECK(result2.value() == expected2);
 }
 
-TEMPLATE_TEST_CASE("RealMatrix - identity() static function", "[RealMatrix]",
-                   SCALAR_TYPES) {
-  using T = TestType;
-
-  auto A = slp::RealMatrix<T>::identity(3);
-
-  CHECK(A.rows() == 3);
-  CHECK(A.cols() == 3);
-
-  CHECK(A.value() == Eigen::Matrix3<T>::Identity());
-}
-
-TEMPLATE_TEST_CASE("RealMatrix - zero() static function", "[RealMatrix]",
-                   SCALAR_TYPES) {
-  using T = TestType;
-
-  auto A = slp::RealMatrix<T>::zero(2, 3);
-
-  CHECK(A.rows() == 2);
-  CHECK(A.cols() == 3);
-
-  for (auto& elem : A) {
-    CHECK(elem.value() == T(0));
-  }
-}
-
-TEMPLATE_TEST_CASE("RealMatrix - one() static function", "[RealMatrix]",
-                   SCALAR_TYPES) {
-  using T = TestType;
-
-  auto A = slp::RealMatrix<T>::one(2, 3);
-
-  CHECK(A.rows() == 2);
-  CHECK(A.cols() == 3);
-
-  for (auto& elem : A) {
-    CHECK(elem.value() == T(1));
-  }
-}
-
-TEMPLATE_TEST_CASE("RealMatrix - constant() static function", "[RealMatrix]",
-                   SCALAR_TYPES) {
-  using T = TestType;
-
-  auto A = slp::RealMatrix<T>::constant(2, 3, T(2));
-
-  CHECK(A.rows() == 2);
-  CHECK(A.cols() == 3);
-
-  for (auto& elem : A) {
-    CHECK(elem.value() == T(2));
-  }
-}
-
-TEMPLATE_TEST_CASE("RealMatrix - cwise_reduce()", "[RealMatrix]",
-                   SCALAR_TYPES) {
-  using T = TestType;
-
-  slp::RealMatrix<T> A{{T(2), T(3), T(4)}, {T(5), T(6), T(7)}};
-  slp::RealMatrix<T> B{{T(8), T(9), T(10)}, {T(11), T(12), T(13)}};
-  slp::RealMatrix result = slp::cwise_reduce<T>(A, B, std::multiplies<>{});
-
-  Eigen::Matrix<T, 2, 3> expected{{T(16), T(27), T(40)}, {T(55), T(72), T(91)}};
-  CHECK(result.value() == expected);
-}
-
 TEMPLATE_TEST_CASE("RealMatrix - exp()", "[RealMatrix]", SCALAR_TYPES) {
   using T = TestType;
   using namespace slp::slicing;
@@ -616,6 +489,133 @@ TEMPLATE_TEST_CASE("RealMatrix - exp()", "[RealMatrix]", SCALAR_TYPES) {
   CHECK_THAT(pascal.exp().value(), WithinRel(expected_pascal, T(32) * ε));
   CHECK_THAT((pascal[_, _].exp().value()),
              WithinRel(expected_pascal, T(32) * ε));
+}
+
+TEMPLATE_TEST_CASE("RealMatrix - Iterators", "[RealMatrix]", SCALAR_TYPES) {
+  using T = TestType;
+
+  slp::RealMatrix<T> A{
+      {T(1), T(2), T(3)}, {T(4), T(5), T(6)}, {T(7), T(8), T(9)}};
+  auto sub_A = A.block(2, 1, 1, 2);
+
+  CHECK(std::distance(A.begin(), A.end()) == 9);
+  CHECK(std::distance(A.cbegin(), A.cend()) == 9);
+  CHECK(std::distance(A.rbegin(), A.rend()) == 9);
+  CHECK(std::distance(A.crbegin(), A.crend()) == 9);
+  CHECK(std::distance(sub_A.begin(), sub_A.end()) == 2);
+  CHECK(std::distance(sub_A.cbegin(), sub_A.cend()) == 2);
+  CHECK(std::distance(sub_A.rbegin(), sub_A.rend()) == 2);
+  CHECK(std::distance(sub_A.crbegin(), sub_A.crend()) == 2);
+
+  int i = 1;
+  for (auto& elem : A) {
+    CHECK(elem.value() == T(i));
+    ++i;
+  }
+
+  i = 9;
+  for (auto& elem : A | std::views::reverse) {
+    CHECK(elem.value() == T(i));
+    --i;
+  }
+
+  i = 8;
+  for (auto& elem : sub_A) {
+    CHECK(elem.value() == T(i));
+    ++i;
+  }
+
+  i = 9;
+  for (auto& elem : sub_A | std::views::reverse) {
+    CHECK(elem.value() == T(i));
+    --i;
+  }
+}
+
+TEMPLATE_TEST_CASE("RealMatrix - identity() static function", "[RealMatrix]",
+                   SCALAR_TYPES) {
+  using T = TestType;
+
+  auto A = slp::RealMatrix<T>::identity(3);
+
+  CHECK(A.rows() == 3);
+  CHECK(A.cols() == 3);
+
+  CHECK(A.value() == Eigen::Matrix3<T>::Identity());
+}
+
+TEMPLATE_TEST_CASE("RealMatrix - zero() static function", "[RealMatrix]",
+                   SCALAR_TYPES) {
+  using T = TestType;
+
+  auto A = slp::RealMatrix<T>::zero(2, 3);
+
+  CHECK(A.rows() == 2);
+  CHECK(A.cols() == 3);
+
+  for (auto& elem : A) {
+    CHECK(elem.value() == T(0));
+  }
+}
+
+TEMPLATE_TEST_CASE("RealMatrix - one() static function", "[RealMatrix]",
+                   SCALAR_TYPES) {
+  using T = TestType;
+
+  auto A = slp::RealMatrix<T>::one(2, 3);
+
+  CHECK(A.rows() == 2);
+  CHECK(A.cols() == 3);
+
+  for (auto& elem : A) {
+    CHECK(elem.value() == T(1));
+  }
+}
+
+TEMPLATE_TEST_CASE("RealMatrix - constant() static function", "[RealMatrix]",
+                   SCALAR_TYPES) {
+  using T = TestType;
+
+  auto A = slp::RealMatrix<T>::constant(2, 3, T(2));
+
+  CHECK(A.rows() == 2);
+  CHECK(A.cols() == 3);
+
+  for (auto& elem : A) {
+    CHECK(elem.value() == T(2));
+  }
+}
+
+TEMPLATE_TEST_CASE("RealMatrix - Real and Eigen matrix operators",
+                   "[RealMatrix]", SCALAR_TYPES) {
+  using T = TestType;
+
+  const slp::Real<T> x{T(2)};
+  const Eigen::Matrix2<T> A{{T(1), T(2)}, {T(3), T(4)}};
+
+  // Eigen matrices
+  CHECK((A * x).value() == Eigen::Matrix2<T>{{T(2), T(4)}, {T(6), T(8)}});
+  CHECK((x * A).value() == Eigen::Matrix2<T>{{T(2), T(4)}, {T(6), T(8)}});
+  CHECK((A / x).value() == Eigen::Matrix2<T>{{T(0.5), T(1)}, {T(1.5), T(2)}});
+
+  // Eigen expressions
+  CHECK(((A + A) * x).value() ==
+        Eigen::Matrix2<T>{{T(4), T(8)}, {T(12), T(16)}});
+  CHECK((x * (A * A)).value() ==
+        Eigen::Matrix2<T>{{T(14), T(20)}, {T(30), T(44)}});
+  CHECK(((A + A) / x).value() == Eigen::Matrix2<T>{{T(1), T(2)}, {T(3), T(4)}});
+}
+
+TEMPLATE_TEST_CASE("RealMatrix - cwise_reduce()", "[RealMatrix]",
+                   SCALAR_TYPES) {
+  using T = TestType;
+
+  slp::RealMatrix<T> A{{T(2), T(3), T(4)}, {T(5), T(6), T(7)}};
+  slp::RealMatrix<T> B{{T(8), T(9), T(10)}, {T(11), T(12), T(13)}};
+  slp::RealMatrix result = slp::cwise_reduce<T>(A, B, std::multiplies<>{});
+
+  Eigen::Matrix<T, 2, 3> expected{{T(16), T(27), T(40)}, {T(55), T(72), T(91)}};
+  CHECK(result.value() == expected);
 }
 
 TEMPLATE_TEST_CASE("RealMatrix - block() free function", "[RealMatrix]",
