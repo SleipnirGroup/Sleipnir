@@ -357,7 +357,7 @@ class RealSubmatrix : public SleipnirBase {
                                             int row_slice_length,
                                             Slice col_slice,
                                             int col_slice_length) const {
-    return RealSubmatrix{
+    return RealSubmatrix<const Mat>{
         *m_mat,
         {m_row_slice.start + row_slice.start * m_row_slice.step,
          m_row_slice.start + row_slice.stop * m_row_slice.step,
@@ -386,7 +386,7 @@ class RealSubmatrix : public SleipnirBase {
   /// @param offset The offset of the segment.
   /// @param length The length of the segment.
   /// @return A segment of the submatrix.
-  const RealSubmatrix<Mat> segment(int offset, int length) const {
+  const RealSubmatrix<const Mat> segment(int offset, int length) const {
     slp_assert(cols() == 1);
     slp_assert(offset >= 0 && offset < rows());
     slp_assert(length >= 0 && length <= rows() - offset);

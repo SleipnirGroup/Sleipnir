@@ -290,6 +290,30 @@ TEMPLATE_TEST_CASE("RealMatrix - Subslicing", "[RealMatrix]", SCALAR_TYPES) {
   }
 }
 
+TEMPLATE_TEST_CASE("RealMatrix - Const subslicing", "[RealMatrix]",
+                   SCALAR_TYPES) {
+  using T = TestType;
+
+  slp::RealMatrix<T> mat{Eigen::Matrix<T, 4, 4>{{T(1), T(2), T(3), T(4)},
+                                                {T(5), T(6), T(7), T(8)},
+                                                {T(9), T(10), T(11), T(12)},
+                                                {T(13), T(14), T(15), T(16)}}};
+  const auto sub = mat.block(1, 0, 3, 4);
+
+  CHECK(slp::RealMatrix<T>{sub.block(1, 1, 2, 2)}.value() ==
+        Eigen::Matrix<T, 2, 2>{{T(10), T(11)}, {T(14), T(15)}});
+  CHECK(slp::RealMatrix<T>{sub[slp::Slice{0, 3, 2}, slp::Slice{1, 4, 2}]}
+            .value() == Eigen::Matrix<T, 2, 2>{{T(6), T(8)}, {T(14), T(16)}});
+  CHECK(slp::RealMatrix<T>{sub.row(2)}.value() ==
+        Eigen::Matrix<T, 1, 4>{{T(13), T(14), T(15), T(16)}});
+  CHECK(slp::RealMatrix<T>{sub.col(3)}.value() ==
+        Eigen::Matrix<T, 3, 1>{{T(8)}, {T(12)}, {T(16)}});
+
+  const auto col = mat.block(0, 2, 4, 1);
+  CHECK(slp::RealMatrix<T>{col.segment(1, 2)}.value() ==
+        Eigen::Matrix<T, 2, 1>{{T(7)}, {T(11)}});
+}
+
 TEMPLATE_TEST_CASE("RealMatrix - Dense matrix multiplication", "[RealMatrix]",
                    SCALAR_TYPES) {
   using T = TestType;
