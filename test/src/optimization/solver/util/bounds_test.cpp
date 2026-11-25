@@ -106,15 +106,20 @@ TEMPLATE_TEST_CASE("Bounds - Projection", "[Bounds]", SCALAR_TYPES) {
       {T(-1), T(-1e-12)},
       {T(2), inf},
   });
-  Eigen::Vector<T, bounds.size()> x, x_correct;
+  Eigen::Vector<T, bounds.size()> x;
 
   // This tests that we exactly match section 3.6 of [2]
   SECTION("Initial value already mostly in bounds") {
     constexpr T κ_1(1e-2);
     constexpr T κ_2(1e-2);
     x.setZero();
-    x_correct << T(0), T(0), T(2), T(12) + κ_2 * T(0.1),
-        T(-1e-12) - std::min(κ_1, κ_2 * T(1 - 1e-12)), T(2) + κ_1 * T(2);
+    const Eigen::Vector<T, bounds.size()> x_correct{
+        T(0),
+        T(0),
+        T(2),
+        T(12) + κ_2 * T(0.1),
+        T(-1e-12) - std::min(κ_1, κ_2 * T(1 - 1e-12)),
+        T(2) + κ_1 * T(2)};
     slp::project_onto_bounds(x, bounds, κ_1, κ_2);
     CHECK(x == x_correct);
   }
@@ -146,7 +151,6 @@ TEMPLATE_TEST_CASE("Bounds - Projection", "[Bounds]", SCALAR_TYPES) {
   SECTION("Initial value above all bounds") {
     constexpr T big_positive(1000);
     x.setConstant(big_positive);
-    x_correct << big_positive, T(3), T(2), T(12.1), T(-1e-12), big_positive;
     slp::project_onto_bounds(x, bounds);
     bounds_are_sane(x, bounds, false);
   }
