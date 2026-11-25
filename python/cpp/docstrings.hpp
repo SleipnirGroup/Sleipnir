@@ -1101,7 +1101,7 @@ Args:
 )doc";
 
 constexpr char mkd_doc_slp_RealMatrix_RealMatrix_5[] =
-R"doc(Constructs a scalar RealMatrix from a nested list of Reals.
+R"doc(Constructs a RealMatrix from a nested list of Reals.
 
 Args:
     list: The nested list of Reals.
@@ -1109,7 +1109,7 @@ Args:
 )doc";
 
 constexpr char mkd_doc_slp_RealMatrix_RealMatrix_6[] =
-R"doc(Constructs a scalar RealMatrix from a nested list of scalars.
+R"doc(Constructs a RealMatrix from a nested list of scalars.
 
 This overload is for Python bindings only.
 
@@ -1119,7 +1119,7 @@ Args:
 )doc";
 
 constexpr char mkd_doc_slp_RealMatrix_RealMatrix_7[] =
-R"doc(Constructs a scalar RealMatrix from a nested list of Reals.
+R"doc(Constructs a RealMatrix from a nested list of Reals.
 
 This overload is for Python bindings only.
 
@@ -1177,28 +1177,28 @@ Args:
 )doc";
 
 constexpr char mkd_doc_slp_RealMatrix_RealMatrix_14[] =
-R"doc(Constructs a column vector wrapper around a Real array.
+R"doc(Constructs a RealMatrix column vector from a Real array.
 
 Args:
-    values: Real array to wrap.
+    values: Real array of values.
 
 )doc";
 
 constexpr char mkd_doc_slp_RealMatrix_RealMatrix_15[] =
-R"doc(Constructs a matrix wrapper around a Real array.
+R"doc(Constructs a RealMatrix from a Real array.
 
 Args:
-    values: Real array to wrap.
+    values: Real array of values.
     rows: The number of matrix rows.
     cols: The number of matrix columns.
 
 )doc";
 
 constexpr char mkd_doc_slp_RealMatrix_T[] =
-R"doc(Returns the transpose of the variable matrix.
+R"doc(Returns the transpose of the matrix.
 
 Returns:
-    The transpose of the variable matrix.
+    The transpose of the matrix.
 
 )doc";
 
@@ -1219,7 +1219,7 @@ Returns:
 )doc";
 
 constexpr char mkd_doc_slp_RealMatrix_block[] =
-R"doc(Returns a block of the variable matrix.
+R"doc(Returns a block of the matrix.
 
 Args:
     row_offset: The row offset of the block selection.
@@ -1228,12 +1228,12 @@ Args:
     block_cols: The number of columns in the block selection.
 
 Returns:
-    A block of the variable matrix.
+    A block of the matrix.
 
 )doc";
 
 constexpr char mkd_doc_slp_RealMatrix_block_2[] =
-R"doc(Returns a block of the variable matrix.
+R"doc(Returns a block of the matrix.
 
 Args:
     row_offset: The row offset of the block selection.
@@ -1242,7 +1242,7 @@ Args:
     block_cols: The number of columns in the block selection.
 
 Returns:
-    A block of the variable matrix.
+    A block of the matrix.
 
 )doc";
 
@@ -1263,24 +1263,24 @@ Returns:
 )doc";
 
 constexpr char mkd_doc_slp_RealMatrix_col[] =
-R"doc(Returns a column slice of the variable matrix.
+R"doc(Returns a column slice of the matrix.
 
 Args:
     col: The column to slice.
 
 Returns:
-    A column slice of the variable matrix.
+    A column slice of the matrix.
 
 )doc";
 
 constexpr char mkd_doc_slp_RealMatrix_col_2[] =
-R"doc(Returns a column slice of the variable matrix.
+R"doc(Returns a column slice of the matrix.
 
 Args:
     col: The column to slice.
 
 Returns:
-    A column slice of the variable matrix.
+    A column slice of the matrix.
 
 )doc";
 
@@ -1313,7 +1313,7 @@ constexpr char mkd_doc_slp_RealMatrix_const_iterator_operator_inc_2[] = R"doc()d
 constexpr char mkd_doc_slp_RealMatrix_const_iterator_operator_mul[] = R"doc()doc";
 
 constexpr char mkd_doc_slp_RealMatrix_constant[] =
-R"doc(Returns a variable matrix filled with a constant.
+R"doc(Returns a matrix filled with a constant.
 
 Args:
     rows: The number of matrix rows.
@@ -1321,7 +1321,7 @@ Args:
     constant: The constant.
 
 Returns:
-    A variable matrix filled with a constant.
+    A matrix filled with a constant.
 
 )doc";
 
@@ -1377,13 +1377,13 @@ Returns:
 )doc";
 
 constexpr char mkd_doc_slp_RealMatrix_identity[] =
-R"doc(Returns an identity variable matrix.
+R"doc(Returns an identity matrix.
 
 Args:
     rows: The number of matrix rows.
 
 Returns:
-    An identity variable matrix.
+    An identity matrix.
 
 )doc";
 
@@ -1414,14 +1414,14 @@ constexpr char mkd_doc_slp_RealMatrix_m_rows[] = R"doc()doc";
 constexpr char mkd_doc_slp_RealMatrix_m_storage[] = R"doc()doc";
 
 constexpr char mkd_doc_slp_RealMatrix_one[] =
-R"doc(Returns a variable matrix filled with ones.
+R"doc(Returns a matrix filled with ones.
 
 Args:
     rows: The number of matrix rows.
     cols: The number of matrix columns.
 
 Returns:
-    A variable matrix filled with ones.
+    A matrix filled with ones.
 
 )doc";
 
@@ -1472,31 +1472,31 @@ Returns:
 )doc";
 
 constexpr char mkd_doc_slp_RealMatrix_operator_array_5[] =
-R"doc(Returns a slice of the variable matrix.
+R"doc(Returns a slice of the matrix.
 
 Args:
     row_slice: The row slice.
     col_slice: The column slice.
 
 Returns:
-    A slice of the variable matrix.
+    A slice of the matrix.
 
 )doc";
 
 constexpr char mkd_doc_slp_RealMatrix_operator_array_6[] =
-R"doc(Returns a slice of the variable matrix.
+R"doc(Returns a slice of the matrix.
 
 Args:
     row_slice: The row slice.
     col_slice: The column slice.
 
 Returns:
-    A slice of the variable matrix.
+    A slice of the matrix.
 
 )doc";
 
 constexpr char mkd_doc_slp_RealMatrix_operator_array_7[] =
-R"doc(Returns a slice of the variable matrix.
+R"doc(Returns a slice of the matrix.
 
 The given slices aren't adjusted. This overload is for Python bindings
 only.
@@ -1508,12 +1508,12 @@ Args:
     col_slice_length: The column slice length.
 
 Returns:
-    A slice of the variable matrix.
+    A slice of the matrix.
 
 )doc";
 
 constexpr char mkd_doc_slp_RealMatrix_operator_array_8[] =
-R"doc(Returns a slice of the variable matrix.
+R"doc(Returns a slice of the matrix.
 
 The given slices aren't adjusted. This overload is for Python bindings
 only.
@@ -1525,18 +1525,18 @@ Args:
     col_slice_length: The column slice length.
 
 Returns:
-    A slice of the variable matrix.
+    A slice of the matrix.
 
 )doc";
 
 constexpr char mkd_doc_slp_RealMatrix_operator_assign[] =
-R"doc(Assigns an Eigen matrix to a RealMatrix.
+R"doc(Assigns an Eigen matrix to the matrix.
 
 Args:
     values: Eigen matrix of values.
 
 Returns:
-    This RealMatrix.
+    This matrix.
 
 )doc";
 
@@ -1549,7 +1549,7 @@ Args:
     value: Value to assign.
 
 Returns:
-    This RealMatrix.
+    This matrix.
 
 )doc";
 
@@ -1665,24 +1665,24 @@ Returns:
 )doc";
 
 constexpr char mkd_doc_slp_RealMatrix_row[] =
-R"doc(Returns a row slice of the variable matrix.
+R"doc(Returns a row slice of the matrix.
 
 Args:
     row: The row to slice.
 
 Returns:
-    A row slice of the variable matrix.
+    A row slice of the matrix.
 
 )doc";
 
 constexpr char mkd_doc_slp_RealMatrix_row_2[] =
-R"doc(Returns a row slice of the variable matrix.
+R"doc(Returns a row slice of the matrix.
 
 Args:
     row: The row to slice.
 
 Returns:
-    A row slice of the variable matrix.
+    A row slice of the matrix.
 
 )doc";
 
@@ -1695,26 +1695,26 @@ Returns:
 )doc";
 
 constexpr char mkd_doc_slp_RealMatrix_segment[] =
-R"doc(Returns a segment of the variable vector.
+R"doc(Returns a segment of the vector.
 
 Args:
     offset: The offset of the segment.
     length: The length of the segment.
 
 Returns:
-    A segment of the variable vector.
+    A segment of the vector.
 
 )doc";
 
 constexpr char mkd_doc_slp_RealMatrix_segment_2[] =
-R"doc(Returns a segment of the variable vector.
+R"doc(Returns a segment of the vector.
 
 Args:
     offset: The offset of the segment.
     length: The length of the segment.
 
 Returns:
-    A segment of the variable vector.
+    A segment of the vector.
 
 )doc";
 
@@ -1743,53 +1743,53 @@ Returns:
 )doc";
 
 constexpr char mkd_doc_slp_RealMatrix_trace[] =
-R"doc(Returns the trace of the variable matrix, the sum of its diagonal.
+R"doc(Returns the trace of the matrix, the sum of its diagonal.
 
 Returns:
-    The trace of the variable matrix.
+    The trace of the matrix.
 
 )doc";
 
 constexpr char mkd_doc_slp_RealMatrix_value[] =
-R"doc(Returns an element of the variable matrix.
+R"doc(Returns an element of the matrix.
 
 Args:
     row: The row of the element to return.
     col: The column of the element to return.
 
 Returns:
-    An element of the variable matrix.
+    An element of the matrix.
 
 )doc";
 
 constexpr char mkd_doc_slp_RealMatrix_value_2[] =
-R"doc(Returns an element of the variable matrix.
+R"doc(Returns an element of the matrix.
 
 Args:
     index: The index of the element to return.
 
 Returns:
-    An element of the variable matrix.
+    An element of the matrix.
 
 )doc";
 
 constexpr char mkd_doc_slp_RealMatrix_value_3[] =
-R"doc(Returns the contents of the variable matrix.
+R"doc(Returns the contents of the matrix.
 
 Returns:
-    The contents of the variable matrix.
+    The contents of the matrix.
 
 )doc";
 
 constexpr char mkd_doc_slp_RealMatrix_zero[] =
-R"doc(Returns a variable matrix filled with zeros.
+R"doc(Returns a matrix filled with zeros.
 
 Args:
     rows: The number of matrix rows.
     cols: The number of matrix columns.
 
 Returns:
-    A variable matrix filled with zeros.
+    A matrix filled with zeros.
 
 )doc";
 
@@ -1978,10 +1978,10 @@ Args:
 )doc";
 
 constexpr char mkd_doc_slp_Submatrix_T[] =
-R"doc(Returns the transpose of the variable matrix.
+R"doc(Returns the transpose of the submatrix.
 
 Returns:
-    The transpose of the variable matrix.
+    The transpose of the submatrix.
 
 )doc";
 
@@ -2002,7 +2002,7 @@ Returns:
 )doc";
 
 constexpr char mkd_doc_slp_Submatrix_block[] =
-R"doc(Returns a block of the variable matrix.
+R"doc(Returns a block of the submatrix.
 
 Args:
     row_offset: The row offset of the block selection.
@@ -2011,12 +2011,12 @@ Args:
     block_cols: The number of columns in the block selection.
 
 Returns:
-    A block of the variable matrix.
+    A block of the submatrix.
 
 )doc";
 
 constexpr char mkd_doc_slp_Submatrix_block_2[] =
-R"doc(Returns a block slice of the variable matrix.
+R"doc(Returns a block slice of the submatrix.
 
 Args:
     row_offset: The row offset of the block selection.
@@ -2025,7 +2025,7 @@ Args:
     block_cols: The number of columns in the block selection.
 
 Returns:
-    A block slice of the variable matrix.
+    A block slice of the submatrix.
 
 )doc";
 
@@ -2046,24 +2046,24 @@ Returns:
 )doc";
 
 constexpr char mkd_doc_slp_Submatrix_col[] =
-R"doc(Returns a column slice of the variable matrix.
+R"doc(Returns a column slice of the submatrix.
 
 Args:
     col: The column to slice.
 
 Returns:
-    A column slice of the variable matrix.
+    A column slice of the submatrix.
 
 )doc";
 
 constexpr char mkd_doc_slp_Submatrix_col_2[] =
-R"doc(Returns a column slice of the variable matrix.
+R"doc(Returns a column slice of the submatrix.
 
 Args:
     col: The column to slice.
 
 Returns:
-    A column slice of the variable matrix.
+    A column slice of the submatrix.
 
 )doc";
 
@@ -2227,31 +2227,31 @@ Returns:
 )doc";
 
 constexpr char mkd_doc_slp_Submatrix_operator_array_5[] =
-R"doc(Returns a slice of the variable matrix.
+R"doc(Returns a slice of the submatrix.
 
 Args:
     row_slice: The row slice.
     col_slice: The column slice.
 
 Returns:
-    A slice of the variable matrix.
+    A slice of the submatrix.
 
 )doc";
 
 constexpr char mkd_doc_slp_Submatrix_operator_array_6[] =
-R"doc(Returns a slice of the variable matrix.
+R"doc(Returns a slice of the submatrix.
 
 Args:
     row_slice: The row slice.
     col_slice: The column slice.
 
 Returns:
-    A slice of the variable matrix.
+    A slice of the submatrix.
 
 )doc";
 
 constexpr char mkd_doc_slp_Submatrix_operator_array_7[] =
-R"doc(Returns a slice of the variable matrix.
+R"doc(Returns a slice of the submatrix.
 
 The given slices aren't adjusted. This overload is for Python bindings
 only.
@@ -2263,12 +2263,12 @@ Args:
     col_slice_length: The column slice length.
 
 Returns:
-    A slice of the variable matrix.
+    A slice of the submatrix.
 
 )doc";
 
 constexpr char mkd_doc_slp_Submatrix_operator_array_8[] =
-R"doc(Returns a slice of the variable matrix.
+R"doc(Returns a slice of the submatrix.
 
 The given slices aren't adjusted. This overload is for Python bindings
 only.
@@ -2280,7 +2280,7 @@ Args:
     col_slice_length: The column slice length.
 
 Returns:
-    A slice of the variable matrix.
+    A slice of the submatrix.
 
 )doc";
 
@@ -2291,7 +2291,7 @@ Args:
     values: Submatrix of values.
 
 Returns:
-    This Submatrix.
+    This submatrix.
 
 )doc";
 
@@ -2302,7 +2302,7 @@ Args:
     values: Submatrix of values.
 
 Returns:
-    This Submatrix.
+    This submatrix.
 
 )doc";
 
@@ -2315,7 +2315,7 @@ Args:
     value: Value to assign.
 
 Returns:
-    This Submatrix.
+    This submatrix.
 
 )doc";
 
@@ -2326,7 +2326,7 @@ Args:
     values: Eigen matrix of values to assign.
 
 Returns:
-    This Submatrix.
+    This submatrix.
 
 )doc";
 
@@ -2337,7 +2337,7 @@ Args:
     values: RealMatrix of values.
 
 Returns:
-    This Submatrix.
+    This submatrix.
 
 )doc";
 
@@ -2348,7 +2348,7 @@ Args:
     values: RealMatrix of values.
 
 Returns:
-    This Submatrix.
+    This submatrix.
 
 )doc";
 
@@ -2464,24 +2464,24 @@ Returns:
 )doc";
 
 constexpr char mkd_doc_slp_Submatrix_row[] =
-R"doc(Returns a row slice of the variable matrix.
+R"doc(Returns a row slice of the submatrix.
 
 Args:
     row: The row to slice.
 
 Returns:
-    A row slice of the variable matrix.
+    A row slice of the submatrix.
 
 )doc";
 
 constexpr char mkd_doc_slp_Submatrix_row_2[] =
-R"doc(Returns a row slice of the variable matrix.
+R"doc(Returns a row slice of the submatrix.
 
 Args:
     row: The row to slice.
 
 Returns:
-    A row slice of the variable matrix.
+    A row slice of the submatrix.
 
 )doc";
 
@@ -2494,26 +2494,26 @@ Returns:
 )doc";
 
 constexpr char mkd_doc_slp_Submatrix_segment[] =
-R"doc(Returns a segment of the variable vector.
+R"doc(Returns a segment of the submatrix.
 
 Args:
     offset: The offset of the segment.
     length: The length of the segment.
 
 Returns:
-    A segment of the variable vector.
+    A segment of the submatrix.
 
 )doc";
 
 constexpr char mkd_doc_slp_Submatrix_segment_2[] =
-R"doc(Returns a segment of the variable vector.
+R"doc(Returns a segment of the submatrix.
 
 Args:
     offset: The offset of the segment.
     length: The length of the segment.
 
 Returns:
-    A segment of the variable vector.
+    A segment of the submatrix.
 
 )doc";
 
@@ -2544,41 +2544,41 @@ Returns:
 )doc";
 
 constexpr char mkd_doc_slp_Submatrix_trace[] =
-R"doc(Returns the trace of the variable matrix, the sum of its diagonal.
+R"doc(Returns the trace of the submatrix, the sum of its diagonal.
 
 Returns:
-    The trace of the variable matrix.
+    The trace of the submatrix.
 
 )doc";
 
 constexpr char mkd_doc_slp_Submatrix_value[] =
-R"doc(Returns an element of the variable matrix.
+R"doc(Returns an element of the submatrix.
 
 Args:
     row: The row of the element to return.
     col: The column of the element to return.
 
 Returns:
-    An element of the variable matrix.
+    An element of the submatrix.
 
 )doc";
 
 constexpr char mkd_doc_slp_Submatrix_value_2[] =
-R"doc(Returns an element of the variable block.
+R"doc(Returns an element of the submatrix.
 
 Args:
     index: The index of the element to return.
 
 Returns:
-    An element of the variable block.
+    An element of the submatrix.
 
 )doc";
 
 constexpr char mkd_doc_slp_Submatrix_value_3[] =
-R"doc(Returns the contents of the variable matrix.
+R"doc(Returns the contents of the submatrix.
 
 Returns:
-    The contents of the variable matrix.
+    The contents of the submatrix.
 
 )doc";
 
