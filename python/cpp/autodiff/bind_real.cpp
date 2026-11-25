@@ -13,7 +13,7 @@
 
 #include <sleipnir/autodiff/real.hpp>
 #include <sleipnir/autodiff/real_matrix.hpp>
-#include <sleipnir/autodiff/submatrix.hpp>
+#include <sleipnir/autodiff/real_submatrix.hpp>
 
 #include "docstrings.hpp"
 #include "for_each_type.hpp"
@@ -45,10 +45,10 @@ void def_unary_math(nb::module_& autodiff, const char* name, F&& f,
       name, [=](const RealMatrix<double>& x) { return x.cwise_transform(f); },
       std::forward<Args>(args)...);
 
-  // Submatrix overload
+  // RealSubmatrix overload
   autodiff.def(
       name,
-      [=](const Submatrix<RealMatrix<double>>& x) {
+      [=](const RealSubmatrix<RealMatrix<double>>& x) {
         return x.cwise_transform(f);
       },
       std::forward<Args>(args)...);

@@ -21,9 +21,9 @@
 
 #include "sleipnir/autodiff/expression_graph.hpp"
 #include "sleipnir/autodiff/real.hpp"
+#include "sleipnir/autodiff/real_submatrix.hpp"
 #include "sleipnir/autodiff/sleipnir_base.hpp"
 #include "sleipnir/autodiff/slice.hpp"
-#include "sleipnir/autodiff/submatrix.hpp"
 #include "sleipnir/util/assert.hpp"
 #include "sleipnir/util/concepts.hpp"
 #include "sleipnir/util/empty.hpp"
@@ -199,11 +199,11 @@ class RealMatrix : public SleipnirBase {
     m_storage.emplace_back(std::move(variable));
   }
 
-  /// Constructs a RealMatrix from a Submatrix.
+  /// Constructs a RealMatrix from a RealSubmatrix.
   ///
-  /// @param values Submatrix of values.
+  /// @param values RealSubmatrix of values.
   // NOLINTNEXTLINE (google-explicit-constructor)
-  RealMatrix(const Submatrix<RealMatrix>& values)
+  RealMatrix(const RealSubmatrix<RealMatrix>& values)
       : m_rows{values.rows()}, m_cols{values.cols()} {
     m_storage.reserve(rows() * cols());
     for (int row = 0; row < rows(); ++row) {
@@ -213,11 +213,11 @@ class RealMatrix : public SleipnirBase {
     }
   }
 
-  /// Constructs a RealMatrix from a Submatrix.
+  /// Constructs a RealMatrix from a RealSubmatrix.
   ///
-  /// @param values Submatrix of values.
+  /// @param values RealSubmatrix of values.
   // NOLINTNEXTLINE (google-explicit-constructor)
-  RealMatrix(const Submatrix<const RealMatrix>& values)
+  RealMatrix(const RealSubmatrix<const RealMatrix>& values)
       : m_rows{values.rows()}, m_cols{values.cols()} {
     m_storage.reserve(rows() * cols());
     for (int row = 0; row < rows(); ++row) {
@@ -349,13 +349,13 @@ class RealMatrix : public SleipnirBase {
   /// @param block_rows The number of rows in the block selection.
   /// @param block_cols The number of columns in the block selection.
   /// @return A block of the matrix.
-  Submatrix<RealMatrix> block(int row_offset, int col_offset, int block_rows,
-                              int block_cols) {
+  RealSubmatrix<RealMatrix> block(int row_offset, int col_offset,
+                                  int block_rows, int block_cols) {
     slp_assert(row_offset >= 0 && row_offset <= rows());
     slp_assert(col_offset >= 0 && col_offset <= cols());
     slp_assert(block_rows >= 0 && block_rows <= rows() - row_offset);
     slp_assert(block_cols >= 0 && block_cols <= cols() - col_offset);
-    return Submatrix{*this, row_offset, col_offset, block_rows, block_cols};
+    return RealSubmatrix{*this, row_offset, col_offset, block_rows, block_cols};
   }
 
   /// Returns a block of the matrix.
@@ -365,14 +365,14 @@ class RealMatrix : public SleipnirBase {
   /// @param block_rows The number of rows in the block selection.
   /// @param block_cols The number of columns in the block selection.
   /// @return A block of the matrix.
-  const Submatrix<const RealMatrix> block(int row_offset, int col_offset,
-                                          int block_rows,
-                                          int block_cols) const {
+  const RealSubmatrix<const RealMatrix> block(int row_offset, int col_offset,
+                                              int block_rows,
+                                              int block_cols) const {
     slp_assert(row_offset >= 0 && row_offset <= rows());
     slp_assert(col_offset >= 0 && col_offset <= cols());
     slp_assert(block_rows >= 0 && block_rows <= rows() - row_offset);
     slp_assert(block_cols >= 0 && block_cols <= cols() - col_offset);
-    return Submatrix{*this, row_offset, col_offset, block_rows, block_cols};
+    return RealSubmatrix{*this, row_offset, col_offset, block_rows, block_cols};
   }
 
   /// Returns a slice of the matrix.
@@ -380,11 +380,11 @@ class RealMatrix : public SleipnirBase {
   /// @param row_slice The row slice.
   /// @param col_slice The column slice.
   /// @return A slice of the matrix.
-  Submatrix<RealMatrix> operator[](Slice row_slice, Slice col_slice) {
+  RealSubmatrix<RealMatrix> operator[](Slice row_slice, Slice col_slice) {
     int row_slice_length = row_slice.adjust(rows());
     int col_slice_length = col_slice.adjust(cols());
-    return Submatrix{*this, std::move(row_slice), row_slice_length,
-                     std::move(col_slice), col_slice_length};
+    return RealSubmatrix{*this, std::move(row_slice), row_slice_length,
+                         std::move(col_slice), col_slice_length};
   }
 
   /// Returns a slice of the matrix.
@@ -392,12 +392,12 @@ class RealMatrix : public SleipnirBase {
   /// @param row_slice The row slice.
   /// @param col_slice The column slice.
   /// @return A slice of the matrix.
-  const Submatrix<const RealMatrix> operator[](Slice row_slice,
-                                               Slice col_slice) const {
+  const RealSubmatrix<const RealMatrix> operator[](Slice row_slice,
+                                                   Slice col_slice) const {
     int row_slice_length = row_slice.adjust(rows());
     int col_slice_length = col_slice.adjust(cols());
-    return Submatrix{*this, std::move(row_slice), row_slice_length,
-                     std::move(col_slice), col_slice_length};
+    return RealSubmatrix{*this, std::move(row_slice), row_slice_length,
+                         std::move(col_slice), col_slice_length};
   }
 
   /// Returns a slice of the matrix.
@@ -410,10 +410,10 @@ class RealMatrix : public SleipnirBase {
   /// @param col_slice The column slice.
   /// @param col_slice_length The column slice length.
   /// @return A slice of the matrix.
-  Submatrix<RealMatrix> operator[](Slice row_slice, int row_slice_length,
-                                   Slice col_slice, int col_slice_length) {
-    return Submatrix{*this, std::move(row_slice), row_slice_length,
-                     std::move(col_slice), col_slice_length};
+  RealSubmatrix<RealMatrix> operator[](Slice row_slice, int row_slice_length,
+                                       Slice col_slice, int col_slice_length) {
+    return RealSubmatrix{*this, std::move(row_slice), row_slice_length,
+                         std::move(col_slice), col_slice_length};
   }
 
   /// Returns a slice of the matrix.
@@ -426,12 +426,12 @@ class RealMatrix : public SleipnirBase {
   /// @param col_slice The column slice.
   /// @param col_slice_length The column slice length.
   /// @return A slice of the matrix.
-  const Submatrix<const RealMatrix> operator[](Slice row_slice,
-                                               int row_slice_length,
-                                               Slice col_slice,
-                                               int col_slice_length) const {
-    return Submatrix{*this, std::move(row_slice), row_slice_length,
-                     std::move(col_slice), col_slice_length};
+  const RealSubmatrix<const RealMatrix> operator[](Slice row_slice,
+                                                   int row_slice_length,
+                                                   Slice col_slice,
+                                                   int col_slice_length) const {
+    return RealSubmatrix{*this, std::move(row_slice), row_slice_length,
+                         std::move(col_slice), col_slice_length};
   }
 
   /// Returns a segment of the vector.
@@ -439,7 +439,7 @@ class RealMatrix : public SleipnirBase {
   /// @param offset The offset of the segment.
   /// @param length The length of the segment.
   /// @return A segment of the vector.
-  Submatrix<RealMatrix> segment(int offset, int length) {
+  RealSubmatrix<RealMatrix> segment(int offset, int length) {
     slp_assert(cols() == 1);
     slp_assert(offset >= 0 && offset < rows());
     slp_assert(length >= 0 && length <= rows() - offset);
@@ -451,7 +451,7 @@ class RealMatrix : public SleipnirBase {
   /// @param offset The offset of the segment.
   /// @param length The length of the segment.
   /// @return A segment of the vector.
-  const Submatrix<const RealMatrix> segment(int offset, int length) const {
+  const RealSubmatrix<const RealMatrix> segment(int offset, int length) const {
     slp_assert(cols() == 1);
     slp_assert(offset >= 0 && offset < rows());
     slp_assert(length >= 0 && length <= rows() - offset);
@@ -462,7 +462,7 @@ class RealMatrix : public SleipnirBase {
   ///
   /// @param row The row to slice.
   /// @return A row slice of the matrix.
-  Submatrix<RealMatrix> row(int row) {
+  RealSubmatrix<RealMatrix> row(int row) {
     slp_assert(row >= 0 && row < rows());
     return block(row, 0, 1, cols());
   }
@@ -471,7 +471,7 @@ class RealMatrix : public SleipnirBase {
   ///
   /// @param row The row to slice.
   /// @return A row slice of the matrix.
-  const Submatrix<const RealMatrix> row(int row) const {
+  const RealSubmatrix<const RealMatrix> row(int row) const {
     slp_assert(row >= 0 && row < rows());
     return block(row, 0, 1, cols());
   }
@@ -480,7 +480,7 @@ class RealMatrix : public SleipnirBase {
   ///
   /// @param col The column to slice.
   /// @return A column slice of the matrix.
-  Submatrix<RealMatrix> col(int col) {
+  RealSubmatrix<RealMatrix> col(int col) {
     slp_assert(col >= 0 && col < cols());
     return block(0, col, rows(), 1);
   }
@@ -489,7 +489,7 @@ class RealMatrix : public SleipnirBase {
   ///
   /// @param col The column to slice.
   /// @return A column slice of the matrix.
-  const Submatrix<const RealMatrix> col(int col) const {
+  const RealSubmatrix<const RealMatrix> col(int col) const {
     slp_assert(col >= 0 && col < cols());
     return block(0, col, rows(), 1);
   }

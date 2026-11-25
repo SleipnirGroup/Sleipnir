@@ -42,7 +42,7 @@ def test_equality_constraint_boolean_comparisons() -> None:
     for lhs, rhs in args:
         assert bool(np.array([[lhs]]) == RealMatrix([[rhs]])) == (lhs == rhs)
 
-    # np.array-Submatrix
+    # np.array-RealSubmatrix
     for lhs, rhs in args:
         assert bool(np.array([[lhs]]) == RealMatrix([[rhs]])[:, :]) == (lhs == rhs)
 
@@ -50,7 +50,7 @@ def test_equality_constraint_boolean_comparisons() -> None:
     for lhs, rhs in args:
         assert bool(RealMatrix([[lhs]]) == np.array([[rhs]])) == (lhs == rhs)
 
-    # Submatrix-np.array
+    # RealSubmatrix-np.array
     for lhs, rhs in args:
         assert bool(RealMatrix([[lhs]])[:, :] == np.array([[rhs]])) == (lhs == rhs)
 
@@ -116,7 +116,7 @@ def test_inequality_constraint_boolean_comparisons() -> None:
         assert bool(np.array([[lhs]]) > RealMatrix([[rhs]])) == (lhs > rhs)
         assert bool(np.array([[lhs]]) >= RealMatrix([[rhs]])) == (lhs >= rhs)
 
-    # np.array-Submatrix
+    # np.array-RealSubmatrix
     for lhs, rhs in args:
         assert bool(np.array([[lhs]]) < RealMatrix([[rhs]])[:, :]) == (lhs < rhs)
         assert bool(np.array([[lhs]]) <= RealMatrix([[rhs]])[:, :]) == (lhs <= rhs)
@@ -130,7 +130,7 @@ def test_inequality_constraint_boolean_comparisons() -> None:
         assert bool(RealMatrix([[lhs]]) > np.array([[rhs]])) == (lhs > rhs)
         assert bool(RealMatrix([[lhs]]) >= np.array([[rhs]])) == (lhs >= rhs)
 
-    # Submatrix-np.array
+    # RealSubmatrix-np.array
     for lhs, rhs in args:
         assert bool(RealMatrix([[lhs]])[:, :] < np.array([[rhs]])) == (lhs < rhs)
         assert bool(RealMatrix([[lhs]])[:, :] <= np.array([[rhs]])) == (lhs <= rhs)

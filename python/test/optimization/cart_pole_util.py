@@ -3,7 +3,7 @@ import math
 import numpy as np
 import numpy.typing as npt
 from sleipnir import autodiff
-from sleipnir.autodiff import Real, RealMatrix, Submatrix
+from sleipnir.autodiff import Real, RealMatrix, RealSubmatrix
 
 # https://underactuated.mit.edu/acrobot.html#cart_pole
 #
@@ -72,7 +72,7 @@ def cart_pole_dynamics_double(
 
 
 def cart_pole_dynamics_variable(
-    x: RealMatrix | Submatrix, u: RealMatrix | Submatrix
+    x: RealMatrix | RealSubmatrix, u: RealMatrix | RealSubmatrix
 ) -> RealMatrix:
     q = x[:2, :]
     qdot = x[2:, :]

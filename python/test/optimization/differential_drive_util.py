@@ -3,7 +3,7 @@ import math
 import numpy as np
 import numpy.typing as npt
 from sleipnir import autodiff
-from sleipnir.autodiff import RealMatrix, Submatrix
+from sleipnir.autodiff import RealMatrix, RealSubmatrix
 
 # x = [x, y, heading, left velocity, right velocity]ᵀ
 # u = [left voltage, right voltage]ᵀ
@@ -36,7 +36,7 @@ def differential_drive_dynamics_double(
 
 
 def differential_drive_dynamics_variable(
-    x: RealMatrix | Submatrix, u: RealMatrix | Submatrix
+    x: RealMatrix | RealSubmatrix, u: RealMatrix | RealSubmatrix
 ) -> RealMatrix:
     xdot = RealMatrix(5, 1)
 

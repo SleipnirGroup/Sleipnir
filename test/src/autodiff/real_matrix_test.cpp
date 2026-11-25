@@ -360,7 +360,7 @@ TEMPLATE_TEST_CASE("RealMatrix - Compound assignment operators", "[RealMatrix]",
   CHECK(A2.value() == Eigen::Matrix2<T>{{T(7), T(10)}, {T(15), T(22)}});
   A2.set_value(Eigen::Matrix2<T>{{T(1), T(2)}, {T(3), T(4)}});
 
-  // Submatrix matrix-matrix operators
+  // RealSubmatrix matrix-matrix operators
   A2.block(0, 0, A2.rows(), A2.cols()) += B;
   CHECK(A2.value() == Eigen::Matrix2<T>{{T(2), T(4)}, {T(6), T(8)}});
   A2.block(0, 0, A2.rows(), A2.cols()) -= B;
@@ -379,7 +379,7 @@ TEMPLATE_TEST_CASE("RealMatrix - Compound assignment operators", "[RealMatrix]",
   A2 /= b;
   CHECK(A2.value() == Eigen::Matrix2<T>{{T(1), T(2)}, {T(3), T(4)}});
 
-  // Submatrix matrix-scalar operators
+  // RealSubmatrix matrix-scalar operators
   A2.block(0, 0, 1, 1) += b;
   CHECK(A2.value() == Eigen::Matrix2<T>{{T(3), T(2)}, {T(3), T(4)}});
   A2.block(0, 0, 1, 1) -= b;
@@ -478,7 +478,7 @@ TEMPLATE_TEST_CASE("RealMatrix - cwise_transform()", "[RealMatrix]",
 
   CHECK(result1.value() == expected1);
 
-  // Submatrix cwise_transform
+  // RealSubmatrix cwise_transform
   auto sub_A = A.block(0, 0, 2, 2);
 
   slp::RealMatrix result2 = sub_A.cwise_transform(slp::abs<T>);

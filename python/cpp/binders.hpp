@@ -10,7 +10,7 @@
 #include <sleipnir/autodiff/jacobian.hpp>
 #include <sleipnir/autodiff/real.hpp>
 #include <sleipnir/autodiff/real_matrix.hpp>
-#include <sleipnir/autodiff/submatrix.hpp>
+#include <sleipnir/autodiff/real_submatrix.hpp>
 #include <sleipnir/optimization/ocp.hpp>
 #include <sleipnir/optimization/ocp/dynamics_type.hpp>
 #include <sleipnir/optimization/ocp/timestep_method.hpp>
@@ -28,7 +28,7 @@ void bind_expression_type(nb::enum_<ExpressionType>& e);
 void bind_real(nb::module_& autodiff, nb::class_<Real<double>>& cls);
 void bind_real_matrix(nb::module_& autodiff,
                       nb::class_<RealMatrix<double>>& cls);
-void bind_submatrix(nb::class_<Submatrix<RealMatrix<double>>>& cls);
+void bind_real_submatrix(nb::class_<RealSubmatrix<RealMatrix<double>>>& cls);
 
 void bind_gradient(nb::class_<Gradient<double>>& cls);
 void bind_hessian(nb::class_<Hessian<double>>& cls);

@@ -3,10 +3,10 @@ from typing import Any, overload
 
 import numpy as np
 import numpy.typing as npt
-from sleipnir.autodiff import RealMatrix, Submatrix
+from sleipnir.autodiff import RealMatrix, RealSubmatrix
 
 type NumericMatrix = npt.NDArray[np.float64]
-type SymbolicMatrix = RealMatrix | Submatrix
+type SymbolicMatrix = RealMatrix | RealSubmatrix
 
 
 @overload
