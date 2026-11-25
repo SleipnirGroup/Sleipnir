@@ -1,6 +1,7 @@
 // Copyright (c) Sleipnir contributors
 
 #include <nanobind/eigen/dense.h>
+#include <nanobind/eigen/sparse.h>
 #include <nanobind/make_iterator.h>
 #include <nanobind/nanobind.h>
 #include <nanobind/operators.h>
@@ -20,6 +21,7 @@
 #include <vector>
 
 #include <Eigen/Core>
+#include <Eigen/SparseCore>
 #include <sleipnir/autodiff/real.hpp>
 #include <sleipnir/autodiff/real_matrix.hpp>
 #include <sleipnir/autodiff/slice.hpp>
@@ -532,6 +534,17 @@ void bind_real_matrix(nb::module_& autodiff,
         return solve(RealMatrix<double>(A), B);
       },
       "A"_a, "B"_a, DOC(slp, solve));
+  // RealMatrix multiplication with SciPy sparse matrices on the right. These
+  // come after every other overload because the sparse caster converts scalars
+  // to 1x1 matrices. SciPy sparse matrices on the left don't defer to reflected
+  // operators.
+  for (const char* name : {"__mul__", "__matmul__"}) {
+    cls.def(
+        name,
+        [](const RealMatrix<double>& lhs,
+           const Eigen::SparseMatrix<double>& rhs) { return lhs * rhs; },
+        nb::is_operator(), "rhs"_a);
+  }
 }
 
 }  // namespace slp

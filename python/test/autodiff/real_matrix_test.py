@@ -2,6 +2,7 @@ import math
 import sys
 
 import numpy as np
+import scipy.sparse
 from sleipnir import autodiff
 from sleipnir.autodiff import ExpressionType, Real, RealMatrix
 
@@ -229,6 +230,46 @@ def test_subslicing() -> None:
             ]
         )
     ).all()
+
+
+def test_dense_matrix_multiplication() -> None:
+    A_dense = np.array([[1.0, 0.0, 2.0], [0.0, 3.0, 0.0], [-1.0, 0.0, 4.0]])
+    A = RealMatrix(A_dense)
+    B_dense = np.array([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
+    B = RealMatrix(B_dense)
+
+    # RealMatrix-RealMatrix
+    assert np.array_equal((A @ B).value(), A_dense @ B_dense)
+    assert np.array_equal((B.T @ A).value(), B_dense.T @ A_dense)
+    assert np.array_equal((A @ B[:, :1]).value(), A_dense @ B_dense[:, :1])
+
+    # NumPy-RealMatrix
+    assert np.array_equal((A_dense @ B).value(), A_dense @ B_dense)
+    assert np.array_equal((A_dense @ B[:, :1]).value(), A_dense @ B_dense[:, :1])
+
+    # RealMatrix-NumPy
+    assert np.array_equal((A @ B_dense).value(), A_dense @ B_dense)
+    assert np.array_equal((B.T @ A_dense).value(), B_dense.T @ A_dense)
+    assert np.array_equal((A @ B_dense[:, :1]).value(), A_dense @ B_dense[:, :1])
+
+    # RealMatrix-scalar
+    assert np.array_equal((B * 2.0).value(), B_dense * 2.0)
+    assert np.array_equal((2.0 * B).value(), 2.0 * B_dense)
+    assert np.array_equal((B[:, :1] * 2.0).value(), B_dense[:, :1] * 2.0)
+
+
+def test_sparse_matrix_multiplication() -> None:
+    A_dense = np.array([[1.0, 0.0, 2.0], [0.0, 3.0, 0.0], [-1.0, 0.0, 4.0]])
+    B_dense = np.array([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
+    B = RealMatrix(B_dense)
+
+    sparse: list[scipy.sparse.csc_matrix | scipy.sparse.csr_matrix] = [
+        scipy.sparse.csc_matrix(A_dense),
+        scipy.sparse.csr_matrix(A_dense),
+    ]
+    for A in sparse:
+        assert np.array_equal((B.T @ A).value(), B_dense.T @ A_dense)
+        assert np.array_equal((B[:, :1].T @ A).value(), B_dense[:, :1].T @ A_dense)
 
 
 def test_compound_assignment_operators() -> None:
