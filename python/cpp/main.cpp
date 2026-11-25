@@ -8,7 +8,7 @@
 #include <sleipnir/autodiff/gradient.hpp>
 #include <sleipnir/autodiff/real.hpp>
 #include <sleipnir/autodiff/real_matrix.hpp>
-#include <sleipnir/autodiff/submatrix.hpp>
+#include <sleipnir/autodiff/real_submatrix.hpp>
 #include <sleipnir/optimization/ocp.hpp>
 #include <sleipnir/optimization/ocp/dynamics_type.hpp>
 #include <sleipnir/optimization/ocp/timestep_method.hpp>
@@ -41,8 +41,8 @@ NB_MODULE(_sleipnir, m) {
   nb::class_<Real<double>> real{autodiff, "Real", DOC(slp, Real)};
   nb::class_<RealMatrix<double>> real_matrix{autodiff, "RealMatrix",
                                              DOC(slp, RealMatrix, 2)};
-  nb::class_<Submatrix<RealMatrix<double>>> submatrix{autodiff, "Submatrix",
-                                                      DOC(slp, Submatrix)};
+  nb::class_<RealSubmatrix<RealMatrix<double>>> real_submatrix{
+      autodiff, "RealSubmatrix", DOC(slp, RealSubmatrix)};
 
   nb::class_<Gradient<double>> gradient{autodiff, "Gradient",
                                         DOC(slp, Gradient)};
@@ -57,12 +57,12 @@ NB_MODULE(_sleipnir, m) {
 
   // Bounds function
   for_each_type<double, int, const Real<double>&, const RealMatrix<double>&,
-                const Submatrix<RealMatrix<double>>&,
+                const RealSubmatrix<RealMatrix<double>>&,
                 nb::DRef<Eigen::MatrixXd>>([&]<typename L> {
     for_each_type<const Real<double>&, const RealMatrix<double>&,
-                  const Submatrix<RealMatrix<double>>&>([&]<typename X> {
+                  const RealSubmatrix<RealMatrix<double>>&>([&]<typename X> {
       for_each_type<double, int, const Real<double>&, const RealMatrix<double>&,
-                    const Submatrix<RealMatrix<double>>&,
+                    const RealSubmatrix<RealMatrix<double>>&,
                     nb::DRef<Eigen::MatrixXd>>([&]<typename U> {
         optimization.def("bounds", &bounds<L&&, X&&, U&&>, "l"_a, "x"_a, "u"_a,
                          DOC(slp, bounds));
@@ -92,10 +92,10 @@ NB_MODULE(_sleipnir, m) {
 
   bind_real(autodiff, real);
   bind_real_matrix(autodiff, real_matrix);
-  bind_submatrix(submatrix);
+  bind_real_submatrix(real_submatrix);
 
   // Implicit conversions
-  real_matrix.def(nb::init_implicit<Submatrix<RealMatrix<double>>>());
+  real_matrix.def(nb::init_implicit<RealSubmatrix<RealMatrix<double>>>());
 
   bind_gradient(gradient);
   bind_hessian(hessian);

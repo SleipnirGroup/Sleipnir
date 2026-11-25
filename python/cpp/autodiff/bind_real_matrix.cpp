@@ -24,8 +24,8 @@
 #include <Eigen/SparseCore>
 #include <sleipnir/autodiff/real.hpp>
 #include <sleipnir/autodiff/real_matrix.hpp>
+#include <sleipnir/autodiff/real_submatrix.hpp>
 #include <sleipnir/autodiff/slice.hpp>
-#include <sleipnir/autodiff/submatrix.hpp>
 #include <sleipnir/util/concepts.hpp>
 
 #include "docstrings.hpp"
@@ -55,7 +55,7 @@ void bind_real_matrix(nb::module_& autodiff,
           DOC(slp, RealMatrix, RealMatrix, 8));
   cls.def(nb::init<const Real<double>&>(), "variable"_a,
           DOC(slp, RealMatrix, RealMatrix, 10));
-  cls.def(nb::init<const Submatrix<RealMatrix<double>>&>(), "values"_a,
+  cls.def(nb::init<const RealSubmatrix<RealMatrix<double>>&>(), "values"_a,
           DOC(slp, RealMatrix, RealMatrix, 12));
   cls.def(
       "set_value",
@@ -137,7 +137,8 @@ void bind_real_matrix(nb::module_& autodiff,
             self[row_slice, row_slice_length, col_slice, col_slice_length];
         if (auto rhs = try_cast<RealMatrix<double>>(value)) {
           lhs = rhs.value();
-        } else if (auto rhs = try_cast<Submatrix<RealMatrix<double>>>(value)) {
+        } else if (auto rhs =
+                       try_cast<RealSubmatrix<RealMatrix<double>>>(value)) {
           lhs = rhs.value();
         } else if (auto rhs = try_cast_to_eigen<double>(value)) {
           lhs = rhs.value();
@@ -192,7 +193,7 @@ void bind_real_matrix(nb::module_& autodiff,
   cls.def(
       "__getitem__",
       [](RealMatrix<double>& self,
-         SliceTuple slices) -> Submatrix<RealMatrix<double>> {
+         SliceTuple slices) -> RealSubmatrix<RealMatrix<double>> {
         if (slices.size() != 2) {
           throw nb::index_error(
               std::format("Expected 2 slices, got {}.", slices.size()).c_str());
@@ -239,8 +240,8 @@ void bind_real_matrix(nb::module_& autodiff,
   cls.def("col", nb::overload_cast<int>(&RealMatrix<double>::col), "col"_a,
           DOC(slp, RealMatrix, col));
 
-  // RealMatrix-matrix multiplication. Products with a Submatrix on the left are
-  // bound on Submatrix.
+  // RealMatrix-matrix multiplication. Products with a RealSubmatrix on the left
+  // are bound on RealSubmatrix.
   for (const char* name : {"__mul__", "__matmul__"}) {
     cls.def(
         name,
@@ -251,14 +252,14 @@ void bind_real_matrix(nb::module_& autodiff,
     cls.def(
         name,
         [](const RealMatrix<double>& lhs,
-           const Submatrix<RealMatrix<double>>& rhs) { return lhs * rhs; },
+           const RealSubmatrix<RealMatrix<double>>& rhs) { return lhs * rhs; },
         nb::is_operator(), "rhs"_a);
   }
   for (const char* name : {"__rmul__", "__rmatmul__"}) {
     cls.def(
         name,
         [](const RealMatrix<double>& rhs,
-           const Submatrix<RealMatrix<double>>& lhs) { return lhs * rhs; },
+           const RealSubmatrix<RealMatrix<double>>& lhs) { return lhs * rhs; },
         nb::is_operator(), "lhs"_a);
   }
 
@@ -373,49 +374,49 @@ void bind_real_matrix(nb::module_& autodiff,
   cls.def(nb::self /= Real<double>(), "rhs"_a,
           DOC(slp, RealMatrix, operator, idiv));
   for_each_type<double, int, const Real<double>&,
-                const Submatrix<RealMatrix<double>>, nb::DRef<Eigen::MatrixXd>>(
-      [&]<typename T> {
-        cls.def(
-            "__add__",
-            [](const RealMatrix<double>& lhs, T&& rhs) {
-              if constexpr (ScalarLike<T>) {
-                return lhs + Real<double>{rhs};
-              } else {
-                return lhs + rhs;
-              }
-            },
-            nb::is_operator(), "rhs"_a);
-        cls.def(
-            "__radd__",
-            [](const RealMatrix<double>& rhs, T&& lhs) {
-              if constexpr (ScalarLike<T>) {
-                return Real<double>{lhs} + rhs;
-              } else {
-                return lhs + rhs;
-              }
-            },
-            nb::is_operator(), "lhs"_a);
-        cls.def(
-            "__sub__",
-            [](const RealMatrix<double>& lhs, T&& rhs) {
-              if constexpr (ScalarLike<T>) {
-                return lhs - Real<double>{rhs};
-              } else {
-                return lhs - rhs;
-              }
-            },
-            nb::is_operator(), "rhs"_a);
-        cls.def(
-            "__rsub__",
-            [](const RealMatrix<double>& rhs, T&& lhs) {
-              if constexpr (ScalarLike<T>) {
-                return Real<double>{lhs} - rhs;
-              } else {
-                return lhs - rhs;
-              }
-            },
-            nb::is_operator(), "lhs"_a);
-      });
+                const RealSubmatrix<RealMatrix<double>>,
+                nb::DRef<Eigen::MatrixXd>>([&]<typename T> {
+    cls.def(
+        "__add__",
+        [](const RealMatrix<double>& lhs, T&& rhs) {
+          if constexpr (ScalarLike<T>) {
+            return lhs + Real<double>{rhs};
+          } else {
+            return lhs + rhs;
+          }
+        },
+        nb::is_operator(), "rhs"_a);
+    cls.def(
+        "__radd__",
+        [](const RealMatrix<double>& rhs, T&& lhs) {
+          if constexpr (ScalarLike<T>) {
+            return Real<double>{lhs} + rhs;
+          } else {
+            return lhs + rhs;
+          }
+        },
+        nb::is_operator(), "lhs"_a);
+    cls.def(
+        "__sub__",
+        [](const RealMatrix<double>& lhs, T&& rhs) {
+          if constexpr (ScalarLike<T>) {
+            return lhs - Real<double>{rhs};
+          } else {
+            return lhs - rhs;
+          }
+        },
+        nb::is_operator(), "rhs"_a);
+    cls.def(
+        "__rsub__",
+        [](const RealMatrix<double>& rhs, T&& lhs) {
+          if constexpr (ScalarLike<T>) {
+            return Real<double>{lhs} - rhs;
+          } else {
+            return lhs - rhs;
+          }
+        },
+        nb::is_operator(), "lhs"_a);
+  });
 
   cls.def(
       "__pow__",
@@ -469,7 +470,7 @@ void bind_real_matrix(nb::module_& autodiff,
       cls.def(T() >= nb::self, "rhs"_a, DOC(slp, operator, ge));
     }
   });
-  for_each_type<const Submatrix<RealMatrix<double>>&,
+  for_each_type<const RealSubmatrix<RealMatrix<double>>&,
                 nb::DRef<Eigen::MatrixXd>>([&]<typename T> {
     cls.def(
         "__eq__",

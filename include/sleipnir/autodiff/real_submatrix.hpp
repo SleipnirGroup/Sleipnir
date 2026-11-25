@@ -24,19 +24,19 @@ namespace slp {
 ///
 /// @tparam Mat The type of the matrix whose storage this class points to.
 template <typename Mat>
-class Submatrix : public SleipnirBase {
+class RealSubmatrix : public SleipnirBase {
  public:
   /// Scalar type alias.
   using Scalar = typename Mat::Scalar;
 
   /// Copy constructor.
-  Submatrix(const Submatrix<Mat>&) = default;
+  RealSubmatrix(const RealSubmatrix<Mat>&) = default;
 
-  /// Assigns a Submatrix to the block.
+  /// Assigns a RealSubmatrix to the block.
   ///
-  /// @param values Submatrix of values.
+  /// @param values RealSubmatrix of values.
   /// @return This submatrix.
-  Submatrix<Mat>& operator=(const Submatrix<Mat>& values) {
+  RealSubmatrix<Mat>& operator=(const RealSubmatrix<Mat>& values) {
     if (this == &values) {
       return *this;
     }
@@ -61,13 +61,13 @@ class Submatrix : public SleipnirBase {
   }
 
   /// Move constructor.
-  Submatrix(Submatrix<Mat>&&) = default;
+  RealSubmatrix(RealSubmatrix<Mat>&&) = default;
 
-  /// Assigns a Submatrix to the block.
+  /// Assigns a RealSubmatrix to the block.
   ///
-  /// @param values Submatrix of values.
+  /// @param values RealSubmatrix of values.
   /// @return This submatrix.
-  Submatrix<Mat>& operator=(Submatrix<Mat>&& values) {
+  RealSubmatrix<Mat>& operator=(RealSubmatrix<Mat>&& values) {
     if (this == &values) {
       return *this;
     }
@@ -91,28 +91,28 @@ class Submatrix : public SleipnirBase {
     return *this;
   }
 
-  /// Constructs a Submatrix pointing to all of the given matrix.
+  /// Constructs a RealSubmatrix pointing to all of the given matrix.
   ///
   /// @param mat The matrix to which to point.
   // NOLINTNEXTLINE (google-explicit-constructor)
-  Submatrix(Mat& mat) : Submatrix{mat, 0, 0, mat.rows(), mat.cols()} {}
+  RealSubmatrix(Mat& mat) : RealSubmatrix{mat, 0, 0, mat.rows(), mat.cols()} {}
 
-  /// Constructs a Submatrix pointing to a subset of the given matrix.
+  /// Constructs a RealSubmatrix pointing to a subset of the given matrix.
   ///
   /// @param mat The matrix to which to point.
   /// @param row_offset The block's row offset.
   /// @param col_offset The block's column offset.
   /// @param block_rows The number of rows in the block.
   /// @param block_cols The number of columns in the block.
-  Submatrix(Mat& mat, int row_offset, int col_offset, int block_rows,
-            int block_cols)
+  RealSubmatrix(Mat& mat, int row_offset, int col_offset, int block_rows,
+                int block_cols)
       : m_mat{&mat},
         m_row_slice{row_offset, row_offset + block_rows, 1},
         m_row_slice_length{m_row_slice.adjust(mat.rows())},
         m_col_slice{col_offset, col_offset + block_cols, 1},
         m_col_slice_length{m_col_slice.adjust(mat.cols())} {}
 
-  /// Constructs a Submatrix pointing to a subset of the given matrix.
+  /// Constructs a RealSubmatrix pointing to a subset of the given matrix.
   ///
   /// Note that the slices are taken as is rather than adjusted.
   ///
@@ -121,8 +121,8 @@ class Submatrix : public SleipnirBase {
   /// @param row_slice_length The block's row length.
   /// @param col_slice The block's column slice.
   /// @param col_slice_length The block's column length.
-  Submatrix(Mat& mat, Slice row_slice, int row_slice_length, Slice col_slice,
-            int col_slice_length)
+  RealSubmatrix(Mat& mat, Slice row_slice, int row_slice_length,
+                Slice col_slice, int col_slice_length)
       : m_mat{&mat},
         m_row_slice{std::move(row_slice)},
         m_row_slice_length{row_slice_length},
@@ -135,7 +135,7 @@ class Submatrix : public SleipnirBase {
   ///
   /// @param value Value to assign.
   /// @return This submatrix.
-  Submatrix<Mat>& operator=(ScalarLike auto value) {
+  RealSubmatrix<Mat>& operator=(ScalarLike auto value) {
     slp_assert(rows() == 1 && cols() == 1);
 
     (*this)[0, 0] = value;
@@ -159,7 +159,7 @@ class Submatrix : public SleipnirBase {
   /// @param values Eigen matrix of values to assign.
   /// @return This submatrix.
   template <typename Derived>
-  Submatrix<Mat>& operator=(const Eigen::MatrixBase<Derived>& values) {
+  RealSubmatrix<Mat>& operator=(const Eigen::MatrixBase<Derived>& values) {
     slp_assert(rows() == values.rows() && cols() == values.cols());
 
     for (int row = 0; row < rows(); ++row) {
@@ -190,7 +190,7 @@ class Submatrix : public SleipnirBase {
   ///
   /// @param values RealMatrix of values.
   /// @return This submatrix.
-  Submatrix<Mat>& operator=(const Mat& values) {
+  RealSubmatrix<Mat>& operator=(const Mat& values) {
     slp_assert(rows() == values.rows() && cols() == values.cols());
 
     for (int row = 0; row < rows(); ++row) {
@@ -205,7 +205,7 @@ class Submatrix : public SleipnirBase {
   ///
   /// @param values RealMatrix of values.
   /// @return This submatrix.
-  Submatrix<Mat>& operator=(Mat&& values) {
+  RealSubmatrix<Mat>& operator=(Mat&& values) {
     slp_assert(rows() == values.rows() && cols() == values.cols());
 
     for (int row = 0; row < rows(); ++row) {
@@ -269,8 +269,8 @@ class Submatrix : public SleipnirBase {
   /// @param block_rows The number of rows in the block selection.
   /// @param block_cols The number of columns in the block selection.
   /// @return A block of the submatrix.
-  Submatrix<Mat> block(int row_offset, int col_offset, int block_rows,
-                       int block_cols) {
+  RealSubmatrix<Mat> block(int row_offset, int col_offset, int block_rows,
+                           int block_cols) {
     slp_assert(row_offset >= 0 && row_offset <= rows());
     slp_assert(col_offset >= 0 && col_offset <= cols());
     slp_assert(block_rows >= 0 && block_rows <= rows() - row_offset);
@@ -286,8 +286,8 @@ class Submatrix : public SleipnirBase {
   /// @param block_rows The number of rows in the block selection.
   /// @param block_cols The number of columns in the block selection.
   /// @return A block slice of the submatrix.
-  const Submatrix<const Mat> block(int row_offset, int col_offset,
-                                   int block_rows, int block_cols) const {
+  const RealSubmatrix<const Mat> block(int row_offset, int col_offset,
+                                       int block_rows, int block_cols) const {
     slp_assert(row_offset >= 0 && row_offset <= rows());
     slp_assert(col_offset >= 0 && col_offset <= cols());
     slp_assert(block_rows >= 0 && block_rows <= rows() - row_offset);
@@ -301,7 +301,7 @@ class Submatrix : public SleipnirBase {
   /// @param row_slice The row slice.
   /// @param col_slice The column slice.
   /// @return A slice of the submatrix.
-  Submatrix<Mat> operator[](Slice row_slice, Slice col_slice) {
+  RealSubmatrix<Mat> operator[](Slice row_slice, Slice col_slice) {
     int row_slice_length = row_slice.adjust(m_row_slice_length);
     int col_slice_length = col_slice.adjust(m_col_slice_length);
     return (*this)[row_slice, row_slice_length, col_slice, col_slice_length];
@@ -312,8 +312,8 @@ class Submatrix : public SleipnirBase {
   /// @param row_slice The row slice.
   /// @param col_slice The column slice.
   /// @return A slice of the submatrix.
-  const Submatrix<const Mat> operator[](Slice row_slice,
-                                        Slice col_slice) const {
+  const RealSubmatrix<const Mat> operator[](Slice row_slice,
+                                            Slice col_slice) const {
     int row_slice_length = row_slice.adjust(m_row_slice_length);
     int col_slice_length = col_slice.adjust(m_col_slice_length);
     return (*this)[row_slice, row_slice_length, col_slice, col_slice_length];
@@ -329,17 +329,18 @@ class Submatrix : public SleipnirBase {
   /// @param col_slice The column slice.
   /// @param col_slice_length The column slice length.
   /// @return A slice of the submatrix.
-  Submatrix<Mat> operator[](Slice row_slice, int row_slice_length,
-                            Slice col_slice, int col_slice_length) {
-    return Submatrix{*m_mat,
-                     {m_row_slice.start + row_slice.start * m_row_slice.step,
-                      m_row_slice.start + row_slice.stop * m_row_slice.step,
-                      row_slice.step * m_row_slice.step},
-                     row_slice_length,
-                     {m_col_slice.start + col_slice.start * m_col_slice.step,
-                      m_col_slice.start + col_slice.stop * m_col_slice.step,
-                      col_slice.step * m_col_slice.step},
-                     col_slice_length};
+  RealSubmatrix<Mat> operator[](Slice row_slice, int row_slice_length,
+                                Slice col_slice, int col_slice_length) {
+    return RealSubmatrix{
+        *m_mat,
+        {m_row_slice.start + row_slice.start * m_row_slice.step,
+         m_row_slice.start + row_slice.stop * m_row_slice.step,
+         row_slice.step * m_row_slice.step},
+        row_slice_length,
+        {m_col_slice.start + col_slice.start * m_col_slice.step,
+         m_col_slice.start + col_slice.stop * m_col_slice.step,
+         col_slice.step * m_col_slice.step},
+        col_slice_length};
   }
 
   /// Returns a slice of the submatrix.
@@ -352,18 +353,20 @@ class Submatrix : public SleipnirBase {
   /// @param col_slice The column slice.
   /// @param col_slice_length The column slice length.
   /// @return A slice of the submatrix.
-  const Submatrix<const Mat> operator[](Slice row_slice, int row_slice_length,
-                                        Slice col_slice,
-                                        int col_slice_length) const {
-    return Submatrix{*m_mat,
-                     {m_row_slice.start + row_slice.start * m_row_slice.step,
-                      m_row_slice.start + row_slice.stop * m_row_slice.step,
-                      row_slice.step * m_row_slice.step},
-                     row_slice_length,
-                     {m_col_slice.start + col_slice.start * m_col_slice.step,
-                      m_col_slice.start + col_slice.stop * m_col_slice.step,
-                      col_slice.step * m_col_slice.step},
-                     col_slice_length};
+  const RealSubmatrix<const Mat> operator[](Slice row_slice,
+                                            int row_slice_length,
+                                            Slice col_slice,
+                                            int col_slice_length) const {
+    return RealSubmatrix{
+        *m_mat,
+        {m_row_slice.start + row_slice.start * m_row_slice.step,
+         m_row_slice.start + row_slice.stop * m_row_slice.step,
+         row_slice.step * m_row_slice.step},
+        row_slice_length,
+        {m_col_slice.start + col_slice.start * m_col_slice.step,
+         m_col_slice.start + col_slice.stop * m_col_slice.step,
+         col_slice.step * m_col_slice.step},
+        col_slice_length};
   }
 
   /// Returns a segment of the submatrix.
@@ -371,7 +374,7 @@ class Submatrix : public SleipnirBase {
   /// @param offset The offset of the segment.
   /// @param length The length of the segment.
   /// @return A segment of the submatrix.
-  Submatrix<Mat> segment(int offset, int length) {
+  RealSubmatrix<Mat> segment(int offset, int length) {
     slp_assert(cols() == 1);
     slp_assert(offset >= 0 && offset < rows());
     slp_assert(length >= 0 && length <= rows() - offset);
@@ -383,7 +386,7 @@ class Submatrix : public SleipnirBase {
   /// @param offset The offset of the segment.
   /// @param length The length of the segment.
   /// @return A segment of the submatrix.
-  const Submatrix<Mat> segment(int offset, int length) const {
+  const RealSubmatrix<Mat> segment(int offset, int length) const {
     slp_assert(cols() == 1);
     slp_assert(offset >= 0 && offset < rows());
     slp_assert(length >= 0 && length <= rows() - offset);
@@ -394,7 +397,7 @@ class Submatrix : public SleipnirBase {
   ///
   /// @param row The row to slice.
   /// @return A row slice of the submatrix.
-  Submatrix<Mat> row(int row) {
+  RealSubmatrix<Mat> row(int row) {
     slp_assert(row >= 0 && row < rows());
     return block(row, 0, 1, cols());
   }
@@ -403,7 +406,7 @@ class Submatrix : public SleipnirBase {
   ///
   /// @param row The row to slice.
   /// @return A row slice of the submatrix.
-  Submatrix<const Mat> row(int row) const {
+  RealSubmatrix<const Mat> row(int row) const {
     slp_assert(row >= 0 && row < rows());
     return block(row, 0, 1, cols());
   }
@@ -412,7 +415,7 @@ class Submatrix : public SleipnirBase {
   ///
   /// @param col The column to slice.
   /// @return A column slice of the submatrix.
-  Submatrix<Mat> col(int col) {
+  RealSubmatrix<Mat> col(int col) {
     slp_assert(col >= 0 && col < cols());
     return block(0, col, rows(), 1);
   }
@@ -421,7 +424,7 @@ class Submatrix : public SleipnirBase {
   ///
   /// @param col The column to slice.
   /// @return A column slice of the submatrix.
-  Submatrix<const Mat> col(int col) const {
+  RealSubmatrix<const Mat> col(int col) const {
     slp_assert(col >= 0 && col < cols());
     return block(0, col, rows(), 1);
   }
@@ -430,7 +433,7 @@ class Submatrix : public SleipnirBase {
   ///
   /// @param rhs Real to multiply.
   /// @return Result of multiplication.
-  Submatrix<Mat>& operator*=(const MatrixLike auto& rhs) {
+  RealSubmatrix<Mat>& operator*=(const MatrixLike auto& rhs) {
     slp_assert(cols() == rhs.rows() && cols() == rhs.cols());
 
     for (int i = 0; i < rows(); ++i) {
@@ -451,7 +454,7 @@ class Submatrix : public SleipnirBase {
   ///
   /// @param rhs Real to multiply.
   /// @return Result of multiplication.
-  Submatrix<Mat>& operator*=(const ScalarLike auto& rhs) {
+  RealSubmatrix<Mat>& operator*=(const ScalarLike auto& rhs) {
     for (int row = 0; row < rows(); ++row) {
       for (int col = 0; col < cols(); ++col) {
         (*this)[row, col] *= rhs;
@@ -465,7 +468,7 @@ class Submatrix : public SleipnirBase {
   ///
   /// @param rhs Real to divide.
   /// @return Result of division.
-  Submatrix<Mat>& operator/=(const ScalarLike auto& rhs) {
+  RealSubmatrix<Mat>& operator/=(const ScalarLike auto& rhs) {
     for (int row = 0; row < rows(); ++row) {
       for (int col = 0; col < cols(); ++col) {
         (*this)[row, col] /= rhs;
@@ -479,7 +482,7 @@ class Submatrix : public SleipnirBase {
   ///
   /// @param rhs Real to add.
   /// @return Result of addition.
-  Submatrix<Mat>& operator+=(const MatrixLike auto& rhs) {
+  RealSubmatrix<Mat>& operator+=(const MatrixLike auto& rhs) {
     slp_assert(rows() == rhs.rows() && cols() == rhs.cols());
 
     for (int row = 0; row < rows(); ++row) {
@@ -495,7 +498,7 @@ class Submatrix : public SleipnirBase {
   ///
   /// @param rhs Real to add.
   /// @return Result of addition.
-  Submatrix<Mat>& operator+=(const ScalarLike auto& rhs) {
+  RealSubmatrix<Mat>& operator+=(const ScalarLike auto& rhs) {
     slp_assert(rows() == 1 && cols() == 1);
 
     for (int row = 0; row < rows(); ++row) {
@@ -511,7 +514,7 @@ class Submatrix : public SleipnirBase {
   ///
   /// @param rhs Real to subtract.
   /// @return Result of subtraction.
-  Submatrix<Mat>& operator-=(const MatrixLike auto& rhs) {
+  RealSubmatrix<Mat>& operator-=(const MatrixLike auto& rhs) {
     slp_assert(rows() == rhs.rows() && cols() == rhs.cols());
 
     for (int row = 0; row < rows(); ++row) {
@@ -527,7 +530,7 @@ class Submatrix : public SleipnirBase {
   ///
   /// @param rhs Real to subtract.
   /// @return Result of subtraction.
-  Submatrix<Mat>& operator-=(const ScalarLike auto& rhs) {
+  RealSubmatrix<Mat>& operator-=(const ScalarLike auto& rhs) {
     slp_assert(rows() == 1 && cols() == 1);
 
     for (int row = 0; row < rows(); ++row) {
@@ -539,7 +542,7 @@ class Submatrix : public SleipnirBase {
     return *this;
   }
 
-  /// Implicit conversion operator from 1x1 Submatrix to Real.
+  /// Implicit conversion operator from 1x1 RealSubmatrix to Real.
   // NOLINTNEXTLINE (google-explicit-constructor)
   operator Real<Scalar>() const {
     slp_assert(rows() == 1 && cols() == 1);
@@ -653,7 +656,7 @@ class Submatrix : public SleipnirBase {
 
     constexpr iterator() noexcept = default;
 
-    constexpr iterator(Submatrix<Mat>* mat, int index) noexcept
+    constexpr iterator(RealSubmatrix<Mat>* mat, int index) noexcept
         : m_mat{mat}, m_index{index} {}
 
     constexpr iterator& operator++() noexcept {
@@ -683,7 +686,7 @@ class Submatrix : public SleipnirBase {
     constexpr reference operator*() const noexcept { return (*m_mat)[m_index]; }
 
    private:
-    Submatrix<Mat>* m_mat = nullptr;
+    RealSubmatrix<Mat>* m_mat = nullptr;
     int m_index = 0;
   };
 
@@ -697,7 +700,7 @@ class Submatrix : public SleipnirBase {
 
     constexpr const_iterator() noexcept = default;
 
-    constexpr const_iterator(const Submatrix<Mat>* mat, int index) noexcept
+    constexpr const_iterator(const RealSubmatrix<Mat>* mat, int index) noexcept
         : m_mat{mat}, m_index{index} {}
 
     constexpr const_iterator& operator++() noexcept {
@@ -729,7 +732,7 @@ class Submatrix : public SleipnirBase {
     }
 
    private:
-    const Submatrix<Mat>* m_mat = nullptr;
+    const RealSubmatrix<Mat>* m_mat = nullptr;
     int m_index = 0;
   };
 

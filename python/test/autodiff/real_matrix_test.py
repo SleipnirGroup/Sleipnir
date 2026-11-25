@@ -287,7 +287,7 @@ def test_compound_assignment_operators() -> None:
     assert (A2.value() == np.array([[7, 10], [15, 22]])).all()
     A2.set_value(np.array([[1, 2], [3, 4]]))
 
-    # Submatrix matrix-matrix operators
+    # RealSubmatrix matrix-matrix operators
     A2[:, :] += B
     assert (A2.value() == np.array([[2, 4], [6, 8]])).all()
     A2[:, :] -= B
@@ -306,7 +306,7 @@ def test_compound_assignment_operators() -> None:
     A2 /= b
     assert (A2.value() == np.array([[1, 2], [3, 4]])).all()
 
-    # Submatrix matrix-scalar operators
+    # RealSubmatrix matrix-scalar operators
     A2[:1, :1] += b
     assert (A2.value() == np.array([[3, 2], [3, 4]])).all()
     A2[:1, :1] -= b
@@ -353,7 +353,7 @@ def test_pow() -> None:
     assert A**2 == np.array([[4.0, 9.0, 16.0], [25.0, 36.0, 49.0]])
     assert A**3 == np.array([[-8.0, -27.0, -64.0], [-125.0, -216.0, -343.0]])
 
-    # Submatrix coefficient-wise power
+    # RealSubmatrix coefficient-wise power
     sub_A = A[:2, :2]
     assert sub_A**2 == np.array([[4.0, 9.0], [25.0, 36.0]])
     assert sub_A**3 == np.array([[-8.0, -27.0], [-125.0, -216.0]])
@@ -371,7 +371,7 @@ def test_cwise_map() -> None:
 
     assert (result1.value() == expected1).all()
 
-    # Submatrix cwise_map
+    # RealSubmatrix cwise_map
     sub_A = A[:2, :2]
 
     result2 = sub_A.cwise_map(autodiff.abs)
@@ -396,7 +396,7 @@ def test_unary_broadcast() -> None:
 
     assert (result1.value() == expected1).all()
 
-    # Submatrix broadcast
+    # RealSubmatrix broadcast
     sub_A = A[:2, :2]
 
     result2 = autodiff.abs(sub_A)
