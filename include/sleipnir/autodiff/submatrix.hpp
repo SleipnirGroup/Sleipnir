@@ -35,7 +35,7 @@ class Submatrix : public SleipnirBase {
   /// Assigns a Submatrix to the block.
   ///
   /// @param values Submatrix of values.
-  /// @return This Submatrix.
+  /// @return This submatrix.
   Submatrix<Mat>& operator=(const Submatrix<Mat>& values) {
     if (this == &values) {
       return *this;
@@ -66,7 +66,7 @@ class Submatrix : public SleipnirBase {
   /// Assigns a Submatrix to the block.
   ///
   /// @param values Submatrix of values.
-  /// @return This Submatrix.
+  /// @return This submatrix.
   Submatrix<Mat>& operator=(Submatrix<Mat>&& values) {
     if (this == &values) {
       return *this;
@@ -134,7 +134,7 @@ class Submatrix : public SleipnirBase {
   /// This only works for blocks with one row and one column.
   ///
   /// @param value Value to assign.
-  /// @return This Submatrix.
+  /// @return This submatrix.
   Submatrix<Mat>& operator=(ScalarLike auto value) {
     slp_assert(rows() == 1 && cols() == 1);
 
@@ -157,7 +157,7 @@ class Submatrix : public SleipnirBase {
   /// Assigns an Eigen matrix to the block.
   ///
   /// @param values Eigen matrix of values to assign.
-  /// @return This Submatrix.
+  /// @return This submatrix.
   template <typename Derived>
   Submatrix<Mat>& operator=(const Eigen::MatrixBase<Derived>& values) {
     slp_assert(rows() == values.rows() && cols() == values.cols());
@@ -189,7 +189,7 @@ class Submatrix : public SleipnirBase {
   /// Assigns a RealMatrix to the block.
   ///
   /// @param values RealMatrix of values.
-  /// @return This Submatrix.
+  /// @return This submatrix.
   Submatrix<Mat>& operator=(const Mat& values) {
     slp_assert(rows() == values.rows() && cols() == values.cols());
 
@@ -204,7 +204,7 @@ class Submatrix : public SleipnirBase {
   /// Assigns a RealMatrix to the block.
   ///
   /// @param values RealMatrix of values.
-  /// @return This Submatrix.
+  /// @return This submatrix.
   Submatrix<Mat>& operator=(Mat&& values) {
     slp_assert(rows() == values.rows() && cols() == values.cols());
 
@@ -262,13 +262,13 @@ class Submatrix : public SleipnirBase {
     return (*this)[index / cols(), index % cols()];
   }
 
-  /// Returns a block of the variable matrix.
+  /// Returns a block of the submatrix.
   ///
   /// @param row_offset The row offset of the block selection.
   /// @param col_offset The column offset of the block selection.
   /// @param block_rows The number of rows in the block selection.
   /// @param block_cols The number of columns in the block selection.
-  /// @return A block of the variable matrix.
+  /// @return A block of the submatrix.
   Submatrix<Mat> block(int row_offset, int col_offset, int block_rows,
                        int block_cols) {
     slp_assert(row_offset >= 0 && row_offset <= rows());
@@ -279,13 +279,13 @@ class Submatrix : public SleipnirBase {
                    Slice{col_offset, col_offset + block_cols, 1}];
   }
 
-  /// Returns a block slice of the variable matrix.
+  /// Returns a block slice of the submatrix.
   ///
   /// @param row_offset The row offset of the block selection.
   /// @param col_offset The column offset of the block selection.
   /// @param block_rows The number of rows in the block selection.
   /// @param block_cols The number of columns in the block selection.
-  /// @return A block slice of the variable matrix.
+  /// @return A block slice of the submatrix.
   const Submatrix<const Mat> block(int row_offset, int col_offset,
                                    int block_rows, int block_cols) const {
     slp_assert(row_offset >= 0 && row_offset <= rows());
@@ -296,22 +296,22 @@ class Submatrix : public SleipnirBase {
                    Slice{col_offset, col_offset + block_cols, 1}];
   }
 
-  /// Returns a slice of the variable matrix.
+  /// Returns a slice of the submatrix.
   ///
   /// @param row_slice The row slice.
   /// @param col_slice The column slice.
-  /// @return A slice of the variable matrix.
+  /// @return A slice of the submatrix.
   Submatrix<Mat> operator[](Slice row_slice, Slice col_slice) {
     int row_slice_length = row_slice.adjust(m_row_slice_length);
     int col_slice_length = col_slice.adjust(m_col_slice_length);
     return (*this)[row_slice, row_slice_length, col_slice, col_slice_length];
   }
 
-  /// Returns a slice of the variable matrix.
+  /// Returns a slice of the submatrix.
   ///
   /// @param row_slice The row slice.
   /// @param col_slice The column slice.
-  /// @return A slice of the variable matrix.
+  /// @return A slice of the submatrix.
   const Submatrix<const Mat> operator[](Slice row_slice,
                                         Slice col_slice) const {
     int row_slice_length = row_slice.adjust(m_row_slice_length);
@@ -319,7 +319,7 @@ class Submatrix : public SleipnirBase {
     return (*this)[row_slice, row_slice_length, col_slice, col_slice_length];
   }
 
-  /// Returns a slice of the variable matrix.
+  /// Returns a slice of the submatrix.
   ///
   /// The given slices aren't adjusted. This overload is for Python bindings
   /// only.
@@ -328,7 +328,7 @@ class Submatrix : public SleipnirBase {
   /// @param row_slice_length The row slice length.
   /// @param col_slice The column slice.
   /// @param col_slice_length The column slice length.
-  /// @return A slice of the variable matrix.
+  /// @return A slice of the submatrix.
   Submatrix<Mat> operator[](Slice row_slice, int row_slice_length,
                             Slice col_slice, int col_slice_length) {
     return Submatrix{*m_mat,
@@ -342,7 +342,7 @@ class Submatrix : public SleipnirBase {
                      col_slice_length};
   }
 
-  /// Returns a slice of the variable matrix.
+  /// Returns a slice of the submatrix.
   ///
   /// The given slices aren't adjusted. This overload is for Python bindings
   /// only.
@@ -351,7 +351,7 @@ class Submatrix : public SleipnirBase {
   /// @param row_slice_length The row slice length.
   /// @param col_slice The column slice.
   /// @param col_slice_length The column slice length.
-  /// @return A slice of the variable matrix.
+  /// @return A slice of the submatrix.
   const Submatrix<const Mat> operator[](Slice row_slice, int row_slice_length,
                                         Slice col_slice,
                                         int col_slice_length) const {
@@ -366,11 +366,11 @@ class Submatrix : public SleipnirBase {
                      col_slice_length};
   }
 
-  /// Returns a segment of the variable vector.
+  /// Returns a segment of the submatrix.
   ///
   /// @param offset The offset of the segment.
   /// @param length The length of the segment.
-  /// @return A segment of the variable vector.
+  /// @return A segment of the submatrix.
   Submatrix<Mat> segment(int offset, int length) {
     slp_assert(cols() == 1);
     slp_assert(offset >= 0 && offset < rows());
@@ -378,11 +378,11 @@ class Submatrix : public SleipnirBase {
     return block(offset, 0, length, 1);
   }
 
-  /// Returns a segment of the variable vector.
+  /// Returns a segment of the submatrix.
   ///
   /// @param offset The offset of the segment.
   /// @param length The length of the segment.
-  /// @return A segment of the variable vector.
+  /// @return A segment of the submatrix.
   const Submatrix<Mat> segment(int offset, int length) const {
     slp_assert(cols() == 1);
     slp_assert(offset >= 0 && offset < rows());
@@ -390,37 +390,37 @@ class Submatrix : public SleipnirBase {
     return block(offset, 0, length, 1);
   }
 
-  /// Returns a row slice of the variable matrix.
+  /// Returns a row slice of the submatrix.
   ///
   /// @param row The row to slice.
-  /// @return A row slice of the variable matrix.
+  /// @return A row slice of the submatrix.
   Submatrix<Mat> row(int row) {
     slp_assert(row >= 0 && row < rows());
     return block(row, 0, 1, cols());
   }
 
-  /// Returns a row slice of the variable matrix.
+  /// Returns a row slice of the submatrix.
   ///
   /// @param row The row to slice.
-  /// @return A row slice of the variable matrix.
+  /// @return A row slice of the submatrix.
   Submatrix<const Mat> row(int row) const {
     slp_assert(row >= 0 && row < rows());
     return block(row, 0, 1, cols());
   }
 
-  /// Returns a column slice of the variable matrix.
+  /// Returns a column slice of the submatrix.
   ///
   /// @param col The column to slice.
-  /// @return A column slice of the variable matrix.
+  /// @return A column slice of the submatrix.
   Submatrix<Mat> col(int col) {
     slp_assert(col >= 0 && col < cols());
     return block(0, col, rows(), 1);
   }
 
-  /// Returns a column slice of the variable matrix.
+  /// Returns a column slice of the submatrix.
   ///
   /// @param col The column to slice.
-  /// @return A column slice of the variable matrix.
+  /// @return A column slice of the submatrix.
   Submatrix<const Mat> col(int col) const {
     slp_assert(col >= 0 && col < cols());
     return block(0, col, rows(), 1);
@@ -546,9 +546,9 @@ class Submatrix : public SleipnirBase {
     return (*this)[0, 0];
   }
 
-  /// Returns the transpose of the variable matrix.
+  /// Returns the transpose of the submatrix.
   ///
-  /// @return The transpose of the variable matrix.
+  /// @return The transpose of the submatrix.
   std::remove_cv_t<Mat> T() const {
     std::remove_cv_t<Mat> result{detail::empty, cols(), rows()};
 
@@ -561,9 +561,9 @@ class Submatrix : public SleipnirBase {
     return result;
   }
 
-  /// Returns the trace of the variable matrix, the sum of its diagonal.
+  /// Returns the trace of the submatrix, the sum of its diagonal.
   ///
-  /// @return The trace of the variable matrix.
+  /// @return The trace of the submatrix.
   Real<Scalar> trace() const {
     slp_assert(rows() == cols());
 
@@ -586,25 +586,25 @@ class Submatrix : public SleipnirBase {
   /// @return The number of columns in the matrix.
   int cols() const { return m_col_slice_length; }
 
-  /// Returns an element of the variable matrix.
+  /// Returns an element of the submatrix.
   ///
   /// @param row The row of the element to return.
   /// @param col The column of the element to return.
-  /// @return An element of the variable matrix.
+  /// @return An element of the submatrix.
   Scalar value(int row, int col) { return (*this)[row, col].value(); }
 
-  /// Returns an element of the variable block.
+  /// Returns an element of the submatrix.
   ///
   /// @param index The index of the element to return.
-  /// @return An element of the variable block.
+  /// @return An element of the submatrix.
   Scalar value(int index) {
     slp_assert(index >= 0 && index < rows() * cols());
     return value(index / cols(), index % cols());
   }
 
-  /// Returns the contents of the variable matrix.
+  /// Returns the contents of the submatrix.
   ///
-  /// @return The contents of the variable matrix.
+  /// @return The contents of the submatrix.
   Eigen::MatrixX<Scalar> value() {
     Eigen::MatrixX<Scalar> result{rows(), cols()};
 

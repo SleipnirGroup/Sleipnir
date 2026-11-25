@@ -72,7 +72,7 @@ class RealMatrix : public SleipnirBase {
     }
   }
 
-  /// Constructs a scalar RealMatrix from a nested list of Reals.
+  /// Constructs a RealMatrix from a nested list of Reals.
   ///
   /// @param list The nested list of Reals.
   RealMatrix(std::initializer_list<std::initializer_list<Real<Scalar>>> list) {
@@ -95,7 +95,7 @@ class RealMatrix : public SleipnirBase {
     }
   }
 
-  /// Constructs a scalar RealMatrix from a nested list of scalars.
+  /// Constructs a RealMatrix from a nested list of scalars.
   ///
   /// This overload is for Python bindings only.
   ///
@@ -121,7 +121,7 @@ class RealMatrix : public SleipnirBase {
     }
   }
 
-  /// Constructs a scalar RealMatrix from a nested list of Reals.
+  /// Constructs a RealMatrix from a nested list of Reals.
   ///
   /// This overload is for Python bindings only.
   ///
@@ -227,9 +227,9 @@ class RealMatrix : public SleipnirBase {
     }
   }
 
-  /// Constructs a column vector wrapper around a Real array.
+  /// Constructs a RealMatrix column vector from a Real array.
   ///
-  /// @param values Real array to wrap.
+  /// @param values Real array of values.
   explicit RealMatrix(std::span<const Real<Scalar>> values)
       : m_rows{static_cast<int>(values.size())}, m_cols{1} {
     m_storage.reserve(rows() * cols());
@@ -240,9 +240,9 @@ class RealMatrix : public SleipnirBase {
     }
   }
 
-  /// Constructs a matrix wrapper around a Real array.
+  /// Constructs a RealMatrix from a Real array.
   ///
-  /// @param values Real array to wrap.
+  /// @param values Real array of values.
   /// @param rows The number of matrix rows.
   /// @param cols The number of matrix columns.
   RealMatrix(std::span<const Real<Scalar>> values, int rows, int cols)
@@ -256,10 +256,10 @@ class RealMatrix : public SleipnirBase {
     }
   }
 
-  /// Assigns an Eigen matrix to a RealMatrix.
+  /// Assigns an Eigen matrix to the matrix.
   ///
   /// @param values Eigen matrix of values.
-  /// @return This RealMatrix.
+  /// @return This matrix.
   template <typename Derived>
   RealMatrix& operator=(const Eigen::MatrixBase<Derived>& values) {
     slp_assert(rows() == values.rows() && cols() == values.cols());
@@ -278,7 +278,7 @@ class RealMatrix : public SleipnirBase {
   /// This only works for matrices with one row and one column.
   ///
   /// @param value Value to assign.
-  /// @return This RealMatrix.
+  /// @return This matrix.
   RealMatrix& operator=(ScalarLike auto value) {
     slp_assert(rows() == 1 && cols() == 1);
 
@@ -342,13 +342,13 @@ class RealMatrix : public SleipnirBase {
     return m_storage[index];
   }
 
-  /// Returns a block of the variable matrix.
+  /// Returns a block of the matrix.
   ///
   /// @param row_offset The row offset of the block selection.
   /// @param col_offset The column offset of the block selection.
   /// @param block_rows The number of rows in the block selection.
   /// @param block_cols The number of columns in the block selection.
-  /// @return A block of the variable matrix.
+  /// @return A block of the matrix.
   Submatrix<RealMatrix> block(int row_offset, int col_offset, int block_rows,
                               int block_cols) {
     slp_assert(row_offset >= 0 && row_offset <= rows());
@@ -358,13 +358,13 @@ class RealMatrix : public SleipnirBase {
     return Submatrix{*this, row_offset, col_offset, block_rows, block_cols};
   }
 
-  /// Returns a block of the variable matrix.
+  /// Returns a block of the matrix.
   ///
   /// @param row_offset The row offset of the block selection.
   /// @param col_offset The column offset of the block selection.
   /// @param block_rows The number of rows in the block selection.
   /// @param block_cols The number of columns in the block selection.
-  /// @return A block of the variable matrix.
+  /// @return A block of the matrix.
   const Submatrix<const RealMatrix> block(int row_offset, int col_offset,
                                           int block_rows,
                                           int block_cols) const {
@@ -375,11 +375,11 @@ class RealMatrix : public SleipnirBase {
     return Submatrix{*this, row_offset, col_offset, block_rows, block_cols};
   }
 
-  /// Returns a slice of the variable matrix.
+  /// Returns a slice of the matrix.
   ///
   /// @param row_slice The row slice.
   /// @param col_slice The column slice.
-  /// @return A slice of the variable matrix.
+  /// @return A slice of the matrix.
   Submatrix<RealMatrix> operator[](Slice row_slice, Slice col_slice) {
     int row_slice_length = row_slice.adjust(rows());
     int col_slice_length = col_slice.adjust(cols());
@@ -387,11 +387,11 @@ class RealMatrix : public SleipnirBase {
                      std::move(col_slice), col_slice_length};
   }
 
-  /// Returns a slice of the variable matrix.
+  /// Returns a slice of the matrix.
   ///
   /// @param row_slice The row slice.
   /// @param col_slice The column slice.
-  /// @return A slice of the variable matrix.
+  /// @return A slice of the matrix.
   const Submatrix<const RealMatrix> operator[](Slice row_slice,
                                                Slice col_slice) const {
     int row_slice_length = row_slice.adjust(rows());
@@ -400,7 +400,7 @@ class RealMatrix : public SleipnirBase {
                      std::move(col_slice), col_slice_length};
   }
 
-  /// Returns a slice of the variable matrix.
+  /// Returns a slice of the matrix.
   ///
   /// The given slices aren't adjusted. This overload is for Python bindings
   /// only.
@@ -409,14 +409,14 @@ class RealMatrix : public SleipnirBase {
   /// @param row_slice_length The row slice length.
   /// @param col_slice The column slice.
   /// @param col_slice_length The column slice length.
-  /// @return A slice of the variable matrix.
+  /// @return A slice of the matrix.
   Submatrix<RealMatrix> operator[](Slice row_slice, int row_slice_length,
                                    Slice col_slice, int col_slice_length) {
     return Submatrix{*this, std::move(row_slice), row_slice_length,
                      std::move(col_slice), col_slice_length};
   }
 
-  /// Returns a slice of the variable matrix.
+  /// Returns a slice of the matrix.
   ///
   /// The given slices aren't adjusted. This overload is for Python bindings
   /// only.
@@ -425,7 +425,7 @@ class RealMatrix : public SleipnirBase {
   /// @param row_slice_length The row slice length.
   /// @param col_slice The column slice.
   /// @param col_slice_length The column slice length.
-  /// @return A slice of the variable matrix.
+  /// @return A slice of the matrix.
   const Submatrix<const RealMatrix> operator[](Slice row_slice,
                                                int row_slice_length,
                                                Slice col_slice,
@@ -434,11 +434,11 @@ class RealMatrix : public SleipnirBase {
                      std::move(col_slice), col_slice_length};
   }
 
-  /// Returns a segment of the variable vector.
+  /// Returns a segment of the vector.
   ///
   /// @param offset The offset of the segment.
   /// @param length The length of the segment.
-  /// @return A segment of the variable vector.
+  /// @return A segment of the vector.
   Submatrix<RealMatrix> segment(int offset, int length) {
     slp_assert(cols() == 1);
     slp_assert(offset >= 0 && offset < rows());
@@ -446,11 +446,11 @@ class RealMatrix : public SleipnirBase {
     return block(offset, 0, length, 1);
   }
 
-  /// Returns a segment of the variable vector.
+  /// Returns a segment of the vector.
   ///
   /// @param offset The offset of the segment.
   /// @param length The length of the segment.
-  /// @return A segment of the variable vector.
+  /// @return A segment of the vector.
   const Submatrix<const RealMatrix> segment(int offset, int length) const {
     slp_assert(cols() == 1);
     slp_assert(offset >= 0 && offset < rows());
@@ -458,37 +458,37 @@ class RealMatrix : public SleipnirBase {
     return block(offset, 0, length, 1);
   }
 
-  /// Returns a row slice of the variable matrix.
+  /// Returns a row slice of the matrix.
   ///
   /// @param row The row to slice.
-  /// @return A row slice of the variable matrix.
+  /// @return A row slice of the matrix.
   Submatrix<RealMatrix> row(int row) {
     slp_assert(row >= 0 && row < rows());
     return block(row, 0, 1, cols());
   }
 
-  /// Returns a row slice of the variable matrix.
+  /// Returns a row slice of the matrix.
   ///
   /// @param row The row to slice.
-  /// @return A row slice of the variable matrix.
+  /// @return A row slice of the matrix.
   const Submatrix<const RealMatrix> row(int row) const {
     slp_assert(row >= 0 && row < rows());
     return block(row, 0, 1, cols());
   }
 
-  /// Returns a column slice of the variable matrix.
+  /// Returns a column slice of the matrix.
   ///
   /// @param col The column to slice.
-  /// @return A column slice of the variable matrix.
+  /// @return A column slice of the matrix.
   Submatrix<RealMatrix> col(int col) {
     slp_assert(col >= 0 && col < cols());
     return block(0, col, rows(), 1);
   }
 
-  /// Returns a column slice of the variable matrix.
+  /// Returns a column slice of the matrix.
   ///
   /// @param col The column to slice.
-  /// @return A column slice of the variable matrix.
+  /// @return A column slice of the matrix.
   const Submatrix<const RealMatrix> col(int col) const {
     slp_assert(col >= 0 && col < cols());
     return block(0, col, rows(), 1);
@@ -950,9 +950,9 @@ class RealMatrix : public SleipnirBase {
     return (*this)[0, 0];
   }
 
-  /// Returns the transpose of the variable matrix.
+  /// Returns the transpose of the matrix.
   ///
-  /// @return The transpose of the variable matrix.
+  /// @return The transpose of the matrix.
   RealMatrix<Scalar> T() const {
     RealMatrix<Scalar> result{detail::empty, cols(), rows()};
 
@@ -965,9 +965,9 @@ class RealMatrix : public SleipnirBase {
     return result;
   }
 
-  /// Returns the trace of the variable matrix, the sum of its diagonal.
+  /// Returns the trace of the matrix, the sum of its diagonal.
   ///
-  /// @return The trace of the variable matrix.
+  /// @return The trace of the matrix.
   Real<Scalar> trace() const {
     slp_assert(rows() == cols());
 
@@ -990,22 +990,22 @@ class RealMatrix : public SleipnirBase {
   /// @return The number of columns in the matrix.
   int cols() const { return m_cols; }
 
-  /// Returns an element of the variable matrix.
+  /// Returns an element of the matrix.
   ///
   /// @param row The row of the element to return.
   /// @param col The column of the element to return.
-  /// @return An element of the variable matrix.
+  /// @return An element of the matrix.
   Scalar value(int row, int col) { return (*this)[row, col].value(); }
 
-  /// Returns an element of the variable matrix.
+  /// Returns an element of the matrix.
   ///
   /// @param index The index of the element to return.
-  /// @return An element of the variable matrix.
+  /// @return An element of the matrix.
   Scalar value(int index) { return (*this)[index].value(); }
 
-  /// Returns the contents of the variable matrix.
+  /// Returns the contents of the matrix.
   ///
-  /// @return The contents of the variable matrix.
+  /// @return The contents of the matrix.
   Eigen::MatrixX<Scalar> value() {
     Eigen::MatrixX<Scalar> result{rows(), cols()};
 
@@ -1312,10 +1312,10 @@ class RealMatrix : public SleipnirBase {
   /// @return Number of elements in matrix.
   size_t size() const { return m_storage.size(); }
 
-  /// Returns an identity variable matrix.
+  /// Returns an identity matrix.
   ///
   /// @param rows The number of matrix rows.
-  /// @return An identity variable matrix.
+  /// @return An identity matrix.
   static RealMatrix<Scalar> identity(int rows) {
     RealMatrix<Scalar> result{detail::empty, rows, rows};
 
@@ -1328,11 +1328,11 @@ class RealMatrix : public SleipnirBase {
     return result;
   }
 
-  /// Returns a variable matrix filled with zeros.
+  /// Returns a matrix filled with zeros.
   ///
   /// @param rows The number of matrix rows.
   /// @param cols The number of matrix columns.
-  /// @return A variable matrix filled with zeros.
+  /// @return A matrix filled with zeros.
   static RealMatrix<Scalar> zero(int rows, int cols) {
     RealMatrix<Scalar> result{detail::empty, rows, cols};
 
@@ -1343,11 +1343,11 @@ class RealMatrix : public SleipnirBase {
     return result;
   }
 
-  /// Returns a variable matrix filled with ones.
+  /// Returns a matrix filled with ones.
   ///
   /// @param rows The number of matrix rows.
   /// @param cols The number of matrix columns.
-  /// @return A variable matrix filled with ones.
+  /// @return A matrix filled with ones.
   static RealMatrix<Scalar> one(int rows, int cols) {
     RealMatrix<Scalar> result{detail::empty, rows, cols};
 
@@ -1358,12 +1358,12 @@ class RealMatrix : public SleipnirBase {
     return result;
   }
 
-  /// Returns a variable matrix filled with a constant.
+  /// Returns a matrix filled with a constant.
   ///
   /// @param rows The number of matrix rows.
   /// @param cols The number of matrix columns.
   /// @param constant The constant.
-  /// @return A variable matrix filled with a constant.
+  /// @return A matrix filled with a constant.
   static RealMatrix<Scalar> constant(int rows, int cols, Scalar constant) {
     RealMatrix<Scalar> result{detail::empty, rows, cols};
 
