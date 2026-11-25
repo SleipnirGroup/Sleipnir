@@ -317,6 +317,16 @@ def test_compound_assignment_operators() -> None:
     assert (A2.value() == np.array([[1, 2], [3, 4]])).all()
 
 
+def test_trace() -> None:
+    A = RealMatrix([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]])
+
+    assert A.trace().value() == 15.0
+
+    # Block
+    assert A[1:3, 1:3].trace().value() == 14.0
+    assert A[0:2, 1:3].trace().value() == 8.0
+
+
 def test_value() -> None:
     A = RealMatrix([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]])
     expected = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]])
