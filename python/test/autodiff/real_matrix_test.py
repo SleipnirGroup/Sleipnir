@@ -276,24 +276,6 @@ def test_compound_assignment_operators() -> None:
     assert (A2.value() == np.array([[1, 2], [3, 4]])).all()
 
 
-def test_iterators() -> None:
-    A = RealMatrix([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]])
-    sub_A = A[2:3, 1:3]
-
-    assert sum(1 for _ in A) == 9
-    assert sum(1 for _ in sub_A) == 2
-
-    i = 1
-    for elem in A:
-        assert elem.value() == i
-        i += 1
-
-    i = 8
-    for elem in sub_A:
-        assert elem.value() == i
-        i += 1
-
-
 def test_value() -> None:
     A = RealMatrix([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]])
     expected = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]])
@@ -374,52 +356,6 @@ def test_unary_broadcast() -> None:
     assert (sub_A.value() == -expected2).all()
 
     assert (result2.value() == expected2).all()
-
-
-def test_identity_static_function() -> None:
-    A = RealMatrix.identity(3)
-
-    assert A.shape == (3, 3)
-
-    assert (A.value() == np.identity(3)).all()
-
-
-def test_zero_static_function() -> None:
-    A = RealMatrix.zero(2, 3)
-
-    assert A.shape == (2, 3)
-
-    for row in range(A.rows()):
-        for col in range(A.cols()):
-            assert A[row, col].value() == 0.0
-
-
-def test_one_static_function() -> None:
-    A = RealMatrix.one(2, 3)
-
-    assert A.shape == (2, 3)
-
-    for row in range(A.rows()):
-        for col in range(A.cols()):
-            assert A[row, col].value() == 1.0
-
-
-def test_constant_static_function() -> None:
-    A = RealMatrix.constant(2, 3, 2.0)
-
-    assert A.shape == (2, 3)
-
-    for row in range(A.rows()):
-        for col in range(A.cols()):
-            assert A[row, col].value() == 2.0
-
-
-def test_cwise_reduce() -> None:
-    A = RealMatrix([[2.0, 3.0, 4.0], [5.0, 6.0, 7.0]])
-    B = RealMatrix([[8.0, 9.0, 10.0], [11.0, 12.0, 13.0]])
-    result = autodiff.cwise_reduce(A, B, lambda a, b: a * b)
-
-    assert (result.value() == np.array([[16.0, 27.0, 40.0], [55.0, 72.0, 91.0]])).all()
 
 
 def test_exp() -> None:
@@ -511,6 +447,70 @@ def test_exp() -> None:
     np.testing.assert_allclose(
         pascal[:, :].exp().value(), expected_pascal, rtol=32 * ε, atol=0
     )
+
+
+def test_iterators() -> None:
+    A = RealMatrix([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]])
+    sub_A = A[2:3, 1:3]
+
+    assert sum(1 for _ in A) == 9
+    assert sum(1 for _ in sub_A) == 2
+
+    i = 1
+    for elem in A:
+        assert elem.value() == i
+        i += 1
+
+    i = 8
+    for elem in sub_A:
+        assert elem.value() == i
+        i += 1
+
+
+def test_identity_static_function() -> None:
+    A = RealMatrix.identity(3)
+
+    assert A.shape == (3, 3)
+
+    assert (A.value() == np.identity(3)).all()
+
+
+def test_zero_static_function() -> None:
+    A = RealMatrix.zero(2, 3)
+
+    assert A.shape == (2, 3)
+
+    for row in range(A.rows()):
+        for col in range(A.cols()):
+            assert A[row, col].value() == 0.0
+
+
+def test_one_static_function() -> None:
+    A = RealMatrix.one(2, 3)
+
+    assert A.shape == (2, 3)
+
+    for row in range(A.rows()):
+        for col in range(A.cols()):
+            assert A[row, col].value() == 1.0
+
+
+def test_constant_static_function() -> None:
+    A = RealMatrix.constant(2, 3, 2.0)
+
+    assert A.shape == (2, 3)
+
+    for row in range(A.rows()):
+        for col in range(A.cols()):
+            assert A[row, col].value() == 2.0
+
+
+def test_cwise_reduce() -> None:
+    A = RealMatrix([[2.0, 3.0, 4.0], [5.0, 6.0, 7.0]])
+    B = RealMatrix([[8.0, 9.0, 10.0], [11.0, 12.0, 13.0]])
+    result = autodiff.cwise_reduce(A, B, lambda a, b: a * b)
+
+    assert (result.value() == np.array([[16.0, 27.0, 40.0], [55.0, 72.0, 91.0]])).all()
 
 
 def test_block_free_function() -> None:
