@@ -2,6 +2,7 @@ import math
 import sys
 
 import numpy as np
+import pytest
 import scipy.sparse
 from sleipnir import autodiff
 from sleipnir.autodiff import ExpressionType, Real, RealMatrix
@@ -156,6 +157,26 @@ def test_slicing() -> None:
             ]
         )
     ).all()
+
+
+def test_slicing_integer_indices() -> None:
+    A = np.arange(1.0, 7.0).reshape(2, 3)
+    mat = RealMatrix(A)
+
+    # Negative indices count from the end
+    assert np.array_equal(mat[-1, :].value(), A[-1:, :])
+    assert np.array_equal(mat[:, -1].value(), A[:, -1:])
+    assert np.array_equal(mat[:, :][-2, 1:].value(), A[-2:-1, 1:])
+
+    # Out-of-range indices raise
+    with pytest.raises(IndexError):
+        mat[2, :]
+    with pytest.raises(IndexError):
+        mat[:, -4]
+    with pytest.raises(IndexError):
+        mat[:, :][0, 3]
+    with pytest.raises(IndexError):
+        mat[:, :][-3, :] = 1.0
 
 
 def test_subslicing() -> None:
