@@ -17,7 +17,7 @@ void bind_hessian(nb::class_<Hessian<double>>& cls) {
 
   cls.def(nb::init<Real<double>, Real<double>>(), "expression"_a, "wrt"_a,
           DOC(slp, Hessian, Hessian));
-  cls.def(nb::init<Real<double>, Matrix<double>>(), "expression"_a, "wrt"_a,
+  cls.def(nb::init<Real<double>, RealMatrix<double>>(), "expression"_a, "wrt"_a,
           DOC(slp, Hessian, Hessian));
   cls.def("get", &Hessian<double>::get, DOC(slp, Hessian, get));
   cls.def("value", &Hessian<double>::value, DOC(slp, Hessian, value));

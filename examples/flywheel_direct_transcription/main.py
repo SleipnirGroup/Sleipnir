@@ -18,8 +18,8 @@ def main() -> None:
     B = 1.0 - math.exp(-dt)
 
     problem = Problem()
-    X = problem.decision_variable(1, N + 1)
-    U = problem.decision_variable(1, N)
+    X = problem.real_decision_variable(1, N + 1)
+    U = problem.real_decision_variable(1, N)
 
     # Dynamics constraint
     for k in range(N):

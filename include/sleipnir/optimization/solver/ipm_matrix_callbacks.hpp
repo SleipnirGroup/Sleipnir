@@ -11,7 +11,7 @@
 
 namespace slp {
 
-/// Matrix callbacks for the interior-point method solver.
+/// RealMatrix callbacks for the interior-point method solver.
 ///
 /// @tparam Scalar Scalar type.
 template <typename Scalar>

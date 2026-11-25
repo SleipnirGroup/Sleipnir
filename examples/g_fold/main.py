@@ -80,7 +80,7 @@ def time_horizon_upper_bound(
     #
     # See equation (11) of README.md.
     problem = Problem()
-    t_f = problem.decision_variable()
+    t_f = problem.real_decision_variable()
 
     # R(t) = I + k₁(t)S(ω) + k₂(t)S(ω)²
     # R_int(t) = tI + k₂(t)S(ω) + k₃(t)S(ω)²
@@ -332,13 +332,13 @@ def main() -> None:
         problem = Problem()
 
         # x = [position, velocity]ᵀ
-        X = problem.decision_variable(6, N + 1)
+        X = problem.real_decision_variable(6, N + 1)
         # z = ln(m)
-        Z = problem.decision_variable(1, N + 1)
+        Z = problem.real_decision_variable(1, N + 1)
         # u = T_c/m
-        U = problem.decision_variable(3, N)
+        U = problem.real_decision_variable(3, N)
         # σ = Γ/m
-        σ = problem.decision_variable(1, N)
+        σ = problem.real_decision_variable(1, N)
 
         q = X[:3, :]
         v = X[3:6, :]

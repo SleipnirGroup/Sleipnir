@@ -44,7 +44,7 @@ iterations = 0
 def test_problem_spy() -> None:
     problem = Problem()
 
-    x, y = problem.decision_variable(2)
+    x, y = problem.real_decision_variable(2)
     x.set_value(20.0)
     y.set_value(20.0)
 

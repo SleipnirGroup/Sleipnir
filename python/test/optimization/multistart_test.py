@@ -15,7 +15,7 @@ def mishras_bird_function_solve(
 ) -> tuple[ExitStatus, float, DecisionVariables]:
     problem = Problem()
 
-    x, y = problem.decision_variable(2)
+    x, y = problem.real_decision_variable(2)
     x.set_value(input.x)
     y.set_value(input.y)
 

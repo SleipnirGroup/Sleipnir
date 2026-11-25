@@ -20,7 +20,7 @@ import numpy.typing as npt
 from mpl_toolkits.mplot3d import Axes3D
 from numpy.linalg import norm
 from sleipnir import autodiff
-from sleipnir.autodiff import Matrix, Submatrix, block, sqrt
+from sleipnir.autodiff import RealMatrix, Submatrix, block, sqrt
 from sleipnir.optimization import Problem
 
 field_width = 8.2296  # 27 ft -> m
@@ -37,8 +37,8 @@ def lerp(a: float, b: float, t: float) -> float:
     return a + t * (b - a)
 
 
-def cross(a: Matrix | Submatrix, b: npt.NDArray[np.float64]) -> Matrix:
-    return Matrix(
+def cross(a: RealMatrix | Submatrix, b: npt.NDArray[np.float64]) -> RealMatrix:
+    return RealMatrix(
         [
             [a[1, 0] * b[2, 0] - a[2, 0] * b[1, 0]],
             [a[2, 0] * b[0, 0] - a[0, 0] * b[2, 0]],
@@ -47,7 +47,7 @@ def cross(a: Matrix | Submatrix, b: npt.NDArray[np.float64]) -> Matrix:
     )
 
 
-def f(x: Matrix | Submatrix) -> Matrix:
+def f(x: RealMatrix | Submatrix) -> RealMatrix:
     # x' = x'
     # y' = y'
     # z' = z'
@@ -101,7 +101,7 @@ def main() -> None:
 
     # Set up duration decision variables
     N = 50
-    T = problem.decision_variable()
+    T = problem.real_decision_variable()
     problem.subject_to(T >= 0)
     T.set_value(1)
     dt = T / N
@@ -114,7 +114,7 @@ def main() -> None:
     # x = [x velocity]
     #     [y velocity]
     #     [z velocity]
-    X = problem.decision_variable(6, N)
+    X = problem.real_decision_variable(6, N)
 
     p = X[:3, :]
     p_x = X[0, :]

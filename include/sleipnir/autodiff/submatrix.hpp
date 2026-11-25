@@ -186,9 +186,9 @@ class Submatrix : public SleipnirBase {
     }
   }
 
-  /// Assigns a Matrix to the block.
+  /// Assigns a RealMatrix to the block.
   ///
-  /// @param values Matrix of values.
+  /// @param values RealMatrix of values.
   /// @return This Submatrix.
   Submatrix<Mat>& operator=(const Mat& values) {
     slp_assert(rows() == values.rows() && cols() == values.cols());
@@ -201,9 +201,9 @@ class Submatrix : public SleipnirBase {
     return *this;
   }
 
-  /// Assigns a Matrix to the block.
+  /// Assigns a RealMatrix to the block.
   ///
-  /// @param values Matrix of values.
+  /// @param values RealMatrix of values.
   /// @return This Submatrix.
   Submatrix<Mat>& operator=(Mat&& values) {
     slp_assert(rows() == values.rows() && cols() == values.cols());

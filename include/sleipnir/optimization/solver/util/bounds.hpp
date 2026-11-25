@@ -54,9 +54,9 @@ template <typename Scalar>
 Bounds<Scalar> get_bounds(std::span<Real<Scalar>> decision_variables,
                           std::span<Real<Scalar>> inequality_constraints,
                           const Eigen::SparseMatrix<Scalar>& A_i) {
-  // NB: Casting to long is unspecified if the size of decision_variable.size()
-  // is greater than the max long value, but then we wouldn't be able to fill
-  // A_i correctly anyway.
+  // NB: Casting to long is unspecified if the size of
+  // real_decision_variable.size() is greater than the max long value, but then
+  // we wouldn't be able to fill A_i correctly anyway.
   slp_assert(static_cast<Eigen::Index>(decision_variables.size()) ==
              A_i.cols());
   slp_assert(static_cast<Eigen::Index>(inequality_constraints.size()) ==

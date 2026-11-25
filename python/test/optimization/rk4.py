@@ -3,10 +3,10 @@ from typing import Any, overload
 
 import numpy as np
 import numpy.typing as npt
-from sleipnir.autodiff import Matrix, Submatrix
+from sleipnir.autodiff import RealMatrix, Submatrix
 
 type NumericMatrix = npt.NDArray[np.float64]
-type SymbolicMatrix = Matrix | Submatrix
+type SymbolicMatrix = RealMatrix | Submatrix
 
 
 @overload
@@ -20,11 +20,11 @@ def rk4(
 
 @overload
 def rk4(
-    f: Callable[[SymbolicMatrix, SymbolicMatrix], Matrix],
+    f: Callable[[SymbolicMatrix, SymbolicMatrix], RealMatrix],
     x: SymbolicMatrix,
     u: SymbolicMatrix,
     dt: float,
-) -> Matrix: ...
+) -> RealMatrix: ...
 
 
 def rk4(f: Callable[[Any, Any], Any], x: Any, u: Any, dt: float) -> Any:

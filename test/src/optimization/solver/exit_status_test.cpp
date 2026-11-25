@@ -24,7 +24,7 @@ TEMPLATE_TEST_CASE("ExitStatus - Callback requested stop", "[ExitStatus]",
   using T = TestType;
 
   slp::Problem<T> problem;
-  auto x = problem.decision_variable();
+  auto x = problem.real_decision_variable();
   problem.minimize(x * x);
 
   problem.add_callback([](const slp::IterationInfo<T>&) {});
@@ -62,9 +62,9 @@ TEMPLATE_TEST_CASE("ExitStatus - Too few DOFs", "[ExitStatus]", SCALAR_TYPES) {
 
   slp::Problem<T> problem;
 
-  auto x = problem.decision_variable();
-  auto y = problem.decision_variable();
-  auto z = problem.decision_variable();
+  auto x = problem.real_decision_variable();
+  auto y = problem.real_decision_variable();
+  auto z = problem.real_decision_variable();
 
   problem.subject_to(x == T(1));
   problem.subject_to(x == T(2));
@@ -86,9 +86,9 @@ TEMPLATE_TEST_CASE("ExitStatus - Locally infeasible", "[ExitStatus]",
   {
     slp::Problem<T> problem;
 
-    auto x = problem.decision_variable();
-    auto y = problem.decision_variable();
-    auto z = problem.decision_variable();
+    auto x = problem.real_decision_variable();
+    auto y = problem.real_decision_variable();
+    auto z = problem.real_decision_variable();
 
     problem.subject_to(x == y + T(1));
     problem.subject_to(y == z + T(1));
@@ -106,9 +106,9 @@ TEMPLATE_TEST_CASE("ExitStatus - Locally infeasible", "[ExitStatus]",
   {
     slp::Problem<T> problem;
 
-    auto x = problem.decision_variable();
-    auto y = problem.decision_variable();
-    auto z = problem.decision_variable();
+    auto x = problem.real_decision_variable();
+    auto y = problem.real_decision_variable();
+    auto z = problem.real_decision_variable();
 
     problem.subject_to(x >= y + T(1));
     problem.subject_to(y >= z + T(1));
@@ -136,7 +136,7 @@ TEMPLATE_TEST_CASE("ExitStatus - Small constraint scaling is feasible",
   {
     slp::Problem<T> problem;
 
-    auto x = problem.decision_variable();
+    auto x = problem.real_decision_variable();
     x.set_value(T(5005));
 
     problem.subject_to(scale * (x - T(5)) == T(0));
@@ -153,7 +153,7 @@ TEMPLATE_TEST_CASE("ExitStatus - Small constraint scaling is feasible",
   {
     slp::Problem<T> problem;
 
-    auto x = problem.decision_variable();
+    auto x = problem.real_decision_variable();
     x.set_value(T(5005));
 
     problem.subject_to(scale * (T(5) - x) >= T(0));
@@ -174,7 +174,7 @@ TEMPLATE_TEST_CASE("ExitStatus - Nonfinite initial guess", "[ExitStatus]",
   // Nonfinite cost
   {
     slp::Problem<T> problem;
-    auto x = problem.decision_variable();
+    auto x = problem.real_decision_variable();
     problem.minimize(T(1) / x);
 
     CHECK(problem.solve() == slp::ExitStatus::NONFINITE_INITIAL_GUESS);
@@ -183,7 +183,7 @@ TEMPLATE_TEST_CASE("ExitStatus - Nonfinite initial guess", "[ExitStatus]",
   // Nonfinite gradient
   {
     slp::Problem<T> problem;
-    auto x = problem.decision_variable();
+    auto x = problem.real_decision_variable();
     problem.minimize(sqrt(x));
 
     CHECK(problem.solve() == slp::ExitStatus::NONFINITE_INITIAL_GUESS);
@@ -192,7 +192,7 @@ TEMPLATE_TEST_CASE("ExitStatus - Nonfinite initial guess", "[ExitStatus]",
   // Nonfinite equality constraint
   {
     slp::Problem<T> problem;
-    auto x = problem.decision_variable();
+    auto x = problem.real_decision_variable();
     problem.subject_to(T(1) / x == T(1));
 
     CHECK(problem.solve() == slp::ExitStatus::NONFINITE_INITIAL_GUESS);
@@ -201,7 +201,7 @@ TEMPLATE_TEST_CASE("ExitStatus - Nonfinite initial guess", "[ExitStatus]",
   // Nonfinite equality constraint Jacobian
   {
     slp::Problem<T> problem;
-    auto x = problem.decision_variable();
+    auto x = problem.real_decision_variable();
     problem.subject_to(sqrt(x) == T(1));
 
     CHECK(problem.solve() == slp::ExitStatus::NONFINITE_INITIAL_GUESS);
@@ -210,7 +210,7 @@ TEMPLATE_TEST_CASE("ExitStatus - Nonfinite initial guess", "[ExitStatus]",
   // Nonfinite inequality constraint
   {
     slp::Problem<T> problem;
-    auto x = problem.decision_variable();
+    auto x = problem.real_decision_variable();
     problem.subject_to(T(1) / x > T(1));
 
     CHECK(problem.solve() == slp::ExitStatus::NONFINITE_INITIAL_GUESS);
@@ -219,7 +219,7 @@ TEMPLATE_TEST_CASE("ExitStatus - Nonfinite initial guess", "[ExitStatus]",
   // Nonfinite inequality constraint Jacobian
   {
     slp::Problem<T> problem;
-    auto x = problem.decision_variable();
+    auto x = problem.real_decision_variable();
     problem.subject_to(sqrt(x) > T(1));
 
     CHECK(problem.solve() == slp::ExitStatus::NONFINITE_INITIAL_GUESS);
@@ -232,7 +232,7 @@ TEMPLATE_TEST_CASE("ExitStatus - Diverging iterates", "[ExitStatus]",
 
   slp::Problem<T> problem;
 
-  auto x = problem.decision_variable();
+  auto x = problem.real_decision_variable();
   x.set_value(T(1));
 
   problem.minimize(-x * x);
@@ -253,7 +253,7 @@ TEMPLATE_TEST_CASE("ExitStatus - Large iterates aren't diverging",
   // with physical units, so they shouldn't trigger the divergence check
   slp::Problem<T> problem;
 
-  auto x = problem.decision_variable();
+  auto x = problem.real_decision_variable();
   x.set_value(T(0));
 
   problem.minimize((x - T(1e6)) * (x - T(1e6)));
@@ -272,7 +272,7 @@ TEMPLATE_TEST_CASE("ExitStatus - Max iterations exceeded", "[ExitStatus]",
 
   slp::Problem<T> problem;
 
-  auto x = problem.decision_variable();
+  auto x = problem.real_decision_variable();
   x.set_value(T(1));
 
   problem.minimize(x * x);
@@ -292,7 +292,7 @@ TEMPLATE_TEST_CASE("ExitStatus - Timeout", "[ExitStatus]", SCALAR_TYPES) {
 
   slp::Problem<T> problem;
 
-  auto x = problem.decision_variable();
+  auto x = problem.real_decision_variable();
   x.set_value(T(1));
 
   problem.minimize(x * x);

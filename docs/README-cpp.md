@@ -41,10 +41,10 @@ First, we need to make decision variables for our state and input.
 
 ```cpp
 // 2x1 state vector with N + 1 timesteps (includes last state)
-auto X = problem.decision_variable(2, N + 1);
+auto X = problem.real_decision_variable(2, N + 1);
 
 // 1x1 input vector with N timesteps (input at last state doesn't matter)
-auto U = problem.decision_variable(1, N);
+auto U = problem.real_decision_variable(1, N);
 ```
 
 By convention, we use capital letters for the variables to designate matrices.

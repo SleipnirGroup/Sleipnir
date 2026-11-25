@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from sleipnir.autodiff import ExpressionType, Matrix, Real
+from sleipnir.autodiff import ExpressionType, Real, RealMatrix
 
 
 def test_default_constructor() -> None:
@@ -43,7 +43,7 @@ def test_numpy_array_operators() -> None:
         (A * x, [[2.0, 4.0], [6.0, 8.0]]),
         (A / x, [[0.5, 1.0], [1.5, 2.0]]),
     ]:
-        assert isinstance(result, Matrix)
+        assert isinstance(result, RealMatrix)
         assert np.array_equal(result.value(), expected)
 
     # int arrays
@@ -53,7 +53,7 @@ def test_numpy_array_operators() -> None:
         (B * x, [[2.0, 4.0], [6.0, 8.0]]),
         (B / x, [[0.5, 1.0], [1.5, 2.0]]),
     ]:
-        assert isinstance(result, Matrix)
+        assert isinstance(result, RealMatrix)
         assert np.array_equal(result.value(), expected)
 
     # NumPy scalars

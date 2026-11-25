@@ -7,7 +7,7 @@ from tolerance import solution_tolerance
 def test_maximize() -> None:
     problem = Problem()
 
-    x, y = problem.decision_variable(2)
+    x, y = problem.real_decision_variable(2)
     x.set_value(1.0)
     y.set_value(1.0)
 
@@ -32,7 +32,7 @@ def test_maximize() -> None:
 def test_free_variable() -> None:
     problem = Problem()
 
-    x = problem.decision_variable(2)
+    x = problem.real_decision_variable(2)
     x[0].set_value(1.0)
     x[1].set_value(2.0)
 

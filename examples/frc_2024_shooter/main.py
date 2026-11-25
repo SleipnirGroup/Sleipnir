@@ -19,7 +19,7 @@ import numpy as np
 import numpy.typing as npt
 from mpl_toolkits.mplot3d import Axes3D
 from numpy.linalg import norm
-from sleipnir.autodiff import Gradient, Matrix, Submatrix, block, sqrt
+from sleipnir.autodiff import Gradient, RealMatrix, Submatrix, block, sqrt
 from sleipnir.optimization import Problem
 
 field_width = 8.2296  # 27 ft -> m
@@ -41,8 +41,8 @@ target_wrt_field = np.array(
 g = np.array([[0], [0], [9.806]])  # m/s²
 
 
-def cross_variable(a: Matrix | Submatrix, b: npt.NDArray[np.float64]) -> Matrix:
-    return Matrix(
+def cross_variable(a: RealMatrix | Submatrix, b: npt.NDArray[np.float64]) -> RealMatrix:
+    return RealMatrix(
         [
             [a[1, 0] * b[2, 0] - a[2, 0] * b[1, 0]],
             [a[2, 0] * b[0, 0] - a[0, 0] * b[2, 0]],
@@ -51,7 +51,7 @@ def cross_variable(a: Matrix | Submatrix, b: npt.NDArray[np.float64]) -> Matrix:
     )
 
 
-def f_variable(x: Matrix | Submatrix) -> Matrix:
+def f_variable(x: RealMatrix | Submatrix) -> RealMatrix:
     # x' = x'
     # y' = y'
     # z' = z'
@@ -156,7 +156,7 @@ def main() -> None:
 
     # Set up duration decision variables
     N = 10
-    T = problem.decision_variable()
+    T = problem.real_decision_variable()
     problem.subject_to(T >= 0)
     T.set_value(1)
     dt = T / N
@@ -169,7 +169,7 @@ def main() -> None:
     # x = [x velocity]
     #     [y velocity]
     #     [z velocity]
-    x = problem.decision_variable(6)
+    x = problem.real_decision_variable(6)
 
     # Position initial guess is start position
     x[:3, :].set_value(shooter_wrt_field[:3, :])

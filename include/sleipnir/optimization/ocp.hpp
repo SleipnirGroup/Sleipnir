@@ -9,8 +9,8 @@
 #include <utility>
 
 #include "sleipnir/autodiff/expression_type.hpp"
-#include "sleipnir/autodiff/matrix.hpp"
 #include "sleipnir/autodiff/real.hpp"
+#include "sleipnir/autodiff/real_matrix.hpp"
 #include "sleipnir/optimization/ocp/dynamics_type.hpp"
 #include "sleipnir/optimization/ocp/timestep_method.hpp"
 #include "sleipnir/optimization/ocp/transcription_method.hpp"
@@ -71,8 +71,8 @@ class OCP : public Problem<Scalar> {
   /// @param transcription_method The transcription method.
   OCP(int num_states, int num_inputs, std::chrono::duration<Scalar> dt,
       int num_steps,
-      function_ref<Matrix<Scalar>(const Matrix<Scalar>& x,
-                                  const Matrix<Scalar>& u)>
+      function_ref<RealMatrix<Scalar>(const RealMatrix<Scalar>& x,
+                                      const RealMatrix<Scalar>& u)>
           dynamics,
       DynamicsType dynamics_type = DynamicsType::EXPLICIT_ODE,
       TimestepMethod timestep_method = TimestepMethod::FIXED,
@@ -82,11 +82,10 @@ class OCP : public Problem<Scalar> {
             num_inputs,
             dt,
             num_steps,
-            [=]([[maybe_unused]] const Matrix<Scalar>& t,
-                const Matrix<Scalar>& x, const Matrix<Scalar>& u,
-                [[maybe_unused]] const Matrix<Scalar>& dt) -> Matrix<Scalar> {
-              return dynamics(x, u);
-            },
+            [=]([[maybe_unused]] const RealMatrix<Scalar>& t,
+                const RealMatrix<Scalar>& x, const RealMatrix<Scalar>& u,
+                [[maybe_unused]] const RealMatrix<Scalar>& dt)
+                -> RealMatrix<Scalar> { return dynamics(x, u); },
             dynamics_type,
             timestep_method,
             transcription_method} {}
@@ -110,9 +109,9 @@ class OCP : public Problem<Scalar> {
   /// @param transcription_method The transcription method.
   OCP(int num_states, int num_inputs, std::chrono::duration<Scalar> dt,
       int num_steps,
-      function_ref<
-          Matrix<Scalar>(const Real<Scalar>& t, const Matrix<Scalar>& x,
-                         const Matrix<Scalar>& u, const Real<Scalar>& dt)>
+      function_ref<RealMatrix<Scalar>(
+          const Real<Scalar>& t, const RealMatrix<Scalar>& x,
+          const RealMatrix<Scalar>& u, const Real<Scalar>& dt)>
           dynamics,
       DynamicsType dynamics_type = DynamicsType::EXPLICIT_ODE,
       TimestepMethod timestep_method = TimestepMethod::FIXED,
@@ -123,41 +122,41 @@ class OCP : public Problem<Scalar> {
         m_dynamics_type{dynamics_type},
         m_transcription_method{transcription_method} {
     // u is num_steps + 1 so that the final constraint function evaluation works
-    m_U = this->decision_variable(num_inputs, m_num_steps + 1);
+    m_U = this->real_decision_variable(num_inputs, m_num_steps + 1);
 
     if (timestep_method == TimestepMethod::FIXED) {
-      m_DT = Matrix<Scalar>{1, m_num_steps + 1};
+      m_DT = RealMatrix<Scalar>{1, m_num_steps + 1};
       for (int i = 0; i < num_steps + 1; ++i) {
         m_DT[0, i] = dt.count();
       }
     } else if (timestep_method == TimestepMethod::VARIABLE_SINGLE) {
-      Real single_dt = this->decision_variable();
+      Real single_dt = this->real_decision_variable();
       single_dt.set_value(dt.count());
 
       // Set the member variable matrix to track the decision variable
-      m_DT = Matrix<Scalar>{1, m_num_steps + 1};
+      m_DT = RealMatrix<Scalar>{1, m_num_steps + 1};
       for (int i = 0; i < num_steps + 1; ++i) {
         m_DT[0, i] = single_dt;
       }
     } else if (timestep_method == TimestepMethod::VARIABLE) {
-      m_DT = this->decision_variable(1, m_num_steps + 1);
+      m_DT = this->real_decision_variable(1, m_num_steps + 1);
       for (int i = 0; i < num_steps + 1; ++i) {
         m_DT[0, i].set_value(dt.count());
       }
     }
 
     if (transcription_method == TranscriptionMethod::DIRECT_TRANSCRIPTION) {
-      m_X = this->decision_variable(num_states, m_num_steps + 1);
+      m_X = this->real_decision_variable(num_states, m_num_steps + 1);
       constrain_direct_transcription();
     } else if (transcription_method ==
                TranscriptionMethod::DIRECT_COLLOCATION) {
-      m_X = this->decision_variable(num_states, m_num_steps + 1);
+      m_X = this->real_decision_variable(num_states, m_num_steps + 1);
       constrain_direct_collocation();
     } else if (transcription_method == TranscriptionMethod::SINGLE_SHOOTING) {
       // In single-shooting the states aren't decision variables, but instead
       // depend on the input and previous states. The initial state is a
       // parameter.
-      m_X = Matrix<Scalar>{detail::empty, num_states, m_num_steps + 1};
+      m_X = RealMatrix<Scalar>{detail::empty, num_states, m_num_steps + 1};
       m_X.col(0) = this->parameter(num_states);
       constrain_single_shooting();
     }
@@ -172,14 +171,14 @@ class OCP : public Problem<Scalar> {
     auto x_0 = this->initial_state();
 
     // Broadcast scalars to the initial state's shape
-    Matrix<Scalar> x_0_value;
+    RealMatrix<Scalar> x_0_value;
     if constexpr (ScalarLike<T>) {
-      x_0_value = Matrix<Scalar>{detail::empty, x_0.rows(), x_0.cols()};
+      x_0_value = RealMatrix<Scalar>{detail::empty, x_0.rows(), x_0.cols()};
       for (auto& elem : x_0_value) {
         elem = initial_state;
       }
     } else {
-      x_0_value = Matrix<Scalar>{initial_state};
+      x_0_value = RealMatrix<Scalar>{initial_state};
     }
 
     // In single-shooting, the initial state is a parameter, so if the requested
@@ -210,9 +209,9 @@ class OCP : public Problem<Scalar> {
   ///
   /// @param callback The callback f(x, u) where x is the state and u is the
   ///     input vector.
-  void for_each_step(
-      const function_ref<void(const Matrix<Scalar>& x, const Matrix<Scalar>& u)>
-          callback) {
+  void for_each_step(const function_ref<void(const RealMatrix<Scalar>& x,
+                                             const RealMatrix<Scalar>& u)>
+                         callback) {
     for (int i = 0; i < m_num_steps + 1; ++i) {
       auto x = X().col(i);
       auto u = U().col(i);
@@ -226,10 +225,10 @@ class OCP : public Problem<Scalar> {
   ///
   /// @param callback The callback f(t, x, u, dt) where t is time, x is the
   ///     state vector, u is the input vector, and dt is the timestep duration.
-  void for_each_step(
-      const function_ref<void(const Real<Scalar>& t, const Matrix<Scalar>& x,
-                              const Matrix<Scalar>& u, const Real<Scalar>& dt)>
-          callback) {
+  void for_each_step(const function_ref<
+                     void(const Real<Scalar>& t, const RealMatrix<Scalar>& x,
+                          const RealMatrix<Scalar>& u, const Real<Scalar>& dt)>
+                         callback) {
     Real<Scalar> time{0};
 
     for (int i = 0; i < m_num_steps + 1; ++i) {
@@ -286,7 +285,7 @@ class OCP : public Problem<Scalar> {
   /// Shaped (num_states)x(num_steps+1).
   ///
   /// @return The state variable matrix.
-  Matrix<Scalar>& X() { return m_X; }
+  RealMatrix<Scalar>& X() { return m_X; }
 
   /// Gets the input variables. After the problem is solved, this will contain
   /// the inputs corresponding to the optimized trajectory.
@@ -295,7 +294,7 @@ class OCP : public Problem<Scalar> {
   /// in the trajectory.
   ///
   /// @return The input variable matrix.
-  Matrix<Scalar>& U() { return m_U; }
+  RealMatrix<Scalar>& U() { return m_U; }
 
   /// Gets the timestep variables. After the problem is solved, this will
   /// contain the timesteps corresponding to the optimized trajectory.
@@ -304,30 +303,31 @@ class OCP : public Problem<Scalar> {
   /// trajectory.
   ///
   /// @return The timestep variable matrix.
-  Matrix<Scalar>& dt() { return m_DT; }
+  RealMatrix<Scalar>& dt() { return m_DT; }
 
   /// Gets the initial state in the trajectory.
   ///
   /// @return The initial state of the trajectory.
-  Matrix<Scalar> initial_state() { return m_X.col(0); }
+  RealMatrix<Scalar> initial_state() { return m_X.col(0); }
 
   /// Gets the final state in the trajectory.
   ///
   /// @return The final state of the trajectory.
-  Matrix<Scalar> final_state() { return m_X.col(m_num_steps); }
+  RealMatrix<Scalar> final_state() { return m_X.col(m_num_steps); }
 
  private:
   int m_num_steps;
 
-  function_ref<Matrix<Scalar>(const Real<Scalar>& t, const Matrix<Scalar>& x,
-                              const Matrix<Scalar>& u, const Real<Scalar>& dt)>
+  function_ref<RealMatrix<Scalar>(
+      const Real<Scalar>& t, const RealMatrix<Scalar>& x,
+      const RealMatrix<Scalar>& u, const Real<Scalar>& dt)>
       m_dynamics;
   DynamicsType m_dynamics_type;
   TranscriptionMethod m_transcription_method;
 
-  Matrix<Scalar> m_X;
-  Matrix<Scalar> m_U;
-  Matrix<Scalar> m_DT;
+  RealMatrix<Scalar> m_X;
+  RealMatrix<Scalar> m_U;
+  RealMatrix<Scalar> m_DT;
 
   /// Performs 4th order Runge-Kutta integration of dx/dt = f(t, x, u) for dt.
   ///
@@ -395,10 +395,10 @@ class OCP : public Problem<Scalar> {
       Real dt = this->dt()[0, i];
 
       if (m_dynamics_type == DynamicsType::EXPLICIT_ODE) {
-        this->subject_to(
-            x_end ==
-            rk4<const decltype(m_dynamics)&, Matrix<Scalar>, Matrix<Scalar>,
-                Real<Scalar>>(m_dynamics, x_begin, u, time, dt));
+        this->subject_to(x_end ==
+                         rk4<const decltype(m_dynamics)&, RealMatrix<Scalar>,
+                             RealMatrix<Scalar>, Real<Scalar>>(
+                             m_dynamics, x_begin, u, time, dt));
       } else if (m_dynamics_type == DynamicsType::DISCRETE) {
         this->subject_to(x_end == m_dynamics(time, x_begin, u, dt));
       }
@@ -418,8 +418,9 @@ class OCP : public Problem<Scalar> {
       Real dt = this->dt()[0, i];
 
       if (m_dynamics_type == DynamicsType::EXPLICIT_ODE) {
-        x_end = rk4<const decltype(m_dynamics)&, Matrix<Scalar>, Matrix<Scalar>,
-                    Real<Scalar>>(m_dynamics, x_begin, u, time, dt);
+        x_end = rk4<const decltype(m_dynamics)&, RealMatrix<Scalar>,
+                    RealMatrix<Scalar>, Real<Scalar>>(m_dynamics, x_begin, u,
+                                                      time, dt);
       } else if (m_dynamics_type == DynamicsType::DISCRETE) {
         x_end = m_dynamics(time, x_begin, u, dt);
       }

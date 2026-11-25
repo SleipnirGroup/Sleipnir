@@ -18,7 +18,7 @@ TEMPLATE_TEST_CASE("Problem - Unconstrained 1D", "[Problem]", SCALAR_TYPES) {
 
   slp::Problem<T> problem;
 
-  auto x = problem.decision_variable();
+  auto x = problem.real_decision_variable();
   x.set_value(T(2));
 
   problem.minimize(x * x - T(6) * x);
@@ -38,8 +38,8 @@ TEMPLATE_TEST_CASE("Problem - Unconstrained 2D", "[Problem]", SCALAR_TYPES) {
   {
     slp::Problem<T> problem;
 
-    auto x = problem.decision_variable();
-    auto y = problem.decision_variable();
+    auto x = problem.real_decision_variable();
+    auto y = problem.real_decision_variable();
     x.set_value(T(1));
     y.set_value(T(2));
 
@@ -58,7 +58,7 @@ TEMPLATE_TEST_CASE("Problem - Unconstrained 2D", "[Problem]", SCALAR_TYPES) {
   {
     slp::Problem<T> problem;
 
-    auto x = problem.decision_variable(2);
+    auto x = problem.real_decision_variable(2);
     x[0].set_value(T(1));
     x[1].set_value(T(2));
 
@@ -121,8 +121,8 @@ TEMPLATE_TEST_CASE("Problem - Equality-constrained", "[Problem]",
   {
     slp::Problem<T> problem;
 
-    auto x = problem.decision_variable();
-    auto y = problem.decision_variable();
+    auto x = problem.real_decision_variable();
+    auto y = problem.real_decision_variable();
 
     problem.maximize(x * y);
 
@@ -141,7 +141,7 @@ TEMPLATE_TEST_CASE("Problem - Equality-constrained", "[Problem]",
   {
     slp::Problem<T> problem;
 
-    auto x = problem.decision_variable(2);
+    auto x = problem.real_decision_variable(2);
     x[0].set_value(T(1));
     x[1].set_value(T(2));
 
@@ -166,8 +166,8 @@ TEMPLATE_TEST_CASE("Problem - Inequality-constrained 2D", "[Problem]",
 
   slp::Problem<T> problem;
 
-  auto x = problem.decision_variable();
-  auto y = problem.decision_variable();
+  auto x = problem.real_decision_variable();
+  auto y = problem.real_decision_variable();
   x.set_value(T(5));
   y.set_value(T(5));
 

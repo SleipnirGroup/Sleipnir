@@ -6,8 +6,8 @@
 #include <Eigen/Core>
 #include <sleipnir/autodiff/expression_type.hpp>
 #include <sleipnir/autodiff/gradient.hpp>
-#include <sleipnir/autodiff/matrix.hpp>
 #include <sleipnir/autodiff/real.hpp>
+#include <sleipnir/autodiff/real_matrix.hpp>
 #include <sleipnir/autodiff/submatrix.hpp>
 #include <sleipnir/optimization/ocp.hpp>
 #include <sleipnir/optimization/ocp/dynamics_type.hpp>
@@ -39,9 +39,10 @@ NB_MODULE(_sleipnir, m) {
                                             DOC(slp, ExpressionType)};
 
   nb::class_<Real<double>> real{autodiff, "Real", DOC(slp, Real)};
-  nb::class_<Matrix<double>> matrix{autodiff, "Matrix", DOC(slp, Matrix)};
-  nb::class_<Submatrix<Matrix<double>>> submatrix{autodiff, "Submatrix",
-                                                  DOC(slp, Submatrix)};
+  nb::class_<RealMatrix<double>> real_matrix{autodiff, "RealMatrix",
+                                             DOC(slp, RealMatrix, 2)};
+  nb::class_<Submatrix<RealMatrix<double>>> submatrix{autodiff, "Submatrix",
+                                                      DOC(slp, Submatrix)};
 
   nb::class_<Gradient<double>> gradient{autodiff, "Gradient",
                                         DOC(slp, Gradient)};
@@ -55,19 +56,19 @@ NB_MODULE(_sleipnir, m) {
       optimization, "InequalityConstraints", DOC(slp_InequalityConstraints)};
 
   // Bounds function
-  for_each_type<double, int, const Real<double>&, const Matrix<double>&,
-                const Submatrix<Matrix<double>>&, nb::DRef<Eigen::MatrixXd>>(
-      [&]<typename L> {
-        for_each_type<const Real<double>&, const Matrix<double>&,
-                      const Submatrix<Matrix<double>>&>([&]<typename X> {
-          for_each_type<double, int, const Real<double>&, const Matrix<double>&,
-                        const Submatrix<Matrix<double>>&,
-                        nb::DRef<Eigen::MatrixXd>>([&]<typename U> {
-            optimization.def("bounds", &bounds<L&&, X&&, U&&>, "l"_a, "x"_a,
-                             "u"_a, DOC(slp, bounds));
-          });
-        });
+  for_each_type<double, int, const Real<double>&, const RealMatrix<double>&,
+                const Submatrix<RealMatrix<double>>&,
+                nb::DRef<Eigen::MatrixXd>>([&]<typename L> {
+    for_each_type<const Real<double>&, const RealMatrix<double>&,
+                  const Submatrix<RealMatrix<double>>&>([&]<typename X> {
+      for_each_type<double, int, const Real<double>&, const RealMatrix<double>&,
+                    const Submatrix<RealMatrix<double>>&,
+                    nb::DRef<Eigen::MatrixXd>>([&]<typename U> {
+        optimization.def("bounds", &bounds<L&&, X&&, U&&>, "l"_a, "x"_a, "u"_a,
+                         DOC(slp, bounds));
       });
+    });
+  });
 
   nb::enum_<ExitStatus> exit_status{optimization, "ExitStatus",
                                     DOC(slp, ExitStatus)};
@@ -90,11 +91,11 @@ NB_MODULE(_sleipnir, m) {
   bind_expression_type(expression_type);
 
   bind_real(autodiff, real);
-  bind_matrix(autodiff, matrix);
+  bind_real_matrix(autodiff, real_matrix);
   bind_submatrix(submatrix);
 
   // Implicit conversions
-  matrix.def(nb::init_implicit<Submatrix<Matrix<double>>>());
+  real_matrix.def(nb::init_implicit<Submatrix<RealMatrix<double>>>());
 
   bind_gradient(gradient);
   bind_hessian(hessian);

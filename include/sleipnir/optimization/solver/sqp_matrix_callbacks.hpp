@@ -11,7 +11,7 @@
 
 namespace slp {
 
-/// Matrix callbacks for the Sequential Quadratic Programming (SQP) solver.
+/// RealMatrix callbacks for the Sequential Quadratic Programming (SQP) solver.
 ///
 /// @tparam Scalar Scalar type.
 template <typename Scalar>

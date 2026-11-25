@@ -11,8 +11,8 @@
 #include <string>
 #include <utility>
 
-#include <sleipnir/autodiff/matrix.hpp>
 #include <sleipnir/autodiff/real.hpp>
+#include <sleipnir/autodiff/real_matrix.hpp>
 #include <sleipnir/autodiff/submatrix.hpp>
 
 #include "docstrings.hpp"
@@ -40,15 +40,17 @@ void def_unary_math(nb::module_& autodiff, const char* name, F&& f,
   // Real overload
   autodiff.def(name, f, std::forward<Args>(args)...);
 
-  // Matrix overload
+  // RealMatrix overload
   autodiff.def(
-      name, [=](const Matrix<double>& x) { return x.cwise_transform(f); },
+      name, [=](const RealMatrix<double>& x) { return x.cwise_transform(f); },
       std::forward<Args>(args)...);
 
   // Submatrix overload
   autodiff.def(
       name,
-      [=](const Submatrix<Matrix<double>>& x) { return x.cwise_transform(f); },
+      [=](const Submatrix<RealMatrix<double>>& x) {
+        return x.cwise_transform(f);
+      },
       std::forward<Args>(args)...);
 }
 
@@ -168,7 +170,7 @@ void bind_real(nb::module_& autodiff, nb::class_<Real<double>>& cls) {
         std::string ufunc_name =
             nb::cast<std::string>(ufunc.attr("__repr__")());
 
-        // Matrix only represents 2D arrays
+        // RealMatrix only represents 2D arrays
         auto is_2d_array = [](const nb::handle& obj) {
           return nb::isinstance<nb::ndarray<>>(obj) &&
                  nb::cast<nb::ndarray<>>(obj).ndim() == 2;

@@ -19,8 +19,8 @@
 #include <tuple>
 
 #include <Eigen/Core>
-#include <sleipnir/autodiff/matrix.hpp>
 #include <sleipnir/autodiff/real.hpp>
+#include <sleipnir/autodiff/real_matrix.hpp>
 #include <sleipnir/autodiff/slice.hpp>
 #include <sleipnir/autodiff/submatrix.hpp>
 #include <sleipnir/util/concepts.hpp>
@@ -34,33 +34,33 @@ namespace nb = nanobind;
 
 namespace slp {
 
-void bind_submatrix(nb::class_<Submatrix<Matrix<double>>>& cls) {
+void bind_submatrix(nb::class_<Submatrix<RealMatrix<double>>>& cls) {
   using namespace nb::literals;
 
   cls.def(
       "set_value",
-      [](Submatrix<Matrix<double>>& self, double value) {
+      [](Submatrix<RealMatrix<double>>& self, double value) {
         self.set_value(value);
       },
       "value"_a, DOC(slp, Submatrix, set_value));
   cls.def(
       "set_value",
-      [](Submatrix<Matrix<double>>& self, nb::DRef<Eigen::MatrixXd> values) {
-        self.set_value(values);
-      },
+      [](Submatrix<RealMatrix<double>>& self,
+         nb::DRef<Eigen::MatrixXd> values) { self.set_value(values); },
       "values"_a, DOC(slp, Submatrix, set_value, 2));
   for_each_type<Eigen::MatrixXf, Eigen::MatrixX<int64_t>,
                 Eigen::MatrixX<int32_t>>([&]<typename T> {
     cls.def(
         "set_value",
-        [](Submatrix<Matrix<double>>& self, nb::DRef<T> values) {
+        [](Submatrix<RealMatrix<double>>& self, nb::DRef<T> values) {
           self.set_value(values.template cast<double>());
         },
         "values"_a, DOC(slp, Submatrix, set_value, 2));
   });
   cls.def(
       "__setitem__",
-      [](Submatrix<Matrix<double>>& self, int row, const Real<double>& value) {
+      [](Submatrix<RealMatrix<double>>& self, int row,
+         const Real<double>& value) {
         if (row < 0) {
           row += self.size();
         }
@@ -69,7 +69,8 @@ void bind_submatrix(nb::class_<Submatrix<Matrix<double>>>& cls) {
       "row"_a, "value"_a);
   cls.def(
       "__setitem__",
-      [](Submatrix<Matrix<double>>& self, SliceTuple slices, nb::object value) {
+      [](Submatrix<RealMatrix<double>>& self, SliceTuple slices,
+         nb::object value) {
         if (slices.size() != 2) {
           throw nb::index_error(
               std::format("Expected 2 slices, got {}.", slices.size()).c_str());
@@ -112,9 +113,9 @@ void bind_submatrix(nb::class_<Submatrix<Matrix<double>>>& cls) {
 
         auto lhs =
             self[row_slice, row_slice_length, col_slice, col_slice_length];
-        if (auto rhs = try_cast<Matrix<double>>(value)) {
+        if (auto rhs = try_cast<RealMatrix<double>>(value)) {
           lhs = rhs.value();
-        } else if (auto rhs = try_cast<Submatrix<Matrix<double>>>(value)) {
+        } else if (auto rhs = try_cast<Submatrix<RealMatrix<double>>>(value)) {
           lhs = rhs.value();
         } else if (auto rhs = try_cast_to_eigen<double>(value)) {
           lhs = rhs.value();
@@ -138,7 +139,7 @@ void bind_submatrix(nb::class_<Submatrix<Matrix<double>>>& cls) {
       "slices"_a, "value"_a);
   cls.def(
       "__getitem__",
-      [](Submatrix<Matrix<double>>& self, int row) -> Real<double>& {
+      [](Submatrix<RealMatrix<double>>& self, int row) -> Real<double>& {
         if (row < 0) {
           row += self.size();
         }
@@ -147,7 +148,7 @@ void bind_submatrix(nb::class_<Submatrix<Matrix<double>>>& cls) {
       nb::keep_alive<0, 1>(), "row"_a, DOC(slp, Submatrix, operator, array, 3));
   cls.def(
       "__getitem__",
-      [](Submatrix<Matrix<double>>& self,
+      [](Submatrix<RealMatrix<double>>& self,
          std::tuple<int, int> slices) -> Real<double>& {
         auto [row, col] = slices;
 
@@ -167,8 +168,8 @@ void bind_submatrix(nb::class_<Submatrix<Matrix<double>>>& cls) {
       DOC(slp, Submatrix, operator, array));
   cls.def(
       "__getitem__",
-      [](Submatrix<Matrix<double>>& self,
-         SliceTuple slices) -> Submatrix<Matrix<double>> {
+      [](Submatrix<RealMatrix<double>>& self,
+         SliceTuple slices) -> Submatrix<RealMatrix<double>> {
         if (slices.size() != 2) {
           throw nb::index_error(
               std::format("Expected 2 slices, got {}.", slices.size()).c_str());
@@ -212,40 +213,38 @@ void bind_submatrix(nb::class_<Submatrix<Matrix<double>>>& cls) {
         return self[row_slice, row_slice_length, col_slice, col_slice_length];
       },
       nb::keep_alive<0, 1>(), DOC(slp, Submatrix, operator, array), "slices"_a);
-  cls.def("row", nb::overload_cast<int>(&Submatrix<Matrix<double>>::row),
+  cls.def("row", nb::overload_cast<int>(&Submatrix<RealMatrix<double>>::row),
           "row"_a, DOC(slp, Submatrix, row));
-  cls.def("col", nb::overload_cast<int>(&Submatrix<Matrix<double>>::col),
+  cls.def("col", nb::overload_cast<int>(&Submatrix<RealMatrix<double>>::col),
           "col"_a, DOC(slp, Submatrix, col));
 
-  // Matrix-matrix multiplication. Products with a Matrix on the left
-  // are bound on Matrix.
+  // RealMatrix-matrix multiplication. Products with a RealMatrix on the left
+  // are bound on RealMatrix.
   for (const char* name : {"__mul__", "__matmul__"}) {
     cls.def(
         name,
-        [](const Submatrix<Matrix<double>>& lhs,
-           const Submatrix<Matrix<double>>& rhs) { return lhs * rhs; },
+        [](const Submatrix<RealMatrix<double>>& lhs,
+           const Submatrix<RealMatrix<double>>& rhs) { return lhs * rhs; },
         nb::is_operator(), "rhs"_a);
   }
 
-  // Matrix multiplication with NumPy arrays. These are also handled by
+  // RealMatrix multiplication with NumPy arrays. These are also handled by
   // __array_ufunc__ below, but type checkers only see these overloads.
   cls.def(
       "__matmul__",
-      [](const Submatrix<Matrix<double>>& lhs, nb::DRef<Eigen::MatrixXd> rhs) {
-        return lhs * rhs;
-      },
+      [](const Submatrix<RealMatrix<double>>& lhs,
+         nb::DRef<Eigen::MatrixXd> rhs) { return lhs * rhs; },
       nb::is_operator(), "rhs"_a);
   cls.def(
       "__rmatmul__",
-      [](const Submatrix<Matrix<double>>& rhs, nb::DRef<Eigen::MatrixXd> lhs) {
-        return lhs * rhs;
-      },
+      [](const Submatrix<RealMatrix<double>>& rhs,
+         nb::DRef<Eigen::MatrixXd> lhs) { return lhs * rhs; },
       nb::is_operator(), "lhs"_a);
 
   // https://numpy.org/doc/stable/user/basics.dispatch.html
   cls.def(
       "__array_ufunc__",
-      [](Submatrix<Matrix<double>>& self, nb::object ufunc, nb::str method,
+      [](Submatrix<RealMatrix<double>>& self, nb::object ufunc, nb::str method,
          nb::args inputs, const nb::kwargs&) -> nb::object {
         std::string method_name = nb::cast<std::string>(method);
         std::string ufunc_name =
@@ -331,7 +330,7 @@ void bind_submatrix(nb::class_<Submatrix<Matrix<double>>>& cls) {
   cls.def(nb::self - nb::self, "rhs"_a);
   cls.def(-nb::self);
 
-  // Matrix-scalar/scalar-matrix operations
+  // RealMatrix-scalar/scalar-matrix operations
   cls.def(nb::self * Real<double>(), "rhs"_a);
   cls.def(Real<double>() * nb::self, "lhs"_a);
   cls.def(nb::self / Real<double>(), "rhs"_a);
@@ -341,7 +340,7 @@ void bind_submatrix(nb::class_<Submatrix<Matrix<double>>>& cls) {
       [&]<typename T> {
         cls.def(
             "__add__",
-            [](const Submatrix<Matrix<double>>& lhs, T&& rhs) {
+            [](const Submatrix<RealMatrix<double>>& lhs, T&& rhs) {
               if constexpr (ScalarLike<T>) {
                 return lhs + Real<double>{rhs};
               } else {
@@ -351,7 +350,7 @@ void bind_submatrix(nb::class_<Submatrix<Matrix<double>>>& cls) {
             nb::is_operator(), "rhs"_a);
         cls.def(
             "__radd__",
-            [](const Submatrix<Matrix<double>>& rhs, T&& lhs) {
+            [](const Submatrix<RealMatrix<double>>& rhs, T&& lhs) {
               if constexpr (ScalarLike<T>) {
                 return Real<double>{lhs} + rhs;
               } else {
@@ -361,7 +360,7 @@ void bind_submatrix(nb::class_<Submatrix<Matrix<double>>>& cls) {
             nb::is_operator(), "lhs"_a);
         cls.def(
             "__sub__",
-            [](const Submatrix<Matrix<double>>& lhs, T&& rhs) {
+            [](const Submatrix<RealMatrix<double>>& lhs, T&& rhs) {
               if constexpr (ScalarLike<T>) {
                 return lhs - Real<double>{rhs};
               } else {
@@ -371,7 +370,7 @@ void bind_submatrix(nb::class_<Submatrix<Matrix<double>>>& cls) {
             nb::is_operator(), "rhs"_a);
         cls.def(
             "__rsub__",
-            [](const Submatrix<Matrix<double>>& rhs, T&& lhs) {
+            [](const Submatrix<RealMatrix<double>>& rhs, T&& lhs) {
               if constexpr (ScalarLike<T>) {
                 return Real<double>{lhs} - rhs;
               } else {
@@ -383,32 +382,36 @@ void bind_submatrix(nb::class_<Submatrix<Matrix<double>>>& cls) {
 
   cls.def(
       "__pow__",
-      [](const Submatrix<Matrix<double>>& self, int power) {
+      [](const Submatrix<RealMatrix<double>>& self, int power) {
         return self.cwise_transform(
             [=](const auto& elem) { return pow(elem, power); });
       },
       nb::is_operator(), "power"_a);
-  cls.def_prop_ro("T", &Submatrix<Matrix<double>>::T, DOC(slp, Submatrix, T));
-  cls.def("rows", &Submatrix<Matrix<double>>::rows, DOC(slp, Submatrix, rows));
-  cls.def("cols", &Submatrix<Matrix<double>>::cols, DOC(slp, Submatrix, cols));
-  cls.def_prop_ro("shape", [](const Submatrix<Matrix<double>>& self) {
+  cls.def_prop_ro("T", &Submatrix<RealMatrix<double>>::T,
+                  DOC(slp, Submatrix, T));
+  cls.def("rows", &Submatrix<RealMatrix<double>>::rows,
+          DOC(slp, Submatrix, rows));
+  cls.def("cols", &Submatrix<RealMatrix<double>>::cols,
+          DOC(slp, Submatrix, cols));
+  cls.def_prop_ro("shape", [](const Submatrix<RealMatrix<double>>& self) {
     return nb::make_tuple(self.rows(), self.cols());
   });
   cls.def("value",
-          nb::overload_cast<int, int>(&Submatrix<Matrix<double>>::value),
+          nb::overload_cast<int, int>(&Submatrix<RealMatrix<double>>::value),
           "row"_a, "col"_a, DOC(slp, Submatrix, value));
-  cls.def("value", nb::overload_cast<int>(&Submatrix<Matrix<double>>::value),
+  cls.def("value",
+          nb::overload_cast<int>(&Submatrix<RealMatrix<double>>::value),
           "index"_a, DOC(slp, Submatrix, value, 2));
-  cls.def("value", nb::overload_cast<>(&Submatrix<Matrix<double>>::value),
+  cls.def("value", nb::overload_cast<>(&Submatrix<RealMatrix<double>>::value),
           DOC(slp, Submatrix, value, 3));
   cls.def(
       "cwise_map",
-      [](const Submatrix<Matrix<double>>& self,
+      [](const Submatrix<RealMatrix<double>>& self,
          const std::function<Real<double>(const Real<double>& x)>& unary_op) {
         return self.cwise_transform(unary_op);
       },
       "func"_a, DOC(slp, Submatrix, cwise_transform));
-  cls.def("exp", &Submatrix<Matrix<double>>::exp, DOC(slp, Submatrix, exp));
+  cls.def("exp", &Submatrix<RealMatrix<double>>::exp, DOC(slp, Submatrix, exp));
 
   // Comparison operators
   for_each_type<nb::detail::self_t, double, int, Real<double>>([&]<typename T> {
@@ -425,47 +428,47 @@ void bind_submatrix(nb::class_<Submatrix<Matrix<double>>>& cls) {
       cls.def(T() >= nb::self, "rhs"_a, DOC(slp, operator, ge));
     }
   });
-  for_each_type<const Matrix<double>&, nb::DRef<Eigen::MatrixXd>>(
+  for_each_type<const RealMatrix<double>&, nb::DRef<Eigen::MatrixXd>>(
       [&]<typename T> {
         cls.def(
             "__eq__",
-            [](const Submatrix<Matrix<double>>& lhs, T&& rhs) {
+            [](const Submatrix<RealMatrix<double>>& lhs, T&& rhs) {
               return lhs == rhs;
             },
             nb::is_operator(), "rhs"_a, DOC(slp, operator, eq));
         cls.def(
             "__lt__",
-            [](const Submatrix<Matrix<double>>& lhs, T&& rhs) {
+            [](const Submatrix<RealMatrix<double>>& lhs, T&& rhs) {
               return lhs < rhs;
             },
             nb::is_operator(), "rhs"_a, DOC(slp, operator, lt));
         cls.def(
             "__le__",
-            [](const Submatrix<Matrix<double>>& lhs, T&& rhs) {
+            [](const Submatrix<RealMatrix<double>>& lhs, T&& rhs) {
               return lhs <= rhs;
             },
             nb::is_operator(), "rhs"_a, DOC(slp, operator, le));
         cls.def(
             "__gt__",
-            [](const Submatrix<Matrix<double>>& lhs, T&& rhs) {
+            [](const Submatrix<RealMatrix<double>>& lhs, T&& rhs) {
               return lhs > rhs;
             },
             nb::is_operator(), "rhs"_a, DOC(slp, operator, gt));
         cls.def(
             "__ge__",
-            [](const Submatrix<Matrix<double>>& lhs, T&& rhs) {
+            [](const Submatrix<RealMatrix<double>>& lhs, T&& rhs) {
               return lhs >= rhs;
             },
             nb::is_operator(), "rhs"_a, DOC(slp, operator, ge));
       });
 
-  cls.def("__len__", &Submatrix<Matrix<double>>::rows,
+  cls.def("__len__", &Submatrix<RealMatrix<double>>::rows,
           DOC(slp, Submatrix, rows));
 
   cls.def(
       "__iter__",
-      [](const Submatrix<Matrix<double>>& self) {
-        return nb::make_iterator(nb::type<Submatrix<Matrix<double>>>(),
+      [](const Submatrix<RealMatrix<double>>& self) {
+        return nb::make_iterator(nb::type<Submatrix<RealMatrix<double>>>(),
                                  "value_iterator", self.begin(), self.end());
       },
       nb::keep_alive<0, 1>());

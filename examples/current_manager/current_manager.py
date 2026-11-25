@@ -21,7 +21,7 @@ class CurrentManager:
         """
         self.__problem = Problem()
         self.__desired_currents = self.__problem.parameter(len(current_tolerances))
-        self.__allocated_currents = self.__problem.decision_variable(
+        self.__allocated_currents = self.__problem.real_decision_variable(
             len(current_tolerances)
         )
 

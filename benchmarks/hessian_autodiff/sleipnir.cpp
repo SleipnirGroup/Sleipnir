@@ -7,8 +7,8 @@
 
 #include <Eigen/Core>
 #include <sleipnir/autodiff/hessian.hpp>
-#include <sleipnir/autodiff/matrix.hpp>
 #include <sleipnir/autodiff/real.hpp>
+#include <sleipnir/autodiff/real_matrix.hpp>
 
 #include "benchmark_util.hpp"
 #include "sleipnir_autodiff_evaluator.hpp"
@@ -18,7 +18,7 @@ namespace {
 /// Returns the extended Rosenbrock function.
 ///
 /// @param x The input.
-slp::Real<double> rosenbrock(const slp::Matrix<double>& x) {
+slp::Real<double> rosenbrock(const slp::RealMatrix<double>& x) {
   // Hessian sparsity pattern (x entry represents nonzero):
   //
   //        x₀    x₁    x₂    x₃  ⋯ xₙ₋₃  xₙ₋₂  xₙ₋₁
@@ -41,7 +41,7 @@ slp::Real<double> rosenbrock(const slp::Matrix<double>& x) {
 
 void register_sleipnir_benchmarks(std::span<const int> nums_variables) {
   register_autodiff_benchmarks("Sleipnir", nums_variables, [](int N) {
-    slp::Matrix<double> x{N};
+    slp::RealMatrix<double> x{N};
     slp::Hessian<double, Eigen::Lower> H{rosenbrock(x), x};
     return SleipnirAutodiffEvaluator{std::move(x), std::move(H)};
   });

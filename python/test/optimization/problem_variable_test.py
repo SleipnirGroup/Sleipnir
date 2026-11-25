@@ -9,7 +9,7 @@ def test_scalar_init_assign() -> None:
     problem = Problem()
 
     # Scalar zero init
-    x = problem.decision_variable()
+    x = problem.real_decision_variable()
     assert x.value() == 0.0
 
     # Scalar assignment
@@ -23,7 +23,7 @@ def test_vector_init_assign() -> None:
     problem = Problem()
 
     # Vector zero init
-    y = problem.decision_variable(2)
+    y = problem.real_decision_variable(2)
     assert y.value(0) == 0.0
     assert y.value(1) == 0.0
 
@@ -41,8 +41,8 @@ def test_vector_init_assign() -> None:
 def test_matrix_init_assign() -> None:
     problem = Problem()
 
-    # Matrix zero init
-    z = problem.decision_variable(3, 2)
+    # RealMatrix zero init
+    z = problem.real_decision_variable(3, 2)
     assert z.value(0, 0) == 0.0
     assert z.value(0, 1) == 0.0
     assert z.value(1, 0) == 0.0
@@ -50,7 +50,7 @@ def test_matrix_init_assign() -> None:
     assert z.value(2, 0) == 0.0
     assert z.value(2, 1) == 0.0
 
-    # Matrix assignment; element comparison
+    # RealMatrix assignment; element comparison
     z.set_value(np.array([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]]))
     assert z.value(0, 0) == 1.0
     assert z.value(0, 1) == 2.0
@@ -59,7 +59,7 @@ def test_matrix_init_assign() -> None:
     assert z.value(2, 0) == 5.0
     assert z.value(2, 1) == 6.0
 
-    # Matrix assignment; matrix comparison
+    # RealMatrix assignment; matrix comparison
     expected = np.array([[7.0, 8.0], [9.0, 10.0], [11.0, 12.0]])
     z.set_value(expected)
     assert (z.value() == expected).all()
@@ -95,7 +95,7 @@ def test_parameter_not_folded() -> None:
     p = problem.parameter()
     q = problem.parameter()
     q.set_value(1.0)
-    x = problem.decision_variable()
+    x = problem.real_decision_variable()
 
     product = p * x
     quotient = x / q
@@ -116,7 +116,7 @@ def test_parameter_resolve_with_new_values() -> None:
 
     target = problem.parameter()
     upper_bound = problem.parameter()
-    x = problem.decision_variable()
+    x = problem.real_decision_variable()
 
     problem.minimize((x - target) * (x - target))
     problem.subject_to(x <= upper_bound)

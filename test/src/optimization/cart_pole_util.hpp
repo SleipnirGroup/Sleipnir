@@ -6,7 +6,7 @@
 
 #include <Eigen/Core>
 #include <Eigen/QR>  // IWYU pragma: keep
-#include <sleipnir/autodiff/matrix.hpp>
+#include <sleipnir/autodiff/real_matrix.hpp>
 
 template <typename Scalar>
 class CartPoleUtil {
@@ -79,8 +79,8 @@ class CartPoleUtil {
     return qddot;
   }
 
-  static slp::Matrix<Scalar> dynamics_variable(const slp::Matrix<Scalar>& x,
-                                               const slp::Matrix<Scalar>& u) {
+  static slp::RealMatrix<Scalar> dynamics_variable(
+      const slp::RealMatrix<Scalar>& x, const slp::RealMatrix<Scalar>& u) {
     using std::pow;
 
     auto q = x.segment(0, 2);
@@ -90,24 +90,24 @@ class CartPoleUtil {
 
     //        [ m_c + m_p  m_p l cosθ]
     // M(q) = [m_p l cosθ    m_p l²  ]
-    slp::Matrix<Scalar> M{{m_c + m_p, m_p * l * cos(theta)},
-                          {m_p * l * cos(theta), m_p * pow(l, Scalar(2))}};
+    slp::RealMatrix<Scalar> M{{m_c + m_p, m_p * l * cos(theta)},
+                              {m_p * l * cos(theta), m_p * pow(l, Scalar(2))}};
 
     //           [0  −m_p lθ̇ sinθ]
     // C(q, q̇) = [0       0      ]
-    slp::Matrix<Scalar> C{{Scalar(0), -m_p * l * thetadot * sin(theta)},
-                          {Scalar(0), Scalar(0)}};
+    slp::RealMatrix<Scalar> C{{Scalar(0), -m_p * l * thetadot * sin(theta)},
+                              {Scalar(0), Scalar(0)}};
 
     //          [     0      ]
     // τ_g(q) = [-m_p gl sinθ]
-    slp::Matrix<Scalar> tau_g{{Scalar(0)}, {-m_p * g * l * sin(theta)}};
+    slp::RealMatrix<Scalar> tau_g{{Scalar(0)}, {-m_p * g * l * sin(theta)}};
 
     //     [1]
     // B = [0]
     constexpr Eigen::Matrix<Scalar, 2, 1> B{{Scalar(1)}, {Scalar(0)}};
 
     // q̈ = M⁻¹(q)(τ_g(q) − C(q, q̇)q̇ + Bu)
-    slp::Matrix<Scalar> qddot{4};
+    slp::RealMatrix<Scalar> qddot{4};
     qddot.segment(0, 2) = qdot;
     qddot.segment(2, 2) = solve(M, tau_g - C * qdot + B * u);
     return qddot;

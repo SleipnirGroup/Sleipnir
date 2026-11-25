@@ -14,8 +14,8 @@
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_range_equals.hpp>
 #include <sleipnir/autodiff/jacobian.hpp>
-#include <sleipnir/autodiff/matrix.hpp>
 #include <sleipnir/autodiff/real.hpp>
+#include <sleipnir/autodiff/real_matrix.hpp>
 #include <sleipnir/optimization/solver/util/bounds.hpp>
 
 #include "scalar_types.hpp"
@@ -76,8 +76,8 @@ TEMPLATE_TEST_CASE("Bounds - Detection", "[Bounds]", SCALAR_TYPES) {
           {9, 12},
       });
 
-  slp::Matrix<T> x_ad{decision_variables};
-  slp::Matrix<T> c_i_ad{inequality_constraint_variables};
+  slp::RealMatrix<T> x_ad{decision_variables};
+  slp::RealMatrix<T> c_i_ad{inequality_constraint_variables};
   slp::Jacobian A_i{c_i_ad, x_ad};
   const auto [bound_constraint_mask, decision_var_indices_to_bounds,
               conflicting_bounds] =

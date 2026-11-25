@@ -10,8 +10,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <sleipnir/autodiff/expression_type.hpp>
-#include <sleipnir/autodiff/matrix.hpp>
 #include <sleipnir/autodiff/real.hpp>
+#include <sleipnir/autodiff/real_matrix.hpp>
 #include <sleipnir/optimization/problem.hpp>
 #include <sleipnir/optimization/solver/exit_status.hpp>
 #include <sleipnir/util/pool.hpp>
@@ -43,7 +43,7 @@ TEMPLATE_TEST_CASE("Problem - Differential drive", "[Problem]", SCALAR_TYPES) {
   slp::Problem<T> problem;
 
   // x = [x, y, heading, left velocity, right velocity]ᵀ
-  auto X = problem.decision_variable(5, N + 1);
+  auto X = problem.real_decision_variable(5, N + 1);
 
   // Initial guess
   for (int k = 0; k < N; ++k) {
@@ -52,7 +52,7 @@ TEMPLATE_TEST_CASE("Problem - Differential drive", "[Problem]", SCALAR_TYPES) {
   }
 
   // u = [left voltage, right voltage]ᵀ
-  auto U = problem.decision_variable(2, N);
+  auto U = problem.real_decision_variable(2, N);
 
   // Initial conditions
   problem.subject_to(X.col(0) == x_initial);
@@ -68,7 +68,7 @@ TEMPLATE_TEST_CASE("Problem - Differential drive", "[Problem]", SCALAR_TYPES) {
     problem.subject_to(
         X.col(k + 1) ==
         rk4<T, decltype(DifferentialDriveUtil<T>::dynamics_variable),
-            slp::Matrix<T>, slp::Matrix<T>>(
+            slp::RealMatrix<T>, slp::RealMatrix<T>>(
             DifferentialDriveUtil<T>::dynamics_variable, X.col(k), U.col(k),
             dt));
   }

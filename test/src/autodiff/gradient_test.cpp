@@ -9,8 +9,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <sleipnir/autodiff/gradient.hpp>
-#include <sleipnir/autodiff/matrix.hpp>
 #include <sleipnir/autodiff/real.hpp>
+#include <sleipnir/autodiff/real_matrix.hpp>
 #include <sleipnir/util/pool.hpp>
 #include <sleipnir/util/scope_exit.hpp>
 
@@ -873,7 +873,7 @@ TEMPLATE_TEST_CASE("Gradient - Non-scalar", "[Gradient]", SCALAR_TYPES) {
   slp::scope_exit exit{
       [] { CHECK(slp::global_pool_resource().blocks_in_use() == 0u); }};
 
-  slp::Matrix<T> x{3};
+  slp::RealMatrix<T> x{3};
   x[0].set_value(T(1));
   x[1].set_value(T(2));
   x[2].set_value(T(3));

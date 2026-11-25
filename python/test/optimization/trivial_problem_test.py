@@ -16,7 +16,7 @@ def test_empty() -> None:
 def test_no_cost_unconstrained_1() -> None:
     problem = Problem()
 
-    X = problem.decision_variable(2, 3)
+    X = problem.real_decision_variable(2, 3)
 
     assert problem.cost_function_type() == ExpressionType.NONE
     assert problem.equality_constraint_type() == ExpressionType.NONE
@@ -32,7 +32,7 @@ def test_no_cost_unconstrained_1() -> None:
 def test_no_cost_unconstrained_2() -> None:
     problem = Problem()
 
-    X = problem.decision_variable(2, 3)
+    X = problem.real_decision_variable(2, 3)
     X.set_value(np.ones((2, 3)))
 
     assert problem.cost_function_type() == ExpressionType.NONE

@@ -102,7 +102,7 @@ std::tuple<Eigen::VectorX<Scalar>, Eigen::VectorX<Scalar>> compute_p_n(
 /// feasible point.
 ///
 /// @tparam Scalar Scalar type.
-/// @param[in] matrix_callbacks Matrix callbacks.
+/// @param[in] matrix_callbacks RealMatrix callbacks.
 /// @param[in] iteration_callbacks The list of callbacks to call at the
 ///     beginning of each iteration.
 /// @param[in] options Solver options.
@@ -358,7 +358,7 @@ ExitStatus feasibility_restoration(
 /// the normal interior-point method fails to converge to a feasible point.
 ///
 /// @tparam Scalar Scalar type.
-/// @param[in] matrix_callbacks Matrix callbacks.
+/// @param[in] matrix_callbacks RealMatrix callbacks.
 /// @param[in] iteration_callbacks The list of callbacks to call at the
 ///     beginning of each iteration.
 /// @param[in] options Solver options.

@@ -8,7 +8,7 @@ from tolerance import solution_tolerance
 def test_unconstrained1d() -> None:
     problem = Problem()
 
-    x = problem.decision_variable()
+    x = problem.real_decision_variable()
     x.set_value(2.0)
 
     problem.minimize(x * x - 6.0 * x)
@@ -25,7 +25,7 @@ def test_unconstrained1d() -> None:
 def test_unconstrained2d_1() -> None:
     problem = Problem()
 
-    x, y = problem.decision_variable(2)
+    x, y = problem.real_decision_variable(2)
     x.set_value(1.0)
     y.set_value(2.0)
 
@@ -44,7 +44,7 @@ def test_unconstrained2d_1() -> None:
 def test_unconstrained2d_2() -> None:
     problem = Problem()
 
-    x = problem.decision_variable(2)
+    x = problem.real_decision_variable(2)
     x[0].set_value(1.0)
     x[1].set_value(2.0)
 
@@ -102,7 +102,7 @@ def test_unconstrained2d_2() -> None:
 def test_equality_constrained_1() -> None:
     problem = Problem()
 
-    x, y = problem.decision_variable(2)
+    x, y = problem.real_decision_variable(2)
 
     problem.maximize(x * y)
 
@@ -121,7 +121,7 @@ def test_equality_constrained_1() -> None:
 def test_equality_constrained_2() -> None:
     problem = Problem()
 
-    x = problem.decision_variable(2)
+    x = problem.real_decision_variable(2)
     x[0].set_value(1.0)
     x[1].set_value(2.0)
 
@@ -142,7 +142,7 @@ def test_equality_constrained_2() -> None:
 def test_inequality_constrained_2d() -> None:
     problem = Problem()
 
-    x, y = problem.decision_variable(2)
+    x, y = problem.real_decision_variable(2)
     x.set_value(5.0)
     y.set_value(5.0)
 

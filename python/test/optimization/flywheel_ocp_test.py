@@ -4,7 +4,7 @@ from collections.abc import Callable
 import numpy as np
 import pytest
 from flywheel_util import optimal_flywheel_trajectory
-from sleipnir.autodiff import ExpressionType, Matrix
+from sleipnir.autodiff import ExpressionType, RealMatrix
 from sleipnir.optimization import (
     OCP,
     DynamicsType,
@@ -19,7 +19,7 @@ def flywheel_test(
     test_name: str,
     A: float,
     B: float,
-    f: Callable[[Matrix, Matrix], Matrix],
+    f: Callable[[RealMatrix, RealMatrix], RealMatrix],
     dynamics_type: DynamicsType,
     transcription_method: TranscriptionMethod,
 ) -> None:
@@ -108,7 +108,7 @@ def test_flywheel_explicit_ocp() -> None:
     A = -1.0
     B = 1.0
 
-    def f_ode(x: Matrix, u: Matrix) -> Matrix:
+    def f_ode(x: RealMatrix, u: RealMatrix) -> RealMatrix:
         return A * x + B * u
 
     flywheel_test(
@@ -145,7 +145,7 @@ def test_flywheel_discrete_ocp() -> None:
     A_discrete = math.exp(A * dt)
     B_discrete = (1.0 - A_discrete) * B
 
-    def f_discrete(x: Matrix, u: Matrix) -> Matrix:
+    def f_discrete(x: RealMatrix, u: RealMatrix) -> RealMatrix:
         return A_discrete * x + B_discrete * u
 
     flywheel_test(

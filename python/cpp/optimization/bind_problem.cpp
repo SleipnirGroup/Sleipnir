@@ -14,8 +14,8 @@
 #include <string_view>
 #include <utility>
 
-#include <sleipnir/autodiff/matrix.hpp>
 #include <sleipnir/autodiff/real.hpp>
+#include <sleipnir/autodiff/real_matrix.hpp>
 #include <sleipnir/optimization/problem.hpp>
 #include <sleipnir/optimization/solver/iteration_info.hpp>
 #include <sleipnir/optimization/solver/options.hpp>
@@ -135,17 +135,17 @@ void bind_problem(nb::class_<Problem<double>>& cls) {
         });
       },
       DOC(slp, Problem, Problem));
-  cls.def("decision_variable",
-          nb::overload_cast<>(&Problem<double>::decision_variable),
-          DOC(slp, Problem, decision_variable));
-  cls.def("decision_variable",
-          nb::overload_cast<int, int>(&Problem<double>::decision_variable),
-          "rows"_a, "cols"_a = 1, DOC(slp, Problem, decision_variable, 2));
+  cls.def("real_decision_variable",
+          nb::overload_cast<>(&Problem<double>::real_decision_variable),
+          DOC(slp, Problem, real_decision_variable));
+  cls.def("real_decision_variable",
+          nb::overload_cast<int, int>(&Problem<double>::real_decision_variable),
+          "rows"_a, "cols"_a = 1, DOC(slp, Problem, real_decision_variable, 2));
   cls.def("parameter", nb::overload_cast<>(&Problem<double>::parameter),
           DOC(slp, Problem, parameter));
   cls.def("parameter", nb::overload_cast<int, int>(&Problem<double>::parameter),
           "rows"_a, "cols"_a = 1, DOC(slp, Problem, parameter, 2));
-  for_each_type<double, const Real<double>&, const Matrix<double>&>(
+  for_each_type<double, const Real<double>&, const RealMatrix<double>&>(
       [&]<typename T> {
         cls.def(
             "minimize",

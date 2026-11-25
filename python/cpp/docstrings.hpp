@@ -241,13 +241,13 @@ Args:
 )doc";
 
 constexpr char mkd_doc_slp_Gradient_get[] =
-R"doc(Returns the gradient as a Matrix.
+R"doc(Returns the gradient as a RealMatrix.
 
 This is useful when constructing optimization problems with
 derivatives in them.
 
 Returns:
-    The gradient as a Matrix.
+    The gradient as a RealMatrix.
 
 )doc";
 
@@ -300,13 +300,13 @@ Args:
 )doc";
 
 constexpr char mkd_doc_slp_Hessian_get[] =
-R"doc(Returns the Hessian as a Matrix.
+R"doc(Returns the Hessian as a RealMatrix.
 
 This is useful when constructing optimization problems with
 derivatives in them.
 
 Returns:
-    The Hessian as a Matrix.
+    The Hessian as a RealMatrix.
 
 )doc";
 
@@ -461,13 +461,13 @@ Args:
 )doc";
 
 constexpr char mkd_doc_slp_Jacobian_get[] =
-R"doc(Returns the Jacobian as a Matrix.
+R"doc(Returns the Jacobian as a RealMatrix.
 
 This is useful when constructing optimization problems with
 derivatives in them.
 
 Returns:
-    The Jacobian as a Matrix.
+    The Jacobian as a RealMatrix.
 
 )doc";
 
@@ -494,730 +494,6 @@ R"doc(Evaluates the Jacobian at wrt's value.
 
 Returns:
     The Jacobian at wrt's value.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix[] =
-R"doc(A matrix of autodiff expressions.
-
-Template Args:
-    Scalar_: Scalar type.)doc";
-
-constexpr char mkd_doc_slp_Matrix_2[] = R"doc()doc";
-
-constexpr char mkd_doc_slp_Matrix_3[] = R"doc()doc";
-
-constexpr char mkd_doc_slp_Matrix_Matrix[] = R"doc(Constructs an empty Matrix.)doc";
-
-constexpr char mkd_doc_slp_Matrix_Matrix_2[] =
-R"doc(Constructs a zero-initialized Matrix column vector with the given
-rows.
-
-Args:
-    rows: The number of matrix rows.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_Matrix_3[] =
-R"doc(Constructs a zero-initialized Matrix with the given dimensions.
-
-Args:
-    rows: The number of matrix rows.
-    cols: The number of matrix columns.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_Matrix_4[] =
-R"doc(Constructs an empty Matrix with the given dimensions.
-
-Args:
-    rows: The number of matrix rows.
-    cols: The number of matrix columns.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_Matrix_5[] =
-R"doc(Constructs a scalar Matrix from a nested list of Reals.
-
-Args:
-    list: The nested list of Reals.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_Matrix_6[] =
-R"doc(Constructs a scalar Matrix from a nested list of scalars.
-
-This overload is for Python bindings only.
-
-Args:
-    list: The nested list of Reals.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_Matrix_7[] =
-R"doc(Constructs a scalar Matrix from a nested list of Reals.
-
-This overload is for Python bindings only.
-
-Args:
-    list: The nested list of Reals.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_Matrix_8[] =
-R"doc(Constructs a Matrix from an Eigen matrix.
-
-Args:
-    values: Eigen matrix of values.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_Matrix_9[] =
-R"doc(Constructs a Matrix from an Eigen diagonal matrix.
-
-Args:
-    values: Diagonal matrix of values.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_Matrix_10[] =
-R"doc(Constructs a scalar Matrix from a Real.
-
-Args:
-    variable: Real.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_Matrix_11[] =
-R"doc(Constructs a scalar Matrix from a Real.
-
-Args:
-    variable: Real.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_Matrix_12[] =
-R"doc(Constructs a Matrix from a Submatrix.
-
-Args:
-    values: Submatrix of values.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_Matrix_13[] =
-R"doc(Constructs a Matrix from a Submatrix.
-
-Args:
-    values: Submatrix of values.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_Matrix_14[] =
-R"doc(Constructs a column vector wrapper around a Real array.
-
-Args:
-    values: Real array to wrap.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_Matrix_15[] =
-R"doc(Constructs a matrix wrapper around a Real array.
-
-Args:
-    values: Real array to wrap.
-    rows: The number of matrix rows.
-    cols: The number of matrix columns.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_T[] =
-R"doc(Returns the transpose of the variable matrix.
-
-Returns:
-    The transpose of the variable matrix.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_begin[] =
-R"doc(Returns begin iterator.
-
-Returns:
-    Begin iterator.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_begin_2[] =
-R"doc(Returns const begin iterator.
-
-Returns:
-    Const begin iterator.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_block[] =
-R"doc(Returns a block of the variable matrix.
-
-Args:
-    row_offset: The row offset of the block selection.
-    col_offset: The column offset of the block selection.
-    block_rows: The number of rows in the block selection.
-    block_cols: The number of columns in the block selection.
-
-Returns:
-    A block of the variable matrix.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_block_2[] =
-R"doc(Returns a block of the variable matrix.
-
-Args:
-    row_offset: The row offset of the block selection.
-    col_offset: The column offset of the block selection.
-    block_rows: The number of rows in the block selection.
-    block_cols: The number of columns in the block selection.
-
-Returns:
-    A block of the variable matrix.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_cbegin[] =
-R"doc(Returns const begin iterator.
-
-Returns:
-    Const begin iterator.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_cend[] =
-R"doc(Returns const end iterator.
-
-Returns:
-    Const end iterator.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_col[] =
-R"doc(Returns a column slice of the variable matrix.
-
-Args:
-    col: The column to slice.
-
-Returns:
-    A column slice of the variable matrix.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_col_2[] =
-R"doc(Returns a column slice of the variable matrix.
-
-Args:
-    col: The column to slice.
-
-Returns:
-    A column slice of the variable matrix.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_cols[] =
-R"doc(Returns the number of columns in the matrix.
-
-Returns:
-    The number of columns in the matrix.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_const_iterator[] = R"doc()doc";
-
-constexpr char mkd_doc_slp_Matrix_const_iterator_const_iterator[] = R"doc()doc";
-
-constexpr char mkd_doc_slp_Matrix_const_iterator_const_iterator_2[] = R"doc()doc";
-
-constexpr char mkd_doc_slp_Matrix_const_iterator_m_it[] = R"doc()doc";
-
-constexpr char mkd_doc_slp_Matrix_const_iterator_operator_dec[] = R"doc()doc";
-
-constexpr char mkd_doc_slp_Matrix_const_iterator_operator_dec_2[] = R"doc()doc";
-
-constexpr char mkd_doc_slp_Matrix_const_iterator_operator_eq[] = R"doc()doc";
-
-constexpr char mkd_doc_slp_Matrix_const_iterator_operator_inc[] = R"doc()doc";
-
-constexpr char mkd_doc_slp_Matrix_const_iterator_operator_inc_2[] = R"doc()doc";
-
-constexpr char mkd_doc_slp_Matrix_const_iterator_operator_mul[] = R"doc()doc";
-
-constexpr char mkd_doc_slp_Matrix_constant[] =
-R"doc(Returns a variable matrix filled with a constant.
-
-Args:
-    rows: The number of matrix rows.
-    cols: The number of matrix columns.
-    constant: The constant.
-
-Returns:
-    A variable matrix filled with a constant.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_crbegin[] =
-R"doc(Returns const reverse begin iterator.
-
-Returns:
-    Const reverse begin iterator.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_crend[] =
-R"doc(Returns const reverse end iterator.
-
-Returns:
-    Const reverse end iterator.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_cwise_transform[] =
-R"doc(Transforms the matrix coefficient-wise with an unary operator.
-
-Args:
-    unary_op: The unary operator to use for the transform operation.
-
-Returns:
-    Result of the unary operator.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_end[] =
-R"doc(Returns end iterator.
-
-Returns:
-    End iterator.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_end_2[] =
-R"doc(Returns const end iterator.
-
-Returns:
-    Const end iterator.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_exp[] =
-R"doc(Returns the matrix exponential.
-
-Returns:
-    The matrix exponential.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_identity[] =
-R"doc(Returns an identity variable matrix.
-
-Args:
-    rows: The number of matrix rows.
-
-Returns:
-    An identity variable matrix.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_iterator[] = R"doc()doc";
-
-constexpr char mkd_doc_slp_Matrix_iterator_iterator[] = R"doc()doc";
-
-constexpr char mkd_doc_slp_Matrix_iterator_iterator_2[] = R"doc()doc";
-
-constexpr char mkd_doc_slp_Matrix_iterator_m_it[] = R"doc()doc";
-
-constexpr char mkd_doc_slp_Matrix_iterator_operator_dec[] = R"doc()doc";
-
-constexpr char mkd_doc_slp_Matrix_iterator_operator_dec_2[] = R"doc()doc";
-
-constexpr char mkd_doc_slp_Matrix_iterator_operator_eq[] = R"doc()doc";
-
-constexpr char mkd_doc_slp_Matrix_iterator_operator_inc[] = R"doc()doc";
-
-constexpr char mkd_doc_slp_Matrix_iterator_operator_inc_2[] = R"doc()doc";
-
-constexpr char mkd_doc_slp_Matrix_iterator_operator_mul[] = R"doc()doc";
-
-constexpr char mkd_doc_slp_Matrix_m_cols[] = R"doc()doc";
-
-constexpr char mkd_doc_slp_Matrix_m_rows[] = R"doc()doc";
-
-constexpr char mkd_doc_slp_Matrix_m_storage[] = R"doc()doc";
-
-constexpr char mkd_doc_slp_Matrix_one[] =
-R"doc(Returns a variable matrix filled with ones.
-
-Args:
-    rows: The number of matrix rows.
-    cols: The number of matrix columns.
-
-Returns:
-    A variable matrix filled with ones.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_operator_array[] =
-R"doc(Returns the element at the given row and column.
-
-Args:
-    row: The row.
-    col: The column.
-
-Returns:
-    The element at the given row and column.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_operator_array_2[] =
-R"doc(Returns the element at the given row and column.
-
-Args:
-    row: The row.
-    col: The column.
-
-Returns:
-    The element at the given row and column.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_operator_array_3[] =
-R"doc(Returns the element at the given index.
-
-Args:
-    index: The index.
-
-Returns:
-    The element at the given index.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_operator_array_4[] =
-R"doc(Returns the element at the given index.
-
-Args:
-    index: The index.
-
-Returns:
-    The element at the given index.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_operator_array_5[] =
-R"doc(Returns a slice of the variable matrix.
-
-Args:
-    row_slice: The row slice.
-    col_slice: The column slice.
-
-Returns:
-    A slice of the variable matrix.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_operator_array_6[] =
-R"doc(Returns a slice of the variable matrix.
-
-Args:
-    row_slice: The row slice.
-    col_slice: The column slice.
-
-Returns:
-    A slice of the variable matrix.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_operator_array_7[] =
-R"doc(Returns a slice of the variable matrix.
-
-The given slices aren't adjusted. This overload is for Python bindings
-only.
-
-Args:
-    row_slice: The row slice.
-    row_slice_length: The row slice length.
-    col_slice: The column slice.
-    col_slice_length: The column slice length.
-
-Returns:
-    A slice of the variable matrix.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_operator_array_8[] =
-R"doc(Returns a slice of the variable matrix.
-
-The given slices aren't adjusted. This overload is for Python bindings
-only.
-
-Args:
-    row_slice: The row slice.
-    row_slice_length: The row slice length.
-    col_slice: The column slice.
-    col_slice_length: The column slice length.
-
-Returns:
-    A slice of the variable matrix.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_operator_assign[] =
-R"doc(Assigns an Eigen matrix to a Matrix.
-
-Args:
-    values: Eigen matrix of values.
-
-Returns:
-    This Matrix.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_operator_assign_2[] =
-R"doc(Assigns a scalar to the matrix.
-
-This only works for matrices with one row and one column.
-
-Args:
-    value: Value to assign.
-
-Returns:
-    This Matrix.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_operator_iadd[] =
-R"doc(Compound addition-assignment operator.
-
-Args:
-    rhs: Real to add.
-
-Returns:
-    Result of addition.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_operator_iadd_2[] =
-R"doc(Compound addition-assignment operator.
-
-Args:
-    rhs: Real to add.
-
-Returns:
-    Result of addition.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_operator_idiv[] =
-R"doc(Compound matrix division-assignment operator.
-
-Args:
-    rhs: Real to divide.
-
-Returns:
-    Result of division.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_operator_imul[] =
-R"doc(Compound matrix multiplication-assignment operator.
-
-Args:
-    rhs: Real to multiply.
-
-Returns:
-    Result of multiplication.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_operator_imul_2[] =
-R"doc(Compound matrix-scalar multiplication-assignment operator.
-
-Args:
-    rhs: Real to multiply.
-
-Returns:
-    Result of multiplication.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_operator_isub[] =
-R"doc(Compound subtraction-assignment operator.
-
-Args:
-    rhs: Real to subtract.
-
-Returns:
-    Result of subtraction.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_operator_isub_2[] =
-R"doc(Compound subtraction-assignment operator.
-
-Args:
-    rhs: Real to subtract.
-
-Returns:
-    Result of subtraction.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_operator_slp_Real[] = R"doc(Implicit conversion operator from 1x1 Matrix to Real.)doc";
-
-constexpr char mkd_doc_slp_Matrix_rbegin[] =
-R"doc(Returns reverse begin iterator.
-
-Returns:
-    Reverse begin iterator.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_rbegin_2[] =
-R"doc(Returns const reverse begin iterator.
-
-Returns:
-    Const reverse begin iterator.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_rend[] =
-R"doc(Returns reverse end iterator.
-
-Returns:
-    Reverse end iterator.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_rend_2[] =
-R"doc(Returns const reverse end iterator.
-
-Returns:
-    Const reverse end iterator.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_row[] =
-R"doc(Returns a row slice of the variable matrix.
-
-Args:
-    row: The row to slice.
-
-Returns:
-    A row slice of the variable matrix.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_row_2[] =
-R"doc(Returns a row slice of the variable matrix.
-
-Args:
-    row: The row to slice.
-
-Returns:
-    A row slice of the variable matrix.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_rows[] =
-R"doc(Returns the number of rows in the matrix.
-
-Returns:
-    The number of rows in the matrix.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_segment[] =
-R"doc(Returns a segment of the variable vector.
-
-Args:
-    offset: The offset of the segment.
-    length: The length of the segment.
-
-Returns:
-    A segment of the variable vector.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_segment_2[] =
-R"doc(Returns a segment of the variable vector.
-
-Args:
-    offset: The offset of the segment.
-    length: The length of the segment.
-
-Returns:
-    A segment of the variable vector.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_set_value[] =
-R"doc(Sets the Matrix's internal values.
-
-Args:
-    values: Eigen matrix of values.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_size[] =
-R"doc(Returns number of elements in matrix.
-
-Returns:
-    Number of elements in matrix.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_to_eigen[] =
-R"doc(Converts the Matrix to an Eigen matrix.
-
-Returns:
-    Eigen matrix.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_value[] =
-R"doc(Returns an element of the variable matrix.
-
-Args:
-    row: The row of the element to return.
-    col: The column of the element to return.
-
-Returns:
-    An element of the variable matrix.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_value_2[] =
-R"doc(Returns an element of the variable matrix.
-
-Args:
-    index: The index of the element to return.
-
-Returns:
-    An element of the variable matrix.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_value_3[] =
-R"doc(Returns the contents of the variable matrix.
-
-Returns:
-    The contents of the variable matrix.
-
-)doc";
-
-constexpr char mkd_doc_slp_Matrix_zero[] =
-R"doc(Returns a variable matrix filled with zeros.
-
-Args:
-    rows: The number of matrix rows.
-    cols: The number of matrix columns.
-
-Returns:
-    A variable matrix filled with zeros.
 
 )doc";
 
@@ -1576,30 +852,6 @@ Returns:
 
 )doc";
 
-constexpr char mkd_doc_slp_Problem_decision_variable[] =
-R"doc(Creates a decision variable in the optimization problem.
-
-Decision variables have an initial value of zero.
-
-Returns:
-    A decision variable in the optimization problem.
-
-)doc";
-
-constexpr char mkd_doc_slp_Problem_decision_variable_2[] =
-R"doc(Creates a matrix of decision variables in the optimization problem.
-
-Decision variables have an initial value of zero.
-
-Args:
-    rows: Number of matrix rows.
-    cols: Number of matrix columns.
-
-Returns:
-    A matrix of decision variables in the optimization problem.
-
-)doc";
-
 constexpr char mkd_doc_slp_Problem_equality_constraint_type[] =
 R"doc(Returns the type of the highest order equality constraint.
 
@@ -1637,9 +889,9 @@ solver will find the closest solution to the initial conditions that's
 in the feasible set.
 
 Args:
-    objective: The objective function to maximize. A 1x1 Matrix will
-               implicitly convert to a Real, and a non-1x1 Matrix will
-               raise an assertion.
+    objective: The objective function to maximize. A 1x1 RealMatrix
+               will implicitly convert to a Real, and a non-1x1
+               RealMatrix will raise an assertion.
 
 )doc";
 
@@ -1652,9 +904,9 @@ solver will find the closest solution to the initial conditions that's
 in the feasible set.
 
 Args:
-    objective: The objective function to maximize. A 1x1 Matrix will
-               implicitly convert to a Real, and a non-1x1 Matrix will
-               raise an assertion.
+    objective: The objective function to maximize. A 1x1 RealMatrix
+               will implicitly convert to a Real, and a non-1x1
+               RealMatrix will raise an assertion.
 
 )doc";
 
@@ -1666,9 +918,9 @@ solver will find the closest solution to the initial conditions that's
 in the feasible set.
 
 Args:
-    cost: The cost function to minimize. A 1x1 Matrix will implicitly
-          convert to a Real, and a non-1x1 Matrix will raise an
-          assertion.
+    cost: The cost function to minimize. A 1x1 RealMatrix will
+          implicitly convert to a Real, and a non-1x1 RealMatrix will
+          raise an assertion.
 
 )doc";
 
@@ -1680,9 +932,9 @@ solver will find the closest solution to the initial conditions that's
 in the feasible set.
 
 Args:
-    cost: The cost function to minimize. A 1x1 Matrix will implicitly
-          convert to a Real, and a non-1x1 Matrix will raise an
-          assertion.
+    cost: The cost function to minimize. A 1x1 RealMatrix will
+          implicitly convert to a Real, and a non-1x1 RealMatrix will
+          raise an assertion.
 
 )doc";
 
@@ -1721,6 +973,30 @@ Returns:
 constexpr char mkd_doc_slp_Problem_print_exit_conditions[] = R"doc()doc";
 
 constexpr char mkd_doc_slp_Problem_print_problem_analysis[] = R"doc()doc";
+
+constexpr char mkd_doc_slp_Problem_real_decision_variable[] =
+R"doc(Creates a decision variable in the optimization problem.
+
+Decision variables have an initial value of zero.
+
+Returns:
+    A decision variable in the optimization problem.
+
+)doc";
+
+constexpr char mkd_doc_slp_Problem_real_decision_variable_2[] =
+R"doc(Creates a matrix of decision variables in the optimization problem.
+
+Decision variables have an initial value of zero.
+
+Args:
+    rows: Number of matrix rows.
+    cols: Number of matrix columns.
+
+Returns:
+    A matrix of decision variables in the optimization problem.
+
+)doc";
 
 constexpr char mkd_doc_slp_Problem_solve[] =
 R"doc(Solves the optimization problem. The solution will be stored in the
@@ -1784,6 +1060,730 @@ R"doc(A real-valued autodiff expression.
 
 Template Args:
     Scalar_: Scalar type.)doc";
+
+constexpr char mkd_doc_slp_RealMatrix[] = R"doc()doc";
+
+constexpr char mkd_doc_slp_RealMatrix_2[] =
+R"doc(A matrix of autodiff expressions.
+
+Template Args:
+    Scalar_: Scalar type.)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_3[] = R"doc()doc";
+
+constexpr char mkd_doc_slp_RealMatrix_RealMatrix[] = R"doc(Constructs an empty RealMatrix.)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_RealMatrix_2[] =
+R"doc(Constructs a zero-initialized RealMatrix column vector with the given
+rows.
+
+Args:
+    rows: The number of matrix rows.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_RealMatrix_3[] =
+R"doc(Constructs a zero-initialized RealMatrix with the given dimensions.
+
+Args:
+    rows: The number of matrix rows.
+    cols: The number of matrix columns.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_RealMatrix_4[] =
+R"doc(Constructs an empty RealMatrix with the given dimensions.
+
+Args:
+    rows: The number of matrix rows.
+    cols: The number of matrix columns.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_RealMatrix_5[] =
+R"doc(Constructs a scalar RealMatrix from a nested list of Reals.
+
+Args:
+    list: The nested list of Reals.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_RealMatrix_6[] =
+R"doc(Constructs a scalar RealMatrix from a nested list of scalars.
+
+This overload is for Python bindings only.
+
+Args:
+    list: The nested list of Reals.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_RealMatrix_7[] =
+R"doc(Constructs a scalar RealMatrix from a nested list of Reals.
+
+This overload is for Python bindings only.
+
+Args:
+    list: The nested list of Reals.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_RealMatrix_8[] =
+R"doc(Constructs a RealMatrix from an Eigen matrix.
+
+Args:
+    values: Eigen matrix of values.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_RealMatrix_9[] =
+R"doc(Constructs a RealMatrix from an Eigen diagonal matrix.
+
+Args:
+    values: Diagonal matrix of values.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_RealMatrix_10[] =
+R"doc(Constructs a scalar RealMatrix from a Real.
+
+Args:
+    variable: Real.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_RealMatrix_11[] =
+R"doc(Constructs a scalar RealMatrix from a Real.
+
+Args:
+    variable: Real.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_RealMatrix_12[] =
+R"doc(Constructs a RealMatrix from a Submatrix.
+
+Args:
+    values: Submatrix of values.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_RealMatrix_13[] =
+R"doc(Constructs a RealMatrix from a Submatrix.
+
+Args:
+    values: Submatrix of values.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_RealMatrix_14[] =
+R"doc(Constructs a column vector wrapper around a Real array.
+
+Args:
+    values: Real array to wrap.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_RealMatrix_15[] =
+R"doc(Constructs a matrix wrapper around a Real array.
+
+Args:
+    values: Real array to wrap.
+    rows: The number of matrix rows.
+    cols: The number of matrix columns.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_T[] =
+R"doc(Returns the transpose of the variable matrix.
+
+Returns:
+    The transpose of the variable matrix.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_begin[] =
+R"doc(Returns begin iterator.
+
+Returns:
+    Begin iterator.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_begin_2[] =
+R"doc(Returns const begin iterator.
+
+Returns:
+    Const begin iterator.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_block[] =
+R"doc(Returns a block of the variable matrix.
+
+Args:
+    row_offset: The row offset of the block selection.
+    col_offset: The column offset of the block selection.
+    block_rows: The number of rows in the block selection.
+    block_cols: The number of columns in the block selection.
+
+Returns:
+    A block of the variable matrix.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_block_2[] =
+R"doc(Returns a block of the variable matrix.
+
+Args:
+    row_offset: The row offset of the block selection.
+    col_offset: The column offset of the block selection.
+    block_rows: The number of rows in the block selection.
+    block_cols: The number of columns in the block selection.
+
+Returns:
+    A block of the variable matrix.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_cbegin[] =
+R"doc(Returns const begin iterator.
+
+Returns:
+    Const begin iterator.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_cend[] =
+R"doc(Returns const end iterator.
+
+Returns:
+    Const end iterator.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_col[] =
+R"doc(Returns a column slice of the variable matrix.
+
+Args:
+    col: The column to slice.
+
+Returns:
+    A column slice of the variable matrix.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_col_2[] =
+R"doc(Returns a column slice of the variable matrix.
+
+Args:
+    col: The column to slice.
+
+Returns:
+    A column slice of the variable matrix.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_cols[] =
+R"doc(Returns the number of columns in the matrix.
+
+Returns:
+    The number of columns in the matrix.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_const_iterator[] = R"doc()doc";
+
+constexpr char mkd_doc_slp_RealMatrix_const_iterator_const_iterator[] = R"doc()doc";
+
+constexpr char mkd_doc_slp_RealMatrix_const_iterator_const_iterator_2[] = R"doc()doc";
+
+constexpr char mkd_doc_slp_RealMatrix_const_iterator_m_it[] = R"doc()doc";
+
+constexpr char mkd_doc_slp_RealMatrix_const_iterator_operator_dec[] = R"doc()doc";
+
+constexpr char mkd_doc_slp_RealMatrix_const_iterator_operator_dec_2[] = R"doc()doc";
+
+constexpr char mkd_doc_slp_RealMatrix_const_iterator_operator_eq[] = R"doc()doc";
+
+constexpr char mkd_doc_slp_RealMatrix_const_iterator_operator_inc[] = R"doc()doc";
+
+constexpr char mkd_doc_slp_RealMatrix_const_iterator_operator_inc_2[] = R"doc()doc";
+
+constexpr char mkd_doc_slp_RealMatrix_const_iterator_operator_mul[] = R"doc()doc";
+
+constexpr char mkd_doc_slp_RealMatrix_constant[] =
+R"doc(Returns a variable matrix filled with a constant.
+
+Args:
+    rows: The number of matrix rows.
+    cols: The number of matrix columns.
+    constant: The constant.
+
+Returns:
+    A variable matrix filled with a constant.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_crbegin[] =
+R"doc(Returns const reverse begin iterator.
+
+Returns:
+    Const reverse begin iterator.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_crend[] =
+R"doc(Returns const reverse end iterator.
+
+Returns:
+    Const reverse end iterator.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_cwise_transform[] =
+R"doc(Transforms the matrix coefficient-wise with an unary operator.
+
+Args:
+    unary_op: The unary operator to use for the transform operation.
+
+Returns:
+    Result of the unary operator.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_end[] =
+R"doc(Returns end iterator.
+
+Returns:
+    End iterator.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_end_2[] =
+R"doc(Returns const end iterator.
+
+Returns:
+    Const end iterator.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_exp[] =
+R"doc(Returns the matrix exponential.
+
+Returns:
+    The matrix exponential.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_identity[] =
+R"doc(Returns an identity variable matrix.
+
+Args:
+    rows: The number of matrix rows.
+
+Returns:
+    An identity variable matrix.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_iterator[] = R"doc()doc";
+
+constexpr char mkd_doc_slp_RealMatrix_iterator_iterator[] = R"doc()doc";
+
+constexpr char mkd_doc_slp_RealMatrix_iterator_iterator_2[] = R"doc()doc";
+
+constexpr char mkd_doc_slp_RealMatrix_iterator_m_it[] = R"doc()doc";
+
+constexpr char mkd_doc_slp_RealMatrix_iterator_operator_dec[] = R"doc()doc";
+
+constexpr char mkd_doc_slp_RealMatrix_iterator_operator_dec_2[] = R"doc()doc";
+
+constexpr char mkd_doc_slp_RealMatrix_iterator_operator_eq[] = R"doc()doc";
+
+constexpr char mkd_doc_slp_RealMatrix_iterator_operator_inc[] = R"doc()doc";
+
+constexpr char mkd_doc_slp_RealMatrix_iterator_operator_inc_2[] = R"doc()doc";
+
+constexpr char mkd_doc_slp_RealMatrix_iterator_operator_mul[] = R"doc()doc";
+
+constexpr char mkd_doc_slp_RealMatrix_m_cols[] = R"doc()doc";
+
+constexpr char mkd_doc_slp_RealMatrix_m_rows[] = R"doc()doc";
+
+constexpr char mkd_doc_slp_RealMatrix_m_storage[] = R"doc()doc";
+
+constexpr char mkd_doc_slp_RealMatrix_one[] =
+R"doc(Returns a variable matrix filled with ones.
+
+Args:
+    rows: The number of matrix rows.
+    cols: The number of matrix columns.
+
+Returns:
+    A variable matrix filled with ones.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_operator_array[] =
+R"doc(Returns the element at the given row and column.
+
+Args:
+    row: The row.
+    col: The column.
+
+Returns:
+    The element at the given row and column.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_operator_array_2[] =
+R"doc(Returns the element at the given row and column.
+
+Args:
+    row: The row.
+    col: The column.
+
+Returns:
+    The element at the given row and column.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_operator_array_3[] =
+R"doc(Returns the element at the given index.
+
+Args:
+    index: The index.
+
+Returns:
+    The element at the given index.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_operator_array_4[] =
+R"doc(Returns the element at the given index.
+
+Args:
+    index: The index.
+
+Returns:
+    The element at the given index.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_operator_array_5[] =
+R"doc(Returns a slice of the variable matrix.
+
+Args:
+    row_slice: The row slice.
+    col_slice: The column slice.
+
+Returns:
+    A slice of the variable matrix.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_operator_array_6[] =
+R"doc(Returns a slice of the variable matrix.
+
+Args:
+    row_slice: The row slice.
+    col_slice: The column slice.
+
+Returns:
+    A slice of the variable matrix.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_operator_array_7[] =
+R"doc(Returns a slice of the variable matrix.
+
+The given slices aren't adjusted. This overload is for Python bindings
+only.
+
+Args:
+    row_slice: The row slice.
+    row_slice_length: The row slice length.
+    col_slice: The column slice.
+    col_slice_length: The column slice length.
+
+Returns:
+    A slice of the variable matrix.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_operator_array_8[] =
+R"doc(Returns a slice of the variable matrix.
+
+The given slices aren't adjusted. This overload is for Python bindings
+only.
+
+Args:
+    row_slice: The row slice.
+    row_slice_length: The row slice length.
+    col_slice: The column slice.
+    col_slice_length: The column slice length.
+
+Returns:
+    A slice of the variable matrix.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_operator_assign[] =
+R"doc(Assigns an Eigen matrix to a RealMatrix.
+
+Args:
+    values: Eigen matrix of values.
+
+Returns:
+    This RealMatrix.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_operator_assign_2[] =
+R"doc(Assigns a scalar to the matrix.
+
+This only works for matrices with one row and one column.
+
+Args:
+    value: Value to assign.
+
+Returns:
+    This RealMatrix.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_operator_iadd[] =
+R"doc(Compound addition-assignment operator.
+
+Args:
+    rhs: Real to add.
+
+Returns:
+    Result of addition.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_operator_iadd_2[] =
+R"doc(Compound addition-assignment operator.
+
+Args:
+    rhs: Real to add.
+
+Returns:
+    Result of addition.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_operator_idiv[] =
+R"doc(Compound matrix division-assignment operator.
+
+Args:
+    rhs: Real to divide.
+
+Returns:
+    Result of division.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_operator_imul[] =
+R"doc(Compound matrix multiplication-assignment operator.
+
+Args:
+    rhs: Real to multiply.
+
+Returns:
+    Result of multiplication.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_operator_imul_2[] =
+R"doc(Compound matrix-scalar multiplication-assignment operator.
+
+Args:
+    rhs: Real to multiply.
+
+Returns:
+    Result of multiplication.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_operator_isub[] =
+R"doc(Compound subtraction-assignment operator.
+
+Args:
+    rhs: Real to subtract.
+
+Returns:
+    Result of subtraction.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_operator_isub_2[] =
+R"doc(Compound subtraction-assignment operator.
+
+Args:
+    rhs: Real to subtract.
+
+Returns:
+    Result of subtraction.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_operator_slp_Real[] = R"doc(Implicit conversion operator from 1x1 RealMatrix to Real.)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_rbegin[] =
+R"doc(Returns reverse begin iterator.
+
+Returns:
+    Reverse begin iterator.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_rbegin_2[] =
+R"doc(Returns const reverse begin iterator.
+
+Returns:
+    Const reverse begin iterator.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_rend[] =
+R"doc(Returns reverse end iterator.
+
+Returns:
+    Reverse end iterator.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_rend_2[] =
+R"doc(Returns const reverse end iterator.
+
+Returns:
+    Const reverse end iterator.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_row[] =
+R"doc(Returns a row slice of the variable matrix.
+
+Args:
+    row: The row to slice.
+
+Returns:
+    A row slice of the variable matrix.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_row_2[] =
+R"doc(Returns a row slice of the variable matrix.
+
+Args:
+    row: The row to slice.
+
+Returns:
+    A row slice of the variable matrix.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_rows[] =
+R"doc(Returns the number of rows in the matrix.
+
+Returns:
+    The number of rows in the matrix.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_segment[] =
+R"doc(Returns a segment of the variable vector.
+
+Args:
+    offset: The offset of the segment.
+    length: The length of the segment.
+
+Returns:
+    A segment of the variable vector.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_segment_2[] =
+R"doc(Returns a segment of the variable vector.
+
+Args:
+    offset: The offset of the segment.
+    length: The length of the segment.
+
+Returns:
+    A segment of the variable vector.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_set_value[] =
+R"doc(Sets the RealMatrix's internal values.
+
+Args:
+    values: Eigen matrix of values.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_size[] =
+R"doc(Returns number of elements in matrix.
+
+Returns:
+    Number of elements in matrix.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_to_eigen[] =
+R"doc(Converts the RealMatrix to an Eigen matrix.
+
+Returns:
+    Eigen matrix.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_value[] =
+R"doc(Returns an element of the variable matrix.
+
+Args:
+    row: The row of the element to return.
+    col: The column of the element to return.
+
+Returns:
+    An element of the variable matrix.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_value_2[] =
+R"doc(Returns an element of the variable matrix.
+
+Args:
+    index: The index of the element to return.
+
+Returns:
+    An element of the variable matrix.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_value_3[] =
+R"doc(Returns the contents of the variable matrix.
+
+Returns:
+    The contents of the variable matrix.
+
+)doc";
+
+constexpr char mkd_doc_slp_RealMatrix_zero[] =
+R"doc(Returns a variable matrix filled with zeros.
+
+Args:
+    rows: The number of matrix rows.
+    cols: The number of matrix columns.
+
+Returns:
+    A variable matrix filled with zeros.
+
+)doc";
 
 constexpr char mkd_doc_slp_Real_Real[] = R"doc(Constructs a linear Real with a value of zero.)doc";
 
@@ -2323,10 +2323,10 @@ Returns:
 )doc";
 
 constexpr char mkd_doc_slp_Submatrix_operator_assign_5[] =
-R"doc(Assigns a Matrix to the block.
+R"doc(Assigns a RealMatrix to the block.
 
 Args:
-    values: Matrix of values.
+    values: RealMatrix of values.
 
 Returns:
     This Submatrix.
@@ -2334,10 +2334,10 @@ Returns:
 )doc";
 
 constexpr char mkd_doc_slp_Submatrix_operator_assign_6[] =
-R"doc(Assigns a Matrix to the block.
+R"doc(Assigns a RealMatrix to the block.
 
 Args:
-    values: Matrix of values.
+    values: RealMatrix of values.
 
 Returns:
     This Submatrix.
@@ -2671,7 +2671,7 @@ Template Args:
 )doc";
 
 constexpr char mkd_doc_slp_block[] =
-R"doc(Assembles a Matrix from a nested list of blocks.
+R"doc(Assembles a RealMatrix from a nested list of blocks.
 
 Each row's blocks must have the same height, and the assembled block
 rows must have the same width. For example, for the block matrix [[A,
@@ -2687,7 +2687,7 @@ Template Args:
 )doc";
 
 constexpr char mkd_doc_slp_block_2[] =
-R"doc(Assembles a Matrix from a nested list of blocks.
+R"doc(Assembles a RealMatrix from a nested list of blocks.
 
 Each row's blocks must have the same height, and the assembled block
 rows must have the same width. For example, for the block matrix [[A,
@@ -2760,11 +2760,13 @@ Template Args:
 
 )doc";
 
-constexpr char mkd_doc_slp_detail_gradient_tree[] =
+constexpr char mkd_doc_slp_detail_gradient_tree[] = R"doc()doc";
+
+constexpr char mkd_doc_slp_detail_gradient_tree_2[] =
 R"doc(Returns the variable's gradient tree.
 
 This function lazily allocates variables, so elements of the returned
-Matrix will be empty if the corresponding element of wrt had no
+RealMatrix will be empty if the corresponding element of wrt had no
 adjoint. Ensure Real::expr isn't nullptr before calling member
 functions.
 
@@ -2779,8 +2781,6 @@ Returns:
     The variable's gradient tree.
 
 )doc";
-
-constexpr char mkd_doc_slp_detail_gradient_tree_2[] = R"doc()doc";
 
 constexpr char mkd_doc_slp_erf[] =
 R"doc(erf() for Reals.

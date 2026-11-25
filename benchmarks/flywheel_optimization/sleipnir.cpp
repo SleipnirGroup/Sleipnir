@@ -28,8 +28,8 @@ slp::Problem<double> flywheel_sleipnir(std::chrono::duration<double> dt,
   Eigen::Matrix<double, 1, 1> B{1.0 - std::exp(-dt.count())};
 
   slp::Problem<double> problem;
-  auto X = problem.decision_variable(1, N + 1);
-  auto U = problem.decision_variable(1, N);
+  auto X = problem.real_decision_variable(1, N + 1);
+  auto U = problem.real_decision_variable(1, N);
 
   // Dynamics constraint
   for (int k = 0; k < N; ++k) {
